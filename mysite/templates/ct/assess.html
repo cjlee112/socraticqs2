@@ -1,0 +1,40 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Assess a student answer
+{% endcomment %}
+
+{% block title %}
+  {{ response.question.title }}
+{% endblock %}
+
+{% block content %}
+    <B>Question:</B> {{ qtext }} <BR>
+    <B>Correct answer:</B> {{ answer }} <BR>
+    <B>Submitted answer:</B> {{ response.atext }} <BR>
+    <p> <B>Confidence:</B> {{ response.confidence }} </p>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<br>
+
+<form action="{% url 'ct:evaluate' response.id %}" method="post">
+{% csrf_token %}
+How does this answer compare with the right answer?<br>
+{% for k,v in response.EVAL_CHOICES %}
+  <INPUT TYPE="radio" NAME="score" VALUE="{{ k }}">{{ v }}<BR>
+{% endfor %}
+{% if response.question.errormodel_set.all %}
+<br>Did this submitted answer make one of the following common errors?<br>
+{% for em in response.question.errormodel_set.all %}
+  <INPUT TYPE="radio" NAME="knownError" VALUE="{{ em.id }}">
+  {{ em.description }}<BR>
+{% endfor %}
+<br>If you think it made an error not listed above, 
+{% else %}
+  <INPUT TYPE="hidden" NAME="knownError" VALUE="">
+{% endif %}
+please describe the error,
+i.e. indicate how its reasoning differed from the right idea.<br>
+<TEXTAREA NAME="novelError" COLS=80 ROWS=24 WRAP="off"></TEXTAREA>
+<input type="submit" value="Go" />
+</form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Assess a student answer
+{% endcomment %}
+
+{% block title %}
+  {{ errorModel.question.title }}
+{% endblock %}
+
+{% block content %}
+    <B>Question:</B> {{ qtext }} <BR>
+    <B>Correct answer:</B> {{ answer }} <BR>
+    <B>Error:</B> {{ errorModel.description }} <BR>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<br>
+
+<form action="{% url 'ct:remediate' errorModel.id %}" method="post">
+{% csrf_token %}
+<br>What review or exercises do you think would help someone who
+made this error correct their understanding?<br>
+<TEXTAREA NAME="remediation" COLS=80 ROWS=24 WRAP="off">{{ remediation }}</TEXTAREA>
+<br>Describe a counterexample that you think convincingly shows that
+this error is indeed wrong.<br>
+<TEXTAREA NAME="counterExample" COLS=80 ROWS=24 WRAP="off">{{ counterExample }}</TEXTAREA>
+<input type="submit" value="Go" />
+</form>
+
+<h2>Examples of this Error</h2>
+{% for se in errorModel.studenterror_set.all %}
+<P>{{ se.response.atext }}</P><HR>
+{% endfor %}
+
+{% endblock %}

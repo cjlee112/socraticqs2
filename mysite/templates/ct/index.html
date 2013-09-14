@@ -1,0 +1,19 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Main page of the portal.
+{% endcomment %}
+
+{% block title %}
+  Portal
+{% endblock %}
+
+{% block content %}
+  <section>
+{% if user.is_authenticated %}
+    <h2>Welcome, {{ user.username }}. Thanks for logging in.</h2>
+{% else %}
+    <h2>Welcome, new user. Please log in.</h2>
+{% endif %}
+    <p>This is the main page of the web portal.</p>
+  </section>
+{% endblock %}

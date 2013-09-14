@@ -1,0 +1,31 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Write a glossary
+{% endcomment %}
+
+{% block title %}
+  {{ glossary.title }}
+{% endblock %}
+
+{% block content %}
+    <B>Assignment:</B> {{ glossary.explanation }} <BR>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'ct:new_term' glossary.id %}" method="post">
+{% csrf_token %}
+Add a term or copy an existing term:
+<INPUT TYPE="text" NAME="term" SIZE=30/><BR>
+Existing terms: {{ existingTerms }}<BR>
+Write a concise definition of the term:<BR>
+<TEXTAREA NAME="definition" COLS=80 ROWS=10 WRAP="off">{{ definition }}</TEXTAREA><BR>
+<input type="submit" value="Save" />
+</form>
+
+<h2>Your Glossary</h2>
+{% for v in vocabulary %}
+<P> <B>{{ v.term }}</B>: {{ v.definition }}</P>
+{% endfor %}
+
+
+{% endblock %}
