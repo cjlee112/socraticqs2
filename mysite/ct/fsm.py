@@ -10,26 +10,23 @@ class FSMStack(object):
             self.state = None
             return
         self.state = models.FSMState.objects.get(pk=fsmID)
-    def transition(self, request, name='next', **kwargs):
+    def event(self, request, eventName='next', **kwargs):
+        'top-level interface for passing event to a running FSM instance'
         if self.state is None: # no ongoing activity
             return
         try:
-            path = self.state.transition(name, **kwargs)
+            path = self.state.event(self, request, eventName, **kwargs)
         except models.FSMDone:
             return self.pop(request, **kwargs)
         if path:
             return HttpResponseRedirect(path)
-    def push(self, request, fsmName, stateArgs={}, stateData={}, **kwargs):
+    def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
+        'start running a new FSM instance (layer)'
         fsm = models.FSM.objects.get(name=fsmName)
-        state = models.FSMState(user=request.user, fsmNode=fsm.startNode,
-                                parentState=self.state, **stateArgs)
-        if stateData:
-            state.save_json_data(stateData) # serialize & save to db
-        else:
-            state.save() # just save to db
-        self.state = state
-        request.session['fsmID'] = state.pk
-        path = state.event(self, 'START', request, **kwargs)
+        self.state = models.FSMState(user=request.user, fsmNode=fsm.startNode,
+                                parentState=self.state, **kwargs)
+        path = self.state.start_fsm(self, request, stateData, **startArgs)
+        request.session['fsmID'] = self.state.pk
         return HttpResponseRedirect(path)
     def pop(self, request, **kwargs):
         if request.user != self.state.user:

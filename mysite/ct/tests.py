@@ -214,11 +214,11 @@ class FSMTests(TestCase):
         result = fsmStack.push(request, 'test', stateData=fsmData)
         self.assertEqual(request.session['fsmID'], fsmStack.state.pk)
         self.assertEqual(fsmStack.state.load_json_data(), fsmData)
-        self.assertEqual(result.url, '/ct/')
+        self.assertEqual(result.url, '/ct/trivial/')
     def test_trivial_plugin(self):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
-        self.assertEqual(f.startNode.call_plugin(0, 0, 0), 'trivial result')
+        self.assertEqual(f.startNode.call_plugin(0, 0, 0), '/ct/trivial/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'
         edgeDictBad = (

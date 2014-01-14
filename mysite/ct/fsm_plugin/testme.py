@@ -1,3 +1,3 @@
 
-def trivial(self, fsmStack, eventName, request, **kwargs):
-    return 'trivial result'
+def trivial(self, fsmStack, request, eventName, **kwargs):
+    return '/ct/trivial/'

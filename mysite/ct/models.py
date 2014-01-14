@@ -979,15 +979,21 @@ def dump_json_id_dict(d):
             data[k] = v
     return json.dumps(data)
 
-def save_json_data(self, d, attr='data'):
+def save_json_data(self, d=None, attr='data', doSave=True):
     'save dict of object refs back to db blob field'
+    dictAttr = '_%s_dict' % attr
+    if d is None: # save cached data
+        d = getattr(self, dictAttr)
+    else: # save specified dict
+        setattr(self, dictAttr, d) # cache on local object
     if d:
         s = dump_json_id_dict(d)
     else:
         s = None
     setattr(self, attr, s)
-    self.save()
-        
+    if doSave: # immediately write to db
+        self.save()
+
 # index of types that can be saved in json blobs
 klassNameDict = dict(
     Concept=Concept, ConceptGraph=ConceptGraph,
@@ -1019,15 +1025,33 @@ def load_json_id_dict(s):
 
 def load_json_data(self, attr='data'):
     'get dict of db objects from json blob field'
+    dictAttr = '_%s_dict' % attr
+    try:
+        return getattr(self, dictAttr)
+    except AttributeError:
+        pass
     s = getattr(self, attr)
     if s:
-        return load_json_id_dict(s)
+        d = load_json_id_dict(s)
     else:
-        return {}
+        d = {}
+    setattr(self, dictAttr, d)
+    return d
 
+def set_data_attr(self, attr, v):
+    '''set a single data attribute
+    (must later call save_json_data() to serialize)'''
+    d = self.load_json_data()
+    d[attr] = v
+        
+def get_data_attr(self, attr):
+    'get a single data attribute from json data'
+    d = self.load_json_data()
+    return d[attr]
+    
 PLUGIN_IMPORT_TEST = 'IMPORT TEST'
 
-def call_plugin(self, fsmStack, eventName, request, prefix='ct.fsm_plugin.',
+def call_plugin(self, fsmStack, request, eventName, prefix='ct.fsm_plugin.',
                 **kwargs):
     'import and call plugin func for this object'
     import importlib
@@ -1040,7 +1064,7 @@ def call_plugin(self, fsmStack, eventName, request, prefix='ct.fsm_plugin.',
     func = getattr(mod, funcName)
     if eventName == PLUGIN_IMPORT_TEST:
         return True
-    return func(self, fsmStack, eventName, request, **kwargs)
+    return func(self, fsmStack, request, eventName, **kwargs)
     
 ##################################################################
 # activity stack FSM
@@ -1117,7 +1141,15 @@ class FSMNode(models.Model):
     funcName = models.CharField(max_length=200, null=True)
     load_json_data = load_json_data
     save_json_data = save_json_data
+    get_data_attr = get_data_attr
+    set_data_attr = set_data_attr
     call_plugin = call_plugin
+    def event(self, fsmStack, request, eventName, **kwargs):
+        'process event using plugin if available, otherwise generic processing'
+        if self.funcName: # use plugin to process event
+            return self.call_plugin(fsmStack, request, eventName, **kwargs)
+        # perform generic event processing here
+        raise ValueError('need to implement event handling')
     def get_path(self, **kwargs):
         return reverse(self.path, kwargs=kwargs)
 
@@ -1139,6 +1171,8 @@ class FSMEdge(models.Model):
     _funcDict = {}
     load_json_data = load_json_data
     save_json_data = save_json_data
+    get_data_attr = get_data_attr
+    set_data_attr = set_data_attr
     call_plugin = call_plugin
     def get_path(self, **kwargs):
         if self.funcName:
@@ -1172,11 +1206,19 @@ class FSMState(models.Model):
     atime = models.DateTimeField('time started', default=timezone.now)
     load_json_data = load_json_data
     save_json_data = save_json_data
-    def event(self, fsmStack, eventName, request, **kwargs):
+    get_data_attr = get_data_attr
+    set_data_attr = set_data_attr
+    def event(self, fsmStack, request, eventName, **kwargs):
         'trigger proper consequences if any for this event'
-        if eventName == 'START':
-            return '/ct/'
-        raise ValueError('no code for handling this event yet!')
+        return self.fsmNode.event(fsmStack, request, eventName, **kwargs)
+    def start_fsm(self, fsmStack, request, stateData, **kwargs):
+        'initialize new FSM by calling START node and saving state data to db'
+        if stateData:
+            self.save_json_data(stateData, doSave=False) # cache
+        path = self.event(fsmStack, request, 'start', **kwargs)
+        self.save_json_data(doSave=False) # serialize to json blob
+        self.save()
+        return path
     def transition(self, name='next', **kwargs):
         try:
             edge = FSMEdge.objects.get(fromNode=self.fsmNode,
