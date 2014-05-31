@@ -14,7 +14,6 @@ john.save()
 
 r = q.response_set.create(atext='I really have no idea.', 
                           atime=timezone.now(),
-                          requestHelp=False,
                           author=john)
 
 se = r.studenterror_set.create(atime=timezone.now(),
