@@ -19,14 +19,9 @@
     <PRE>\(\sum_{\alpha}{p(\alpha|Z)}=1 \)</PRE>
     <br>
 
-<form action="{% url 'ct:answer' question.id %}" method="post">
+<form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
-<TEXTAREA NAME="atext" COLS=80 ROWS=24 WRAP="off">{{ answer }}</TEXTAREA>
-<br>
-How confident are you in your answer?<br>
-{% for k,v in conf_choices %}
-  <INPUT TYPE="radio" NAME="confidence" VALUE="{{ k }}">{{ v }}<BR>
-{% endfor %}
+{{ form.as_p }}
 <input type="submit" value="Go" />
 </form>
 {% endblock %}

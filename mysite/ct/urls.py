@@ -3,8 +3,8 @@ from ct.views import *
 
 urlpatterns = patterns('',
     (r'^$', main_page),
-    url(r'^(?P<ct_id>\d+)/ask/$', question_page, name='ask'),
-    url(r'^(?P<ct_id>\d+)/answer/$', submit_answer, name='answer'),
+    url(r'^(?P<ct_id>\d+)/responses/$', respond, name='respond'),
+    url(r'^unitq/(?P<unitq_id>\d+)/responses/$', respond_unitq, name='respond_unitq'),
     url(r'^resp/(?P<resp_id>\d+)/assess/$', assess_page, name='assess'),
     url(r'^resp/(?P<resp_id>\d+)/evaluate/$', submit_eval, name='evaluate'),
     url(r'^err/(?P<em_id>\d+)/remedy/$', remedy_page, name='remedy'),

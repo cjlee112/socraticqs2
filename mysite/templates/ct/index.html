@@ -9,8 +9,13 @@
 
 {% block content %}
   <section>
-{% if user.is_authenticated %}
-    <h2>Welcome, {{ user.username }}. Thanks for logging in.</h2>
+{% if user.is_authenticated and user.role_set.count > 0 %}
+    <h2>{{ user.username }}'s Classes</h2>
+    <ul>
+    {% for role in user.role_set.all %}
+    <li>{{ role.course.title }} ({{ role.get_role_display }})</li>
+    {% endfor %}
+    </ul>
 {% else %}
     <h2>Welcome, new user. Please log in.</h2>
 {% endif %}

@@ -5,40 +5,40 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from ct.models import *
+from ct.forms import ResponseForm
 
 @login_required
 def main_page(request):
     return render(request, 'ct/index.html')
 
 @login_required
-def question_page(request, ct_id):
-    q = get_object_or_404(Question, pk=ct_id)
-    return render_ask_form(request, q)
+def respond_unitq(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    return _respond(request, unitq.question, unitq)
 
-def render_ask_form(request, q, **context):
-    context.update(dict(question=q, conf_choices=Response.CONF_CHOICES,
-                        qtext=mark_safe(q.qtext)))
-    return render(request, 'ct/ask.html', context)
 
 @login_required
-def submit_answer(request, ct_id):
-    q = get_object_or_404(Question, pk=ct_id)
-    try:
-        answer = request.POST['atext'].strip()
-        if not answer:
-            raise KeyError
-    except KeyError:
-        return render_ask_form(request, q, 
-                               error_message='You must give an answer.')
-    try:
-        confidence = request.POST['confidence']
-    except KeyError:
-        return render_ask_form(request, q, answer=answer,
-                         error_message='You must choose a confidence level.')
-    r = q.response_set.create(atext=answer, atime=timezone.now(),
-                              confidence=confidence, author=request.user)
-    return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
+def respond(request, ct_id):
+    return _respond(request, get_object_or_404(Question, pk=ct_id))
 
+
+def _respond(request, q, unitq=None):
+    if request.method == 'POST':
+        form = ResponseForm(request.POST)
+        if form.is_valid():
+            r = form.save(commit=False)
+            r.question = q
+            r.unitq = unitq
+            r.atime = timezone.now()
+            r.author = request.user
+            r.save()
+            return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
+    else:
+        form = ResponseForm()
+
+    return render(request, 'ct/ask.html',
+                  dict(question=q, qtext=mark_safe(q.qtext), form=form,
+                       actionTarget=request.path))
 
 @login_required
 def assess_page(request, resp_id):
