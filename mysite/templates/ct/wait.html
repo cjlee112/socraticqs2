@@ -1,0 +1,17 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Tell the user to wait for next stage of Live exercise
+{% endcomment %}
+
+{% block title %}
+  Thanks!
+{% endblock %}
+
+{% block content %}
+Please wait until your instructor asks you to click the Next button...
+
+<button type="button" onclick="location.href='{% url 'ct:wait' unitq.id %}'">
+Next
+</button>
+
+{% endblock %}
