@@ -38,3 +38,7 @@ r = q.response_set.create(atext='I really have no idea.',
 se = r.studenterror_set.create(atime=timezone.now(),
                                errorModel=em,
                                author=john)
+
+em2 = ct.models.ErrorModel(description='very common, very silly error',
+                           alwaysAsk=True)
+em2.save()

@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from ct.models import *
-from ct.forms import ResponseForm
+from ct.forms import *
 
 @login_required
 def main_page(request):
@@ -69,53 +69,44 @@ def unitq_control(request, unitq_id):
     if role != Role.INSTRUCTOR:
         return HttpResponse("Only the instructor can access this",
                             status_code=403)
-    if not unitq.liveStage: # active live session
+    if not unitq.liveStage: # activate live session
         unitq.liveStage = unitq.RESPONSE_STAGE
     if request.method == 'POST':
         pass
     return render(request, 'ct/control.html', dict(unitq=unitq))
 
-    
-@login_required
-def assess_page(request, resp_id):
-    r = get_object_or_404(Response, pk=resp_id)
-    return render_assess_form(request, r)
-
-def render_assess_form(request, r, **context):
-    context.update(dict(response=r, qtext=mark_safe(r.question.qtext),
-                        answer=mark_safe(r.question.answer)))
-    return render(request, 'ct/assess.html', context)
-
 
 @login_required
-def submit_eval(request, resp_id):
+def assess(request, resp_id):
     r = get_object_or_404(Response, pk=resp_id)
-    try:
-        score = request.POST['score']
-    except KeyError:
-        return render_assess_form(request, r,
-                         error_message='You must choose an assessment.')
-    if score == r.CORRECT:
-        return HttpResponseRedirect('/ct')
-    
-    try:
-        em_id = int(request.POST['knownError'])
-        em = get_object_or_404(ErrorModel, pk=em_id)
-    except (KeyError,ValueError):
-        try:
-            novelError = request.POST['novelError'].strip()
-            if not novelError:
-                raise KeyError
-        except KeyError:
-            return render_assess_form(request, r,
-               error_message='You must choose an existing error or write a new error description.')
-        else:
-            em = r.question.errormodel_set.create(description=novelError, 
-                                                  isAbort=False)
-    r.studenterror_set.create(atime=timezone.now(), errorModel=em, 
-                              author=request.user)
-    return HttpResponseRedirect(reverse('ct:remedy', args=(em.id,)))
-            
+    errors = list(r.question.errormodel_set.all()) \
+           + list(ErrorModel.get_generic())
+    choices = [(e.id, e.description) for e in errors]
+    if request.method == 'POST':
+        form = SelfAssessForm(request.POST)
+        form.fields['emlist'].choices = choices
+        if form.is_valid():
+            r.selfeval = form.cleaned_data['selfeval']
+            r.save()
+            print form.cleaned_data['emlist']
+            for emID in form.cleaned_data['emlist']:
+                em = get_object_or_404(ErrorModel, pk=emID)
+                se = r.studenterror_set.create(atime=timezone.now(),
+                                               errorModel=em,
+                                               author=r.author)
+            return HttpResponseRedirect('/ct')
+    else:
+        form = SelfAssessForm()
+        form.fields['emlist'].choices = choices 
+
+    return render(request, 'ct/assess.html',
+                  dict(response=r, qtext=mark_safe(r.question.qtext),
+                       answer=mark_safe(r.question.answer), form=form,
+                       actionTarget=request.path))
+
+############################################################33
+# NOT USED... JUST EXPERIMENTAL
+
 @login_required
 def remedy_page(request, em_id):
     em = get_object_or_404(ErrorModel, pk=em_id)

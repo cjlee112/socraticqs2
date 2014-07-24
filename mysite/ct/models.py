@@ -62,6 +62,7 @@ class UnitQ(models.Model):
     START_STAGE = 0
     RESPONSE_STAGE = 1
     ASSESSMENT_STAGE = 2
+    DONE_STAGE = 3
     unit = models.ForeignKey(Unit)
     question = models.ForeignKey(Question)
     order = models.IntegerField(null=True)
@@ -92,6 +93,14 @@ class ErrorModel(models.Model):
     question = models.ForeignKey(Question, blank=True, null=True)
     description = models.TextField()
     isAbort = models.BooleanField(default=False)
+    isFail = models.BooleanField(default=False)
+    alwaysAsk = models.BooleanField(default=False)
+
+    @classmethod
+    def get_generic(klass):
+        'get all error models marked as alwaysAsk'
+        return klass.objects.filter(alwaysAsk=True)
+    
     def __unicode__(self):
         return self.description
 
