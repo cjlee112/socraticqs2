@@ -11,7 +11,7 @@
     <B>Question:</B> {{ qtext }} <BR>
     <B>Correct answer:</B> {{ answer }} <BR>
     <B>Submitted answer:</B> {{ response.atext }} <BR>
-    <p> <B>Confidence:</B> {{ response.confidence }} </p>
+    <p> <B>Confidence:</B> {{ response.get_confidence_display }} </p>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <br>

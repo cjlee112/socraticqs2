@@ -18,7 +18,9 @@ q = ct.models.Question(title='A Great Question',
                        author=teacher)
 q.save()
 
-ut = u.unitq_set.create(question=q, order=1)
+unitq = u.unitq_set.create(question=q, order=1)
+unitq.liveStage = unitq.RESPONSE_STAGE
+unitq.save()
 
 em = q.errormodel_set.create(description='You made a boo-boo!')
 

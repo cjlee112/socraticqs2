@@ -32,6 +32,10 @@ def _respond(request, q, unitq=None):
             r.atime = timezone.now()
             r.author = request.user
             r.save()
+            if unitq: # let LIVE mode override default next step
+                target = unitq.get_next_target(UnitQ.RESPONSE_STAGE)
+                if target:
+                    return render(request, target, dict(unitq=unitq))
             return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
     else:
         form = ResponseForm()
@@ -40,6 +44,38 @@ def _respond(request, q, unitq=None):
                   dict(question=q, qtext=mark_safe(q.qtext), form=form,
                        actionTarget=request.path))
 
+@login_required
+def wait(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    stage, r = unitq.get_user_stage(request.user)
+    if not unitq.liveStage or stage < unitq.liveStage: # redirect to next
+        target = unitq_next_url(unitq, stage, r)
+        return HttpResponseRedirect(target)
+    return render(request, 'ct/wait.html', dict(unitq=unitq)) # keep waiting
+
+def unitq_next_url(unitq, stage, response=None):
+    'get URL for next stage'
+    if stage == unitq.START_STAGE:
+        return reverse('ct:respond_unitq', args=(unitq.id,))
+    elif stage == unitq.RESPONSE_STAGE:
+        return reverse('ct:assess', args=(response.id,))
+    elif stage == unitq.ASSESSMENT_STAGE:
+        return reverse('ct:unit', args=(unitq.unit.id,))
+
+@login_required
+def unitq_control(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    role = unitq.unit.course.get_user_role(request.user)
+    if role != Role.INSTRUCTOR:
+        return HttpResponse("Only the instructor can access this",
+                            status_code=403)
+    if not unitq.liveStage: # active live session
+        unitq.liveStage = unitq.RESPONSE_STAGE
+    if request.method == 'POST':
+        pass
+    return render(request, 'ct/control.html', dict(unitq=unitq))
+
+    
 @login_required
 def assess_page(request, resp_id):
     r = get_object_or_404(Response, pk=resp_id)

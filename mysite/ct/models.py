@@ -6,18 +6,29 @@ from django.contrib.auth.models import User
 class Course(models.Model):
     title = models.CharField(max_length=200)
     liveUnit = models.ForeignKey('Unit', related_name='+', null=True)
+    def get_user_role(self, user, justOne=True, raiseError=True):
+        'return role(s) of specified user in this course'
+        l = [r.role for r in self.role_set.filter(user=user)]
+        if (raiseError or justOne) and not l:
+            raise KeyError('user not in this class')
+        if justOne:
+            return l[0]
+        else:
+            return l
 
 class Role(models.Model):
     INSTRUCTOR = 'prof'
     TA = 'TA'
-    STUDENT = 'student'
+    ENROLLED = 'student'
+    SELFSTUDY = 'self'
     ROLE_CHOICES = (
         (INSTRUCTOR, 'Instructor'),
         (TA, 'Teaching Assistant'),
-        (STUDENT, 'Student'),
+        (ENROLLED, 'Enrolled Student'),
+        (SELFSTUDY, 'Self-study'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, 
-                            default=STUDENT)
+                            default=ENROLLED)
     course = models.ForeignKey(Course)
     user = models.ForeignKey(User)
 
@@ -48,13 +59,30 @@ class Question(models.Model):
         return self.title
 
 class UnitQ(models.Model):
-    ASK_STAGE = 1
-    ASSESS_STAGE = 2
+    START_STAGE = 0
+    RESPONSE_STAGE = 1
+    ASSESSMENT_STAGE = 2
     unit = models.ForeignKey(Unit)
     question = models.ForeignKey(Question)
     order = models.IntegerField(null=True)
     liveStage = models.IntegerField(null=True)
     startTime = models.DateTimeField('time started', null=True)
+
+    UNITQ_WAIT = 'ct/wait.html'
+    def get_next_target(self, stage):
+        'stub for protocol edge transition'
+        if self.liveStage == stage:
+            return self.UNITQ_WAIT # wait for instructor to advance
+
+    def get_user_stage(self, user):
+        try:
+            r = self.response_set.filter(author=user)[0]
+        except IndexError:
+            return self.START_STAGE, None
+        if r.selfeval is None:
+            return self.RESPONSE_STAGE, r
+        else:
+            return self.ASSESSMENT_STAGE, r
 
 class StudyList(models.Model):
     question = models.ForeignKey(Question)
@@ -88,10 +116,10 @@ class Response(models.Model):
     unitq = models.ForeignKey(UnitQ, null=True)
     atext = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
-                                  default=GUESS)
+                                  blank=False, null=False)
     atime = models.DateTimeField('time submitted')
     selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES, 
-                                default=DIFFERENT, blank=True, null=True)
+                                blank=True, null=True)
     requestHelp = models.BooleanField(default=False)
     author = models.ForeignKey(User)
     def __unicode__(self):
