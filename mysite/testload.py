@@ -22,7 +22,8 @@ unitq = u.unitq_set.create(question=q, order=1)
 unitq.liveStage = unitq.RESPONSE_STAGE
 unitq.save()
 
-em = q.errormodel_set.create(description='You made a boo-boo!')
+em = q.errormodel_set.create(description='You made a boo-boo!',
+                             atime=timezone.now(), author=teacher)
 
 try:
     john = User.objects.get(pk=2) # our first student
@@ -40,5 +41,6 @@ se = r.studenterror_set.create(atime=timezone.now(),
                                author=john)
 
 em2 = ct.models.ErrorModel(description='very common, very silly error',
-                           alwaysAsk=True)
+                           alwaysAsk=True, atime=timezone.now(),
+                           author=teacher)
 em2.save()

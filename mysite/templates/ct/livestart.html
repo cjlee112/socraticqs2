@@ -1,0 +1,35 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Start LIVE exercise
+{% endcomment %}
+
+{% block title %}
+  {{ unitq.question.title }}
+{% endblock %}
+
+{% block content %}
+<h2>Instructions</h2>
+
+<ul>
+<li>Present the question to the students.</li>
+<li>Ask whether they have any questions about what exactly they're
+being asked.</li>
+<li>For a concept test, typically tell them to think
+about the question for a minute or two, 
+and take another minute or two to enter a brief answer.</li>
+<li>Tell them to start by clicking their START link.
+<li>Click the Start button below to begin the timer.</li>
+</ul>
+
+<button type="button" onclick="location.href='{% url 'ct:control' unitq.id %}'">
+Start the exercise timer
+</button>
+
+<h2>Question</h2> 
+{{ qtext }}
+
+<h2>Correct answer</h2> 
+{{ answer }}
+
+{% endblock %}
+

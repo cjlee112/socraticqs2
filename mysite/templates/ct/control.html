@@ -1,0 +1,92 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Let the instructor control exercise in real-time
+{% endcomment %}
+
+{% block title %}
+  {{ unitq.question.title }}
+{% endblock %}
+
+{% block content %}
+<h2>Instructions</h2>
+
+<ul>
+<li>Monitor the fraction of students that have answered, in real-time.</li>
+<li>View the latest student answers</li>
+<li>Add new error models that describe errors you see students making,
+    if they don't fit existing error models shown below.
+<li>When you feel enough students have responded (totally up to you
+    but typically around half), tell
+    the students what stage to proceed to.</li>
+<li>E.g. you could ask them to discuss their answer with their neighbor;</li>
+<li>Or you could proceed directly
+    to the ASSESS stage to present the solution and have the
+    students self-assess.</li>
+<li>To end the exercise and start self-assessment, click the 
+    End button below.</li>
+</ul>
+
+<button type="button" onclick="location.href='{% url 'ct:end' unitq.id %}'">
+End the exercise
+</button>
+
+<h2>Responses</h2>
+
+<b>Time Elapsed:</b> {{ elapsedTime }} 
+<br>
+<table border=1>
+<caption>Student Answers So Far</caption>
+  <tr>
+    <th>Just guessing</th>
+    <th>Not quite sure</th>
+    <th>Pretty sure</th>
+    <th>(not yet)</th>
+  </tr>
+  <tr>
+    {% for c in counts %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+<h2>Question</h2> 
+{{ qtext }}
+
+<h2>Correct answer</h2> 
+{{ answer }}
+
+<h2>Common Error Models</h2>
+<ul>
+{% for e in emlist %}
+  <li>{{ e }}</li>
+{% endfor %}
+</ul>
+
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+{{ emform.as_p }}
+<input type="submit" value="Create" />
+</form>
+
+<form action="{{ actionTarget }}" method="get">
+<B>
+  {{ rlform.ndisplay.errors }}
+  <label for="id_ndisplay">Top</label>
+  {{ rlform.ndisplay }}
+Responses
+  {{ rlform.sortOrder.errors }}
+  <label for="id_ndisplay">Sorted By</label>
+  {{ rlform.sortOrder }}
+<input type="submit" value="Refresh" />
+</B>
+</form>
+<br>
+<ul>
+{% for r in responses %}
+  <li>{{ r.atext }}</li>
+{% endfor %}
+</ul>
+
+
+{% endblock %}
+

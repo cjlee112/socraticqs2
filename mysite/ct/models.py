@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your models here.
 
@@ -84,6 +85,8 @@ class UnitQ(models.Model):
             return self.RESPONSE_STAGE, r
         else:
             return self.ASSESSMENT_STAGE, r
+    def start_user_session(self, user):
+        LiveUser.start_user_session(self, user)
 
 class StudyList(models.Model):
     question = models.ForeignKey(Question)
@@ -95,6 +98,8 @@ class ErrorModel(models.Model):
     isAbort = models.BooleanField(default=False)
     isFail = models.BooleanField(default=False)
     alwaysAsk = models.BooleanField(default=False)
+    atime = models.DateTimeField('time submitted')
+    author = models.ForeignKey(User)
 
     @classmethod
     def get_generic(klass):
@@ -143,6 +148,20 @@ class StudentError(models.Model):
         return 'eval by ' + self.author.username
 
 
+class LiveUser(models.Model):
+    unitq = models.ForeignKey(UnitQ)
+    user = models.ForeignKey(User, unique=True)
+
+    @classmethod
+    def start_user_session(klass, unitq, user):
+        'record user as logged in to this live UnitQ'
+        try:
+            o = klass.objects.get(user=user)
+            o.unitq = unitq
+        except ObjectDoesNotExist:
+            o = klass(unitq=unitq, user=user)
+        o.save()
+        return o
 
 ######################################################################
 # CURRENTLY UNUSED

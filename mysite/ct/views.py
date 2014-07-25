@@ -47,6 +47,7 @@ def _respond(request, q, unitq=None):
 @login_required
 def wait(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    unitq.start_user_session(request.user) # user in live session
     stage, r = unitq.get_user_stage(request.user)
     if not unitq.liveStage or stage < unitq.liveStage: # redirect to next
         target = unitq_next_url(unitq, stage, r)
@@ -62,19 +63,76 @@ def unitq_next_url(unitq, stage, response=None):
     elif stage == unitq.ASSESSMENT_STAGE:
         return reverse('ct:unit', args=(unitq.unit.id,))
 
-@login_required
-def unitq_control(request, unitq_id):
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+
+def check_instructor_auth(request, unitq):
     role = unitq.unit.course.get_user_role(request.user)
     if role != Role.INSTRUCTOR:
         return HttpResponse("Only the instructor can access this",
                             status_code=403)
+    
+@login_required
+def unitq_live_start(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    notInstructor = check_instructor_auth(request, unitq)
+    if notInstructor:
+        return notInstructor
     if not unitq.liveStage: # activate live session
         unitq.liveStage = unitq.RESPONSE_STAGE
     if request.method == 'POST':
         pass
-    return render(request, 'ct/control.html', dict(unitq=unitq))
+    return render(request, 'ct/livestart.html',
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer)))
 
+@login_required
+def unitq_control(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    if unitq.startTime is None:
+        unitq.startTime = timezone.now()
+        unitq.save() # save time stamp
+    notInstructor = check_instructor_auth(request, unitq)
+    if notInstructor:
+        return notInstructor
+    responses = unitq.response_set.all()
+    sure = responses.filter(confidence=Response.SURE)
+    unsure = responses.filter(confidence=Response.UNSURE)
+    guess = responses.filter(confidence=Response.GUESS)
+    nuser = unitq.liveuser_set.count() # count logged in users
+    counts = [guess.count(), unsure.count(), sure.count(), 0]
+    counts[-1] = nuser - sum(counts)
+    sec = (timezone.now() - unitq.startTime).seconds
+    elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
+    emlist = [e.description for e in unitq.question.errormodel_set.all()]
+    ndisplay = 25
+    sortOrder = '-atime'
+    rlform = ResponseListForm()
+    if request.method == 'POST':
+        emform = ErrorModelForm(request.POST)
+        if emform.is_valid():
+            e = emform.save(commit=False)
+            e.question = unitq.question
+            e.atime = timezone.now()
+            e.author = request.user
+            e.save()
+    else:
+        emform = ErrorModelForm()
+        if request.GET:
+            rlform = ResponseListForm(request.GET)
+            if rlform.is_valid():
+                ndisplay = int(rlform.cleaned_data['ndisplay'])
+                sortOrder = rlform.cleaned_data['sortOrder']
+    responses.order_by(sortOrder)
+    return render(request, 'ct/control.html',
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer),
+                       counts=counts, elapsedTime=elapsedTime, 
+                       emlist=emlist, actionTarget=request.path,
+                       emform=emform, responses=responses[:ndisplay],
+                       rlform=rlform))
+    
+
+def unitq_end(request, m):
+    pass
 
 @login_required
 def assess(request, resp_id):
