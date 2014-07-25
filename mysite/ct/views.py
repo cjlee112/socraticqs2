@@ -87,13 +87,13 @@ def unitq_live_start(request, unitq_id):
 @login_required
 def unitq_control(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    notInstructor = check_instructor_auth(request, unitq)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
     if unitq.startTime is None:
         unitq.startTime = timezone.now()
         unitq.save() # save time stamp
-    notInstructor = check_instructor_auth(request, unitq)
-    if notInstructor:
-        return notInstructor
-    responses = unitq.response_set.all()
+    responses = unitq.response_set.all() # get responses from live session
     sure = responses.filter(confidence=Response.SURE)
     unsure = responses.filter(confidence=Response.UNSURE)
     guess = responses.filter(confidence=Response.GUESS)
@@ -103,10 +103,10 @@ def unitq_control(request, unitq_id):
     sec = (timezone.now() - unitq.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     emlist = [e.description for e in unitq.question.errormodel_set.all()]
-    ndisplay = 25
+    ndisplay = 25 # set default values
     sortOrder = '-atime'
     rlform = ResponseListForm()
-    if request.method == 'POST':
+    if request.method == 'POST': # create a new ErrorModel
         emform = ErrorModelForm(request.POST)
         if emform.is_valid():
             e = emform.save(commit=False)
@@ -116,12 +116,12 @@ def unitq_control(request, unitq_id):
             e.save()
     else:
         emform = ErrorModelForm()
-        if request.GET:
+        if request.GET: # new query parameters for displaying responses
             rlform = ResponseListForm(request.GET)
             if rlform.is_valid():
                 ndisplay = int(rlform.cleaned_data['ndisplay'])
                 sortOrder = rlform.cleaned_data['sortOrder']
-    responses.order_by(sortOrder)
+    responses.order_by(sortOrder) # apply the desired sort order
     return render(request, 'ct/control.html',
                   dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
                        answer=mark_safe(unitq.question.answer),
@@ -145,8 +145,8 @@ def assess(request, resp_id):
         form.fields['emlist'].choices = choices
         if form.is_valid():
             r.selfeval = form.cleaned_data['selfeval']
+            r.status = form.cleaned_data['status']
             r.save()
-            print form.cleaned_data['emlist']
             for emID in form.cleaned_data['emlist']:
                 em = get_object_or_404(ErrorModel, pk=emID)
                 se = r.studenterror_set.create(atime=timezone.now(),

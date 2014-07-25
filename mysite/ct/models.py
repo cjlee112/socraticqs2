@@ -126,6 +126,14 @@ class Response(models.Model):
         (UNSURE, 'Not quite sure'),
         (SURE, 'Pretty sure'),
     )
+    NEED_HELP_STATUS = 'help'
+    NEED_REVIEW_STATUS = 'review'
+    DONE_STATUS = 'done'
+    STATUS_CHOICES = (
+        (NEED_HELP_STATUS, 'Still confused, need help'),
+        (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
+        (DONE_STATUS, 'Solidly'),
+    )
     question = models.ForeignKey(Question)
     unitq = models.ForeignKey(UnitQ, null=True)
     atext = models.TextField()
@@ -133,8 +141,9 @@ class Response(models.Model):
                                   blank=False, null=False)
     atime = models.DateTimeField('time submitted')
     selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES, 
-                                blank=True, null=True)
-    requestHelp = models.BooleanField(default=False)
+                                blank=False, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
+                              blank=False, null=True)
     author = models.ForeignKey(User)
     def __unicode__(self):
         return 'answer by ' + self.author.username

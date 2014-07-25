@@ -34,6 +34,13 @@
   {{ form.emlist }}
 </div>
 
+<div class="fieldWrapper">
+  {{ form.status.errors }}
+  <label for="id_status">
+  How well do you feel you understand this concept now?</label><br>
+  {{ form.status }}
+</div>
+
 <p><input type="submit" value="Go" /></p>
 </form>
 {% endblock %}

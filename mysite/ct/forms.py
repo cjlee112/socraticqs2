@@ -16,6 +16,8 @@ class ResponseForm(forms.ModelForm):
 
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES)
+    status = forms.ChoiceField(choices=(('', '----'),)
+                               + Response.STATUS_CHOICES)
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False)
 
