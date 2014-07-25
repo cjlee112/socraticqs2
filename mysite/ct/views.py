@@ -2,8 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from django.utils import timezone
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import ensure_csrf_cookie
+import json
 from ct.models import *
 from ct.forms import *
 
@@ -213,6 +216,37 @@ def assess(request, resp_id):
                   dict(response=r, qtext=mark_safe(r.question.qtext),
                        answer=mark_safe(r.question.answer), form=form,
                        actionTarget=request.path))
+
+
+
+@login_required
+def flag_question(request, ct_id):
+    q = get_object_or_404(Question, pk=ct_id)
+    if request.is_ajax() and request.method == 'POST':
+        newstate = int(request.POST['state'])
+        try:
+            sl = StudyList.objects.get(question=q, user=request.user)
+            if not newstate:
+                sl.delete()
+        except ObjectDoesNotExist:
+            if newstate:
+                q.studylist_set.create(user=request.user)
+        data = json.dumps(dict(newstate=newstate))
+        return HttpResponse(data, content_type='application/json')
+
+@ensure_csrf_cookie
+def question(request, ct_id):
+    q = get_object_or_404(Question, pk=ct_id)
+    try:
+        sl = StudyList.objects.get(question=q, user=request.user)
+        inStudylist = 1
+    except ObjectDoesNotExist:
+        inStudylist = 0
+    return render(request, 'ct/question.html',
+                  dict(question=q, qtext=mark_safe(q.qtext),
+                       answer=mark_safe(q.answer),
+                       actionTarget=request.path,
+                       inStudylist=inStudylist))
 
 ############################################################33
 # NOT USED... JUST EXPERIMENTAL

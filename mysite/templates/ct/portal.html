@@ -4,8 +4,36 @@
 {% endcomment %}
 
 {% block head %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
+</script>
+
 <script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,Safe">
 </script>
+
+<script type="text/javascript">
+function setInterest(targeturl, state, csrftoken)
+{
+  $.post(targeturl,
+  {
+    csrfmiddlewaretoken:csrftoken,
+    state:state
+  });
+}
+
+function toggleInterest(o, targeturl, csrftoken)
+{
+  if (o.value == "1")
+  {
+    o.value="0";
+  }
+  else
+  {
+    o.value="1";
+  }
+  setInterest(targeturl, o.value, csrftoken);
+}
+</script>
+
 
   <title>Socraticqs Online</title>
 {% endblock %}

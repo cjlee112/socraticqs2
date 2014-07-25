@@ -1,0 +1,31 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Let the instructor monitor self-assessment
+{% endcomment %}
+
+{% block title %}
+  {{ question.title }}
+{% endblock %}
+
+{% block content %}
+<input type="checkbox" name="studylist"
+onclick="toggleInterest(this, '{{ actionTarget }}studylist/', '{{ csrf_token }}')"
+{% if inStudylist %}
+value="1" CHECKED
+{% else %}
+value="0"
+{% endif %}
+/>Keep in my study list
+
+<h2>Question</h2> 
+{{ qtext }}
+
+{% if answer %}
+<h2>Correct answer</h2> 
+{{ answer }}
+{% endif %}
+
+
+
+{% endblock %}
+
