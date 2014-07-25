@@ -78,6 +78,7 @@ def unitq_live_start(request, unitq_id):
         return notInstructor
     if not unitq.liveStage: # activate live session
         unitq.liveStage = unitq.RESPONSE_STAGE
+        unitq.save()
     if request.method == 'POST':
         pass
     return render(request, 'ct/livestart.html',
@@ -129,10 +130,61 @@ def unitq_control(request, unitq_id):
                        emlist=emlist, actionTarget=request.path,
                        emform=emform, responses=responses[:ndisplay],
                        rlform=rlform))
-    
 
-def unitq_end(request, m):
-    pass
+def count_vectors(data, start=None, end=None):
+    d = {}
+    for t in data:
+        k = t[start:end]
+        d[k] = d.get(k, 0) + 1
+    return d
+
+def make_table(d, keyset, func, t=()):
+    keys = keyset[0]
+    keyset = keyset[1:]
+    l = []
+    for k in keys:
+        kt = t + (k,)
+        if keyset:
+            l.append(make_table(d, keyset, func, kt))
+        else:
+            l.append(func(d.get(kt, 0)))
+    return l
+
+@login_required
+def unitq_end(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    notInstructor = check_instructor_auth(request, unitq)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    unitq.liveStage = unitq.ASSESSMENT_STAGE
+    unitq.save()
+    n = unitq.response_set.count() # count all responses from live session
+    responses = unitq.response_set.exclude(selfeval=None) # self-assessed
+    data = [(r.confidence, r.selfeval, r.status) for r in responses]
+    ndata = len(data)
+    statusCounts = count_vectors(data, -1)
+    evalCounts = count_vectors(data, end=2)
+    fmt_count = lambda c: '%d (%.0f%%)' % (c, c * 100. / n)
+    confKeys = [t[0] for t in Response.CONF_CHOICES]
+    confLabels = [t[1] for t in Response.CONF_CHOICES]
+    evalKeys = [t[0] for t in Response.EVAL_CHOICES]
+    statusKeys = [t[0] for t in Response.STATUS_CHOICES]
+    statusCounts = make_table(statusCounts, (statusKeys,), fmt_count)
+    statusCounts.append(fmt_count(n - ndata))
+    if ndata > 0: # build the self-assessment table
+        fmt_count = lambda c: '%d (%.0f%%)' % (c, c * 100. / ndata)
+        evalCounts = make_table(evalCounts, (confKeys, evalKeys), fmt_count)
+        evalCounts = zip(confLabels, evalCounts)
+    else: # no data so don't display anything
+        evalCounts = ()
+    sec = (timezone.now() - unitq.startTime).seconds
+    elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
+    return render(request, 'ct/end.html',
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer),
+                       statusCounts=statusCounts, elapsedTime=elapsedTime,
+                       evalCounts=evalCounts))
+
 
 @login_required
 def assess(request, resp_id):

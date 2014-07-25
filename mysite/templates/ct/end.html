@@ -1,0 +1,80 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Let the instructor monitor self-assessment
+{% endcomment %}
+
+{% block title %}
+  {{ unitq.question.title }}
+{% endblock %}
+
+{% block content %}
+<h2>Instructions</h2>
+
+<ul>
+<li>Monitor the fraction of students that have answered, in real-time.</li>
+<li>View the latest student answers</li>
+<li>Add new error models that describe errors you see students making,
+    if they don't fit existing error models shown below.
+<li>When you feel enough students have responded (totally up to you
+    but typically around half), tell
+    the students what stage to proceed to.</li>
+<li>E.g. you could ask them to discuss their answer with their neighbor;</li>
+<li>Or you could proceed directly
+    to the ASSESS stage to present the solution and have the
+    students self-assess.</li>
+<li>To end the exercise and start self-assessment, click the 
+    End button below.</li>
+</ul>
+
+<button type="button" onclick="location.href='{% url 'ct:end' unitq.id %}'">
+End the exercise
+</button>
+
+<h2>Final Status for Understanding This Concept</h2>
+
+<b>Time Elapsed:</b> {{ elapsedTime }} 
+<br>
+<table border=1>
+  <tr>
+    <th>Still confused, need help</th>
+    <th>OK, but need review</th>
+    <th>Solid understanding</th>
+    <th>(not yet)</th>
+  </tr>
+  <tr>
+    {% for c in statusCounts %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+{% if evalCounts %}
+<h2>Student Self-Assessments</h2>
+
+<table border=1>
+  <tr>
+    <th></th>
+    <th>Wrong</th>
+    <th>Close</th>
+    <th>Correct</th>
+  </tr>
+  {% for label, row in evalCounts %}
+  <tr>
+    <td><b>{{ label }}</b></td>
+    {% for c in row %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<h2>Question</h2> 
+{{ qtext }}
+
+<h2>Correct answer</h2> 
+{{ answer }}
+
+
+{% endblock %}
+

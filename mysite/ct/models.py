@@ -114,12 +114,12 @@ class Response(models.Model):
     CLOSE = 'close'
     DIFFERENT = 'different'
     EVAL_CHOICES = (
-        (CORRECT, 'Essentially the same'),
-        (CLOSE, 'Close'),
         (DIFFERENT, 'Different'),
+        (CLOSE, 'Close'),
+        (CORRECT, 'Essentially the same'),
     )
-    GUESS = 'guess'
-    UNSURE = 'unsure'
+    GUESS = 'guess' # chosen for sort order g < n < s
+    UNSURE = 'notsure'
     SURE = 'sure'
     CONF_CHOICES = (
         (GUESS, 'Just guessing'), 
