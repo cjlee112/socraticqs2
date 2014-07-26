@@ -1,0 +1,29 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  View or edit a course unit
+{% endcomment %}
+
+{% block title %}
+  {{ unit.title }}
+{% endblock %}
+
+{% block content %}
+{% if unit.unitq_set %}
+<h2>Exercises in this Unit</h2>
+<ul>
+{% for unitq in unit.unitq_set.all %}
+  <li>{{ unitq.question.title }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<h2>Add an Exercise</h2>
+
+<form action="/ct/unitq/" method="post">
+{% csrf_token %}
+{{ slform }}
+<input type="submit" value="Add" />
+</form>
+
+{% endblock %}
+

@@ -44,3 +44,9 @@ em2 = ct.models.ErrorModel(description='very common, very silly error',
                            alwaysAsk=True, atime=timezone.now(),
                            author=teacher)
 em2.save()
+
+q2 = ct.models.Question(title='Another Question',
+                       qtext='If Bob has 7 apples...',
+                       answer='If life gives you apples, make applesauce.',
+                       author=john)
+q2.save()

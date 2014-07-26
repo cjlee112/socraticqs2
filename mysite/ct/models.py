@@ -38,6 +38,8 @@ class Unit(models.Model):
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course)
     liveUnitQ = models.ForeignKey('UnitQ', related_name='+', null=True)
+    def __unicode__(self):
+        return self.title
 
 class Question(models.Model):
     PUBLIC = 'public'
@@ -91,6 +93,8 @@ class UnitQ(models.Model):
 class StudyList(models.Model):
     question = models.ForeignKey(Question)
     user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.question.title
     
 class ErrorModel(models.Model):
     question = models.ForeignKey(Question, blank=True, null=True)

@@ -67,8 +67,8 @@ def unitq_next_url(unitq, stage, response=None):
         return reverse('ct:unit', args=(unitq.unit.id,))
 
 
-def check_instructor_auth(request, unitq):
-    role = unitq.unit.course.get_user_role(request.user)
+def check_instructor_auth(course, request):
+    role = course.get_user_role(request.user)
     if role != Role.INSTRUCTOR:
         return HttpResponse("Only the instructor can access this",
                             status_code=403)
@@ -76,7 +76,7 @@ def check_instructor_auth(request, unitq):
 @login_required
 def unitq_live_start(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(request, unitq)
+    notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor:
         return notInstructor
     if not unitq.liveStage: # activate live session
@@ -91,7 +91,7 @@ def unitq_live_start(request, unitq_id):
 @login_required
 def unitq_control(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(request, unitq)
+    notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     if unitq.startTime is None:
@@ -156,7 +156,7 @@ def make_table(d, keyset, func, t=()):
 @login_required
 def unitq_end(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(request, unitq)
+    notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     unitq.liveStage = unitq.ASSESSMENT_STAGE
@@ -248,6 +248,31 @@ def question(request, ct_id):
                        actionTarget=request.path,
                        inStudylist=inStudylist))
 
+@login_required
+def unit(request, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    notInstructor = check_instructor_auth(unit.course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    questions = Question.objects.filter(studylist__user=request.user)
+    slform = UnitQForm(unit.id, questions)
+    #choices = [(sl.question.id, sl.question.title) for sl in studylist]
+    #slform.fields['studylist'].choices = choices 
+    return render(request, 'ct/unit.html',
+                  dict(unit=unit, actionTarget=request.path, slform=slform))
+
+
+@login_required
+def new_unitq(request):
+    if request.method == 'POST':
+        form = UnitQForm(None, None, request.POST)
+        if form.is_valid():
+            unitq = form.save()
+            return HttpResponseRedirect(reverse('ct:unit', args=(unitq.unit.id,)))
+        return HttpResponse("POST data invalid", status_code=404)
+    return HttpResponse("GET not implemented", status_code=405)
+    
+    
 ############################################################33
 # NOT USED... JUST EXPERIMENTAL
 

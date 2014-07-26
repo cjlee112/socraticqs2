@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Question, Response, ErrorModel
+from ct.models import Question, Response, ErrorModel, UnitQ, Unit
 from django.utils.translation import ugettext_lazy as _
 
 class QuestionForm(forms.ModelForm):
@@ -35,4 +35,19 @@ class ResponseListForm(forms.Form):
                                            ('atime', 'Least recent first'),
                                            ('-confidence', 'Most confident first'),
                                            ('confidence', 'Least confident first'))) 
+
+
+class UnitQForm(forms.ModelForm):
+    def __init__(self, unitID, questionSet, *args, **kwargs):
+        super(UnitQForm, self).__init__(*args, **kwargs)
+        if unitID:
+            self.fields['unit'].queryset = Unit.objects.filter(pk=unitID)
+            self.fields['unit'].initial = unitID
+        if questionSet:
+            self.fields['question'].queryset = questionSet
+    class Meta:
+        model = UnitQ
+        fields = ['unit', 'question']
+        labels = dict(question=_('From your study-list'))
+        widgets = dict(unit=forms.HiddenInput())
 
