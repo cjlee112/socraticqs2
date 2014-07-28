@@ -10,7 +10,7 @@
 {% block content %}
 Please wait until your instructor asks you to click the Next button...
 
-<button type="button" onclick="location.href='{% url 'ct:wait' unitq.id %}'">
+<button type="button" onclick="location.href='{{ actionTarget }}'">
 Next
 </button>
 

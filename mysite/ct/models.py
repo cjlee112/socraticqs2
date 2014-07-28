@@ -72,11 +72,9 @@ class UnitQ(models.Model):
     liveStage = models.IntegerField(null=True)
     startTime = models.DateTimeField('time started', null=True)
 
-    UNITQ_WAIT = 'ct/wait.html'
-    def get_next_target(self, stage):
-        'stub for protocol edge transition'
-        if self.liveStage == stage:
-            return self.UNITQ_WAIT # wait for instructor to advance
+    def iswait(self, stage):
+        'should student wait until instructor advances live session?'
+        return self.liveStage == stage  # wait for instructor to advance
 
     def get_user_stage(self, user):
         try:
@@ -89,6 +87,12 @@ class UnitQ(models.Model):
             return self.ASSESSMENT_STAGE, r
     def start_user_session(self, user):
         LiveUser.start_user_session(self, user)
+    def livestart(self):
+        self.liveStage = self.RESPONSE_STAGE
+        self.save()
+        self.unit.liveUnitQ = self
+        self.unit.save()
+        
 
 class StudyList(models.Model):
     question = models.ForeignKey(Question)

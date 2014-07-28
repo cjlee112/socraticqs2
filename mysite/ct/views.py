@@ -35,10 +35,10 @@ def _respond(request, q, unitq=None):
             r.atime = timezone.now()
             r.author = request.user
             r.save()
-            if unitq: # let LIVE mode override default next step
-                target = unitq.get_next_target(UnitQ.RESPONSE_STAGE)
-                if target:
-                    return render(request, target, dict(unitq=unitq))
+            # let LIVE mode override default next step
+            if unitq and unitq.iswait(UnitQ.RESPONSE_STAGE):
+                return render(request, 'ct/wait.html',
+                    dict(actionTarget=reverse('ct:wait', args=(unitq.id,))))
             return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
     else:
         form = ResponseForm()
@@ -55,7 +55,8 @@ def wait(request, unitq_id):
     if not unitq.liveStage or stage < unitq.liveStage: # redirect to next
         target = unitq_next_url(unitq, stage, r)
         return HttpResponseRedirect(target)
-    return render(request, 'ct/wait.html', dict(unitq=unitq)) # keep waiting
+    return render(request, 'ct/wait.html',
+                  dict(actionTarget=request.path)) # keep waiting
 
 def unitq_next_url(unitq, stage, response=None):
     'get URL for next stage'
@@ -66,7 +67,6 @@ def unitq_next_url(unitq, stage, response=None):
     elif stage == unitq.ASSESSMENT_STAGE:
         return reverse('ct:unit', args=(unitq.unit.id,))
 
-
 def check_instructor_auth(course, request):
     role = course.get_user_role(request.user)
     if role != Role.INSTRUCTOR:
@@ -74,16 +74,32 @@ def check_instructor_auth(course, request):
                             status_code=403)
     
 @login_required
+def unitq(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    notInstructor = check_instructor_auth(unitq.unit.course, request)
+    if notInstructor:
+        return notInstructor
+    if request.method == 'POST':
+        if request.POST.get('task') == 'livestart':
+            unitq.livestart()
+            return HttpResponseRedirect(reverse('ct:livestart',
+                                                args=(unitq.id,)))
+        elif request.POST.get('task') == 'delete':
+            unit = unitq.unit
+            unitq.delete()
+            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
+    return render(request, target,
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer)))
+
+@login_required
 def unitq_live_start(request, unitq_id):
     unitq = get_object_or_404(UnitQ, pk=unitq_id)
     notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor:
         return notInstructor
-    if not unitq.liveStage: # activate live session
-        unitq.liveStage = unitq.RESPONSE_STAGE
-        unitq.save()
-    if request.method == 'POST':
-        pass
+    if request.method != 'GET':
+        return HttpResponse("not allowed", status_code=405)
     return render(request, 'ct/livestart.html',
                   dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
                        answer=mark_safe(unitq.question.answer)))
@@ -254,21 +270,45 @@ def unit(request, unit_id):
     notInstructor = check_instructor_auth(unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
+    if request.method == 'POST':
+        if 'title' in request.POST:
+            titleform = UnitTitleForm(request.POST, instance=unit)
+            if titleform.is_valid():
+                titleform.save()
+    else:
+        titleform = UnitTitleForm(instance=unit)
+
     questions = Question.objects.filter(studylist__user=request.user)
-    slform = UnitQForm(unit.id, questions)
+    slform = UnitQForm(questions)
     #choices = [(sl.question.id, sl.question.title) for sl in studylist]
     #slform.fields['studylist'].choices = choices 
     return render(request, 'ct/unit.html',
-                  dict(unit=unit, actionTarget=request.path, slform=slform))
+                  dict(unit=unit, actionTarget=request.path, slform=slform,
+                       titleform=titleform))
+
+@login_required
+def unit_wait(request, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    if unit.liveUnitQ: 
+        return HttpResponseRedirect(reverse('ct:wait',
+                                            args=(unit.liveUnitQ.id,)))
+    return render(request, 'ct/wait.html',
+                  dict(actionTarget=request.path)) # keep waiting
 
 
 @login_required
-def new_unitq(request):
+def new_unitq(request, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    notInstructor = check_instructor_auth(unit.course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
     if request.method == 'POST':
-        form = UnitQForm(None, None, request.POST)
+        form = UnitQForm(None, request.POST)
         if form.is_valid():
-            unitq = form.save()
-            return HttpResponseRedirect(reverse('ct:unit', args=(unitq.unit.id,)))
+            unitq = form.save(commit=False)
+            unitq.unit = unit
+            unitq.save()
+            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
         return HttpResponse("POST data invalid", status_code=404)
     return HttpResponse("GET not implemented", status_code=405)
     

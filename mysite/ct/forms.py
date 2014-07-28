@@ -36,18 +36,18 @@ class ResponseListForm(forms.Form):
                                            ('-confidence', 'Most confident first'),
                                            ('confidence', 'Least confident first'))) 
 
-
+class UnitTitleForm(forms.ModelForm):
+    class Meta:
+        model = Unit
+        fields = ['title']
+    
 class UnitQForm(forms.ModelForm):
-    def __init__(self, unitID, questionSet, *args, **kwargs):
+    def __init__(self, questionSet, *args, **kwargs):
         super(UnitQForm, self).__init__(*args, **kwargs)
-        if unitID:
-            self.fields['unit'].queryset = Unit.objects.filter(pk=unitID)
-            self.fields['unit'].initial = unitID
         if questionSet:
             self.fields['question'].queryset = questionSet
     class Meta:
         model = UnitQ
-        fields = ['unit', 'question']
+        fields = ['question']
         labels = dict(question=_('From your study-list'))
-        widgets = dict(unit=forms.HiddenInput())
 
