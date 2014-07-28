@@ -205,7 +205,8 @@ def unitq_end(request, unitq_id):
                   dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
                        answer=mark_safe(unitq.question.answer),
                        statusCounts=statusCounts, elapsedTime=elapsedTime,
-                       evalCounts=evalCounts, actionTarget=request.path))
+                       evalCounts=evalCounts, actionTarget=request.path,
+                       refreshRate=15))
 
 
 @login_required

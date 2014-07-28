@@ -7,6 +7,10 @@
   {{ unitq.question.title }}
 {% endblock %}
 
+{% block refresher %}
+<meta http-equiv="Refresh" content="{{ refreshRate }}; url={{ actionTarget }}">
+{% endblock %}
+
 {% block content %}
 <h2>Instructions</h2>
 
@@ -27,6 +31,10 @@
 <h2>Final Status for Understanding This Concept</h2>
 
 <b>Time Elapsed:</b> {{ elapsedTime }} 
+<button type="button" onclick="location.href='{{ actionTarget }}'">
+Refresh
+</button>
+
 <br>
 <table border=1>
   <tr>
