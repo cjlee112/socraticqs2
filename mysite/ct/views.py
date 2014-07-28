@@ -65,7 +65,7 @@ def unitq_next_url(unitq, stage, response=None):
     elif stage == unitq.RESPONSE_STAGE:
         return reverse('ct:assess', args=(response.id,))
     elif stage == unitq.ASSESSMENT_STAGE:
-        return reverse('ct:unit', args=(unitq.unit.id,))
+        return reverse('ct:unit_wait', args=(unitq.unit.id,))
 
 def check_instructor_auth(course, request):
     role = course.get_user_role(request.user)
@@ -88,9 +88,7 @@ def unitq(request, unitq_id):
             unit = unitq.unit
             unitq.delete()
             return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
-    return render(request, target,
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer)))
+    return HttpResponse("not allowed", status_code=405)
 
 @login_required
 def unitq_live_start(request, unitq_id):
@@ -175,6 +173,11 @@ def unitq_end(request, unitq_id):
     notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
+    if request.method == 'POST':
+        if request.POST.get('task') == 'finish':
+            unitq.livestart(end=True)
+            return HttpResponseRedirect(reverse('ct:unit',
+                                                args=(unitq.unit.id,)))
     unitq.liveStage = unitq.ASSESSMENT_STAGE
     unitq.save()
     n = unitq.response_set.count() # count all responses from live session
@@ -202,7 +205,7 @@ def unitq_end(request, unitq_id):
                   dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
                        answer=mark_safe(unitq.question.answer),
                        statusCounts=statusCounts, elapsedTime=elapsedTime,
-                       evalCounts=evalCounts))
+                       evalCounts=evalCounts, actionTarget=request.path))
 
 
 @login_required
@@ -223,7 +226,10 @@ def assess(request, resp_id):
                 se = r.studenterror_set.create(atime=timezone.now(),
                                                errorModel=em,
                                                author=r.author)
-            return HttpResponseRedirect('/ct')
+            if r.unitq:
+                return render(request, 'ct/wait.html',
+                    dict(actionTarget=reverse('ct:wait', args=(r.unitq.id,))))
+            return HttpResponseRedirect('/ct/')
     else:
         form = SelfAssessForm()
         form.fields['emlist'].choices = choices 

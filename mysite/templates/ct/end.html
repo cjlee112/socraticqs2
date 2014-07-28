@@ -11,24 +11,18 @@
 <h2>Instructions</h2>
 
 <ul>
-<li>Monitor the fraction of students that have answered, in real-time.</li>
-<li>View the latest student answers</li>
-<li>Add new error models that describe errors you see students making,
-    if they don't fit existing error models shown below.
-<li>When you feel enough students have responded (totally up to you
-    but typically around half), tell
-    the students what stage to proceed to.</li>
-<li>E.g. you could ask them to discuss their answer with their neighbor;</li>
-<li>Or you could proceed directly
-    to the ASSESS stage to present the solution and have the
-    students self-assess.</li>
-<li>To end the exercise and start self-assessment, click the 
-    End button below.</li>
+<li>Tell the students to click the Next button to begin self-assessment.
+<li>Monitor the students's self-assessments, in real-time.</li>
+<li>To stop monitoring self-assessment and return to the Unit control page,
+    click the Done button below.  Note: students will still be
+    able to submit self-assessments after you click Done.</li>
 </ul>
 
-<button type="button" onclick="location.href='{% url 'ct:end' unitq.id %}'">
-End the exercise
-</button>
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="finish" />
+  <input type="submit" value="Done" />
+</form>
 
 <h2>Final Status for Understanding This Concept</h2>
 

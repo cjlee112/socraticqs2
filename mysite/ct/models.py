@@ -87,10 +87,14 @@ class UnitQ(models.Model):
             return self.ASSESSMENT_STAGE, r
     def start_user_session(self, user):
         LiveUser.start_user_session(self, user)
-    def livestart(self):
-        self.liveStage = self.RESPONSE_STAGE
+    def livestart(self, end=False):
+        if end:
+            self.liveStage = self.DONE_STAGE
+            self.unit.liveUnitQ = None
+        else:
+            self.liveStage = self.RESPONSE_STAGE
+            self.unit.liveUnitQ = self
         self.save()
-        self.unit.liveUnitQ = self
         self.unit.save()
         
 
