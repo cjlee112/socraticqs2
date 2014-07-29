@@ -41,9 +41,9 @@ $( "#edittoggle" ).click(function() {
 </ul>
 {% endif %}
 
-<h2>Add an Exercise</h2>
+<h2>Add a New Unit</h2>
 
-<form action="{{ actionTarget }}unit/" method="post">
+<form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
 {{ unitform }}
 <input type="submit" value="Add" />

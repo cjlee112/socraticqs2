@@ -5,8 +5,19 @@ from django.core.exceptions import ObjectDoesNotExist
 # Create your models here.
 
 class Course(models.Model):
+    PUBLIC = 'public'
+    INSTRUCTOR_ONLY = 'instr'
+    CONCEPT_INVENTORY = 'CI'
+    PRIVATE = 'private'
+    ACCESS_CHOICES = (
+        (PUBLIC, 'Public'),
+        (INSTRUCTOR_ONLY, 'By instructors only'),
+        (PRIVATE, 'By author only'),
+    )
     title = models.CharField(max_length=200)
     liveUnit = models.ForeignKey('Unit', related_name='+', null=True)
+    access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
+                              default=PUBLIC)
     def get_user_role(self, user, justOne=True, raiseError=True):
         'return role(s) of specified user in this course'
         l = [r.role for r in self.role_set.filter(user=user)]
@@ -16,6 +27,8 @@ class Course(models.Model):
             return l[0]
         else:
             return l
+    def __unicode__(self):
+        return self.title
 
 class Role(models.Model):
     INSTRUCTOR = 'prof'
@@ -96,6 +109,8 @@ class UnitQ(models.Model):
             self.unit.liveUnitQ = self
         self.save()
         self.unit.save()
+    def __unicode__(self):
+        return self.question.title
         
 
 class StudyList(models.Model):

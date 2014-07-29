@@ -6,7 +6,10 @@ class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ['title', 'qtext', 'answer', 'access']
+        labels = dict(qtext=_('Question'))
 
+class QuestionSearchForm(forms.Form):
+    search = forms.CharField(label='Search for questions containing')
 
 class ResponseForm(forms.ModelForm):
     class Meta:
@@ -44,7 +47,7 @@ class UnitTitleForm(forms.ModelForm):
 class CourseTitleForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ['title']
+        fields = ['title', 'access']
     
 class UnitQForm(forms.ModelForm):
     def __init__(self, questionSet, *args, **kwargs):

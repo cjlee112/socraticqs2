@@ -28,11 +28,15 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
+<p>Course: <a href="{% url 'ct:course' unit.course.id %}">
+{{ unit.course.title }}</a></p>
+
 {% if unit.unitq_set.count > 0 %}
 <h2>Exercises in this Unit</h2>
 <ul>
 {% for unitq in unit.unitq_set.all %}
-  <li>{{ unitq.question.title }}:
+  <li><a href="{% url 'ct:question' unitq.question.id %}">
+  {{ unitq.question.title }}</a>:
   {% if unitq.response_set.count > 0 %}
     ({{ unitq.response_set.count }} student responses)
   {% endif %}
@@ -55,9 +59,18 @@ $( "#edittoggle" ).click(function() {
 
 <h2>Add an Exercise</h2>
 
-<form action="{{ actionTarget }}unitq/" method="post">
+<form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
 {{ slform }}
+<input type="submit" value="Add" />
+</form>
+
+<h3>Write a New Exercise</h3>
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<table>
+{{ qform }}
+</table>
 <input type="submit" value="Add" />
 </form>
 

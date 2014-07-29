@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
@@ -293,6 +294,37 @@ def question(request, ct_id):
                        inStudylist=inStudylist))
 
 
+def new_question(request):
+    form = QuestionForm(request.POST)
+    if form.is_valid():
+        question = form.save(commit=False)
+        question.author = request.user
+        question.save()
+        return question, form
+    return None, form
+
+@login_required
+def questions(request):
+    qset = ()
+    if request.method == 'POST':
+        question, qform = new_question(request)
+        if question:
+            return HttpResponseRedirect(reverse('ct:question',
+                                                args=(question.id,)))
+    elif 'search' in request.GET:
+        searchForm = QuestionSearchForm(request.GET)
+        if searchForm.is_valid():
+            s = searchForm.cleaned_data['search']
+            qset = Question.objects.filter(Q(title__icontains=s) |
+                                           Q(qtext__icontains=s) |
+                                           Q(answer__icontains=s))
+    else:
+        searchForm = QuestionSearchForm()
+    return render(request, 'ct/questions.html',
+                  dict(qset=qset, actionTarget=request.path,
+                       searchForm=searchForm))
+
+
 @login_required
 def teach(request):
     courseform = CourseTitleForm()
@@ -324,40 +356,27 @@ def course(request, course_id):
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
+    unitform = UnitTitleForm()
+    titleform = CourseTitleForm(instance=course)
     if request.method == 'POST':
-        if 'title' in request.POST:
+        if 'access' in request.POST: # update course attrs
             titleform = CourseTitleForm(request.POST, instance=course)
             if titleform.is_valid():
                 titleform.save()
-        elif request.POST.get('task') == 'delete':
+        elif 'title' in request.POST: # create new unit
+            unitform = UnitTitleForm(request.POST)
+            if unitform.is_valid():
+                unit = unitform.save(commit=False)
+                unit.course = course
+                unit.save()
+                return HttpResponseRedirect(reverse('ct:unit',
+                                                    args=(unit.id,)))
+        elif request.POST.get('task') == 'delete': # delete me
             course.delete()
             return HttpResponseRedirect(reverse('ct:teach'))
-    else:
-        titleform = CourseTitleForm(instance=course)
-
-    unitform = UnitTitleForm()
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
                        titleform=titleform, unitform=unitform))
-
-@login_required
-def new_unit(request, course_id):
-    course = get_object_or_404(Course, pk=course_id)
-    notInstructor = check_instructor_auth(course, request)
-    if notInstructor: # must be instructor to use this interface
-        return notInstructor
-    if request.method == 'POST':
-        form = UnitTitleForm(request.POST)
-        if form.is_valid():
-            unit = form.save(commit=False)
-            unit.course = course
-            unit.save()
-            return HttpResponseRedirect(reverse('ct:unit',
-                                                args=(unit.id,)))
-    else:
-        pass
-    return HttpResponseRedirect(reverse('ct:course', args=(course.id,)))
-
 
 @login_required
 def unit(request, unit_id):
@@ -365,26 +384,35 @@ def unit(request, unit_id):
     notInstructor = check_instructor_auth(unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
+    qform = QuestionForm()
+    titleform = UnitTitleForm(instance=unit)
     if request.method == 'POST':
-        if 'title' in request.POST:
+        if 'qtext' in request.POST: # create new exercise
+            question, qform = new_question(request)
+            if question:
+                unitq = UnitQ(unit=unit, question=question)
+                unitq.save()
+                qform = QuestionForm() # new blank form to display
+        elif 'question' in request.POST: # add new UnitQ
+            unitqform = UnitQForm(None, request.POST)
+            if unitqform.is_valid():
+                unitq = unitqform.save(commit=False)
+                unitq.unit = unit
+                unitq.save()
+        elif 'title' in request.POST: # update unit attributes
             titleform = UnitTitleForm(request.POST, instance=unit)
             if titleform.is_valid():
                 titleform.save()
-        elif request.POST.get('task') == 'delete':
+        elif request.POST.get('task') == 'delete': # delete me
             course = unit.course
             unit.delete()
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
-    else:
-        titleform = UnitTitleForm(instance=unit)
-
     questions = Question.objects.filter(studylist__user=request.user)
     slform = UnitQForm(questions)
-    #choices = [(sl.question.id, sl.question.title) for sl in studylist]
-    #slform.fields['studylist'].choices = choices 
     return render(request, 'ct/unit.html',
                   dict(unit=unit, actionTarget=request.path, slform=slform,
-                       titleform=titleform))
+                       titleform=titleform, qform=qform))
 
 @login_required
 def unit_wait(request, unit_id):
@@ -396,21 +424,6 @@ def unit_wait(request, unit_id):
                   dict(actionTarget=request.path)) # keep waiting
 
 
-@login_required
-def new_unitq(request, unit_id):
-    unit = get_object_or_404(Unit, pk=unit_id)
-    notInstructor = check_instructor_auth(unit.course, request)
-    if notInstructor: # must be instructor to use this interface
-        return notInstructor
-    if request.method == 'POST':
-        form = UnitQForm(None, request.POST)
-        if form.is_valid():
-            unitq = form.save(commit=False)
-            unitq.unit = unit
-            unitq.save()
-            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
-        return HttpResponse("POST data invalid", status_code=404)
-    return HttpResponse("GET not implemented", status_code=405)
     
     
 ############################################################33
