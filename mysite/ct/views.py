@@ -81,15 +81,24 @@ def unitq(request, unitq_id):
     if notInstructor:
         return notInstructor
     if request.method == 'POST':
+        unit = unitq.unit
         if request.POST.get('task') == 'livestart':
             unitq.livestart()
             return HttpResponseRedirect(reverse('ct:livestart',
                                                 args=(unitq.id,)))
         elif request.POST.get('task') == 'delete':
-            unit = unitq.unit
             unitq.delete()
-            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
-    return HttpResponse("not allowed", status_code=405)
+        return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
+    n = unitq.response_set.count() # count all responses from live session
+    responses = unitq.response_set.exclude(selfeval=None) # self-assessed
+    statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
+    errorCounts = errormodel_table(unitq, ndata)
+    return render(request, 'ct/unitq.html',
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer),
+                       statusCounts=statusCounts,
+                       evalCounts=evalCounts, actionTarget=request.path,
+                       errorCounts=errorCounts))
 
 @login_required
 def unitq_live_start(request, unitq_id):

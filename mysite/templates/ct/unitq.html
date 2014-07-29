@@ -1,0 +1,75 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Let the instructor analyze exercise results
+{% endcomment %}
+
+{% block title %}
+  {{ unitq.question.title }}
+{% endblock %}
+
+{% block content %}
+<h2>Instructions</h2>
+
+<ul>
+<li>Tell the students to click the Next button to begin self-assessment.
+<li>Monitor the students's self-assessments, in real-time.</li>
+<li>To stop monitoring self-assessment and return to the Unit control page,
+    click the Done button below.  Note: students will still be
+    able to submit self-assessments after you click Done.</li>
+</ul>
+
+<h2>Final Status for Understanding This Concept</h2>
+
+<table border=1>
+  <tr>
+    <th>Still confused, need help</th>
+    <th>OK, but need review</th>
+    <th>Solid understanding</th>
+    <th>(not yet)</th>
+  </tr>
+  <tr>
+    {% for c in statusCounts %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+{% if evalCounts %}
+<h2>Student Self-Assessments</h2>
+
+<table border=1>
+  <tr>
+    <th></th>
+    <th>Wrong</th>
+    <th>Close</th>
+    <th>Correct</th>
+  </tr>
+  {% for label, row in evalCounts %}
+  <tr>
+    <td><b>{{ label }}</b></td>
+    {% for c in row %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if errorCounts %}
+<h2>Student Errors</h2>
+<ul>
+  {% for em, studentErrors, emTotal in errorCounts %}
+    <li><b>{{ emTotal }}</b>: {{ em.description }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Question</h2> 
+{{ qtext }}
+
+<h2>Correct answer</h2> 
+{{ answer }}
+
+
+{% endblock %}
+

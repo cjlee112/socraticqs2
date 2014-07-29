@@ -48,7 +48,8 @@ You are now teaching this unit as a <b>live (classroom) session</b>.
   <li><a href="{% url 'ct:question' unitq.question.id %}">
   {{ unitq.question.title }}</a>:
   {% if unitq.response_set.count > 0 %}
-    ({{ unitq.response_set.count }} student responses)
+    (<a href="{% url 'ct:unitq' unitq.id %}">
+     {{ unitq.response_set.count }} student responses</a>)
   {% endif %}
   <form action="{% url 'ct:unitq' unitq.id %}" method="post"
    style=" display:inline!important;">
