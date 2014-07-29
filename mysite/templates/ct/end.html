@@ -71,6 +71,15 @@ Refresh
 </table>
 {% endif %}
 
+{% if errorCounts %}
+<h2>Student Errors</h2>
+<ul>
+  {% for em, studentErrors, emTotal in errorCounts %}
+    <li><b>{{ emTotal }}</b>: {{ em.description }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
 <h2>Question</h2> 
 {{ qtext }}
 

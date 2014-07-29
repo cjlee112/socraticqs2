@@ -182,6 +182,19 @@ def unitq_end(request, unitq_id):
     unitq.save()
     n = unitq.response_set.count() # count all responses from live session
     responses = unitq.response_set.exclude(selfeval=None) # self-assessed
+    statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
+    errorCounts = errormodel_table(unitq, ndata)
+    sec = (timezone.now() - unitq.startTime).seconds
+    elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
+    return render(request, 'ct/end.html',
+                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
+                       answer=mark_safe(unitq.question.answer),
+                       statusCounts=statusCounts, elapsedTime=elapsedTime,
+                       evalCounts=evalCounts, actionTarget=request.path,
+                       refreshRate=15, errorCounts=errorCounts))
+
+
+def status_confeval_tables(responses, n):
     data = [(r.confidence, r.selfeval, r.status) for r in responses]
     ndata = len(data)
     statusCounts = count_vectors(data, -1)
@@ -199,15 +212,23 @@ def unitq_end(request, unitq_id):
         evalCounts = zip(confLabels, evalCounts)
     else: # no data so don't display anything
         evalCounts = ()
-    sec = (timezone.now() - unitq.startTime).seconds
-    elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
-    return render(request, 'ct/end.html',
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer),
-                       statusCounts=statusCounts, elapsedTime=elapsedTime,
-                       evalCounts=evalCounts, actionTarget=request.path,
-                       refreshRate=15))
+    return statusCounts, evalCounts, ndata
 
+def errormodel_table(unitq, n, question=None, fmt='%d students (%.0f%%)'):
+    if question:
+        studentErrors = StudentError.objects.filter(response__question=question)
+    else:
+        studentErrors = StudentError.objects.filter(response__unitq=unitq)
+    d = {}
+    for se in studentErrors:
+        try:
+            d[se.errorModel].append(se)
+        except KeyError:
+            d[se.errorModel] = [se]
+    l = d.items()
+    l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
+    fmt_count = lambda c: fmt % (c, c * 100. / n)
+    return [(t[0],t[1],fmt_count(len(t[1]))) for t in l]
 
 @login_required
 def assess(request, resp_id):
