@@ -31,6 +31,16 @@ $( "#edittoggle" ).click(function() {
 <p>Course: <a href="{% url 'ct:course' unit.course.id %}">
 {{ unit.course.title }}</a></p>
 
+{% if unit.liveUnitQ %}
+You are now teaching this unit as a <b>live (classroom) session</b>. 
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="liveend" />
+  <input type="submit" value="End Live Session" />
+  </form>
+{% endif %}
+
 {% if unit.unitq_set.count > 0 %}
 <h2>Exercises in this Unit</h2>
 <ul>
@@ -44,7 +54,7 @@ $( "#edittoggle" ).click(function() {
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="task" value="livestart" />
-  <input type="submit" value="Start Exercise" />
+  <input type="submit" value="Start Live Exercise" />
   </form>
   <form action="{% url 'ct:unitq' unitq.id %}" method="post"
    style=" display:inline!important;">

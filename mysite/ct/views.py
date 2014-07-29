@@ -349,13 +349,23 @@ def courses(request):
     courseSet = Course.objects.filter(unit__unitq__isnull=False)
     return render(request, 'ct/courses.html', dict(courses=courseSet))
 
+
+def redirect_live(unit, default=None):
+    if not unit:
+        return default
+    elif unit.liveUnitQ:
+        return HttpResponseRedirect(unitq_next_url(unit.liveUnitQ,
+                                                   UnitQ.START_STAGE))
+    return HttpResponseRedirect(reverse('ct:unit_wait', args=(unit.id,)))
+        
             
 @login_required
 def course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # must be instructor to use this interface
-        return notInstructor
+        return redirect_live(course.liveUnit,
+          HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
     unitform = UnitTitleForm()
     titleform = CourseTitleForm(instance=course)
     if request.method == 'POST':
@@ -377,6 +387,14 @@ def course(request, course_id):
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
                        titleform=titleform, unitform=unitform))
+
+def course_study(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    target = redirect_live(course.liveUnit)
+    if target:
+        return target
+    return render(request, 'ct/course_study.html',
+                  dict(course=course, actionTarget=request.path))
 
 @login_required
 def unit(request, unit_id):
@@ -403,6 +421,11 @@ def unit(request, unit_id):
             titleform = UnitTitleForm(request.POST, instance=unit)
             if titleform.is_valid():
                 titleform.save()
+        elif request.POST.get('task') == 'liveend': # end live session
+            unit.liveUnitQ = None
+            unit.save()
+            unit.course.liveUnit = None
+            unit.course.save()
         elif request.POST.get('task') == 'delete': # delete me
             course = unit.course
             unit.delete()

@@ -1,0 +1,22 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ unit.title }}
+{% endblock %}
+
+{% block content %}
+<h2>Units in this Course</h2>
+<ul>
+{% for unit in course.unit_set.all %}
+  <li><a href="{% url 'ct:unit' unit.id %}">{{ unit.title }}</a>:
+  {% if unit.unitq_set.count > 0 %}
+    ({{ unit.unitq_set.count }} exercises)
+  {% endif %}
+  </li>
+{% endfor %}
+</ul>
+
+{% endblock %}

@@ -107,6 +107,8 @@ class UnitQ(models.Model):
         else:
             self.liveStage = self.RESPONSE_STAGE
             self.unit.liveUnitQ = self
+            self.unit.course.liveUnit = self.unit
+            self.unit.course.save()
         self.save()
         self.unit.save()
     def __unicode__(self):
