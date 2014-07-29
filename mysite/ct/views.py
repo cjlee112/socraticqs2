@@ -293,6 +293,26 @@ def question(request, ct_id):
                        inStudylist=inStudylist))
 
 @login_required
+def course(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    notInstructor = check_instructor_auth(course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    if request.method == 'POST':
+        if 'title' in request.POST:
+            titleform = CourseTitleForm(request.POST, instance=course)
+            if titleform.is_valid():
+                titleform.save()
+    else:
+        titleform = CourseTitleForm(instance=course)
+
+    unitform = UnitTitleForm()
+    return render(request, 'ct/course.html',
+                  dict(course=course, actionTarget=request.path,
+                       titleform=titleform, unitform=unitform))
+
+
+@login_required
 def unit(request, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     notInstructor = check_instructor_auth(unit.course, request)
@@ -303,6 +323,11 @@ def unit(request, unit_id):
             titleform = UnitTitleForm(request.POST, instance=unit)
             if titleform.is_valid():
                 titleform.save()
+        elif request.POST.get('task') == 'delete':
+            course = unit.course
+            unit.delete()
+            return HttpResponseRedirect(reverse('ct:course',
+                                                args=(course.id,)))
     else:
         titleform = UnitTitleForm(instance=unit)
 

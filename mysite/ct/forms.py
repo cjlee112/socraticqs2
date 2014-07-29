@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Question, Response, ErrorModel, UnitQ, Unit
+from ct.models import Question, Response, ErrorModel, UnitQ, Unit, Course
 from django.utils.translation import ugettext_lazy as _
 
 class QuestionForm(forms.ModelForm):
@@ -39,6 +39,11 @@ class ResponseListForm(forms.Form):
 class UnitTitleForm(forms.ModelForm):
     class Meta:
         model = Unit
+        fields = ['title']
+    
+class CourseTitleForm(forms.ModelForm):
+    class Meta:
+        model = Course
         fields = ['title']
     
 class UnitQForm(forms.ModelForm):

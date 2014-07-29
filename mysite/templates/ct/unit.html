@@ -15,6 +15,11 @@
 {{ titleform }}
 <input type="submit" value="Update" />
 </form>
+  <form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="delete" />
+  <input type="submit" value="Delete this Unit" />
+  </form>
 </div>
 
 <script>

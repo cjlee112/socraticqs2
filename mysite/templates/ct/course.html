@@ -1,0 +1,53 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ unit.title }}
+{% endblock %}
+
+{% block content %}
+<input type="checkbox" id="edittoggle"/>Edit.<BR>
+<div id="editform" style="display: none">
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+{{ titleform }}
+<input type="submit" value="Update" />
+</form>
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<input type="hidden" name="task" value="delete" />
+<input type="submit" value="Delete this Course" />
+</form>
+</div>
+
+<script>
+$( "#edittoggle" ).click(function() {
+  $( "#editform" ).toggle();
+});
+</script>
+
+{% if course.unit_set.count > 0 %}
+<h2>Units in this Course</h2>
+<ul>
+{% for unit in course.unit_set.all %}
+  <li><a href="{% url 'ct:unit' unit.id %}">{{ unit.title }}</a>:
+  {% if unit.unitq_set.count > 0 %}
+    ({{ unit.unitq_set.count }} exercises)
+  {% endif %}
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<h2>Add an Exercise</h2>
+
+<form action="{{ actionTarget }}unit/" method="post">
+{% csrf_token %}
+{{ unitform }}
+<input type="submit" value="Add" />
+</form>
+
+{% endblock %}
+

@@ -4,6 +4,7 @@ from ct.views import *
 urlpatterns = patterns('',
     (r'^$', main_page),
     url(r'^(?P<ct_id>\d+)/$', question, name='question'),
+    url(r'^course/(?P<course_id>\d+)/$', course, name='course'),
     url(r'^unit/(?P<unit_id>\d+)/$', unit, name='unit'),
     url(r'^unit/(?P<unit_id>\d+)/wait/$', unit_wait, name='unit_wait'),
     url(r'^(?P<ct_id>\d+)/studylist/$', flag_question, name='flag_question'),
