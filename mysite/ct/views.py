@@ -292,6 +292,32 @@ def question(request, ct_id):
                        actionTarget=request.path,
                        inStudylist=inStudylist))
 
+
+@login_required
+def teach(request):
+    courseform = CourseTitleForm()
+    courses = Course.objects.filter(role__role=Role.INSTRUCTOR,
+                                    role__user=request.user)
+    return render(request, 'ct/teach.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       courses=courses, courseform=courseform))
+
+@login_required
+def courses(request):
+    if request.method == 'POST':
+        form = CourseTitleForm(request.POST)
+        if form.is_valid():
+            course = form.save()
+            role = Role(course=course, user=request.user,
+                        role=Role.INSTRUCTOR)
+            role.save()
+            return HttpResponseRedirect(reverse('ct:course',
+                                                args=(course.id,)))
+
+    courseSet = Course.objects.filter(unit__unitq__isnull=False)
+    return render(request, 'ct/courses.html', dict(courses=courseSet))
+
+            
 @login_required
 def course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
@@ -303,6 +329,9 @@ def course(request, course_id):
             titleform = CourseTitleForm(request.POST, instance=course)
             if titleform.is_valid():
                 titleform.save()
+        elif request.POST.get('task') == 'delete':
+            course.delete()
+            return HttpResponseRedirect(reverse('ct:teach'))
     else:
         titleform = CourseTitleForm(instance=course)
 
@@ -310,6 +339,24 @@ def course(request, course_id):
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
                        titleform=titleform, unitform=unitform))
+
+@login_required
+def new_unit(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    notInstructor = check_instructor_auth(course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    if request.method == 'POST':
+        form = UnitTitleForm(request.POST)
+        if form.is_valid():
+            unit = form.save(commit=False)
+            unit.course = course
+            unit.save()
+            return HttpResponseRedirect(reverse('ct:unit',
+                                                args=(unit.id,)))
+    else:
+        pass
+    return HttpResponseRedirect(reverse('ct:course', args=(course.id,)))
 
 
 @login_required

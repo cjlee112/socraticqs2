@@ -13,7 +13,8 @@
     <h2>{{ user.username }}'s Classes</h2>
     <ul>
     {% for role in user.role_set.all %}
-    <li>{{ role.course.title }} ({{ role.get_role_display }})</li>
+    <li><a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
+      ({{ role.get_role_display }})</li>
     {% endfor %}
     </ul>
 {% else %}
