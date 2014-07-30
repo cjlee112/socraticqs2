@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
 {% comment %}
   Let the instructor analyze exercise results
 {% endcomment %}
@@ -88,7 +89,7 @@ $( "#instrtoggle" ).click(function() {
 <h2>Uncategorized Student Errors</h2>
 <ul>
   {% for r in uncategorized %}
-    <li>{{ r.atext }} ({{ r.get_status_display }};
+    <li>{{ r.atext |md2html }} ({{ r.get_status_display }};
       {{ r.get_selfeval_display }})</li>
   {% endfor %}
 </ul>

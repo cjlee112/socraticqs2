@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
 {% comment %}
   Assess a student answer
 {% endcomment %}
@@ -10,7 +11,7 @@
 {% block content %}
     <B>Question:</B> {{ qtext }} <BR>
     <B>Correct answer:</B> {{ answer }} <BR>
-    <B>Submitted answer:</B> {{ response.atext }} <BR>
+    <B>Submitted answer:</B> {{ response.atext |md2html }} <BR>
     <p> <B>Confidence:</B> {{ response.get_confidence_display }} </p>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 

@@ -10,6 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
+from ct.templatetags.ct_extras import md2html
 
 @login_required
 def main_page(request):
@@ -24,7 +25,6 @@ def respond_unitq(request, unitq_id):
 @login_required
 def respond(request, ct_id):
     return _respond(request, get_object_or_404(Question, pk=ct_id))
-
 
 def _respond(request, q, unitq=None):
     if request.method == 'POST':
@@ -45,7 +45,7 @@ def _respond(request, q, unitq=None):
         form = ResponseForm()
 
     return render(request, 'ct/ask.html',
-                  dict(question=q, qtext=mark_safe(q.qtext), form=form,
+                  dict(question=q, qtext=md2html(q.qtext), form=form,
                        actionTarget=request.path))
 
 @login_required
@@ -107,8 +107,8 @@ def unitq(request, unitq_id):
       .exclude(selfeval=Response.CORRECT)
     uncats.order_by('status')
     return render(request, 'ct/unitq.html',
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer),
+                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
+                       answer=md2html(unitq.question.answer),
                        statusCounts=statusCounts, uncategorized=uncats,
                        evalCounts=evalCounts, actionTarget=request.path,
                        errorCounts=errorCounts, emform=emform))
@@ -122,8 +122,8 @@ def unitq_live_start(request, unitq_id):
     if request.method != 'GET':
         return HttpResponse("not allowed", status_code=405)
     return render(request, 'ct/livestart.html',
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer)))
+                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
+                       answer=md2html(unitq.question.answer)))
 
 @login_required
 def unitq_control(request, unitq_id):
@@ -164,8 +164,8 @@ def unitq_control(request, unitq_id):
                 sortOrder = rlform.cleaned_data['sortOrder']
     responses.order_by(sortOrder) # apply the desired sort order
     return render(request, 'ct/control.html',
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer),
+                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
+                       answer=md2html(unitq.question.answer),
                        counts=counts, elapsedTime=elapsedTime, 
                        emlist=emlist, actionTarget=request.path,
                        emform=emform, responses=responses[:ndisplay],
@@ -210,8 +210,8 @@ def unitq_end(request, unitq_id):
     sec = (timezone.now() - unitq.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     return render(request, 'ct/end.html',
-                  dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
-                       answer=mark_safe(unitq.question.answer),
+                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
+                       answer=md2html(unitq.question.answer),
                        statusCounts=statusCounts, elapsedTime=elapsedTime,
                        evalCounts=evalCounts, actionTarget=request.path,
                        refreshRate=15, errorCounts=errorCounts))
@@ -287,8 +287,8 @@ def assess(request, resp_id):
         form.fields['emlist'].choices = choices 
 
     return render(request, 'ct/assess.html',
-                  dict(response=r, qtext=mark_safe(r.question.qtext),
-                       answer=mark_safe(r.question.answer), form=form,
+                  dict(response=r, qtext=md2html(r.question.qtext),
+                       answer=md2html(r.question.answer), form=form,
                        actionTarget=request.path))
 
 
@@ -317,8 +317,8 @@ def question(request, ct_id):
     except ObjectDoesNotExist:
         inStudylist = 0
     return render(request, 'ct/question.html',
-                  dict(question=q, qtext=mark_safe(q.qtext),
-                       answer=mark_safe(q.answer),
+                  dict(question=q, qtext=md2html(q.qtext),
+                       answer=md2html(q.answer),
                        actionTarget=request.path,
                        inStudylist=inStudylist))
 
@@ -487,8 +487,8 @@ def remedy_page(request, em_id):
     return render_remedy_form(request, em)
 
 def render_remedy_form(request, em, **context):
-    context.update(dict(errorModel=em, qtext=mark_safe(em.question.qtext),
-                        answer=mark_safe(em.question.answer)))
+    context.update(dict(errorModel=em, qtext=md2html(em.question.qtext),
+                        answer=md2html(em.question.answer)))
     return render(request, 'ct/remedy.html', context)
 
 @login_required

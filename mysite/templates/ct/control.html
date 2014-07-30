@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
 {% comment %}
   Let the instructor control exercise in real-time
 {% endcomment %}
@@ -100,7 +101,7 @@ Responses
 <br>
 <ul>
 {% for r in responses %}
-  <li>{{ r.atext }}</li>
+  <li>{{ r.atext |md2html }}</li>
 {% endfor %}
 </ul>
 
