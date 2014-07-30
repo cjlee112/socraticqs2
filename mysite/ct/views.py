@@ -80,25 +80,38 @@ def unitq(request, unitq_id):
     notInstructor = check_instructor_auth(unitq.unit.course, request)
     if notInstructor:
         return notInstructor
+    emform = ErrorModelForm()
     if request.method == 'POST':
-        unit = unitq.unit
-        if request.POST.get('task') == 'livestart':
+        if 'description' in request.POST:
+            emform = ErrorModelForm(request.POST)
+            if emform.is_valid():
+                e = emform.save(commit=False)
+                e.question = unitq.question
+                e.atime = timezone.now()
+                e.author = request.user
+                e.save()
+                emform = ErrorModelForm() # new blank form
+        elif request.POST.get('task') == 'livestart':
             unitq.livestart()
             return HttpResponseRedirect(reverse('ct:livestart',
                                                 args=(unitq.id,)))
         elif request.POST.get('task') == 'delete':
+            unit = unitq.unit
             unitq.delete()
-        return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
+            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
     n = unitq.response_set.count() # count all responses from live session
     responses = unitq.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
-    errorCounts = errormodel_table(unitq, ndata)
+    errorCounts = errormodel_table(unitq, ndata, includeAll=True)
+    uncats = Response.objects.filter(unitq=unitq, studenterror__isnull=True) \
+      .exclude(selfeval=Response.CORRECT)
+    uncats.order_by('status')
     return render(request, 'ct/unitq.html',
                   dict(unitq=unitq, qtext=mark_safe(unitq.question.qtext),
                        answer=mark_safe(unitq.question.answer),
-                       statusCounts=statusCounts,
+                       statusCounts=statusCounts, uncategorized=uncats,
                        evalCounts=evalCounts, actionTarget=request.path,
-                       errorCounts=errorCounts))
+                       errorCounts=errorCounts, emform=emform))
 
 @login_required
 def unitq_live_start(request, unitq_id):
@@ -224,11 +237,13 @@ def status_confeval_tables(responses, n):
         evalCounts = ()
     return statusCounts, evalCounts, ndata
 
-def errormodel_table(unitq, n, question=None, fmt='%d students (%.0f%%)'):
+def errormodel_table(unitq, n, question=None, fmt='%d students (%.0f%%)',
+                     includeAll=False):
     if question:
         studentErrors = StudentError.objects.filter(response__question=question)
     else:
         studentErrors = StudentError.objects.filter(response__unitq=unitq)
+        question = unitq.question
     d = {}
     for se in studentErrors:
         try:
@@ -236,6 +251,11 @@ def errormodel_table(unitq, n, question=None, fmt='%d students (%.0f%%)'):
         except KeyError:
             d[se.errorModel] = [se]
     l = d.items()
+    if includeAll: # add all EM for this question
+        extraEM = ErrorModel.objects.filter(question=question) \
+          .exclude(studenterror__response__unitq=unitq)
+        for em in extraEM:
+            l.append((em, ()))
     l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
     fmt_count = lambda c: fmt % (c, c * 100. / n)
     return [(t[0],t[1],fmt_count(len(t[1]))) for t in l]

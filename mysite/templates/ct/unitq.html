@@ -76,12 +76,28 @@ $( "#instrtoggle" ).click(function() {
 {% endif %}
 
 {% if errorCounts %}
-<h2>Student Errors</h2>
+<h2>Categorized Student Errors</h2>
 <ul>
   {% for em, studentErrors, emTotal in errorCounts %}
     <li><b>{{ emTotal }}</b>: {{ em.description }}</li>
   {% endfor %}
 </ul>
+{% endif %}
+
+{% if uncategorized %}
+<h2>Uncategorized Student Errors</h2>
+<ul>
+  {% for r in uncategorized %}
+    <li>{{ r.atext }} ({{ r.get_status_display }};
+      {{ r.get_selfeval_display }})</li>
+  {% endfor %}
+</ul>
+
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+{{ emform.as_p }}
+<input type="submit" value="Create" />
+</form>
 {% endif %}
 
 
