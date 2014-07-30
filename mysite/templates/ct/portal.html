@@ -44,16 +44,7 @@ function toggleInterest(o, targeturl, csrftoken)
     <h1>{% block title %}{% endblock %}</h1>
   </header>
 
-  <section>
-    <ul>
-      <li><a href="/">home</a></li>
-      <li><a href="/logout/">logout</a></li>
-    </ul>
-  </section>
 
   {% block content %}{% endblock %}
 
-  <footer>
-    <span>&copy; 2010, Django Consultants</span>
-  </footer>
 {% endblock %}

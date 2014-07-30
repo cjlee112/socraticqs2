@@ -12,15 +12,38 @@
 {% endblock %}
 
 {% block content %}
-<h2>Instructions</h2>
+<input type="checkbox" id="qtoggle"/>Show Question & Answer<BR>
+<div id="qdiv" style="display: none">
+<h2>Question</h2> 
+{{ qtext }}
 
+<h2>Correct answer</h2> 
+{{ answer }}
+</div>
+
+<script>
+$( "#qtoggle" ).click(function() {
+  $( "#qdiv" ).toggle();
+});
+</script>
+
+
+<input type="checkbox" id="instrtoggle"/>Show Page Instructions<BR>
+<div id="instrdiv" style="display: none">
 <ul>
-<li>Tell the students to click the Next button to begin self-assessment.
+<li>Tell the students to click the Next button to begin self-assessment.</li>
 <li>Monitor the students's self-assessments, in real-time.</li>
 <li>To stop monitoring self-assessment and return to the Unit control page,
     click the Done button below.  Note: students will still be
     able to submit self-assessments after you click Done.</li>
 </ul>
+</div>
+
+<script>
+$( "#instrtoggle" ).click(function() {
+  $( "#instrdiv" ).toggle();
+});
+</script>
 
 <form action="{{ actionTarget }}" method="post">
   {% csrf_token %}
@@ -79,13 +102,6 @@ Refresh
   {% endfor %}
 </ul>
 {% endif %}
-
-<h2>Question</h2> 
-{{ qtext }}
-
-<h2>Correct answer</h2> 
-{{ answer }}
-
 
 {% endblock %}
 

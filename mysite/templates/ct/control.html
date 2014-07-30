@@ -8,13 +8,29 @@
 {% endblock %}
 
 {% block content %}
-<h2>Instructions</h2>
+<input type="checkbox" id="qtoggle"/>Show Question & Answer<BR>
+<div id="qdiv" style="display: none">
+<h2>Question</h2> 
+{{ qtext }}
 
+<h2>Correct answer</h2> 
+{{ answer }}
+</div>
+
+<script>
+$( "#qtoggle" ).click(function() {
+  $( "#qdiv" ).toggle();
+});
+</script>
+
+
+<input type="checkbox" id="instrtoggle"/>Show Page Instructions<BR>
+<div id="instrdiv" style="display: none">
 <ul>
 <li>Monitor the fraction of students that have answered, in real-time.</li>
 <li>View the latest student answers</li>
 <li>Add new error models that describe errors you see students making,
-    if they don't fit existing error models shown below.
+    if they don't fit existing error models shown below.</li>
 <li>When you feel enough students have responded (totally up to you
     but typically around half), tell
     the students what stage to proceed to.</li>
@@ -25,6 +41,13 @@
 <li>To end the exercise and start self-assessment, click the 
     End button below.</li>
 </ul>
+</div>
+
+<script>
+$( "#instrtoggle" ).click(function() {
+  $( "#instrdiv" ).toggle();
+});
+</script>
 
 <button type="button" onclick="location.href='{% url 'ct:end' unitq.id %}'">
 End the exercise
@@ -48,12 +71,6 @@ End the exercise
     {% endfor %}
   </tr>
 </table>
-
-<h2>Question</h2> 
-{{ qtext }}
-
-<h2>Correct answer</h2> 
-{{ answer }}
 
 <h2>Common Error Models</h2>
 <ul>
