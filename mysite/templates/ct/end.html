@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
 {% comment %}
   Let the instructor monitor self-assessment
 {% endcomment %}
@@ -96,11 +97,14 @@ Refresh
 
 {% if errorCounts %}
 <h2>Student Errors</h2>
-<ul>
+<table border=1>
+  <tr><th>Students</th><th>Error</th></tr>
   {% for em, studentErrors, emTotal in errorCounts %}
-    <li><b>{{ emTotal }}</b>: {{ em.description }}</li>
+    <tr>
+    <td>{{ emTotal }}</td><td>{{ em.description |md2html }}</td>
+    </tr>
   {% endfor %}
-</ul>
+</table>
 {% endif %}
 
 {% endblock %}

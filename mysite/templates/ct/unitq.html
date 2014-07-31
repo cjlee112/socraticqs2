@@ -78,21 +78,29 @@ $( "#instrtoggle" ).click(function() {
 
 {% if errorCounts %}
 <h2>Categorized Student Errors</h2>
-<ul>
+<table border=1>
+  <tr><th>Students</th><th>Error</th></tr>
   {% for em, studentErrors, emTotal in errorCounts %}
-    <li><b>{{ emTotal }}</b>: {{ em.description }}</li>
+    <tr>
+    <td>{{ emTotal }}</td>
+    <td>{{ em.description |md2html }}</td>
+    </tr>
   {% endfor %}
-</ul>
+</table>
 {% endif %}
 
 {% if uncategorized %}
 <h2>Uncategorized Student Errors</h2>
-<ul>
+<table border=1>
+  <tr><th>Status</th><th>Correct?</th><th>Student's answer</th></tr>
   {% for r in uncategorized %}
-    <li>{{ r.atext |md2html }} ({{ r.get_status_display }};
-      {{ r.get_selfeval_display }})</li>
+    <tr>
+    <td>{{ r.get_status_display }}</td>
+    <td>{{ r.get_selfeval_display }})</td>
+    <td>{{ r.atext |md2html }}</td>
+    </tr>
   {% endfor %}
-</ul>
+</table>
 
 <form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
