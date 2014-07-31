@@ -2,6 +2,8 @@ import ct.models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+import csv
+import codecs
 
 
 course = ct.models.Course(title='Introduction to Bioinformatics Theory')
@@ -50,3 +52,20 @@ q2 = ct.models.Question(title='Another Question',
                        answer='If life gives you apples, make applesauce.',
                        author=john)
 q2.save()
+
+def load_csv(csvfile, unit, author):
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
+        reader = csv.reader(ifile)
+        for row in reader:
+            q = ct.models.Question(title=row[0], qtext=row[1], answer=row[2],
+                                   author=author)
+            q.save()
+            unitq = unit.unitq_set.create(question=q, order=1)
+            unitq.save()
+            for e in row[3:]:
+                em = q.errormodel_set.create(description=e,
+                             atime=timezone.now(), author=author)
+                
+
+load_csv('ct/lec2.csv', u, teacher) # try loading some real data
+
