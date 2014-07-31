@@ -2,9 +2,115 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-# Create your models here.
+
+###################################################
+# Question and associated info
+
+class Question(models.Model):
+    '''a challenge-response learning exercise designed to reveal
+    conceptual errors'''
+    PUBLIC = 'public'
+    INSTRUCTOR_ONLY = 'instr'
+    CONCEPT_INVENTORY = 'CI'
+    PRIVATE = 'private'
+    ACCESS_CHOICES = (
+        (PUBLIC, 'Public'),
+        (INSTRUCTOR_ONLY, 'By instructors only'),
+        (CONCEPT_INVENTORY, 'For concept inventory only'),
+        (PRIVATE, 'By author only'),
+    )
+    title = models.CharField(max_length=200)
+    qtext = models.TextField()
+    answer = models.TextField()
+    access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
+                              default=PUBLIC)
+    author = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.title
+
+class StudyList(models.Model):
+    'list of questions of interest to each user'
+    question = models.ForeignKey(Question)
+    user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.question.title
+    
+class ErrorModel(models.Model):
+    'a specific kind of error on a question, or a generic error'
+    question = models.ForeignKey(Question, blank=True, null=True)
+    description = models.TextField()
+    isAbort = models.BooleanField(default=False)
+    isFail = models.BooleanField(default=False)
+    alwaysAsk = models.BooleanField(default=False)
+    atime = models.DateTimeField('time submitted')
+    author = models.ForeignKey(User)
+
+    @classmethod
+    def get_generic(klass):
+        'get all error models marked as alwaysAsk'
+        return klass.objects.filter(alwaysAsk=True)
+    
+    def __unicode__(self):
+        return self.description
+
+
+class Response(models.Model):
+    'answer entered by a student in response to a question'
+    CORRECT = 'correct'
+    CLOSE = 'close'
+    DIFFERENT = 'different'
+    EVAL_CHOICES = (
+        (DIFFERENT, 'Different'),
+        (CLOSE, 'Close'),
+        (CORRECT, 'Essentially the same'),
+    )
+    GUESS = 'guess' # chosen for sort order g < n < s
+    UNSURE = 'notsure'
+    SURE = 'sure'
+    CONF_CHOICES = (
+        (GUESS, 'Just guessing'), 
+        (UNSURE, 'Not quite sure'),
+        (SURE, 'Pretty sure'),
+    )
+    NEED_HELP_STATUS = 'help'
+    NEED_REVIEW_STATUS = 'review'
+    DONE_STATUS = 'done'
+    STATUS_CHOICES = (
+        (NEED_HELP_STATUS, 'Still confused, need help'),
+        (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
+        (DONE_STATUS, 'Solidly'),
+    )
+    question = models.ForeignKey(Question)
+    unitq = models.ForeignKey('UnitQ', null=True)
+    atext = models.TextField()
+    confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
+                                  blank=False, null=False)
+    atime = models.DateTimeField('time submitted')
+    selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES, 
+                                blank=False, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
+                              blank=False, null=True)
+    author = models.ForeignKey(User)
+    def __unicode__(self):
+        return 'answer by ' + self.author.username
+
+class StudentError(models.Model):
+    'identification of a specific error model made by a student'
+    response = models.ForeignKey(Response)
+    atime = models.DateTimeField('time submitted')
+    errorModel = models.ForeignKey(ErrorModel, blank=True, null=True)
+    author = models.ForeignKey(User)
+    def __unicode__(self):
+        return 'eval by ' + self.author.username
+
+
+
+
+#######################################
+# Course and membership info
 
 class Course(models.Model):
+    'a traditional (multi-concept) course'
     PUBLIC = 'public'
     INSTRUCTOR_ONLY = 'instr'
     CONCEPT_INVENTORY = 'CI'
@@ -31,6 +137,7 @@ class Course(models.Model):
         return self.title
 
 class Role(models.Model):
+    'membership of a user in a course'
     INSTRUCTOR = 'prof'
     TA = 'TA'
     ENROLLED = 'student'
@@ -48,33 +155,15 @@ class Role(models.Model):
 
 
 class Unit(models.Model):
+    'a unit of exercises performed together, e.g. one lecture'
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course)
     liveUnitQ = models.ForeignKey('UnitQ', related_name='+', null=True)
     def __unicode__(self):
         return self.title
 
-class Question(models.Model):
-    PUBLIC = 'public'
-    INSTRUCTOR_ONLY = 'instr'
-    CONCEPT_INVENTORY = 'CI'
-    PRIVATE = 'private'
-    ACCESS_CHOICES = (
-        (PUBLIC, 'Public'),
-        (INSTRUCTOR_ONLY, 'By instructors only'),
-        (CONCEPT_INVENTORY, 'For concept inventory only'),
-        (PRIVATE, 'By author only'),
-    )
-    title = models.CharField(max_length=200)
-    qtext = models.TextField()
-    answer = models.TextField()
-    access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
-                              default=PUBLIC)
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return self.title
-
 class UnitQ(models.Model):
+    'an exercise (posing one question) in a course unit'
     START_STAGE = 0
     RESPONSE_STAGE = 1
     ASSESSMENT_STAGE = 2
@@ -114,79 +203,8 @@ class UnitQ(models.Model):
     def __unicode__(self):
         return self.question.title
         
-
-class StudyList(models.Model):
-    question = models.ForeignKey(Question)
-    user = models.ForeignKey(User)
-    def __unicode__(self):
-        return self.question.title
-    
-class ErrorModel(models.Model):
-    question = models.ForeignKey(Question, blank=True, null=True)
-    description = models.TextField()
-    isAbort = models.BooleanField(default=False)
-    isFail = models.BooleanField(default=False)
-    alwaysAsk = models.BooleanField(default=False)
-    atime = models.DateTimeField('time submitted')
-    author = models.ForeignKey(User)
-
-    @classmethod
-    def get_generic(klass):
-        'get all error models marked as alwaysAsk'
-        return klass.objects.filter(alwaysAsk=True)
-    
-    def __unicode__(self):
-        return self.description
-
-class Response(models.Model):
-    CORRECT = 'correct'
-    CLOSE = 'close'
-    DIFFERENT = 'different'
-    EVAL_CHOICES = (
-        (DIFFERENT, 'Different'),
-        (CLOSE, 'Close'),
-        (CORRECT, 'Essentially the same'),
-    )
-    GUESS = 'guess' # chosen for sort order g < n < s
-    UNSURE = 'notsure'
-    SURE = 'sure'
-    CONF_CHOICES = (
-        (GUESS, 'Just guessing'), 
-        (UNSURE, 'Not quite sure'),
-        (SURE, 'Pretty sure'),
-    )
-    NEED_HELP_STATUS = 'help'
-    NEED_REVIEW_STATUS = 'review'
-    DONE_STATUS = 'done'
-    STATUS_CHOICES = (
-        (NEED_HELP_STATUS, 'Still confused, need help'),
-        (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
-        (DONE_STATUS, 'Solidly'),
-    )
-    question = models.ForeignKey(Question)
-    unitq = models.ForeignKey(UnitQ, null=True)
-    atext = models.TextField()
-    confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
-                                  blank=False, null=False)
-    atime = models.DateTimeField('time submitted')
-    selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES, 
-                                blank=False, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
-                              blank=False, null=True)
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'answer by ' + self.author.username
-
-class StudentError(models.Model):
-    response = models.ForeignKey(Response)
-    atime = models.DateTimeField('time submitted')
-    errorModel = models.ForeignKey(ErrorModel, blank=True, null=True)
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'eval by ' + self.author.username
-
-
 class LiveUser(models.Model):
+    'user logged in to a live exercise'
     unitq = models.ForeignKey(UnitQ)
     user = models.ForeignKey(User, unique=True)
 
@@ -200,6 +218,8 @@ class LiveUser(models.Model):
             o = klass(unitq=unitq, user=user)
         o.save()
         return o
+
+
 
 ######################################################################
 # CURRENTLY UNUSED

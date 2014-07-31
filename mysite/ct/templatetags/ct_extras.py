@@ -9,12 +9,15 @@ InlineMathPat = re.compile(r'\\\((.+?)\\\)', flags=re.DOTALL)
 DisplayMathPat = re.compile(r'\\\[(.+?)\\\]', flags=re.DOTALL)
 
 @register.filter(name='md2html')
-def md2html(txt):
+def md2html(txt, stripP=False):
     'convert markdown to html, preserving latex delimiters'
     # markdown replaces \( with (, so have to protect our math...
     # replace \(math\) with \\(math\\)
     txt = InlineMathPat.sub(r'\\\\(\1\\\\)', txt)
     # replace \[math\] with \\[math\\]
     txt = DisplayMathPat.sub(r'\\\\[\1\\\\]', txt)
-    return mark_safe(markdown(txt, safe_mode='escape'))
+    txt = markdown(txt, safe_mode='escape')
+    if stripP and txt.startswith('<p>') and txt.endswith('</p>'):
+        txt = txt[3:-4]
+    return mark_safe(txt)
 
