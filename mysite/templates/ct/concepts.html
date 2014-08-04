@@ -1,0 +1,63 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  Courselets.org Concepts
+{% endblock %}
+
+{% block content %}
+{{ msg }}
+
+<form action="{{ actionTarget }}" method="get">
+{{ searchForm }}
+<input type="submit" value="Search" />
+</form>
+
+{% if cset.count > 0 or wset %}
+<h2>Search Results</h2>
+{% endif %}
+
+{% if cset.count > 0 %}
+<h3>Concepts linked to other Courselets.org Questions</h3>
+If one of these matches the concept your question mainly aims to test,
+please click <b>Link question to this concept</b>.
+<ul>
+{% for c in cset %}
+  <li><a href="{% url 'ct:concept' c.id %}">{{ c.title }}</a>
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="conceptID" value="{{ c.id }}" />
+  <input type="submit" value="Link question to this concept" />
+  </form>
+  : {{ c.description }}
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if wset %}
+
+<h3>Concepts found in Wikipedia</h3>
+If one of these matches the concept your question mainly aims to test,
+and does <b>not</b> match any concept already added to Courselets.org
+(above),
+please click <b>Link question to this concept</b>.
+To see details from Wikipedia about each concept, just click its title.
+<ul>
+{% for title, sourceID, sourceURL in wset %}
+  <li><a href="{{ sourceURL }}">{{ title }}</a>:
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="wikipediaID" value="{{ sourceID }}" />
+  <input type="submit" value="Link question to this concept" />
+  </form>
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

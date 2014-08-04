@@ -272,6 +272,7 @@ def errormodel_table(unitq, n, question=None, fmt='%d (%.0f%%)',
     fmt_count = lambda c: fmt % (c, c * 100. / n)
     return [(t[0],t[1],fmt_count(len(t[1]))) for t in l]
 
+
 ######################################################3
 # UI for searching, creating Question entries
 
@@ -320,7 +321,9 @@ def question(request, ct_id):
                   dict(question=q, qtext=md2html(q.qtext),
                        answer=md2html(q.answer),
                        actionTarget=request.path,
-                       inStudylist=inStudylist))
+                       inStudylist=inStudylist,
+                       allowEdit=(q.author == request.user),
+                       atime=display_datetime(q.atime)))
 
 
 @login_required
@@ -339,6 +342,23 @@ def flag_question(request, ct_id):
         data = json.dumps(dict(newstate=newstate))
         return HttpResponse(data, content_type='application/json')
 
+
+@login_required
+def question_concept(request, ct_id):
+    q = get_object_or_404(Question, pk=ct_id)
+    if q.author != request.user:
+        return HttpResponse("Only the author can edit this",
+                            status_code=403)
+    r = _concepts(request, '''Please choose a Concept that best describes
+    what this question aims to test, by entering a search term to
+    find relevant concepts.''')
+    if isinstance(r, Concept): # user chose a concept to link
+        q.concept = r # link question to this concept
+        q.save()
+        return HttpResponseRedirect(reverse('ct:question', args=(q.id,)))
+    return r
+
+    
 #################################################
 # instructor course UI
 
@@ -358,7 +378,9 @@ def courses(request):
     if request.method == 'POST':
         form = CourseTitleForm(request.POST)
         if form.is_valid():
-            course = form.save()
+            course = form.save(commit=False)
+            course.addedBy = request.user
+            course.save()
             role = Role(course=course, user=request.user,
                         role=Role.INSTRUCTOR)
             role.save()
@@ -389,6 +411,7 @@ def course(request, course_id):
             if unitform.is_valid():
                 unit = unitform.save(commit=False)
                 unit.course = course
+                unit.addedBy = request.user
                 unit.save()
                 return HttpResponseRedirect(reverse('ct:unit',
                                                     args=(unit.id,)))
@@ -420,7 +443,11 @@ def unit(request, unit_id):
             if unitqform.is_valid():
                 unitq = unitqform.save(commit=False)
                 unitq.unit = unit
+                unitq.addedBy = request.user
                 unitq.save()
+                if unitq.question.concept is None: # need to choose concept
+                    return HttpResponseRedirect(reverse('ct:unitq_concept',
+                                                args=(unitq.id,)))
         elif 'title' in request.POST: # update unit attributes
             titleform = UnitTitleForm(request.POST, instance=unit)
             if titleform.is_valid():
@@ -481,6 +508,60 @@ def unitq(request, unitq_id):
                        evalCounts=evalCounts, actionTarget=request.path,
                        errorCounts=errorCounts, emform=emform))
 
+@login_required
+def unitq_concept(request, unitq_id):
+    unitq = get_object_or_404(UnitQ, pk=unitq_id)
+    notInstructor = check_instructor_auth(unitq.unit.course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    r = _concepts(request, '''Please choose a Concept that best describes
+    what this question aims to test, by entering a search term to
+    find relevant concepts.''')
+    if isinstance(r, Concept): # user chose a concept to link
+        unitq.question.concept = r # link question to this concept
+        unitq.question.save()
+        return HttpResponseRedirect(reverse('ct:unit', args=(unitq.unit.id,)))
+    return r
+
+
+@login_required
+def concepts(request):
+    r = _concepts(request)
+    if isinstance(r, Concept):
+        return 'write a success message!'
+    return r
+
+def _concepts(request, msg=''):
+    'search or create a Concept'
+    cset = wset = ()
+    if request.method == 'POST':
+        if 'wikipediaID' in request.POST:
+            t = Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
+                                          request.user)
+            return t[0] # return concept object
+        elif 'conceptID' in request.POST:
+            return Concept.objects.get(pk=int(request.POST.get('conceptID')))
+        return 'please write POST error message'
+    elif 'search' in request.GET:
+        searchForm = ConceptSearchForm(request.GET)
+        if searchForm.is_valid():
+            s = searchForm.cleaned_data['search']
+            cset = Concept.objects.filter(Q(title__icontains=s) |
+                                          Q(description__icontains=s))
+            wset = Lesson.search_sourceDB(s)
+    else:
+        searchForm = ConceptSearchForm()
+    return render(request, 'ct/concepts.html',
+                  dict(cset=cset, actionTarget=request.path, msg=msg,
+                       searchForm=searchForm, wset=wset))
+
+
+def concept(request, concept_id):
+    concept = get_object_or_404(Concept, pk=concept_id)
+    return render(request, 'ct/concept.html',
+                  dict(actionTarget=request.path, concept=concept,
+                       atime=display_datetime(concept.atime)))
+        
 
 ###########################################################
 # student UI for courses

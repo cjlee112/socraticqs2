@@ -17,6 +17,24 @@ value="0"
 {% endif %}
 />Keep in my study list
 
+<p>By {{ question.author.username }}, {{ atime }}</p>
+
+{% if question.concept %}
+<p>Tests <a href="{% url 'ct:concept' question.concept.id %}">
+{{ question.concept.title }}</a>
+  {% if allowEdit %}
+    <button type="button" onclick="location.href='{{ actionTarget }}concept/'">
+    Change
+    </button>
+  {% endif %}
+</p>
+{% elif allowEdit %}
+Please link this question to a concept:
+<button type="button" onclick="location.href='{{ actionTarget }}concept/'">
+Add concept link
+</button>
+{% endif %}
+
 <h2>Question</h2> 
 {{ qtext }}
 

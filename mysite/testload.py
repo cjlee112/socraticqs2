@@ -5,13 +5,14 @@ from django.core.exceptions import ObjectDoesNotExist
 import csv
 import codecs
 
+teacher = User.objects.get(pk=1) # our default admin user
 
-course = ct.models.Course(title='Introduction to Bioinformatics Theory')
+course = ct.models.Course(title='Introduction to Bioinformatics Theory',
+                          addedBy=teacher)
 course.save()
 
-u = course.unit_set.create(title='Conditional Probability')
+u = course.unit_set.create(title='Conditional Probability', addedBy=teacher)
 
-teacher = User.objects.get(pk=1) # our default admin user
 course.role_set.create(user=teacher, role=ct.models.Role.INSTRUCTOR)
 
 q = ct.models.Question(title='A Great Question',
@@ -20,7 +21,7 @@ q = ct.models.Question(title='A Great Question',
                        author=teacher)
 q.save()
 
-unitq = u.unitq_set.create(question=q, order=1)
+unitq = u.unitq_set.create(question=q, order=1, addedBy=teacher)
 unitq.liveStage = unitq.RESPONSE_STAGE
 unitq.save()
 
@@ -60,7 +61,7 @@ def load_csv(csvfile, unit, author):
             q = ct.models.Question(title=row[0], qtext=row[1], answer=row[2],
                                    author=author)
             q.save()
-            unitq = unit.unitq_set.create(question=q, order=1)
+            unitq = unit.unitq_set.create(question=q, order=1, addedBy=teacher)
             unitq.save()
             for e in row[3:]:
                 em = q.errormodel_set.create(description=e,
@@ -69,3 +70,4 @@ def load_csv(csvfile, unit, author):
 
 load_csv('ct/lec2.csv', u, teacher) # try loading some real data
 
+ny, nyLesson = ct.models.Concept.get_from_sourceDB('New York', teacher)

@@ -1,0 +1,48 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  Show materials relevant for a given concept
+{% endcomment %}
+
+{% block title %}
+  {{ concept.title }}
+{% endblock %}
+
+{% block content %}
+{{ concept.description }}
+
+{% if concept.question_set.count > 0 %}
+<h2>Questions Testing This Concept</h2> 
+  <ul>
+  {% for q in concept.question_set.all %}
+    <li>
+    <a href="{% url 'ct:question' q.id %}">{{ q.title }}</a>:
+    {% if q.response_set.count > 0 %}
+       {{ q.response_set.count }} student responses)
+    {% endif %}
+
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+{% if concept.lessonlink_set.count > 0 %}
+<h2>Materials For Learning About This Concept</h2> 
+  <ul>
+  {% for ll in concept.lessonlink_set.all %}
+    <li>
+    <a href="{{ ll.lesson.get_url }}">{{ ll.lesson.title }}</a>
+    {% if ll.lesson.sourceDB %}
+      ({{ ll.lesson.sourceDB }})
+    {% endif %}
+    : {{ ll.get_relationship_display }} this concept.
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+<p>
+Added by: {{ concept.addedBy.username }}, {{ atime }}
+</p>
+
+{% endblock %}
+

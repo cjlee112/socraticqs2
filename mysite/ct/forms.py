@@ -59,3 +59,6 @@ class UnitQForm(forms.ModelForm):
         fields = ['question']
         labels = dict(question=_('From your study-list'))
 
+class ConceptSearchForm(forms.Form):
+    search = forms.CharField(label='Search for concepts containing')
+
