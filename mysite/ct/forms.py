@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Question, Response, ErrorModel, UnitQ, Unit, Course
+from ct.models import Question, Response, ErrorModel, UnitQ, Unit, Course, CommonError, Remediation
 from django.utils.translation import ugettext_lazy as _
 
 class QuestionForm(forms.ModelForm):
@@ -30,7 +30,18 @@ class ErrorModelForm(forms.ModelForm):
         model = ErrorModel
         fields = ['description']
         labels = dict(description=_('Add a new error model'))
-    
+
+class ErrorModelCEForm(forms.ModelForm):
+    def __init__(self, ceSet, *args, **kwargs):
+        super(ErrorModelCEForm, self).__init__(*args, **kwargs)
+        if ceSet:
+            self.fields['commonError'].queryset = ceSet
+    class Meta:
+        model = ErrorModel
+        fields = ['commonError']
+        widgets = dict(commonError=forms.RadioSelect)
+        labels = dict(commonError=_('Common errors for this concept'))
+            
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),
                                           ('100', '100')))
@@ -62,3 +73,25 @@ class UnitQForm(forms.ModelForm):
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
 
+class CommonErrorForm(forms.ModelForm):
+    class Meta:
+        model = CommonError
+        fields = ['synopsis', 'disproof', 'prescription', 'dangerzone']
+        
+class LessonSearchForm(forms.Form):
+    sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
+                                 label='Search Courselets.org and')
+    search = forms.CharField(label='for material containing')
+    
+
+class NewRemediationForm(forms.ModelForm):
+    class Meta:
+        model = Remediation
+        fields = ['title']
+        labels = dict(title=_('Concise suggestion'))
+
+class RemediationForm(forms.ModelForm):
+    class Meta:
+        model = Remediation
+        fields = ['title', 'advice']
+    

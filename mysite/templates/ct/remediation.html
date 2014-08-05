@@ -1,0 +1,105 @@
+{% extends "ct/portal.html" %}
+{% comment %}
+  search for or add new lessons
+{% endcomment %}
+
+{% block title %}
+  {{ remedy.title }}
+{% endblock %}
+
+{% block content %}
+{% if remedy.advice %}
+  {{ remedy.advice }}
+{% endif %}
+
+<input type="checkbox" id="edittoggle"/>Edit.<BR>
+<div id="editform" style="display: none">
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  {{ titleform.as_p }}
+  <input type="submit" value="Update" />
+</form>
+</div>
+
+<script>
+$( "#edittoggle" ).click(function() {
+  $( "#editform" ).toggle();
+});
+</script>
+
+{% if remedy.lessons.count > 0 %}
+  <h3>Linked Learning Materials</h3>
+  <ul>
+  {% for lesson in remedy.lessons.all %}
+    <li><a href="{{ lesson.get_url }}">{{ lesson.title }}</a>
+    <form action="{{ actionTarget }}" method="post"
+      style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="rmLesson" />
+    <input type="hidden" name="lessonID" value="{{ lesson.id }}" />
+    <input type="submit" value="Remove" />
+    </form>
+    : ({{ lesson.get_kind_display }})
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+<h3>Add Materials</h3>
+<p>You can add material that addresses this
+error, by entering a search term to
+find relevant materials.</p>
+
+<form action="{{ actionTarget }}" method="get"
+   style=" display:inline!important;">
+{{ searchForm }}
+<input type="submit" value="Search" />
+</form>
+
+{% if lessonSet or wset %}
+<h2>Search Results</h2>
+{% endif %}
+
+{% if lessonSet %}
+<h3>Courselets.org Lessons</h3>
+To add one of these materials to this Remediation,
+please click <b>Add</b>.
+<ul>
+{% for lesson in lessonSet.all %}
+  <li><a href="{{ lesson.get_url }}">{{ lesson.title }}</a>
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="lessonID" value="{{ lesson.id }}" />
+  <input type="submit" value="Add" />
+  </form>
+  : ({{ lesson.get_kind_display }})
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if wset %}
+
+<h3>Materials found in Wikipedia</h3>
+To add one of these materials to this Remediation,
+please click <b>Add</b>.
+To see details from Wikipedia about each concept, just click its title.
+<ul>
+{% for title, sourceID, sourceURL in wset %}
+  <li><a href="{{ sourceURL }}">{{ title }}</a>:
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="sourceDB" value="{{ sourceDB }}" />
+  <input type="hidden" name="sourceID" value="{{ sourceID }}" />
+  <input type="submit" value="Add" />
+  </form>
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<p>By {{ remedy.author.username }}, {{ atime }}</p>
+
+{% endblock %}

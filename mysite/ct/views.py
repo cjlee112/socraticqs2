@@ -358,6 +358,116 @@ def question_concept(request, ct_id):
         return HttpResponseRedirect(reverse('ct:question', args=(q.id,)))
     return r
 
+@login_required
+def error_model(request, em_id):
+    em = get_object_or_404(ErrorModel, pk=em_id)
+    if em.author != request.user:
+        return HttpResponse("Only the author can edit this",
+                            status_code=403)
+    if em.commonError:
+        relatedErrors = em.commonError.errormodel_set.exclude(pk=em.pk)
+    else:
+        relatedErrors = ()
+    n = em.question.response_set.filter(selfeval__isnull=False).count()
+    if n > 0:
+        nerr = Response.objects.filter(studenterror__errorModel=em).count()
+        emPercent = '%.0f' % nerr * 100. / n
+    else:
+        emPercent = None
+    ceform = CommonErrorForm()
+    ceform.fields['synopsis'].initial = em.description
+    
+    emform = ErrorModelForm(instance=em)
+    nrform = NewRemediationForm()
+    if request.method == 'POST':
+        if 'description' in request.POST:
+            emform = ErrorModelForm(request.POST, instance=em)
+            if emform.is_valid():
+                emform.save()
+        elif 'title' in request.POST:
+            nrform = NewRemediationForm(request.POST)
+            if nrform.is_valid():
+                remedy = nrform.save(commit=False)
+                remedy.errorModel = em
+                remedy.author = request.user
+                remedy.save()
+                return HttpResponseRedirect(reverse('ct:remediation',
+                                                    args=(remedy.id,)))
+        elif 'commonError' in request.POST:
+            emceForm = ErrorModelCEForm(None, request.POST, instance=em)
+            if emceForm.is_valid():
+                emceForm.save()
+        else:
+            ceform = CommonErrorForm(request.POST)
+            if ceform.is_valid():
+                ce = ceform.save(commit=False)
+                ce.concept = em.question.concept
+                ce.author = request.user
+                ce.save()
+                em.commonError = ce
+                em.save()
+    if em.question.concept:
+        commonErrors = em.question.concept.commonerror_set.all()
+        emceForm = ErrorModelCEForm(commonErrors)
+        if em.commonError:
+            emceForm.fields['commonError'].initial = em.commonError.id
+    else:
+        emceForm = ''
+    return render(request, 'ct/errormodel.html',
+                  dict(em=em, actionTarget=request.path, emform=emform,
+                       atime=display_datetime(em.atime), nrform=nrform,
+                       relatedErrors=relatedErrors, ceform=ceform,
+                       emPercent=emPercent, N=n, emceForm=emceForm))
+
+@login_required
+def remediation(request, rem_id):
+    remedy = get_object_or_404(Remediation, pk=rem_id)
+    if remedy.author != request.user:
+        return HttpResponse("Only the author can edit this",
+                            status_code=403)
+    titleform = RemediationForm(instance=remedy)
+    searchForm, sourceDB, lessonSet, wset = _search_lessons(request)
+    if request.method == 'POST':
+        if 'advice' in request.POST:
+            titleform = RemediationForm(request.POST, instance=remedy)
+            if titleform.is_valid():
+                titleform.save()
+        else:
+            _post_lesson(request, remedy)
+    return render(request, 'ct/remediation.html',
+                  dict(remedy=remedy, sourceDB=sourceDB,
+                       lessonSet=lessonSet, actionTarget=request.path,
+                       searchForm=searchForm, wset=wset,
+                       titleform=titleform,
+                       atime=display_datetime(remedy.atime)))
+
+def _post_lesson(request, remedy):
+    'form interface for adding and removing lessons'
+    if 'sourceID' in request.POST:
+        lesson = Lesson.get_from_sourceDB(request.POST.get('sourceID'),
+                    request.user, request.POST.get('sourceDB'))
+        remedy.lessons.add(lesson)
+    elif request.POST.get('task') == 'rmLesson':
+        lesson = Lesson.objects.get(pk=int(request.POST.get('lessonID')))
+        remedy.lessons.remove(lesson)
+    elif 'lessonID' in request.POST:
+        lesson = Lesson.objects.get(pk=int(request.POST.get('lessonID')))
+        remedy.lessons.add(lesson)
+
+def _search_lessons(request):
+    'form interface for search Lessons and external sourceDB'
+    searchForm = LessonSearchForm()
+    lessonSet = wset = ()
+    sourceDB = ''
+    if 'search' in request.GET:
+        searchForm = LessonSearchForm(request.GET)
+        if searchForm.is_valid():
+            s = searchForm.cleaned_data['search']
+            sourceDB = searchForm.cleaned_data['sourceDB']
+            lessonSet = Lesson.objects.filter(Q(title__icontains=s) |
+                                              Q(text__icontains=s))
+            wset = Lesson.search_sourceDB(s, sourceDB)
+    return searchForm, sourceDB, lessonSet, wset
     
 #################################################
 # instructor course UI

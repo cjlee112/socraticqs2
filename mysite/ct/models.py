@@ -54,6 +54,8 @@ class Concept(models.Model):
                     relationship=LessonLink.DEFINES)
         ll.save()
         return concept, lesson
+    def __unicode__(self):
+        return self.title
             
 
 class ConceptLink(models.Model):
@@ -131,6 +133,8 @@ class Lesson(models.Model):
         dataClass = klass._sourceDBdict[sourceDB]
         return dataClass.search(query, **kwargs)
 
+    def __unicode__(self):
+        return self.title
     def get_url(self):
         if self.sourceDB:
             return self.url
@@ -163,11 +167,13 @@ class CommonError(models.Model):
     'a conceptual error spanning many questions on the same concept'
     concept = models.ForeignKey(Concept)
     synopsis = models.TextField() # "Some people thought..."
-    disproof = models.TextField() # formal statement of why CE is wrong
-    prescription = models.TextField() # what to change to apply concept right
-    dangerzone = models.TextField() # warnings of when people make this CE
+    disproof = models.TextField(null=True) # formal statement of why CE is wrong
+    prescription = models.TextField(null=True) # what to change to apply concept right
+    dangerzone = models.TextField(null=True) # warnings of when people make this CE
     atime = models.DateTimeField('time submitted', default=timezone.now)
     author = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.synopsis
 
 class CounterExample(models.Model):
     'clear example that shows a CommonError must be wrong'
@@ -235,7 +241,7 @@ class StudyList(models.Model):
 class ErrorModel(models.Model):
     'a specific kind of error on a question, or a generic error'
     question = models.ForeignKey(Question, blank=True, null=True)
-    commonError = models.ForeignKey(CommonError, null=True)
+    commonError = models.ForeignKey(CommonError, blank=False, null=True)
     description = models.TextField()
     isAbort = models.BooleanField(default=False)
     isFail = models.BooleanField(default=False)
@@ -303,8 +309,9 @@ class StudentError(models.Model):
 
 class Remediation(models.Model):
     errorModel = models.ForeignKey(ErrorModel)
-    lessons = models.ManyToManyField(Lesson) # what materials to use
-    advice = models.TextField() # how to use the reccd materials
+    title = models.CharField(max_length=200)
+    advice = models.TextField(null=True) # how to use the reccd materials
+    lessons = models.ManyToManyField(Lesson, null=True) # what materials to use
     atime = models.DateTimeField('time submitted', default=timezone.now)
     author = models.ForeignKey(User)
     def __unicode__(self):
