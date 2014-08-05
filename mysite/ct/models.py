@@ -310,7 +310,7 @@ class StudentError(models.Model):
 class Remediation(models.Model):
     errorModel = models.ForeignKey(ErrorModel)
     title = models.CharField(max_length=200)
-    advice = models.TextField(null=True) # how to use the reccd materials
+    advice = models.TextField() # how to use the reccd materials
     lessons = models.ManyToManyField(Lesson, null=True) # what materials to use
     atime = models.DateTimeField('time submitted', default=timezone.now)
     author = models.ForeignKey(User)

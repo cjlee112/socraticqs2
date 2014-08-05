@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   search for or add new lessons
 {% endcomment %}
@@ -13,12 +15,8 @@
 {% endif %}
 
 <input type="checkbox" id="edittoggle"/>Edit.<BR>
-<div id="editform" style="display: none">
-<form action="{{ actionTarget }}" method="post">
-  {% csrf_token %}
-  {{ titleform.as_p }}
-  <input type="submit" value="Update" />
-</form>
+<div class="container-fluid" id="editform" style="display: none">
+{% crispy titleform %}
 </div>
 
 <script>
@@ -26,6 +24,7 @@ $( "#edittoggle" ).click(function() {
   $( "#editform" ).toggle();
 });
 </script>
+
 
 {% if remedy.lessons.count > 0 %}
   <h3>Linked Learning Materials</h3>

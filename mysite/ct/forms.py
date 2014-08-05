@@ -1,6 +1,9 @@
 from django import forms
 from ct.models import Question, Response, ErrorModel, UnitQ, Unit, Course, CommonError, Remediation
 from django.utils.translation import ugettext_lazy as _
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit, Layout
+## from crispy_forms.bootstrap import StrictButton
 
 class QuestionForm(forms.ModelForm):
     class Meta:
@@ -79,19 +82,28 @@ class CommonErrorForm(forms.ModelForm):
         fields = ['synopsis', 'disproof', 'prescription', 'dangerzone']
         
 class LessonSearchForm(forms.Form):
+    ## def __init__(self, *args, **kwargs):
+    ##     super(LessonSearchForm, self).__init__(*args, **kwargs)
+    ##     self.helper = FormHelper(self)
+    ##     self.helper.form_id = 'id-lessonSearchForm'
+    ##     self.helper.form_method = 'get'
+    ##     self.helper.form_class = 'form-inline'
+    ##     self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+    ##     self.helper.add_input(StrictButton('Search', css_class='btn-default'))
     sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
                                  label='Search Courselets.org and')
     search = forms.CharField(label='for material containing')
     
 
-class NewRemediationForm(forms.ModelForm):
-    class Meta:
-        model = Remediation
-        fields = ['title']
-        labels = dict(title=_('Concise suggestion'))
-
 class RemediationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RemediationForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-remediationForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Update'))
     class Meta:
         model = Remediation
         fields = ['title', 'advice']
+        labels = dict(title=_('Concise suggestion'))
     

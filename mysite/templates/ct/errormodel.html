@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   instructor UI for a conceptual error
 {% endcomment %}
@@ -25,12 +27,15 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
-
-<p>Question: <a href="{% url 'ct:question' em.question.id %}">
-{{ em.question.title }}</a>.
-{% if emPercent %}
-  {{ emPercent }}% of students make this error (N={{ N }}).</p>
+<p>
+{% if em.question %}
+  Question: <a href="{% url 'ct:question' em.question.id %}">
+  {{ em.question.title }}</a>.
 {% endif %}
+{% if emPercent %}
+  {{ emPercent }}% of students make this error (N={{ N }}).
+{% endif %}
+</p>
 
 <h3>Remediations</h3>
 <ul>
@@ -40,16 +45,27 @@ $( "#edittoggle" ).click(function() {
 {% endfor %}
 </ul>
 
-You can add a new remediation by typing a concise suggestion
+{% if em.remediation_set.count > 0 %}
+  <input type="checkbox" id="remtoggle"/>Add a new remediation.<BR>
+
+  <script>
+  $( "#remtoggle" ).click(function() {
+    $( "#remform" ).toggle();
+  });
+  </script>
+
+  <div class="container-fluid" id="remform" style="display: none">
+{% else %}
+  <div class="container-fluid" id="remform">
+{% endif %}
+Type a concise suggestion
 for how students can learn to fix this specific error in their thinking
 (e.g. "Review the reading on normalization"; you will have a chance
-to add detailed advice to this remediation later on), and click <b>Add</b>.
+to add lesson links to this remediation later on), 
+and click <b>Update</b>.
 
-<form action="{{ actionTarget }}" method="post">
-  {% csrf_token %}
-  {{ nrform.as_p }}
-  <input type="submit" value="Add" />
-</form>
+{% crispy nrform %}
+</div>
 
 {% if em.question.concept %}
   <h3>Link to Common Error</h3>

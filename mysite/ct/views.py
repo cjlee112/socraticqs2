@@ -368,24 +368,29 @@ def error_model(request, em_id):
         relatedErrors = em.commonError.errormodel_set.exclude(pk=em.pk)
     else:
         relatedErrors = ()
-    n = em.question.response_set.filter(selfeval__isnull=False).count()
+    if em.question:
+        n = em.question.response_set.filter(selfeval__isnull=False).count()
+    elif em.alwaysAsk:
+        n = Response.objects.count()
+    else:
+        n = 0
     if n > 0:
         nerr = Response.objects.filter(studenterror__errorModel=em).count()
-        emPercent = '%.0f' % nerr * 100. / n
+        emPercent = '%.0f' % (nerr * 100. / n)
     else:
         emPercent = None
     ceform = CommonErrorForm()
     ceform.fields['synopsis'].initial = em.description
     
     emform = ErrorModelForm(instance=em)
-    nrform = NewRemediationForm()
+    nrform = RemediationForm()
     if request.method == 'POST':
         if 'description' in request.POST:
             emform = ErrorModelForm(request.POST, instance=em)
             if emform.is_valid():
                 emform.save()
         elif 'title' in request.POST:
-            nrform = NewRemediationForm(request.POST)
+            nrform = RemediationForm(request.POST)
             if nrform.is_valid():
                 remedy = nrform.save(commit=False)
                 remedy.errorModel = em
@@ -406,13 +411,14 @@ def error_model(request, em_id):
                 ce.save()
                 em.commonError = ce
                 em.save()
-    if em.question.concept:
+    if em.question and em.question.concept:
         commonErrors = em.question.concept.commonerror_set.all()
         emceForm = ErrorModelCEForm(commonErrors)
         if em.commonError:
             emceForm.fields['commonError'].initial = em.commonError.id
     else:
         emceForm = ''
+    set_crispy_action(request.path, nrform) # set actionTarget directly
     return render(request, 'ct/errormodel.html',
                   dict(em=em, actionTarget=request.path, emform=emform,
                        atime=display_datetime(em.atime), nrform=nrform,
@@ -434,6 +440,7 @@ def remediation(request, rem_id):
                 titleform.save()
         else:
             _post_lesson(request, remedy)
+    set_crispy_action(request.path, titleform) # set actionTarget directly
     return render(request, 'ct/remediation.html',
                   dict(remedy=remedy, sourceDB=sourceDB,
                        lessonSet=lessonSet, actionTarget=request.path,
@@ -467,6 +474,7 @@ def _search_lessons(request):
             lessonSet = Lesson.objects.filter(Q(title__icontains=s) |
                                               Q(text__icontains=s))
             wset = Lesson.search_sourceDB(s, sourceDB)
+    ## searchForm.helper.form_action = request.path # set actionTarget directly
     return searchForm, sourceDB, lessonSet, wset
     
 #################################################
@@ -700,6 +708,15 @@ def redirect_live(unit, default=None):
     return HttpResponseRedirect(reverse('ct:unit_wait', args=(unit.id,)))
         
             
+
+
+###############################################################
+# utility functions
+
+def set_crispy_action(actionTarget, *forms):
+    'set the form.helper.form_action for one or more forms'
+    for form in forms:
+        form.helper.form_action = actionTarget
     
     
 ############################################################
