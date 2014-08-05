@@ -96,14 +96,18 @@ class LessonSearchForm(forms.Form):
     
 
 class RemediationForm(forms.ModelForm):
+    submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
         super(RemediationForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-remediationForm'
         self.helper.form_class = 'form-vertical'
-        self.helper.add_input(Submit('submit', 'Update'))
+        self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Remediation
         fields = ['title', 'advice']
         labels = dict(title=_('Concise suggestion'))
     
+
+class NewRemediationForm(RemediationForm):
+    submitLabel = 'Add'

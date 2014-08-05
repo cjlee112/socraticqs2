@@ -383,14 +383,14 @@ def error_model(request, em_id):
     ceform.fields['synopsis'].initial = em.description
     
     emform = ErrorModelForm(instance=em)
-    nrform = RemediationForm()
+    nrform = NewRemediationForm()
     if request.method == 'POST':
         if 'description' in request.POST:
             emform = ErrorModelForm(request.POST, instance=em)
             if emform.is_valid():
                 emform.save()
         elif 'title' in request.POST:
-            nrform = RemediationForm(request.POST)
+            nrform = NewRemediationForm(request.POST)
             if nrform.is_valid():
                 remedy = nrform.save(commit=False)
                 remedy.errorModel = em
