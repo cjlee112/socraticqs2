@@ -6,15 +6,31 @@ from crispy_forms.layout import Submit, Layout
 ## from crispy_forms.bootstrap import StrictButton
 
 class QuestionForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-questionForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Question
         fields = ['title', 'qtext', 'answer', 'access']
         labels = dict(qtext=_('Question'))
 
+class NewQuestionForm(QuestionForm):
+    submitLabel = 'Add'
+
 class QuestionSearchForm(forms.Form):
     search = forms.CharField(label='Search for questions containing')
 
 class ResponseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ResponseForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-responseForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Save'))
     class Meta:
         model = Response
         fields = ['atext', 'confidence']
@@ -29,6 +45,12 @@ class SelfAssessForm(forms.Form):
 
 
 class ErrorModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ErrorModelForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-errorModelForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Save'))
     class Meta:
         model = ErrorModel
         fields = ['description']
@@ -54,15 +76,35 @@ class ResponseListForm(forms.Form):
                                            ('confidence', 'Least confident first'))) 
 
 class UnitTitleForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(UnitTitleForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-commonErrorForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Unit
         fields = ['title']
-    
+
+class NewUnitTitleForm(UnitTitleForm):
+    submitLabel = 'Add'
+
 class CourseTitleForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(CourseTitleForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-commonErrorForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Course
         fields = ['title', 'access']
-    
+
+class NewCourseTitleForm(CourseTitleForm):
+    submitLabel = 'Add'
+
 class UnitQForm(forms.ModelForm):
     def __init__(self, questionSet, *args, **kwargs):
         super(UnitQForm, self).__init__(*args, **kwargs)
@@ -77,9 +119,19 @@ class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
 
 class CommonErrorForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(CommonErrorForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-commonErrorForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = CommonError
         fields = ['synopsis', 'disproof', 'prescription', 'dangerzone']
+
+class NewCommonErrorForm(CommonErrorForm):
+    submitLabel = 'Add'
         
 class LessonSearchForm(forms.Form):
     ## def __init__(self, *args, **kwargs):

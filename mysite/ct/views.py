@@ -43,7 +43,7 @@ def _respond(request, q, unitq=None):
             return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
     else:
         form = ResponseForm()
-
+    set_crispy_action(request.path, form)
     return render(request, 'ct/ask.html',
                   dict(question=q, qtext=md2html(q.qtext), form=form,
                        actionTarget=request.path))
@@ -154,7 +154,6 @@ def unitq_control(request, unitq_id):
     counts[-1] = nuser - sum(counts)
     sec = (timezone.now() - unitq.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
-    emlist = [e.description for e in unitq.question.errormodel_set.all()]
     ndisplay = 25 # set default values
     sortOrder = '-atime'
     rlform = ResponseListForm()
@@ -174,11 +173,12 @@ def unitq_control(request, unitq_id):
                 ndisplay = int(rlform.cleaned_data['ndisplay'])
                 sortOrder = rlform.cleaned_data['sortOrder']
     responses.order_by(sortOrder) # apply the desired sort order
+    set_crispy_action(request.path, emform)
     return render(request, 'ct/control.html',
                   dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
                        answer=md2html(unitq.question.answer),
                        counts=counts, elapsedTime=elapsedTime, 
-                       emlist=emlist, actionTarget=request.path,
+                       actionTarget=request.path,
                        emform=emform, responses=responses[:ndisplay],
                        rlform=rlform))
 
@@ -278,7 +278,7 @@ def errormodel_table(unitq, n, question=None, fmt='%d (%.0f%%)',
 
 def new_question(request):
     'create new Question from POST form data'
-    form = QuestionForm(request.POST)
+    form = NewQuestionForm(request.POST)
     if form.is_valid():
         question = form.save(commit=False)
         question.author = request.user
@@ -312,14 +312,21 @@ def questions(request):
 def question(request, ct_id):
     'generic page for a specific question'
     q = get_object_or_404(Question, pk=ct_id)
+    qform = QuestionForm(instance=q)
+    if request.method == 'POST':
+        qform = QuestionForm(request.POST, instance=q)
+        if qform.is_valid():
+            qform.save()    
     try:
         sl = StudyList.objects.get(question=q, user=request.user)
         inStudylist = 1
     except ObjectDoesNotExist:
         inStudylist = 0
+    set_crispy_action(request.path, qform)
     return render(request, 'ct/question.html',
                   dict(question=q, qtext=md2html(q.qtext),
                        answer=md2html(q.answer),
+                       qform=qform,
                        actionTarget=request.path,
                        inStudylist=inStudylist,
                        allowEdit=(q.author == request.user),
@@ -379,7 +386,7 @@ def error_model(request, em_id):
         emPercent = '%.0f' % (nerr * 100. / n)
     else:
         emPercent = None
-    ceform = CommonErrorForm()
+    ceform = NewCommonErrorForm()
     ceform.fields['synopsis'].initial = em.description
     
     emform = ErrorModelForm(instance=em)
@@ -403,7 +410,7 @@ def error_model(request, em_id):
             if emceForm.is_valid():
                 emceForm.save()
         else:
-            ceform = CommonErrorForm(request.POST)
+            ceform = NewCommonErrorForm(request.POST)
             if ceform.is_valid():
                 ce = ceform.save(commit=False)
                 ce.concept = em.question.concept
@@ -411,14 +418,15 @@ def error_model(request, em_id):
                 ce.save()
                 em.commonError = ce
                 em.save()
-    if em.question and em.question.concept:
+    if em.question and em.question.concept and \
+      em.question.concept.commonerror_set.count() > 0:
         commonErrors = em.question.concept.commonerror_set.all()
         emceForm = ErrorModelCEForm(commonErrors)
         if em.commonError:
             emceForm.fields['commonError'].initial = em.commonError.id
     else:
-        emceForm = ''
-    set_crispy_action(request.path, nrform) # set actionTarget directly
+        emceForm = None
+    set_crispy_action(request.path, nrform, ceform) # set actionTarget directly
     return render(request, 'ct/errormodel.html',
                   dict(em=em, actionTarget=request.path, emform=emform,
                        atime=display_datetime(em.atime), nrform=nrform,
@@ -483,7 +491,8 @@ def _search_lessons(request):
 @login_required
 def teach(request):
     'top-level instructor UI'
-    courseform = CourseTitleForm()
+    courseform = NewCourseTitleForm()
+    set_crispy_action(reverse('ct:courses'), courseform)
     courses = Course.objects.filter(role__role=Role.INSTRUCTOR,
                                     role__user=request.user)
     return render(request, 'ct/teach.html',
@@ -517,7 +526,7 @@ def course(request, course_id):
     if notInstructor: # redirect students to live session or student page
         return redirect_live(course.liveUnit,
           HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
-    unitform = UnitTitleForm()
+    unitform = NewUnitTitleForm()
     titleform = CourseTitleForm(instance=course)
     if request.method == 'POST':
         if 'access' in request.POST: # update course attrs
@@ -525,7 +534,7 @@ def course(request, course_id):
             if titleform.is_valid():
                 titleform.save()
         elif 'title' in request.POST: # create new unit
-            unitform = UnitTitleForm(request.POST)
+            unitform = NewUnitTitleForm(request.POST)
             if unitform.is_valid():
                 unit = unitform.save(commit=False)
                 unit.course = course
@@ -536,6 +545,7 @@ def course(request, course_id):
         elif request.POST.get('task') == 'delete': # delete me
             course.delete()
             return HttpResponseRedirect(reverse('ct:teach'))
+    set_crispy_action(request.path, unitform, titleform)
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
                        titleform=titleform, unitform=unitform))
@@ -547,15 +557,16 @@ def unit(request, unit_id):
     notInstructor = check_instructor_auth(unit.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
-    qform = QuestionForm()
+    qform = NewQuestionForm()
     titleform = UnitTitleForm(instance=unit)
     if request.method == 'POST':
         if 'qtext' in request.POST: # create new exercise
             question, qform = new_question(request)
             if question:
-                unitq = UnitQ(unit=unit, question=question)
+                unitq = UnitQ(unit=unit, question=question,
+                              addedBy=request.user)
                 unitq.save()
-                qform = QuestionForm() # new blank form to display
+                qform = NewQuestionForm() # new blank form to display
         elif 'question' in request.POST: # add new UnitQ
             unitqform = UnitQForm(None, request.POST)
             if unitqform.is_valid():
@@ -581,7 +592,11 @@ def unit(request, unit_id):
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
     questions = Question.objects.filter(studylist__user=request.user)
-    slform = UnitQForm(questions)
+    if questions.count() > 0:
+        slform = UnitQForm(questions)
+    else:
+        slform = None
+    set_crispy_action(request.path, qform, titleform)    
     return render(request, 'ct/unit.html',
                   dict(unit=unit, actionTarget=request.path, slform=slform,
                        titleform=titleform, qform=qform))

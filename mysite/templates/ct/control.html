@@ -1,5 +1,7 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
 {% load ct_extras %}
+
 {% comment %}
   Let the instructor control exercise in real-time
 {% endcomment %}
@@ -75,16 +77,14 @@ End the exercise
 
 <h2>Common Error Models</h2>
 <ul>
-{% for e in emlist %}
-  <li>{{ e }}</li>
+{% for em in unitq.question.errormodel_set.all %}
+  <li>{{ em.description }}</li>
 {% endfor %}
 </ul>
 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-{{ emform.as_p }}
-<input type="submit" value="Create" />
-</form>
+<div class="container-fluid">
+{% crispy emform %}
+</div>
 
 <form action="{{ actionTarget }}" method="get">
 <B>

@@ -15,11 +15,11 @@
 <input type="submit" value="Search" />
 </form>
 
-{% if cset.count > 0 or wset %}
+{% if cset or wset %}
 <h2>Search Results</h2>
 {% endif %}
 
-{% if cset.count > 0 %}
+{% if cset %}
 <h3>Concepts linked to other Courselets.org Questions</h3>
 If one of these matches the concept your question mainly aims to test,
 please click <b>Link question to this concept</b>.

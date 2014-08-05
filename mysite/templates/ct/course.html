@@ -1,20 +1,18 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   View or edit a course
 {% endcomment %}
 
 {% block title %}
-  {{ unit.title }}
+  {{ course.title }}
 {% endblock %}
 
 {% block content %}
 <input type="checkbox" id="edittoggle"/>Edit.<BR>
-<div id="editform" style="display: none">
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-{{ titleform }}
-<input type="submit" value="Update" />
-</form>
+<div class="container-fluid" id="editform" style="display: none">
+{% crispy titleform %}
 <form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
 <input type="hidden" name="task" value="delete" />
@@ -43,11 +41,9 @@ $( "#edittoggle" ).click(function() {
 
 <h2>Add a New Unit</h2>
 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-{{ unitform }}
-<input type="submit" value="Add" />
-</form>
+<div class="container-fluid">
+{% crispy unitform %}
+</div>
 
 {% endblock %}
 

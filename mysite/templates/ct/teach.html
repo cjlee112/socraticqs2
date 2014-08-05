@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   View or edit a course
 {% endcomment %}
@@ -23,10 +25,8 @@
 
 <h2>Create a Course</h2>
 
-<form action="{% url 'ct:courses' %}" method="post">
-{% csrf_token %}
-{{ courseform }}
-<input type="submit" value="Add" />
-</form>
+<div class="container-fluid">
+{% crispy courseform %}
+</div>
 
 {% endblock %}

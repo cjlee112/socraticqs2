@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   Let the instructor monitor self-assessment
 {% endcomment %}
@@ -43,6 +45,18 @@ Add concept link
 {{ answer }}
 {% endif %}
 
+{% if allowEdit %}
+  <input type="checkbox" id="edittoggle"/>Edit.<BR>
+  <div class="container-fluid" id="editform" style="display: none">
+  {% crispy qform %}
+  </div>
+
+  <script>
+  $( "#edittoggle" ).click(function() {
+    $( "#editform" ).toggle();
+  });
+  </script>
+{% endif %}
 
 
 {% endblock %}

@@ -82,15 +82,14 @@ and click <b>Add</b>.
       </form>
   {% endif %}
   
-  {% if not em.commonError %}
+  {% if em.commonError %}
+    <p>Example of common error: {{ em.commonError.synopsis }}</p>
+  {% else %}
     <h3>Add new Common Error based on this Error Model</h3>
-    <form action="{{ actionTarget }}" method="post">
-    {% csrf_token %}
-    {{ ceform.as_p }}
-    <input type="submit" value="Add Common Error" />
-    </form>
+    <div class="container-fluid">
+    {% crispy ceform %}
+    </div>
   {% endif %}
-  <p>Example of common error: {{ em.commonError.synopsis }}</p>
 {% endif %}
 
 {% if relatedErrors %}

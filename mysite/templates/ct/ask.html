@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
 {% comment %}
   Ask the user a question
 {% endcomment %}
@@ -19,9 +21,8 @@
     <PRE>\[\sum_{\alpha}{p(\alpha|Z)}=1\]</PRE>
     <br>
 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Go" />
-</form>
+<div class="container-fluid">
+{% crispy form %}
+</div>
+
 {% endblock %}
