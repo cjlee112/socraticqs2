@@ -610,7 +610,7 @@ def courselet(request, courselet_id):
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
     set_crispy_action(request.path, qform, titleform)    
-    return render(request, 'ct/unit.html',
+    return render(request, 'ct/courselet.html',
                   dict(courselet=courselet, actionTarget=request.path,
                        slform=slform, titleform=titleform, qform=qform))
 
@@ -649,7 +649,7 @@ def course_question(request, cq_id):
     uncats = Response.objects.filter(courseQuestion=courseQuestion,
         studenterror__isnull=True).exclude(selfeval=Response.CORRECT)
     uncats.order_by('status')
-    return render(request, 'ct/unitq.html',
+    return render(request, 'ct/course_question.html',
                   dict(courseQuestion=courseQuestion,
                        qtext=md2html(courseQuestion.question.qtext),
                        answer=md2html(courseQuestion.question.answer),
