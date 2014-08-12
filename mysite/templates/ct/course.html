@@ -26,23 +26,23 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
-{% if course.unit_set.count > 0 %}
-<h2>Units in this Course</h2>
+{% if course.courselet_set.count > 0 %}
+<h2>Courselets in this Course</h2>
 <ul>
-{% for unit in course.unit_set.all %}
-  <li><a href="{% url 'ct:unit' unit.id %}">{{ unit.title }}</a>:
-  {% if unit.unitq_set.count > 0 %}
-    ({{ unit.unitq_set.count }} exercises)
+{% for courselet in course.courselet_set.all %}
+  <li><a href="{% url 'ct:courselet' courselet.id %}">{{ courselet.title }}</a>:
+  {% if courselet.coursequestion_set.count > 0 %}
+    ({{ courselet.coursequestion_set.count }} exercises)
   {% endif %}
   </li>
 {% endfor %}
 </ul>
 {% endif %}
 
-<h2>Add a New Unit</h2>
+<h2>Add a New Courselet</h2>
 
 <div class="container-fluid">
-{% crispy unitform %}
+{% crispy courseletform %}
 </div>
 
 {% endblock %}

@@ -11,7 +11,7 @@ course = ct.models.Course(title='Introduction to Bioinformatics Theory',
                           addedBy=teacher)
 course.save()
 
-u = course.unit_set.create(title='Conditional Probability', addedBy=teacher)
+u = course.courselet_set.create(title='Conditional Probability', addedBy=teacher)
 
 course.role_set.create(user=teacher, role=ct.models.Role.INSTRUCTOR)
 
@@ -21,9 +21,9 @@ q = ct.models.Question(title='A Great Question',
                        author=teacher)
 q.save()
 
-unitq = u.unitq_set.create(question=q, order=1, addedBy=teacher)
-unitq.liveStage = unitq.RESPONSE_STAGE
-unitq.save()
+cq = u.coursequestion_set.create(question=q, order=1, addedBy=teacher)
+cq.liveStage = cq.RESPONSE_STAGE
+cq.save()
 
 em = q.errormodel_set.create(description='You made a boo-boo!',
                              atime=timezone.now(), author=teacher)
@@ -54,15 +54,16 @@ q2 = ct.models.Question(title='Another Question',
                        author=john)
 q2.save()
 
-def load_csv(csvfile, unit, author):
+def load_csv(csvfile, courselet, author):
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
         reader = csv.reader(ifile)
         for row in reader:
             q = ct.models.Question(title=row[0], qtext=row[1], answer=row[2],
                                    author=author)
             q.save()
-            unitq = unit.unitq_set.create(question=q, order=1, addedBy=teacher)
-            unitq.save()
+            cq = courselet.coursequestion_set.create(question=q, order=1,
+                                                     addedBy=teacher)
+            cq.save()
             for e in row[3:]:
                 em = q.errormodel_set.create(description=e,
                              atime=timezone.now(), author=author)

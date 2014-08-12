@@ -4,7 +4,7 @@
 {% endcomment %}
 
 {% block title %}
-  {{ unitq.question.title }}
+  {{ courseQuestion.question.title }}
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@ and take another minute or two to enter a brief answer.</li>
 <li>Click the Start button below to begin the timer.</li>
 </ul>
 
-<button type="button" onclick="location.href='{% url 'ct:control' unitq.id %}'">
+<button type="button" onclick="location.href='{% url 'ct:control' courseQuestion.id %}'">
 Start the exercise timer
 </button>
 

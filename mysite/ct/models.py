@@ -285,7 +285,7 @@ class Response(models.Model):
         (DONE_STATUS, 'Solidly'),
     )
     question = models.ForeignKey(Question)
-    unitq = models.ForeignKey('UnitQ', null=True)
+    courseQuestion = models.ForeignKey('CourseQuestion', null=True)
     atext = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
                                   blank=False, null=False)
@@ -335,7 +335,7 @@ class Course(models.Model):
         (PRIVATE, 'By author only'),
     )
     title = models.CharField(max_length=200)
-    liveUnit = models.ForeignKey('Unit', related_name='+', null=True)
+    liveCourselet = models.ForeignKey('Courselet', related_name='+', null=True)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
                               default=PUBLIC)
     addedBy = models.ForeignKey(User)
@@ -371,23 +371,24 @@ class Role(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
 
-class Unit(models.Model):
+class Courselet(models.Model):
     'a unit of exercises performed together, e.g. one lecture'
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course)
-    liveUnitQ = models.ForeignKey('UnitQ', related_name='+', null=True)
+    liveCourseQuestion = models.ForeignKey('CourseQuestion',
+                                           related_name='+', null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     def __unicode__(self):
         return self.title
 
-class UnitQ(models.Model):
-    'an exercise (posing one question) in a course unit'
+class CourseQuestion(models.Model):
+    'an exercise (posing one question) in a courselet'
     START_STAGE = 0
     RESPONSE_STAGE = 1
     ASSESSMENT_STAGE = 2
     DONE_STAGE = 3
-    unit = models.ForeignKey(Unit)
+    courselet = models.ForeignKey(Courselet)
     question = models.ForeignKey(Question)
     order = models.IntegerField(null=True)
     liveStage = models.IntegerField(null=True)
@@ -413,36 +414,36 @@ class UnitQ(models.Model):
     def livestart(self, end=False):
         if end:
             self.liveStage = self.DONE_STAGE
-            self.unit.liveUnitQ = None
+            self.courselet.liveCourseQuestion = None
         else:
             self.liveStage = self.RESPONSE_STAGE
-            self.unit.liveUnitQ = self
-            self.unit.course.liveUnit = self.unit
-            self.unit.course.save()
+            self.courselet.liveCourseQuestion = self
+            self.courselet.course.liveCourselet = self.courselet
+            self.courselet.course.save()
         self.save()
-        self.unit.save()
+        self.courselet.save()
     def __unicode__(self):
         return self.question.title
         
 class LiveUser(models.Model):
     'user logged in to a live exercise'
-    unitq = models.ForeignKey(UnitQ)
+    courseQuestion = models.ForeignKey(CourseQuestion)
     user = models.ForeignKey(User, unique=True)
 
     @classmethod
-    def start_user_session(klass, unitq, user):
-        'record user as logged in to this live UnitQ'
+    def start_user_session(klass, courseQuestion, user):
+        'record user as logged in to this live courseQuestion'
         try:
             o = klass.objects.get(user=user)
-            o.unitq = unitq
+            o.courseQuestion = courseQuestion
         except ObjectDoesNotExist:
-            o = klass(unitq=unitq, user=user)
+            o = klass(courseQuestion=courseQuestion, user=user)
         o.save()
         return o
 
-class UnitLesson(models.Model):
-    'non-Question materials to display in a unit'
-    unit = models.ForeignKey(Unit)
+class CourseLesson(models.Model):
+    'non-Question materials to display in a courselet'
+    courselet = models.ForeignKey(Courselet)
     lesson = models.ForeignKey(Lesson)
     order = models.IntegerField(null=True)
     intro = models.TextField(null=True)

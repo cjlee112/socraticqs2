@@ -2,11 +2,11 @@
 {% load crispy_forms_tags %}
 
 {% comment %}
-  View or edit a course unit
+  View or edit a courselet
 {% endcomment %}
 
 {% block title %}
-  {{ unit.title }}
+  {{ courselet.title }}
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
 <form action="{{ actionTarget }}" method="post">
   {% csrf_token %}
   <input type="hidden" name="task" value="delete" />
-  <input type="submit" value="Delete this Unit" />
+  <input type="submit" value="Delete this Courselet" />
 </form>
 </div>
 
@@ -27,11 +27,11 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
-<p>Course: <a href="{% url 'ct:course' unit.course.id %}">
-{{ unit.course.title }}</a></p>
+<p>Course: <a href="{% url 'ct:course' courselet.course.id %}">
+{{ courselet.course.title }}</a></p>
 
-{% if unit.liveUnitQ %}
-You are now teaching this unit as a <b>live (classroom) session</b>. 
+{% if courselet.liveCourseQuestion %}
+You are now teaching this courselet as a <b>live (classroom) session</b>. 
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
@@ -40,27 +40,27 @@ You are now teaching this unit as a <b>live (classroom) session</b>.
   </form>
 {% endif %}
 
-{% if unit.unitq_set.count > 0 %}
-<h2>Exercises in this Unit</h2>
+{% if courselet.coursequestion_set.count > 0 %}
+<h2>Exercises in this Courselet</h2>
 <ul>
-{% for unitq in unit.unitq_set.all %}
-  <li><a href="{% url 'ct:question' unitq.question.id %}">
-  {{ unitq.question.title }}</a>:
-  {% if unitq.response_set.count > 0 %}
-    (<a href="{% url 'ct:unitq' unitq.id %}">
-     {{ unitq.response_set.count }} student responses</a>)
+{% for cq in courselet.coursequestion_set.all %}
+  <li><a href="{% url 'ct:question' cq.question.id %}">
+  {{ cq.question.title }}</a>:
+  {% if cq.response_set.count > 0 %}
+    (<a href="{% url 'ct:course_question' cq.id %}">
+     {{ cq.response_set.count }} student responses</a>)
   {% endif %}
-  <form action="{% url 'ct:unitq' unitq.id %}" method="post"
+  <form action="{% url 'ct:course_question' cq.id %}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="task" value="livestart" />
   <input type="submit" value="Start Live Exercise" />
   </form>
-  <form action="{% url 'ct:unitq' unitq.id %}" method="post"
+  <form action="{% url 'ct:course_question' cq.id %}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="task" value="delete" />
-  <input type="submit" value="Remove from Unit" />
+  <input type="submit" value="Remove from Courselet" />
   </form>
   </li>
 {% endfor %}

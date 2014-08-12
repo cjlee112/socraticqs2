@@ -7,7 +7,7 @@
 {% endcomment %}
 
 {% block title %}
-  {{ unitq.question.title }}
+  {{ courseQuestion.question.title }}
 {% endblock %}
 
 {% block content %}
@@ -52,7 +52,7 @@ $( "#instrtoggle" ).click(function() {
 });
 </script>
 
-<button type="button" onclick="location.href='{% url 'ct:end' unitq.id %}'">
+<button type="button" onclick="location.href='{% url 'ct:end' courseQuestion.id %}'">
 End the exercise
 </button>
 
@@ -77,7 +77,7 @@ End the exercise
 
 <h2>Common Error Models</h2>
 <ul>
-{% for em in unitq.question.errormodel_set.all %}
+{% for em in courseQuestion.question.errormodel_set.all %}
   <li>{{ em.description }}</li>
 {% endfor %}
 </ul>

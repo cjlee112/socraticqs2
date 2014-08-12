@@ -11,8 +11,8 @@
 <ul>
 {% for course in courses %}
   <li><a href="{% url 'ct:course' course.id %}">{{ course.title }}</a>:
-  {% if course.unit_set.count > 0 %}
-    ({{ course.unit_set.count }} units)
+  {% if course.courselet_set.count > 0 %}
+    ({{ course.courselet_set.count }} courselets)
   {% endif %}
   </li>
 {% endfor %}

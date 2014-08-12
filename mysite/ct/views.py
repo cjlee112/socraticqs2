@@ -16,31 +16,34 @@ from ct.templatetags.ct_extras import md2html
 # student live session UI
 
 @login_required
-def respond_unitq(request, unitq_id):
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    return _respond(request, unitq.question, unitq)
+def respond_cq(request, cq_id):
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    return _respond(request, courseQuestion.question, courseQuestion)
 
 
 @login_required
 def respond(request, ct_id):
     return _respond(request, get_object_or_404(Question, pk=ct_id))
 
-def _respond(request, q, unitq=None):
+def _respond(request, q, courseQuestion=None):
     'ask student a question'
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
             r = form.save(commit=False)
             r.question = q
-            r.unitq = unitq
+            r.courseQuestion = courseQuestion
             r.atime = timezone.now()
             r.author = request.user
             r.save()
             # let LIVE mode override default next step
-            if unitq and unitq.iswait(UnitQ.RESPONSE_STAGE):
+            if courseQuestion and \
+               courseQuestion.iswait(CourseQuestion.RESPONSE_STAGE):
                 return render(request, 'ct/wait.html',
-                    dict(actionTarget=reverse('ct:wait', args=(unitq.id,))))
-            return HttpResponseRedirect(reverse('ct:assess', args=(r.id,)))
+                    dict(actionTarget=reverse('ct:wait',
+                                              args=(courseQuestion.id,))))
+            return HttpResponseRedirect(reverse('ct:assess',
+                                                args=(r.id,)))
     else:
         form = ResponseForm()
     set_crispy_action(request.path, form)
@@ -67,9 +70,10 @@ def assess(request, resp_id):
                 se = r.studenterror_set.create(atime=timezone.now(),
                                                errorModel=em,
                                                author=r.author)
-            if r.unitq:
+            if r.courseQuestion:
                 return render(request, 'ct/wait.html',
-                    dict(actionTarget=reverse('ct:wait', args=(r.unitq.id,))))
+                    dict(actionTarget=reverse('ct:wait',
+                                              args=(r.courseQuestion.id,))))
             return HttpResponseRedirect('/ct/')
     else:
         form = SelfAssessForm()
@@ -82,39 +86,40 @@ def assess(request, resp_id):
 
 
 @login_required
-def unit_wait(request, unit_id):
+def courselet_wait(request, courselet_id):
     'keep student waiting until instructor starts live exercise'
-    unit = get_object_or_404(Unit, pk=unit_id)
-    if unit.liveUnitQ: 
+    courselet = get_object_or_404(Courselet, pk=courselet_id)
+    if courselet.liveCourseQuestion: 
         return HttpResponseRedirect(reverse('ct:wait',
-                                            args=(unit.liveUnitQ.id,)))
+                                args=(courselet.liveCourseQuestion.id,)))
     return render(request, 'ct/wait.html',
                   dict(actionTarget=request.path)) # keep waiting
 
 @login_required
-def wait(request, unitq_id):
+def wait(request, cq_id):
     'keep student waiting until instructor advances live session stage'
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    unitq.start_user_session(request.user) # user in live session
-    stage, r = unitq.get_user_stage(request.user)
-    if not unitq.liveStage or stage < unitq.liveStage: # redirect to next
-        target = unitq_next_url(unitq, stage, r)
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    courseQuestion.start_user_session(request.user) # user in live session
+    stage, r = courseQuestion.get_user_stage(request.user)
+    if not courseQuestion.liveStage or \
+      stage < courseQuestion.liveStage: # redirect to next
+        target = cq_next_url(courseQuestion, stage, r)
         return HttpResponseRedirect(target)
     return render(request, 'ct/wait.html',
                   dict(actionTarget=request.path)) # keep waiting
 
-def unitq_next_url(unitq, stage, response=None):
+def cq_next_url(courseQuestion, stage, response=None):
     'get URL for next stage'
-    if stage == unitq.START_STAGE:
-        return reverse('ct:respond_unitq', args=(unitq.id,))
-    elif stage == unitq.RESPONSE_STAGE:
+    if stage == courseQuestion.START_STAGE:
+        return reverse('ct:respond_cq', args=(courseQuestion.id,))
+    elif stage == courseQuestion.RESPONSE_STAGE:
         return reverse('ct:assess', args=(response.id,))
-    elif stage == unitq.ASSESSMENT_STAGE:
-        return reverse('ct:unit_wait', args=(unitq.unit.id,))
+    elif stage == courseQuestion.ASSESSMENT_STAGE:
+        return reverse('ct:courselet_wait', args=(courseQuestion.courselet.id,))
 
     
 #############################################################
-# instructor UnitQ live session UI
+# instructor CourseQuestion live session UI
     
 def check_instructor_auth(course, request):
     role = course.get_user_role(request.user)
@@ -123,36 +128,39 @@ def check_instructor_auth(course, request):
                             status_code=403)
     
 @login_required
-def unitq_live_start(request, unitq_id):
+def live_start(request, cq_id):
     'instructor live session START page'
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(unitq.unit.course, request)
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
+                                          request)
     if notInstructor:
         return notInstructor
     if request.method != 'GET':
         return HttpResponse("not allowed", status_code=405)
     return render(request, 'ct/livestart.html',
-                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
-                       answer=md2html(unitq.question.answer)))
+                  dict(courseQuestion=courseQuestion,
+                       qtext=md2html(courseQuestion.question.qtext),
+                       answer=md2html(courseQuestion.question.answer)))
 
 @login_required
-def unitq_control(request, unitq_id):
+def live_control(request, cq_id):
     'instructor live session UI for monitoring student responses'
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(unitq.unit.course, request)
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
+                                          request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
-    if unitq.startTime is None:
-        unitq.startTime = timezone.now()
-        unitq.save() # save time stamp
-    responses = unitq.response_set.all() # get responses from live session
+    if courseQuestion.startTime is None:
+        courseQuestion.startTime = timezone.now()
+        courseQuestion.save() # save time stamp
+    responses = courseQuestion.response_set.all() # get responses from live session
     sure = responses.filter(confidence=Response.SURE)
     unsure = responses.filter(confidence=Response.UNSURE)
     guess = responses.filter(confidence=Response.GUESS)
-    nuser = unitq.liveuser_set.count() # count logged in users
+    nuser = courseQuestion.liveuser_set.count() # count logged in users
     counts = [guess.count(), unsure.count(), sure.count(), 0]
     counts[-1] = nuser - sum(counts)
-    sec = (timezone.now() - unitq.startTime).seconds
+    sec = (timezone.now() - courseQuestion.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     ndisplay = 25 # set default values
     sortOrder = '-atime'
@@ -161,7 +169,7 @@ def unitq_control(request, unitq_id):
         emform = ErrorModelForm(request.POST)
         if emform.is_valid():
             e = emform.save(commit=False)
-            e.question = unitq.question
+            e.question = courseQuestion.question
             e.atime = timezone.now()
             e.author = request.user
             e.save()
@@ -175,8 +183,9 @@ def unitq_control(request, unitq_id):
     responses.order_by(sortOrder) # apply the desired sort order
     set_crispy_action(request.path, emform)
     return render(request, 'ct/control.html',
-                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
-                       answer=md2html(unitq.question.answer),
+                  dict(courseQuestion=courseQuestion,
+                       qtext=md2html(courseQuestion.question.qtext),
+                       answer=md2html(courseQuestion.question.answer),
                        counts=counts, elapsedTime=elapsedTime, 
                        actionTarget=request.path,
                        emform=emform, responses=responses[:ndisplay],
@@ -202,28 +211,30 @@ def make_table(d, keyset, func, t=()):
     return l
 
 @login_required
-def unitq_end(request, unitq_id):
+def live_end(request, cq_id):
     'instructor live session UI for monitoring student self-assessment'
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(unitq.unit.course, request)
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
+                                          request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     if request.method == 'POST':
         if request.POST.get('task') == 'finish':
-            unitq.livestart(end=True)
-            return HttpResponseRedirect(reverse('ct:unit',
-                                                args=(unitq.unit.id,)))
-    unitq.liveStage = unitq.ASSESSMENT_STAGE
-    unitq.save()
-    n = unitq.response_set.count() # count all responses from live session
-    responses = unitq.response_set.exclude(selfeval=None) # self-assessed
+            courseQuestion.livestart(end=True)
+            return HttpResponseRedirect(reverse('ct:courselet',
+                                    args=(courseQuestion.courselet.id,)))
+    courseQuestion.liveStage = courseQuestion.ASSESSMENT_STAGE
+    courseQuestion.save()
+    n = courseQuestion.response_set.count() # count all responses from live session
+    responses = courseQuestion.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
-    errorCounts = errormodel_table(unitq, ndata)
-    sec = (timezone.now() - unitq.startTime).seconds
+    errorCounts = errormodel_table(courseQuestion, ndata)
+    sec = (timezone.now() - courseQuestion.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     return render(request, 'ct/end.html',
-                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
-                       answer=md2html(unitq.question.answer),
+                  dict(courseQuestion=courseQuestion,
+                       qtext=md2html(courseQuestion.question.qtext),
+                       answer=md2html(courseQuestion.question.answer),
                        statusCounts=statusCounts, elapsedTime=elapsedTime,
                        evalCounts=evalCounts, actionTarget=request.path,
                        refreshRate=15, errorCounts=errorCounts))
@@ -249,13 +260,13 @@ def status_confeval_tables(responses, n):
         evalCounts = ()
     return statusCounts, evalCounts, ndata
 
-def errormodel_table(unitq, n, question=None, fmt='%d (%.0f%%)',
+def errormodel_table(courseQuestion, n, question=None, fmt='%d (%.0f%%)',
                      includeAll=False):
     if question:
         studentErrors = StudentError.objects.filter(response__question=question)
     else:
-        studentErrors = StudentError.objects.filter(response__unitq=unitq)
-        question = unitq.question
+        studentErrors = StudentError.objects.filter(response__courseQuestion=courseQuestion)
+        question = courseQuestion.question
     d = {}
     for se in studentErrors:
         try:
@@ -265,7 +276,7 @@ def errormodel_table(unitq, n, question=None, fmt='%d (%.0f%%)',
     l = d.items()
     if includeAll: # add all EM for this question
         extraEM = ErrorModel.objects.filter(question=question) \
-          .exclude(studenterror__response__unitq=unitq)
+          .exclude(studenterror__response__courseQuestion=courseQuestion)
         for em in extraEM:
             l.append((em, ()))
     l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
@@ -514,7 +525,7 @@ def courses(request):
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
 
-    courseSet = Course.objects.filter(unit__unitq__isnull=False)
+    courseSet = Course.objects.filter(courselet__coursequestion__isnull=False)
     return render(request, 'ct/courses.html', dict(courses=courseSet))
 
 
@@ -524,88 +535,91 @@ def course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # redirect students to live session or student page
-        return redirect_live(course.liveUnit,
+        return redirect_live(course.liveCourselet,
           HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
-    unitform = NewUnitTitleForm()
+    courseletform = NewCourseletTitleForm()
     titleform = CourseTitleForm(instance=course)
     if request.method == 'POST':
         if 'access' in request.POST: # update course attrs
             titleform = CourseTitleForm(request.POST, instance=course)
             if titleform.is_valid():
                 titleform.save()
-        elif 'title' in request.POST: # create new unit
-            unitform = NewUnitTitleForm(request.POST)
-            if unitform.is_valid():
-                unit = unitform.save(commit=False)
-                unit.course = course
-                unit.addedBy = request.user
-                unit.save()
-                return HttpResponseRedirect(reverse('ct:unit',
-                                                    args=(unit.id,)))
+        elif 'title' in request.POST: # create new courselet
+            courseletform = NewCourseletTitleForm(request.POST)
+            if courseletform.is_valid():
+                courselet = courseletform.save(commit=False)
+                courselet.course = course
+                courselet.addedBy = request.user
+                courselet.save()
+                return HttpResponseRedirect(reverse('ct:courselet',
+                                                    args=(courselet.id,)))
         elif request.POST.get('task') == 'delete': # delete me
             course.delete()
             return HttpResponseRedirect(reverse('ct:teach'))
-    set_crispy_action(request.path, unitform, titleform)
+    set_crispy_action(request.path, courseletform, titleform)
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
-                       titleform=titleform, unitform=unitform))
+                       titleform=titleform,
+                       courseletform=courseletform))
 
 @login_required
-def unit(request, unit_id):
-    'instructor UI for managing a course unit'
-    unit = get_object_or_404(Unit, pk=unit_id)
-    notInstructor = check_instructor_auth(unit.course, request)
+def courselet(request, courselet_id):
+    'instructor UI for managing a courselet'
+    courselet = get_object_or_404(Courselet, pk=courselet_id)
+    notInstructor = check_instructor_auth(courselet.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     qform = NewQuestionForm()
-    titleform = UnitTitleForm(instance=unit)
+    titleform = CourseletTitleForm(instance=courselet)
+    questions = Question.objects.filter(studylist__user=request.user)
+    if questions.count() > 0:
+        slform = CourseQuestionForm(questions)
+    else:
+        slform = None
     if request.method == 'POST':
         if 'qtext' in request.POST: # create new exercise
             question, qform = new_question(request)
             if question:
-                unitq = UnitQ(unit=unit, question=question,
-                              addedBy=request.user)
-                unitq.save()
+                courseQuestion = CourseQuestion(courselet=courselet,
+                                                question=question,
+                                                addedBy=request.user)
+                courseQuestion.save()
                 qform = NewQuestionForm() # new blank form to display
-        elif 'question' in request.POST: # add new UnitQ
-            unitqform = UnitQForm(None, request.POST)
-            if unitqform.is_valid():
-                unitq = unitqform.save(commit=False)
-                unitq.unit = unit
-                unitq.addedBy = request.user
-                unitq.save()
-                if unitq.question.concept is None: # need to choose concept
-                    return HttpResponseRedirect(reverse('ct:unitq_concept',
-                                                args=(unitq.id,)))
-        elif 'title' in request.POST: # update unit attributes
-            titleform = UnitTitleForm(request.POST, instance=unit)
+        elif 'question' in request.POST: # add new CourseQuestion
+            slform = CourseQuestionForm(None, request.POST)
+            if slform.is_valid():
+                courseQuestion = slform.save(commit=False)
+                courseQuestion.courselet = courselet
+                courseQuestion.addedBy = request.user
+                courseQuestion.save()
+                if courseQuestion.question.concept is None: # need to choose concept
+                    return HttpResponseRedirect(reverse('ct:cq_concept',
+                                                args=(courseQuestion.id,)))
+        elif 'title' in request.POST: # update courselet attributes
+            titleform = CourseletTitleForm(request.POST, instance=courselet)
             if titleform.is_valid():
                 titleform.save()
         elif request.POST.get('task') == 'liveend': # end live session
-            unit.liveUnitQ = None
-            unit.save()
-            unit.course.liveUnit = None
-            unit.course.save()
+            courselet.liveCourseQuestion = None
+            courselet.save()
+            courselet.course.liveCourselet = None
+            courselet.course.save()
         elif request.POST.get('task') == 'delete': # delete me
-            course = unit.course
-            unit.delete()
+            course = courselet.course
+            courselet.delete()
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
-    questions = Question.objects.filter(studylist__user=request.user)
-    if questions.count() > 0:
-        slform = UnitQForm(questions)
-    else:
-        slform = None
     set_crispy_action(request.path, qform, titleform)    
     return render(request, 'ct/unit.html',
-                  dict(unit=unit, actionTarget=request.path, slform=slform,
-                       titleform=titleform, qform=qform))
+                  dict(courselet=courselet, actionTarget=request.path,
+                       slform=slform, titleform=titleform, qform=qform))
 
 @login_required
-def unitq(request, unitq_id):
-    'instructor UnitQ report / management page'
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(unitq.unit.course, request)
+def course_question(request, cq_id):
+    'instructor CourseQuestion report / management page'
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
+                                          request)
     if notInstructor:
         return notInstructor
     emform = ErrorModelForm()
@@ -614,46 +628,50 @@ def unitq(request, unitq_id):
             emform = ErrorModelForm(request.POST)
             if emform.is_valid():
                 e = emform.save(commit=False)
-                e.question = unitq.question
+                e.question = courseQuestion.question
                 e.atime = timezone.now()
                 e.author = request.user
                 e.save()
                 emform = ErrorModelForm() # new blank form
         elif request.POST.get('task') == 'livestart':
-            unitq.livestart()
+            courseQuestion.livestart()
             return HttpResponseRedirect(reverse('ct:livestart',
-                                                args=(unitq.id,)))
+                                                args=(courseQuestion.id,)))
         elif request.POST.get('task') == 'delete':
-            unit = unitq.unit
-            unitq.delete()
-            return HttpResponseRedirect(reverse('ct:unit', args=(unit.id,)))
-    n = unitq.response_set.count() # count all responses from live session
-    responses = unitq.response_set.exclude(selfeval=None) # self-assessed
+            courselet = courseQuestion.courselet
+            courseQuestion.delete()
+            return HttpResponseRedirect(reverse('ct:courselet',
+                                                args=(courselet.id,)))
+    n = courseQuestion.response_set.count() # count all responses from live session
+    responses = courseQuestion.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
-    errorCounts = errormodel_table(unitq, ndata, includeAll=True)
-    uncats = Response.objects.filter(unitq=unitq, studenterror__isnull=True) \
-      .exclude(selfeval=Response.CORRECT)
+    errorCounts = errormodel_table(courseQuestion, ndata, includeAll=True)
+    uncats = Response.objects.filter(courseQuestion=courseQuestion,
+        studenterror__isnull=True).exclude(selfeval=Response.CORRECT)
     uncats.order_by('status')
     return render(request, 'ct/unitq.html',
-                  dict(unitq=unitq, qtext=md2html(unitq.question.qtext),
-                       answer=md2html(unitq.question.answer),
+                  dict(courseQuestion=courseQuestion,
+                       qtext=md2html(courseQuestion.question.qtext),
+                       answer=md2html(courseQuestion.question.answer),
                        statusCounts=statusCounts, uncategorized=uncats,
                        evalCounts=evalCounts, actionTarget=request.path,
                        errorCounts=errorCounts, emform=emform))
 
 @login_required
-def unitq_concept(request, unitq_id):
-    unitq = get_object_or_404(UnitQ, pk=unitq_id)
-    notInstructor = check_instructor_auth(unitq.unit.course, request)
+def cq_concept(request, cq_id):
+    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
+    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
+                                          request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     r = _concepts(request, '''Please choose a Concept that best describes
     what this question aims to test, by entering a search term to
     find relevant concepts.''')
     if isinstance(r, Concept): # user chose a concept to link
-        unitq.question.concept = r # link question to this concept
-        unitq.question.save()
-        return HttpResponseRedirect(reverse('ct:unit', args=(unitq.unit.id,)))
+        courseQuestion.question.concept = r # link question to this concept
+        courseQuestion.question.save()
+        return HttpResponseRedirect(reverse('ct:courselet',
+                            args=(courseQuestion.courselet.id,)))
     return r
 
 
@@ -707,20 +725,21 @@ def main_page(request):
 def course_study(request, course_id):
     'generic page for student course view'
     course = get_object_or_404(Course, pk=course_id)
-    target = redirect_live(course.liveUnit)
+    target = redirect_live(course.liveCourselet)
     if target:
         return target
     return render(request, 'ct/course_study.html',
                   dict(course=course, actionTarget=request.path))
 
-def redirect_live(unit, default=None):
+def redirect_live(courselet, default=None):
     'redirect student to live exercise if ongoing'
-    if not unit:
+    if not courselet:
         return default
-    elif unit.liveUnitQ:
-        return HttpResponseRedirect(unitq_next_url(unit.liveUnitQ,
-                                                   UnitQ.START_STAGE))
-    return HttpResponseRedirect(reverse('ct:unit_wait', args=(unit.id,)))
+    elif courselet.liveCourseQuestion:
+        return HttpResponseRedirect(cq_next_url(courselet.liveCourseQuestion,
+                                                CourseQuestion.START_STAGE))
+    return HttpResponseRedirect(reverse('ct:courselet_wait',
+                                        args=(courselet.id,)))
         
             
 

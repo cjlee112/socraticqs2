@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Question, Response, ErrorModel, UnitQ, Unit, Course, CommonError, Remediation
+from ct.models import Question, Response, ErrorModel, CourseQuestion, Courselet, Course, CommonError, Remediation
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
@@ -75,19 +75,19 @@ class ResponseListForm(forms.Form):
                                            ('-confidence', 'Most confident first'),
                                            ('confidence', 'Least confident first'))) 
 
-class UnitTitleForm(forms.ModelForm):
+class CourseletTitleForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
-        super(UnitTitleForm, self).__init__(*args, **kwargs)
+        super(CourseletTitleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
-        self.helper.form_id = 'id-commonErrorForm'
+        self.helper.form_id = 'id-courseletTitleForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
-        model = Unit
+        model = Courselet
         fields = ['title']
 
-class NewUnitTitleForm(UnitTitleForm):
+class NewCourseletTitleForm(CourseletTitleForm):
     submitLabel = 'Add'
 
 class CourseTitleForm(forms.ModelForm):
@@ -95,7 +95,7 @@ class CourseTitleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CourseTitleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
-        self.helper.form_id = 'id-commonErrorForm'
+        self.helper.form_id = 'id-courseTitleForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
@@ -105,13 +105,13 @@ class CourseTitleForm(forms.ModelForm):
 class NewCourseTitleForm(CourseTitleForm):
     submitLabel = 'Add'
 
-class UnitQForm(forms.ModelForm):
+class CourseQuestionForm(forms.ModelForm):
     def __init__(self, questionSet, *args, **kwargs):
-        super(UnitQForm, self).__init__(*args, **kwargs)
+        super(CourseQuestionForm, self).__init__(*args, **kwargs)
         if questionSet:
             self.fields['question'].queryset = questionSet
     class Meta:
-        model = UnitQ
+        model = CourseQuestion
         fields = ['question']
         labels = dict(question=_('From your study-list'))
 
