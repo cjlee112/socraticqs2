@@ -375,6 +375,7 @@ class Courselet(models.Model):
     'a unit of exercises performed together, e.g. one lecture'
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course)
+    concepts = models.ManyToManyField(Concept)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     def __unicode__(self):

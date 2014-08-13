@@ -630,6 +630,26 @@ def course_question(request, cq_id):
                        errorCounts=errorCounts, emform=emform))
 
 @login_required
+def courselet_concept(request, courselet_id):
+    courselet = get_object_or_404(Courselet, pk=courselet_id)
+    notInstructor = check_instructor_auth(courselet.course, request)
+    if notInstructor: # must be instructor to use this interface
+        return notInstructor
+    r = _concepts(request, '''Please choose a Concept that this courselet
+    will teach, by entering a search term to
+    find relevant concepts.''')
+    if isinstance(r, Concept): # user chose a concept to link
+        if r in tuple(courselet.concepts.all()):
+            return _concepts(request, '''You have already added that concept
+        to this courselet.''', ignorePOST=True)
+        else:
+            courselet.concepts.add(r) # link to this concept
+            return HttpResponseRedirect(reverse('ct:courselet',
+                                            args=(courselet.id,)))
+    return r
+
+
+@login_required
 def cq_concept(request, cq_id):
     courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
     notInstructor = check_instructor_auth(courseQuestion.courselet.course,
@@ -654,10 +674,10 @@ def concepts(request):
         return 'write a success message!'
     return r
 
-def _concepts(request, msg=''):
+def _concepts(request, msg='', ignorePOST=False):
     'search or create a Concept'
     cset = wset = ()
-    if request.method == 'POST':
+    if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
             t = Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
                                           request.user)

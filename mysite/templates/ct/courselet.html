@@ -30,6 +30,20 @@ $( "#edittoggle" ).click(function() {
 <p>Course: <a href="{% url 'ct:course' courselet.course.id %}">
 {{ courselet.course.title }}</a></p>
 
+<h2>Concepts Taught in This Courselet</h2>
+{% if courselet.concepts.count > 0 %}
+  <ul>
+  {% for c in courselet.concepts.all %}
+     <li><a href="{% url 'ct:concept' c.id %}">{{ c.title }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <b>Please add one or more concepts to this courselet!</b>
+{% endif %}
+<button type="button" onclick="location.href='{% url 'ct:courselet_concept' courselet.id %}'">
+Add Concept
+</button>
+
 {% if courselet.coursequestion_set.count > 0 %}
 <h2>Exercises in this Courselet</h2>
 <ul>
