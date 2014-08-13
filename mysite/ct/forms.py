@@ -56,17 +56,6 @@ class ErrorModelForm(forms.ModelForm):
         fields = ['description']
         labels = dict(description=_('Add a new error model'))
 
-class ErrorModelCEForm(forms.ModelForm):
-    def __init__(self, ceSet, *args, **kwargs):
-        super(ErrorModelCEForm, self).__init__(*args, **kwargs)
-        if ceSet:
-            self.fields['commonError'].queryset = ceSet
-    class Meta:
-        model = ErrorModel
-        fields = ['commonError']
-        widgets = dict(commonError=forms.RadioSelect)
-        labels = dict(commonError=_('Common errors for this concept'))
-            
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),
                                           ('100', '100')))
@@ -118,21 +107,6 @@ class CourseQuestionForm(forms.ModelForm):
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
 
-class CommonErrorForm(forms.ModelForm):
-    submitLabel = 'Update'
-    def __init__(self, *args, **kwargs):
-        super(CommonErrorForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_id = 'id-commonErrorForm'
-        self.helper.form_class = 'form-vertical'
-        self.helper.add_input(Submit('submit', self.submitLabel))
-    class Meta:
-        model = CommonError
-        fields = ['synopsis', 'disproof', 'prescription', 'dangerzone']
-
-class NewCommonErrorForm(CommonErrorForm):
-    submitLabel = 'Add'
-        
 class LessonSearchForm(forms.Form):
     ## def __init__(self, *args, **kwargs):
     ##     super(LessonSearchForm, self).__init__(*args, **kwargs)

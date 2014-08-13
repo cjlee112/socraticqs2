@@ -10,7 +10,17 @@
 {% block content %}
   <section>
 {% if user.is_authenticated and user.role_set.count > 0 %}
-    {% if liveSessions %}
+    {% if liveID %}
+      <p>You are currently in a live session.  Either click here
+      to <a href="{% url 'ct:live' %}">go to its exercises</a> or else
+      <form action="{{ actionTarget }}" method="post"
+       style=" display:inline!important;">
+      {% csrf_token %}
+      <input type="hidden" name="task" value="liveend" />
+      <input type="submit" value="Exit Live Exercise" />
+      </form>
+      </p>
+    {% elif liveSessions %}
       <h2>Live Sessions</h2>
       <ul>
       {% for liveSession in liveSessions.all %}

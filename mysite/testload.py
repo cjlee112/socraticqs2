@@ -22,11 +22,12 @@ q = ct.models.Question(title='A Great Question',
 q.save()
 
 cq = u.coursequestion_set.create(question=q, order=1, addedBy=teacher)
-cq.liveStage = cq.RESPONSE_STAGE
 cq.save()
 
-em = q.errormodel_set.create(description='You made a boo-boo!',
-                             atime=timezone.now(), author=teacher)
+em = ct.models.ErrorModel(description='You made a boo-boo!', author=teacher)
+em.save()
+cem = cq.courseerrormodel_set.create(errorModel=em, course=course,
+                                     addedBy=teacher)
 
 try:
     john = User.objects.get(pk=2) # our first student
@@ -35,17 +36,12 @@ except ObjectDoesNotExist:
                                     'johnpassword')
     john.save()
 
-r = q.response_set.create(atext='I really have no idea.', 
-                          atime=timezone.now(),
-                          author=john)
+r = q.response_set.create(atext='I really have no idea.', author=john)
 
-se = r.studenterror_set.create(atime=timezone.now(),
-                               errorModel=em,
-                               author=john)
+se = r.studenterror_set.create(courseErrorModel=cem, author=john)
 
 em2 = ct.models.ErrorModel(description='very common, very silly error',
-                           alwaysAsk=True, atime=timezone.now(),
-                           author=teacher)
+                           alwaysAsk=True, author=teacher)
 em2.save()
 
 q2 = ct.models.Question(title='Another Question',
@@ -62,11 +58,14 @@ def load_csv(csvfile, courselet, author):
                                    author=author)
             q.save()
             cq = courselet.coursequestion_set.create(question=q, order=1,
-                                                     addedBy=teacher)
+                                                     addedBy=author)
             cq.save()
             for e in row[3:]:
-                em = q.errormodel_set.create(description=e,
-                             atime=timezone.now(), author=author)
+                em = ct.models.ErrorModel(description=e, author=author)
+                em.save()
+                cem = cq.courseerrormodel_set.create(errorModel=em,
+                                                     course=courselet.course,
+                                                     addedBy=author)
                 
 
 load_csv('ct/lec2.csv', u, teacher) # try loading some real data

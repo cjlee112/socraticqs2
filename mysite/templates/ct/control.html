@@ -77,8 +77,8 @@ End the exercise
 
 <h2>Common Error Models</h2>
 <ul>
-{% for em in courseQuestion.question.errormodel_set.all %}
-  <li>{{ em.description }}</li>
+{% for cem in courseQuestion.courseerrormodel_set.all %}
+  <li>{{ cem.errorModel.description }}</li>
 {% endfor %}
 </ul>
 

@@ -240,11 +240,11 @@ class StudyList(models.Model):
     
 class ErrorModel(models.Model):
     'a specific kind of error on a question, or a generic error'
-    question = models.ForeignKey(Question, blank=True, null=True)
-    commonError = models.ForeignKey(CommonError, blank=False, null=True)
+    concept = models.ForeignKey(Concept, null=True)
     description = models.TextField()
     isAbort = models.BooleanField(default=False)
     isFail = models.BooleanField(default=False)
+    isPuzzled = models.BooleanField(default=False)
     alwaysAsk = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     author = models.ForeignKey(User)
@@ -303,7 +303,7 @@ class StudentError(models.Model):
     'identification of a specific error model made by a student'
     response = models.ForeignKey(Response)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    errorModel = models.ForeignKey(ErrorModel, blank=True, null=True)
+    courseErrorModel = models.ForeignKey('CourseErrorModel', blank=True, null=True)
     author = models.ForeignKey(User)
     def __unicode__(self):
         return 'eval by ' + self.author.username
@@ -387,20 +387,68 @@ class CourseQuestion(models.Model):
     order = models.IntegerField(null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    def errormodel_table(self, n, **kwargs):
+        return errormodel_table(self, n, attr='courseQuestion', target2=self,
+                                **kwargs)
     def __unicode__(self):
         return self.question.title
 
+class CourseErrorModel(models.Model):
+    errorModel = models.ForeignKey(ErrorModel)
+    courseQuestion = models.ForeignKey(CourseQuestion)
+    course = models.ForeignKey(Course)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.errorModel.description
 
+
+def errormodel_table(target, n, target2=None, fmt='%d (%.0f%%)',
+                     includeAll=False, attr='liveQuestion',
+                     attr2='courseQuestion'):
+    if n == 0: # prevent div by zero error
+        n = 1
+    kwargs = {'response__' + attr:target}
+    studentErrors = StudentError.objects.filter(**kwargs)
+    d = {}
+    for se in studentErrors:
+        try:
+            d[se.courseErrorModel].append(se)
+        except KeyError:
+            d[se.courseErrorModel] = [se]
+    l = d.items()
+    if includeAll: # add all EM for this question
+        kwargs = {'studenterror__response__' + attr:target}
+        extraEM = CourseErrorModel.objects.filter(**{attr2:target2}) \
+          .exclude(**kwargs)
+        for em in extraEM:
+            l.append((em, ()))
+    l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
+    fmt_count = lambda c: fmt % (c, c * 100. / n)
+    return [(t[0],t[1],fmt_count(len(t[1]))) for t in l]
+
+
+    
 #############################################################
 # live session info
 
 class LiveSession(models.Model):
     WAIT = None
     startTime = models.DateTimeField('time started', default=timezone.now)
+    endTime = models.DateTimeField('time completed', null=True)
     course = models.ForeignKey(Course)
     addedBy = models.ForeignKey(User)
     liveQuestion = models.ForeignKey('LiveQuestion',
                                      related_name='+', null=True)
+    @classmethod
+    def get_from_request(klass, request, instructor=False):
+        if instructor:
+            attr = 'liveInstructor'
+        else:
+            attr = 'liveID'
+        liveID = request.session[attr]
+        return klass.objects.get(pk=liveID)
+        
     def get_live_question(self, courseQuestion):
         if self.liveQuestion and \
           self.liveQuestion.courseQuestion == courseQuestion:
@@ -427,7 +475,31 @@ class LiveSession(models.Model):
     def __unicode__(self):
         return 'Instructor: %s, started at %s' %(self.addedBy.username,
                                                  str(self.startTime))
-    
+
+def add_live_user(request, liveID):
+    'add user to live session by setting session liveID value'
+    liveSession = LiveSession.objects.get(pk=liveID) # make sure it exists
+    request.session['liveID'] = liveID
+    return liveSession
+
+def rm_live_user(request, liveSession=None):
+    'remove user liveID session value and associated LiveUser record'
+    if not liveSession:
+        try:
+            liveID = request.session['liveID']
+        except KeyError:
+            return
+    try:
+        if not liveSession:
+            liveSession = LiveSession.objects.get(pk=liveID)
+        liveUser = LiveUser.objects.get(user=request.user,
+                                        liveQuestion__liveSession=liveSession)
+        liveUser.delete()
+    except ObjectDoesNotExist:
+        pass
+    del request.session['liveID']
+
+        
 class LiveQuestion(models.Model):
     'an exercise (posing one question) in a courselet'
     START_STAGE = 0
@@ -441,6 +513,8 @@ class LiveQuestion(models.Model):
     aTime = models.DateTimeField('time started', default=timezone.now)
     addedBy = models.ForeignKey(User)
 
+    def errormodel_table(self, n, **kwargs):
+        return errormodel_table(self, n, target2=self.courseQuestion, **kwargs)
     def iswait(self, stage):
         'should student wait until instructor advances live session?'
         return self.liveStage == stage  # wait for instructor to advance
