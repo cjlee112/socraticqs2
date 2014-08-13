@@ -26,6 +26,24 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
+{% if liveID %}
+<div class="container-fluid" id="liveform">
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<input type="hidden" name="task" value="liveend" />
+<input type="submit" value="End Live Session" />
+</form>
+</div>
+{% else %}
+<div class="container-fluid" id="liveform">
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<input type="hidden" name="task" value="livestart" />
+<input type="submit" value="Start Live Session" />
+</form>
+</div>
+{% endif %}
+
 {% if course.courselet_set.count > 0 %}
 <h2>Courselets in this Course</h2>
 <ul>

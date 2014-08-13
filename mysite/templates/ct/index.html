@@ -10,6 +10,21 @@
 {% block content %}
   <section>
 {% if user.is_authenticated and user.role_set.count > 0 %}
+    {% if liveSessions %}
+      <h2>Live Sessions</h2>
+      <ul>
+      {% for liveSession in liveSessions.all %}
+        <li>{{ liveSession }}
+          <form action="{{ actionTarget }}" method="post"
+           style=" display:inline!important;">
+          {% csrf_token %}
+          <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
+          <input type="submit" value="Join" />
+          </form>
+        </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
     <h2>{{ user.username }}'s Classes</h2>
     <ul>
     {% for role in user.role_set.all %}

@@ -15,6 +15,41 @@ from ct.templatetags.ct_extras import md2html
 ######################################################
 # student live session UI
 
+def get_live_session(request):
+    liveID = request.session['liveID']
+    return LiveSession.objects.get(pk=liveID)
+
+def live_response(request, r=None):
+    'if in live session, synchronize students to desired stage'
+    try:
+        liveSession = get_live_session(request)
+    except KeyError:
+        return None, None
+    stage, r = liveSession.get_next_stage(request.user, r)
+    print 'stage', stage, liveSession.liveQuestion.liveStage
+    if stage == liveSession.WAIT: # just wait
+        return render(request, 'ct/wait.html',
+                      dict(actionTarget=reverse('ct:live'))), liveSession
+    liveQuestion = liveSession.liveQuestion
+    url = liveQuestion.next_url(stage, r)
+    if r and r.liveQuestion != liveQuestion:
+        return render(request, 'ct/wait.html',
+                    dict(actionTarget=url,
+                    message='''Please click Next to join the new question
+                    the instructor has assigned.  You can return to follow
+                    up on this exercise after class (online).''')), liveSession
+    return HttpResponseRedirect(url), liveSession
+
+
+def start_live_user(request, courseQuestion):
+    try:
+        liveSession = get_live_session(request)
+    except KeyError:
+        return
+    if liveSession.liveQuestion and \
+      liveSession.liveQuestion.courseQuestion == courseQuestion:
+        liveSession.liveQuestion.start_user_session(request.user)
+
 @login_required
 def respond_cq(request, cq_id):
     courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
@@ -35,13 +70,12 @@ def _respond(request, q, courseQuestion=None):
             r.courseQuestion = courseQuestion
             r.atime = timezone.now()
             r.author = request.user
+            response, liveSession = live_response(request, r)
+            if liveSession:
+                r.liveQuestion = liveSession.get_live_question(courseQuestion)
             r.save()
-            # let LIVE mode override default next step
-            if courseQuestion and \
-               courseQuestion.iswait(CourseQuestion.RESPONSE_STAGE):
-                return render(request, 'ct/wait.html',
-                    dict(actionTarget=reverse('ct:wait',
-                                              args=(courseQuestion.id,))))
+            if response: # let LIVE mode override default next step
+                return response
             return HttpResponseRedirect(reverse('ct:assess',
                                                 args=(r.id,)))
     else:
@@ -70,10 +104,9 @@ def assess(request, resp_id):
                 se = r.studenterror_set.create(atime=timezone.now(),
                                                errorModel=em,
                                                author=r.author)
-            if r.courseQuestion:
-                return render(request, 'ct/wait.html',
-                    dict(actionTarget=reverse('ct:wait',
-                                              args=(r.courseQuestion.id,))))
+            response, liveSession = live_response(request, r)
+            if response: # let LIVE mode override default next step
+                return response
             return HttpResponseRedirect('/ct/')
     else:
         form = SelfAssessForm()
@@ -86,36 +119,12 @@ def assess(request, resp_id):
 
 
 @login_required
-def courselet_wait(request, courselet_id):
-    'keep student waiting until instructor starts live exercise'
-    courselet = get_object_or_404(Courselet, pk=courselet_id)
-    if courselet.liveCourseQuestion: 
-        return HttpResponseRedirect(reverse('ct:wait',
-                                args=(courselet.liveCourseQuestion.id,)))
-    return render(request, 'ct/wait.html',
-                  dict(actionTarget=request.path)) # keep waiting
-
-@login_required
-def wait(request, cq_id):
-    'keep student waiting until instructor advances live session stage'
-    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
-    courseQuestion.start_user_session(request.user) # user in live session
-    stage, r = courseQuestion.get_user_stage(request.user)
-    if not courseQuestion.liveStage or \
-      stage < courseQuestion.liveStage: # redirect to next
-        target = cq_next_url(courseQuestion, stage, r)
-        return HttpResponseRedirect(target)
-    return render(request, 'ct/wait.html',
-                  dict(actionTarget=request.path)) # keep waiting
-
-def cq_next_url(courseQuestion, stage, response=None):
-    'get URL for next stage'
-    if stage == courseQuestion.START_STAGE:
-        return reverse('ct:respond_cq', args=(courseQuestion.id,))
-    elif stage == courseQuestion.RESPONSE_STAGE:
-        return reverse('ct:assess', args=(response.id,))
-    elif stage == courseQuestion.ASSESSMENT_STAGE:
-        return reverse('ct:courselet_wait', args=(courseQuestion.courselet.id,))
+def live_session(request):
+    'keep student waiting until instructor advances live exercise'
+    response, liveSession = live_response(request)
+    if response:
+        return response
+    return HttpResponseRedirect(reverse('ct:home'))
 
     
 #############################################################
@@ -126,13 +135,18 @@ def check_instructor_auth(course, request):
     if role != Role.INSTRUCTOR:
         return HttpResponse("Only the instructor can access this",
                             status_code=403)
+
+def check_liveinst_auth(request):
+    liveSession = get_live_session(request)
+    liveQuestion = liveSession.liveQuestion
+    courseQuestion = liveQuestion.courseQuestion
+    return (check_instructor_auth(liveSession.course, request),
+            liveQuestion, courseQuestion)
     
 @login_required
-def live_start(request, cq_id):
+def live_start(request):
     'instructor live session START page'
-    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
-    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
-                                          request)
+    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
     if notInstructor:
         return notInstructor
     if request.method != 'GET':
@@ -143,24 +157,22 @@ def live_start(request, cq_id):
                        answer=md2html(courseQuestion.question.answer)))
 
 @login_required
-def live_control(request, cq_id):
+def live_control(request):
     'instructor live session UI for monitoring student responses'
-    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
-    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
-                                          request)
+    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
-    if courseQuestion.startTime is None:
-        courseQuestion.startTime = timezone.now()
-        courseQuestion.save() # save time stamp
-    responses = courseQuestion.response_set.all() # get responses from live session
+    if liveQuestion.startTime is None:
+        liveQuestion.startTime = timezone.now()
+        liveQuestion.save() # save time stamp
+    responses = liveQuestion.response_set.all() # responses from live session
     sure = responses.filter(confidence=Response.SURE)
     unsure = responses.filter(confidence=Response.UNSURE)
     guess = responses.filter(confidence=Response.GUESS)
-    nuser = courseQuestion.liveuser_set.count() # count logged in users
+    nuser = liveQuestion.liveuser_set.count() # count logged in users
     counts = [guess.count(), unsure.count(), sure.count(), 0]
     counts[-1] = nuser - sum(counts)
-    sec = (timezone.now() - courseQuestion.startTime).seconds
+    sec = (timezone.now() - liveQuestion.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     ndisplay = 25 # set default values
     sortOrder = '-atime'
@@ -211,25 +223,24 @@ def make_table(d, keyset, func, t=()):
     return l
 
 @login_required
-def live_end(request, cq_id):
+def live_end(request):
     'instructor live session UI for monitoring student self-assessment'
-    courseQuestion = get_object_or_404(CourseQuestion, pk=cq_id)
-    notInstructor = check_instructor_auth(courseQuestion.courselet.course,
-                                          request)
+    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     if request.method == 'POST':
         if request.POST.get('task') == 'finish':
-            courseQuestion.livestart(end=True)
+            liveQuestion.end()
             return HttpResponseRedirect(reverse('ct:courselet',
                                     args=(courseQuestion.courselet.id,)))
-    courseQuestion.liveStage = courseQuestion.ASSESSMENT_STAGE
-    courseQuestion.save()
-    n = courseQuestion.response_set.count() # count all responses from live session
-    responses = courseQuestion.response_set.exclude(selfeval=None) # self-assessed
+    elif liveQuestion.liveStage < liveQuestion.ASSESSMENT_STAGE:
+        liveQuestion.liveStage = liveQuestion.ASSESSMENT_STAGE
+        liveQuestion.save()
+    n = liveQuestion.response_set.count() # count all responses from live session
+    responses = liveQuestion.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
-    errorCounts = errormodel_table(courseQuestion, ndata)
-    sec = (timezone.now() - courseQuestion.startTime).seconds
+    errorCounts = errormodel_table(liveQuestion, ndata)
+    sec = (timezone.now() - liveQuestion.startTime).seconds
     elapsedTime = '%d:%02d' % (sec / 60, sec % 60)
     return render(request, 'ct/end.html',
                   dict(courseQuestion=courseQuestion,
@@ -260,13 +271,10 @@ def status_confeval_tables(responses, n):
         evalCounts = ()
     return statusCounts, evalCounts, ndata
 
-def errormodel_table(courseQuestion, n, question=None, fmt='%d (%.0f%%)',
-                     includeAll=False):
-    if question:
-        studentErrors = StudentError.objects.filter(response__question=question)
-    else:
-        studentErrors = StudentError.objects.filter(response__courseQuestion=courseQuestion)
-        question = courseQuestion.question
+def errormodel_table(target, n, question=None, fmt='%d (%.0f%%)',
+                     includeAll=False, attr='liveQuestion'):
+    kwargs = {'response__' + attr:target}
+    studentErrors = StudentError.objects.filter(**kwargs)
     d = {}
     for se in studentErrors:
         try:
@@ -275,8 +283,9 @@ def errormodel_table(courseQuestion, n, question=None, fmt='%d (%.0f%%)',
             d[se.errorModel] = [se]
     l = d.items()
     if includeAll: # add all EM for this question
+        kwargs = {'studenterror__response__' + attr:target}
         extraEM = ErrorModel.objects.filter(question=question) \
-          .exclude(studenterror__response__courseQuestion=courseQuestion)
+          .exclude(**kwargs)
         for em in extraEM:
             l.append((em, ()))
     l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
@@ -539,6 +548,7 @@ def course(request, course_id):
           HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
     courseletform = NewCourseletTitleForm()
     titleform = CourseTitleForm(instance=course)
+    liveID = request.session.get('liveID')
     if request.method == 'POST':
         if 'access' in request.POST: # update course attrs
             titleform = CourseTitleForm(request.POST, instance=course)
@@ -556,10 +566,19 @@ def course(request, course_id):
         elif request.POST.get('task') == 'delete': # delete me
             course.delete()
             return HttpResponseRedirect(reverse('ct:teach'))
+        elif request.POST.get('task') == 'livestart': # create live session
+            liveSession = LiveSession(course=course, addedBy=request.user)
+            liveSession.save()
+            request.session['liveID'] = liveSession.id
+        elif request.POST.get('task') == 'liveend': # end live session
+            del request.session['liveID']
+            liveSession = LiveSession.objects.get(pk=liveID)
+            liveSession.liveQuestion = None
+            liveSession.save()
     set_crispy_action(request.path, courseletform, titleform)
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
-                       titleform=titleform,
+                       titleform=titleform, liveID=liveID,
                        courseletform=courseletform))
 
 @login_required
@@ -569,6 +588,7 @@ def courselet(request, courselet_id):
     notInstructor = check_instructor_auth(courselet.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
+    liveID = request.session.get('liveID')
     qform = NewQuestionForm()
     titleform = CourseletTitleForm(instance=courselet)
     questions = Question.objects.filter(studylist__user=request.user)
@@ -612,7 +632,8 @@ def courselet(request, courselet_id):
     set_crispy_action(request.path, qform, titleform)    
     return render(request, 'ct/courselet.html',
                   dict(courselet=courselet, actionTarget=request.path,
-                       slform=slform, titleform=titleform, qform=qform))
+                       slform=slform, titleform=titleform, qform=qform,
+                       liveID=liveID))
 
 @login_required
 def course_question(request, cq_id):
@@ -634,9 +655,12 @@ def course_question(request, cq_id):
                 e.save()
                 emform = ErrorModelForm() # new blank form
         elif request.POST.get('task') == 'livestart':
-            courseQuestion.livestart()
-            return HttpResponseRedirect(reverse('ct:livestart',
-                                                args=(courseQuestion.id,)))
+            liveSession = get_live_session(request)
+            liveQuestion = LiveQuestion(liveSession=liveSession,
+                                        courseQuestion=courseQuestion,
+                                        addedBy=request.user)
+            liveQuestion.start() # calls save()
+            return HttpResponseRedirect(reverse('ct:livestart'))
         elif request.POST.get('task') == 'delete':
             courselet = courseQuestion.courselet
             courseQuestion.delete()
@@ -645,7 +669,9 @@ def course_question(request, cq_id):
     n = courseQuestion.response_set.count() # count all responses from live session
     responses = courseQuestion.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
-    errorCounts = errormodel_table(courseQuestion, ndata, includeAll=True)
+    errorCounts = errormodel_table(courseQuestion, ndata,
+                                   courseQuestion.question, includeAll=True,
+                                   attr='courseQuestion')
     uncats = Response.objects.filter(courseQuestion=courseQuestion,
         studenterror__isnull=True).exclude(selfeval=Response.CORRECT)
     uncats.order_by('status')
@@ -717,10 +743,20 @@ def concept(request, concept_id):
 ###########################################################
 # student UI for courses
 
+def get_live_sessions(request):
+    return LiveSession.objects.filter(course__role__user=request.user)
+#                                      course__role__role=Role.ENROLLED)
+
 @login_required
 def main_page(request):
     'generic home page'
-    return render(request, 'ct/index.html')
+    if request.method == 'POST':
+        if 'liveID' in request.POST:
+            request.session['liveID'] = int(request.POST['liveID'])
+            return HttpResponseRedirect(reverse('ct:live'))
+    return render(request, 'ct/index.html',
+                  dict(liveSessions=get_live_sessions(request),
+                       actionTarget=request.path))
 
 def course_study(request, course_id):
     'generic page for student course view'

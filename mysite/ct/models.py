@@ -286,6 +286,7 @@ class Response(models.Model):
     )
     question = models.ForeignKey(Question)
     courseQuestion = models.ForeignKey('CourseQuestion', null=True)
+    liveQuestion = models.ForeignKey('LiveQuestion', null=True)
     atext = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
                                   blank=False, null=False)
@@ -395,49 +396,110 @@ class CourseQuestion(models.Model):
     startTime = models.DateTimeField('time started', null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.question.title
+
+
+#############################################################
+# live session info
+
+class LiveSession(models.Model):
+    WAIT = None
+    startTime = models.DateTimeField('time started', default=timezone.now)
+    course = models.ForeignKey(Course)
+    addedBy = models.ForeignKey(User)
+    liveQuestion = models.ForeignKey('LiveQuestion',
+                                     related_name='+', null=True)
+    def get_live_question(self, courseQuestion):
+        if self.liveQuestion and \
+          self.liveQuestion.courseQuestion == courseQuestion:
+            return self.liveQuestion
+        return self.livequestion_set.get(courseQuestion=courseQuestion)
+    def get_next_stage(self, user, r=None):
+        lq = self.liveQuestion
+        if lq: # check against current LiveQuestion
+            stage, r = lq.get_user_stage(user, r)
+            if stage == lq.ASSESSMENT_STAGE or \
+              (stage == lq.RESPONSE_STAGE and 
+               lq.liveStage == lq.RESPONSE_STAGE):
+                return self.WAIT, r # hold until instructor advances
+            else:
+                return stage, r
+        elif not r:
+            return self.WAIT, r
+        else:
+            lq = self.get_live_question(r.courseQuestion)
+            stage, r = lq.get_user_stage(user, r)
+            if stage >= lq.ASSESSMENT_STAGE:
+                return self.WAIT, r
+            return stage, r
+    def __unicode__(self):
+        return 'Instructor: %s, started at %s' %(self.addedBy.username,
+                                                 str(self.startTime))
+    
+class LiveQuestion(models.Model):
+    'an exercise (posing one question) in a courselet'
+    START_STAGE = 0
+    RESPONSE_STAGE = 1
+    ASSESSMENT_STAGE = 2
+    DONE_STAGE = 3
+    liveSession = models.ForeignKey(LiveSession)
+    courseQuestion = models.ForeignKey(CourseQuestion)
+    liveStage = models.IntegerField(null=True)
+    startTime = models.DateTimeField('time started', null=True)
+    aTime = models.DateTimeField('time started', default=timezone.now)
+    addedBy = models.ForeignKey(User)
 
     def iswait(self, stage):
         'should student wait until instructor advances live session?'
         return self.liveStage == stage  # wait for instructor to advance
 
-    def get_user_stage(self, user):
-        try:
-            r = self.response_set.filter(author=user)[0]
-        except IndexError:
-            return self.START_STAGE, None
+    def get_user_stage(self, user, r=None):
+        if not r:
+            try:
+                r = self.response_set.filter(author=user)[0]
+            except IndexError:
+                return self.START_STAGE, None
         if r.selfeval is None:
             return self.RESPONSE_STAGE, r
         else:
             return self.ASSESSMENT_STAGE, r
     def start_user_session(self, user):
         LiveUser.start_user_session(self, user)
-    def livestart(self, end=False):
-        if end:
-            self.liveStage = self.DONE_STAGE
-            self.courselet.liveCourseQuestion = None
-        else:
-            self.liveStage = self.RESPONSE_STAGE
-            self.courselet.liveCourseQuestion = self
-            self.courselet.course.liveCourselet = self.courselet
-            self.courselet.course.save()
+    def start(self):
+        self.liveStage = self.RESPONSE_STAGE
         self.save()
-        self.courselet.save()
+        self.liveSession.liveQuestion = self
+        self.liveSession.save()
+    def end(self):
+        self.liveStage = self.DONE_STAGE
+        self.save()
+        self.liveSession.liveQuestion = None
+        self.liveSession.save()
+    def next_url(self, stage, response=None):
+        if stage == self.START_STAGE:
+            return reverse('ct:respond_cq', args=(self.courseQuestion.id,))
+        elif stage == self.RESPONSE_STAGE:
+            return reverse('ct:assess', args=(response.id,))
+        elif stage == self.ASSESSMENT_STAGE:
+            return reverse('ct:live')
     def __unicode__(self):
-        return self.question.title
-        
+        return self.courseQuestion.question.title
+
+    
 class LiveUser(models.Model):
     'user logged in to a live exercise'
-    courseQuestion = models.ForeignKey(CourseQuestion)
+    liveQuestion = models.ForeignKey(LiveQuestion)
     user = models.ForeignKey(User, unique=True)
 
     @classmethod
-    def start_user_session(klass, courseQuestion, user):
+    def start_user_session(klass, liveQuestion, user):
         'record user as logged in to this live courseQuestion'
         try:
             o = klass.objects.get(user=user)
-            o.courseQuestion = courseQuestion
+            o.liveQuestion = liveQuestion
         except ObjectDoesNotExist:
-            o = klass(courseQuestion=courseQuestion, user=user)
+            o = klass(liveQuestion=liveQuestion, user=user)
         o.save()
         return o
 

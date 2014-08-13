@@ -8,7 +8,12 @@
 {% endblock %}
 
 {% block content %}
-Please wait until your instructor asks you to click the Next button...
+
+{% if message %}
+  {{ message }}
+{% else %}
+  Please wait until your instructor asks you to click the Next button...
+{% endif %}
 
 <button type="button" onclick="location.href='{{ actionTarget }}'">
 Next

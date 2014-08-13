@@ -50,18 +50,21 @@ You are now teaching this courselet as a <b>live (classroom) session</b>.
     (<a href="{% url 'ct:course_question' cq.id %}">
      {{ cq.response_set.count }} student responses</a>)
   {% endif %}
-  <form action="{% url 'ct:course_question' cq.id %}" method="post"
-   style=" display:inline!important;">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="livestart" />
-  <input type="submit" value="Start Live Exercise" />
-  </form>
-  <form action="{% url 'ct:course_question' cq.id %}" method="post"
-   style=" display:inline!important;">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="delete" />
-  <input type="submit" value="Remove from Courselet" />
-  </form>
+  {% if liveID %}
+    <form action="{% url 'ct:course_question' cq.id %}" method="post"
+     style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="livestart" />
+    <input type="submit" value="Start Live Exercise" />
+    </form>
+  {% else %}
+    <form action="{% url 'ct:course_question' cq.id %}" method="post"
+     style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="delete" />
+    <input type="submit" value="Remove from Courselet" />
+    </form>
+  {% endif %}
   </li>
 {% endfor %}
 </ul>
