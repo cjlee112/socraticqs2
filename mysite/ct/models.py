@@ -336,7 +336,6 @@ class Course(models.Model):
         (PRIVATE, 'By author only'),
     )
     title = models.CharField(max_length=200)
-    liveCourselet = models.ForeignKey('Courselet', related_name='+', null=True)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
                               default=PUBLIC)
     addedBy = models.ForeignKey(User)
@@ -376,8 +375,6 @@ class Courselet(models.Model):
     'a unit of exercises performed together, e.g. one lecture'
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course)
-    liveCourseQuestion = models.ForeignKey('CourseQuestion',
-                                           related_name='+', null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     def __unicode__(self):
@@ -385,15 +382,9 @@ class Courselet(models.Model):
 
 class CourseQuestion(models.Model):
     'an exercise (posing one question) in a courselet'
-    START_STAGE = 0
-    RESPONSE_STAGE = 1
-    ASSESSMENT_STAGE = 2
-    DONE_STAGE = 3
     courselet = models.ForeignKey(Courselet)
     question = models.ForeignKey(Question)
     order = models.IntegerField(null=True)
-    liveStage = models.IntegerField(null=True)
-    startTime = models.DateTimeField('time started', null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     def __unicode__(self):

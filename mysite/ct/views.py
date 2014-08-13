@@ -26,7 +26,6 @@ def live_response(request, r=None):
     except KeyError:
         return None, None
     stage, r = liveSession.get_next_stage(request.user, r)
-    print 'stage', stage, liveSession.liveQuestion.liveStage
     if stage == liveSession.WAIT: # just wait
         return render(request, 'ct/wait.html',
                       dict(actionTarget=reverse('ct:live'))), liveSession
@@ -544,7 +543,7 @@ def course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # redirect students to live session or student page
-        return redirect_live(course.liveCourselet,
+        return redirect_live(request,
           HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
     courseletform = NewCourseletTitleForm()
     titleform = CourseTitleForm(instance=course)
@@ -619,11 +618,6 @@ def courselet(request, courselet_id):
             titleform = CourseletTitleForm(request.POST, instance=courselet)
             if titleform.is_valid():
                 titleform.save()
-        elif request.POST.get('task') == 'liveend': # end live session
-            courselet.liveCourseQuestion = None
-            courselet.save()
-            courselet.course.liveCourselet = None
-            courselet.course.save()
         elif request.POST.get('task') == 'delete': # delete me
             course = courselet.course
             courselet.delete()
@@ -761,21 +755,21 @@ def main_page(request):
 def course_study(request, course_id):
     'generic page for student course view'
     course = get_object_or_404(Course, pk=course_id)
-    target = redirect_live(course.liveCourselet)
+    target = redirect_live(request)
     if target:
         return target
     return render(request, 'ct/course_study.html',
                   dict(course=course, actionTarget=request.path))
 
-def redirect_live(courselet, default=None):
+def redirect_live(request, default=None):
     'redirect student to live exercise if ongoing'
-    if not courselet:
+    response, liveSession = live_response(request)
+    if not liveSession:
         return default
-    elif courselet.liveCourseQuestion:
-        return HttpResponseRedirect(cq_next_url(courselet.liveCourseQuestion,
-                                                CourseQuestion.START_STAGE))
-    return HttpResponseRedirect(reverse('ct:courselet_wait',
-                                        args=(courselet.id,)))
+    elif isinstance(response, HttpResponseRedirect):
+        return response
+    else:
+        return HttpResponseRedirect(reverse('ct:home'))
         
             
 

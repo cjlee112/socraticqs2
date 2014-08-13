@@ -30,16 +30,6 @@ $( "#edittoggle" ).click(function() {
 <p>Course: <a href="{% url 'ct:course' courselet.course.id %}">
 {{ courselet.course.title }}</a></p>
 
-{% if courselet.liveCourseQuestion %}
-You are now teaching this courselet as a <b>live (classroom) session</b>. 
-  <form action="{{ actionTarget }}" method="post"
-   style=" display:inline!important;">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="liveend" />
-  <input type="submit" value="End Live Session" />
-  </form>
-{% endif %}
-
 {% if courselet.coursequestion_set.count > 0 %}
 <h2>Exercises in this Courselet</h2>
 <ul>
