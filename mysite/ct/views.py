@@ -534,6 +534,13 @@ def course(request, course_id):
                        titleform=titleform, liveID=liveID,
                        courseletform=courseletform))
 
+def get_slform(courselet, user):
+    questions = Question.objects.filter(Q(studylist__user=user) |
+                Q(concept__courselet=courselet)) \
+                .exclude(coursequestion__courselet=courselet)
+    if questions.count() > 0:
+        return CourseQuestionForm(questions)
+
 @login_required
 def courselet(request, courselet_id):
     'instructor UI for managing a courselet'
@@ -544,11 +551,7 @@ def courselet(request, courselet_id):
     liveID = request.session.get('liveInstructor')
     qform = NewQuestionForm()
     titleform = CourseletTitleForm(instance=courselet)
-    questions = Question.objects.filter(studylist__user=request.user)
-    if questions.count() > 0:
-        slform = CourseQuestionForm(questions)
-    else:
-        slform = None
+    slform = get_slform(courselet, request.user)
     if request.method == 'POST':
         if 'qtext' in request.POST: # create new exercise
             question, qform = new_question(request)
@@ -568,6 +571,7 @@ def courselet(request, courselet_id):
                 if courseQuestion.question.concept is None: # need to choose concept
                     return HttpResponseRedirect(reverse('ct:cq_concept',
                                                 args=(courseQuestion.id,)))
+                slform = get_slform(courselet, request.user) # fresh form
         elif 'title' in request.POST: # update courselet attributes
             titleform = CourseletTitleForm(request.POST, instance=courselet)
             if titleform.is_valid():

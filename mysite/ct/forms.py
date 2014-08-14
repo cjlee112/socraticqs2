@@ -102,7 +102,7 @@ class CourseQuestionForm(forms.ModelForm):
     class Meta:
         model = CourseQuestion
         fields = ['question']
-        labels = dict(question=_('From your study-list'))
+        labels = dict(question=_('From related concepts or your study-list'))
 
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
