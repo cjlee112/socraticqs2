@@ -59,7 +59,6 @@ def load_csv(csvfile, courselet, author):
             q.save()
             cq = courselet.coursequestion_set.create(question=q, order=1,
                                                      addedBy=author)
-            cq.save()
             for e in row[3:]:
                 em = ct.models.ErrorModel(description=e, author=author)
                 em.save()

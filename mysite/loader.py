@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import sqlite3
 import csv
+import codecs
+import os.path
 
 def get_question_by_tem(c, title, errorModel):
     c.execute('select q.id, count(*) from questions q, error_models em, responses r where q.title=? and em.explanation=? and q.id=em.question_id and q.id=r.question_id group by q.id', (title, errorModel))
@@ -20,21 +22,27 @@ def check_single(l):
         return None
     raise KeyError('duplicated title: ' + title)
 
-def import_error_models(c, qid, q):
+def import_error_models(c, qid, cq, author):
     c.execute('select id,belief from error_models where question_id=?', (qid,))
     errorModels = {}
     for eid,belief in c.fetchall():
-        em = q.errormodel_set.create(description=belief, isAbort=False)
-        errorModels[eid] = em
+        em = ct.models.ErrorModel.find_or_create(description=belief,
+                                                 author=author)
+        cem = cq.courseerrormodel_set.create(errorModel=em,
+                                             course=cq.courselet.course,
+                                             addedBy=author)
+        errorModels[eid] = cem
     return errorModels
 
-def import_responses(c, qid, q, students, levels=('guess', 'unsure', 'sure')):
+def import_responses(c, qid, cq, students):
+    levels = [t[0] for t in ct.models.Response.CONF_CHOICES]
     c.execute('select uid,answer,confidence,submit_time,reasons from responses where question_id=?', (qid,))
     responses = {}
     for uid,answer,confidence,submit_time,reasons in c.fetchall():
-        r = q.response_set.create(atext=answer, atime=submit_time,
-                                  confidence=levels[confidence], 
-                                  selfeval=reasons, author=students[uid])
+        r = cq.response_set.create(atext=answer, atime=submit_time,
+                                   confidence=levels[confidence],
+                                   question=cq.question,
+                                   selfeval=reasons, author=students[uid])
         responses[uid] = r
     return responses
                                   
@@ -43,8 +51,9 @@ def import_student_errors(c, qid, students, responses, errorModels):
     for error_id,uid,submit_time in c.fetchall():
         r = responses[uid]
         u = students[uid]
-        em = errorModels[error_id]
-        r.studenterror_set.create(atime=submit_time, errorModel=em, author=u)
+        cem = errorModels[error_id]
+        r.studenterror_set.create(atime=submit_time, courseErrorModel=cem,
+                                  author=u)
 
 def import_students(c):
     students = {}
@@ -59,36 +68,69 @@ def import_students(c):
         except ValueError:
             lastname = fullname
             firstname = ''
-        u = User.objects.create_user(username, 'unknown', uid, 
+        try:
+            u = User.objects.get(username=username)
+        except User.DoesNotExist:
+            u = User.objects.create_user(username, 'unknown', uid, 
                                      first_name=firstname, last_name=lastname)
-        u.save()
+            u.save()
         students[uid] = u
     return students
     
 
-def import_socraticqs(dbfile, csvfile, skipEmpty=True):
-    conn = sqlite3.connect(dbfile)
-    c = conn.cursor()
-    students = import_students(c)
+def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
     questions = []
-    with open(csvfile, 'Ub') as ifile:
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
         for t in csv.reader(ifile):
-            title, text, explanation, nerror = t[1:5]
-            if int(nerror) > 0:
-                qid = get_question_by_tem(c, title, t[5])
-            else:
+            rustID, title, text, explanation = t[:4]
+            if ct.models.Question.objects.filter(rustID=rustID).count() > 0:
+                continue # already loaded in models database
+            errors = t[4:]
+            qid = None
+            if len(errors) > 0:
+                qid = get_question_by_tem(c, title, errors[0])
+            if qid is None:
                 qid = get_question_by_title(c, title)
             if qid is None or (skipEmpty and qid[1] == 0):
                 continue
             else:
                 qid = qid[0]
-            q = ct.models.Question(title=title, qtext=text, answer=explanation)
+            q = ct.models.Question(title=title, qtext=text, answer=explanation,
+                                   author=author, rustID=rustID)
             q.save()
-            questions.append(q)
-            responses = import_responses(c, qid, q, students)
-            errorModels = import_error_models(c, qid, q)
+            cq = courselet.coursequestion_set.create(question=q, order=1,
+                                                     addedBy=author)
+            questions.append(cq)
+            responses = import_responses(c, qid, cq, students)
+            errorModels = import_error_models(c, qid, cq, author)
             import_student_errors(c, qid, students, responses, errorModels)
     return questions
 
+def import_courselets(course, csvdir, courseletTuples, dbfile, author=None):
+    if author is None:
+        author = course.addedBy
+    conn = sqlite3.connect(dbfile)
+    c = conn.cursor()
+    students = import_students(c)
+    for courseletFile, title in courseletTuples:
+        courseletFile = os.path.join(csvdir, courseletFile)
+        courselet = course.courselet_set.create(title=title, addedBy=author)
+        import_courselet(c, courseletFile, courselet, author, students, False)
+    conn.close()
 
+def import_course(csvfile, dbfile,
+                  title='Introduction to Bioinformatics Theory', author=None):
+    if author is None:
+        author = User.objects.get(pk=1) # our default admin user
+    course = ct.models.Course(title=title, addedBy=author)
+    course.save()
+    course.role_set.create(user=author, role=ct.models.Role.INSTRUCTOR)
+    csvdir = os.path.dirname(dbfile)
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
+        import_courselets(course, csvdir, csv.reader(ifile), dbfile, author)
+    return course
 
+if __name__ == '__main__':
+    import_course('testdata/c260_2013/courselets.csv',
+                  'testdata/c260_2013/course.db')
+    

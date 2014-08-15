@@ -228,6 +228,7 @@ class Question(models.Model):
     concept = models.ForeignKey(Concept, null=True)
     author = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    rustID = models.CharField(max_length=64)
     def __unicode__(self):
         return self.title
 
@@ -248,6 +249,19 @@ class ErrorModel(models.Model):
     alwaysAsk = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     author = models.ForeignKey(User)
+
+    @classmethod
+    def find_or_create(klass, description, **kwargs):
+        try:
+            return klass.objects.filter(description=description)[0]
+        except IndexError:
+            o = klass(description=description, **kwargs)
+            if '(ABORT)' in description:
+                o.isAbort = True
+            if '(FAIL)' in description >= 0:
+                o.isFail = True
+            o.save()
+            return o
 
     @classmethod
     def get_generic(klass):
