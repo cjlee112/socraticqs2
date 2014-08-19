@@ -82,10 +82,10 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
     questions = []
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
         for t in csv.reader(ifile):
-            rustID, title, text, explanation = t[:4]
+            rustID, conceptID, title, text, explanation = t[:5]
             if ct.models.Question.objects.filter(rustID=rustID).count() > 0:
                 continue # already loaded in models database
-            errors = t[4:]
+            errors = t[5:]
             qid = None
             if len(errors) > 0:
                 qid = get_question_by_tem(c, title, errors[0])
@@ -97,6 +97,9 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
                 qid = qid[0]
             q = ct.models.Question(title=title, qtext=text, answer=explanation,
                                    author=author, rustID=rustID)
+            if conceptID:
+                q.concept = ct.models.Concept.get_from_sourceDB(conceptID,
+                                                                author)[0]
             q.save()
             cq = courselet.coursequestion_set.create(question=q, order=1,
                                                      addedBy=author)
@@ -125,7 +128,7 @@ def import_course(csvfile, dbfile,
     course = ct.models.Course(title=title, addedBy=author)
     course.save()
     course.role_set.create(user=author, role=ct.models.Role.INSTRUCTOR)
-    csvdir = os.path.dirname(dbfile)
+    csvdir = os.path.dirname(csvfile)
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
         import_courselets(course, csvdir, csv.reader(ifile), dbfile, author)
     return course
