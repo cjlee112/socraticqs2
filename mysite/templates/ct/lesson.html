@@ -1,0 +1,24 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+
+{% comment %}
+  View or edit a lesson
+{% endcomment %}
+
+{% block title %}
+  {{ lesson.title }}
+{% endblock %}
+
+{% block content %}
+{{ lesson.text |md2html }}
+{% if lesson.sourceDB == 'youtube' %}
+<iframe width="560" height="315"
+        src="http://www.youtube.com/embed/{{ lesson.sourceID }}?rel=0"
+        frameborder="0" allowfullscreen></iframe>
+{% elif lesson.sourceDB == 'vimeo' %}
+<iframe width="500" height="281"
+        src="http://player.vimeo.com/video/{{ lesson.sourceID }}"
+        frameborder="0" webkitallowfullscreen mozallowfullscreen
+        allowfullscreen></iframe>
+{% endif %}
+{% endblock %}

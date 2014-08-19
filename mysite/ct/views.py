@@ -455,6 +455,12 @@ def _search_lessons(request):
             wset = Lesson.search_sourceDB(s, sourceDB)
     ## searchForm.helper.form_action = request.path # set actionTarget directly
     return searchForm, sourceDB, lessonSet, wset
+
+def lesson(request, lesson_id):
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    return render(request, 'ct/lesson.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       lesson=lesson))
     
 #################################################
 # instructor course UI
