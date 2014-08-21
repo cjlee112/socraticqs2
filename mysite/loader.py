@@ -85,7 +85,7 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
     questions = []
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
         for t in csv.reader(ifile):
-            rustID, conceptID, title, text, explanation = t[:5]
+            rustID, concepts, title, text, explanation = t[:5]
             if ct.models.Question.objects.filter(rustID=rustID).count() > 0:
                 continue # already loaded in models database
             errors = t[5:]
@@ -98,9 +98,16 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
                 continue
             q = ct.models.Question(title=title, qtext=text, answer=explanation,
                                    author=author, rustID=rustID)
-            if conceptID:
-                q.concept = ct.models.Concept.get_from_sourceDB(conceptID,
-                                                                author)[0]
+            if concepts:
+                for conceptID in concepts.split(','):
+                    try:
+                        q.concept = ct.models.Concept.\
+                          get_from_sourceDB(conceptID, author)[0]
+                    except KeyError:
+                        print 'ignoring concept not found in wikipedia:', conceptID
+                        continue
+                    if courselet.concepts.filter(id=q.concept.id).count() == 0:
+                        courselet.concepts.add(q.concept)
             q.save()
             cq = courselet.coursequestion_set.create(question=q, order=1,
                                                      addedBy=author)
