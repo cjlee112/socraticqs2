@@ -22,10 +22,9 @@ def check_single(l):
         return None
     raise KeyError('duplicated title: ' + title)
 
-def import_error_models(c, qid, cq, author):
-    c.execute('select id,belief from error_models where question_id=?', (qid,))
+def load_error_models(errors, cq, author):
     errorModels = {}
-    for eid,belief in c.fetchall():
+    for eid,belief in errors:
         em = ct.models.ErrorModel.find_or_create(description=belief,
                                                  author=author)
         cem = cq.courseerrormodel_set.create(errorModel=em,
@@ -33,6 +32,10 @@ def import_error_models(c, qid, cq, author):
                                              addedBy=author)
         errorModels[eid] = cem
     return errorModels
+
+def import_error_models(c, qid, cq, author):
+    c.execute('select id,belief from error_models where question_id=?', (qid,))
+    return load_error_models(c.fetchall(), cq, author)
 
 def import_responses(c, qid, cq, students):
     levels = [t[0] for t in ct.models.Response.CONF_CHOICES]
@@ -91,10 +94,8 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
                 qid = get_question_by_tem(c, title, errors[0])
             if qid is None:
                 qid = get_question_by_title(c, title)
-            if qid is None or (skipEmpty and qid[1] == 0):
+            if skipEmpty and (qid is None or qid[1] == 0):
                 continue
-            else:
-                qid = qid[0]
             q = ct.models.Question(title=title, qtext=text, answer=explanation,
                                    author=author, rustID=rustID)
             if conceptID:
@@ -104,9 +105,13 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
             cq = courselet.coursequestion_set.create(question=q, order=1,
                                                      addedBy=author)
             questions.append(cq)
-            responses = import_responses(c, qid, cq, students)
-            errorModels = import_error_models(c, qid, cq, author)
-            import_student_errors(c, qid, students, responses, errorModels)
+            if qid: # import socraticqs data 
+                qid = qid[0]
+                responses = import_responses(c, qid, cq, students)
+                errorModels = import_error_models(c, qid, cq, author)
+                import_student_errors(c, qid, students, responses, errorModels)
+            else: # just save our error models as-is
+                load_error_models(enumerate(errors), cq, author)
     return questions
 
 def import_courselets(course, csvdir, courseletTuples, dbfile, author=None):
