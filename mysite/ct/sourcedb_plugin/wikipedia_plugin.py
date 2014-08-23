@@ -5,7 +5,8 @@ class LessonDoc(object):
     def __init__(self, sourceID):
         try:
             self._data = wikipedia.page(sourceID)
-        except wikipedia.exceptions.DisambiguationError, e:
+        except (wikipedia.exceptions.DisambiguationError,
+                wikipedia.exceptions.PageError), e:
             raise KeyError(str(e))
         self.sourceID = sourceID
         self.title = sourceID

@@ -44,14 +44,14 @@ class Concept(models.Model):
         lesson = Lesson.get_from_sourceDB(sourceID, user, sourceDB)
         try:
             return lesson.lessonlink_set.filter(relationship=
-                                    LessonLink.DEFINES)[0].concept, lesson
+                                    LessonLink.IS)[0].concept, lesson
         except IndexError:
             pass
         concept = klass(title=lesson.title, addedBy=user,
                         description=lesson.text + ' (%s)' % sourceDB)
         concept.save()
         ll = LessonLink(concept=concept, lesson=lesson, addedBy=user,
-                    relationship=LessonLink.DEFINES)
+                        relationship=LessonLink.IS)
         ll.save()
         return concept, lesson
     def __unicode__(self):
@@ -113,6 +113,7 @@ class Lesson(models.Model):
     sourceID = models.CharField(max_length=100, null=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    rustID = models.CharField(max_length=64)
 
     @classmethod
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
@@ -143,17 +144,31 @@ class Lesson(models.Model):
         
     
 class LessonLink(models.Model):
+    IS = 'is'
     DEFINES = 'defines'
+    INFORMAL_DEFINITION = 'informal'
+    FORMAL_DEFINITION = 'formaldef'
     DERIVES = 'derives'
-    DEPENDS = 'depends'
+    PROVES = 'proves'
+    ASSUMES = 'assumes'
     MOTIVATES = 'motiv'
     ILLUSTRATES = 'illust'
+    INTRODUCES = 'intro'
+    COMMENTS = 'comment'
+    WARNS = 'warns'
     REL_CHOICES = (
+        (IS, 'Represents (unique ID)'),
         (DEFINES, 'Defines'),
+        (INFORMAL_DEFINITION, 'Intuitive statement of'),
+        (FORMAL_DEFINITION, 'Formal definition for'),
         (DERIVES, 'Derives'),
-        (DEPENDS, 'Depends on'),
+        (PROVES, 'Proves'),
+        (ASSUMES, 'Assumes'),
         (MOTIVATES, 'Motivates'),
         (ILLUSTRATES, 'Illustrates'),
+        (INTRODUCES, 'Introduces'),
+        (COMMENTS, 'Comments on'),
+        (WARNS, 'Warning about'),
     )
     concept = models.ForeignKey(Concept)
     lesson = models.ForeignKey(Lesson, null=True)
@@ -229,9 +244,29 @@ class Question(models.Model):
     author = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     rustID = models.CharField(max_length=64)
+    errorModels = models.ManyToManyField('ErrorModel')
     def __unicode__(self):
         return self.title
 
+class QuestionLesson(models.Model):
+    PRESENTS_QUESTION = 'presq'
+    PRESENTS_ANSWER = 'presa'
+    CASE_ADDRESSED = 'case'
+    INTRODUCES = 'intros'
+    REL_CHOICES = (
+        (PRESENTS_QUESTION, 'Presents question for'),
+        (PRESENTS_ANSWER, 'Presents answer for'),
+        (CASE_ADDRESSED, 'Case description for'),
+        (INTRODUCES, 'Introduces'),
+    )
+    lesson = models.ForeignKey(Lesson)
+    question = models.ForeignKey(Question)
+    relationship = models.CharField(max_length=10, choices=REL_CHOICES,
+                                    default=CASE_ADDRESSED)
+    addedBy = models.ForeignKey(User)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    
+    
 class StudyList(models.Model):
     'list of questions of interest to each user'
     question = models.ForeignKey(Question)
@@ -321,6 +356,34 @@ class StudentError(models.Model):
     author = models.ForeignKey(User)
     def __unicode__(self):
         return 'eval by ' + self.author.username
+
+class Resolution(models.Model):
+    EXPLAINS = 'explains'
+    COUNTER_EXAMPLE = 'counter'
+    INFORMAL_DEFINITION = 'informal'
+    FORMAL_DEFINITION = 'formaldef'
+    ILLUSTRATES = 'illust'
+    INTRODUCES = 'intro'
+    COMMENTS = 'comment'
+    WARNS = 'warns'
+    REL_CHOICES = (
+        (EXPLAINS, 'Explains'),
+        (COUNTER_EXAMPLE, 'Clear example of incorrectness of'),
+        (INFORMAL_DEFINITION, 'Intuitive statement of'),
+        (FORMAL_DEFINITION, 'Formal definition for'),
+        (ILLUSTRATES, 'Illustrates'),
+        (INTRODUCES, 'Introduces'),
+        (COMMENTS, 'Comments on'),
+        (WARNS, 'Warns where people commonly make'),
+    )
+    errorModel = models.ForeignKey(ErrorModel)
+    lesson = models.ForeignKey(Lesson)
+    relationship = models.CharField(max_length=10, choices=REL_CHOICES,
+                                    default=EXPLAINS)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    def __unicode__(self):
+        return 'advice by ' + self.addedBy.username
 
 class Remediation(models.Model):
     errorModel = models.ForeignKey(ErrorModel)

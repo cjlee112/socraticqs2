@@ -145,6 +145,189 @@ def import_course(csvfile, dbfile,
         import_courselets(course, csvdir, csv.reader(ifile), dbfile, author)
     return course
 
+def save_lesson(d, author, nodeID, rustID, title, text, sourceDB=None,
+                sourceID=None):
+    lesson = ct.models.Lesson(rustID=rustID, title=title, text=text,
+                              addedBy=author)
+    if sourceDB:
+        lesson.sourceDB = sourceDB
+        lesson.sourceID = sourceID
+    lesson.save()
+    d[nodeID] = lesson
+    return lesson
+
+def save_question(d, author, nodeID, rustID, title, qtext, answer, *errors):
+    q = ct.models.Question(title=title, qtext=qtext, answer=answer,
+                           author=author, rustID=rustID)
+    q.save()
+    d[nodeID] = q
+    for error in errors:
+        em = save_error_model(None, author, None, error)
+        q.errorModels.add(em)
+    return q
+
+def save_error_model(d, author, nodeID, description, errorType=None,
+                     alwaysAsk=False):
+    em = ct.models.ErrorModel(description=description, author=author,
+                              alwaysAsk=alwaysAsk)
+    if errorType == 'abort':
+        em.isAbort = True
+    elif errorType == 'fail':
+        em.isFail = True
+    em.save()
+    if nodeID is not None:
+        d[nodeID] = em
+    return em
+
+def get_or_save_concept(concepts, conceptID, author, text=''):
+    try: # get from local dict
+        return concepts[conceptID]
+    except KeyError:
+        pass
+    title = ' '.join(conceptID.split('_')) # space separated string
+    try: # get from database
+        concept = ct.models.Concept.objects.filter(title=title).all()[0]
+    except IndexError:
+        concept = None
+    if not concept and not text:
+        try: # get from wikipedia if possible
+            concept = ct.models.Concept.get_from_sourceDB(title, author)[0]
+        except KeyError:
+            pass
+    if not concept: # create it with whatever description we've got
+        concept = ct.models.Concept(title=title, addedBy=author,
+                                    description=text)
+        concept.save()
+        try: # link to wikipedia if matching page found
+            lesson = ct.models.Lesson.get_from_sourceDB(title, author)
+        except KeyError:
+            pass
+        else:
+            concept.lessonlink_set.create(lesson=lesson, addedBy=author,
+                    relationship=ct.models.LessonLink.IS)
+    concepts[conceptID] = concept
+    return concept
+
+def save_concepts(links, d, author):
+    concepts = {}
+    for nodeID, relation, title in links: # save definitions
+        if relation == 'defines':
+            lesson = d[nodeID]
+            concept = get_or_save_concept(concepts, title, author, lesson.text)
+            concept.lessonlink_set.create(lesson=lesson, addedBy=author,
+                        relationship=ct.models.LessonLink.DEFINES)
+    return concepts
+
+def save_concept_links(concepts, links, d, conceptErrors, author):
+    rel = {
+        'motivates':ct.models.LessonLink.MOTIVATES,
+        'depends':ct.models.LessonLink.ASSUMES,
+        'proves':ct.models.LessonLink.PROVES,
+        'warning':ct.models.LessonLink.WARNS,
+        'comment':ct.models.LessonLink.COMMENTS,
+        'derivation':ct.models.LessonLink.DERIVES,
+        'intro':ct.models.LessonLink.INTRODUCES,
+        'informal-definition':ct.models.LessonLink.INFORMAL_DEFINITION,
+        'formal-definition':ct.models.LessonLink.FORMAL_DEFINITION,
+    }
+    crel = dict(
+        motivates=ct.models.ConceptLink.MOTIVATES,
+        depends=ct.models.ConceptLink.DEPENDS,
+    )
+    rrel = {
+        'informal-definition':ct.models.Resolution.INFORMAL_DEFINITION,
+        'formal-definition':ct.models.Resolution.FORMAL_DEFINITION,
+        'intro':ct.models.Resolution.INTRODUCES,
+        'comment':ct.models.Resolution.COMMENTS,
+        'warning':ct.models.Resolution.WARNS,
+    }
+    for em, conceptID in conceptErrors.values(): # link to concepts
+        em.concept = get_or_save_concept(concepts, conceptID, author)
+        em.save()
+    for nodeID, relation, title in links:
+        try: # is this an ErrorModel instead of a Concept?
+            em, conceptID = conceptErrors[title]
+        except KeyError:
+            pass
+        else:
+            lesson = d[nodeID] # yes, so save resolution
+            if isinstance(lesson, ct.models.Question):
+                lesson.errorModels.add(em) # add em to this question
+            else: # link lesson as Resolution of ErrorModel
+                relationship = rrel.get(relation, ct.models.Resolution.EXPLAINS)
+                r = ct.models.Resolution(lesson=lesson, errorModel=em,
+                                        addedBy=author,
+                                        relationship=relationship)
+                r.save()
+            continue # done processing this link
+        if relation == 'defines':
+            continue # already processed, nothing to do
+        elif relation == 'tests': # link question to concept
+            q = d[nodeID]
+            q.concept = get_or_save_concept(concepts, title, author)
+            q.save()
+        else: # link lesson to concept
+            lesson = d[nodeID]
+            concept = get_or_save_concept(concepts, title, author)
+            concept.lessonlink_set.create(lesson=lesson, addedBy=author,
+                                          relationship=rel[relation])
+            try: # does lesson define a concept?
+                relationship = crel[relation]
+                concept2 = ct.models.Concept.objects \
+                  .filter(lessonlink__lesson=lesson,
+                          lessonlink__relationship= \
+                          ct.models.LessonLink.DEFINES).all()[0]
+            except (KeyError,IndexError):
+                pass
+            else:  # if so, link its concept to concept
+                cl = ct.models.ConceptLink(fromConcept=concept2,
+                    toConcept=concept, addedBy=author,
+                    relationship=relationship)
+                cl.save()
+
+def save_question_links(qlinks, d, author):
+    'add links between lessons and questions'
+    rel = dict(qintro=ct.models.QuestionLesson.CASE_ADDRESSED)
+    for qID, relation, lessonID in qlinks:
+        lesson = d[lessonID]
+        q = d[qID]
+        ql = ct.models.QuestionLesson(lesson=lesson, question=q,
+                                      addedBy=author,
+                                      relationship=rel[relation])
+        ql.save()
+
+def import_concept_lessons_csv(csvfile, author=None):
+    d = {}
+    links = []
+    qlinks = []
+    conceptErrors = {}
+    if author is None:
+        author = User.objects.get(pk=1) # our default admin user
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
+        for row in csv.reader(ifile):
+            if row[0] == 'lesson':
+                save_lesson(d, author, *row[1:])
+            elif row[0] == 'question':
+                save_question(d, author, *row[1:])
+            elif row[0] == 'error':
+                nodeID, rustID, description, conceptID = row[1:]
+                em = save_error_model(d, author, nodeID, description)
+                conceptErrors[rustID] = (em, conceptID)
+            elif row[0] == 'generic-error':
+                save_error_model(d, author, None, row[1], row[2], True)
+            elif row[0] == 'qlink':
+                qlinks.append(row[1:])
+            elif row[0] == 'conceptlink':
+                links.append(row[1:])
+            else: # parent-linked concept lesson
+                conceptID = row[-1]
+                lesson = save_lesson(d, author, *row[1:-1])
+                links.append((row[1], row[0], conceptID))
+
+    concepts = save_concepts(links, d, author)
+    save_concept_links(concepts, links, d, conceptErrors, author)
+    save_question_links(qlinks, d, author)
+
 if __name__ == '__main__':
     import_course('testdata/c260_2013/courselets.csv',
                   'testdata/c260_2013/course.db')
