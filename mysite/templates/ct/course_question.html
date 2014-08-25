@@ -80,10 +80,10 @@ $( "#instrtoggle" ).click(function() {
 <h2>Categorized Student Errors</h2>
 <table border=1>
   <tr><th>Students</th><th>Error</th></tr>
-  {% for em, studentErrors, emTotal in errorCounts %}
+  {% for em, emTotal in errorCounts %}
     <tr>
     <td>{{ emTotal }}</td>
-    <td>{{ em.errorModel.description |md2html }}</td>
+    <td>{{ em.description |md2html }}</td>
     </tr>
   {% endfor %}
 </table>

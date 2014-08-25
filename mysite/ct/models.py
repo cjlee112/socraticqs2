@@ -245,6 +245,8 @@ class Question(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     rustID = models.CharField(max_length=64)
     errorModels = models.ManyToManyField('ErrorModel')
+    def errormodel_table(self, n, **kwargs):
+        return errormodel_table(self, n, attr='__question', **kwargs)
     def __unicode__(self):
         return self.title
 
@@ -466,8 +468,7 @@ class CourseQuestion(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     def errormodel_table(self, n, **kwargs):
-        return errormodel_table(self, n, attr='courseQuestion', target2=self,
-                                **kwargs)
+        return errormodel_table(self, n, **kwargs)
     def __unicode__(self):
         return self.question.title
 
@@ -481,29 +482,20 @@ class CourseErrorModel(models.Model):
         return self.errorModel.description
 
 
-def errormodel_table(target, n, target2=None, fmt='%d (%.0f%%)',
-                     includeAll=False, attr='liveQuestion',
-                     attr2='courseQuestion'):
+def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
     if n == 0: # prevent div by zero error
         n = 1
-    kwargs = {'response__' + attr:target}
-    studentErrors = StudentError.objects.filter(**kwargs)
-    d = {}
-    for se in studentErrors:
-        try:
-            d[se.courseErrorModel].append(se)
-        except KeyError:
-            d[se.courseErrorModel] = [se]
-    l = d.items()
-    if includeAll: # add all EM for this question
-        kwargs = {'studenterror__response__' + attr:target}
-        extraEM = CourseErrorModel.objects.filter(**{attr2:target2}) \
-          .exclude(**kwargs)
-        for em in extraEM:
-            l.append((em, ()))
-    l.sort(lambda x,y:cmp(len(x[1]), len(y[1])), reverse=True)
+    kwargs = {'courseerrormodel__courseQuestion' + attr:target}
+    l = []
+    for em in ErrorModel.objects.filter(**kwargs):
+        kwargs = {'courseErrorModel__courseQuestion' + attr:target,
+                  'courseErrorModel__errorModel':em}
+        nse = StudentError.objects.filter(**kwargs).count()
+        if nse > 0 or includeAll:
+            l.append((em, nse))
+    l.sort(lambda x,y:cmp(x[1], y[1]), reverse=True)
     fmt_count = lambda c: fmt % (c, c * 100. / n)
-    return [(t[0],t[1],fmt_count(len(t[1]))) for t in l]
+    return [(t[0],fmt_count(t[1])) for t in l]
 
 
     
@@ -592,7 +584,7 @@ class LiveQuestion(models.Model):
     addedBy = models.ForeignKey(User)
 
     def errormodel_table(self, n, **kwargs):
-        return errormodel_table(self, n, target2=self.courseQuestion, **kwargs)
+        return errormodel_table(self, n, attr='__livequestion', **kwargs)
     def iswait(self, stage):
         'should student wait until instructor advances live session?'
         return self.liveStage == stage  # wait for instructor to advance
