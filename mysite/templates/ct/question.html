@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 
 {% comment %}
   Let the instructor monitor self-assessment
@@ -56,6 +57,56 @@ Add concept link
     $( "#editform" ).toggle();
   });
   </script>
+{% endif %}
+
+<h2>Final Status for Understanding This Concept</h2>
+
+<table border=1>
+  <tr>
+    <th>Still confused, need help</th>
+    <th>OK, but need review</th>
+    <th>Solid understanding</th>
+    <th>(not yet)</th>
+  </tr>
+  <tr>
+    {% for c in statusCounts %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+</table>
+
+{% if evalCounts %}
+<h2>Student Self-Assessments</h2>
+
+<table border=1>
+  <tr>
+    <th></th>
+    <th>Wrong</th>
+    <th>Close</th>
+    <th>Correct</th>
+  </tr>
+  {% for label, row in evalCounts %}
+  <tr>
+    <td><b>{{ label }}</b></td>
+    {% for c in row %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if errorCounts %}
+<h2>Categorized Student Errors</h2>
+<table border=1>
+  <tr><th>Students</th><th>Error</th></tr>
+  {% for em, emTotal in errorCounts %}
+    <tr>
+    <td>{{ emTotal }}</td>
+    <td>{{ em.description |md2html }}</td>
+    </tr>
+  {% endfor %}
+</table>
 {% endif %}
 
 

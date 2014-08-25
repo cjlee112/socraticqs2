@@ -320,6 +320,10 @@ def question(request, ct_id):
         inStudylist = 1
     except ObjectDoesNotExist:
         inStudylist = 0
+    responses = q.response_set.exclude(selfeval=None) # self-assessed
+    n = len(responses)
+    statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
+    errorCounts = q.errormodel_table(ndata)
     set_crispy_action(request.path, qform)
     return render(request, 'ct/question.html',
                   dict(question=q, qtext=md2html(q.qtext),
@@ -328,7 +332,9 @@ def question(request, ct_id):
                        actionTarget=request.path,
                        inStudylist=inStudylist,
                        allowEdit=(q.author == request.user),
-                       atime=display_datetime(q.atime)))
+                       atime=display_datetime(q.atime),
+                       statusCounts=statusCounts, evalCounts=evalCounts,
+                       errorCounts=errorCounts))
 
 
 @login_required
