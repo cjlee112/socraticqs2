@@ -6,6 +6,37 @@ import csv
 import codecs
 import os.path
 
+class PhraseIndex(object):
+    def __init__(self, t, nword=3):
+        'construct phrase index for list of entries of the form [(id, text),]'
+        self.nword = nword
+        d = {}
+        self.sizes = {}
+        for i, text in t:
+            l = text.split()
+            self.sizes[i] = len(l) - nword + 1 # save numbers of phrases
+            for j in range(len(l) - nword + 1): # index all phrases in this text
+                phrase = tuple(l[j:j + nword])
+                try:
+                    d[phrase].append(i)
+                except KeyError:
+                    d[phrase] = [i]
+        self.d = d
+
+    def __getitem__(self, text):
+        'find entry with highest phrase match fraction'
+        l = text.split()
+        counts = {}
+        for j in range(len(l) - self.nword + 1):
+            phrase = tuple(l[j:j + self.nword])
+            for i in self.d.get(phrase, ()):
+                counts[i] = counts.get(i, 0)  + 1
+        l = []
+        for i, c in counts.items(): # compute match fractions
+            l.append((c / float(self.sizes[i]), i))
+        l.sort()
+        return l[-1][1] # return id with highest match fraction
+
 def get_question_by_tem(c, title, errorModel):
     c.execute('select q.id, count(*) from questions q, error_models em, responses r where q.title=? and em.explanation=? and q.id=em.question_id and q.id=r.question_id group by q.id', (title, errorModel))
     return check_single(c.fetchall())
@@ -36,6 +67,18 @@ def load_error_models(errors, cq, author):
 def import_error_models(c, qid, cq, author):
     c.execute('select id,belief from error_models where question_id=?', (qid,))
     return load_error_models(c.fetchall(), cq, author)
+
+def import_error_models2(c, qid, cq, author, emIndex):
+    'find best phrase-match ErrorModels vs. socraticqs db for this qid'
+    c.execute('select id,belief from error_models where question_id=?', (qid,))
+    errorModels = {}
+    for eid,belief in c.fetchall():
+        em = ct.models.ErrorModel.objects.get(id=emIndex[belief])
+        cem = cq.courseerrormodel_set.create(errorModel=em,
+                                             course=cq.courselet.course,
+                                             addedBy=author)
+        errorModels[eid] = cem
+    return errorModels
 
 def import_responses(c, qid, cq, students):
     levels = [t[0] for t in ct.models.Response.CONF_CHOICES]
@@ -81,6 +124,23 @@ def import_students(c):
     return students
     
 
+def import_courselet2(c, csvfile, courselet, author, students, emIndex):
+    questions = []
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
+        for t in csv.reader(ifile):
+            rustID, concepts, title, text, explanation = t[:5]
+            q = ct.models.Question.objects.get(rustID=rustID)
+            cq = courselet.coursequestion_set.create(question=q, order=1,
+                                                     addedBy=author)
+            questions.append(cq)
+            qid = get_question_by_title(c, q.title)
+            if qid: # import socraticqs data 
+                qid = qid[0]
+                responses = import_responses(c, qid, cq, students)
+                errorModels = import_error_models2(c, qid, cq, author, emIndex)
+                import_student_errors(c, qid, students, responses, errorModels)
+    return questions
+
 def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
     questions = []
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
@@ -121,7 +181,8 @@ def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
                 load_error_models(enumerate(errors), cq, author)
     return questions
 
-def import_courselets(course, csvdir, courseletTuples, dbfile, author=None):
+def import_courselets(course, csvdir, courseletTuples, dbfile, emIndex,
+                      author=None):
     if author is None:
         author = course.addedBy
     conn = sqlite3.connect(dbfile)
@@ -130,19 +191,23 @@ def import_courselets(course, csvdir, courseletTuples, dbfile, author=None):
     for courseletFile, title in courseletTuples:
         courseletFile = os.path.join(csvdir, courseletFile)
         courselet = course.courselet_set.create(title=title, addedBy=author)
-        import_courselet(c, courseletFile, courselet, author, students, False)
+        import_courselet2(c, courseletFile, courselet, author, students,
+                          emIndex)
     conn.close()
 
-def import_course(csvfile, dbfile,
+def import_course(csvfile, dbfile, emIndex=None,
                   title='Introduction to Bioinformatics Theory', author=None):
-    if author is None:
+    if not author:
         author = User.objects.get(pk=1) # our default admin user
+    if not emIndex: # build phrase index of all error models
+        emIndex = index_error_models()
     course = ct.models.Course(title=title, addedBy=author)
     course.save()
     course.role_set.create(user=author, role=ct.models.Role.INSTRUCTOR)
     csvdir = os.path.dirname(csvfile)
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
-        import_courselets(course, csvdir, csv.reader(ifile), dbfile, author)
+        import_courselets(course, csvdir, csv.reader(ifile), dbfile, emIndex,
+                          author)
     return course
 
 def save_lesson(d, author, nodeID, rustID, title, text, sourceDB=None,
@@ -179,7 +244,7 @@ def save_error_model(d, author, nodeID, description, errorType=None,
         d[nodeID] = em
     return em
 
-def get_or_save_concept(concepts, conceptID, author, text=''):
+def get_or_save_concept(concepts, conceptID, author, text='', debug=False):
     try: # get from local dict
         return concepts[conceptID]
     except KeyError:
@@ -189,6 +254,10 @@ def get_or_save_concept(concepts, conceptID, author, text=''):
         concept = ct.models.Concept.objects.filter(title=title).all()[0]
     except IndexError:
         concept = None
+    if not concept and debug: # quick test, skip wikipedia retrieval
+        concept = ct.models.Concept(title=title, addedBy=author,
+                                    description=text)
+        concept.save()
     if not concept and not text:
         try: # get from wikipedia if possible
             concept = ct.models.Concept.get_from_sourceDB(title, author)[0]
@@ -269,8 +338,12 @@ def save_concept_links(concepts, links, d, conceptErrors, author):
         else: # link lesson to concept
             lesson = d[nodeID]
             concept = get_or_save_concept(concepts, title, author)
-            concept.lessonlink_set.create(lesson=lesson, addedBy=author,
-                                          relationship=rel[relation])
+            if isinstance(lesson, ct.models.Question):
+                concept.lessonlink_set.create(question=lesson, addedBy=author,
+                                            relationship=rel[relation])
+            else:
+                concept.lessonlink_set.create(lesson=lesson, addedBy=author,
+                                            relationship=rel[relation])
             try: # does lesson define a concept?
                 relationship = crel[relation]
                 concept2 = ct.models.Concept.objects \
@@ -296,6 +369,13 @@ def save_question_links(qlinks, d, author):
                                       relationship=rel[relation])
         ql.save()
 
+def index_error_models():
+    'construct phrase index of all error models in db'
+    l = []
+    for em in ct.models.ErrorModel.objects.all():
+        l.append((em.id, em.description))
+    return PhraseIndex(l)
+        
 def import_concept_lessons_csv(csvfile, author=None):
     d = {}
     links = []
@@ -329,6 +409,7 @@ def import_concept_lessons_csv(csvfile, author=None):
     save_question_links(qlinks, d, author)
 
 if __name__ == '__main__':
+    import_concept_lessons_csv('testdata/c260_2013/concept_lessons.csv')
     import_course('testdata/c260_2013/courselets.csv',
                   'testdata/c260_2013/course.db')
     
