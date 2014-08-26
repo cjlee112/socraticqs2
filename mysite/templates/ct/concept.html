@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
+
 {% comment %}
   Show materials relevant for a given concept
 {% endcomment %}
@@ -8,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-{{ concept.description }}
+{{ concept.description |md2html }}
 
 {% if concept.question_set.count > 0 %}
 <h2>Questions Testing This Concept</h2> 
@@ -17,7 +19,7 @@
     <li>
     <a href="{% url 'ct:question' q.id %}">{{ q.title }}</a>:
     {% if q.response_set.count > 0 %}
-       {{ q.response_set.count }} student responses)
+       ({{ q.response_set.count }} student responses)
     {% endif %}
 
     </li>
@@ -34,11 +36,30 @@
     {% if ll.lesson.sourceDB %}
       ({{ ll.lesson.sourceDB }})
     {% endif %}
-    : {{ ll.get_relationship_display }} this concept.
+    {% if ll.lesson.text.strip and ll.lesson.text|length < 100 %}
+      : {{ ll.lesson.text |md2html }}
+    {% else %}
+      : {{ ll.get_relationship_display }} this concept.
+    {% endif %}
     </li>
   {% endfor %}
   </ul>
 {% endif %}
+
+<h2>Related Concepts</h2> 
+  <ul>
+  {% for cl in concept.relatedFrom.all %}
+    <li>
+    <a href="{% url 'ct:concept' cl.fromConcept.id %}">{{ cl.fromConcept.title }}</a>
+    : {{ cl.get_relationship_display }} this concept.
+    </li>
+  {% endfor %}
+  {% for cl in concept.relatedTo.all %}
+    <li>This concept {{ cl.get_relationship_display }}
+    <a href="{% url 'ct:concept' cl.toConcept.id %}">{{ cl.toConcept.title }}</a>.
+    </li>
+  {% endfor %}
+  </ul>
 
 <p>
 Added by: {{ concept.addedBy.username }}, {{ atime }}

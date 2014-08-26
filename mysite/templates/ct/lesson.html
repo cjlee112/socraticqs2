@@ -22,4 +22,18 @@
         frameborder="0" webkitallowfullscreen mozallowfullscreen
         allowfullscreen></iframe>
 {% endif %}
+
+{% if lesson.lessonlink_set.count > 0 %}
+<h2>Related concepts</h2> 
+  <ul>
+  {% for ll in lesson.lessonlink_set.all %}
+    <li>
+    {{ ll.get_relationship_display }}
+    <a href="{% url 'ct:concept' ll.concept.id %}">
+    {{ ll.concept.title }}</a>.
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
 {% endblock %}
