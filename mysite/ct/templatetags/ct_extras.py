@@ -1,5 +1,5 @@
 from django.utils.safestring import mark_safe
-from markdown import markdown
+#from markdown import markdown
 from django import template
 import re
 import pypandoc
