@@ -1,3 +1,5 @@
+import django
+django.setup()
 import ct.models
 from django.utils import timezone
 from django.contrib.auth.models import User
