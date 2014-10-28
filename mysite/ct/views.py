@@ -380,9 +380,10 @@ def error_model(request, em_id):
         n = Response.objects.count()
     else:
         n = Response.objects.filter(selfeval__isnull=False,
-                coursequestion__courseerrormodel__errormodel=em).count()
+                courseQuestion__courseerrormodel__errorModel=em).count()
     if n > 0:
-        nerr = Response.objects.filter(studenterror__errorModel=em).count()
+        nerr = Response.objects.filter(
+            studenterror__courseErrorModel__errorModel=em).count()
         emPercent = '%.0f' % (nerr * 100. / n)
     else:
         emPercent = None
