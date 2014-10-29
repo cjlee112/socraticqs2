@@ -11,6 +11,23 @@
 {% endblock %}
 
 {% block content %}
+<input type="checkbox" id="edittoggle"/>Edit.<BR>
+<div class="container-fluid" id="editform" style="display: none">
+{% crispy titleform %}
+  
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="delete" />
+  <input type="submit" value="Delete this Courselet" />
+</form>
+</div>
+
+<script>
+$( "#edittoggle" ).click(function() {
+  $( "#editform" ).toggle();
+});
+</script>
+
 {{ lesson.text |md2html }}
 {% if lesson.sourceDB == 'youtube' %}
 <iframe width="560" height="315"
@@ -23,8 +40,8 @@
         allowfullscreen></iframe>
 {% endif %}
 
-{% if lesson.lessonlink_set.count > 0 %}
 <h2>Related concepts</h2> 
+{% if lesson.lessonlink_set.count > 0 %}
   <ul>
   {% for ll in lesson.lessonlink_set.all %}
     <li>
@@ -34,6 +51,11 @@
     </li>
   {% endfor %}
   </ul>
+{% else %}
+  <b>Please add one or more concepts to this lesson!</b>
 {% endif %}
+<button type="button" onclick="location.href='{% url 'ct:lesson_concept' lesson.id %}'">
+Add Concept
+</button>
 
 {% endblock %}

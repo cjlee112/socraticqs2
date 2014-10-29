@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Question, Response, ErrorModel, CourseQuestion, Courselet, Course, CommonError, Remediation, Concept
+from ct.models import Question, Response, ErrorModel, CourseQuestion, Courselet, Course, CommonError, Remediation, Concept, Lesson
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
@@ -121,6 +121,22 @@ class NewConceptForm(ConceptForm):
 
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
+
+class LessonForm(forms.ModelForm):
+    submitLabel = 'Update'
+    url = forms.CharField(required=False)
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-lessonForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
+    class Meta:
+        model = Lesson
+        fields = ['title', 'kind', 'text', 'url']
+
+class NewLessonForm(LessonForm):
+    submitLabel = 'Add'
 
 class LessonSearchForm(forms.Form):
     ## def __init__(self, *args, **kwargs):

@@ -465,9 +465,22 @@ def _search_lessons(request):
 
 def lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, pk=lesson_id)
+    if request.user == lesson.addedBy:
+        titleform = LessonForm(instance=lesson)
+        if request.method == 'POST':
+            if 'title' in request.POST: # update courselet attributes
+                titleform = LessonForm(request.POST, instance=lesson)
+                if titleform.is_valid():
+                    titleform.save()
+            elif request.POST.get('task') == 'delete': # delete me
+                lesson.delete()
+                return HttpResponseRedirect(reverse('ct:teach'))
+
+    else:
+        titleform = None
     return render(request, 'ct/lesson.html',
                   dict(user=request.user, actionTarget=request.path,
-                       lesson=lesson))
+                       lesson=lesson, titleform=titleform))
     
 #################################################
 # instructor course UI
@@ -697,6 +710,27 @@ def cq_concept(request, cq_id):
         courseQuestion.question.save()
         return HttpResponseRedirect(reverse('ct:courselet',
                             args=(courseQuestion.courselet.id,)))
+    return r
+
+
+@login_required
+def lesson_concept(request, lesson_id):
+    lesson = get_object_or_404(Lesson, pk=lesson_id)
+    if request.user != lesson.addedBy:
+        return HttpResponse("Only the lesson author can access this",
+                            status_code=403)
+    r = _concepts(request, '''Please choose a Concept that this lesson
+    will teach, by entering a search term to
+    find relevant concepts.''')
+    if isinstance(r, Concept): # user chose a concept to link
+        if r in tuple(Concept.objects.filter(lessonlink__lesson=lesson).all()):
+            return _concepts(request, '''You have already added that concept
+        to this leson.''', ignorePOST=True)
+        else:
+            ll = LessonLink(lesson=lesson, concept=r, addedBy=request.user)
+            ll.save()
+            return HttpResponseRedirect(reverse('ct:lesson',
+                                            args=(lesson.id,)))
     return r
 
 
