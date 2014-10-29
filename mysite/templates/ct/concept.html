@@ -82,7 +82,7 @@ $( "#edittoggle" ).click(function() {
   </ul>
 
 <p>
-Added by: {{ concept.addedBy.username }}, {{ atime }}
+Added by: {{ concept.addedBy.get_full_name }}, {{ atime }}
 </p>
 
 {% endblock %}

@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {% block title %}
-  Prof. {{ user.username }}
+  Prof. {{ user.get_full_name }}
 {% endblock %}
 
 {% block content %}

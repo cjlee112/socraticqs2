@@ -20,7 +20,7 @@ value="0"
 {% endif %}
 />Keep in my study list
 
-<p>By {{ question.author.username }}, {{ atime }}</p>
+<p>By {{ question.author.get_full_name }}, {{ atime }}</p>
 
 {% if question.concept %}
 <p>Tests <a href="{% url 'ct:concept' question.concept.id %}">

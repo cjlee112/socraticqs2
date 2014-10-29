@@ -99,6 +99,6 @@ To see details from Wikipedia about each concept, just click its title.
 </ul>
 {% endif %}
 
-<p>By {{ remedy.author.username }}, {{ atime }}</p>
+<p>By {{ remedy.author.get_full_name }}, {{ atime }}</p>
 
 {% endblock %}

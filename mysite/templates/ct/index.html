@@ -35,7 +35,7 @@
       {% endfor %}
       </ul>
     {% endif %}
-    <h2>{{ user.username }}'s Classes</h2>
+    <h2>{{ user.get_full_name }}'s Classes</h2>
     <ul>
     {% for role in user.role_set.all %}
     <li><a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
