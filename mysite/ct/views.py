@@ -598,7 +598,7 @@ def courselet(request, courselet_id):
     return render(request, 'ct/courselet.html',
                   dict(courselet=courselet, actionTarget=request.path,
                        slform=slform, titleform=titleform, qform=qform,
-                       liveID=liveID))
+                       liveID=liveID, exercises=courselet.get_exercises()))
 
 @login_required
 def course_question(request, cq_id):
@@ -645,6 +645,22 @@ def course_question(request, cq_id):
                        statusCounts=statusCounts, uncategorized=uncats,
                        evalCounts=evalCounts, actionTarget=request.path,
                        errorCounts=errorCounts, emform=emform))
+
+@login_required
+def course_lesson(request, cl_id):
+    'instructor CourseLesson report / management page'
+    courseLesson = get_object_or_404(CourseLesson, pk=cl_id)
+    notInstructor = check_instructor_auth(courseLesson.courselet.course,
+                                          request)
+    if notInstructor:
+        return notInstructor
+    if request.method == 'POST':
+        if request.POST.get('task') == 'delete':
+            courselet = courseLesson.courselet
+            courseLesson.delete()
+            return HttpResponseRedirect(reverse('ct:courselet',
+                                                args=(courselet.id,)))
+
 
 @login_required
 def courselet_concept(request, courselet_id):

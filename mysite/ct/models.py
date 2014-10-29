@@ -457,6 +457,22 @@ class Courselet(models.Model):
     concepts = models.ManyToManyField(Concept)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    def get_exercises(self):
+        'merged, ordered list of lessons + questions for this courselet'
+        l = list(self.coursequestion_set.all()) + \
+          list(self.courselesson_set.all())
+        l.sort(lambda x,y:cmp(x.order, y.order))
+        return l
+    def reorder_exercise(self, old, new):
+        'renumber exercises to move an exercise from old -> new position'
+        l = self.get_exercises()
+        ex = l[old] # select desired exercise by old position
+        l = l[:old] + l[old + 1:] # exclude this exercise
+        l = l[:new] + [ex] + l[new:] # insert ex in new position
+        for i, ex in enumerate(l):
+            if i != ex.order: # order changed, have to update
+                ex.order = i
+                ex.save()
     def __unicode__(self):
         return self.title
 
@@ -467,6 +483,7 @@ class CourseQuestion(models.Model):
     order = models.IntegerField(null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    isQuestion = True
     def errormodel_table(self, n, **kwargs):
         return errormodel_table(self, n, **kwargs)
     def __unicode__(self):
@@ -647,6 +664,7 @@ class CourseLesson(models.Model):
     conclusion = models.TextField(null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    isQuestion = False
 
 
 ##############################################################

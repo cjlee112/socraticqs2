@@ -44,25 +44,37 @@ $( "#edittoggle" ).click(function() {
 Add Concept
 </button>
 
-{% if courselet.coursequestion_set.count > 0 %}
+{% if exercises %}
 <h2>Exercises in this Courselet</h2>
 <ul>
-{% for cq in courselet.coursequestion_set.all %}
-  <li><a href="{% url 'ct:question' cq.question.id %}">
-  {{ cq.question.title }}</a>:
-  {% if cq.response_set.count > 0 %}
-    (<a href="{% url 'ct:course_question' cq.id %}">
-     {{ cq.response_set.count }} student responses</a>)
+{% for ex in exercises %}
+  <li>
+  {% if ex.isQuestion %}
+  <a href="{% url 'ct:question' ex.question.id %}">
+  {{ ex.question.title }}</a>:
+  {% if ex.response_set.count > 0 %}
+    (<a href="{% url 'ct:course_question' ex.id %}">
+     {{ ex.response_set.count }} student responses</a>)
   {% endif %}
   {% if liveID %}
-    <form action="{% url 'ct:course_question' cq.id %}" method="post"
+    <form action="{% url 'ct:course_question' ex.id %}" method="post"
      style=" display:inline!important;">
     {% csrf_token %}
     <input type="hidden" name="task" value="livestart" />
     <input type="submit" value="Start Live Exercise" />
     </form>
   {% else %}
-    <form action="{% url 'ct:course_question' cq.id %}" method="post"
+    <form action="{% url 'ct:course_question' ex.id %}" method="post"
+     style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="delete" />
+    <input type="submit" value="Remove from Courselet" />
+    </form>
+  {% endif %}
+  {% else %}
+  <a href="{% url 'ct:lesson' ex.lesson.id %}">
+  {{ ex.lesson.title }}</a>:
+    <form action="{% url 'ct:course_lesson' ex.id %}" method="post"
      style=" display:inline!important;">
     {% csrf_token %}
     <input type="hidden" name="task" value="delete" />
