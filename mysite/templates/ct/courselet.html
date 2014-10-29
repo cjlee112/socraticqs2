@@ -108,5 +108,17 @@ $( "#newqtoggle" ).click(function() {
 </script>
 
 
+<input type="checkbox" id="newltoggle"/>Write a New Lesson.<BR>
+<div class="container-fluid" id="newlform" style="display: none">
+{% crispy lform %}
+</div>
+
+<script>
+$( "#newltoggle" ).click(function() {
+  $( "#newlform" ).toggle();
+});
+</script>
+
+
 {% endblock %}
 

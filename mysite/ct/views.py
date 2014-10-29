@@ -284,6 +284,17 @@ def new_question(request):
         return question, form
     return None, form
 
+def new_lesson(request):
+    'create new Lesson from POST form data'
+    form = NewLessonForm(request.POST)
+    if form.is_valid():
+        lesson = form.save(commit=False)
+        lesson.addedBy = request.user
+        lesson.rustID = ''
+        lesson.save()
+        return lesson, form
+    return None, form
+
 @login_required
 def questions(request):
     'search or create a Question'
@@ -576,17 +587,30 @@ def courselet(request, courselet_id):
         return notInstructor
     liveID = request.session.get('liveInstructor')
     qform = NewQuestionForm()
+    lform = NewLessonForm()
     titleform = CourseletTitleForm(instance=courselet)
     slform = get_slform(courselet, request.user)
     if request.method == 'POST':
         if 'qtext' in request.POST: # create new exercise
             question, qform = new_question(request)
             if question:
+                n = courselet.courselesson_set.count() + \
+                  courselet.coursequestion_set.count()
                 courseQuestion = CourseQuestion(courselet=courselet,
-                                                question=question,
+                                                question=question, order=n,
                                                 addedBy=request.user)
                 courseQuestion.save()
                 qform = NewQuestionForm() # new blank form to display
+        elif 'kind' in request.POST: # create new lesson
+            lesson, lform = new_lesson(request)
+            if lesson:
+                n = courselet.courselesson_set.count() + \
+                  courselet.coursequestion_set.count()
+                courseLesson = CourseLesson(courselet=courselet,
+                                            lesson=lesson,
+                                            order=n, addedBy=request.user)
+                courseLesson.save()
+                lform = NewLessonForm() # new blank form to display
         elif 'question' in request.POST: # add new CourseQuestion
             slform = CourseQuestionForm(None, request.POST)
             if slform.is_valid():
@@ -607,11 +631,12 @@ def courselet(request, courselet_id):
             courselet.delete()
             return HttpResponseRedirect(reverse('ct:course',
                                                 args=(course.id,)))
-    set_crispy_action(request.path, qform, titleform)    
+    set_crispy_action(request.path, qform, lform, titleform)    
     return render(request, 'ct/courselet.html',
                   dict(courselet=courselet, actionTarget=request.path,
                        slform=slform, titleform=titleform, qform=qform,
-                       liveID=liveID, exercises=courselet.get_exercises()))
+                       liveID=liveID, exercises=courselet.get_exercises(),
+                       lform=lform))
 
 @login_required
 def course_question(request, cq_id):

@@ -55,7 +55,19 @@ $( "#edittoggle" ).click(function() {
   <b>Please add one or more concepts to this lesson!</b>
 {% endif %}
 <button type="button" onclick="location.href='{% url 'ct:lesson_concept' lesson.id %}'">
-Add Concept
+Add a Concept
 </button>
+
+{% if lesson.courselesson_set.count > 0 %}
+<h2>Used in Courselets</h2> 
+  <ul>
+  {% for cl in lesson.courselesson_set.all %}
+    <li>
+    <a href="{% url 'ct:courselet' cl.courselet.id %}">
+    {{ cl.courselet.title }}</a>.
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
 
 {% endblock %}
