@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
 {% comment %}
   View or edit a course
 {% endcomment %}
@@ -58,6 +59,17 @@ To see details from Wikipedia about each concept, just click its title.
   </li>
 {% endfor %}
 </ul>
+
+{% if conceptForm %}
+<h3>Write a New Concept</h3>
+If none of the above matches your intended concept, you can add it
+directly by giving a short title and description, then click <b>Add</b>.
+
+<div class="container-fluid">
+{% crispy conceptForm %}
+</div>
+
+{% endif %}
 {% endif %}
 
 {% endblock %}

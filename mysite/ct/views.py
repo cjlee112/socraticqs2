@@ -688,12 +688,14 @@ def cq_concept(request, cq_id):
 def concepts(request):
     r = _concepts(request)
     if isinstance(r, Concept):
-        return 'write a success message!'
+        return _concepts(request, '''Successfully added concept.
+            Thank you!''', ignorePOST=True)
     return r
 
 def _concepts(request, msg='', ignorePOST=False):
     'search or create a Concept'
     cset = wset = ()
+    conceptForm = None
     if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
             t = Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
@@ -701,7 +703,15 @@ def _concepts(request, msg='', ignorePOST=False):
             return t[0] # return concept object
         elif 'conceptID' in request.POST:
             return Concept.objects.get(pk=int(request.POST.get('conceptID')))
-        return 'please write POST error message'
+        elif 'title' in request.POST: # create new concept
+            conceptForm = NewConceptForm(request.POST)
+            if conceptForm.is_valid():
+                concept = conceptForm.save(commit=False)
+                concept.addedBy = request.user
+                concept.save()
+                return concept
+        else:
+            return 'please write POST error message'
     elif 'search' in request.GET:
         searchForm = ConceptSearchForm(request.GET)
         if searchForm.is_valid():
@@ -709,18 +719,36 @@ def _concepts(request, msg='', ignorePOST=False):
             cset = Concept.objects.filter(Q(title__icontains=s) |
                                           Q(description__icontains=s))
             wset = Lesson.search_sourceDB(s)
+            conceptForm = NewConceptForm()
     else:
         searchForm = ConceptSearchForm()
+    if conceptForm:
+        set_crispy_action(request.path, conceptForm)
     return render(request, 'ct/concepts.html',
                   dict(cset=cset, actionTarget=request.path, msg=msg,
-                       searchForm=searchForm, wset=wset))
+                       searchForm=searchForm, wset=wset,
+                       conceptForm=conceptForm))
 
 
 def concept(request, concept_id):
     concept = get_object_or_404(Concept, pk=concept_id)
+    if request.user == concept.addedBy:
+        titleform = ConceptForm(instance=concept)
+        if request.method == 'POST':
+            if 'title' in request.POST:
+                titleform = ConceptForm(request.POST, instance=concept)
+                if titleform.is_valid():
+                    titleform.save()
+            elif request.POST.get('task') == 'delete':
+                concept.delete()
+                return HttpResponseRedirect(reverse('ct:concepts'))
+        set_crispy_action(request.path, titleform)
+    else:
+        titleform = None
     return render(request, 'ct/concept.html',
                   dict(actionTarget=request.path, concept=concept,
-                       atime=display_datetime(concept.atime)))
+                       atime=display_datetime(concept.atime),
+                       titleform=titleform))
         
 
 ###########################################################

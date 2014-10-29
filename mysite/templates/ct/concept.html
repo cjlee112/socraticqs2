@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
 {% load ct_extras %}
 
 {% comment %}
@@ -10,6 +11,25 @@
 {% endblock %}
 
 {% block content %}
+{% if titleform %}
+<input type="checkbox" id="edittoggle"/>Edit.<BR>
+<div class="container-fluid" id="editform" style="display: none">
+{% crispy titleform %}
+  
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="delete" />
+  <input type="submit" value="Delete this Concept" />
+</form>
+</div>
+
+<script>
+$( "#edittoggle" ).click(function() {
+  $( "#editform" ).toggle();
+});
+</script>
+{% endif %}
+
 {{ concept.description |md2html }}
 
 {% if concept.question_set.count > 0 %}
