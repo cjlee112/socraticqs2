@@ -39,6 +39,7 @@ $( "#instrtoggle" ).click(function() {
 });
 </script>
 
+{% if statusCounts %}
 <h2>Final Status for Understanding This Concept</h2>
 
 <table border=1>
@@ -54,6 +55,7 @@ $( "#instrtoggle" ).click(function() {
     {% endfor %}
   </tr>
 </table>
+{% endif %}
 
 {% if evalCounts %}
 <h2>Student Self-Assessments</h2>
