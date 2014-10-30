@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 
 {% comment %}
   search for or add new lessons
@@ -11,7 +12,7 @@
 
 {% block content %}
 {% if remedy.advice %}
-  {{ remedy.advice }}
+  {{ remedy.advice |md2html }}
 {% endif %}
 
 <input type="checkbox" id="edittoggle"/>Edit.<BR>
