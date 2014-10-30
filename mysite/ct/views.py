@@ -652,10 +652,11 @@ def course_question(request, cq_id):
             emform = ErrorModelForm(request.POST)
             if emform.is_valid():
                 e = emform.save(commit=False)
-                e.question = courseQuestion.question
-                e.atime = timezone.now()
                 e.author = request.user
                 e.save()
+                courseQuestion.courseerrormodel_set.create(errorModel=e,
+                    course=courseQuestion.courselet.course,
+                    addedBy=request.user)
                 emform = ErrorModelForm() # new blank form
         elif request.POST.get('task') == 'livestart':
             liveSession = LiveSession.get_from_request(request, True)
