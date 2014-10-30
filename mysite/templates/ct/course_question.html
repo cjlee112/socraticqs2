@@ -83,7 +83,8 @@ $( "#instrtoggle" ).click(function() {
   {% for em, emTotal in errorCounts %}
     <tr>
     <td>{{ emTotal }}</td>
-    <td>{{ em.description |md2html }}</td>
+    <td>{{ em.description |md2html }}
+        (<a href="{% url 'ct:error_model' em.id %}">Details</a>)</td>
     </tr>
   {% endfor %}
 </table>
@@ -102,12 +103,14 @@ $( "#instrtoggle" ).click(function() {
   {% endfor %}
 </table>
 
+{% endif %}
+
+<h3>Add an Error Model</h3>
 <form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
 {{ emform.as_p }}
 <input type="submit" value="Create" />
 </form>
-{% endif %}
 
 
 

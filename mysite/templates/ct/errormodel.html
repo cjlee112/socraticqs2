@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 
 {% comment %}
   instructor UI for a conceptual error
@@ -10,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-<p>{{ em.description }}</p>
+<p>{{ em.description |md2html }}</p>
 
 <input type="checkbox" id="edittoggle"/>Edit.<BR>
 <div id="editform" style="display: none">

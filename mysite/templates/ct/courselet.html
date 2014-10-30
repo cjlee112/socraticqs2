@@ -52,10 +52,8 @@ Add Concept
   {% if ex.isQuestion %}
   <a href="{% url 'ct:question' ex.question.id %}">
   {{ ex.question.title }}</a>:
-  {% if ex.response_set.count > 0 %}
     (<a href="{% url 'ct:course_question' ex.id %}">
-     {{ ex.response_set.count }} student responses</a>)
-  {% endif %}
+     {{ ex.response_set.count }} student responses in this course</a>)
   {% if liveID %}
     <form action="{% url 'ct:course_question' ex.id %}" method="post"
      style=" display:inline!important;">
