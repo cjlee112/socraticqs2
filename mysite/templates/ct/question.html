@@ -59,6 +59,7 @@ Add concept link
   </script>
 {% endif %}
 
+{% if statusCounts %}
 <h2>Final Status for Understanding This Concept</h2>
 
 <table border=1>
@@ -74,6 +75,7 @@ Add concept link
     {% endfor %}
   </tr>
 </table>
+{% endif %}
 
 {% if evalCounts %}
 <h2>Student Self-Assessments</h2>
