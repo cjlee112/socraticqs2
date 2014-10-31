@@ -98,8 +98,14 @@ $( "#instrtoggle" ).click(function() {
   <tr><th>Status</th><th>Correct?</th><th>Student's answer</th></tr>
   {% for r in uncategorized %}
     <tr>
-    <td>{{ r.get_status_display }}</td>
-    <td>{{ r.get_selfeval_display }})</td>
+    <td>
+    {% if r.status %}
+        {{ r.get_status_display }}
+    {% else %}
+        <a href="{% url 'ct:assess' r.id %}">Assess</a>
+    {% endif %}
+    </td>
+    <td>{{ r.get_selfeval_display }}</td>
     <td>{{ r.atext |md2html }}</td>
     </tr>
   {% endfor %}
