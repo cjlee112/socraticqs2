@@ -5,17 +5,18 @@ import sqlite3
 import csv
 import codecs
 import os.path
+import random
 
 class PhraseIndex(object):
-    def __init__(self, t, nword=3):
+    def __init__(self, t, nword=2):
         'construct phrase index for list of entries of the form [(id, text),]'
         self.nword = nword
         d = {}
         self.sizes = {}
         for i, text in t:
-            l = text.split()
-            self.sizes[i] = len(l) - nword + 1 # save numbers of phrases
-            for j in range(len(l) - nword + 1): # index all phrases in this text
+            n, l = self.get_phrases(text)
+            self.sizes[i] = n # save numbers of phrases
+            for j in range(n): # index all phrases in this text
                 phrase = tuple(l[j:j + nword])
                 try:
                     d[phrase].append(i)
@@ -23,11 +24,19 @@ class PhraseIndex(object):
                     d[phrase] = [i]
         self.d = d
 
+    def get_phrases(self, text):
+        'split into words, handling case < nword gracefully'
+        l = text.split()
+        if len(l) > self.nword:
+            return len(l) - self.nword + 1, l
+        else: # handle short phrases gracefully to allow matching
+            return 1, l
+
     def __getitem__(self, text):
         'find entry with highest phrase match fraction'
-        l = text.split()
+        n, l = self.get_phrases(text)
         counts = {}
-        for j in range(len(l) - self.nword + 1):
+        for j in range(n):
             phrase = tuple(l[j:j + self.nword])
             for i in self.d.get(phrase, ()):
                 counts[i] = counts.get(i, 0)  + 1
@@ -124,6 +133,43 @@ def import_students(c):
     return students
     
 
+def import_students_anonymous(c, uidDict=None, email='unknown'):
+    'import students using anonymization stored in uidDict'
+    students = {}
+    if not uidDict:
+        uidDict = {}
+    c.execute('select * from students')
+    for uid, fullname, username, date_added, added_by in c.fetchall():
+        if not uid:
+            continue
+        try:
+            anonID = uidDict[uid]
+        except KeyError:
+            anonID = 'user%d' % hash(random.random())
+            uidDict[uid] = anonID
+        try:
+            u = User.objects.get(username=anonID)
+        except User.DoesNotExist:
+            u = User.objects.create_user(anonID, email, None, 
+                                     first_name='Student', last_name=anonID)
+            u.save()
+        students[uid] = u
+    return students, uidDict
+
+def import_students_anonymize_file(c, csvfile='anonymize.csv', **kwargs):
+    'anonymize while importing, loading/updating uid -> anonID map in csvfile'
+    uidDict = {}
+    if os.path.exists(csvfile):
+        with open(csvfile, 'rb') as ifile:
+            for t in csv.reader(ifile):
+                uidDict[t[0]] = t[1]
+    students, uidDict = import_students_anonymous(c, uidDict, **kwargs)
+    with open(csvfile, 'wb') as ifile:
+        uidWriter = csv.writer(ifile)
+        for t in uidDict.items():
+            uidWriter.writerow(t)
+    return students
+    
 def import_courselet2(c, csvfile, courselet, author, students, emIndex):
     questions = []
     with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
@@ -140,6 +186,17 @@ def import_courselet2(c, csvfile, courselet, author, students, emIndex):
                 errorModels = import_error_models2(c, qid, cq, author, emIndex)
                 import_student_errors(c, qid, students, responses, errorModels)
     return questions
+
+def import_course_question(c, courselet, q, qid, students, emIndex):
+    '''import socraticqs data for specified qid to specified Question (rustID)
+    by creating CourseQuestion etc. within this courselet'''
+    n = courselet.courselesson_set.count() + \
+                  courselet.coursequestion_set.count()
+    cq = courselet.coursequestion_set.create(question=q, order=n,
+                                             addedBy=courselet.addedBy)
+    responses = import_responses(c, qid, cq, students)
+    errorModels = import_error_models2(c, qid, cq, courselet.addedBy, emIndex)
+    import_student_errors(c, qid, students, responses, errorModels)
 
 def import_courselet(c, csvfile, courselet, author, students, skipEmpty=True):
     questions = []
@@ -408,6 +465,37 @@ def import_concept_lessons_csv(csvfile, author=None):
     save_concept_links(concepts, links, d, conceptErrors, author)
     save_question_links(qlinks, d, author)
 
+
+def import_selected_questions_csv(csvfile, rustIDs, author=None):
+    'create Question objects for specified rustID(s) from csvfile'
+    d = {}
+    if author is None:
+        author = User.objects.get(pk=1) # our default admin user
+    with codecs.open(csvfile, 'r', encoding='utf-8') as ifile:
+        for row in csv.reader(ifile):
+            if row[0] == 'question' and row[2] in rustIDs:
+                save_question(d, author, *row[1:])
+    return d
+
+def import_selected_questions(courselet, rustIDs, csvfile, dbfile,
+                              emIndex=None, students=None):
+    '''import specified questions (by rustID) from csvfile
+    along with their associated socraticqs data, anonymized'''
+    questions = import_selected_questions_csv(csvfile, rustIDs,
+                                              courselet.addedBy)
+    if not emIndex: # build phrase index of all error models
+        emIndex = index_error_models()
+    conn = sqlite3.connect(dbfile)
+    c = conn.cursor()
+    if not students:
+        students = import_students_anonymize_file(c)
+    c.execute('select id, title from questions') # index socraticqs questions
+    qIndex = PhraseIndex(c.fetchall())
+    for q in questions.values():
+        qid = qIndex[q.title] # find matching question in socraticqs db
+        import_course_question(c, courselet, q, qid, students, emIndex)
+    conn.close()
+    
 if __name__ == '__main__':
     import_concept_lessons_csv('testdata/c260_2013/concept_lessons.csv')
     import_course('testdata/c260_2013/courselets.csv',
