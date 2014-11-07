@@ -52,9 +52,11 @@ $( "#instrtoggle" ).click(function() {
 });
 </script>
 
-<button type="button" onclick="location.href='{% url 'ct:end' %}'">
-End the exercise
-</button>
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="live_end" />
+  <input type="submit" value="End the exercise" />
+</form>
 
 <h2>Responses</h2>
 

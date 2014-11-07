@@ -54,7 +54,7 @@ Add Concept
   {{ ex.question.title }}</a>:
     (<a href="{% url 'ct:course_question' ex.id %}">
      {{ ex.response_set.count }} student responses in this course</a>)
-  {% if liveID %}
+  {% if fsmStack.state.liveSession %}
     <form action="{% url 'ct:course_question' ex.id %}" method="post"
      style=" display:inline!important;">
     {% csrf_token %}

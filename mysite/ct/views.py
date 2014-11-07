@@ -11,18 +11,21 @@ import json
 from ct.models import *
 from ct.forms import *
 from ct.templatetags.ct_extras import md2html
+from ct.fsm import FSMStack
 
 ######################################################
 # student live session UI
 
 def live_response(request, r=None):
     'if in live session, synchronize students to desired stage'
+    fsmStack = FSMStack(request)
     try:
-        liveSession = LiveSession.get_from_request(request)
-    except KeyError:
+        liveSession = fsmStack.state.liveSession
+    except AttributeError:
         return None, None
     if liveSession.endTime: # all done
         rm_live_user(request, liveSession)
+        fsmStack.pop(request)
         return None, None
     stage, r = liveSession.get_next_stage(request.user, r)
     if stage == liveSession.WAIT: # just wait
@@ -135,34 +138,36 @@ def check_instructor_auth(course, request):
                             status_code=403)
 
 def check_liveinst_auth(request):
-    liveSession = LiveSession.get_from_request(request, True)
-    liveQuestion = liveSession.liveQuestion
+    fsmStack = FSMStack(request)
+    liveSession = fsmStack.state.liveSession
+    liveQuestion = fsmStack.state.liveQuestion
     courseQuestion = liveQuestion.courseQuestion
     return (check_instructor_auth(liveSession.course, request),
-            liveQuestion, courseQuestion)
+            liveQuestion, courseQuestion, fsmStack)
     
 @login_required
 def live_start(request):
     'instructor live session START page'
-    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
+    notInstructor, liveQuestion, courseQuestion, fsmStack = check_liveinst_auth(request)
     if notInstructor:
         return notInstructor
-    if request.method != 'GET':
-        return HttpResponse("not allowed", status_code=405)
+    if request.method == 'POST':
+        if request.POST.get('task') == 'live_control':
+            liveQuestion.startTime = timezone.now()
+            liveQuestion.save() # save time stamp
+            return fsmStack.transition(request, 'live_control')
     return render(request, 'ct/livestart.html',
                   dict(courseQuestion=courseQuestion,
+                       actionTarget=request.path,
                        qtext=md2html(courseQuestion.question.qtext),
                        answer=md2html(courseQuestion.question.answer)))
 
 @login_required
 def live_control(request):
     'instructor live session UI for monitoring student responses'
-    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
+    notInstructor, liveQuestion, courseQuestion, fsmStack = check_liveinst_auth(request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
-    if liveQuestion.startTime is None:
-        liveQuestion.startTime = timezone.now()
-        liveQuestion.save() # save time stamp
     responses = liveQuestion.response_set.all() # responses from live session
     sure = responses.filter(confidence=Response.SURE)
     unsure = responses.filter(confidence=Response.UNSURE)
@@ -176,13 +181,19 @@ def live_control(request):
     sortOrder = '-atime'
     rlform = ResponseListForm()
     if request.method == 'POST': # create a new ErrorModel
-        emform = ErrorModelForm(request.POST)
-        if emform.is_valid():
-            e = emform.save(commit=False)
-            e.author = request.user
-            e.save()
-            courseQuestion.courseerrormodel_set.create(errorModel=e,
-                course=courseQuestion.courselet.course, addedBy=request.user)
+        if request.POST.get('task') == 'live_end':
+            liveQuestion.liveStage = liveQuestion.ASSESSMENT_STAGE
+            liveQuestion.save()
+            return fsmStack.transition(request, 'live_end')
+        else:
+            emform = ErrorModelForm(request.POST)
+            if emform.is_valid():
+                e = emform.save(commit=False)
+                e.author = request.user
+                e.save()
+                courseQuestion.courseerrormodel_set.create(errorModel=e,
+                    course=courseQuestion.courselet.course,
+                    addedBy=request.user)
     else:
         emform = ErrorModelForm()
         if request.GET: # new query parameters for displaying responses
@@ -223,17 +234,14 @@ def make_table(d, keyset, func, t=()):
 @login_required
 def live_end(request):
     'instructor live session UI for monitoring student self-assessment'
-    notInstructor, liveQuestion, courseQuestion = check_liveinst_auth(request)
+    notInstructor, liveQuestion, courseQuestion, fsmStack = check_liveinst_auth(request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
     if request.method == 'POST':
         if request.POST.get('task') == 'finish':
             liveQuestion.end()
-            return HttpResponseRedirect(reverse('ct:courselet',
-                                    args=(courseQuestion.courselet.id,)))
-    elif liveQuestion.liveStage < liveQuestion.ASSESSMENT_STAGE:
-        liveQuestion.liveStage = liveQuestion.ASSESSMENT_STAGE
-        liveQuestion.save()
+            return fsmStack.transition(request, 'live_session',
+                        dict(courselet_id=courseQuestion.courselet.id))
     n = liveQuestion.response_set.count() # count all responses from live session
     responses = liveQuestion.response_set.exclude(selfeval=None) # self-assessed
     statusCounts, evalCounts, ndata = status_confeval_tables(responses, n)
@@ -536,7 +544,7 @@ def course(request, course_id):
           HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
     courseletform = NewCourseletTitleForm()
     titleform = CourseTitleForm(instance=course)
-    liveID = request.session.get('liveInstructor')
+    fsmStack = FSMStack(request)
     if request.method == 'POST':
         if 'access' in request.POST: # update course attrs
             titleform = CourseTitleForm(request.POST, instance=course)
@@ -557,18 +565,18 @@ def course(request, course_id):
         elif request.POST.get('task') == 'livestart': # create live session
             liveSession = LiveSession(course=course, addedBy=request.user)
             liveSession.save()
-            request.session['liveInstructor'] = liveID = liveSession.id
+            fsmStack.push(request, 'liveInstructor',
+                          dict(liveSession=liveSession))
         elif request.POST.get('task') == 'liveend': # end live session
-            del request.session['liveInstructor']
-            liveSession = LiveSession.objects.get(pk=liveID)
+            liveSession = fsmStack.state.liveSession
             liveSession.liveQuestion = None
             liveSession.endTime = timezone.now() # mark as completed
             liveSession.save()
-            liveID = None
+            fsmStack.pop(request)
     set_crispy_action(request.path, courseletform, titleform)
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
-                       titleform=titleform, liveID=liveID,
+                       titleform=titleform, fsmStack=fsmStack,
                        courseletform=courseletform))
 
 def get_slform(courselet, user):
@@ -585,7 +593,7 @@ def courselet(request, courselet_id):
     notInstructor = check_instructor_auth(courselet.course, request)
     if notInstructor: # must be instructor to use this interface
         return notInstructor
-    liveID = request.session.get('liveInstructor')
+    fsmStack = FSMStack(request)
     qform = NewQuestionForm()
     lform = NewLessonForm()
     titleform = CourseletTitleForm(instance=courselet)
@@ -635,8 +643,8 @@ def courselet(request, courselet_id):
     return render(request, 'ct/courselet.html',
                   dict(courselet=courselet, actionTarget=request.path,
                        slform=slform, titleform=titleform, qform=qform,
-                       liveID=liveID, exercises=courselet.get_exercises(),
-                       lform=lform))
+                       fsmStack=fsmStack,
+                       exercises=courselet.get_exercises(), lform=lform))
 
 @login_required
 def course_question(request, cq_id):
@@ -647,6 +655,7 @@ def course_question(request, cq_id):
     if notInstructor:
         return notInstructor
     emform = ErrorModelForm()
+    fsmStack = FSMStack(request)
     if request.method == 'POST':
         if 'description' in request.POST:
             emform = ErrorModelForm(request.POST)
@@ -659,12 +668,13 @@ def course_question(request, cq_id):
                     addedBy=request.user)
                 emform = ErrorModelForm() # new blank form
         elif request.POST.get('task') == 'livestart':
-            liveSession = LiveSession.get_from_request(request, True)
+            liveSession = fsmStack.state.liveSession
             liveQuestion = LiveQuestion(liveSession=liveSession,
                                         courseQuestion=courseQuestion,
                                         addedBy=request.user)
             liveQuestion.start() # calls save()
-            return HttpResponseRedirect(reverse('ct:livestart'))
+            fsmStack.state.liveQuestion = liveQuestion
+            return fsmStack.transition(request, 'livestart')
         elif request.POST.get('task') == 'delete':
             courselet = courseQuestion.courselet
             courseQuestion.delete()
@@ -838,17 +848,20 @@ def get_live_sessions(request):
 @login_required
 def main_page(request):
     'generic home page'
-    liveID = request.session.get('liveID')
+    fsmStack = FSMStack(request)
     if request.method == 'POST':
         if 'liveID' in request.POST:
-            add_live_user(request, int(request.POST['liveID']))
-            return HttpResponseRedirect(reverse('ct:live'))
+            liveID = int(request.POST['liveID'])
+            liveSession = LiveSession.objects.get(pk=liveID) # make sure it exists
+            return fsmStack.push(request, 'liveStudent',
+                  dict(liveSession=liveSession,
+                       liveQuestion=liveSession.liveQuestion))
         elif request.POST.get('task') == 'liveend': # end live session
-            rm_live_user(request)
-            liveID = None
+            rm_live_user(request, fsmStack.state.liveSession)
+            return fsmStack.pop(request)
     return render(request, 'ct/index.html',
                   dict(liveSessions=get_live_sessions(request),
-                       actionTarget=request.path, liveID=liveID))
+                       actionTarget=request.path, fsmStack=fsmStack))
 
 def course_study(request, course_id):
     'generic page for student course view'

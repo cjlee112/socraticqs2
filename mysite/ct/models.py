@@ -563,28 +563,14 @@ class LiveSession(models.Model):
         return 'Instructor: %s, started at %s' %(self.addedBy.username,
                                                  str(self.startTime))
 
-def add_live_user(request, liveID):
-    'add user to live session by setting session liveID value'
-    liveSession = LiveSession.objects.get(pk=liveID) # make sure it exists
-    request.session['liveID'] = liveID
-    return liveSession
-
-def rm_live_user(request, liveSession=None):
+def rm_live_user(request, liveSession):
     'remove user liveID session value and associated LiveUser record'
-    if not liveSession:
-        try:
-            liveID = request.session['liveID']
-        except KeyError:
-            return
     try:
-        if not liveSession:
-            liveSession = LiveSession.objects.get(pk=liveID)
         liveUser = LiveUser.objects.get(user=request.user,
                                         liveQuestion__liveSession=liveSession)
         liveUser.delete()
     except ObjectDoesNotExist:
         pass
-    del request.session['liveID']
 
         
 class LiveQuestion(models.Model):
@@ -691,6 +677,85 @@ def display_datetime(dt):
             return '%d %s ago' % (n, singularize(n, unit))
     return '%s %d, %d' % (monthStrings[dt.month - 1], dt.day, dt.year)
 
+
+##################################################################
+# activity stack FSM
+
+class FSM(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True)
+    help = models.TextField(null=True)
+    startNode = models.ForeignKey('FSMNode')
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+
+class FSMNode(models.Model):
+    fsm = models.ForeignKey(FSM)
+    name = models.CharField(max_length=64)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True)
+    help = models.TextField(null=True)
+    path = models.CharField(max_length=200)
+    data = models.TextField(null=True)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    def get_path(self, **kwargs):
+        return reverse(self.path, kwargs=kwargs)
+
+class FSMDone(ValueError):
+    pass
+
+class FSMEdge(models.Model):
+    name = models.CharField(max_length=64)
+    fromNode = models.ForeignKey(FSMNode)
+    toNode = models.ForeignKey(FSMNode)
+    funcName = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True)
+    help = models.TextField(null=True)
+    data = models.TextField(null=True)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    _funcDict = {}
+    def get_path(self, **kwargs):
+        if self.funcName:
+            try:
+                func = self._funcDict[self.funcName]
+            except KeyError:
+                modname, funcname = self.funcName.split('.')
+                mod = __import__('fsm_plugin.' + modname, globals(),
+                                 locals(), [funcname])
+                func = self._funcDict[self.funcName] = getattr(mod, funcname)
+            try:
+                kwargs = func(self.fromNode, self.toNode, self.data, **kwargs)
+            except ValueError:
+                return
+        if not self.toNode:
+            raise FSMDone()
+        return self.toNode.get_path(**kwargs)
+
+class FSMState(models.Model):
+    user = models.ForeignKey(User)
+    fsmNode = models.ForeignKey(FSMNode)
+    parentState = models.ForeignKey('FSMState', null=True)
+    linkState = models.ForeignKey('FSMState', null=True)
+    liveSession = models.ForeignKey(LiveSession, null=True)
+    liveQuestion = models.ForeignKey(LiveQuestion, null=True)
+    data = models.TextField(null=True)
+    isModal = models.BooleanField(default=False)
+    atime = models.DateTimeField('time started', default=timezone.now)
+    def transition(self, name='next', **kwargs):
+        try:
+            edge = FSMEdge.objects.get(fromNode=self.fsmNode,
+                                              name=name)
+        except FSMEdge.DoesNotExist:
+            raise
+        path = edge.get_path(**kwargs)
+        if path:
+            self.fsmNode = edge.toNode
+            self.save()
+            return path
 
         
 ##################################################################

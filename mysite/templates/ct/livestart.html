@@ -21,9 +21,11 @@ and take another minute or two to enter a brief answer.</li>
 <li>Click the Start button below to begin the timer.</li>
 </ul>
 
-<button type="button" onclick="location.href='{% url 'ct:control' %}'">
-Start the exercise timer
-</button>
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="live_control" />
+  <input type="submit" value="Start the exercise timer" />
+</form>
 
 <h2>Question</h2> 
 {{ qtext }}

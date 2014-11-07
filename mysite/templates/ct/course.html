@@ -26,7 +26,7 @@ $( "#edittoggle" ).click(function() {
 });
 </script>
 
-{% if liveID %}
+{% if fsmStack.state.liveSession %}
 You are now teaching this course as a <b>live (classroom) session</b>. 
 <form action="{{ actionTarget }}" method="post">
 {% csrf_token %}
