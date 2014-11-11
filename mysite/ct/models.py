@@ -30,12 +30,19 @@ def import_sourcedb_plugins(pattern='sourcedb_plugin/[a-z]*.py'):
 
 
 ########################################################
-# Concept and associated info
+# Concept ID and graph -- not version controlled
 
 class Concept(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     addedBy = models.ForeignKey(User)
+    approvedBy = models.ForeignKey(User, null=True,
+                                   related_name='approvedConcepts')
+    isError = models.BooleanField(default=False)
+    isAbort = models.BooleanField(default=False)
+    isFail = models.BooleanField(default=False)
+    isPuzzled = models.BooleanField(default=False)
+    alwaysAsk = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     def __unicode__(self):
         return self.title
@@ -43,60 +50,113 @@ class Concept(models.Model):
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
         lesson = Lesson.get_from_sourceDB(sourceID, user, sourceDB)
         try:
-            return lesson.lessonlink_set.filter(relationship=
-                                    LessonLink.IS)[0].concept, lesson
+            return lesson.conceptlink_set.filter(relationship=
+                                    ConceptLink.IS)[0].concept, lesson
         except IndexError:
             pass
         concept = klass(title=lesson.title, addedBy=user,
                         description=lesson.text + ' (%s)' % sourceDB)
         concept.save()
-        ll = LessonLink(concept=concept, lesson=lesson, addedBy=user,
-                        relationship=LessonLink.IS)
-        ll.save()
+        cl = ConceptLink(concept=concept, lesson=lesson, addedBy=user,
+                         relationship=ConceptLink.IS)
+        cl.save()
         return concept, lesson
     def __unicode__(self):
         return self.title
             
 
-class ConceptLink(models.Model):
+class ConceptGraph(models.Model):
     DEPENDS = 'depends'
     MOTIVATES = 'motiv'
+    MISUNDERSTANDS = 'errmod'
+    VIOLATES = 'violates'
+    CONTAINS = 'contains'
+    TESTS = 'tests'
+    CONFLICTS = 'conflicts'
+    PROVES = 'proves'
+    DISPROVES = 'dispro'
     REL_CHOICES = (
         (DEPENDS, 'Depends on'),
         (MOTIVATES, 'Motivates'),
+        (MISUNDERSTANDS, 'misunderstands'),
+        (VIOLATES, 'Violates'),
+        (CONTAINS, 'Contains'),
+        (TESTS, 'Tests'),
+        (CONFLICTS, 'Conflicts with'),
+        (PROVES, 'Proves'),
+        (DISPROVES, 'Disproves'),
     )
     fromConcept = models.ForeignKey(Concept, related_name='relatedTo')
     toConcept = models.ForeignKey(Concept, related_name='relatedFrom')
     relationship = models.CharField(max_length=10, choices=REL_CHOICES,
                                     default=DEPENDS)
     addedBy = models.ForeignKey(User)
+    approvedBy = models.ForeignKey(User, null=True,
+                                   related_name='approvedConceptEdges')
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+########################################################
+# version-controlled teaching material
+
+PUBLIC_ACCESS = 'public'
+INSTRUCTOR_ENROLLED = 'enroll'
+FINAL_EXAM_ONLY = 'exam'
+PRIVATE_ACCESS = 'private'
+ACCESS_CHOICES = (
+    (PUBLIC_ACCESS, 'Public'),
+    (INSTRUCTOR_ENROLLED, 'By instructors only'),
+    (FINAL_EXAM_ONLY, 'Protected exam only'),
+    (PRIVATE_ACCESS, 'By author only'),
+)
+
+
 class Lesson(models.Model):
-    READING = 'reading'
+    BASE_EXPLANATION = 'base' # focused on one concept, as intro for ORCT
+    EXPLANATION = 'explanation' # conventional textbook or lecture explanation
+
+    ORCT_QUESTION = 'orct'
+    CONCEPT_INVENTORY_QUESTION = 'mcct'
+    EXERCISE = 'exercise'
+    PROJECT = 'project'
+    PRACTICE_EXAM = 'practice'
+    
+    ANSWER = 'answer'
+    ERROR_MODEL = 'errmod'
+
     DATA = 'data'
+    CASESTUDY = 'case'
+    ENCYCLOPEDIA = 'e-pedia'
+    FAQ_QUESTION = 'faq'
+    FORUM = 'forum'
+    # MEDIA CHOICES
+    READING = 'reading'
     LECTURE = 'lecture'
     SLIDES = 'slides'
-    EXERCISE = 'exercise'
-    CASESTUDY = 'case'
-    PROJECT = 'project'
-    ENCYCLOPEDIA = 'e-pedia'
-    FORUM = 'forum'
     VIDEO = 'video'
     AUDIO = 'audio'
     IMAGE = 'image'
     DATABASE = 'db'
     SOFTWARE = 'software'
     KIND_CHOICES = (
-        (READING, READING),
+        (BASE_EXPLANATION, 'brief definition and explanation'),
+        (EXPLANATION, 'long explanation'),
+        (ORCT_QUESTION, 'Open Response Concept Test question'),
+        (CONCEPT_INVENTORY_QUESTION, 'Concept Inventory Test question'),
+        (EXERCISE, EXERCISE),
+        (PROJECT, PROJECT),
+        (PRACTICE_EXAM, 'practice exam question'),
+        (ANSWER, ANSWER),
+        (ERROR_MODEL, 'error model'),
         (DATA, DATA),
+        (CASESTUDY, 'Case Study'),
+        (ENCYCLOPEDIA, 'Encyclopedia'),
+        (FAQ_QUESTION, 'frequently asked question'),
+        (FORUM, FORUM),
+    )
+    MEDIA_CHOICES = (
+        (READING, READING),
         (LECTURE, LECTURE),
         (SLIDES, SLIDES),
-        (EXERCISE, EXERCISE),
-        (CASESTUDY, 'Case Study'),
-        (PROJECT, PROJECT),
-        (ENCYCLOPEDIA, 'Encyclopedia'),
-        (FORUM, FORUM),
         (VIDEO, VIDEO),
         (AUDIO, AUDIO),
         (IMAGE, IMAGE),
@@ -106,14 +166,25 @@ class Lesson(models.Model):
     _sourceDBdict = import_sourcedb_plugins()
     title = models.CharField(max_length=100)
     text = models.TextField(null=True)
+    data = models.TextField(null=True) # JSON DATA
     url = models.CharField(max_length=256, null=True)
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
-                            default=READING)
+                            default=BASE_EXPLANATION)
+    medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
+                              default=READING)
+    access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
+                              default=PUBLIC_ACCESS)
     sourceDB = models.CharField(max_length=32, null=True)
     sourceID = models.CharField(max_length=100, null=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    rustID = models.CharField(max_length=64)
+    treeID = models.IntegerField(null=True) # VCS METADATA
+    parent = models.ForeignKey('Lesson', null=True,
+                               related_name='children')
+    mergeParent = models.ForeignKey('Lesson', null=True,
+                                    related_name='mergeChildren')
+    changeLog = models.TextField(null=True)
+    commitTime = models.DateTimeField('time committed', null=True)
 
     @classmethod
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
@@ -143,11 +214,12 @@ class Lesson(models.Model):
             return reverse('ct:lesson', args=(self.id,))
         
     
-class LessonLink(models.Model):
+class ConceptLink(models.Model):
     IS = 'is'
     DEFINES = 'defines'
     INFORMAL_DEFINITION = 'informal'
     FORMAL_DEFINITION = 'formaldef'
+    TESTS = 'tests'
     DERIVES = 'derives'
     PROVES = 'proves'
     ASSUMES = 'assumes'
@@ -157,10 +229,11 @@ class LessonLink(models.Model):
     COMMENTS = 'comment'
     WARNS = 'warns'
     REL_CHOICES = (
-        (IS, 'Represents (unique ID)'),
+        (IS, 'Represents (unique ID for)'),
         (DEFINES, 'Defines'),
         (INFORMAL_DEFINITION, 'Intuitive statement of'),
         (FORMAL_DEFINITION, 'Formal definition for'),
+        (TESTS, 'Tests understanding of'),
         (DERIVES, 'Derives'),
         (PROVES, 'Proves'),
         (ASSUMES, 'Assumes'),
@@ -171,146 +244,117 @@ class LessonLink(models.Model):
         (WARNS, 'Warning about'),
     )
     concept = models.ForeignKey(Concept)
-    lesson = models.ForeignKey(Lesson, null=True)
-    question = models.ForeignKey('Question', null=True)
+    lesson = models.ForeignKey(Lesson)
     relationship = models.CharField(max_length=10, choices=REL_CHOICES,
                                     default=DEFINES)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
-class CommonError(models.Model):
-    'a conceptual error spanning many questions on the same concept'
-    concept = models.ForeignKey(Concept)
-    synopsis = models.TextField() # "Some people thought..."
-    disproof = models.TextField(null=True) # formal statement of why CE is wrong
-    prescription = models.TextField(null=True) # what to change to apply concept right
-    dangerzone = models.TextField(null=True) # warnings of when people make this CE
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    author = models.ForeignKey(User)
+class StudyList(models.Model):
+    'list of materials of interest to each user'
+    lesson = models.ForeignKey(Lesson)
+    user = models.ForeignKey(User)
     def __unicode__(self):
-        return self.synopsis
+        return self.lesson.title
 
-class CounterExample(models.Model):
-    'clear example that shows a CommonError must be wrong'
-    commonError = models.ForeignKey(CommonError)
-    intro = models.TextField() # succinctly define the example case
-    hint = models.TextField() # question that points directly to the mismatch
-    conclusion = models.TextField() # states how CE obviously wrong on this example
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    author = models.ForeignKey(User)
+############################################################
+# unit lesson repo and graph
 
-class ConceptTerm(models.Model):
-    'word, picture or equation that helps students add concept to their "language"'
-    TERM = 'term'
-    PICTURE = 'pict'
-    EQUATION = 'eq'
+class UnitLesson(models.Model):
+    'pointer to a Lesson as part of a Unit branch'
+    COMPONENT = 'part'
+    ANSWERS = 'answers'
+    MISUNDERSTANDS = 'errmod'
+    PRETEST_POSTTEST = 'pretest'
+    SUBUNIT = 'subunit'
     KIND_CHOICES = (
-        (TERM, 'Vocabulary Term'),
-        (PICTURE, 'Picture'),
-        (EQUATION, 'Equation'),
+        (COMPONENT, 'Included in this courselet'),
+        (ANSWERS, 'Answer for a question'),
+        (MISUNDERSTANDS, 'Common error for a question'),
+        (PRETEST_POSTTEST, 'Pre-test/Post-test for this courselet'),
+        (SUBUNIT, 'Container for this courselet'),
     )
+    unit = models.ForeignKey('Unit')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
-                            default=TERM)
-    name = models.CharField(max_length=100)
-    concept = models.ForeignKey(Concept)
-    description = models.TextField()
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    author = models.ForeignKey(User)
-    
+                            default=COMPONENT)
+    lesson = models.ForeignKey(Lesson, null=True)
+    parent = models.ForeignKey('UnitLesson', null=True)
+    order = models.IntegerField(null=True)
+    atime = models.DateTimeField('time added', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    treeID = models.IntegerField() # VCS METADATA
+    branch = models.CharField(max_length=32, default='master')
 
-
-###################################################
-# Question and associated info
-
-class Question(models.Model):
-    '''a challenge-response learning exercise designed to reveal
-    conceptual errors'''
-    PUBLIC = 'public'
-    INSTRUCTOR_ONLY = 'instr'
-    CONCEPT_INVENTORY = 'CI'
-    PRIVATE = 'private'
-    ACCESS_CHOICES = (
-        (PUBLIC, 'Public'),
-        (INSTRUCTOR_ONLY, 'By instructors only'),
-        (CONCEPT_INVENTORY, 'For concept inventory only'),
-        (PRIVATE, 'By author only'),
+class Unit(models.Model):
+    'a container of exercises performed together'
+    COURSELET = 'unit'
+    LIVE_SESSION = 'live'
+    RESOLUTION = 'resol'
+    KIND_CHOICES = (
+        (COURSELET, 'Courselet'),
+        (LIVE_SESSION, 'Live session'),
+        (RESOLUTION, 'Resolutions for an error model'),
     )
     title = models.CharField(max_length=200)
-    qtext = models.TextField()
-    answer = models.TextField()
-    access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
-                              default=PUBLIC)
-    concept = models.ForeignKey(Concept, null=True)
-    author = models.ForeignKey(User)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    rustID = models.CharField(max_length=64)
-    errorModels = models.ManyToManyField('ErrorModel')
-    def errormodel_table(self, n, **kwargs):
-        return errormodel_table(self, n, attr='__question', **kwargs)
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES,
+                            default=COURSELET)
+    atime = models.DateTimeField('time created', default=timezone.now)
+    addedBy = models.ForeignKey(User)
+    def create_lesson(self, title, text, author=None, **kwargs):
+        if author is None:
+            author = self.addedBy
+        lesson = Lesson(title=title, text=text, addedBy=author, **kwargs)
+        lesson.save()
+        n = self.unitlesson_set.filter(order__isnull=False).count()
+        ul = UnitLesson(unit=self, lesson=lesson, addedBy=author,
+                        treeID=lesson.pk, order=n)
+        ul.save()
+        lesson.treeID = lesson.pk
+        lesson.save()
+        return lesson
+    def get_exercises(self):
+        'ordered list of lessons for this courselet'
+        l = list(self.unitlesson_set.filter(order__isnull=False))
+        l.sort(lambda x,y:cmp(x.order, y.order))
+        return l
+    def reorder_exercise(self, old, new):
+        'renumber exercises to move an exercise from old -> new position'
+        l = self.get_exercises()
+        ex = l[old] # select desired exercise by old position
+        l = l[:old] + l[old + 1:] # exclude this exercise
+        l = l[:new] + [ex] + l[new:] # insert ex in new position
+        for i, ex in enumerate(l):
+            if i != ex.order: # order changed, have to update
+                ex.order = i
+                ex.save()
     def __unicode__(self):
         return self.title
 
-class QuestionLesson(models.Model):
-    PRESENTS_QUESTION = 'presq'
-    PRESENTS_ANSWER = 'presa'
-    CASE_ADDRESSED = 'case'
-    INTRODUCES = 'intros'
-    REL_CHOICES = (
-        (PRESENTS_QUESTION, 'Presents question for'),
-        (PRESENTS_ANSWER, 'Presents answer for'),
-        (CASE_ADDRESSED, 'Case description for'),
-        (INTRODUCES, 'Introduces'),
-    )
-    lesson = models.ForeignKey(Lesson)
-    question = models.ForeignKey(Question)
-    relationship = models.CharField(max_length=10, choices=REL_CHOICES,
-                                    default=CASE_ADDRESSED)
-    addedBy = models.ForeignKey(User)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
     
-    
-class StudyList(models.Model):
-    'list of questions of interest to each user'
-    question = models.ForeignKey(Question)
-    user = models.ForeignKey(User)
-    def __unicode__(self):
-        return self.question.title
-    
-class ErrorModel(models.Model):
-    'a specific kind of error on a question, or a generic error'
-    concept = models.ForeignKey(Concept, null=True)
-    description = models.TextField()
-    isAbort = models.BooleanField(default=False)
-    isFail = models.BooleanField(default=False)
-    isPuzzled = models.BooleanField(default=False)
-    alwaysAsk = models.BooleanField(default=False)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    author = models.ForeignKey(User)
 
-    @classmethod
-    def find_or_create(klass, description, **kwargs):
-        try:
-            return klass.objects.filter(description=description)[0]
-        except IndexError:
-            o = klass(description=description, **kwargs)
-            if '(ABORT)' in description:
-                o.isAbort = True
-            if '(FAIL)' in description >= 0:
-                o.isFail = True
-            o.save()
-            return o
+############################################################
+# student response and error data
 
-    @classmethod
-    def get_generic(klass):
-        'get all error models marked as alwaysAsk'
-        return klass.objects.filter(alwaysAsk=True)
-    
-    def __unicode__(self):
-        return self.description
+NEED_HELP_STATUS = 'help'
+NEED_REVIEW_STATUS = 'review'
+DONE_STATUS = 'done'
+STATUS_CHOICES = (
+    (NEED_HELP_STATUS, 'Still confused, need help'),
+    (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
+    (DONE_STATUS, 'Solidly'),
+)
 
-
+        
 class Response(models.Model):
     'answer entered by a student in response to a question'
+    ORCT_RESPONSE = 'orct'
+    STUDENT_QUESTION = 'sq'
+    COMMENT = 'comment'
+    KIND_CHOICES = (
+        (ORCT_RESPONSE, 'ORCT response'),
+        (STUDENT_QUESTION, 'Question about a lesson'),
+        (COMMENT, 'Reply comment'),
+    )
     CORRECT = 'correct'
     CLOSE = 'close'
     DIFFERENT = 'different'
@@ -327,18 +371,12 @@ class Response(models.Model):
         (UNSURE, 'Not quite sure'),
         (SURE, 'Pretty sure'),
     )
-    NEED_HELP_STATUS = 'help'
-    NEED_REVIEW_STATUS = 'review'
-    DONE_STATUS = 'done'
-    STATUS_CHOICES = (
-        (NEED_HELP_STATUS, 'Still confused, need help'),
-        (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
-        (DONE_STATUS, 'Solidly'),
-    )
-    question = models.ForeignKey(Question)
-    courseQuestion = models.ForeignKey('CourseQuestion', null=True)
-    liveQuestion = models.ForeignKey('LiveQuestion', null=True)
-    atext = models.TextField()
+    lesson = models.ForeignKey(Lesson) # exact version this applies to
+    unitLesson = models.ForeignKey(UnitLesson, null=True)
+    course = models.ForeignKey('Course', null=True)
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES,
+                            default=ORCT_RESPONSE)
+    text = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
                                   blank=False, null=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
@@ -347,6 +385,8 @@ class Response(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
                               blank=False, null=True)
     author = models.ForeignKey(User)
+    needsEval = models.BooleanField(default=False)
+    parent = models.ForeignKey('Response', null=True) # reply-to
     def __unicode__(self):
         return 'answer by ' + self.author.username
 
@@ -354,71 +394,59 @@ class StudentError(models.Model):
     'identification of a specific error model made by a student'
     response = models.ForeignKey(Response)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    courseErrorModel = models.ForeignKey('CourseErrorModel', blank=True, null=True)
+    errorModel = models.ForeignKey(UnitLesson, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
+                              blank=False, null=True)
     author = models.ForeignKey(User)
     def __unicode__(self):
         return 'eval by ' + self.author.username
 
-class Resolution(models.Model):
-    EXPLAINS = 'explains'
-    COUNTER_EXAMPLE = 'counter'
-    INFORMAL_DEFINITION = 'informal'
-    FORMAL_DEFINITION = 'formaldef'
-    ILLUSTRATES = 'illust'
-    INTRODUCES = 'intro'
-    COMMENTS = 'comment'
-    WARNS = 'warns'
-    REL_CHOICES = (
-        (EXPLAINS, 'Explains'),
-        (COUNTER_EXAMPLE, 'Clear example of incorrectness of'),
-        (INFORMAL_DEFINITION, 'Intuitive statement of'),
-        (FORMAL_DEFINITION, 'Formal definition for'),
-        (ILLUSTRATES, 'Illustrates'),
-        (INTRODUCES, 'Introduces'),
-        (COMMENTS, 'Comments on'),
-        (WARNS, 'Warns where people commonly make'),
-    )
-    errorModel = models.ForeignKey(ErrorModel)
-    lesson = models.ForeignKey(Lesson)
-    relationship = models.CharField(max_length=10, choices=REL_CHOICES,
-                                    default=EXPLAINS)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'advice by ' + self.addedBy.username
 
-class Remediation(models.Model):
-    errorModel = models.ForeignKey(ErrorModel)
-    title = models.CharField(max_length=200)
-    advice = models.TextField() # how to use the reccd materials
-    lessons = models.ManyToManyField(Lesson, null=True) # what materials to use
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'advice by ' + self.author.username
+def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
+    if n == 0: # prevent div by zero error
+        n = 1
+    kwargs = {'kind':Lesson.MISUNDERSTANDS, 'parent':target}
+    l = []
+    for em in UnitLesson.objects.filter(**kwargs):
+        kwargs = {'errorModel':em}
+        nse = StudentError.objects.filter(**kwargs).count()
+        if nse > 0 or includeAll:
+            l.append((em, nse))
+    l.sort(lambda x,y:cmp(x[1], y[1]), reverse=True)
+    fmt_count = lambda c: fmt % (c, c * 100. / n)
+    return [(t[0],fmt_count(t[1])) for t in l]
 
 
-
+    
 
 #######################################
 # Course and membership info
 
 class Course(models.Model):
-    'a traditional (multi-concept) course'
-    PUBLIC = 'public'
-    INSTRUCTOR_ONLY = 'instr'
-    CONCEPT_INVENTORY = 'CI'
-    PRIVATE = 'private'
+    'top-level (enrollment) container'
     ACCESS_CHOICES = (
-        (PUBLIC, 'Public'),
-        (INSTRUCTOR_ONLY, 'By instructors only'),
-        (PRIVATE, 'By author only'),
+        (PUBLIC_ACCESS, 'Public'),
+        (INSTRUCTOR_ENROLLED, 'By instructors only'),
+        (PRIVATE_ACCESS, 'By author only'),
     )
     title = models.CharField(max_length=200)
+    description = models.TextField()
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
-                              default=PUBLIC)
+                              default=PUBLIC_ACCESS)
+    enrollCode = models.CharField(max_length=64, null=True)
+    lockout = models.CharField(max_length=200, null=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    def create_unit(self, title, author=None):
+        if author is None:
+            author = self.addedBy
+        unit = Unit(title=title, addedBy=author)
+        unit.save()
+        cu = CourseUnit(unit=unit, course=self, addedBy=author,
+                        order=CourseUnit.objects.filter(course=self).count())
+        cu.save()
+        return unit
+        
     def get_user_role(self, user, justOne=True, raiseError=True):
         'return role(s) of specified user in this course'
         l = [r.role for r in self.role_set.filter(user=user)]
@@ -431,6 +459,14 @@ class Course(models.Model):
     def __unicode__(self):
         return self.title
 
+class CourseUnit(models.Model):
+    'list of units in a course'
+    unit = models.ForeignKey(Unit)
+    course = models.ForeignKey(Course)
+    order = models.IntegerField()
+    addedBy = models.ForeignKey(User)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    
 class Role(models.Model):
     'membership of a user in a course'
     INSTRUCTOR = 'prof'
@@ -449,208 +485,6 @@ class Role(models.Model):
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
-
-class Courselet(models.Model):
-    'a unit of exercises performed together, e.g. one lecture'
-    title = models.CharField(max_length=200)
-    course = models.ForeignKey(Course)
-    concepts = models.ManyToManyField(Concept)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-    def get_exercises(self):
-        'merged, ordered list of lessons + questions for this courselet'
-        l = list(self.coursequestion_set.all()) + \
-          list(self.courselesson_set.all())
-        l.sort(lambda x,y:cmp(x.order, y.order))
-        return l
-    def reorder_exercise(self, old, new):
-        'renumber exercises to move an exercise from old -> new position'
-        l = self.get_exercises()
-        ex = l[old] # select desired exercise by old position
-        l = l[:old] + l[old + 1:] # exclude this exercise
-        l = l[:new] + [ex] + l[new:] # insert ex in new position
-        for i, ex in enumerate(l):
-            if i != ex.order: # order changed, have to update
-                ex.order = i
-                ex.save()
-    def __unicode__(self):
-        return self.title
-
-class CourseQuestion(models.Model):
-    'an exercise (posing one question) in a courselet'
-    courselet = models.ForeignKey(Courselet)
-    question = models.ForeignKey(Question)
-    order = models.IntegerField(null=True)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-    isQuestion = True
-    def errormodel_table(self, n, **kwargs):
-        return errormodel_table(self, n, **kwargs)
-    def __unicode__(self):
-        return self.question.title
-
-class CourseErrorModel(models.Model):
-    errorModel = models.ForeignKey(ErrorModel)
-    courseQuestion = models.ForeignKey(CourseQuestion)
-    course = models.ForeignKey(Course)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-    def __unicode__(self):
-        return self.errorModel.description
-
-
-def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
-    if n == 0: # prevent div by zero error
-        n = 1
-    kwargs = {'courseerrormodel__courseQuestion' + attr:target}
-    l = []
-    for em in ErrorModel.objects.filter(**kwargs):
-        kwargs = {'courseErrorModel__courseQuestion' + attr:target,
-                  'courseErrorModel__errorModel':em}
-        nse = StudentError.objects.filter(**kwargs).count()
-        if nse > 0 or includeAll:
-            l.append((em, nse))
-    l.sort(lambda x,y:cmp(x[1], y[1]), reverse=True)
-    fmt_count = lambda c: fmt % (c, c * 100. / n)
-    return [(t[0],fmt_count(t[1])) for t in l]
-
-
-    
-#############################################################
-# live session info
-
-class LiveSession(models.Model):
-    WAIT = None
-    startTime = models.DateTimeField('time started', default=timezone.now)
-    endTime = models.DateTimeField('time completed', null=True)
-    course = models.ForeignKey(Course)
-    addedBy = models.ForeignKey(User)
-    liveQuestion = models.ForeignKey('LiveQuestion',
-                                     related_name='+', null=True)
-    @classmethod
-    def get_from_request(klass, request, instructor=False):
-        if instructor:
-            attr = 'liveInstructor'
-        else:
-            attr = 'liveID'
-        liveID = request.session[attr]
-        return klass.objects.get(pk=liveID)
-        
-    def get_live_question(self, courseQuestion):
-        if self.liveQuestion and \
-          self.liveQuestion.courseQuestion == courseQuestion:
-            return self.liveQuestion
-        return self.livequestion_set.get(courseQuestion=courseQuestion)
-    def get_next_stage(self, user, r=None):
-        lq = self.liveQuestion
-        if lq: # check against current LiveQuestion
-            stage, r = lq.get_user_stage(user, r)
-            if stage == lq.ASSESSMENT_STAGE or \
-              (stage == lq.RESPONSE_STAGE and 
-               lq.liveStage == lq.RESPONSE_STAGE):
-                return self.WAIT, r # hold until instructor advances
-            else:
-                return stage, r
-        elif not r:
-            return self.WAIT, r
-        else:
-            lq = self.get_live_question(r.courseQuestion)
-            stage, r = lq.get_user_stage(user, r)
-            if stage >= lq.ASSESSMENT_STAGE:
-                return self.WAIT, r
-            return stage, r
-    def __unicode__(self):
-        return 'Instructor: %s, started at %s' %(self.addedBy.username,
-                                                 str(self.startTime))
-
-def rm_live_user(request, liveSession):
-    'remove user liveID session value and associated LiveUser record'
-    try:
-        liveUser = LiveUser.objects.get(user=request.user,
-                                        liveQuestion__liveSession=liveSession)
-        liveUser.delete()
-    except ObjectDoesNotExist:
-        pass
-
-        
-class LiveQuestion(models.Model):
-    'an exercise (posing one question) in a courselet'
-    START_STAGE = 0
-    RESPONSE_STAGE = 1
-    ASSESSMENT_STAGE = 2
-    DONE_STAGE = 3
-    liveSession = models.ForeignKey(LiveSession)
-    courseQuestion = models.ForeignKey(CourseQuestion)
-    liveStage = models.IntegerField(null=True)
-    startTime = models.DateTimeField('time started', null=True)
-    aTime = models.DateTimeField('time started', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-
-    def errormodel_table(self, n, **kwargs):
-        return errormodel_table(self, n, attr='__livequestion', **kwargs)
-    def iswait(self, stage):
-        'should student wait until instructor advances live session?'
-        return self.liveStage == stage  # wait for instructor to advance
-
-    def get_user_stage(self, user, r=None):
-        if not r:
-            try:
-                r = self.response_set.filter(author=user)[0]
-            except IndexError:
-                return self.START_STAGE, None
-        if r.selfeval is None:
-            return self.RESPONSE_STAGE, r
-        else:
-            return self.ASSESSMENT_STAGE, r
-    def start_user_session(self, user):
-        LiveUser.start_user_session(self, user)
-    def start(self):
-        self.liveStage = self.RESPONSE_STAGE
-        self.save()
-        self.liveSession.liveQuestion = self
-        self.liveSession.save()
-    def end(self):
-        self.liveStage = self.DONE_STAGE
-        self.save()
-        self.liveSession.liveQuestion = None
-        self.liveSession.save()
-    def next_url(self, stage, response=None):
-        if stage == self.START_STAGE:
-            return reverse('ct:respond_cq', args=(self.courseQuestion.id,))
-        elif stage == self.RESPONSE_STAGE:
-            return reverse('ct:assess', args=(response.id,))
-        elif stage == self.ASSESSMENT_STAGE:
-            return reverse('ct:live')
-    def __unicode__(self):
-        return self.courseQuestion.question.title
-
-    
-class LiveUser(models.Model):
-    'user logged in to a live exercise'
-    liveQuestion = models.ForeignKey(LiveQuestion)
-    user = models.ForeignKey(User, unique=True)
-
-    @classmethod
-    def start_user_session(klass, liveQuestion, user):
-        'record user as logged in to this live courseQuestion'
-        try:
-            o = klass.objects.get(user=user)
-            o.liveQuestion = liveQuestion
-        except ObjectDoesNotExist:
-            o = klass(liveQuestion=liveQuestion, user=user)
-        o.save()
-        return o
-
-class CourseLesson(models.Model):
-    'non-Question materials to display in a courselet'
-    courselet = models.ForeignKey(Courselet)
-    lesson = models.ForeignKey(Lesson)
-    order = models.IntegerField(null=True)
-    intro = models.TextField(null=True)
-    conclusion = models.TextField(null=True)
-    atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
-    isQuestion = False
 
 
 ##############################################################
@@ -686,7 +520,7 @@ class FSM(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     help = models.TextField(null=True)
-    startNode = models.ForeignKey('FSMNode')
+    startNode = models.ForeignKey('FSMNode', related_name='+')
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
 
@@ -708,8 +542,8 @@ class FSMDone(ValueError):
 
 class FSMEdge(models.Model):
     name = models.CharField(max_length=64)
-    fromNode = models.ForeignKey(FSMNode)
-    toNode = models.ForeignKey(FSMNode)
+    fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
+    toNode = models.ForeignKey(FSMNode, related_name='incoming')
     funcName = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
@@ -738,10 +572,11 @@ class FSMEdge(models.Model):
 class FSMState(models.Model):
     user = models.ForeignKey(User)
     fsmNode = models.ForeignKey(FSMNode)
-    parentState = models.ForeignKey('FSMState', null=True)
-    linkState = models.ForeignKey('FSMState', null=True)
-    liveSession = models.ForeignKey(LiveSession, null=True)
-    liveQuestion = models.ForeignKey(LiveQuestion, null=True)
+    parentState = models.ForeignKey('FSMState', null=True,
+                                    related_name='children')
+    linkState = models.ForeignKey('FSMState', null=True,
+                                  related_name='linkChildren')
+    unitLesson = models.ForeignKey(UnitLesson, null=True)
     data = models.TextField(null=True)
     isModal = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
@@ -795,46 +630,4 @@ class FSMState(models.Model):
 ##     course = models.ForeignKey(Lesson, null=True)
 ##     conceptTerm = models.ForeignKey(Lesson, null=True)
     
-
-######################################################################
-# CURRENTLY UNUSED
-    
-class Glossary(models.Model):
-    title = models.CharField(max_length=200)
-    explanation = models.TextField()
-    def __unicode__(self):
-        return 'glossary: %s' % self.title
-    
-
-class Vocabulary(models.Model):
-    glossary = models.ForeignKey(Glossary)
-    term = models.CharField(max_length=100)
-    definition = models.TextField()
-    atime = models.DateTimeField('time submitted')
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'def: %s (%s)' % (self.term, self.author.username)
-
-
-class ConceptPicture(models.Model):
-    glossary = models.ForeignKey(Glossary)
-    title = models.CharField(max_length=200)
-    terms = models.CharField(max_length=200)
-    explanation = models.TextField()
-    atime = models.DateTimeField('time submitted')
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'pic: %s (%s)' % (self.title, self.author.username)
-
-class ConceptEquation(models.Model):
-    glossary = models.ForeignKey(Glossary)
-    title = models.CharField(max_length=200)
-    terms = models.CharField(max_length=200)
-    math = models.TextField()
-    explanation = models.TextField()
-    atime = models.DateTimeField('time submitted')
-    author = models.ForeignKey(User)
-    def __unicode__(self):
-        return 'equation: %s (%s)' % (self.title, self.author.username)
-
 

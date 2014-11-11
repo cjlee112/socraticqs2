@@ -805,7 +805,7 @@ def _concepts(request, msg='', ignorePOST=False):
             cset = Concept.objects.filter(Q(title__icontains=s) |
                                           Q(description__icontains=s))
             wset = Lesson.search_sourceDB(s)
-            conceptForm = NewConceptForm()
+            conceptForm = NewConceptForm() # let user define new concept
     else:
         searchForm = ConceptSearchForm()
     if conceptForm:
@@ -841,8 +841,9 @@ def concept(request, concept_id):
 # student UI for courses
 
 def get_live_sessions(request):
-    return LiveSession.objects.filter(course__role__user=request.user,
-                                      endTime__isnull=True)
+    return () # !! implement live session finding here!!
+    ## return LiveSession.objects.filter(course__role__user=request.user,
+    ##                                   endTime__isnull=True)
 #                                      course__role__role=Role.ENROLLED)
 
 @login_required

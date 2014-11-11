@@ -32,25 +32,10 @@ $( "#edittoggle" ).click(function() {
 
 {{ concept.description |md2html }}
 
-{% if concept.question_set.count > 0 %}
-<h2>Questions Testing This Concept</h2> 
-  <ul>
-  {% for q in concept.question_set.all %}
-    <li>
-    <a href="{% url 'ct:question' q.id %}">{{ q.title }}</a>:
-    {% if q.response_set.count > 0 %}
-       ({{ q.response_set.count }} student responses)
-    {% endif %}
-
-    </li>
-  {% endfor %}
-  </ul>
-{% endif %}
-
-{% if concept.lessonlink_set.count > 0 %}
+{% if concept.conceptlink_set.count > 0 %}
 <h2>Materials For Learning About This Concept</h2> 
   <ul>
-  {% for ll in concept.lessonlink_set.all %}
+  {% for ll in concept.conceptlink_set.all %}
     <li>
     <a href="{{ ll.lesson.get_url }}">{{ ll.lesson.title }}</a>
     {% if ll.lesson.sourceDB %}
