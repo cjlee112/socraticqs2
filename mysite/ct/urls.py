@@ -3,13 +3,16 @@ from ct.views import *
 
 urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
+    url(r'^courses/$', courses, name='courses'),
+    url(r'^courses/(?P<course_id>\d+)/$', course, name='course'),
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/concepts/$',
+        ul_concepts, name='ul_concepts'),
+    # deprecated
     url(r'^teach/$', teach, name='teach'),
     url(r'^live/$', live_session, name='live'),
     url(r'^live/start/$', live_start, name='livestart'),
     url(r'^live/control/$', live_control, name='control'),
     url(r'^live/end/$', live_end, name='end'),
-    url(r'^courses/$', courses, name='courses'),
-    url(r'^courses/(?P<course_id>\d+)/$', course, name='course'),
     url(r'^courses/(?P<course_id>\d+)/study/$', course_study,
         name='course_study'),
     url(r'^courselets/(?P<courselet_id>\d+)/$', courselet, name='courselet'),

@@ -778,15 +778,24 @@ def concepts(request):
             Thank you!''', ignorePOST=True)
     return r
 
-def _concepts(request, msg='', ignorePOST=False):
+def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
+              **kwargs):
     'search or create a Concept'
     cset = wset = ()
     conceptForm = None
+    searchForm = ConceptSearchForm()
     if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
             t = Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
                                           request.user)
             return t[0] # return concept object
+        elif 'clID' in request.POST:
+            cl = get_object_or_404(ConceptLink,
+                                   pk=int(request.POST.get('clID')))
+            clform = ConceptLinkForm(request.POST, instance=cl)
+            if clform.is_valid():
+                clform.save()
+                conceptLinks.replace(cl, clform)
         elif 'conceptID' in request.POST:
             return Concept.objects.get(pk=int(request.POST.get('conceptID')))
         elif 'title' in request.POST: # create new concept
@@ -802,18 +811,15 @@ def _concepts(request, msg='', ignorePOST=False):
         searchForm = ConceptSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            cset = Concept.objects.filter(Q(title__icontains=s) |
-                                          Q(description__icontains=s))
+            cset = Concept.search_text(s)
             wset = Lesson.search_sourceDB(s)
             conceptForm = NewConceptForm() # let user define new concept
-    else:
-        searchForm = ConceptSearchForm()
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
-    return render(request, 'ct/concepts.html',
-                  dict(cset=cset, actionTarget=request.path, msg=msg,
+    kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset,
-                       conceptForm=conceptForm))
+                       conceptForm=conceptForm, conceptLinks=conceptLinks))
+    return render(request, 'ct/concepts.html', kwargs)
 
 
 def concept(request, concept_id):
@@ -835,7 +841,40 @@ def concept(request, concept_id):
                   dict(actionTarget=request.path, concept=concept,
                        atime=display_datetime(concept.atime),
                        titleform=titleform))
-        
+
+###########################################################
+# WelcomeMat refactored views
+
+class ConceptLinkTable(object):
+    def __init__(self, **kwargs):
+        self.data = []
+        for k,v in kwargs.items():
+            setattr(self, k, v)
+    def append(self, cl):
+        self.data.append((cl, ConceptLinkForm(instance=cl)))
+    def replace(self, cl, clform):
+        for i,t in enumerate(self.data):
+            if t[0] == cl:
+                self.data[i] = (cl, clform)
+
+@login_required
+def ul_concepts(request, course_id, unit_id, ul_id):
+    unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
+    cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
+    clTable = ConceptLinkTable(headers=('This lesson...', 'Concept'),
+                               title='Concepts Linked to this Lesson')
+    for cl in cLinks:
+        clTable.append(cl)
+    r = _concepts(request, '''To add a concept to this lesson, start by
+    typing a search for relevant concepts. ''', conceptLinks=clTable)
+    if isinstance(r, Concept):
+        cl = unitLesson.lesson.conceptlink_set.create(concept=r,
+                                                      addedBy=request.user)
+        clTable.append(cl)
+        return _concepts(request, '''Successfully added concept.
+            Thank you!''', ignorePOST=True, conceptLinks=clTable)
+    return r
+
 
 ###########################################################
 # student UI for courses

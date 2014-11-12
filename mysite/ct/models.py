@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 import glob
 from datetime import timedelta
 
@@ -61,6 +62,11 @@ class Concept(models.Model):
                          relationship=ConceptLink.IS)
         cl.save()
         return concept, lesson
+    @classmethod
+    def search_text(klass, s):
+        'search Concept title and description'
+        return klass.objects.filter(Q(title__icontains=s) |
+                                    Q(description__icontains=s)).distinct()
     def __unicode__(self):
         return self.title
             
@@ -205,6 +211,14 @@ class Lesson(models.Model):
         dataClass = klass._sourceDBdict[sourceDB]
         return dataClass.search(query, **kwargs)
 
+    @classmethod
+    def search_text(klass, s, noDup=True):
+        'search Lesson title and text'
+        out = klass.objects.filter(Q(title__icontains=s) |
+                                   Q(text__icontains=s)).distinct()
+        if noDup:
+            out = distinct_subset(out)
+        return out
     def __unicode__(self):
         return self.title
     def get_url(self):
@@ -212,7 +226,17 @@ class Lesson(models.Model):
             return self.url
         else:
             return reverse('ct:lesson', args=(self.id,))
-        
+
+def distinct_subset(inlist):
+    'eliminate duplicate treeIDs from the input list'
+    s = set()
+    outlist = []
+    for o in inlist:
+        if o.treeID not in s:
+            s.add(o.treeID)
+            outlist.append(o)
+    return outlist
+            
     
 class ConceptLink(models.Model):
     IS = 'is'
@@ -284,6 +308,14 @@ class UnitLesson(models.Model):
     addedBy = models.ForeignKey(User)
     treeID = models.IntegerField() # VCS METADATA
     branch = models.CharField(max_length=32, default='master')
+    @classmethod
+    def search_text(klass, s, noDup=True):
+        'search Lesson title and text'
+        out = klass.objects.filter(Q(lesson__title__icontains=s) |
+                                   Q(lesson__text__icontains=s)).distinct()
+        if noDup:
+            out = distinct_subset(out)
+        return out
 
 class Unit(models.Model):
     'a container of exercises performed together'

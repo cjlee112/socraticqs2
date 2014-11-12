@@ -11,6 +11,34 @@
 {% block content %}
 {{ msg }}
 
+{% if conceptLinks.data %}
+<h2>{{ conceptLinks.title }}</h2>
+<table class="table table-striped">
+<thead><tr>
+{% for h in conceptLinks.headers %}
+  <th>{{ h }}</th>
+{% endfor %}
+</tr></thead>
+<tbody>
+{% for cl,clform in conceptLinks.data %}
+  <tr>
+    <td>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ clform.relationship }}
+    <input type="hidden" name="clID" value="{{ cl.id }}" />
+    <input type="submit" value="Update" />
+    </form>
+    </td>
+    <td><a href="{{ actionTarget }}{{ cl.pk }}/">
+        {{ cl.concept.title }}</a></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
 <form action="{{ actionTarget }}" method="get">
 {{ searchForm }}
 <input type="submit" value="Search" />
