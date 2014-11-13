@@ -24,14 +24,17 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a name="conceptTab" data-toggle="tab">{{ tabTitle }}</a></li>
   {% for tabLabel,tabURL in navTabs %}
+  {% if "/" in tabURL %}
   <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
   {% endfor %}
 </ul>
 
 <div class="tab-content">
-  <div class="tab-pane active" id="conceptPage">
+  <div class="tab-pane active" id="ConceptsTabDiv">
 
 {% if conceptLinks.data %}
 <table class="table table-striped">
@@ -207,6 +210,6 @@ directly by giving a short title and description, then click <b>Add</b>.
 
 {% endif %}
 
-  </div><!-- @end #conceptPage -->
+  </div><!-- @end #ConceptsTabDiv -->
 </div>
 {% endblock %}
