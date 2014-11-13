@@ -787,10 +787,14 @@ def update_concept_link(request, conceptLinks):
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
-              actionLabel='Link to this Concept', navTabs=None, **kwargs):
+              actionLabel='Link to this Concept', navTabs=None,
+              errorModels=None, tabTitle='Related Concepts', **kwargs):
     'search or create a Concept'
     cset = wset = ()
-    conceptForm = None
+    if errorModels is not None:
+        conceptForm = NewConceptForm()
+    else:
+        conceptForm = None
     searchForm = ConceptSearchForm()
     if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
@@ -835,8 +839,11 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
         searchForm = ConceptSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            cset = Concept.search_text(s)
-            wset = Lesson.search_sourceDB(s)
+            if errorModels is not None: # search errors only
+                cset = Concept.search_text(s).filter(isError=True)
+            else: # search correct concepts only
+                cset = Concept.search_text(s).filter(isError=False)
+                wset = Lesson.search_sourceDB(s)
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
@@ -844,13 +851,22 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     if not navTabs:
         lessonPath = get_relative_url(request.path, -2, None,
                                        ('lessons', ''))
-        navTabs=(('Lessons', lessonPath),)
+        navTabs=[('Lessons', lessonPath),]
+        if errorModels is not None:
+            conceptPath = get_relative_url(request.path, -2, None,
+                                       ('concepts', ''))
+            navTabs.append(('Related Concepts', conceptPath))
+        else:
+            conceptPath = get_relative_url(request.path, -2, None,
+                                       ('errors', ''))
+            navTabs.append(('Errors', conceptPath))
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       basePath=basePath))
+                       basePath=basePath, errorModels=errorModels,
+                       tabTitle=tabTitle))
     return render(request, 'ct/concepts.html', kwargs)
 
 
@@ -975,6 +991,29 @@ def concept_concepts(request, course_id, unit_id, concept_id):
             Thank you!''', ignorePOST=True, toTable=toTable,
             fromTable=fromTable, pageTitle=concept.title, unit=unit,
             headText=headText)
+    return r
+
+
+@login_required
+def concept_errors(request, course_id, unit_id, concept_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    concept = get_object_or_404(Concept, pk=concept_id)
+    headText = md2html(concept.description)
+    errorModels = list(concept.relatedFrom
+      .filter(relationship=ConceptGraph.MISUNDERSTANDS))
+    r = _concepts(request, '''To add a concept link, start by
+    typing a search for relevant concepts. ''', errorModels=errorModels,
+                  pageTitle=concept.title, unit=unit, headText=headText,
+                  tabTitle='Errors')
+    if isinstance(r, Concept):
+        r.isError = True
+        cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
+                                    relationship=ConceptGraph.MISUNDERSTANDS)
+        errorModels.append(cg)
+        return _concepts(request, '''Successfully added error model.
+            Thank you!''', ignorePOST=True, errorModels=errorModels,
+            pageTitle=concept.title, unit=unit, headText=headText,
+            tabTitle='Errors')
     return r
 
 

@@ -24,7 +24,7 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a name="conceptTab" data-toggle="tab">Related Concepts</a></li>
+  <li class="active"><a name="conceptTab" data-toggle="tab">{{ tabTitle }}</a></li>
   {% for tabLabel,tabURL in navTabs %}
   <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
   {% endfor %}
@@ -132,6 +132,20 @@ $( "#headtoggle" ).click(function() {
 </table>
 {% endif %}
 
+{% if errorModels %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Common misunderstandings of this concept</th>
+</tr></thead>
+<tbody>
+{% for cg in errorModels %}
+  <tr><td><a href="{{ actionTarget }}{{ cg.fromConcept.pk }}/">
+        {{ cg.fromConcept.title }}</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
 {{ msg }}
 <form action="{{ actionTarget }}" method="get">
 {{ searchForm }}
@@ -162,7 +176,6 @@ please click <b>{{ actionLabel }}</b>.
 {% endif %}
 
 {% if wset %}
-
 <h3>Concepts found in Wikipedia</h3>
 If one of these matches the concept your question mainly aims to test,
 and does <b>not</b> match any concept already added to Courselets.org
@@ -181,6 +194,7 @@ To see details from Wikipedia about each concept, just click its title.
   </li>
 {% endfor %}
 </ul>
+{% endif %}
 
 {% if conceptForm %}
 <h3>Write a New Concept</h3>
@@ -191,7 +205,6 @@ directly by giving a short title and description, then click <b>Add</b>.
 {% crispy conceptForm %}
 </div>
 
-{% endif %}
 {% endif %}
 
   </div><!-- @end #conceptPage -->
