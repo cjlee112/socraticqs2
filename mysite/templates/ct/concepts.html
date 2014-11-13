@@ -10,6 +10,19 @@
 
 {% block content %}
 
+{% if headText %}
+<input type="checkbox" id="headtoggle"/>Show Text<BR>
+<div id="headdiv" style="display: none">
+{{ headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
 <ul class="nav nav-tabs">
   <li class="active"><a name="conceptTab" data-toggle="tab">Related Concepts</a></li>
   {% for tabLabel,tabURL in navTabs %}

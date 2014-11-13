@@ -954,6 +954,7 @@ def ul_concepts(request, course_id, unit_id, ul_id):
 def concept_concepts(request, course_id, unit_id, concept_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     concept = get_object_or_404(Concept, pk=concept_id)
+    headText = md2html(concept.description)
     toConcepts = concept.relatedTo.all()
     fromConcepts = concept.relatedFrom \
       .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
@@ -965,13 +966,15 @@ def concept_concepts(request, course_id, unit_id, concept_id):
                     title='Concepts Linking to this Concept')
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', toTable=toTable,
-                  fromTable=fromTable, pageTitle=concept.title, unit=unit)
+                  fromTable=fromTable, pageTitle=concept.title, unit=unit,
+                  headText=headText)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
         toTable.append(cg)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, toTable=toTable,
-            fromTable=fromTable, pageTitle=concept.title, unit=unit)
+            fromTable=fromTable, pageTitle=concept.title, unit=unit,
+            headText=headText)
     return r
 
 
@@ -1020,19 +1023,20 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
 def concept_lessons(request, course_id, unit_id, concept_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     concept = get_object_or_404(Concept, pk=concept_id)
+    headText = md2html(concept.description)
     cLinks = ConceptLink.objects.filter(concept=concept)
     clTable = ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
                                title='Lessons Linked to this Concept')
     r = _lessons(request, concept,
        '''To add a lesson to this concept, start by
        typing a search for relevant lessons. ''', conceptLinks=clTable,
-                  pageTitle=concept.title, unit=unit)
+                  pageTitle=concept.title, unit=unit, headText=headText)
     if isinstance(r, Lesson):
         cl = r.conceptlink_set.get()
         clTable.append(cl)
         return _lessons(request, concept, '''Successfully added concept.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
-            pageTitle=concept.title, unit=unit)
+            pageTitle=concept.title, unit=unit, headText=headText)
     return r
 
 
