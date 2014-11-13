@@ -39,6 +39,76 @@
 </table>
 {% endif %}
 
+{% if toTable.data %}
+<h2>{{ toTable.title }}</h2>
+<table class="table table-striped">
+<thead><tr>
+{% for h in toTable.headers %}
+  <th>{{ h }}</th>
+{% endfor %}
+</tr></thead>
+<tbody>
+{% for cg,cgform in toTable.data %}
+  <tr>
+    <td>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ cgform.relationship }}
+    <input type="hidden" name="cgID" value="{{ cg.id }}" />
+    <input type="submit" value="Update" title="click to update the relationship" />
+    </form>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="reverse" />
+    <input type="hidden" name="cgID" value="{{ cg.id }}" />
+    <input type="submit" value="Reverse" title="click to reverse the relationship between these concepts" />
+    </form>
+    </td>
+    <td><a href="{{ actionTarget }}{{ cg.pk }}/">
+        {{ cg.toConcept.title }}</a></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if fromTable.data %}
+<h2>{{ fromTable.title }}</h2>
+<table class="table table-striped">
+<thead><tr>
+{% for h in fromTable.headers %}
+  <th>{{ h }}</th>
+{% endfor %}
+</tr></thead>
+<tbody>
+{% for cg,cgform in fromTable.data %}
+  <tr>
+    <td><a href="{{ actionTarget }}{{ cg.pk }}/">
+        {{ cg.fromConcept.title }}</a></td>
+    <td>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ cgform.relationship }}
+    <input type="hidden" name="cgID" value="{{ cg.id }}" />
+    <input type="submit" value="Update" title="click to update the relationship" />
+    </form>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="reverse" />
+    <input type="hidden" name="cgID" value="{{ cg.id }}" />
+    <input type="submit" value="Reverse" title="click to reverse the relationship between these concepts" />
+    </form>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
 <form action="{{ actionTarget }}" method="get">
 {{ searchForm }}
 <input type="submit" value="Search" />

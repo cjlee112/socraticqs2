@@ -779,7 +779,7 @@ def concepts(request):
     return r
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
-              **kwargs):
+              toTable=None, fromTable=None, **kwargs):
     'search or create a Concept'
     cset = wset = ()
     conceptForm = None
@@ -796,6 +796,22 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             if clform.is_valid():
                 clform.save()
                 conceptLinks.replace(cl, clform)
+        elif request.POST.get('task') == 'reverse' and 'cgID' in request.POST:
+            cg = get_object_or_404(ConceptGraph,
+                                   pk=int(request.POST.get('cgID')))
+            c = cg.fromConcept
+            cg.fromConcept = cg.toConcept
+            cg.toConcept = c
+            cg.save() # save the reversed relationship
+            toTable.move_between_tables(cg, fromTable)
+        elif 'cgID' in request.POST:
+            cg = get_object_or_404(ConceptGraph,
+                                   pk=int(request.POST.get('cgID')))
+            cgform = ConceptGraphForm(request.POST, instance=cg)
+            if cgform.is_valid():
+                cgform.save()
+                toTable.replace(cg, cgform)
+                fromTable.replace(cg, cgform)
         elif 'conceptID' in request.POST:
             return Concept.objects.get(pk=int(request.POST.get('conceptID')))
         elif 'title' in request.POST: # create new concept
@@ -818,11 +834,12 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
         set_crispy_action(request.path, conceptForm)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset,
+                       toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks))
     return render(request, 'ct/concepts.html', kwargs)
 
 
-def concept(request, concept_id):
+def edit_concept(request, concept_id):
     concept = get_object_or_404(Concept, pk=concept_id)
     if request.user == concept.addedBy:
         titleform = ConceptForm(instance=concept)
@@ -846,25 +863,36 @@ def concept(request, concept_id):
 # WelcomeMat refactored views
 
 class ConceptLinkTable(object):
-    def __init__(self, **kwargs):
+    def __init__(self, data=(), formClass=ConceptLinkForm, **kwargs):
+        self.formClass = formClass
         self.data = []
+        for cl in data:
+            self.append(cl)
         for k,v in kwargs.items():
             setattr(self, k, v)
     def append(self, cl):
-        self.data.append((cl, ConceptLinkForm(instance=cl)))
+        self.data.append((cl, self.formClass(instance=cl)))
     def replace(self, cl, clform):
         for i,t in enumerate(self.data):
             if t[0] == cl:
                 self.data[i] = (cl, clform)
+    def remove(self, cl):
+        for i,t in enumerate(self.data):
+            if t[0] == cl:
+                del self.data[i]
+                return True
+    def move_between_tables(self, cl, other):
+        if self.remove(cl):
+            other.append(cl)
+        elif other.remove(cl):
+            self.append(cl)
 
 @login_required
 def ul_concepts(request, course_id, unit_id, ul_id):
     unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
-    clTable = ConceptLinkTable(headers=('This lesson...', 'Concept'),
+    clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
-    for cl in cLinks:
-        clTable.append(cl)
     r = _concepts(request, '''To add a concept to this lesson, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable)
     if isinstance(r, Concept):
@@ -875,6 +903,28 @@ def ul_concepts(request, course_id, unit_id, ul_id):
             Thank you!''', ignorePOST=True, conceptLinks=clTable)
     return r
 
+@login_required
+def concept_concepts(request, concept_id):
+    concept = get_object_or_404(Concept, pk=concept_id)
+    toConcepts = concept.relatedTo.all()
+    fromConcepts = concept.relatedFrom \
+      .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
+    toTable = ConceptLinkTable(toConcepts, ConceptGraphForm,
+                    headers=('This concept...', 'Related Concept'),
+                    title='Concepts Linked from this Concept')
+    fromTable = ConceptLinkTable(fromConcepts, ConceptGraphForm,
+                    headers=('Related Concept', '...this concept',),
+                    title='Concepts Linking to this Concept')
+    r = _concepts(request, '''To add a concept link, start by
+    typing a search for relevant concepts. ''', toTable=toTable,
+                  fromTable=fromTable)
+    if isinstance(r, Concept):
+        cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
+        toTable.append(cg)
+        return _concepts(request, '''Successfully added concept.
+            Thank you!''', ignorePOST=True, toTable=toTable,
+            fromTable=fromTable)
+    return r
 
 ###########################################################
 # student UI for courses

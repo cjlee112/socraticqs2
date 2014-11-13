@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, STATUS_CHOICES
+from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
@@ -91,6 +91,18 @@ class ConceptLinkForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = ConceptLink
+        fields = ['relationship']
+
+class ConceptGraphForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(ConceptGraphForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-conceptGraphForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
+    class Meta:
+        model = ConceptGraph
         fields = ['relationship']
 
 class LessonForm(forms.ModelForm):
