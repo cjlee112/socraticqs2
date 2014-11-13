@@ -5,14 +5,17 @@
 {% endcomment %}
 
 {% block title %}
-  Courselets.org Concepts
+  {{ pageTitle }}
 {% endblock %}
 
 {% block content %}
 {{ msg }}
 
+{% if conceptLinks.data or toTable.data or fromTable.data%}
+<h3>Related Concepts in Courselets.org</h3>
+{% endif %}
+
 {% if conceptLinks.data %}
-<h2>{{ conceptLinks.title }}</h2>
 <table class="table table-striped">
 <thead><tr>
 {% for h in conceptLinks.headers %}
@@ -40,7 +43,6 @@
 {% endif %}
 
 {% if toTable.data %}
-<h2>{{ toTable.title }}</h2>
 <table class="table table-striped">
 <thead><tr>
 {% for h in toTable.headers %}
@@ -75,7 +77,6 @@
 {% endif %}
 
 {% if fromTable.data %}
-<h2>{{ fromTable.title }}</h2>
 <table class="table table-striped">
 <thead><tr>
 {% for h in fromTable.headers %}
@@ -121,7 +122,7 @@
 {% if cset %}
 <h3>Concepts linked to other Courselets.org Questions</h3>
 If one of these matches the concept your question mainly aims to test,
-please click <b>Link question to this concept</b>.
+please click <b>{{ actionLabel }}</b>.
 <ul>
 {% for c in cset %}
   <li><a href="{% url 'ct:concept' c.id %}">{{ c.title }}</a>
@@ -129,7 +130,7 @@ please click <b>Link question to this concept</b>.
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="conceptID" value="{{ c.id }}" />
-  <input type="submit" value="Link question to this concept" />
+  <input type="submit" value="{{ actionLabel }}" />
   </form>
   : {{ c.description }}
   </li>
@@ -143,7 +144,7 @@ please click <b>Link question to this concept</b>.
 If one of these matches the concept your question mainly aims to test,
 and does <b>not</b> match any concept already added to Courselets.org
 (above),
-please click <b>Link question to this concept</b>.
+please click <b>{{ actionLabel }}</b>.
 To see details from Wikipedia about each concept, just click its title.
 <ul>
 {% for title, sourceID, sourceURL in wset %}
@@ -152,7 +153,7 @@ To see details from Wikipedia about each concept, just click its title.
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="wikipediaID" value="{{ sourceID }}" />
-  <input type="submit" value="Link question to this concept" />
+  <input type="submit" value="{{ actionLabel }}" />
   </form>
   </li>
 {% endfor %}

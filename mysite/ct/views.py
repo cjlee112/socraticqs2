@@ -779,7 +779,8 @@ def concepts(request):
     return r
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
-              toTable=None, fromTable=None, **kwargs):
+              toTable=None, fromTable=None, pageTitle='Concepts',
+              actionLabel='Link to this Concept', **kwargs):
     'search or create a Concept'
     cset = wset = ()
     conceptForm = None
@@ -835,7 +836,8 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset,
                        toTable=toTable, fromTable=fromTable,
-                       conceptForm=conceptForm, conceptLinks=conceptLinks))
+                       conceptForm=conceptForm, conceptLinks=conceptLinks,
+                       actionLabel=actionLabel, pageTitle=pageTitle))
     return render(request, 'ct/concepts.html', kwargs)
 
 
@@ -894,13 +896,15 @@ def ul_concepts(request, course_id, unit_id, ul_id):
     clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
     r = _concepts(request, '''To add a concept to this lesson, start by
-    typing a search for relevant concepts. ''', conceptLinks=clTable)
+    typing a search for relevant concepts. ''', conceptLinks=clTable,
+                  pageTitle=unitLesson.lesson.title)
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
         clTable.append(cl)
         return _concepts(request, '''Successfully added concept.
-            Thank you!''', ignorePOST=True, conceptLinks=clTable)
+            Thank you!''', ignorePOST=True, conceptLinks=clTable,
+                  pageTitle=unitLesson.lesson.title)
     return r
 
 @login_required
@@ -917,13 +921,13 @@ def concept_concepts(request, concept_id):
                     title='Concepts Linking to this Concept')
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', toTable=toTable,
-                  fromTable=fromTable)
+                  fromTable=fromTable, pageTitle=concept.title)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
         toTable.append(cg)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, toTable=toTable,
-            fromTable=fromTable)
+            fromTable=fromTable, pageTitle=concept.title)
     return r
 
 ###########################################################
