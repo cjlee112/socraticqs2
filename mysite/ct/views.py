@@ -787,8 +787,7 @@ def update_concept_link(request, conceptLinks):
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
-              actionLabel='Link to this Concept',
-              navTabs=(('Lessons', '/lessons'),), **kwargs):
+              actionLabel='Link to this Concept', navTabs=None, **kwargs):
     'search or create a Concept'
     cset = wset = ()
     conceptForm = None
@@ -841,8 +840,11 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
-    l = request.path.split('/')
-    basePath = '/'.join(l[:-4] + l[-2:])
+    basePath = get_relative_url(request.path)
+    if not navTabs:
+        lessonPath = get_relative_url(request.path, -2, None,
+                                       ('lessons', ''))
+        navTabs=(('Lessons', lessonPath),)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
@@ -874,6 +876,16 @@ def edit_concept(request, concept_id):
 
 ###########################################################
 # WelcomeMat refactored views
+
+def get_relative_url(path, stem=-4, tail=-2, extension=()):
+    'construct URL from desired stem and tail + optional extension'
+    l = path.split('/')
+    out = l[:stem]
+    if tail:
+        out += l[tail:]
+    if extension:
+        out += extension
+    return '/'.join(out)
 
 class ConceptLinkTable(object):
     def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
@@ -964,9 +976,8 @@ def concept_concepts(request, course_id, unit_id, concept_id):
 
 
 def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
-             pageTitle='Lessons', unit=None,
-              actionLabel='Add to This Unit',
-              navTabs=(('Related Concepts', '/concepts'),), **kwargs):
+             pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
+             navTabs=None, **kwargs):
     'search or create a Lesson'
     lessonForm = None
     searchForm = LessonSearchForm()
@@ -993,8 +1004,11 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
             lessonForm = NewLessonForm()
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
-    l = request.path.split('/')
-    basePath = '/'.join(l[:-4] + l[-2:])
+    basePath = get_relative_url(request.path)
+    if not navTabs:
+        conceptPath = get_relative_url(request.path, -2, None,
+                                       ('concepts', ''))
+        navTabs=(('Related Concepts', conceptPath),)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, navTabs=navTabs,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
