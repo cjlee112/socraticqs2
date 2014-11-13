@@ -224,19 +224,21 @@ class Lesson(models.Model):
         'create lesson for initial concept definition'
         lesson = klass(title=concept.title, text=concept.description,
                        addedBy=concept.addedBy, **kwargs)
-        lesson.save_root()
-        lesson.conceptlink_set.create(concept=concept,
-                                      addedBy=concept.addedBy,
-                                      relationship=ConceptLink.IS)
-        if unit:
-            lesson.unitlesson_set.create(unit=unit, addedBy=concept.addedBy,
-                                         treeID=lesson.treeID, **ulArgs)
+        lesson.save_root(concept, unit, ConceptLink.IS, **ulArgs)
         return lesson
-    def save_root(self):
+    def save_root(self, concept=None, unit=None, relationship=None, **kwargs):
         'create root commit by initializing treeID'
         self.save()
         self.treeID = self.pk
         self.save()
+        if concept:
+            if relationship is None:
+                relationship = DEFAULT_RELATION_MAP[self.kind]
+            self.conceptlink_set.create(concept=concept,
+                        addedBy=self.addedBy, relationship=relationship)
+        if unit:
+            self.unitlesson_set.create(unit=unit, addedBy=self.addedBy,
+                                       treeID=self.treeID, **kwargs)
     def __unicode__(self):
         return self.title
     def get_url(self):
@@ -292,6 +294,26 @@ class ConceptLink(models.Model):
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+DEFAULT_RELATION_MAP = {
+    Lesson.BASE_EXPLANATION:ConceptLink.IS,
+    Lesson.EXPLANATION:ConceptLink.DEFINES,
+    Lesson.ORCT_QUESTION:ConceptLink.TESTS,
+    Lesson.CONCEPT_INVENTORY_QUESTION:ConceptLink.TESTS,
+    Lesson.EXERCISE:ConceptLink.TESTS,
+    Lesson.PROJECT:ConceptLink.TESTS,
+    Lesson.PRACTICE_EXAM:ConceptLink.TESTS,
+    
+    Lesson.ANSWER:ConceptLink.ILLUSTRATES,
+    Lesson.ERROR_MODEL:ConceptLink.IS,
+
+    Lesson.DATA:ConceptLink.ILLUSTRATES,
+    Lesson.CASESTUDY:ConceptLink.ILLUSTRATES,
+    Lesson.ENCYCLOPEDIA:ConceptLink.DEFINES,
+    Lesson.FAQ_QUESTION:ConceptLink.COMMENTS,
+    Lesson.FORUM:ConceptLink.COMMENTS,
+}
+
+    
 class StudyList(models.Model):
     'list of materials of interest to each user'
     lesson = models.ForeignKey(Lesson)

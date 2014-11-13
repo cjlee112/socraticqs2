@@ -1,0 +1,88 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageTitle }}
+{% endblock %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+  <li class="active"><a name="lessonTab" data-toggle="tab">Lessons</a></li>
+  {% for tabLabel,tabURL in navTabs %}
+  <li><a href="{{ tabURL }}" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="lessonPage">
+
+{% if conceptLinks.data %}
+<table class="table table-striped">
+<thead><tr>
+{% for h in conceptLinks.headers %}
+  <th>{{ h }}</th>
+{% endfor %}
+</tr></thead>
+<tbody>
+{% for cl,clform in conceptLinks.data %}
+  <tr>
+    <td><a href="{{ basePath }}{{ cl.lesson.pk }}/">
+        {{ cl.lesson.title }}</a></td>
+    <td>
+    {% if conceptLinks.noEdit %}
+      {{ cl.get_relationship_display }}
+    {% else %}
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ clform.relationship }}
+    <input type="hidden" name="clID" value="{{ cl.id }}" />
+    <input type="submit" value="Update" />
+    </form>
+    {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+
+{{ msg }}
+<form action="{{ actionTarget }}" method="get">
+{{ searchForm }}
+<input type="submit" value="Search" />
+</form>
+
+{% if lessonSet %}
+<h2>Search Results</h2>
+If one of these is relevant to this concept,
+please click <b>{{ actionLabel }}</b>.
+<ul>
+{% for lesson in lessonSet %}
+  <li><a href="{{ basePath}}{{ lesson.pk }}/">{{ lesson.title }}</a>
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="lessonID" value="{{ lesson.pk }}" />
+  <input type="submit" value="{{ actionLabel }}" />
+  </form>
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if lessonForm %}
+<h3>Write a New Lesson</h3>
+<div class="container-fluid">
+{% crispy lessonForm %}
+</div>
+{% endif %}
+
+  </div><!-- @end #conceptPage -->
+</div>
+{% endblock %}

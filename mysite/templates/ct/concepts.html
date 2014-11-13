@@ -43,7 +43,7 @@
     </form>
     {% endif %}
     </td>
-    <td><a href="{{ actionTarget }}{{ cl.pk }}/">
+    <td><a href="{{ actionTarget }}{{ cl.concept.pk }}/lessons/">
         {{ cl.concept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -77,7 +77,7 @@
     <input type="submit" value="Reverse" title="click to reverse the relationship between these concepts" />
     </form>
     </td>
-    <td><a href="{{ actionTarget }}{{ cg.pk }}/">
+    <td><a href="{{ basePath }}{{ cg.toConcept.pk }}/">
         {{ cg.toConcept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -95,7 +95,7 @@
 <tbody>
 {% for cg,cgform in fromTable.data %}
   <tr>
-    <td><a href="{{ actionTarget }}{{ cg.pk }}/">
+    <td><a href="{{ basePath }}{{ cg.fromConcept.pk }}/">
         {{ cg.fromConcept.title }}</a></td>
     <td>
     <form action="{{ actionTarget }}" method="post"

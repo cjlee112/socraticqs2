@@ -11,6 +11,8 @@ urlpatterns = patterns('',
         ul_concepts, name='ul_concepts'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<concept_id>\d+)/concepts/$',
         concept_concepts, name='concept_concepts'),
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<concept_id>\d+)/lessons/$',
+        concept_lessons, name='concept_lessons'),
     url(r'^concepts/(?P<concept_id>\d+)/edit/$', edit_concept,
         name='edit_concept'),
     # deprecated

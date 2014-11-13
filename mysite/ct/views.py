@@ -778,6 +778,13 @@ def concepts(request):
             Thank you!''', ignorePOST=True)
     return r
 
+def update_concept_link(request, conceptLinks):
+    cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
+    clform = ConceptLinkForm(request.POST, instance=cl)
+    if clform.is_valid():
+        clform.save()
+        conceptLinks.replace(cl, clform)
+
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
               actionLabel='Link to this Concept',
@@ -796,12 +803,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
                                              addedBy=concept.addedBy)
             return concept
         elif 'clID' in request.POST:
-            cl = get_object_or_404(ConceptLink,
-                                   pk=int(request.POST.get('clID')))
-            clform = ConceptLinkForm(request.POST, instance=cl)
-            if clform.is_valid():
-                clform.save()
-                conceptLinks.replace(cl, clform)
+            update_concept_link(request, conceptLinks)
         elif request.POST.get('task') == 'reverse' and 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
@@ -839,11 +841,14 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
+    l = request.path.split('/')
+    basePath = '/'.join(l[:-4] + l[-2:])
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
-                       actionLabel=actionLabel, pageTitle=pageTitle))
+                       actionLabel=actionLabel, pageTitle=pageTitle,
+                       basePath=basePath))
     return render(request, 'ct/concepts.html', kwargs)
 
 
@@ -956,6 +961,66 @@ def concept_concepts(request, course_id, unit_id, concept_id):
             Thank you!''', ignorePOST=True, toTable=toTable,
             fromTable=fromTable, pageTitle=concept.title, unit=unit)
     return r
+
+
+def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
+             pageTitle='Lessons', unit=None,
+              actionLabel='Add to This Unit',
+              navTabs=(('Related Concepts', '/concepts'),), **kwargs):
+    'search or create a Lesson'
+    lessonForm = None
+    searchForm = LessonSearchForm()
+    lessonSet = ()
+    if request.method == 'POST' and not ignorePOST:
+        if 'clID' in request.POST:
+            update_concept_link(request, conceptLinks)
+        elif 'title' in request.POST: # create new concept
+            lessonForm = NewLessonForm(request.POST)
+            if lessonForm.is_valid():
+                lesson = lessonForm.save(commit=False)
+                lesson.addedBy = request.user
+                lesson.save_root(concept, unit)
+                return lesson
+        else:
+            return 'please write POST error message'
+
+    elif 'search' in request.GET:
+        searchForm = LessonSearchForm(request.GET)
+        if searchForm.is_valid():
+            s = searchForm.cleaned_data['search']
+            lessonSet = Lesson.objects.filter(Q(title__icontains=s) |
+                                              Q(text__icontains=s))
+            lessonForm = NewLessonForm()
+    if lessonForm:
+        set_crispy_action(request.path, lessonForm)
+    l = request.path.split('/')
+    basePath = '/'.join(l[:-4] + l[-2:])
+    kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path, msg=msg,
+                       searchForm=searchForm, navTabs=navTabs,
+                       lessonForm=lessonForm, conceptLinks=conceptLinks,
+                       actionLabel=actionLabel, pageTitle=pageTitle,
+                       basePath=basePath))
+    return render(request, 'ct/lessons.html', kwargs)
+
+@login_required
+def concept_lessons(request, course_id, unit_id, concept_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    concept = get_object_or_404(Concept, pk=concept_id)
+    cLinks = ConceptLink.objects.filter(concept=concept)
+    clTable = ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
+                               title='Lessons Linked to this Concept')
+    r = _lessons(request, concept,
+       '''To add a lesson to this concept, start by
+       typing a search for relevant lessons. ''', conceptLinks=clTable,
+                  pageTitle=concept.title, unit=unit)
+    if isinstance(r, Lesson):
+        cl = r.conceptlink_set.get()
+        clTable.append(cl)
+        return _lessons(request, concept, '''Successfully added concept.
+            Thank you!''', ignorePOST=True, conceptLinks=clTable,
+            pageTitle=concept.title, unit=unit)
+    return r
+
 
 ###########################################################
 # student UI for courses
