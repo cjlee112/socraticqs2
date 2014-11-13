@@ -9,11 +9,16 @@
 {% endblock %}
 
 {% block content %}
-{{ msg }}
 
-{% if conceptLinks.data or toTable.data or fromTable.data%}
-<h3>Related Concepts in Courselets.org</h3>
-{% endif %}
+<ul class="nav nav-tabs">
+  <li class="active"><a name="conceptTab" data-toggle="tab">Related Concepts</a></li>
+  {% for tabLabel,tabURL in navTabs %}
+  <li><a href="{{ tabURL }}" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="conceptPage">
 
 {% if conceptLinks.data %}
 <table class="table table-striped">
@@ -110,6 +115,7 @@
 </table>
 {% endif %}
 
+{{ msg }}
 <form action="{{ actionTarget }}" method="get">
 {{ searchForm }}
 <input type="submit" value="Search" />
@@ -171,4 +177,6 @@ directly by giving a short title and description, then click <b>Add</b>.
 {% endif %}
 {% endif %}
 
+  </div><!-- @end #conceptPage -->
+</div>
 {% endblock %}

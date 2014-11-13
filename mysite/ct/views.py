@@ -780,7 +780,8 @@ def concepts(request):
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts',
-              actionLabel='Link to this Concept', **kwargs):
+              actionLabel='Link to this Concept',
+              navTabs=(('Lessons', '/lessons'),), **kwargs):
     'search or create a Concept'
     cset = wset = ()
     conceptForm = None
@@ -834,7 +835,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
-                       searchForm=searchForm, wset=wset,
+                       searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle))
