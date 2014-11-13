@@ -202,7 +202,7 @@ class Lesson(models.Model):
         data = dataClass(sourceID)
         lesson = klass(title=data.title, url=data.url, sourceDB=sourceDB,
                        sourceID=sourceID, addedBy=user, text=data.description)
-        lesson.save()
+        lesson.save_root()
         lesson._sourceDBdata = data
         return lesson
 
@@ -219,6 +219,24 @@ class Lesson(models.Model):
         if noDup:
             out = distinct_subset(out)
         return out
+    @classmethod
+    def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
+        'create lesson for initial concept definition'
+        lesson = klass(title=concept.title, text=concept.description,
+                       addedBy=concept.addedBy, **kwargs)
+        lesson.save_root()
+        lesson.conceptlink_set.create(concept=concept,
+                                      addedBy=concept.addedBy,
+                                      relationship=ConceptLink.IS)
+        if unit:
+            lesson.unitlesson_set.create(unit=unit, addedBy=concept.addedBy,
+                                         treeID=lesson.treeID, **ulArgs)
+        return lesson
+    def save_root(self):
+        'create root commit by initializing treeID'
+        self.save()
+        self.treeID = self.pk
+        self.save()
     def __unicode__(self):
         return self.title
     def get_url(self):
@@ -255,8 +273,8 @@ class ConceptLink(models.Model):
     REL_CHOICES = (
         (IS, 'Represents (unique ID for)'),
         (DEFINES, 'Defines'),
-        (INFORMAL_DEFINITION, 'Intuitive statement of'),
-        (FORMAL_DEFINITION, 'Formal definition for'),
+        (INFORMAL_DEFINITION, 'Intuitively defines'),
+        (FORMAL_DEFINITION, 'Formally defines'),
         (TESTS, 'Tests understanding of'),
         (DERIVES, 'Derives'),
         (PROVES, 'Proves'),
@@ -265,7 +283,7 @@ class ConceptLink(models.Model):
         (ILLUSTRATES, 'Illustrates'),
         (INTRODUCES, 'Introduces'),
         (COMMENTS, 'Comments on'),
-        (WARNS, 'Warning about'),
+        (WARNS, 'Warns about'),
     )
     concept = models.ForeignKey(Concept)
     lesson = models.ForeignKey(Lesson)

@@ -779,7 +779,7 @@ def concepts(request):
     return r
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
-              toTable=None, fromTable=None, pageTitle='Concepts',
+              toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
               actionLabel='Link to this Concept',
               navTabs=(('Lessons', '/lessons'),), **kwargs):
     'search or create a Concept'
@@ -788,9 +788,13 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     searchForm = ConceptSearchForm()
     if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
-            t = Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
-                                          request.user)
-            return t[0] # return concept object
+            concept, lesson = \
+              Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
+                                        request.user)
+            if unit:
+                lesson.unitlesson_set.create(unit=unit, treeID=lesson.treeID,
+                                             addedBy=concept.addedBy)
+            return concept
         elif 'clID' in request.POST:
             cl = get_object_or_404(ConceptLink,
                                    pk=int(request.POST.get('clID')))
@@ -822,6 +826,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
                 concept = conceptForm.save(commit=False)
                 concept.addedBy = request.user
                 concept.save()
+                Lesson.create_from_concept(concept, unit)
                 return concept
         else:
             return 'please write POST error message'
@@ -866,8 +871,10 @@ def edit_concept(request, concept_id):
 # WelcomeMat refactored views
 
 class ConceptLinkTable(object):
-    def __init__(self, data=(), formClass=ConceptLinkForm, **kwargs):
+    def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
+                 **kwargs):
         self.formClass = formClass
+        self.noEdit = noEdit
         self.data = []
         for cl in data:
             self.append(cl)
@@ -891,6 +898,24 @@ class ConceptLinkTable(object):
             self.append(cl)
 
 @login_required
+def unit_concepts(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    navTabs = (('Lessons', '/lessons'), ('Edit', '/edit'),)
+    cLinks = ConceptLink.objects.filter(Q(lesson__unitlesson__unit=unit) &
+                                        ~Q(lesson__unitlesson__kind=
+                                           UnitLesson.MISUNDERSTANDS))
+    clTable = ConceptLinkTable(cLinks, noEdit=True,
+                        headers=('This courselet...', 'Concept'),
+                        title='Concepts Linked to this Courselet')
+    r = _concepts(request, '''To add a concept to this courselet, start by
+    typing a search for relevant concepts. ''', conceptLinks=clTable,
+                  pageTitle=unit.title, unit=unit, navTabs=navTabs)
+    if isinstance(r, Concept):
+        url = '%s%d/concepts/' % (request.path, r.id)
+        return HttpResponseRedirect(url)
+    return r
+
+@login_required
 def ul_concepts(request, course_id, unit_id, ul_id):
     unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
@@ -898,18 +923,19 @@ def ul_concepts(request, course_id, unit_id, ul_id):
                                title='Concepts Linked to this Lesson')
     r = _concepts(request, '''To add a concept to this lesson, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title)
+                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit)
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
         clTable.append(cl)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title)
+                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit)
     return r
 
 @login_required
-def concept_concepts(request, concept_id):
+def concept_concepts(request, course_id, unit_id, concept_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
     concept = get_object_or_404(Concept, pk=concept_id)
     toConcepts = concept.relatedTo.all()
     fromConcepts = concept.relatedFrom \
@@ -922,13 +948,13 @@ def concept_concepts(request, concept_id):
                     title='Concepts Linking to this Concept')
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', toTable=toTable,
-                  fromTable=fromTable, pageTitle=concept.title)
+                  fromTable=fromTable, pageTitle=concept.title, unit=unit)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
         toTable.append(cg)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, toTable=toTable,
-            fromTable=fromTable, pageTitle=concept.title)
+            fromTable=fromTable, pageTitle=concept.title, unit=unit)
     return r
 
 ###########################################################

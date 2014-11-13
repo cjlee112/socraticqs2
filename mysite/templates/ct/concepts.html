@@ -31,6 +31,9 @@
 {% for cl,clform in conceptLinks.data %}
   <tr>
     <td>
+    {% if conceptLinks.noEdit %}
+      {{ cl.get_relationship_display }}
+    {% else %}
     <form action="{{ actionTarget }}" method="post"
           style=" display:inline!important;">
     {% csrf_token %}
@@ -38,6 +41,7 @@
     <input type="hidden" name="clID" value="{{ cl.id }}" />
     <input type="submit" value="Update" />
     </form>
+    {% endif %}
     </td>
     <td><a href="{{ actionTarget }}{{ cl.pk }}/">
         {{ cl.concept.title }}</a></td>
