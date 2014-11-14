@@ -246,13 +246,14 @@ class Lesson(models.Model):
         else:
             return reverse('ct:lesson', args=(self.id,))
 
-def distinct_subset(inlist):
+def distinct_subset(inlist, distinct_func=lambda x:x.treeID):
     'eliminate duplicate treeIDs from the input list'
     s = set()
     outlist = []
     for o in inlist:
-        if o.treeID not in s:
-            s.add(o.treeID)
+        k = distinct_func(o)
+        if k not in s:
+            s.add(k)
             outlist.append(o)
     return outlist
             
