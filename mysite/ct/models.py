@@ -220,13 +220,15 @@ class Lesson(models.Model):
             out = distinct_subset(out)
         return out
     @classmethod
-    def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
+    def create_from_concept(klass, concept, **kwargs):
         'create lesson for initial concept definition'
+        if concept.isError:
+            kwargs['kind'] = ERROR_MODEL
         lesson = klass(title=concept.title, text=concept.description,
                        addedBy=concept.addedBy, **kwargs)
-        lesson.save_root(concept, unit, ConceptLink.IS, **ulArgs)
+        lesson.save_root(concept, ConceptLink.IS)
         return lesson
-    def save_root(self, concept=None, unit=None, relationship=None, **kwargs):
+    def save_root(self, concept=None, relationship=None):
         'create root commit by initializing treeID'
         self.save()
         self.treeID = self.pk
@@ -236,9 +238,6 @@ class Lesson(models.Model):
                 relationship = DEFAULT_RELATION_MAP[self.kind]
             self.conceptlink_set.create(concept=concept,
                         addedBy=self.addedBy, relationship=relationship)
-        if unit:
-            self.unitlesson_set.create(unit=unit, addedBy=self.addedBy,
-                                       treeID=self.treeID, **kwargs)
     def __unicode__(self):
         return self.title
     def get_url(self):
@@ -348,6 +347,20 @@ class UnitLesson(models.Model):
     addedBy = models.ForeignKey(User)
     treeID = models.IntegerField() # VCS METADATA
     branch = models.CharField(max_length=32, default='master')
+    @classmethod
+    def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
+        'create lesson for initial concept definition'
+        lesson = Lesson.create_from_concept(concept, **kwargs)
+        return klass.create_from_lesson(lesson, unit, **ulArgs)
+    @classmethod
+    def create_from_lesson(klass, lesson, unit, **kwargs):
+        kindMap = {Lesson.ANSWER:klass.ANSWERS,
+                   Lesson.ERROR_MODEL:klass.MISUNDERSTANDS}
+        kwargs['kind'] = kindMap.get(lesson.kind, klass.COMPONENT)
+        ul = klass(unit=unit, lesson=lesson, addedBy=lesson.addedBy,
+                   treeID=lesson.treeID, **kwargs)
+        ul.save()
+        return ul
     @classmethod
     def search_text(klass, s, noDup=True):
         'search Lesson title and text'

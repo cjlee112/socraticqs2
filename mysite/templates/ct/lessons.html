@@ -79,12 +79,12 @@ $( "#headtoggle" ).click(function() {
 If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
 <ul>
-{% for lesson in lessonSet %}
-  <li><a href="{{ basePath}}{{ lesson.pk }}/">{{ lesson.title }}</a>
+{% for ul in lessonSet %}
+  <li><a href="{{ basePath}}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
-  <input type="hidden" name="lessonID" value="{{ lesson.pk }}" />
+  <input type="hidden" name="ulID" value="{{ ul.pk }}" />
   <input type="submit" value="{{ actionLabel }}" />
   </form>
   </li>

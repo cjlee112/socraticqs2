@@ -778,6 +778,9 @@ def concepts(request):
             Thank you!''', ignorePOST=True)
     return r
 
+###########################################################
+# WelcomeMat refactored views
+
 def update_concept_link(request, conceptLinks):
     cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
     clform = ConceptLinkForm(request.POST, instance=cl)
@@ -831,7 +834,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
                 concept = conceptForm.save(commit=False)
                 concept.addedBy = request.user
                 concept.save()
-                Lesson.create_from_concept(concept, unit)
+                UnitLesson.create_from_concept(concept, unit)
                 return concept
         else:
             return 'please write POST error message'
@@ -878,9 +881,6 @@ def edit_concept(request, course_id, unit_id, concept_id):
                        atime=display_datetime(concept.atime),
                        titleform=titleform, navTabs=navTabs))
 
-###########################################################
-# WelcomeMat refactored views
-
 def get_relative_url(path, stem=-4, tail=-2, extension=()):
     'construct URL from desired stem and tail + optional extension'
     l = path.split('/')
@@ -907,6 +907,10 @@ def make_tabs(path, current, tabs, stem=-2, tail=None):
 
 def concept_tabs(path, current,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+
+def lesson_tabs(path, current,
+                 tabs=('Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
 
@@ -951,7 +955,7 @@ def unit_concepts(request, course_id, unit_id):
     typing a search for relevant concepts. ''', conceptLinks=clTable,
                   pageTitle=unit.title, unit=unit, navTabs=navTabs)
     if isinstance(r, Concept):
-        url = '%s%d/concepts/' % (request.path, r.id)
+        url = '%s%d/lessons/' % (request.path, r.id)
         return HttpResponseRedirect(url)
     return r
 
@@ -1039,13 +1043,15 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks)
-        elif 'title' in request.POST: # create new concept
+        elif 'ulID' in request.POST:
+            return UnitLesson.objects.get(pk=int(request.POST.get('ulID')))
+        elif 'title' in request.POST: # create new lesson
             lessonForm = NewLessonForm(request.POST)
             if lessonForm.is_valid():
                 lesson = lessonForm.save(commit=False)
                 lesson.addedBy = request.user
-                lesson.save_root(concept, unit)
-                return lesson
+                lesson.save_root(concept)
+                return UnitLesson.create_from_lesson(lesson, unit)
         else:
             return 'please write POST error message'
 
@@ -1053,8 +1059,9 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
         searchForm = LessonSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            lessonSet = Lesson.objects.filter(Q(title__icontains=s) |
-                                              Q(text__icontains=s))
+            lessonSet = distinct_subset(UnitLesson.objects. 
+              filter(Q(lesson__title__icontains=s) |
+                     Q(lesson__text__icontains=s)))
             lessonForm = NewLessonForm()
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
@@ -1078,15 +1085,56 @@ def concept_lessons(request, course_id, unit_id, concept_id):
        typing a search for relevant lessons. ''', conceptLinks=clTable,
                   pageTitle=concept.title, unit=unit, headText=headText,
                   navTabs=navTabs)
-    if isinstance(r, Lesson):
-        cl = r.conceptlink_set.get()
+    if isinstance(r, UnitLesson):
+        if r.unit != unit: # copy from another unit
+            r = r.copy()
+        elif r.lesson.kind == Lesson.ORCT_QUESTION:
+            if r.unitlesson_set.filter(kind=UnitLesson.MISUNDERSTANDS) \
+                                      .count() == 0: # add error models
+                for cg in concept.relatedFrom \
+                    .filter(relationship=ConceptGraph.MISUNDERSTANDS):
+                    lesson = Lesson.objects \
+                      .get(conceptlink__concept=cg.fromConcept,
+                           conceptlink__relationship=ConceptLink.IS)
+                    UnitLesson.create_from_lesson(lesson, unit,
+                            kind=UnitLesson.MISUNDERSTANDS, parent=r)
+            if r.unitlesson_set.filter(kind=UnitLesson.ANSWERS).count() == 0:
+                answer = Lesson(title='Answer', text='write an answer',
+                                addedBy=r.addedBy, kind=Lesson.ANSWER)
+                answer.save_root()
+                ul = UnitLesson.create_from_lesson(answer, unit,
+                            kind=UnitLesson.ANSWERS, parent=r)
+                return HttpResponseRedirect(reverse('ct:edit_lesson',
+                                args=(course_id, unit_id, ul.id,)))
+        cl = r.lesson.conceptlink_set.get()
         clTable.append(cl)
-        return _lessons(request, concept, '''Successfully added concept.
+        return _lessons(request, concept, '''Successfully added lesson.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
             pageTitle=concept.title, unit=unit, headText=headText,
             navTabs=navTabs)
     return r
 
+
+def edit_lesson(request, course_id, unit_id, ul_id):
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    navTabs = lesson_tabs(request.path, 'Edit')
+    if request.user == ul.addedBy:
+        titleform = LessonForm(instance=ul.lesson)
+        if request.method == 'POST':
+            if 'title' in request.POST:
+                titleform = LessonForm(request.POST, instance=ul.lesson)
+                if titleform.is_valid():
+                    titleform.save()
+            elif request.POST.get('task') == 'delete':
+                ul.delete()
+                return HttpResponseRedirect(reverse('ct:concepts'))
+        set_crispy_action(request.path, titleform)
+    else:
+        titleform = None
+    return render(request, 'ct/edit_lesson.html',
+                  dict(actionTarget=request.path, unitLesson=ul,
+                       atime=display_datetime(ul.atime),
+                       titleform=titleform, navTabs=navTabs))
 
 ###########################################################
 # student UI for courses
