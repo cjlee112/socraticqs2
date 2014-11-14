@@ -39,13 +39,15 @@ $( "#headtoggle" ).click(function() {
 {% if lessonTable %}
 <table class="table table-striped">
 <thead><tr>
-  <th>Lesson</th>
+  <th>Lesson</th><th>Type</th><th>Author</th>
 </tr></thead>
 <tbody>
 {% for ul in lessonTable %}
   <tr>
     <td><a href="{{ actionTarget }}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
     </td>
+    <td>{{ ul.lesson.get_kind_display }}</td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
   </tr>
 {% endfor %}
 </tbody>
