@@ -59,7 +59,7 @@ $( "#headtoggle" ).click(function() {
     </form>
     {% endif %}
     </td>
-    <td><a href="{{ actionTarget }}{{ cl.concept.pk }}/lessons/">
+    <td><a href="{{ basePath }}concepts/{{ cl.concept.pk }}/lessons/">
         {{ cl.concept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -93,7 +93,7 @@ $( "#headtoggle" ).click(function() {
     <input type="submit" value="Reverse" title="click to reverse the relationship between these concepts" />
     </form>
     </td>
-    <td><a href="{{ basePath }}{{ cg.toConcept.pk }}/">
+    <td><a href="{{ basePath }}concepts/{{ cg.toConcept.pk }}/lessons/">
         {{ cg.toConcept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -111,7 +111,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for cg,cgform in fromTable.data %}
   <tr>
-    <td><a href="{{ basePath }}{{ cg.fromConcept.pk }}/">
+    <td><a href="{{ basePath }}concepts/{{ cg.fromConcept.pk }}/lessons/">
         {{ cg.fromConcept.title }}</a></td>
     <td>
     <form action="{{ actionTarget }}" method="post"
@@ -142,7 +142,7 @@ $( "#headtoggle" ).click(function() {
 </tr></thead>
 <tbody>
 {% for cg in errorModels %}
-  <tr><td><a href="{{ actionTarget }}{{ cg.fromConcept.pk }}/">
+  <tr><td><a href="{{ basePath }}concepts/{{ cg.fromConcept.pk }}/lessons/">
         {{ cg.fromConcept.title }}</a></td></tr>
 {% endfor %}
 </tbody>

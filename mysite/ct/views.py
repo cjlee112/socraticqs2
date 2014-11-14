@@ -482,25 +482,6 @@ def _search_lessons(request):
     ## searchForm.helper.form_action = request.path # set actionTarget directly
     return searchForm, sourceDB, lessonSet, wset
 
-def lesson(request, lesson_id):
-    lesson = get_object_or_404(Lesson, pk=lesson_id)
-    if request.user == lesson.addedBy:
-        titleform = LessonForm(instance=lesson)
-        if request.method == 'POST':
-            if 'title' in request.POST: # update courselet attributes
-                titleform = LessonForm(request.POST, instance=lesson)
-                if titleform.is_valid():
-                    titleform.save()
-            elif request.POST.get('task') == 'delete': # delete me
-                lesson.delete()
-                return HttpResponseRedirect(reverse('ct:teach'))
-
-    else:
-        titleform = None
-    return render(request, 'ct/lesson.html',
-                  dict(user=request.user, actionTarget=request.path,
-                       lesson=lesson, titleform=titleform))
-    
 #################################################
 # instructor course UI
 
@@ -790,7 +771,7 @@ def update_concept_link(request, conceptLinks):
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
-              actionLabel='Link to this Concept', navTabs=(),
+              actionLabel='Link to this Concept', navTabs=(), basePath=None,
               errorModels=None, **kwargs):
     'search or create a Concept'
     cset = wset = ()
@@ -850,7 +831,8 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
-    basePath = get_relative_url(request.path)
+    if not basePath:
+        basePath = get_base_url(request.path)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
@@ -882,15 +864,12 @@ def edit_concept(request, course_id, unit_id, concept_id):
                        atime=display_datetime(concept.atime),
                        titleform=titleform, navTabs=navTabs))
 
-def get_relative_url(path, stem=-4, tail=-2, extension=()):
-    'construct URL from desired stem and tail + optional extension'
+def get_base_url(path, extension=[], baseToken='units', tail=2):
     l = path.split('/')
-    out = l[:stem]
-    if tail:
-        out += l[tail:]
-    if extension:
-        out += extension
-    return '/'.join(out)
+    for i,v in enumerate(l):
+        if v == baseToken:
+            return '/'.join(l[:i + tail] + extension) + '/'
+    raise ValueError('baseToken not found in path')
 
 def make_tabs(path, current, tabs, stem=-2, tail=None):
     l = path.split('/')
@@ -910,18 +889,25 @@ def concept_tabs(path, current,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
 
+def make_tab(path, current, label, url):
+    'use #LABELTabDiv or URL depending on whether current matches label'
+    if current == label:
+        return (label,'#%sTabDiv' % label)
+    else:
+        return (label, url)
+
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Concepts', 'Errors', 'Edit'), **kwargs):
+                 tabs=('Teach', 'Concepts', 'Errors', 'Edit'), **kwargs):
     outTabs = make_tabs(path, current, tabs, **kwargs)
-    try:
-        a = unitLesson.get_answer().get()
-        if current == 'Answer':
-            outTabs.append(('Answer','#AnswerTabDiv'))
-        else:
-            outTabs.append(('Answer', get_relative_url(path, -3, None,
-                                                   (str(a.pk), ''))))
-    except UnitLesson.DoesNotExist:
-        pass
+    if unitLesson.kind in (UnitLesson.ANSWERS, UnitLesson.MISUNDERSTANDS) \
+       and unitLesson.parent:
+        outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
+                    ['lessons', str(unitLesson.parent.pk), 'teach'])))
+    else:
+        a = unitLesson.get_answer().all()
+        if a:
+            outTabs.append(make_tab(path, current, 'Answer',
+                get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
     return outTabs
     
 def unit_tabs(path, current,
@@ -992,7 +978,8 @@ def ul_concepts(request, course_id, unit_id, ul_id):
         clTable.append(cl)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit)
+                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
+                  headText=headText, navTabs=navTabs)
     return r
 
 def concept_page_data(request, unit_id, concept_id, currentTab):
@@ -1055,7 +1042,7 @@ def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
              pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
              navTabs=(), allowSearch=True, creationInstructions=None,
-             templateFile='ct/lessons.html', **kwargs):
+             templateFile='ct/lessons.html', basePath=None, **kwargs):
     'search or create a Lesson'
     if creationInstructions:
         lessonForm = NewLessonForm()
@@ -1090,7 +1077,8 @@ def _lessons(request, concept=None, msg='',
                      Q(lesson__text__icontains=s)))
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
-    basePath = get_relative_url(request.path)
+    if not basePath:
+        basePath = get_base_url(request.path)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, navTabs=navTabs,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
@@ -1103,7 +1091,7 @@ def _lessons(request, concept=None, msg='',
 def concept_lessons(request, course_id, unit_id, concept_id):
     unit, concept, navTabs, headText = \
       concept_page_data(request, unit_id, concept_id, 'Lessons')
-    cLinks = ConceptLink.objects.filter(concept=concept)
+    cLinks = UnitLesson.get_conceptlinks(concept, unit)
     clTable = ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
                                title='Lessons Linked to this Concept')
     creationInstructions='''You can type a new lesson on this
@@ -1165,6 +1153,13 @@ def unit_lessons(request, course_id, unit_id):
     return r
 
 
+def ul_teach(request, course_id, unit_id, ul_id):
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    navTabs = lesson_tabs(request.path, 'Teach', ul)
+    return render(request, 'ct/lesson.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, navTabs=navTabs))
+    
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     navTabs = lesson_tabs(request.path, 'Edit', ul)
@@ -1175,6 +1170,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 titleform = LessonForm(request.POST, instance=ul.lesson)
                 if titleform.is_valid():
                     titleform.save()
+                    return HttpResponseRedirect(reverse('ct:ul_teach',
+                                args=(course_id, unit_id, ul_id)))
             elif request.POST.get('task') == 'delete':
                 ul.delete()
                 return HttpResponseRedirect(reverse('ct:unit_lessons',
@@ -1216,8 +1213,10 @@ def ul_errors(request, course_id, unit_id, ul_id):
             lessonTable.append(ul)
         return _lessons(request, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, 
-            pageTitle=unit.title, unit=unit, 
-            navTabs=navTabs, lessonTable=lessonTable)
+            pageTitle=unit.title, unit=unit, navTabs=navTabs,
+            statusTable=statusTable, evalTable=evalTable,
+            seTable=seTable, headText=headText,
+            templateFile='ct/errors.html')
     return r
 
 

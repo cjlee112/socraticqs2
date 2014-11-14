@@ -86,7 +86,7 @@ $( "#headtoggle" ).click(function() {
 {% for ul,emTotal in seTable %}
   <tr>
     <td>{{ emTotal }}</td>
-    <td><a href="{{ actionTarget }}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+    <td><a href="{{ basePath }}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
     </td>
   </tr>
 {% endfor %}
@@ -108,7 +108,7 @@ If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
 <ul>
 {% for ul in lessonSet %}
-  <li><a href="{{ basePath}}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+  <li><a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}

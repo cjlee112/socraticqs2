@@ -3,71 +3,40 @@
 {% load ct_extras %}
 
 {% comment %}
-  View or edit a lesson
+  Teacher's overview of a lesson
 {% endcomment %}
 
 {% block title %}
-  {{ lesson.title }}
+  {{ unitLesson.lesson.title }}
 {% endblock %}
 
 {% block content %}
-<input type="checkbox" id="edittoggle"/>Edit.<BR>
-<div class="container-fluid" id="editform" style="display: none">
-{% crispy titleform %}
-  
-<form action="{{ actionTarget }}" method="post">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="delete" />
-  <input type="submit" value="Delete this Courselet" />
-</form>
-</div>
 
-<script>
-$( "#edittoggle" ).click(function() {
-  $( "#editform" ).toggle();
-});
-</script>
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
 
-{{ lesson.text |md2html }}
-{% if lesson.sourceDB == 'youtube' %}
+<div class="tab-content">
+  <div class="tab-pane active" id="TeachTabDiv">
+
+{{ unitLesson.lesson.text |md2html }}
+{% if unitLesson.lesson.sourceDB == 'youtube' %}
 <iframe width="560" height="315"
-        src="http://www.youtube.com/embed/{{ lesson.sourceID }}?rel=0"
+        src="http://www.youtube.com/embed/{{ unitLesson.lesson.sourceID }}?rel=0"
         frameborder="0" allowfullscreen></iframe>
-{% elif lesson.sourceDB == 'vimeo' %}
+{% elif unitLesson.lesson.sourceDB == 'vimeo' %}
 <iframe width="500" height="281"
-        src="http://player.vimeo.com/video/{{ lesson.sourceID }}"
+        src="http://player.vimeo.com/video/{{ unitLesson.lesson.sourceID }}"
         frameborder="0" webkitallowfullscreen mozallowfullscreen
         allowfullscreen></iframe>
 {% endif %}
 
-<h2>Related concepts</h2> 
-{% if lesson.lessonlink_set.count > 0 %}
-  <ul>
-  {% for ll in lesson.lessonlink_set.all %}
-    <li>
-    {{ ll.get_relationship_display }}
-    <a href="{% url 'ct:concept' ll.concept.id %}">
-    {{ ll.concept.title }}</a>.
-    </li>
-  {% endfor %}
-  </ul>
-{% else %}
-  <b>Please add one or more concepts to this lesson!</b>
-{% endif %}
-<button type="button" onclick="location.href='{% url 'ct:lesson_concept' lesson.id %}'">
-Add a Concept
-</button>
-
-{% if lesson.courselesson_set.count > 0 %}
-<h2>Used in Courselets</h2> 
-  <ul>
-  {% for cl in lesson.courselesson_set.all %}
-    <li>
-    <a href="{% url 'ct:courselet' cl.courselet.id %}">
-    {{ cl.courselet.title }}</a>.
-    </li>
-  {% endfor %}
-  </ul>
-{% endif %}
-
+  </div><!-- @end #TeachTabDiv -->
+</div>
 {% endblock %}

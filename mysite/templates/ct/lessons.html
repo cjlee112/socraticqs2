@@ -44,7 +44,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for ul in lessonTable %}
   <tr>
-    <td><a href="{{ actionTarget }}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+    <td><a href="{{ basePath }}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
     <td>{{ ul.lesson.addedBy.get_full_name }}</td>
@@ -64,7 +64,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for cl,clform in conceptLinks.data %}
   <tr>
-    <td><a href="{{ basePath }}{{ cl.lesson.pk }}/">
+    <td><a href="{{ basePath }}lessons/{{ cl.unitLesson.pk }}/teach/">
         {{ cl.lesson.title }}</a></td>
     <td>
     {% if conceptLinks.noEdit %}
@@ -100,7 +100,7 @@ If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
 <ul>
 {% for ul in lessonSet %}
-  <li><a href="{{ basePath}}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+  <li><a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
