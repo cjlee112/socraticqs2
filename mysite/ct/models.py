@@ -369,6 +369,9 @@ class UnitLesson(models.Model):
         if noDup:
             out = distinct_subset(out)
         return out
+    def get_answer(self):
+        'get query set with answer(s) if any'
+        return self.unitlesson_set.filter(kind=self.ANSWERS)
 
 class Unit(models.Model):
     'a container of exercises performed together'

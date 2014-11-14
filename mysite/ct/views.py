@@ -910,9 +910,19 @@ def concept_tabs(path, current,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
 
-def lesson_tabs(path, current,
+def lesson_tabs(path, current, unitLesson,
                  tabs=('Concepts', 'Errors', 'Edit'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
+    outTabs = make_tabs(path, current, tabs, **kwargs)
+    try:
+        a = unitLesson.get_answer().get()
+        if current == 'Answer':
+            outTabs.append(('Answer','#AnswerTabDiv'))
+        else:
+            outTabs.append(('Answer', get_relative_url(path, -3, None,
+                                                   (str(a.pk), ''))))
+    except UnitLesson.DoesNotExist:
+        pass
+    return outTabs
     
 def unit_tabs(path, current,
               tabs=('Concepts', 'Lessons', 'Edit'), **kwargs):
@@ -968,7 +978,7 @@ def unit_concepts(request, course_id, unit_id):
 def ul_concepts(request, course_id, unit_id, ul_id):
     unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
     headText = md2html(unitLesson.lesson.text)
-    navTabs = lesson_tabs(request.path, 'Concepts')
+    navTabs = lesson_tabs(request.path, 'Concepts', unitLesson)
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
     clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
@@ -1157,7 +1167,7 @@ def unit_lessons(request, course_id, unit_id):
 
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
-    navTabs = lesson_tabs(request.path, 'Edit')
+    navTabs = lesson_tabs(request.path, 'Edit', ul)
     if request.user == ul.addedBy:
         titleform = LessonForm(instance=ul.lesson)
         if request.method == 'POST':
@@ -1182,7 +1192,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     headText = md2html(ul.lesson.text)
-    navTabs = lesson_tabs(request.path, 'Errors')
+    navTabs = lesson_tabs(request.path, 'Errors', ul)
     query = Q(unitLesson=ul, selfeval__isnull=False)
     statusTable, evalTable, n = Response.get_counts(query)
     query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
