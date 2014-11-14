@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 import glob
 from datetime import timedelta
 
@@ -420,6 +420,9 @@ class Unit(models.Model):
 ############################################################
 # student response and error data
 
+def fmt_count(c, n):
+    return '%.0f%% (%d)' % (c * 100. / n, c)
+
 NEED_HELP_STATUS = 'help'
 NEED_REVIEW_STATUS = 'review'
 DONE_STATUS = 'done'
@@ -474,6 +477,26 @@ class Response(models.Model):
     parent = models.ForeignKey('Response', null=True) # reply-to
     def __unicode__(self):
         return 'answer by ' + self.author.username
+    @classmethod
+    def get_counts(klass, query, fmt_count=fmt_count):
+        'generate display tables for Response data'
+        querySet = klass.objects.filter(query)
+        statusDict = {}
+        for d in querySet.values('status').annotate(dcount=Count('status')):
+            statusDict[d['status']] = d['dcount']
+        n = querySet.count() or 1 # prevent DivideByZero
+        statusTable = [fmt_count(statusDict.get(k, 0), n)
+                       for k,_ in STATUS_CHOICES] \
+                       + [fmt_count(n - sum(statusDict.values()), n)]
+        evalDict = {}
+        for d in querySet.values('confidence', 'selfeval') \
+          .annotate(dcount=Count('confidence')):
+            evalDict[d['confidence'],d['selfeval']] = d['dcount']
+        l = []
+        for conf,label in klass.CONF_CHOICES:
+            l.append((label, [fmt_count(evalDict.get((conf,selfeval), 0), n)
+                              for selfeval,_ in klass.EVAL_CHOICES]))
+        return statusTable, l, n
 
 class StudentError(models.Model):
     'identification of a specific error model made by a student'
@@ -485,7 +508,16 @@ class StudentError(models.Model):
     author = models.ForeignKey(User)
     def __unicode__(self):
         return 'eval by ' + self.author.username
-
+    @classmethod
+    def get_counts(klass, query, n, fmt_count=fmt_count):
+        'generate display table for StudentError data'
+        querySet = klass.objects.filter(query)
+        l = []
+        for d in querySet.values('errorModel') \
+          .annotate(c=Count('errorModel')):
+            l.append((UnitLesson.objects.get(pk=d['errorModel']), d['c']))
+        l.sort(lambda x,y:cmp(x[1], y[1]), reverse=True)
+        return [(t[0],fmt_count(t[1], n)) for t in l]
 
 def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
     if n == 0: # prevent div by zero error

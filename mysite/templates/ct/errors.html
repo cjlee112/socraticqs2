@@ -1,0 +1,133 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageTitle }}
+{% endblock %}
+
+{% block content %}
+
+{% if headText %}
+<input type="checkbox" id="headtoggle"/>Show Question and Answer<BR>
+<div id="headdiv" style="display: none">
+{{ headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="ErrorsTabDiv">
+
+{% if statusTable %}
+<h2>Final Status for Understanding This Concept</h2>
+
+<table class="table table-striped">
+  <thead><tr>
+    <th>Still confused, need help</th>
+    <th>OK, but need review</th>
+    <th>Solid understanding</th>
+    <th>(not yet)</th>
+  </tr></thead>
+  <tbody><tr>
+    {% for c in statusTable %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr></tbody>
+</table>
+{% endif %}
+
+{% if evalTable %}
+<h2>Student Self-Assessments</h2>
+
+<table class="table table-striped">
+  <thead><tr>
+    <th></th>
+    <th>Wrong</th>
+    <th>Close</th>
+    <th>Correct</th>
+  </tr></thead>
+  <tbody>
+  {% for label, row in evalTable %}
+  <tr>
+    <td><b>{{ label }}</b></td>
+    {% for c in row %}
+    <td>{{ c }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if seTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Students</th><th>Error</th>
+</tr></thead>
+<tbody>
+{% for ul,emTotal in seTable %}
+  <tr>
+    <td>{{ emTotal }}</td>
+    <td><a href="{{ actionTarget }}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{{ msg }}
+{% if searchForm %}
+<form action="{{ actionTarget }}" method="get">
+{{ searchForm }}
+<input type="submit" value="Search" />
+</form>
+{% endif %}
+
+{% if lessonSet %}
+<h2>Search Results</h2>
+If one of these is relevant to this concept,
+please click <b>{{ actionLabel }}</b>.
+<ul>
+{% for ul in lessonSet %}
+  <li><a href="{{ basePath}}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="ulID" value="{{ ul.pk }}" />
+  <input type="submit" value="{{ actionLabel }}" />
+  </form>
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% if lessonForm %}
+<h3>Write a New Lesson</h3>
+{{ creationInstructions }}
+<div class="container-fluid">
+{% crispy lessonForm %}
+</div>
+{% endif %}
+
+  </div><!-- @end #ErrorsTabDiv -->
+</div>
+{% endblock %}

@@ -967,12 +967,15 @@ def unit_concepts(request, course_id, unit_id):
 @login_required
 def ul_concepts(request, course_id, unit_id, ul_id):
     unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
+    headText = md2html(unitLesson.lesson.text)
+    navTabs = lesson_tabs(request.path, 'Concepts')
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
     clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
     r = _concepts(request, '''To add a concept to this lesson, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit)
+                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
+                  headText=headText, navTabs=navTabs)
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
@@ -1042,7 +1045,7 @@ def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
              pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
              navTabs=(), allowSearch=True, creationInstructions=None,
-             **kwargs):
+             templateFile='ct/lessons.html', **kwargs):
     'search or create a Lesson'
     if creationInstructions:
         lessonForm = NewLessonForm()
@@ -1084,7 +1087,7 @@ def _lessons(request, concept=None, msg='',
                        actionLabel=actionLabel, pageTitle=pageTitle,
                        basePath=basePath,
                        creationInstructions=creationInstructions))
-    return render(request, 'ct/lessons.html', kwargs)
+    return render(request, templateFile, kwargs)
 
 @login_required
 def concept_lessons(request, course_id, unit_id, concept_id):
@@ -1173,6 +1176,40 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                   dict(actionTarget=request.path, unitLesson=ul,
                        atime=display_datetime(ul.atime),
                        titleform=titleform, navTabs=navTabs))
+
+@login_required
+def ul_errors(request, course_id, unit_id, ul_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    headText = md2html(ul.lesson.text)
+    navTabs = lesson_tabs(request.path, 'Errors')
+    query = Q(unitLesson=ul, selfeval__isnull=False)
+    statusTable, evalTable, n = Response.get_counts(query)
+    query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
+    seTable = StudentError.get_counts(query, n)
+    errorModels = set([t[0] for t in seTable])
+    for em in ul.unitlesson_set.filter(kind=UnitLesson.MISUNDERSTANDS):
+        if em not in errorModels:
+            seTable.append((em, fmt_count(0, n)))
+    r = _lessons(request, msg='''You can search for a lesson to add
+          to this courselet, or write a new lesson for a concept by
+          clicking on the Concepts tab.''', 
+                  pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
+                  statusTable=statusTable, evalTable=evalTable,
+                  seTable=seTable, headText=headText,
+                  templateFile='ct/errors.html')
+    if isinstance(r, UnitLesson):
+        if r.unit == unit:
+            msg = 'Lesson already in this unit, so no change made.'
+        else:  # copy from another unit
+            ul = r.copy()
+            lessonTable.append(ul)
+        return _lessons(request, msg='''Successfully added lesson.
+            Thank you!''', ignorePOST=True, 
+            pageTitle=unit.title, unit=unit, 
+            navTabs=navTabs, lessonTable=lessonTable)
+    return r
+
 
 ###########################################################
 # student UI for courses
