@@ -913,6 +913,10 @@ def lesson_tabs(path, current,
                  tabs=('Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
+def unit_tabs(path, current,
+              tabs=('Concepts', 'Lessons', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+    
 
 class ConceptLinkTable(object):
     def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
@@ -944,7 +948,7 @@ class ConceptLinkTable(object):
 @login_required
 def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
-    navTabs = (('Lessons', '/lessons'), ('Edit', '/edit'),)
+    navTabs = unit_tabs(request.path, 'Concepts')
     cLinks = ConceptLink.objects.filter(Q(lesson__unitlesson__unit=unit) &
                                         ~Q(lesson__unitlesson__kind=
                                            UnitLesson.MISUNDERSTANDS))
@@ -1033,12 +1037,20 @@ def concept_errors(request, course_id, unit_id, concept_id):
     return r
 
 
-def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
+def _lessons(request, concept=None, msg='',
+             ignorePOST=False, conceptLinks=None,
              pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
-             navTabs=(), **kwargs):
+             navTabs=(), allowSearch=True, creationInstructions=None,
+             **kwargs):
     'search or create a Lesson'
-    lessonForm = None
-    searchForm = LessonSearchForm()
+    if creationInstructions:
+        lessonForm = NewLessonForm()
+    else:
+        lessonForm = None
+    if allowSearch:
+        searchForm = LessonSearchForm()
+    else:
+        searchForm = None
     lessonSet = ()
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
@@ -1055,14 +1067,13 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
         else:
             return 'please write POST error message'
 
-    elif 'search' in request.GET:
+    elif allowSearch and 'search' in request.GET:
         searchForm = LessonSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
             lessonSet = distinct_subset(UnitLesson.objects. 
               filter(Q(lesson__title__icontains=s) |
                      Q(lesson__text__icontains=s)))
-            lessonForm = NewLessonForm()
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     basePath = get_relative_url(request.path)
@@ -1070,7 +1081,8 @@ def _lessons(request, concept, msg='', ignorePOST=False, conceptLinks=None,
                        searchForm=searchForm, navTabs=navTabs,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       basePath=basePath))
+                       basePath=basePath,
+                       creationInstructions=creationInstructions))
     return render(request, 'ct/lessons.html', kwargs)
 
 @login_required
@@ -1080,15 +1092,15 @@ def concept_lessons(request, course_id, unit_id, concept_id):
     cLinks = ConceptLink.objects.filter(concept=concept)
     clTable = ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
                                title='Lessons Linked to this Concept')
-    r = _lessons(request, concept,
-       '''To add a lesson to this concept, start by
-       typing a search for relevant lessons. ''', conceptLinks=clTable,
-                  pageTitle=concept.title, unit=unit, headText=headText,
-                  navTabs=navTabs)
+    creationInstructions='''You can type a new lesson on this
+        concept below (if you add an open-response question,
+        you will be prompted later to write an answer). '''
+    r = _lessons(request, concept, conceptLinks=clTable,
+                 pageTitle=concept.title, unit=unit, headText=headText,
+                 navTabs=navTabs, allowSearch=False,
+                 creationInstructions=creationInstructions)
     if isinstance(r, UnitLesson):
-        if r.unit != unit: # copy from another unit
-            r = r.copy()
-        elif r.lesson.kind == Lesson.ORCT_QUESTION:
+        if r.lesson.kind == Lesson.ORCT_QUESTION:
             if r.unitlesson_set.filter(kind=UnitLesson.MISUNDERSTANDS) \
                                       .count() == 0: # add error models
                 for cg in concept.relatedFrom \
@@ -1111,7 +1123,31 @@ def concept_lessons(request, course_id, unit_id, concept_id):
         return _lessons(request, concept, '''Successfully added lesson.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
             pageTitle=concept.title, unit=unit, headText=headText,
-            navTabs=navTabs)
+            navTabs=navTabs, creationInstructions=creationInstructions,
+            allowSearch=False)
+    return r
+
+@login_required
+def unit_lessons(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    navTabs = unit_tabs(request.path, 'Lessons')
+    lessonTable = list(unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT)
+                       .order_by('order'))
+    r = _lessons(request, msg='''You can search for a lesson to add
+          to this courselet, or write a new lesson for a concept by
+          clicking on the Concepts tab.''', 
+                  pageTitle=unit.title, unit=unit, navTabs=navTabs,
+                  lessonTable=lessonTable)
+    if isinstance(r, UnitLesson):
+        if r.unit == unit:
+            msg = 'Lesson already in this unit, so no change made.'
+        else:  # copy from another unit
+            ul = r.copy()
+            lessonTable.append(ul)
+        return _lessons(request, msg='''Successfully added lesson.
+            Thank you!''', ignorePOST=True, 
+            pageTitle=unit.title, unit=unit, 
+            navTabs=navTabs, lessonTable=lessonTable)
     return r
 
 

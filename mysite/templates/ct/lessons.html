@@ -36,6 +36,22 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="LessonsTabDiv">
 
+{% if lessonTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th>
+</tr></thead>
+<tbody>
+{% for ul in lessonTable %}
+  <tr>
+    <td><a href="{{ actionTarget }}{{ ul.pk }}/">{{ ul.lesson.title }}</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
 {% if conceptLinks.data %}
 <table class="table table-striped">
 <thead><tr>
@@ -69,10 +85,12 @@ $( "#headtoggle" ).click(function() {
 
 
 {{ msg }}
+{% if searchForm %}
 <form action="{{ actionTarget }}" method="get">
 {{ searchForm }}
 <input type="submit" value="Search" />
 </form>
+{% endif %}
 
 {% if lessonSet %}
 <h2>Search Results</h2>
@@ -94,6 +112,7 @@ please click <b>{{ actionLabel }}</b>.
 
 {% if lessonForm %}
 <h3>Write a New Lesson</h3>
+{{ creationInstructions }}
 <div class="container-fluid">
 {% crispy lessonForm %}
 </div>
