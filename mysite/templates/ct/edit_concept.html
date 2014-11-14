@@ -23,20 +23,21 @@
 
 <div class="tab-content">
   <div class="tab-pane active" id="EditTabDiv">
+
 <div class="container-fluid" id="editform">
 {% crispy titleform %}
-  
-<form action="{{ actionTarget }}" method="post">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="delete" />
-  <input type="submit" value="Delete this Concept" />
-</form>
 </div>
 
 
 <p>
 Added by: {{ concept.addedBy.get_full_name }}, {{ atime }}
 </p>
+
+<form action="{{ actionTarget }}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="delete" />
+  <input type="submit" value="Delete this Concept" />
+</form>
 
   </div><!-- @end #EditTabDiv -->
 </div>

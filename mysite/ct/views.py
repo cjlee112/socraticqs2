@@ -872,7 +872,8 @@ def edit_concept(request, course_id, unit_id, concept_id):
                     titleform.save()
             elif request.POST.get('task') == 'delete':
                 concept.delete()
-                return HttpResponseRedirect(reverse('ct:concepts'))
+                return HttpResponseRedirect(reverse('ct:unit_concepts',
+                                args=(course_id, unit_id,)))
         set_crispy_action(request.path, titleform)
     else:
         titleform = None
@@ -1163,7 +1164,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                     titleform.save()
             elif request.POST.get('task') == 'delete':
                 ul.delete()
-                return HttpResponseRedirect(reverse('ct:concepts'))
+                return HttpResponseRedirect(reverse('ct:unit_lessons',
+                                args=(course_id, unit_id,)))
         set_crispy_action(request.path, titleform)
     else:
         titleform = None
