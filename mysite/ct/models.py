@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max
 import glob
 from datetime import timedelta
 
@@ -354,12 +354,16 @@ class UnitLesson(models.Model):
         lesson = Lesson.create_from_concept(concept, **kwargs)
         return klass.create_from_lesson(lesson, unit, **ulArgs)
     @classmethod
-    def create_from_lesson(klass, lesson, unit, **kwargs):
-        kindMap = {Lesson.ANSWER:klass.ANSWERS,
-                   Lesson.ERROR_MODEL:klass.MISUNDERSTANDS}
-        kwargs['kind'] = kindMap.get(lesson.kind, klass.COMPONENT)
+    def create_from_lesson(klass, lesson, unit, order=None, kind=None,
+                           **kwargs):
+        if not kind:
+            kindMap = {Lesson.ANSWER:klass.ANSWERS,
+                    Lesson.ERROR_MODEL:klass.MISUNDERSTANDS}
+            kind = kindMap.get(lesson.kind, klass.COMPONENT)
+        if order == 'APPEND':
+            order = unit.next_order()
         ul = klass(unit=unit, lesson=lesson, addedBy=lesson.addedBy,
-                   treeID=lesson.treeID, **kwargs)
+                   treeID=lesson.treeID, order=order, kind=kind, **kwargs)
         ul.save()
         return ul
     @classmethod
@@ -386,6 +390,17 @@ class UnitLesson(models.Model):
     def get_answer(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
+    def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
+        'copy self and children to new unit'
+        if order == 'APPEND':
+            order = unit.next_order()
+        ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
+                            kind=self.kind, treeID=self.treeID,
+                            parent=parent, order=order, **kwargs)
+        ul.save()
+        for child in self.unitlesson_set.all(): # copy children
+            child.copy(unit, addedBy, parent=ul, **kwargs)
+        return ul
 
 class Unit(models.Model):
     'a container of exercises performed together'
@@ -402,6 +417,13 @@ class Unit(models.Model):
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    def next_order(self):
+        'get next order value for appending new UnitLesson.order'
+        n = self.unitlesson_set.all().aggregate(n=Max('order'))['n']
+        if n is None:
+            return 0
+        else:
+            return n + 1
     def create_lesson(self, title, text, author=None, **kwargs):
         if author is None:
             author = self.addedBy

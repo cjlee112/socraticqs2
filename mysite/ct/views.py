@@ -911,7 +911,7 @@ def lesson_tabs(path, current, unitLesson,
     return outTabs
     
 def unit_tabs(path, current,
-              tabs=('Concepts', 'Lessons', 'Edit'), **kwargs):
+              tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
 
@@ -1064,7 +1064,8 @@ def _lessons(request, concept=None, msg='',
                 lesson = lessonForm.save(commit=False)
                 lesson.addedBy = request.user
                 lesson.save_root(concept)
-                return UnitLesson.create_from_lesson(lesson, unit)
+                return UnitLesson.create_from_lesson(lesson, unit,
+                                                     order='APPEND')
         else:
             return 'please write POST error message'
 
@@ -1131,11 +1132,14 @@ def concept_lessons(request, course_id, unit_id, concept_id):
     return r
 
 @login_required
-def unit_lessons(request, course_id, unit_id):
+def unit_lessons(request, course_id, unit_id, lessonTable=None,
+                 currentTab='Lessons'):
     unit = get_object_or_404(Unit, pk=unit_id)
-    navTabs = unit_tabs(request.path, 'Lessons')
-    lessonTable = list(unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT)
-                       .order_by('order'))
+    navTabs = unit_tabs(request.path, currentTab)
+    if lessonTable is None:
+        lessonTable = list(unit.unitlesson_set
+            .filter(kind=UnitLesson.COMPONENT, order__isnull=False)
+            .order_by('order'))
     r = _lessons(request, msg='''You can search for a lesson to add
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
@@ -1145,7 +1149,7 @@ def unit_lessons(request, course_id, unit_id):
         if r.unit == unit:
             msg = 'Lesson already in this unit, so no change made.'
         else:  # copy from another unit
-            ul = r.copy()
+            ul = r.copy(order='APPEND')
             lessonTable.append(ul)
         return _lessons(request, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, 
@@ -1153,13 +1157,25 @@ def unit_lessons(request, course_id, unit_id):
             navTabs=navTabs, lessonTable=lessonTable)
     return r
 
+def unit_resources(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    lessonTable = list(unit.unitlesson_set \
+            .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+    return unit_lessons(request, course_id, unit_id, lessonTable, 'Resources')
+
 
 def ul_teach(request, course_id, unit_id, ul_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     navTabs = lesson_tabs(request.path, 'Teach', ul)
+    if request.method == 'POST' and request.POST.get('task') == 'append' \
+            and ul.unit != unit:
+        ulNew = ul.copy(unit, request.user, order='APPEND')
+        return HttpResponseRedirect(reverse('ct:ul_teach',
+                                args=(course_id, unit_id, ulNew.pk)))
     return render(request, 'ct/lesson.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, navTabs=navTabs))
+                       unitLesson=ul, navTabs=navTabs, unit=unit))
     
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
