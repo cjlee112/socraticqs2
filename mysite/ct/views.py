@@ -61,63 +61,6 @@ def respond_cq(request, cq_id):
 def respond(request, ct_id):
     return _respond(request, get_object_or_404(Question, pk=ct_id))
 
-def _respond(request, q, courseQuestion=None):
-    'ask student a question'
-    start_live_user(request, courseQuestion) # add live user if appropriate
-    if request.method == 'POST':
-        form = ResponseForm(request.POST)
-        if form.is_valid():
-            r = form.save(commit=False)
-            r.question = q
-            r.courseQuestion = courseQuestion
-            r.atime = timezone.now()
-            r.author = request.user
-            response, liveSession = live_response(request, r)
-            if liveSession:
-                r.liveQuestion = liveSession.get_live_question(courseQuestion)
-            r.save()
-            if response: # let LIVE mode override default next step
-                return response
-            return HttpResponseRedirect(reverse('ct:assess',
-                                                args=(r.id,)))
-    else:
-        form = ResponseForm()
-    set_crispy_action(request.path, form)
-    return render(request, 'ct/ask.html',
-                  dict(question=q, qtext=md2html(q.qtext), form=form,
-                       actionTarget=request.path))
-
-@login_required
-def assess(request, resp_id):
-    'student self-assessment'
-    r = get_object_or_404(Response, pk=resp_id)
-    errors = r.courseQuestion.courseerrormodel_set.all()
-    choices = [(e.id, md2html(e.errorModel.description, stripP=True))
-               for e in errors]
-    if request.method == 'POST':
-        form = SelfAssessForm(request.POST)
-        form.fields['emlist'].choices = choices
-        if form.is_valid():
-            r.selfeval = form.cleaned_data['selfeval']
-            r.status = form.cleaned_data['status']
-            r.save()
-            for emID in form.cleaned_data['emlist']:
-                em = get_object_or_404(CourseErrorModel, pk=emID)
-                se = r.studenterror_set.create(courseErrorModel=em,
-                                               author=r.author)
-            response, liveSession = live_response(request, r)
-            if response: # let LIVE mode override default next step
-                return response
-            return HttpResponseRedirect('/ct/')
-    else:
-        form = SelfAssessForm()
-        form.fields['emlist'].choices = choices 
-
-    return render(request, 'ct/assess.html',
-                  dict(response=r, qtext=md2html(r.question.qtext),
-                       answer=md2html(r.question.answer), form=form,
-                       actionTarget=request.path))
-
 
 @login_required
 def live_session(request):
@@ -1212,7 +1155,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
     query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
     seTable = StudentError.get_counts(query, n)
     errorModels = set([t[0] for t in seTable])
-    for em in ul.unitlesson_set.filter(kind=UnitLesson.MISUNDERSTANDS):
+    for em in ul.get_errors():
         if em not in errorModels:
             seTable.append((em, fmt_count(0, n)))
     r = _lessons(request, msg='''You can search for a lesson to add
@@ -1236,6 +1179,86 @@ def ul_errors(request, course_id, unit_id, ul_id):
             templateFile='ct/errors.html')
     return r
 
+
+###########################################################
+# welcome mat refactored student UI for courses
+
+def next_lesson_url(path, unitLesson):
+    'get URL for unit lesson following this one'
+    try:
+        nextUL = unitLesson.get_next_lesson()
+        if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
+            return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
+        else:
+            return get_base_url(path, ['lessons', str(nextUL.pk)])
+    except UnitLesson.DoesNotExist:
+        return get_base_url(path)
+    
+
+def lesson(request, course_id, unit_id, ul_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+        return HttpResponseRedirect(request.path + 'ask/')
+    nextLessonURL = next_lesson_url(request.path, ul)
+    return render(request, 'ct/lesson_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit,
+                       nextLessonURL=nextLessonURL))
+    
+@login_required
+def ul_respond(request, course_id, unit_id, ul_id):
+    'ask student a question'
+    course = get_object_or_404(Course, pk=course_id)
+    unit = get_object_or_404(Unit, pk=unit_id)
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    if request.method == 'POST':
+        form = ResponseForm(request.POST)
+        if form.is_valid():
+            r = form.save(commit=False)
+            r.lesson = ul.lesson
+            r.unitLesson = ul
+            r.author = request.user
+            r.save()
+            return HttpResponseRedirect(reverse('ct:assess',
+                    args=(course_id, unit_id, ul_id, r.id,)))
+    else:
+        form = ResponseForm()
+    set_crispy_action(request.path, form)
+    return render(request, 'ct/ask.html',
+                  dict(unitLesson=ul, qtext=md2html(ul.lesson.text),
+                       form=form, actionTarget=request.path))
+
+@login_required
+def assess(request, course_id, unit_id, ul_id, resp_id):
+    'student self-assessment'
+    r = get_object_or_404(Response, pk=resp_id)
+    choices = [(e.id, e.lesson.title) for e in r.unitLesson.get_errors()]
+    if request.method == 'POST':
+        form = SelfAssessForm(request.POST)
+        form.fields['emlist'].choices = choices
+        if form.is_valid():
+            r.selfeval = form.cleaned_data['selfeval']
+            r.status = form.cleaned_data['status']
+            r.save()
+            for emID in form.cleaned_data['emlist']:
+                em = get_object_or_404(UnitLesson, pk=emID)
+                se = r.studenterror_set.create(errorModel=em,
+                        author=request.user, status=r.status)
+            return HttpResponseRedirect(
+                next_lesson_url(request.path, r.unitLesson))
+    else:
+        form = SelfAssessForm()
+        form.fields['emlist'].choices = choices
+    try:
+        answer = r.unitLesson.get_answer()[0]
+    except IndexError:
+        answer = ''
+    else:
+        answer = md2html(answer.lesson.text)
+    return render(request, 'ct/assess.html',
+                  dict(response=r, qtext=md2html(r.lesson.text),
+                       answer=answer, form=form, actionTarget=request.path))
 
 ###########################################################
 # student UI for courses

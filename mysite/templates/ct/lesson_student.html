@@ -1,0 +1,33 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  Teacher's overview of a lesson
+{% endcomment %}
+
+{% block title %}
+  {{ unitLesson.lesson.title }}
+{% endblock %}
+
+{% block content %}
+
+{{ unitLesson.lesson.text |md2html }}
+{% if unitLesson.lesson.sourceDB == 'youtube' %}
+<iframe width="560" height="315"
+        src="http://www.youtube.com/embed/{{ unitLesson.lesson.sourceID }}?rel=0"
+        frameborder="0" allowfullscreen></iframe>
+{% elif unitLesson.lesson.sourceDB == 'vimeo' %}
+<iframe width="500" height="281"
+        src="http://player.vimeo.com/video/{{ unitLesson.lesson.sourceID }}"
+        frameborder="0" webkitallowfullscreen mozallowfullscreen
+        allowfullscreen></iframe>
+{% endif %}
+
+{% if nextLessonURL %}
+<button type="button" onclick="location.href='{{ nextLessonURL }}'">
+Next
+</button>
+{% endif %}
+
+{% endblock %}

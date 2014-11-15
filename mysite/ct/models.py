@@ -390,6 +390,11 @@ class UnitLesson(models.Model):
     def get_answer(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
+    def get_errors(self):
+        'get query set with errors if any'
+        return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS)
+    def get_next_lesson(self):
+        return self.unit.unitlesson_set.get(order=self.order + 1)
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
         'copy self and children to new unit'
         if order == 'APPEND':

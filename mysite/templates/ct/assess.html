@@ -9,13 +9,27 @@
 {% endblock %}
 
 {% block content %}
-    <B>Question:</B> {{ qtext }} <BR>
-    <B>Correct answer:</B> {{ answer }} <BR>
-    <B>Submitted answer:</B> {{ response.atext |md2html }} <BR>
-    <p> <B>Confidence:</B> {{ response.get_confidence_display }} </p>
+<input type="checkbox" id="headtoggle"/>Show Question<BR>
+<div id="headdiv" style="display: none">
+{{ qtext }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+
+<h3>Author's answer</h3> 
+{{ answer }}
+
+<h3>Submitted answer</h3> 
+{{ response.text |md2html }}
+
+
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<br>
+<h3>Assessment</h3>
 
 <form action="{{ actionTarget }}" method="post">
 {{ form.non_field_errors }}
