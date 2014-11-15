@@ -1073,8 +1073,9 @@ def _lessons(request, concept=None, msg='',
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
             lessonSet = distinct_subset(UnitLesson.objects. 
-              filter(Q(lesson__title__icontains=s) |
-                     Q(lesson__text__icontains=s)))
+              filter((Q(lesson__title__icontains=s) |
+                      Q(lesson__text__icontains=s)) &
+                     Q(kind=UnitLesson.COMPONENT)))
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     if not basePath:

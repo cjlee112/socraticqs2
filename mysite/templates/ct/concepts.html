@@ -160,43 +160,52 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
 {% if cset %}
-<h3>Concepts linked to other Courselets.org Questions</h3>
 If one of these matches the concept your question mainly aims to test,
 please click <b>{{ actionLabel }}</b>.
-<ul>
+<table class="table table-striped">
+<thead><tr>
+  <th>Concepts already defined in Courselets.org</th>
+</tr></thead>
+<tbody>
 {% for c in cset %}
-  <li><a href="{% url 'ct:concept' c.id %}">{{ c.title }}</a>
+  <tr><td>
+  <a href="{{ basePath }}concepts/{{ c.id }}/lessons/">{{ c.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="conceptID" value="{{ c.id }}" />
   <input type="submit" value="{{ actionLabel }}" />
   </form>
-  : {{ c.description }}
-  </li>
+  </td></tr>
 {% endfor %}
-</ul>
+</tbody>
+</table>
 {% endif %}
 
 {% if wset %}
-<h3>Concepts found in Wikipedia</h3>
 If one of these matches the concept your question mainly aims to test,
 and does <b>not</b> match any concept already added to Courselets.org
 (above),
 please click <b>{{ actionLabel }}</b>.
 To see details from Wikipedia about each concept, just click its title.
-<ul>
+<table class="table table-striped">
+<thead><tr>
+  <th>Concepts found in Wikipedia</th>
+</tr></thead>
+<tbody>
 {% for title, sourceID, sourceURL in wset %}
-  <li><a href="{{ sourceURL }}">{{ title }}</a>:
+  <tr><td>
+  <a href="{{ sourceURL }}">{{ title }}</a>:
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="wikipediaID" value="{{ sourceID }}" />
   <input type="submit" value="{{ actionLabel }}" />
   </form>
-  </li>
+  </td></tr>
 {% endfor %}
-</ul>
+</tbody>
+</table>
 {% endif %}
 
 {% if conceptForm %}

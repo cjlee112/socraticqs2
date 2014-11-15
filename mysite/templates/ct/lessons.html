@@ -98,18 +98,27 @@ $( "#headtoggle" ).click(function() {
 <h2>Search Results</h2>
 If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
-<ul>
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th><th>Type</th><th>Author</th>
+</tr></thead>
+<tbody>
 {% for ul in lessonSet %}
-  <li><a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
+  <tr><td>
+  <a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
   <input type="hidden" name="ulID" value="{{ ul.pk }}" />
   <input type="submit" value="{{ actionLabel }}" />
   </form>
-  </li>
+  </td>
+    <td>{{ ul.lesson.get_kind_display }}</td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+  </tr>
 {% endfor %}
-</ul>
+</tbody>
+</table>
 {% endif %}
 
 {% if lessonForm %}
