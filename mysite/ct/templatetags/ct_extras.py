@@ -108,3 +108,30 @@ def replace_temporary_markers(txt, func, l):
         lastpos = i + len(marker)
     s += txt[lastpos:]
     return s
+
+def get_base_url(path, extension=[], baseToken='units', tail=2):
+    l = path.split('/')
+    for i,v in enumerate(l):
+        if v == baseToken:
+            return '/'.join(l[:i + tail] + extension) + '/'
+    raise ValueError('baseToken not found in path')
+
+
+@register.filter(name='get_object_url')
+def get_object_url(actionTarget, o, subpath=None):
+    basePath = get_base_url(actionTarget)
+    try:
+        urlFunc = o.get_url
+    except AttributeError:
+        if subpath:
+            tail = subpath + '/'
+        elif subpath is None:
+            tail = 'teach/'
+        else:
+            tail = ''
+        head = getattr(o, '_headURL', o.__class__.__name__.lower())
+        return  '%s%s/%d/%s' % (basePath, head, o.pk,
+                                getattr(o, '_subURL', tail))
+    else:
+        return urlFunc(basePath, subpath)
+    

@@ -33,6 +33,8 @@ urlpatterns = patterns('',
         concept_errors, name='concept_errors'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<concept_id>\d+)/edit/$', edit_concept,
         name='edit_concept'),
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/errors/(?P<concept_id>\d+)/edit/$',
+        edit_error, name='edit_error'),
     # deprecated
     url(r'^teach/$', teach, name='teach'),
     url(r'^live/$', live_session, name='live'),

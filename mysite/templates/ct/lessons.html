@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 {% comment %}
   View or edit a course
 {% endcomment %}
@@ -44,7 +45,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for ul in lessonTable %}
   <tr>
-    <td><a href="{{ basePath }}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
+    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
     <td>{{ ul.lesson.addedBy.get_full_name }}</td>
@@ -64,7 +65,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for cl,clform in conceptLinks.data %}
   <tr>
-    <td><a href="{{ basePath }}lessons/{{ cl.unitLesson.pk }}/teach/">
+    <td><a href="{{ actionTarget |get_object_url:cl.unitLesson }}">
         {{ cl.lesson.title }}</a></td>
     <td>
     {% if conceptLinks.noEdit %}
@@ -105,7 +106,7 @@ please click <b>{{ actionLabel }}</b>.
 <tbody>
 {% for ul in lessonSet %}
   <tr><td>
-  <a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
+  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}

@@ -10,7 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
-from ct.templatetags.ct_extras import md2html
+from ct.templatetags.ct_extras import md2html, get_base_url
 from ct.fsm import FSMStack
 
 ######################################################
@@ -703,6 +703,58 @@ def concepts(request):
     return r
 
 ###########################################################
+# WelcomeMat refactored utilities
+
+def make_tabs(path, current, tabs, stem=-2, tail=None):
+    l = path.split('/')
+    out = l[:stem]
+    if tail:
+        out += l[tail:]
+    outTabs = []
+    for label in tabs:
+        if label == current:
+            url = '#%sTabDiv' % label
+        else:
+            url = '/'.join(out + [label.lower(), ''])
+        outTabs.append((label, url))
+    return outTabs
+
+def concept_tabs(path, current,
+                 tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+
+def error_tabs(path, current,
+                 tabs=('Tests', 'Examples', 'Resolutions', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+
+def make_tab(path, current, label, url):
+    'use #LABELTabDiv or URL depending on whether current matches label'
+    if current == label:
+        return (label,'#%sTabDiv' % label)
+    else:
+        return (label, url)
+
+def lesson_tabs(path, current, unitLesson,
+                 tabs=('Teach', 'Concepts', 'Errors', 'Edit'), **kwargs):
+    outTabs = make_tabs(path, current, tabs, **kwargs)
+    if unitLesson.kind in (UnitLesson.ANSWERS, UnitLesson.MISUNDERSTANDS) \
+       and unitLesson.parent:
+        outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
+                    ['lessons', str(unitLesson.parent.pk), 'teach'])))
+    else:
+        a = unitLesson.get_answers().all()
+        if a:
+            outTabs.append(make_tab(path, current, 'Answer',
+                get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
+    return outTabs
+    
+def unit_tabs(path, current,
+              tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+    
+
+
+###########################################################
 # WelcomeMat refactored views
 
 def update_concept_link(request, conceptLinks):
@@ -714,7 +766,7 @@ def update_concept_link(request, conceptLinks):
 
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
-              actionLabel='Link to this Concept', navTabs=(), basePath=None,
+              actionLabel='Link to this Concept', navTabs=(),
               errorModels=None, **kwargs):
     'search or create a Concept'
     cset = wset = ()
@@ -774,20 +826,19 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
-    if not basePath:
-        basePath = get_base_url(request.path)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
                        searchForm=searchForm, wset=wset, navTabs=navTabs,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       basePath=basePath, errorModels=errorModels))
+                       errorModels=errorModels))
     return render(request, 'ct/concepts.html', kwargs)
 
 
-def edit_concept(request, course_id, unit_id, concept_id):
+def edit_concept(request, course_id, unit_id, concept_id,
+                 tabsFunc=concept_tabs):
     concept = get_object_or_404(Concept, pk=concept_id)
-    navTabs = concept_tabs(request.path, 'Edit')
+    navTabs = tabsFunc(request.path, 'Edit')
     if request.user == concept.addedBy:
         titleform = ConceptForm(instance=concept)
         if request.method == 'POST':
@@ -807,56 +858,9 @@ def edit_concept(request, course_id, unit_id, concept_id):
                        atime=display_datetime(concept.atime),
                        titleform=titleform, navTabs=navTabs))
 
-def get_base_url(path, extension=[], baseToken='units', tail=2):
-    l = path.split('/')
-    for i,v in enumerate(l):
-        if v == baseToken:
-            return '/'.join(l[:i + tail] + extension) + '/'
-    raise ValueError('baseToken not found in path')
-
-def make_tabs(path, current, tabs, stem=-2, tail=None):
-    l = path.split('/')
-    out = l[:stem]
-    if tail:
-        out += l[tail:]
-    outTabs = []
-    for label in tabs:
-        if label == current:
-            url = '#%sTabDiv' % label
-        else:
-            url = '/'.join(out + [label.lower(), ''])
-        outTabs.append((label, url))
-    return outTabs
-
-def concept_tabs(path, current,
-                 tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
-
-def make_tab(path, current, label, url):
-    'use #LABELTabDiv or URL depending on whether current matches label'
-    if current == label:
-        return (label,'#%sTabDiv' % label)
-    else:
-        return (label, url)
-
-def lesson_tabs(path, current, unitLesson,
-                 tabs=('Teach', 'Concepts', 'Errors', 'Edit'), **kwargs):
-    outTabs = make_tabs(path, current, tabs, **kwargs)
-    if unitLesson.kind in (UnitLesson.ANSWERS, UnitLesson.MISUNDERSTANDS) \
-       and unitLesson.parent:
-        outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
-                    ['lessons', str(unitLesson.parent.pk), 'teach'])))
-    else:
-        a = unitLesson.get_answers().all()
-        if a:
-            outTabs.append(make_tab(path, current, 'Answer',
-                get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
-    return outTabs
-    
-def unit_tabs(path, current,
-              tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
-    
+def edit_error(request, course_id, unit_id, concept_id):
+    return edit_concept(request, course_id, unit_id, concept_id,
+                        tabsFunc=error_tabs)
 
 class ConceptLinkTable(object):
     def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
@@ -989,7 +993,7 @@ def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
              pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
              navTabs=(), allowSearch=True, creationInstructions=None,
-             templateFile='ct/lessons.html', basePath=None,
+             templateFile='ct/lessons.html',
              createULFunc=create_unit_lesson, selectULFunc=None,
              newLessonFormClass=NewLessonForm,
              searchArgs=dict(kind=UnitLesson.COMPONENT),
@@ -1035,13 +1039,10 @@ def _lessons(request, concept=None, msg='',
                      Q(**searchArgs)))
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
-    if not basePath:
-        basePath = get_base_url(request.path)
-    kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path, msg=msg,
-                       searchForm=searchForm, navTabs=navTabs,
+    kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path,
+                       searchForm=searchForm, navTabs=navTabs, msg=msg,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       basePath=basePath,
                        creationInstructions=creationInstructions))
     return render(request, templateFile, kwargs)
 

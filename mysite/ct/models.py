@@ -89,6 +89,18 @@ class Concept(models.Model):
                 l.append(UnitLesson.create_from_lesson(lesson, parent.unit,
                             kind=UnitLesson.MISUNDERSTANDS, parent=parent))
         return l
+    def get_url(self, basePath, subpath=None):
+        if self.isError: # default settings
+            head = 'errors'
+            tail = 'edit/'
+        else:
+            head = 'concepts'
+            tail = 'lessons/'
+        if subpath: # apply non-default subpath
+            tail = subpath + '/'
+        elif subpath == '':
+            tail = ''
+        return '%s%s/%d/%s' % (basePath, head, self.pk, tail)
     def __unicode__(self):
         return self.title
             
@@ -348,6 +360,7 @@ class StudyList(models.Model):
 
 class UnitLesson(models.Model):
     'pointer to a Lesson as part of a Unit branch'
+    _headURL = 'lessons'
     COMPONENT = 'part'
     ANSWERS = 'answers'
     MISUNDERSTANDS = 'errmod'

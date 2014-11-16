@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 {% comment %}
   View or edit a course
 {% endcomment %}
@@ -86,7 +87,7 @@ $( "#headtoggle" ).click(function() {
 {% for ul,emTotal in seTable %}
   <tr>
     <td>{{ emTotal }}</td>
-    <td><a href="{{ basePath }}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
+    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
     </td>
   </tr>
 {% endfor %}
@@ -108,7 +109,7 @@ If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
 <ul>
 {% for ul in lessonSet %}
-  <li><a href="{{ basePath}}lessons/{{ ul.pk }}/teach/">{{ ul.lesson.title }}</a>
+  <li><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}

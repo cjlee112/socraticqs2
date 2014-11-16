@@ -1,5 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
+{% load ct_extras %}
 {% comment %}
   View or edit a course
 {% endcomment %}
@@ -59,7 +60,7 @@ $( "#headtoggle" ).click(function() {
     </form>
     {% endif %}
     </td>
-    <td><a href="{{ basePath }}concepts/{{ cl.concept.pk }}/lessons/">
+    <td><a href="{{ actionTarget |get_object_url:cl.concept }}">
         {{ cl.concept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -93,7 +94,7 @@ $( "#headtoggle" ).click(function() {
     <input type="submit" value="Reverse" title="click to reverse the relationship between these concepts" />
     </form>
     </td>
-    <td><a href="{{ basePath }}concepts/{{ cg.toConcept.pk }}/lessons/">
+    <td><a href="{{ actionTarget|get_object_url:cg.toConcept }}">
         {{ cg.toConcept.title }}</a></td>
   </tr>
 {% endfor %}
@@ -111,7 +112,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for cg,cgform in fromTable.data %}
   <tr>
-    <td><a href="{{ basePath }}concepts/{{ cg.fromConcept.pk }}/lessons/">
+    <td><a href="{{ actionTarget |get_object_url:cg.fromConcept }}">
         {{ cg.fromConcept.title }}</a></td>
     <td>
     <form action="{{ actionTarget }}" method="post"
@@ -142,7 +143,7 @@ $( "#headtoggle" ).click(function() {
 </tr></thead>
 <tbody>
 {% for cg in errorModels %}
-  <tr><td><a href="{{ basePath }}concepts/{{ cg.fromConcept.pk }}/lessons/">
+  <tr><td><a href="{{ actionTarget |get_object_url:cg.fromConcept }}">
         {{ cg.fromConcept.title }}</a></td></tr>
 {% endfor %}
 </tbody>
@@ -169,7 +170,7 @@ please click <b>{{ actionLabel }}</b>.
 <tbody>
 {% for c in cset %}
   <tr><td>
-  <a href="{{ basePath }}concepts/{{ c.id }}/lessons/">{{ c.title }}</a>
+  <a href="{{ actionTarget |get_object_url:c }}">{{ c.title }}</a>
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
