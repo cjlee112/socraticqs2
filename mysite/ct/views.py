@@ -847,7 +847,7 @@ def lesson_tabs(path, current, unitLesson,
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
                     ['lessons', str(unitLesson.parent.pk), 'teach'])))
     else:
-        a = unitLesson.get_answer().all()
+        a = unitLesson.get_answers().all()
         if a:
             outTabs.append(make_tab(path, current, 'Answer',
                 get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
@@ -980,15 +980,23 @@ def concept_errors(request, course_id, unit_id, concept_id):
             navTabs=navTabs)
     return r
 
+def create_unit_lesson(lesson, concept, unit, parentUL):
+    'save new lesson, bind to concept, and append to this unit'
+    lesson.save_root(concept)
+    return UnitLesson.create_from_lesson(lesson, unit, order='APPEND')
 
 def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
              pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
              navTabs=(), allowSearch=True, creationInstructions=None,
-             templateFile='ct/lessons.html', basePath=None, **kwargs):
+             templateFile='ct/lessons.html', basePath=None,
+             createULFunc=create_unit_lesson, selectULFunc=None,
+             newLessonFormClass=NewLessonForm,
+             searchArgs=dict(kind=UnitLesson.COMPONENT),
+             parentUL=None, **kwargs):
     'search or create a Lesson'
     if creationInstructions:
-        lessonForm = NewLessonForm()
+        lessonForm = newLessonFormClass()
     else:
         lessonForm = None
     if allowSearch:
@@ -1000,15 +1008,20 @@ def _lessons(request, concept=None, msg='',
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks)
         elif 'ulID' in request.POST:
-            return UnitLesson.objects.get(pk=int(request.POST.get('ulID')))
+            ul = UnitLesson.objects.get(pk=int(request.POST.get('ulID')))
+            if selectULFunc:
+                ul = selectULFunc(ul, concept, unit, request.user, parentUL)
+                if isinstance(ul, UnitLesson):
+                    return ul
+                msg = ul # treat as error message to display
+            else:
+                return ul
         elif 'title' in request.POST: # create new lesson
-            lessonForm = NewLessonForm(request.POST)
+            lessonForm = newLessonFormClass(request.POST)
             if lessonForm.is_valid():
                 lesson = lessonForm.save(commit=False)
                 lesson.addedBy = request.user
-                lesson.save_root(concept)
-                return UnitLesson.create_from_lesson(lesson, unit,
-                                                     order='APPEND')
+                return createULFunc(lesson, concept, unit, parentUL)
         else:
             return 'please write POST error message'
 
@@ -1019,7 +1032,7 @@ def _lessons(request, concept=None, msg='',
             lessonSet = distinct_subset(UnitLesson.objects. 
               filter((Q(lesson__title__icontains=s) |
                       Q(lesson__text__icontains=s)) &
-                     Q(kind=UnitLesson.COMPONENT)))
+                     Q(**searchArgs)))
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     if not basePath:
@@ -1048,16 +1061,9 @@ def concept_lessons(request, course_id, unit_id, concept_id):
                  creationInstructions=creationInstructions)
     if isinstance(r, UnitLesson):
         if r.lesson.kind == Lesson.ORCT_QUESTION:
-            if r.unitlesson_set.filter(kind=UnitLesson.MISUNDERSTANDS) \
-                                      .count() == 0: # add error models
-                for cg in concept.relatedFrom \
-                    .filter(relationship=ConceptGraph.MISUNDERSTANDS):
-                    lesson = Lesson.objects \
-                      .get(conceptlink__concept=cg.fromConcept,
-                           conceptlink__relationship=ConceptLink.IS)
-                    UnitLesson.create_from_lesson(lesson, unit,
-                            kind=UnitLesson.MISUNDERSTANDS, parent=r)
-            if r.unitlesson_set.filter(kind=UnitLesson.ANSWERS).count() == 0:
+            if r.get_errors().count() == 0: # copy error models from concept
+                concept.copy_error_models(r)
+            if r.get_answers().count() == 0: # add empty answer to edit
                 answer = Lesson(title='Answer', text='write an answer',
                                 addedBy=r.addedBy, kind=Lesson.ANSWER)
                 answer.save_root()
@@ -1074,6 +1080,12 @@ def concept_lessons(request, course_id, unit_id, concept_id):
             allowSearch=False)
     return r
 
+def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
+    'copy lesson and append to this unit'
+    if ul.unit == unit:
+        return 'Lesson already in this unit, so no change made.'
+    return ul.copy(unit, addedBy, order='APPEND')
+
 @login_required
 def unit_lessons(request, course_id, unit_id, lessonTable=None,
                  currentTab='Lessons'):
@@ -1087,13 +1099,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
                   pageTitle=unit.title, unit=unit, navTabs=navTabs,
-                  lessonTable=lessonTable)
+                  lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
-        if r.unit == unit:
-            msg = 'Lesson already in this unit, so no change made.'
-        else:  # copy from another unit
-            ul = r.copy(order='APPEND')
-            lessonTable.append(ul)
+        lessonTable.append(r)
         return _lessons(request, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, 
             pageTitle=unit.title, unit=unit, 
@@ -1144,6 +1152,22 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                        atime=display_datetime(ul.atime),
                        titleform=titleform, navTabs=navTabs))
 
+
+def create_error_ul(lesson, concept, unit, parentUL):
+    'create UnitLesson, Concept etc. for new error model'
+    lesson.kind = lesson.ERROR_MODEL
+    em = concept.create_error_model(title=lesson.title,
+            description=lesson.text, addedBy=lesson.addedBy)
+    lesson.save_root(em) # automatically adds ConceptLink to em
+    return UnitLesson.create_from_lesson(lesson, unit, parent=parentUL)
+
+def copy_error_ul(ul, concept, unit, addedBy, parentUL):
+    'copy error and append to this unit'
+    if ul.unit == unit:
+        return 'Lesson already in this unit, so no change made.'
+    return ul.copy(unit, addedBy, order='APPEND', parent=parentUL)
+
+
 @login_required
 def ul_errors(request, course_id, unit_id, ul_id):
     unit = get_object_or_404(Unit, pk=unit_id)
@@ -1152,31 +1176,47 @@ def ul_errors(request, course_id, unit_id, ul_id):
     navTabs = lesson_tabs(request.path, 'Errors', ul)
     query = Q(unitLesson=ul, selfeval__isnull=False)
     statusTable, evalTable, n = Response.get_counts(query)
-    query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
-    seTable = StudentError.get_counts(query, n)
+    if n > 0:
+        query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
+        seTable = StudentError.get_counts(query, n)
+        allowSearch = True
+    else:
+        seTable = []
+        allowSearch = False
+    try:
+        concept = Concept.objects.filter(conceptlink__lesson=ul.lesson,
+                conceptlink__relationship=ConceptLink.TESTS)[0]
+        creationInstructions='You can write a new error model below.'
+        msg='''You can search for existing error models to add
+          to this lesson, or write a new error model below.'''
+    except IndexError:
+        concept = creationInstructions = None
+        msg = '''This lesson is not linked to any concept.  Please
+        add a concept link (by clicking on the Concepts tab) before
+        adding error models to this lesson. '''
     errorModels = set([t[0] for t in seTable])
     for em in ul.get_errors():
         if em not in errorModels:
             seTable.append((em, fmt_count(0, n)))
-    r = _lessons(request, msg='''You can search for a lesson to add
-          to this courselet, or write a new lesson for a concept by
-          clicking on the Concepts tab.''', 
+    r = _lessons(request, concept, msg, allowSearch=allowSearch,
                   pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
                   statusTable=statusTable, evalTable=evalTable,
                   seTable=seTable, headText=headText,
-                  templateFile='ct/errors.html')
+                  templateFile='ct/errors.html',
+                  creationInstructions=creationInstructions,
+                  newLessonFormClass=NewErrorForm, parentUL=ul,
+                  createULFunc=create_error_ul, selectULFunc=copy_error_ul,
+                  searchArgs=dict(kind=UnitLesson.MISUNDERSTANDS))
     if isinstance(r, UnitLesson):
-        if r.unit == unit:
-            msg = 'Lesson already in this unit, so no change made.'
-        else:  # copy from another unit
-            ul = r.copy()
-            lessonTable.append(ul)
-        return _lessons(request, msg='''Successfully added lesson.
-            Thank you!''', ignorePOST=True, 
+        seTable.append((r, fmt_count(0, n)))
+        return _lessons(request, concept, msg='''Successfully added error
+            model.  Thank you!''', ignorePOST=True, 
             pageTitle=unit.title, unit=unit, navTabs=navTabs,
             statusTable=statusTable, evalTable=evalTable,
             seTable=seTable, headText=headText,
-            templateFile='ct/errors.html')
+            templateFile='ct/errors.html',
+            creationInstructions=creationInstructions,
+            newLessonFormClass=NewErrorForm)
     return r
 
 
@@ -1251,7 +1291,7 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
         form = SelfAssessForm()
         form.fields['emlist'].choices = choices
     try:
-        answer = r.unitLesson.get_answer()[0]
+        answer = r.unitLesson.get_answers()[0]
     except IndexError:
         answer = ''
     else:

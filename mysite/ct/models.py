@@ -67,6 +67,28 @@ class Concept(models.Model):
         'search Concept title and description'
         return klass.objects.filter(Q(title__icontains=s) |
                                     Q(description__icontains=s)).distinct()
+    def create_error_model(self, addedBy, **kwargs):
+        'create a new error model for this concept'
+        em = self.__class__(isError=True, addedBy=addedBy, **kwargs)
+        em.save()
+        em.relatedTo.create(toConcept=self, addedBy=addedBy,
+                            relationship=ConceptGraph.MISUNDERSTANDS)
+        return em
+    def copy_error_models(self, parent):
+        'add to parent one UnitLesson for each error RE: this concept'
+        l = []
+        for cg in self.relatedFrom \
+                    .filter(relationship=ConceptGraph.MISUNDERSTANDS):
+            try: # get one lesson representing this error model
+                lesson = Lesson.objects \
+                  .filter(conceptlink__concept=cg.fromConcept,
+                          conceptlink__relationship=ConceptLink.IS)[0]
+            except IndexError:
+                pass
+            else:
+                l.append(UnitLesson.create_from_lesson(lesson, parent.unit,
+                            kind=UnitLesson.MISUNDERSTANDS, parent=parent))
+        return l
     def __unicode__(self):
         return self.title
             
@@ -376,7 +398,7 @@ class UnitLesson(models.Model):
         return out
     @classmethod
     def get_conceptlinks(klass, concept, unit):
-        'get list of (conceptLink, unitLesson) deduped on treeID, relationship'
+        'get list of conceptLinks deduped on treeID, relationship'
         d = {}
         for cl in ConceptLink.objects.filter(concept=concept):
             for ul in klass.objects.filter(lesson=cl.lesson):
@@ -387,7 +409,7 @@ class UnitLesson(models.Model):
         l = d.values()
         l.sort(lambda x,y:cmp(x.relationship, y.relationship))
         return l
-    def get_answer(self):
+    def get_answers(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
     def get_errors(self):
@@ -528,7 +550,9 @@ class Response(models.Model):
         statusDict = {}
         for d in querySet.values('status').annotate(dcount=Count('status')):
             statusDict[d['status']] = d['dcount']
-        n = querySet.count() or 1 # prevent DivideByZero
+        n = querySet.count()
+        if not n: # prevent DivideByZero
+            return (), (), 0
         statusTable = [fmt_count(statusDict.get(k, 0), n)
                        for k,_ in STATUS_CHOICES] \
                        + [fmt_count(n - sum(statusDict.values()), n)]

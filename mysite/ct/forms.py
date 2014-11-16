@@ -108,6 +108,7 @@ class ConceptGraphForm(forms.ModelForm):
 class LessonForm(forms.ModelForm):
     submitLabel = 'Update'
     url = forms.CharField(required=False)
+    changeLog = forms.CharField(required=False, widget=forms.Textarea)
     def __init__(self, *args, **kwargs):
         super(LessonForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -122,6 +123,18 @@ class LessonForm(forms.ModelForm):
 
 class NewLessonForm(LessonForm):
     submitLabel = 'Add'
+
+class NewErrorForm(forms.ModelForm):
+    submitLabel = 'Add'
+    def __init__(self, *args, **kwargs):
+        super(NewErrorForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-errorForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
+    class Meta:
+        model = Lesson
+        fields = ['title', 'text']
 
 class LessonSearchForm(forms.Form):
     ## def __init__(self, *args, **kwargs):
