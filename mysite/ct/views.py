@@ -1186,13 +1186,28 @@ def ul_errors(request, course_id, unit_id, ul_id):
     navTabs = lesson_tabs(request.path, 'Errors', ul)
     query = Q(unitLesson=ul, selfeval__isnull=False)
     statusTable, evalTable, n = Response.get_counts(query)
+    showNovelErrors = False
     if n > 0:
         query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
         seTable = StudentError.get_counts(query, n)
         allowSearch = True
+        neArgs = {}
+        if request.method == 'GET' and 'selfeval' in request.GET:
+            neForm = ResponseFilterForm(request.GET)
+            if neForm.is_valid():
+                showNovelErrors = True
+                if neForm.cleaned_data['selfeval']:
+                    neArgs['selfeval'] = neForm.cleaned_data['selfeval']
+                if neForm.cleaned_data['status']:
+                    neArgs['status'] = neForm.cleaned_data['status']
+                if neForm.cleaned_data['confidence']:
+                    neArgs['confidence'] = neForm.cleaned_data['confidence']
+        else:
+            neForm = ResponseFilterForm(request.GET)
+        novelErrors = Response.get_novel_errors(ul, **neArgs)
     else:
-        seTable = []
-        allowSearch = False
+        seTable = novelErrors = []
+        allowSearch = neForm = False
     try:
         concept = Concept.objects.filter(conceptlink__lesson=ul.lesson,
                 conceptlink__relationship=ConceptLink.TESTS)[0]
@@ -1213,6 +1228,8 @@ def ul_errors(request, course_id, unit_id, ul_id):
                   statusTable=statusTable, evalTable=evalTable,
                   seTable=seTable, headText=headText,
                   templateFile='ct/errors.html',
+                  showNovelErrors=showNovelErrors,
+                  novelErrors=novelErrors, responseFilterForm=neForm,
                   creationInstructions=creationInstructions,
                   newLessonFormClass=NewErrorForm, parentUL=ul,
                   createULFunc=create_error_ul, selectULFunc=copy_error_ul,
@@ -1224,7 +1241,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
             pageTitle=unit.title, unit=unit, navTabs=navTabs,
             statusTable=statusTable, evalTable=evalTable,
             seTable=seTable, headText=headText,
-            templateFile='ct/errors.html',
+            templateFile='ct/errors.html', novelErrors=novelErrors,
             creationInstructions=creationInstructions,
             newLessonFormClass=NewErrorForm)
     return r

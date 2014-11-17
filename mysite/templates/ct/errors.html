@@ -95,6 +95,48 @@ $( "#headtoggle" ).click(function() {
 </table>
 {% endif %}
 
+{% if responseFilterForm %}
+<input type="checkbox" id="noverrtoggle"
+{% if showNovelErrors %}
+CHECKED
+{% endif %}
+/>Show Uncategorized Errors<BR>
+{% if showNovelErrors %}
+<div id="noverrdiv">
+{% else %}
+<div id="noverrdiv" style="display: none">
+{% endif %}
+<form action="{{ actionTarget }}" method="get"
+   style=" display:inline!important;">
+  Show uncategorized student responses that are
+  {{ responseFilterForm.selfeval }} vs. the right answer,
+  where the student was initially {{ responseFilterForm.confidence }},
+  and now understands the concept: {{ responseFilterForm.status }}<br>
+  <input type="submit" value="Show" />
+</form><br>
+<table class="table table-striped">
+<thead><tr>
+  <th>Status</th><th>Student's answer</th>
+</tr></thead>
+<tbody>
+{% for r in novelErrors %}
+  <tr>
+  <td><a href="{{ actionTarget |get_object_url:r }}">Assess</a>
+    </td>
+  <td>{{ r.text|md2html }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<script>
+$( "#noverrtoggle" ).click(function() {
+  $( "#noverrdiv" ).toggle();
+});
+</script>
+{% endif %}
+
 {{ msg }}
 {% if searchForm %}
 <form action="{{ actionTarget }}" method="get">

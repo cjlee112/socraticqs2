@@ -124,6 +124,15 @@ class LessonForm(forms.ModelForm):
 class NewLessonForm(LessonForm):
     submitLabel = 'Add'
 
+class ResponseFilterForm(forms.Form):
+    selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
+                choices=(('', '----'),) + Response.EVAL_CHOICES[:2])
+    status = forms.ChoiceField(required=False,
+                choices=(('', '----'),) + STATUS_CHOICES)
+    confidence = forms.ChoiceField(required=False,
+                choices=(('', '----'),) + Response.CONF_CHOICES)
+
+
 class ErrorForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):

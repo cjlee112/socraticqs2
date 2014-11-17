@@ -606,6 +606,24 @@ class Response(models.Model):
             l.append((label, [fmt_count(evalDict.get((conf,selfeval), 0), n)
                               for selfeval,_ in klass.EVAL_CHOICES]))
         return statusTable, l, n
+    @classmethod
+    def get_novel_errors(klass, unitLesson=None, query=None,
+                         selfeval=DIFFERENT, **kwargs):
+        'get wrong responses with no StudentError classification'
+        if not query:
+            if not unitLesson:
+                raise ValueError('no query and no unitLesson?!?')
+            query = Q(unitLesson=unitLesson)
+        return klass.objects.filter(query &
+                    Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
+    def get_url(self, basePath, subpath=None):
+        'URL for this response'
+        if subpath:
+            tail = subpath + '/'
+        else:
+            tail = ''
+        return '%slessons/%d/responses/%d/%s' % (basePath, self.unitLesson_id,
+                                                 self.pk, tail)
 
 class StudentError(models.Model):
     'identification of a specific error model made by a student'
