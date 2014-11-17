@@ -91,16 +91,20 @@ class Concept(models.Model):
         return l
     def get_url(self, basePath, subpath=None):
         if self.isError: # default settings
+            objID = UnitLesson.objects \
+              .filter(lesson__conceptlink__relationship=ConceptLink.IS,
+                      lesson__conceptlink__concept=self)[0].pk
             head = 'errors'
-            tail = 'edit/'
+            tail = 'resolutions/'
         else:
+            objID = self.pk
             head = 'concepts'
             tail = 'lessons/'
         if subpath: # apply non-default subpath
             tail = subpath + '/'
         elif subpath == '':
             tail = ''
-        return '%s%s/%d/%s' % (basePath, head, self.pk, tail)
+        return '%s%s/%d/%s' % (basePath, head, objID, tail)
     def __unicode__(self):
         return self.title
             
@@ -306,6 +310,7 @@ class ConceptLink(models.Model):
     INTRODUCES = 'intro'
     COMMENTS = 'comment'
     WARNS = 'warns'
+    RESOLVES = 'resol'
     REL_CHOICES = (
         (IS, 'Represents (unique ID for)'),
         (DEFINES, 'Defines'),
@@ -320,6 +325,7 @@ class ConceptLink(models.Model):
         (INTRODUCES, 'Introduces'),
         (COMMENTS, 'Comments on'),
         (WARNS, 'Warns about'),
+        (RESOLVES, 'Helps students resolve'),
     )
     concept = models.ForeignKey(Concept)
     lesson = models.ForeignKey(Lesson)
@@ -364,12 +370,14 @@ class UnitLesson(models.Model):
     COMPONENT = 'part'
     ANSWERS = 'answers'
     MISUNDERSTANDS = 'errmod'
+    RESOLVES = 'resol'
     PRETEST_POSTTEST = 'pretest'
     SUBUNIT = 'subunit'
     KIND_CHOICES = (
         (COMPONENT, 'Included in this courselet'),
         (ANSWERS, 'Answer for a question'),
         (MISUNDERSTANDS, 'Common error for a question'),
+        (RESOLVES, 'Resolution for an error'),
         (PRETEST_POSTTEST, 'Pre-test/Post-test for this courselet'),
         (SUBUNIT, 'Container for this courselet'),
     )
@@ -428,6 +436,14 @@ class UnitLesson(models.Model):
     def get_errors(self):
         'get query set with errors if any'
         return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS)
+    def get_em_resolutions(self):
+        'get deduped list of resolutions UL for this error UL'
+        em = Concept.objects.get(conceptlink__lesson=self.lesson,
+                                 conceptlink__relationship=ConceptLink.IS)
+        query = Q(kind=self.RESOLVES,
+                  lesson__conceptlink__relationship=ConceptLink.RESOLVES,
+                  lesson__conceptlink__concept=em)
+        return em, distinct_subset(UnitLesson.objects.filter(query))
     def get_next_lesson(self):
         return self.unit.unitlesson_set.get(order=self.order + 1)
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
@@ -441,6 +457,18 @@ class UnitLesson(models.Model):
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
+    def get_url(self, basePath, subpath=None):
+        if self.kind == UnitLesson.MISUNDERSTANDS: # default settings
+            head = 'errors'
+            tail = 'resolutions/'
+        else:
+            head = 'lessons'
+            tail = 'teach/'
+        if subpath: # apply non-default subpath
+            tail = subpath + '/'
+        elif subpath == '':
+            tail = ''
+        return '%s%s/%d/%s' % (basePath, head, self.pk, tail)
 
 class Unit(models.Model):
     'a container of exercises performed together'

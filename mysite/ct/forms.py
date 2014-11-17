@@ -124,6 +124,18 @@ class LessonForm(forms.ModelForm):
 class NewLessonForm(LessonForm):
     submitLabel = 'Add'
 
+class ErrorForm(forms.ModelForm):
+    submitLabel = 'Update'
+    def __init__(self, *args, **kwargs):
+        super(ErrorForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-errorForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
+    class Meta:
+        model = Lesson
+        fields = ['title', 'text', 'changeLog']
+
 class NewErrorForm(forms.ModelForm):
     submitLabel = 'Add'
     def __init__(self, *args, **kwargs):

@@ -10,7 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
-from ct.templatetags.ct_extras import md2html, get_base_url
+from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url
 from ct.fsm import FSMStack
 
 ######################################################
@@ -723,9 +723,13 @@ def concept_tabs(path, current,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
 
-def error_tabs(path, current,
-                 tabs=('Tests', 'Examples', 'Resolutions', 'Edit'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
+def error_tabs(path, current, unitLesson,
+               tabs=('Tests', 'Examples', 'Resolutions', 'Edit'), **kwargs):
+    outTabs = make_tabs(path, current, tabs, **kwargs)
+    outTabs.append(make_tab(path, current, 'Question',
+                            get_object_url(path, unitLesson.parent)))
+    return outTabs
+
 
 def make_tab(path, current, label, url):
     'use #LABELTabDiv or URL depending on whether current matches label'
@@ -1131,16 +1135,21 @@ def ul_teach(request, course_id, unit_id, ul_id):
     
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
-    navTabs = lesson_tabs(request.path, 'Edit', ul)
+    if ul.kind == ul.MISUNDERSTANDS:
+        formClass = ErrorForm
+        navTabs = error_tabs(request.path, 'Edit', ul)
+    else:
+        formClass = LessonForm
+        navTabs = lesson_tabs(request.path, 'Edit', ul)
     if request.user == ul.addedBy:
-        titleform = LessonForm(instance=ul.lesson)
+        titleform = formClass(instance=ul.lesson)
         if request.method == 'POST':
             if 'title' in request.POST:
-                titleform = LessonForm(request.POST, instance=ul.lesson)
+                titleform = formClass(request.POST, instance=ul.lesson)
                 if titleform.is_valid():
                     titleform.save()
-                    return HttpResponseRedirect(reverse('ct:ul_teach',
-                                args=(course_id, unit_id, ul_id)))
+                    return HttpResponseRedirect(get_object_url(request.path,
+                                                               ul))
             elif request.POST.get('task') == 'delete':
                 ul.delete()
                 return HttpResponseRedirect(reverse('ct:unit_lessons',
@@ -1220,6 +1229,50 @@ def ul_errors(request, course_id, unit_id, ul_id):
             newLessonFormClass=NewErrorForm)
     return r
 
+def create_resolution_ul(lesson, em, unit, parentUL):
+    'create UnitLesson as resolution linked to error model'
+    lesson.save_root(em, ConceptLink.RESOLVES) # link as resolution
+    return UnitLesson.create_from_lesson(lesson, unit,
+                                         kind=UnitLesson.RESOLVES)
+
+def link_resolution_ul(ul, em, unit, addedBy, parentUL):
+    'link ul as resolution for error model'
+    if ul.lesson.conceptlink_set.filter(concept=em,
+                    relationship=ConceptLink.RESOLVES).count() == 0:
+        ul.lesson.conceptlink_set.create(concept=em, addedBy=addedBy,
+                                  relationship=ConceptLink.RESOLVES)
+    return ul
+
+
+@login_required
+def resolutions(request, course_id, unit_id, ul_id):
+    'UI for user to add or write remediations for a specific error'
+    unit = get_object_or_404(Unit, pk=unit_id)
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    headText = md2html(ul.lesson.text)
+    navTabs = error_tabs(request.path, 'Resolutions', ul)
+    em, lessonTable = ul.get_em_resolutions()
+    msg = '''This page lists lessons, exercises, or review
+    suggested for students who make this error, to help them
+    overcome it.  You can add to the list by either searching
+    for relevant lessons, or writing a new lesson below.'''
+    creationInstructions = '''You can write a new lesson that
+                  helps students overcome this error, and click Add.'''
+    r = _lessons(request, em, msg, lessonTable=lessonTable,
+                 pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
+                 headText=headText, actionLabel='Add to suggestion list',
+                 creationInstructions=creationInstructions,
+                 createULFunc=create_resolution_ul,
+                 selectULFunc=link_resolution_ul)
+    if isinstance(r, UnitLesson):
+        if r not in lessonTable:
+            lessonTable.append(r)
+        return _lessons(request, em, msg='''Successfully added resolution
+                  Thank you!''', ignorePOST=True, lessonTable=lessonTable,
+                  pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
+                  headText=headText, actionLabel='Add to suggestion list',
+                  creationInstructions=creationInstructions)
+    return r
 
 ###########################################################
 # welcome mat refactored student UI for courses
