@@ -86,7 +86,6 @@ class Concept(models.Model):
             head = 'errors'
             tail = 'resolutions/'
         else:
-            objID = self.pk
             head = 'concepts'
             tail = 'lessons/'
         if subpath: # apply non-default subpath
@@ -239,14 +238,6 @@ class Lesson(models.Model):
         dataClass = klass._sourceDBdict[sourceDB]
         return dataClass.search(query, **kwargs)
 
-    @classmethod
-    def search_text(klass, s, noDup=True):
-        'search Lesson title and text'
-        out = klass.objects.filter(Q(title__icontains=s) |
-                                   Q(text__icontains=s)).distinct()
-        if noDup:
-            out = distinct_subset(out)
-        return out
     ## @classmethod
     ## def create_from_concept(klass, concept, **kwargs):
     ##     'create lesson for initial concept definition'
@@ -398,11 +389,20 @@ class UnitLesson(models.Model):
         ul.save()
         return ul
     @classmethod
-    def search_text(klass, s, noDup=True):
-        'search Lesson title and text'
-        out = klass.objects.filter(Q(lesson__title__icontains=s) |
-                                   Q(lesson__text__icontains=s)).distinct()
-        if noDup:
+    def search_text(klass, s, searchType=IS_LESSON, dedupe=True, **kwargs):
+        'search lessons, concepts or errors for title and text'
+        if searchType == IS_LESSON:
+            kwargs['lesson__concept__isnull'] = True
+        elif searchType == IS_ERROR:
+            kwargs['lesson__concept__isnull'] = False
+            kwargs['kind'] = klass.MISUNDERSTANDS
+        else: # search for regular concepts
+            kwargs['lesson__concept__isnull'] = False
+            kwargs['lesson__concept__isError'] = False
+        out = klass.objects.filter((Q(lesson__title__icontains=s) |
+                                    Q(lesson__text__icontains=s)) &
+                                   Q(**kwargs)).distinct()
+        if dedupe:
             out = distinct_subset(out)
         return out
     @classmethod

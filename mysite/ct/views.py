@@ -842,9 +842,9 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
             if errorModels is not None: # search errors only
-                cset = Concept.search_text(s).filter(isError=True)
+                cset = UnitLesson.search_text(s, IS_ERROR)
             else: # search correct concepts only
-                cset = Concept.search_text(s).filter(isError=False)
+                cset = UnitLesson.search_text(s, IS_CONCEPT)
                 wset = Lesson.search_sourceDB(s)
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
@@ -914,6 +914,7 @@ class ConceptLinkTable(object):
 
 @login_required
 def unit_concepts(request, course_id, unit_id):
+    'page for viewing or adding concepts relevant to this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
     navTabs = unit_tabs(request.path, 'Concepts')
     cLinks = ConceptLink.objects.filter(lesson__unitlesson__unit=unit,
@@ -925,14 +926,15 @@ def unit_concepts(request, course_id, unit_id):
                         title='Concepts Linked to this Courselet')
     r = _concepts(request, '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
-                  pageTitle=unit.title, unit=unit, navTabs=navTabs)
-    if isinstance(r, Concept):
-        url = '%s%d/lessons/' % (request.path, r.id)
-        return HttpResponseRedirect(url)
+                  pageTitle=unit.title, unit=unit, navTabs=navTabs,
+                  actionLabel='Add to courselet')
+    if isinstance(r, Concept): # newly created concept
+        return HttpResponseRedirect(get_object_url(request.path, r))
     return r
 
 @login_required
 def ul_concepts(request, course_id, unit_id, ul_id):
+    'page for viewing or adding concept links to this UnitLesson'
     unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
     headText = md2html(unitLesson.lesson.text)
     navTabs = lesson_tabs(request.path, 'Concepts', unitLesson)
@@ -942,7 +944,7 @@ def ul_concepts(request, course_id, unit_id, ul_id):
     r = _concepts(request, '''To add a concept to this lesson, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
                   pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
-                  headText=headText, navTabs=navTabs)
+                  headText=headText, navTabs=navTabs, showConceptAction=True)
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
@@ -950,7 +952,7 @@ def ul_concepts(request, course_id, unit_id, ul_id):
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
                   pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
-                  headText=headText, navTabs=navTabs)
+                  headText=headText, navTabs=navTabs, showConceptAction=True)
     return r
 
 def concept_page_data(request, unit_id, ul_id, currentTab):
@@ -1027,8 +1029,7 @@ def _lessons(request, concept=None, msg='',
              templateFile='ct/lessons.html',
              createULFunc=create_unit_lesson, selectULFunc=None,
              newLessonFormClass=NewLessonForm,
-             searchArgs=dict(kind=UnitLesson.COMPONENT),
-             parentUL=None, **kwargs):
+             searchArgs={}, parentUL=None, **kwargs):
     'search or create a Lesson'
     if creationInstructions:
         lessonForm = newLessonFormClass()
@@ -1064,10 +1065,7 @@ def _lessons(request, concept=None, msg='',
         searchForm = LessonSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            lessonSet = distinct_subset(UnitLesson.objects. 
-              filter((Q(lesson__title__icontains=s) |
-                      Q(lesson__text__icontains=s)) &
-                     Q(**searchArgs)))
+            lessonSet = UnitLesson.search_text(s, **searchArgs)
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path,
@@ -1266,7 +1264,8 @@ def ul_errors(request, course_id, unit_id, ul_id):
                   creationInstructions=creationInstructions,
                   newLessonFormClass=NewErrorForm, parentUL=ul,
                   createULFunc=create_error_ul, selectULFunc=copy_error_ul,
-                  searchArgs=dict(kind=UnitLesson.MISUNDERSTANDS))
+                  searchArgs=dict(searchType=IS_ERROR),
+                  actionLabel='Add error model')
     if isinstance(r, UnitLesson):
         seTable.append((r, fmt_count(0, n)))
         return _lessons(request, concept, msg='''Successfully added error

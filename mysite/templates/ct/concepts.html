@@ -168,15 +168,17 @@ please click <b>{{ actionLabel }}</b>.
   <th>Concepts already defined in Courselets.org</th>
 </tr></thead>
 <tbody>
-{% for c in cset %}
+{% for ul in cset %}
   <tr><td>
-  <a href="{{ actionTarget |get_object_url:c }}">{{ c.title }}</a>
+  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
+  {% if showConceptAction %}
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
   {% csrf_token %}
-  <input type="hidden" name="conceptID" value="{{ c.id }}" />
+  <input type="hidden" name="conceptID" value="{{ ul.lesson.concept.id }}" />
   <input type="submit" value="{{ actionLabel }}" />
   </form>
+  {% endif %}
   </td></tr>
 {% endfor %}
 </tbody>
