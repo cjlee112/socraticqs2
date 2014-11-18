@@ -726,7 +726,8 @@ def concept_tabs(path, current,
 def error_tabs(path, current, unitLesson,
                tabs=('Tests', 'Examples', 'Resolutions', 'Edit'), **kwargs):
     outTabs = make_tabs(path, current, tabs, **kwargs)
-    outTabs.append(make_tab(path, current, 'Question',
+    if unitLesson.parent:
+        outTabs.append(make_tab(path, current, 'Question',
                             get_object_url(path, unitLesson.parent)))
     return outTabs
 
@@ -768,10 +769,17 @@ def update_concept_link(request, conceptLinks):
         clform.save()
         conceptLinks.replace(cl, clform)
 
+def create_concept(concept, unit):
+    'save concept with newly created UnitLesson representing it'
+    concept.save()
+    UnitLesson.create_from_concept(concept, unit)
+    return concept
+
+    
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
               actionLabel='Link to this Concept', navTabs=(),
-              errorModels=None, **kwargs):
+              errorModels=None, createConceptFunc=create_concept, **kwargs):
     'search or create a Concept'
     cset = wset = ()
     if errorModels is not None:
@@ -813,9 +821,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
             if conceptForm.is_valid():
                 concept = conceptForm.save(commit=False)
                 concept.addedBy = request.user
-                concept.save()
-                UnitLesson.create_from_concept(concept, unit)
-                return concept
+                return createConceptFunc(concept, unit)
         else:
             return 'please write POST error message'
     elif 'search' in request.GET:
@@ -966,6 +972,11 @@ def concept_concepts(request, course_id, unit_id, concept_id):
             headText=headText, navTabs=navTabs)
     return r
 
+def create_em_concept(concept, unit):
+    concept.isError = True
+    concept.save()
+    UnitLesson.create_from_concept(concept, unit)
+    return concept
 
 @login_required
 def concept_errors(request, course_id, unit_id, concept_id):
@@ -976,9 +987,8 @@ def concept_errors(request, course_id, unit_id, concept_id):
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', errorModels=errorModels,
                   pageTitle=concept.title, unit=unit, headText=headText,
-                  navTabs=navTabs)
+                  navTabs=navTabs, createConceptFunc=create_em_concept)
     if isinstance(r, Concept):
-        r.isError = True
         cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
                                     relationship=ConceptGraph.MISUNDERSTANDS)
         errorModels.append(cg)
