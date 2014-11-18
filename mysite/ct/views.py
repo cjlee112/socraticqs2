@@ -904,7 +904,8 @@ def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     navTabs = unit_tabs(request.path, 'Concepts')
     cLinks = ConceptLink.objects.filter(lesson__unitlesson__unit=unit,
-        lesson__unitlesson__kind=UnitLesson.COMPONENT)
+        lesson__unitlesson__kind=UnitLesson.COMPONENT,
+        lesson__unitlesson__order__isnull=False)
     cLinks = distinct_subset(cLinks, lambda cl:cl.concept)
     clTable = ConceptLinkTable(cLinks, noEdit=True,
                         headers=('This courselet...', 'Concept'),
