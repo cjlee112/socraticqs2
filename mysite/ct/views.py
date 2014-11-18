@@ -742,8 +742,8 @@ def make_tab(path, current, label, url):
 def lesson_tabs(path, current, unitLesson,
                  tabs=('Teach', 'Concepts', 'Errors', 'Edit'), **kwargs):
     outTabs = make_tabs(path, current, tabs, **kwargs)
-    if unitLesson.kind in (UnitLesson.ANSWERS, UnitLesson.MISUNDERSTANDS) \
-       and unitLesson.parent:
+    if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
+        outTabs = outTabs[:1] + outTabs[3:] # remove concepts & errors tabs
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
                     ['lessons', str(unitLesson.parent.pk), 'teach'])))
     else:
