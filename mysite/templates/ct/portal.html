@@ -40,6 +40,31 @@ function toggleInterest(o, targeturl, csrftoken)
 {% endblock %}
 
 {% block body %}
+  <nav class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/ct/">Courselets.org</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          {% block navbar %}{% endblock %}
+          <li><a href="/ct/about/">About</a></li>
+        </ul>
+        <ul class="nav navbar-right">
+          {% if user %}
+          <li><a href="/ct/people/{{ user.username }}/">{{ user.get_full_name }}</a></li>
+          {% else %}
+          <li><a href="/login/?next=/ct/">Sign in</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
   <header>
     <h1>{% block title %}{% endblock %}</h1>
   </header>

@@ -854,7 +854,7 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       errorModels=errorModels))
+                       errorModels=errorModels, user=request.user))
     return render(request, 'ct/concepts.html', kwargs)
 
 
@@ -1072,7 +1072,8 @@ def _lessons(request, concept=None, msg='',
                        searchForm=searchForm, navTabs=navTabs, msg=msg,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, pageTitle=pageTitle,
-                       creationInstructions=creationInstructions))
+                       creationInstructions=creationInstructions,
+                       user=request.user))
     return render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
@@ -1185,7 +1186,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         titleform = None
     return render(request, 'ct/edit_lesson.html',
                   dict(actionTarget=request.path, unitLesson=ul,
-                       atime=display_datetime(ul.atime),
+                       atime=display_datetime(ul.atime), user=request.user,
                        titleform=titleform, navTabs=navTabs))
 
 
@@ -1371,7 +1372,8 @@ def ul_respond(request, course_id, unit_id, ul_id):
     set_crispy_action(request.path, form)
     return render(request, 'ct/ask.html',
                   dict(unitLesson=ul, qtext=md2html(ul.lesson.text),
-                       form=form, actionTarget=request.path))
+                       form=form, actionTarget=request.path,
+                       user=request.user))
 
 @login_required
 def assess(request, course_id, unit_id, ul_id, resp_id):
@@ -1402,7 +1404,8 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
         answer = md2html(answer.lesson.text)
     return render(request, 'ct/assess.html',
                   dict(response=r, qtext=md2html(r.lesson.text),
-                       answer=answer, form=form, actionTarget=request.path))
+                       answer=answer, form=form, actionTarget=request.path,
+                       user=request.user))
 
 ###########################################################
 # student UI for courses
@@ -1429,7 +1432,8 @@ def main_page(request):
             return fsmStack.pop(request)
     return render(request, 'ct/index.html',
                   dict(liveSessions=get_live_sessions(request),
-                       actionTarget=request.path, fsmStack=fsmStack))
+                       actionTarget=request.path, fsmStack=fsmStack,
+                       user=request.user))
 
 def course_study(request, course_id):
     'generic page for student course view'
