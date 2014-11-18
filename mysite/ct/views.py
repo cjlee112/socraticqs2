@@ -719,7 +719,7 @@ def make_tabs(path, current, tabs, stem=-2, tail=None):
         outTabs.append((label, url))
     return outTabs
 
-def concept_tabs(path, current,
+def concept_tabs(path, current, unitLesson,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
 
@@ -752,6 +752,14 @@ def lesson_tabs(path, current, unitLesson,
             outTabs.append(make_tab(path, current, 'Answer',
                 get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
     return outTabs
+
+def auto_tabs(path, current, unitLesson, **kwargs):
+    tabFunc = {IS_ERROR:error_tabs,
+               IS_CONCEPT:concept_tabs,
+               IS_LESSON:lesson_tabs}
+    return tabFunc[unitLesson.get_type()](path, current, unitLesson, **kwargs)
+    
+
     
 def unit_tabs(path, current,
               tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
@@ -850,32 +858,32 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     return render(request, 'ct/concepts.html', kwargs)
 
 
-def edit_concept(request, course_id, unit_id, concept_id,
-                 tabsFunc=concept_tabs):
-    concept = get_object_or_404(Concept, pk=concept_id)
-    navTabs = tabsFunc(request.path, 'Edit')
-    if request.user == concept.addedBy:
-        titleform = ConceptForm(instance=concept)
-        if request.method == 'POST':
-            if 'title' in request.POST:
-                titleform = ConceptForm(request.POST, instance=concept)
-                if titleform.is_valid():
-                    titleform.save()
-            elif request.POST.get('task') == 'delete':
-                concept.delete()
-                return HttpResponseRedirect(reverse('ct:unit_concepts',
-                                args=(course_id, unit_id,)))
-        set_crispy_action(request.path, titleform)
-    else:
-        titleform = None
-    return render(request, 'ct/edit_concept.html',
-                  dict(actionTarget=request.path, concept=concept,
-                       atime=display_datetime(concept.atime),
-                       titleform=titleform, navTabs=navTabs))
+## def edit_concept(request, course_id, unit_id, ul_id,
+##                  tabsFunc=concept_tabs):
+##     ul = get_object_or_404(UnitLesson, pk=ul_id)
+##     navTabs = tabsFunc(request.path, 'Edit')
+##     if request.user == ul.lesson.addedBy:
+##         titleform = ConceptForm(instance=ul.lesson)
+##         if request.method == 'POST':
+##             if 'title' in request.POST:
+##                 titleform = ConceptForm(request.POST, instance=concept)
+##                 if titleform.is_valid():
+##                     titleform.save()
+##             elif request.POST.get('task') == 'delete':
+##                 concept.delete()
+##                 return HttpResponseRedirect(reverse('ct:unit_concepts',
+##                                 args=(course_id, unit_id,)))
+##         set_crispy_action(request.path, titleform)
+##     else:
+##         titleform = None
+##     return render(request, 'ct/edit_concept.html',
+##                   dict(actionTarget=request.path, concept=concept,
+##                        atime=display_datetime(concept.atime),
+##                        titleform=titleform, navTabs=navTabs))
 
-def edit_error(request, course_id, unit_id, concept_id):
-    return edit_concept(request, course_id, unit_id, concept_id,
-                        tabsFunc=error_tabs)
+## def edit_error(request, course_id, unit_id, concept_id):
+##     return edit_concept(request, course_id, unit_id, concept_id,
+##                         tabsFunc=error_tabs)
 
 class ConceptLinkTable(object):
     def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
@@ -945,17 +953,17 @@ def ul_concepts(request, course_id, unit_id, ul_id):
                   headText=headText, navTabs=navTabs)
     return r
 
-def concept_page_data(request, unit_id, concept_id, currentTab):
+def concept_page_data(request, unit_id, ul_id, currentTab):
     unit = get_object_or_404(Unit, pk=unit_id)
-    concept = get_object_or_404(Concept, pk=concept_id)
-    navTabs = concept_tabs(request.path, currentTab)
-    headText = ''
-    return unit, concept, navTabs, headText
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    navTabs = auto_tabs(request.path, currentTab, ul)
+    headText = md2html(ul.lesson.text)
+    return unit, ul, ul.lesson.concept, navTabs, headText
 
 @login_required
-def concept_concepts(request, course_id, unit_id, concept_id):
-    unit, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, concept_id, 'Concepts')
+def concept_concepts(request, course_id, unit_id, ul_id):
+    unit, ul, concept, navTabs, headText = \
+      concept_page_data(request, unit_id, ul_id, 'Concepts')
     toConcepts = concept.relatedTo.all()
     fromConcepts = concept.relatedFrom \
       .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
@@ -988,9 +996,9 @@ def create_em_concept(concept, lesson, unit):
     return concept
 
 @login_required
-def concept_errors(request, course_id, unit_id, concept_id):
-    unit, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, concept_id, 'Errors')
+def concept_errors(request, course_id, unit_id, ul_id):
+    unit, ul, concept, navTabs, headText = \
+      concept_page_data(request, unit_id, ul_id, 'Errors')
     errorModels = list(concept.relatedFrom
       .filter(relationship=ConceptGraph.MISUNDERSTANDS))
     r = _concepts(request, '''To add a concept link, start by
@@ -1075,9 +1083,9 @@ def make_cl_table(concept, unit):
                             title='Lessons Linked to this Concept')
 
 @login_required
-def concept_lessons(request, course_id, unit_id, concept_id):
-    unit, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, concept_id, 'Lessons')
+def concept_lessons(request, course_id, unit_id, ul_id):
+    unit, ul, concept, navTabs, headText = \
+      concept_page_data(request, unit_id, ul_id, 'Lessons')
     clTable = make_cl_table(concept, unit)
     creationInstructions='''You can type a new lesson on this
         concept below (if you add an open-response question,
@@ -1156,12 +1164,11 @@ def ul_teach(request, course_id, unit_id, ul_id):
     
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
-    if ul.kind == ul.MISUNDERSTANDS:
-        formClass = ErrorForm
-        navTabs = error_tabs(request.path, 'Edit', ul)
-    else:
+    navTabs = auto_tabs(request.path, 'Edit', ul)
+    if ul.get_type() == IS_LESSON:
         formClass = LessonForm
-        navTabs = lesson_tabs(request.path, 'Edit', ul)
+    else:
+        formClass = ErrorForm
     if request.user == ul.addedBy:
         titleform = formClass(instance=ul.lesson)
         if request.method == 'POST':

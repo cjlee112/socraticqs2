@@ -81,8 +81,8 @@ class Concept(models.Model):
                             kind=UnitLesson.MISUNDERSTANDS, parent=parent))
         return l
     def get_url(self, basePath, subpath=None):
+        objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
         if self.isError: # default settings
-            objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
             head = 'errors'
             tail = 'resolutions/'
         else:
@@ -348,6 +348,10 @@ class StudyList(models.Model):
 ############################################################
 # unit lesson repo and graph
 
+IS_ERROR = 0
+IS_CONCEPT = 1
+IS_LESSON = 2
+
 class UnitLesson(models.Model):
     'pointer to a Lesson as part of a Unit branch'
     _headURL = 'lessons'
@@ -444,17 +448,24 @@ class UnitLesson(models.Model):
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
     def get_url(self, basePath, subpath=None):
-        if self.kind == UnitLesson.MISUNDERSTANDS: # default settings
-            head = 'errors'
-            tail = 'resolutions/'
-        else:
-            head = 'lessons'
-            tail = 'teach/'
+        'get URL path for this UL'
+        pathDict = {IS_ERROR:('errors', 'resolutions/'),
+                    IS_CONCEPT:('concepts', 'lessons/'),
+                    IS_LESSON:('lessons', 'teach/'),}
+        head, tail = pathDict[self.get_type()]
         if subpath: # apply non-default subpath
             tail = subpath + '/'
         elif subpath == '':
             tail = ''
         return '%s%s/%d/%s' % (basePath, head, self.pk, tail)
+    def get_type(self):
+        'return classification as error model, concept, or regular lesson'
+        if self.lesson.concept:
+            if self.kind == self.MISUNDERSTANDS:
+                return IS_ERROR
+            else:
+                return IS_CONCEPT
+        return IS_LESSON
 
 class Unit(models.Model):
     'a container of exercises performed together'
