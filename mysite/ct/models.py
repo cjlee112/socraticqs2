@@ -591,9 +591,13 @@ class Response(models.Model):
         n = querySet.count()
         if not n: # prevent DivideByZero
             return (), (), 0
-        statusTable = [fmt_count(statusDict.get(k, 0), n)
-                       for k,_ in STATUS_CHOICES] \
-                       + [fmt_count(n - sum(statusDict.values()), n)]
+        statusTable = [statusDict.get(k, 0) for k,_ in STATUS_CHOICES]
+        nStatus = sum(statusTable)
+        if nStatus > 0: # construct table to display
+            statusTable.append(n - nStatus)
+            statusTable = [fmt_count(i, n) for i in statusTable]
+        else: # no data
+            statusTable = ()
         evalDict = {}
         for d in querySet.values('confidence', 'selfeval') \
           .annotate(dcount=Count('confidence')):

@@ -1152,6 +1152,8 @@ def ul_teach(request, course_id, unit_id, ul_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     navTabs = lesson_tabs(request.path, 'Teach', ul)
+    query = Q(unitLesson=ul, selfeval__isnull=False)
+    statusTable, evalTable, n = Response.get_counts(query)
     if request.method == 'POST' and request.POST.get('task') == 'append' \
             and ul.unit != unit:
         ulNew = ul.copy(unit, request.user, order='APPEND')
@@ -1159,7 +1161,8 @@ def ul_teach(request, course_id, unit_id, ul_id):
                                 args=(course_id, unit_id, ulNew.pk)))
     return render(request, 'ct/lesson.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, navTabs=navTabs, unit=unit))
+                       unitLesson=ul, navTabs=navTabs, unit=unit,
+                       statusTable=statusTable, evalTable=evalTable))
     
 def edit_lesson(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
@@ -1212,8 +1215,8 @@ def ul_errors(request, course_id, unit_id, ul_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     headText = md2html(ul.lesson.text)
     navTabs = lesson_tabs(request.path, 'Errors', ul)
-    query = Q(unitLesson=ul, selfeval__isnull=False)
-    statusTable, evalTable, n = Response.get_counts(query)
+    n = Response.objects.filter(unitLesson=ul,
+                                selfeval__isnull=False).count()
     showNovelErrors = False
     if n > 0:
         query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
@@ -1257,7 +1260,6 @@ def ul_errors(request, course_id, unit_id, ul_id):
             seTable.append((em, fmt_count(0, n)))
     r = _lessons(request, concept, msg,
                   pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
-                  statusTable=statusTable, evalTable=evalTable,
                   seTable=seTable, headText=headText,
                   templateFile='ct/errors.html',
                   showNovelErrors=showNovelErrors,
@@ -1272,7 +1274,6 @@ def ul_errors(request, course_id, unit_id, ul_id):
         return _lessons(request, concept, msg='''Successfully added error
             model.  Thank you!''', ignorePOST=True, 
             pageTitle=unit.title, unit=unit, navTabs=navTabs,
-            statusTable=statusTable, evalTable=evalTable,
             seTable=seTable, headText=headText,
             templateFile='ct/errors.html', novelErrors=novelErrors,
             creationInstructions=creationInstructions,

@@ -37,47 +37,6 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="ErrorsTabDiv">
 
-{% if statusTable %}
-<h2>Final Status for Understanding This Concept</h2>
-
-<table class="table table-striped">
-  <thead><tr>
-    <th>Still confused, need help</th>
-    <th>OK, but need review</th>
-    <th>Solid understanding</th>
-    <th>(not yet)</th>
-  </tr></thead>
-  <tbody><tr>
-    {% for c in statusTable %}
-    <td>{{ c }}</td>
-    {% endfor %}
-  </tr></tbody>
-</table>
-{% endif %}
-
-{% if evalTable %}
-<h2>Student Self-Assessments</h2>
-
-<table class="table table-striped">
-  <thead><tr>
-    <th></th>
-    <th>Wrong</th>
-    <th>Close</th>
-    <th>Correct</th>
-  </tr></thead>
-  <tbody>
-  {% for label, row in evalTable %}
-  <tr>
-    <td><b>{{ label }}</b></td>
-    {% for c in row %}
-    <td>{{ c }}</td>
-    {% endfor %}
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% endif %}
-
 {% if seTable %}
 <table class="table table-striped">
 <thead><tr>
