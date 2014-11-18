@@ -35,7 +35,6 @@ def import_sourcedb_plugins(pattern='sourcedb_plugin/[a-z]*.py'):
 
 class Concept(models.Model):
     title = models.CharField(max_length=100)
-    description = models.TextField()
     addedBy = models.ForeignKey(User)
     approvedBy = models.ForeignKey(User, null=True,
                                    related_name='approvedConcepts')
@@ -50,23 +49,17 @@ class Concept(models.Model):
     @classmethod
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
         lesson = Lesson.get_from_sourceDB(sourceID, user, sourceDB)
-        try:
-            return lesson.conceptlink_set.filter(relationship=
-                                    ConceptLink.IS)[0].concept, lesson
-        except IndexError:
-            pass
-        concept = klass(title=lesson.title, addedBy=user,
-                        description=lesson.text + ' (%s)' % sourceDB)
+        if lesson.concept:
+            return lesson.concept, lesson
+        concept = klass(title=lesson.title, addedBy=user)
         concept.save()
-        cl = ConceptLink(concept=concept, lesson=lesson, addedBy=user,
-                         relationship=ConceptLink.IS)
-        cl.save()
+        lesson.concept = concept
+        lesson.save()
         return concept, lesson
     @classmethod
     def search_text(klass, s):
-        'search Concept title and description'
-        return klass.objects.filter(Q(title__icontains=s) |
-                                    Q(description__icontains=s)).distinct()
+        'search Concept title'
+        return klass.objects.filter(title__icontains=s).distinct()
     def create_error_model(self, addedBy, **kwargs):
         'create a new error model for this concept'
         em = self.__class__(isError=True, addedBy=addedBy, **kwargs)
@@ -80,9 +73,7 @@ class Concept(models.Model):
         for cg in self.relatedFrom \
                     .filter(relationship=ConceptGraph.MISUNDERSTANDS):
             try: # get one lesson representing this error model
-                lesson = Lesson.objects \
-                  .filter(conceptlink__concept=cg.fromConcept,
-                          conceptlink__relationship=ConceptLink.IS)[0]
+                lesson = Lesson.objects.filter(concept=cg.fromConcept)[0]
             except IndexError:
                 pass
             else:
@@ -91,9 +82,7 @@ class Concept(models.Model):
         return l
     def get_url(self, basePath, subpath=None):
         if self.isError: # default settings
-            objID = UnitLesson.objects \
-              .filter(lesson__conceptlink__relationship=ConceptLink.IS,
-                      lesson__conceptlink__concept=self)[0].pk
+            objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
             head = 'errors'
             tail = 'resolutions/'
         else:
@@ -222,6 +211,7 @@ class Lesson(models.Model):
     sourceID = models.CharField(max_length=100, null=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    concept = models.ForeignKey(Concept, null=True) # concept definition
     treeID = models.IntegerField(null=True) # VCS METADATA
     parent = models.ForeignKey('Lesson', null=True,
                                related_name='children')
@@ -257,15 +247,15 @@ class Lesson(models.Model):
         if noDup:
             out = distinct_subset(out)
         return out
-    @classmethod
-    def create_from_concept(klass, concept, **kwargs):
-        'create lesson for initial concept definition'
-        if concept.isError:
-            kwargs['kind'] = klass.ERROR_MODEL
-        lesson = klass(title=concept.title, text=concept.description,
-                       addedBy=concept.addedBy, **kwargs)
-        lesson.save_root(concept, ConceptLink.IS)
-        return lesson
+    ## @classmethod
+    ## def create_from_concept(klass, concept, **kwargs):
+    ##     'create lesson for initial concept definition'
+    ##     if concept.isError:
+    ##         kwargs['kind'] = klass.ERROR_MODEL
+    ##     lesson = klass(title=concept.title, text=concept.description,
+    ##                    addedBy=concept.addedBy, concept=concept, **kwargs)
+    ##     lesson.save_root()
+    ##     return lesson
     def save_root(self, concept=None, relationship=None):
         'create root commit by initializing treeID'
         self.save()
@@ -297,11 +287,9 @@ def distinct_subset(inlist, distinct_func=lambda x:x.treeID):
             
     
 class ConceptLink(models.Model):
-    IS = 'is'
     DEFINES = 'defines'
-    INFORMAL_DEFINITION = 'informal'
-    FORMAL_DEFINITION = 'formaldef'
     TESTS = 'tests'
+    RESOLVES = 'resol'
     DERIVES = 'derives'
     PROVES = 'proves'
     ASSUMES = 'assumes'
@@ -310,13 +298,10 @@ class ConceptLink(models.Model):
     INTRODUCES = 'intro'
     COMMENTS = 'comment'
     WARNS = 'warns'
-    RESOLVES = 'resol'
     REL_CHOICES = (
-        (IS, 'Represents (unique ID for)'),
         (DEFINES, 'Defines'),
-        (INFORMAL_DEFINITION, 'Intuitively defines'),
-        (FORMAL_DEFINITION, 'Formally defines'),
         (TESTS, 'Tests understanding of'),
+        (RESOLVES, 'Helps students resolve'),
         (DERIVES, 'Derives'),
         (PROVES, 'Proves'),
         (ASSUMES, 'Assumes'),
@@ -325,7 +310,6 @@ class ConceptLink(models.Model):
         (INTRODUCES, 'Introduces'),
         (COMMENTS, 'Comments on'),
         (WARNS, 'Warns about'),
-        (RESOLVES, 'Helps students resolve'),
     )
     concept = models.ForeignKey(Concept)
     lesson = models.ForeignKey(Lesson)
@@ -335,7 +319,7 @@ class ConceptLink(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
 DEFAULT_RELATION_MAP = {
-    Lesson.BASE_EXPLANATION:ConceptLink.IS,
+    Lesson.BASE_EXPLANATION:ConceptLink.DEFINES,
     Lesson.EXPLANATION:ConceptLink.DEFINES,
     Lesson.ORCT_QUESTION:ConceptLink.TESTS,
     Lesson.CONCEPT_INVENTORY_QUESTION:ConceptLink.TESTS,
@@ -344,7 +328,7 @@ DEFAULT_RELATION_MAP = {
     Lesson.PRACTICE_EXAM:ConceptLink.TESTS,
     
     Lesson.ANSWER:ConceptLink.ILLUSTRATES,
-    Lesson.ERROR_MODEL:ConceptLink.IS,
+    Lesson.ERROR_MODEL:ConceptLink.DEFINES,
 
     Lesson.DATA:ConceptLink.ILLUSTRATES,
     Lesson.CASESTUDY:ConceptLink.ILLUSTRATES,
@@ -391,11 +375,11 @@ class UnitLesson(models.Model):
     addedBy = models.ForeignKey(User)
     treeID = models.IntegerField() # VCS METADATA
     branch = models.CharField(max_length=32, default='master')
-    @classmethod
-    def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
-        'create lesson for initial concept definition'
-        lesson = Lesson.create_from_concept(concept, **kwargs)
-        return klass.create_from_lesson(lesson, unit, **ulArgs)
+    ## @classmethod
+    ## def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
+    ##     'create lesson for initial concept definition'
+    ##     lesson = Lesson.create_from_concept(concept, **kwargs)
+    ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,
                            **kwargs):
@@ -440,9 +424,8 @@ class UnitLesson(models.Model):
         'get all concept links to this lesson'
         return self.lesson.conceptlink_set.all()
     def get_em_resolutions(self):
-        'get deduped list of resolutions UL for this error UL'
-        em = Concept.objects.get(conceptlink__lesson=self.lesson,
-                                 conceptlink__relationship=ConceptLink.IS)
+        'get deduped list of resolution UL for this error UL'
+        em = self.lesson.concept
         query = Q(kind=self.RESOLVES,
                   lesson__conceptlink__relationship=ConceptLink.RESOLVES,
                   lesson__conceptlink__concept=em)
@@ -570,8 +553,8 @@ class Response(models.Model):
         (SURE, 'Pretty sure'),
     )
     lesson = models.ForeignKey(Lesson) # exact version this applies to
-    unitLesson = models.ForeignKey(UnitLesson, null=True)
-    course = models.ForeignKey('Course', null=True)
+    unitLesson = models.ForeignKey(UnitLesson)
+    course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
     text = models.TextField()
@@ -632,7 +615,7 @@ class StudentError(models.Model):
     'identification of a specific error model made by a student'
     response = models.ForeignKey(Response)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    errorModel = models.ForeignKey(UnitLesson, blank=True, null=True)
+    errorModel = models.ForeignKey(UnitLesson)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
                               blank=False, null=True)
     author = models.ForeignKey(User)
@@ -663,7 +646,24 @@ def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
     fmt_count = lambda c: fmt % (c, c * 100. / n)
     return [(t[0],fmt_count(t[1])) for t in l]
 
+class InquiryCount(models.Model):
+    'record users who have the same question'
+    response = models.ForeignKey(Response)
+    addedBy = models.ForeignKey(User)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    
+class Liked(models.Model):
+    'record users who found UnitLesson showed them something they were missing'
+    unitLesson = models.ForeignKey(UnitLesson)
+    addedBy = models.ForeignKey(User)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
 
+class FAQ(models.Model):
+    'link a student inquiry to a follow-up lesson'
+    response = models.ForeignKey(Response)
+    unitLesson = models.ForeignKey(UnitLesson)
+    addedBy = models.ForeignKey(User)
+    atime = models.DateTimeField('time submitted', default=timezone.now)
     
 
 #######################################

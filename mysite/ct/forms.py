@@ -73,10 +73,18 @@ class ConceptForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Concept
-        fields = ['title', 'description']
+        fields = ['title']
 
-class NewConceptForm(ConceptForm):
+class NewConceptForm(forms.Form):
+    title = forms.CharField()
+    description = forms.CharField(widget=forms.Textarea)
     submitLabel = 'Add'
+    def __init__(self, *args, **kwargs):
+        super(NewConceptForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-conceptForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', self.submitLabel))
 
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')

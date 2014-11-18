@@ -769,10 +769,12 @@ def update_concept_link(request, conceptLinks):
         clform.save()
         conceptLinks.replace(cl, clform)
 
-def create_concept(concept, unit):
+def create_concept(concept, lesson, unit):
     'save concept with newly created UnitLesson representing it'
     concept.save()
-    UnitLesson.create_from_concept(concept, unit)
+    lesson.concept = concept
+    lesson.save_root()
+    UnitLesson.create_from_lesson(lesson, unit)
     return concept
 
     
@@ -819,9 +821,12 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
         elif 'title' in request.POST: # create new concept
             conceptForm = NewConceptForm(request.POST)
             if conceptForm.is_valid():
-                concept = conceptForm.save(commit=False)
-                concept.addedBy = request.user
-                return createConceptFunc(concept, unit)
+                lesson = Lesson(title=conceptForm.cleaned_data['title'],
+                    text=conceptForm.cleaned_data['description'],
+                    addedBy=request.user)
+                concept = Concept(title=conceptForm.cleaned_data['title'],
+                                  addedBy=request.user)
+                return createConceptFunc(concept, lesson, unit)
         else:
             return 'please write POST error message'
     elif 'search' in request.GET:
@@ -944,7 +949,7 @@ def concept_page_data(request, unit_id, concept_id, currentTab):
     unit = get_object_or_404(Unit, pk=unit_id)
     concept = get_object_or_404(Concept, pk=concept_id)
     navTabs = concept_tabs(request.path, currentTab)
-    headText = md2html(concept.description)
+    headText = ''
     return unit, concept, navTabs, headText
 
 @login_required
@@ -973,10 +978,13 @@ def concept_concepts(request, course_id, unit_id, concept_id):
             headText=headText, navTabs=navTabs)
     return r
 
-def create_em_concept(concept, unit):
+def create_em_concept(concept, lesson, unit):
     concept.isError = True
+    lesson.kind = lesson.ERROR_MODEL
     concept.save()
-    UnitLesson.create_from_concept(concept, unit)
+    lesson.concept = concept
+    lesson.save_root()
+    UnitLesson.create_from_lesson(lesson, unit)
     return concept
 
 @login_required
@@ -1061,13 +1069,16 @@ def _lessons(request, concept=None, msg='',
                        creationInstructions=creationInstructions))
     return render(request, templateFile, kwargs)
 
+def make_cl_table(concept, unit):
+    cLinks = UnitLesson.get_conceptlinks(concept, unit)
+    return ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
+                            title='Lessons Linked to this Concept')
+
 @login_required
 def concept_lessons(request, course_id, unit_id, concept_id):
     unit, concept, navTabs, headText = \
       concept_page_data(request, unit_id, concept_id, 'Lessons')
-    cLinks = UnitLesson.get_conceptlinks(concept, unit)
-    clTable = ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
-                               title='Lessons Linked to this Concept')
+    clTable = make_cl_table(concept, unit)
     creationInstructions='''You can type a new lesson on this
         concept below (if you add an open-response question,
         you will be prompted later to write an answer). '''
@@ -1087,8 +1098,7 @@ def concept_lessons(request, course_id, unit_id, concept_id):
                             kind=UnitLesson.ANSWERS, parent=r)
                 return HttpResponseRedirect(reverse('ct:edit_lesson',
                                 args=(course_id, unit_id, ul.id,)))
-        cl = r.lesson.conceptlink_set.get()
-        clTable.append(cl)
+        clTable = make_cl_table(concept, unit) # refresh table
         return _lessons(request, concept, '''Successfully added lesson.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
             pageTitle=concept.title, unit=unit, headText=headText,
@@ -1178,8 +1188,9 @@ def create_error_ul(lesson, concept, unit, parentUL):
     'create UnitLesson, Concept etc. for new error model'
     lesson.kind = lesson.ERROR_MODEL
     em = concept.create_error_model(title=lesson.title,
-            description=lesson.text, addedBy=lesson.addedBy)
-    lesson.save_root(em) # automatically adds ConceptLink to em
+                                    addedBy=lesson.addedBy)
+    lesson.concept = em
+    lesson.save_root()
     return UnitLesson.create_from_lesson(lesson, unit, parent=parentUL)
 
 def copy_error_ul(ul, concept, unit, addedBy, parentUL):
@@ -1344,6 +1355,7 @@ def ul_respond(request, course_id, unit_id, ul_id):
             r = form.save(commit=False)
             r.lesson = ul.lesson
             r.unitLesson = ul
+            r.course = course
             r.author = request.user
             r.save()
             return HttpResponseRedirect(reverse('ct:assess',
