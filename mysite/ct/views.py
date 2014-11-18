@@ -1186,7 +1186,7 @@ def copy_error_ul(ul, concept, unit, addedBy, parentUL):
     'copy error and append to this unit'
     if ul.unit == unit:
         return 'Lesson already in this unit, so no change made.'
-    return ul.copy(unit, addedBy, order='APPEND', parent=parentUL)
+    return ul.copy(unit, addedBy, parent=parentUL)
 
 
 @login_required
@@ -1201,7 +1201,6 @@ def ul_errors(request, course_id, unit_id, ul_id):
     if n > 0:
         query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
         seTable = StudentError.get_counts(query, n)
-        allowSearch = True
         neArgs = {}
         if request.method == 'GET' and 'selfeval' in request.GET:
             neForm = ResponseFilterForm(request.GET)
@@ -1218,14 +1217,19 @@ def ul_errors(request, course_id, unit_id, ul_id):
         novelErrors = Response.get_novel_errors(ul, **neArgs)
     else:
         seTable = novelErrors = []
-        allowSearch = neForm = False
-    try:
-        concept = Concept.objects.filter(conceptlink__lesson=ul.lesson,
-                conceptlink__relationship=ConceptLink.TESTS)[0]
-        creationInstructions='You can write a new error model below.'
-        msg='''You can search for existing error models to add
+        neForm = False
+    cLinks = list(ul.get_linked_concepts())
+    if cLinks:
+        concept = cLinks[0].concept
+        for cl in cLinks:
+            if cl.relationship == ConceptLink.TESTS:
+                concept = cl.concept
+                break
+        creationInstructions = '''You can write a new error model
+        for the concept: %s.''' % concept.title
+        msg = '''You can search for existing error models to add
           to this lesson, or write a new error model below.'''
-    except IndexError:
+    else:
         concept = creationInstructions = None
         msg = '''This lesson is not linked to any concept.  Please
         add a concept link (by clicking on the Concepts tab) before
@@ -1234,7 +1238,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
     for em in ul.get_errors():
         if em not in errorModels:
             seTable.append((em, fmt_count(0, n)))
-    r = _lessons(request, concept, msg, allowSearch=allowSearch,
+    r = _lessons(request, concept, msg,
                   pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
                   statusTable=statusTable, evalTable=evalTable,
                   seTable=seTable, headText=headText,

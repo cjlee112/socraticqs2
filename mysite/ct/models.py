@@ -261,7 +261,7 @@ class Lesson(models.Model):
     def create_from_concept(klass, concept, **kwargs):
         'create lesson for initial concept definition'
         if concept.isError:
-            kwargs['kind'] = ERROR_MODEL
+            kwargs['kind'] = klass.ERROR_MODEL
         lesson = klass(title=concept.title, text=concept.description,
                        addedBy=concept.addedBy, **kwargs)
         lesson.save_root(concept, ConceptLink.IS)
@@ -436,6 +436,9 @@ class UnitLesson(models.Model):
     def get_errors(self):
         'get query set with errors if any'
         return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS)
+    def get_linked_concepts(self):
+        'get all concept links to this lesson'
+        return self.lesson.conceptlink_set.all()
     def get_em_resolutions(self):
         'get deduped list of resolutions UL for this error UL'
         em = Concept.objects.get(conceptlink__lesson=self.lesson,
