@@ -705,18 +705,24 @@ def concepts(request):
 ###########################################################
 # WelcomeMat refactored utilities
 
-def make_tabs(path, current, tabs, stem=-2, tail=None):
-    l = path.split('/')
-    out = l[:stem]
-    if tail:
-        out += l[tail:]
+def make_tabs(path, current, tabs):
     outTabs = []
     for label in tabs:
+        try:
+            i = label.index(':')
+        except ValueError:
+            tail = label.lower() + '/' # default, just use label
+        else: # use specified URL tail
+            tail = label[i + 1:]
+            label = label[:i]
         if label == current:
-            url = '#%sTabDiv' % label
-        else:
-            url = '/'.join(out + [label.lower(), ''])
-        outTabs.append((label, url))
+             if tail and path.endswith(tail):
+                path = path[:-len(tail)]
+             tail = '#%sTabDiv' % label
+        outTabs.append((label, tail))
+    for i,t in enumerate(outTabs):
+        if not t[1].startswith('#'): # add URL prefix
+            outTabs[i] = (t[0], path + t[1])
     return outTabs
 
 def concept_tabs(path, current, unitLesson,
@@ -740,17 +746,17 @@ def make_tab(path, current, label, url):
         return (label, url)
 
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Teach', 'Concepts', 'Errors', 'Edit'), **kwargs):
+                 tabs=('Home:', 'Concepts', 'Errors', 'Edit'), **kwargs):
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
         outTabs = outTabs[:1] + outTabs[3:] # remove concepts & errors tabs
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
-                    ['lessons', str(unitLesson.parent.pk), 'teach'])))
+                    ['lessons', str(unitLesson.parent.pk)])))
     else:
         a = unitLesson.get_answers().all()
         if a:
             outTabs.append(make_tab(path, current, 'Answer',
-                get_base_url(path, ['lessons', str(a[0].pk), 'teach'])))
+                get_base_url(path, ['lessons', str(a[0].pk)])))
     return outTabs
 
 def auto_tabs(path, current, unitLesson, **kwargs):
@@ -766,7 +772,7 @@ def unit_tabs(path, current,
     return make_tabs(path, current, tabs, **kwargs)
     
 def unit_tabs_student(path, current,
-              tabs=('Study', 'Lessons'), **kwargs):
+              tabs=('Study:', 'Lessons'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
 
@@ -1159,7 +1165,7 @@ def unit_resources(request, course_id, unit_id):
 
 
 def ul_teach(request, course_id, unit_id, ul_id):
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Teach',
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
     query = Q(unitLesson=ul, selfeval__isnull=False)
     statusTable, evalTable, n = Response.get_counts(query)

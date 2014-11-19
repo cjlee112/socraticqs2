@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/resources/$',
         unit_resources, name='unit_resources'),
     # lesson tabs
-    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/teach/$',
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/$',
         ul_teach, name='ul_teach'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/concepts/$',
         ul_concepts, name='ul_concepts'),
@@ -36,7 +36,7 @@ urlpatterns = patterns('',
         edit_lesson, name='edit_error'),
     # student UI
     # study pages
-    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/study/$',
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         study_unit, name='study_unit'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/$',
         unit_lessons_student, name='unit_lessons_student'),

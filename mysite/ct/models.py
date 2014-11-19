@@ -80,7 +80,7 @@ class Concept(models.Model):
                 l.append(UnitLesson.create_from_lesson(lesson, parent.unit,
                             kind=UnitLesson.MISUNDERSTANDS, parent=parent))
         return l
-    def get_url(self, basePath, subpath=None):
+    def get_url(self, basePath, subpath=None, isTeach=True):
         objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
         if self.isError: # default settings
             head = 'errors'
@@ -259,11 +259,11 @@ class Lesson(models.Model):
                         addedBy=self.addedBy, relationship=relationship)
     def __unicode__(self):
         return self.title
-    def get_url(self):
-        if self.sourceDB:
-            return self.url
-        else:
-            return reverse('ct:lesson', args=(self.id,))
+    ## def get_url(self):
+    ##     if self.sourceDB:
+    ##         return self.url
+    ##     else:
+    ##         return reverse('ct:lesson', args=(self.id,))
 
 def distinct_subset(inlist, distinct_func=lambda x:x.treeID):
     'eliminate duplicate treeIDs from the input list'
@@ -447,11 +447,11 @@ class UnitLesson(models.Model):
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
-    def get_url(self, basePath, subpath=None):
+    def get_url(self, basePath, subpath=None, isTeach=True):
         'get URL path for this UL'
         pathDict = {IS_ERROR:('errors', 'resolutions/'),
                     IS_CONCEPT:('concepts', 'lessons/'),
-                    IS_LESSON:('lessons', 'teach/'),}
+                    IS_LESSON:('lessons', ''),}
         head, tail = pathDict[self.get_type()]
         if subpath: # apply non-default subpath
             tail = subpath + '/'
@@ -617,7 +617,7 @@ class Response(models.Model):
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
                     Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
-    def get_url(self, basePath, subpath=None):
+    def get_url(self, basePath, subpath=None, isTeach=True):
         'URL for this response'
         if subpath:
             tail = subpath + '/'

@@ -133,5 +133,5 @@ def get_object_url(actionTarget, o, subpath=None):
         return  '%s%s/%d/%s' % (basePath, head, o.pk,
                                 getattr(o, '_subURL', tail))
     else:
-        return urlFunc(basePath, subpath)
+        return urlFunc(basePath, subpath, basePath.startswith('/ct/teach/'))
     
