@@ -766,6 +766,27 @@ def unit_tabs(path, current,
     return make_tabs(path, current, tabs, **kwargs)
     
 
+class PageData(object):
+    def __init__(self, **kwargs):
+        for k,v in kwargs.items():
+            setattr(self, k, v)
+
+def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    pageData = PageData(title=ul.lesson.title,
+                        navTabs=auto_tabs(request.path, currentTab, ul))
+    if includeText:
+        pageData.headText = md2html(ul.lesson.text)
+        ulType = ul.get_type()
+        if ulType == IS_ERROR:
+            pageData.headLabel = 'error model'
+        elif ulType == IS_CONCEPT:
+            pageData.headLabel = 'concept definition'
+        else:
+            pageData.headLabel = ul.lesson.get_kind_display()
+    return unit, ul, ul.lesson.concept, pageData
+
 
 ###########################################################
 # WelcomeMat refactored views
@@ -787,8 +808,8 @@ def create_concept(concept, lesson, unit):
 
     
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
-              toTable=None, fromTable=None, pageTitle='Concepts', unit=None,
-              actionLabel='Link to this Concept', navTabs=(),
+              toTable=None, fromTable=None, unit=None,
+              actionLabel='Link to this Concept',
               errorModels=None, createConceptFunc=create_concept, **kwargs):
     'search or create a Concept'
     cset = wset = ()
@@ -850,10 +871,10 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
     kwargs.update(dict(cset=cset, actionTarget=request.path, msg=msg,
-                       searchForm=searchForm, wset=wset, navTabs=navTabs,
+                       searchForm=searchForm, wset=wset,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
-                       actionLabel=actionLabel, pageTitle=pageTitle,
+                       actionLabel=actionLabel, 
                        errorModels=errorModels, user=request.user))
     return render(request, 'ct/concepts.html', kwargs)
 
@@ -916,7 +937,8 @@ class ConceptLinkTable(object):
 def unit_concepts(request, course_id, unit_id):
     'page for viewing or adding concepts relevant to this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    navTabs = unit_tabs(request.path, 'Concepts')
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs(request.path, 'Concepts'))
     cLinks = ConceptLink.objects.filter(lesson__unitlesson__unit=unit,
         lesson__unitlesson__kind=UnitLesson.COMPONENT,
         lesson__unitlesson__order__isnull=False)
@@ -926,7 +948,7 @@ def unit_concepts(request, course_id, unit_id):
                         title='Concepts Linked to this Courselet')
     r = _concepts(request, '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
-                  pageTitle=unit.title, unit=unit, navTabs=navTabs,
+                  unit=unit, pageData=pageData,
                   actionLabel='Add to courselet')
     if isinstance(r, Concept): # newly created concept
         return HttpResponseRedirect(get_object_url(request.path, r))
@@ -935,37 +957,27 @@ def unit_concepts(request, course_id, unit_id):
 @login_required
 def ul_concepts(request, course_id, unit_id, ul_id):
     'page for viewing or adding concept links to this UnitLesson'
-    unitLesson = get_object_or_404(UnitLesson, pk=ul_id)
-    headText = md2html(unitLesson.lesson.text)
-    navTabs = lesson_tabs(request.path, 'Concepts', unitLesson)
+    unit, unitLesson, _, pageData = ul_page_data(request, unit_id, ul_id,
+                                                 'Concepts')
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
     clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
     r = _concepts(request, '''To add a concept to this lesson, start by
     typing a search for relevant concepts. ''', conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
-                  headText=headText, navTabs=navTabs, showConceptAction=True)
+                  pageData=pageData, unit=unit, showConceptAction=True)
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
         clTable.append(cl)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
-                  pageTitle=unitLesson.lesson.title, unit=unitLesson.unit,
-                  headText=headText, navTabs=navTabs, showConceptAction=True)
+                  pageData=pageData, unit=unit, showConceptAction=True)
     return r
-
-def concept_page_data(request, unit_id, ul_id, currentTab):
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    navTabs = auto_tabs(request.path, currentTab, ul)
-    headText = md2html(ul.lesson.text)
-    return unit, ul, ul.lesson.concept, navTabs, headText
 
 @login_required
 def concept_concepts(request, course_id, unit_id, ul_id):
-    unit, ul, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, ul_id, 'Concepts')
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Concepts')
     toConcepts = concept.relatedTo.all()
     fromConcepts = concept.relatedFrom \
       .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
@@ -977,15 +989,13 @@ def concept_concepts(request, course_id, unit_id, ul_id):
                     title='Concepts Linking to this Concept')
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', toTable=toTable,
-                  fromTable=fromTable, pageTitle=concept.title, unit=unit,
-                  headText=headText, navTabs=navTabs)
+                  fromTable=fromTable, unit=unit, pageData=pageData)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
         toTable.append(cg)
         return _concepts(request, '''Successfully added concept.
             Thank you!''', ignorePOST=True, toTable=toTable,
-            fromTable=fromTable, pageTitle=concept.title, unit=unit,
-            headText=headText, navTabs=navTabs)
+            fromTable=fromTable, unit=unit, pageData=pageData)
     return r
 
 def create_em_concept(concept, lesson, unit):
@@ -999,22 +1009,21 @@ def create_em_concept(concept, lesson, unit):
 
 @login_required
 def concept_errors(request, course_id, unit_id, ul_id):
-    unit, ul, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, ul_id, 'Errors')
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Errors')
     errorModels = list(concept.relatedFrom
       .filter(relationship=ConceptGraph.MISUNDERSTANDS))
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', errorModels=errorModels,
-                  pageTitle=concept.title, unit=unit, headText=headText,
-                  navTabs=navTabs, createConceptFunc=create_em_concept)
+                  pageData=pageData, unit=unit,
+                  createConceptFunc=create_em_concept)
     if isinstance(r, Concept):
         cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
                                     relationship=ConceptGraph.MISUNDERSTANDS)
         errorModels.append(cg)
         return _concepts(request, '''Successfully added error model.
             Thank you!''', ignorePOST=True, errorModels=errorModels,
-            pageTitle=concept.title, unit=unit, headText=headText,
-            navTabs=navTabs)
+            pageData=pageData, unit=unit)
     return r
 
 def create_unit_lesson(lesson, concept, unit, parentUL):
@@ -1024,8 +1033,8 @@ def create_unit_lesson(lesson, concept, unit, parentUL):
 
 def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
-             pageTitle='Lessons', unit=None, actionLabel='Add to This Unit',
-             navTabs=(), allowSearch=True, creationInstructions=None,
+             unit=None, actionLabel='Add to This Unit',
+             allowSearch=True, creationInstructions=None,
              templateFile='ct/lessons.html',
              createULFunc=create_unit_lesson, selectULFunc=None,
              newLessonFormClass=NewLessonForm,
@@ -1069,11 +1078,10 @@ def _lessons(request, concept=None, msg='',
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path,
-                       searchForm=searchForm, navTabs=navTabs, msg=msg,
+                       searchForm=searchForm, msg=msg,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
-                       actionLabel=actionLabel, pageTitle=pageTitle,
-                       creationInstructions=creationInstructions,
-                       user=request.user))
+                       actionLabel=actionLabel, user=request.user,
+                       creationInstructions=creationInstructions))
     return render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
@@ -1083,15 +1091,14 @@ def make_cl_table(concept, unit):
 
 @login_required
 def concept_lessons(request, course_id, unit_id, ul_id):
-    unit, ul, concept, navTabs, headText = \
-      concept_page_data(request, unit_id, ul_id, 'Lessons')
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Lessons')
     clTable = make_cl_table(concept, unit)
     creationInstructions='''You can type a new lesson on this
         concept below (if you add an open-response question,
         you will be prompted later to write an answer). '''
     r = _lessons(request, concept, conceptLinks=clTable,
-                 pageTitle=concept.title, unit=unit, headText=headText,
-                 navTabs=navTabs, allowSearch=False,
+                 pageData=pageData, unit=unit, allowSearch=False,
                  creationInstructions=creationInstructions)
     if isinstance(r, UnitLesson):
         if r.lesson.kind == Lesson.ORCT_QUESTION:
@@ -1108,9 +1115,8 @@ def concept_lessons(request, course_id, unit_id, ul_id):
         clTable = make_cl_table(concept, unit) # refresh table
         return _lessons(request, concept, '''Successfully added lesson.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
-            pageTitle=concept.title, unit=unit, headText=headText,
-            navTabs=navTabs, creationInstructions=creationInstructions,
-            allowSearch=False)
+            pageData=pageData, unit=unit, allowSearch=False,
+            creationInstructions=creationInstructions)
     return r
 
 def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
@@ -1123,7 +1129,8 @@ def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
 def unit_lessons(request, course_id, unit_id, lessonTable=None,
                  currentTab='Lessons'):
     unit = get_object_or_404(Unit, pk=unit_id)
-    navTabs = unit_tabs(request.path, currentTab)
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs(request.path, currentTab))
     if lessonTable is None:
         lessonTable = list(unit.unitlesson_set
             .filter(kind=UnitLesson.COMPONENT, order__isnull=False)
@@ -1131,14 +1138,13 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     r = _lessons(request, msg='''You can search for a lesson to add
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
-                  pageTitle=unit.title, unit=unit, navTabs=navTabs,
+                  pageData=pageData, unit=unit,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
         lessonTable.append(r)
         return _lessons(request, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, 
-            pageTitle=unit.title, unit=unit, 
-            navTabs=navTabs, lessonTable=lessonTable)
+            pageData=pageData, unit=unit, lessonTable=lessonTable)
     return r
 
 def unit_resources(request, course_id, unit_id):
@@ -1149,9 +1155,8 @@ def unit_resources(request, course_id, unit_id):
 
 
 def ul_teach(request, course_id, unit_id, ul_id):
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    navTabs = lesson_tabs(request.path, 'Teach', ul)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Teach',
+                                         False)
     query = Q(unitLesson=ul, selfeval__isnull=False)
     statusTable, evalTable, n = Response.get_counts(query)
     if request.method == 'POST' and request.POST.get('task') == 'append' \
@@ -1161,12 +1166,12 @@ def ul_teach(request, course_id, unit_id, ul_id):
                                 args=(course_id, unit_id, ulNew.pk)))
     return render(request, 'ct/lesson.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, navTabs=navTabs, unit=unit,
+                       unitLesson=ul, pageData=pageData, unit=unit,
                        statusTable=statusTable, evalTable=evalTable))
     
 def edit_lesson(request, course_id, unit_id, ul_id):
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    navTabs = auto_tabs(request.path, 'Edit', ul)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
+                                         False)
     if ul.get_type() == IS_LESSON:
         formClass = LessonForm
     else:
@@ -1190,7 +1195,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     return render(request, 'ct/edit_lesson.html',
                   dict(actionTarget=request.path, unitLesson=ul,
                        atime=display_datetime(ul.atime), user=request.user,
-                       titleform=titleform, navTabs=navTabs))
+                       titleform=titleform, pageData=pageData))
 
 
 def create_error_ul(lesson, concept, unit, parentUL):
@@ -1211,10 +1216,7 @@ def copy_error_ul(ul, concept, unit, addedBy, parentUL):
 
 @login_required
 def ul_errors(request, course_id, unit_id, ul_id):
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    headText = md2html(ul.lesson.text)
-    navTabs = lesson_tabs(request.path, 'Errors', ul)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Errors')
     n = Response.objects.filter(unitLesson=ul,
                                 selfeval__isnull=False).count()
     showNovelErrors = False
@@ -1258,10 +1260,8 @@ def ul_errors(request, course_id, unit_id, ul_id):
     for em in ul.get_errors():
         if em not in errorModels:
             seTable.append((em, fmt_count(0, n)))
-    r = _lessons(request, concept, msg,
-                  pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
-                  seTable=seTable, headText=headText,
-                  templateFile='ct/errors.html',
+    r = _lessons(request, concept, msg, pageData=pageData, unit=unit, 
+                  seTable=seTable, templateFile='ct/errors.html',
                   showNovelErrors=showNovelErrors,
                   novelErrors=novelErrors, responseFilterForm=neForm,
                   creationInstructions=creationInstructions,
@@ -1273,8 +1273,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
         seTable.append((r, fmt_count(0, n)))
         return _lessons(request, concept, msg='''Successfully added error
             model.  Thank you!''', ignorePOST=True, 
-            pageTitle=unit.title, unit=unit, navTabs=navTabs,
-            seTable=seTable, headText=headText,
+            pageData=pageData, unit=unit, seTable=seTable, 
             templateFile='ct/errors.html', novelErrors=novelErrors,
             creationInstructions=creationInstructions,
             newLessonFormClass=NewErrorForm)
@@ -1298,10 +1297,8 @@ def link_resolution_ul(ul, em, unit, addedBy, parentUL):
 @login_required
 def resolutions(request, course_id, unit_id, ul_id):
     'UI for user to add or write remediations for a specific error'
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    headText = md2html(ul.lesson.text)
-    navTabs = error_tabs(request.path, 'Resolutions', ul)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
+                                         'Resolutions')
     em, lessonTable = ul.get_em_resolutions()
     msg = '''This page lists lessons, exercises, or review
     suggested for students who make this error, to help them
@@ -1310,8 +1307,8 @@ def resolutions(request, course_id, unit_id, ul_id):
     creationInstructions = '''You can write a new lesson that
                   helps students overcome this error, and click Add.'''
     r = _lessons(request, em, msg, lessonTable=lessonTable,
-                 pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
-                 headText=headText, actionLabel='Add to suggestion list',
+                 pageData=pageData, unit=unit, 
+                 actionLabel='Add to suggestion list',
                  creationInstructions=creationInstructions,
                  createULFunc=create_resolution_ul,
                  selectULFunc=link_resolution_ul)
@@ -1320,8 +1317,8 @@ def resolutions(request, course_id, unit_id, ul_id):
             lessonTable.append(r)
         return _lessons(request, em, msg='''Successfully added resolution
                   Thank you!''', ignorePOST=True, lessonTable=lessonTable,
-                  pageTitle=ul.lesson.title, unit=unit, navTabs=navTabs,
-                  headText=headText, actionLabel='Add to suggestion list',
+                  pageData=pageData, unit=unit,
+                  actionLabel='Add to suggestion list',
                   creationInstructions=creationInstructions)
     return r
 

@@ -6,15 +6,15 @@
 {% endcomment %}
 
 {% block title %}
-  {{ pageTitle }}
+  {{ pageData.title }}
 {% endblock %}
 
 {% block content %}
 
-{% if headText %}
-<input type="checkbox" id="headtoggle"/>Show Text<BR>
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
 <div id="headdiv" style="display: none">
-{{ headText }}
+{{ pageData.headText }}
 </div>
 
 <script>
@@ -25,7 +25,7 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
 <ul class="nav nav-tabs">
-  {% for tabLabel,tabURL in navTabs %}
+  {% for tabLabel,tabURL in pageData.navTabs %}
   {% if "/" in tabURL %}
   <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
   {% else %}

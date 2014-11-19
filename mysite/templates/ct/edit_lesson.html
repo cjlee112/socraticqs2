@@ -7,12 +7,12 @@
 {% endcomment %}
 
 {% block title %}
-  {{ unitLesson.lesson.title }}
+  {{ pageData.title }}
 {% endblock %}
 
 {% block content %}
 <ul class="nav nav-tabs">
-  {% for tabLabel,tabURL in navTabs %}
+  {% for tabLabel,tabURL in pageData.navTabs %}
   {% if "/" in tabURL %}
   <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
   {% else %}
