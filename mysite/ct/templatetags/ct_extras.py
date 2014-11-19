@@ -116,9 +116,11 @@ def get_base_url(path, extension=[], baseToken='units', tail=2):
             return '/'.join(l[:i + tail] + extension) + '/'
     raise ValueError('baseToken not found in path')
 
+def is_teacher_url(path):
+    return path.startswith('/ct/teach/')
 
 @register.filter(name='get_object_url')
-def get_object_url(actionTarget, o, subpath=None):
+def get_object_url(actionTarget, o, forceDefault=False, subpath=None):
     basePath = get_base_url(actionTarget)
     try:
         urlFunc = o.get_url
@@ -133,5 +135,9 @@ def get_object_url(actionTarget, o, subpath=None):
         return  '%s%s/%d/%s' % (basePath, head, o.pk,
                                 getattr(o, '_subURL', tail))
     else:
-        return urlFunc(basePath, subpath, basePath.startswith('/ct/teach/'))
+        return urlFunc(basePath, forceDefault, subpath,
+                       is_teacher_url(basePath))
     
+@register.filter(name='get_forced_url')
+def get_forced_url(actionTarget, o, subpath=None):
+    return get_object_url(actionTarget, o, True, subpath)

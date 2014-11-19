@@ -10,7 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
-from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url
+from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url
 from ct.fsm import FSMStack
 
 ######################################################
@@ -745,11 +745,18 @@ def make_tab(path, current, label, url):
     else:
         return (label, url)
 
+
+def filter_tabs(tabs, filterLabels):
+    return [t for t in tabs if t[0] in filterLabels]
+    
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Concepts', 'Errors', 'Edit'), **kwargs):
+                 tabs=('Home:', 'Concepts', 'Errors', 'Edit'),
+                 answerTabs=('Home', 'Edit'), **kwargs):
+    if not is_teacher_url(path):
+        tabs = ('Study:', 'Status', 'Concepts', 'Errors', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
-        outTabs = outTabs[:1] + outTabs[3:] # remove concepts & errors tabs
+        outTabs = filter_tabs(outTabs, answerTabs)
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
                     ['lessons', str(unitLesson.parent.pk)])))
     else:
@@ -1360,7 +1367,7 @@ def unit_lessons_student(request, course_id, unit_id):
     lessonTable = unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=False) \
             .order_by('order')
-    return render(request, 'ct/lessons.html',
+    return render(request, 'ct/lessons_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        pageData=pageData, lessonTable=lessonTable))
 
@@ -1421,9 +1428,11 @@ def lesson(request, course_id, unit_id, ul_id):
         return r
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return HttpResponseRedirect(request.path + 'ask/')
+    pageData = PageData(title=ul.lesson.title,
+                        navTabs=lesson_tabs(request.path, 'Study', ul))
     return render(request, 'ct/lesson_student.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, unit=unit))
+                       unitLesson=ul, unit=unit, pageData=pageData))
     
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):

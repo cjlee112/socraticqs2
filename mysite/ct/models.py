@@ -80,7 +80,8 @@ class Concept(models.Model):
                 l.append(UnitLesson.create_from_lesson(lesson, parent.unit,
                             kind=UnitLesson.MISUNDERSTANDS, parent=parent))
         return l
-    def get_url(self, basePath, subpath=None, isTeach=True):
+    def get_url(self, basePath, forceDefault=False, subpath=None,
+                isTeach=True):
         objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
         if self.isError: # default settings
             head = 'errors'
@@ -447,12 +448,16 @@ class UnitLesson(models.Model):
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
-    def get_url(self, basePath, subpath=None, isTeach=True):
+    def get_url(self, basePath, forceDefault=False, subpath=None,
+                isTeach=True):
         'get URL path for this UL'
         pathDict = {IS_ERROR:('errors', 'resolutions/'),
                     IS_CONCEPT:('concepts', 'lessons/'),
                     IS_LESSON:('lessons', ''),}
-        head, tail = pathDict[self.get_type()]
+        if forceDefault:
+            head, tail = pathDict[IS_LESSON]
+        else:
+            head, tail = pathDict[self.get_type()]
         if subpath: # apply non-default subpath
             tail = subpath + '/'
         elif subpath == '':
@@ -617,7 +622,8 @@ class Response(models.Model):
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
                     Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
-    def get_url(self, basePath, subpath=None, isTeach=True):
+    def get_url(self, basePath, forceDefault=False, subpath=None,
+                isTeach=True):
         'URL for this response'
         if subpath:
             tail = subpath + '/'

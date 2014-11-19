@@ -1,0 +1,135 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="LessonsTabDiv">
+
+{% if lessonTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th><th>Type</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for ul in lessonTable %}
+  <tr>
+    <td><a href="{{ actionTarget |get_forced_url:ul }}">{{ ul.lesson.title }}</a>
+    </td>
+    <td>{{ ul.lesson.get_kind_display }}</td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if conceptLinks.data %}
+<table class="table table-striped">
+<thead><tr>
+{% for h in conceptLinks.headers %}
+  <th>{{ h }}</th>
+{% endfor %}
+</tr></thead>
+<tbody>
+{% for cl,clform in conceptLinks.data %}
+  <tr>
+    <td><a href="{{ actionTarget |get_object_url:cl.unitLesson }}">
+        {{ cl.lesson.title }}</a></td>
+    <td>
+    {% if conceptLinks.noEdit %}
+      {{ cl.get_relationship_display }}
+    {% else %}
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ clform.relationship }}
+    <input type="hidden" name="clID" value="{{ cl.id }}" />
+    <input type="submit" value="Update" />
+    </form>
+    {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+
+{{ msg }}
+{% if searchForm %}
+<form action="{{ actionTarget }}" method="get">
+{{ searchForm }}
+<input type="submit" value="Search" />
+</form>
+{% endif %}
+
+{% if lessonSet %}
+<h2>Search Results</h2>
+If one of these is relevant to this concept,
+please click <b>{{ actionLabel }}</b>.
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th><th>Type</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for ul in lessonSet %}
+  <tr><td>
+  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="ulID" value="{{ ul.pk }}" />
+  <input type="submit" value="{{ actionLabel }}" />
+  </form>
+  </td>
+    <td>{{ ul.lesson.get_kind_display }}</td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if lessonForm %}
+<h3>Write a New Lesson</h3>
+{{ creationInstructions }}
+<div class="container-fluid">
+{% crispy lessonForm %}
+</div>
+{% endif %}
+
+  </div><!-- @end #LessonsTabDiv -->
+</div>
+{% endblock %}
