@@ -765,6 +765,10 @@ def unit_tabs(path, current,
               tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
+def unit_tabs_student(path, current,
+              tabs=('Study', 'Lessons'), **kwargs):
+    return make_tabs(path, current, tabs, **kwargs)
+    
 
 class PageData(object):
     def __init__(self, **kwargs):
@@ -1342,6 +1346,17 @@ def study_unit(request, course_id, unit_id):
     return render(request, 'ct/study_unit.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=nextUL, unit=unit))
+
+def unit_lessons_student(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs_student(request.path, 'Lessons'))
+    lessonTable = unit.unitlesson_set \
+            .filter(kind=UnitLesson.COMPONENT, order__isnull=False) \
+            .order_by('order')
+    return render(request, 'ct/lessons.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       pageData=pageData, lessonTable=lessonTable))
 
 def get_study_url(path, nextUL):
     if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
