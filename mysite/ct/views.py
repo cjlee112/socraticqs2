@@ -1376,7 +1376,8 @@ def unit_concepts_student(request, course_id, unit_id):
     l2 = list(unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT,
         lesson__concept__isnull=False))
     conceptTable = distinct_subset(l1 + l2)
-    conceptTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
+    conceptTable.sort(lambda x,y:cmp(x.lesson.concept.title,
+                                     y.lesson.concept.title))
     return render(request, 'ct/concepts_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        pageData=pageData, conceptTable=conceptTable))
