@@ -1325,6 +1325,30 @@ def resolutions(request, course_id, unit_id, ul_id):
 ###########################################################
 # welcome mat refactored student UI for courses
 
+@login_required
+def study_unit(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, pk=unit_id)
+    unitStatus = UnitStatus.get_or_none(unit, request.user)
+    if request.method == 'POST'  and request.POST.get('task') == 'next':
+        if not unitStatus:
+            unitStatus = UnitStatus(unit=unit, user=request.user)
+            unitStatus.save()
+        nextUL = unitStatus.get_lesson()
+        return HttpResponseRedirect(get_study_url(request.path, nextUL))
+    if unitStatus:
+        nextUL = unitStatus.get_lesson()
+    else:
+        nextUL = None
+    return render(request, 'ct/study_unit.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=nextUL, unit=unit))
+
+def get_study_url(path, nextUL):
+    if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
+        return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
+    else:
+        return get_base_url(path, ['lessons', str(nextUL.pk)])
+
 def next_lesson_url(path, unitLesson, unitStatus=None):
     'get URL for unit lesson following this one, and record on unitStatus'
     try:
@@ -1335,17 +1359,11 @@ def next_lesson_url(path, unitLesson, unitStatus=None):
         return get_base_url(path)
     if unitStatus: # record move to next lesson; prevent skipping
         nextUL = unitStatus.set_lesson(nextUL)
-    if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
-        return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
-    else:
-        return get_base_url(path, ['lessons', str(nextUL.pk)])
+    return get_study_url(path, nextUL)
 
 def redirect_next_lesson(request, ul):
     'get redirect to the next lesson, and record on UnitStatus if any'
-    try:
-        unitStatus = UnitStatus.objects.get(unit=ul.unit, user=request.user)
-    except UnitStatus.DoesNotExist:
-        unitStatus = None
+    unitStatus = UnitStatus.get_or_none(ul.unit, request.user)
     url = next_lesson_url(request.path, ul, unitStatus)
     return HttpResponseRedirect(url)
     

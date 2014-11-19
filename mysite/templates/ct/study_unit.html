@@ -1,0 +1,29 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  unit start page
+{% endcomment %}
+
+{% block title %}
+  {{ unit.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if unitLesson %}
+Your current lesson in this courselet is:
+<b>{{ unitLesson.lesson.title }}</b>.
+Click <b>Next</b> to resume this lesson.
+{% else %}
+Welcome!  To start this courselet, click <b>Next</b>.
+{% endif %}
+
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<input type="hidden" name="task" value="next" />
+<input type="submit" value="Next" />
+</form>
+
+{% endblock %}

@@ -36,6 +36,8 @@ urlpatterns = patterns('',
         edit_lesson, name='edit_error'),
     # student UI
     # study pages
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/study/$',
+        study_unit, name='study_unit'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/$',
         lesson, name='lesson'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/ask/$',
