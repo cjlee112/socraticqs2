@@ -772,7 +772,7 @@ def unit_tabs(path, current,
     return make_tabs(path, current, tabs, **kwargs)
     
 def unit_tabs_student(path, current,
-              tabs=('Study:', 'Lessons'), **kwargs):
+              tabs=('Study:', 'Lessons', 'Concepts'), **kwargs):
     return make_tabs(path, current, tabs, **kwargs)
     
 
@@ -1363,6 +1363,23 @@ def unit_lessons_student(request, course_id, unit_id):
     return render(request, 'ct/lessons.html',
                   dict(user=request.user, actionTarget=request.path,
                        pageData=pageData, lessonTable=lessonTable))
+
+@login_required
+def unit_concepts_student(request, course_id, unit_id):
+    'student concept glossary for  this courselet'
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs_student(request.path, 'Concepts'))
+    l1 = list(UnitLesson.objects.filter(kind=UnitLesson.COMPONENT,
+        lesson__concept__conceptlink__lesson__unitlesson__unit=unit)
+        .distinct())
+    l2 = list(unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT,
+        lesson__concept__isnull=False))
+    conceptTable = distinct_subset(l1 + l2)
+    conceptTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
+    return render(request, 'ct/concepts_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       pageData=pageData, conceptTable=conceptTable))
 
 def get_study_url(path, nextUL):
     if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
