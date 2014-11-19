@@ -1325,28 +1325,48 @@ def resolutions(request, course_id, unit_id, ul_id):
 ###########################################################
 # welcome mat refactored student UI for courses
 
-def next_lesson_url(path, unitLesson):
-    'get URL for unit lesson following this one'
+def next_lesson_url(path, unitLesson, unitStatus=None):
+    'get URL for unit lesson following this one, and record on unitStatus'
     try:
         nextUL = unitLesson.get_next_lesson()
-        if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
-            return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
-        else:
-            return get_base_url(path, ['lessons', str(nextUL.pk)])
     except UnitLesson.DoesNotExist:
+        if unitStatus: # record completion of lesson sequence
+            unitStatus.done()
         return get_base_url(path)
-    
+    if unitStatus: # record move to next lesson; prevent skipping
+        nextUL = unitStatus.set_lesson(nextUL)
+    if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
+        return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
+    else:
+        return get_base_url(path, ['lessons', str(nextUL.pk)])
 
+def redirect_next_lesson(request, ul):
+    'get redirect to the next lesson, and record on UnitStatus if any'
+    try:
+        unitStatus = UnitStatus.objects.get(unit=ul.unit, user=request.user)
+    except UnitStatus.DoesNotExist:
+        unitStatus = None
+    url = next_lesson_url(request.path, ul, unitStatus)
+    return HttpResponseRedirect(url)
+    
+        
+def redirect_if_next(request, ul):
+    'if POST:task=next, redirect to the next UnitLesson in this sequence'
+    if request.method == 'POST'  and request.POST.get('task') == 'next':
+        return redirect_next_lesson(request, ul)
+
+    
 def lesson(request, course_id, unit_id, ul_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
-    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+    r = redirect_if_next(request, ul)
+    if r:
+        return r
+    elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return HttpResponseRedirect(request.path + 'ask/')
-    nextLessonURL = next_lesson_url(request.path, ul)
     return render(request, 'ct/lesson_student.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, unit=unit,
-                       nextLessonURL=nextLessonURL))
+                       unitLesson=ul, unit=unit))
     
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
@@ -1389,8 +1409,7 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,
                         author=request.user, status=r.status)
-            return HttpResponseRedirect(
-                next_lesson_url(request.path, r.unitLesson))
+            return redirect_next_lesson(request, r.unitLesson)
     else:
         form = SelfAssessForm()
         form.fields['emlist'].choices = choices

@@ -747,7 +747,42 @@ class Role(models.Model):
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
-
+class UnitStatus(models.Model):
+    'records what user has completed in a unit lesson sequence'
+    unit = models.ForeignKey(Unit)
+    user = models.ForeignKey(User)
+    startTime = models.DateTimeField('time started', default=timezone.now)
+    endTime = models.DateTimeField('time ended', null=True)
+    order = models.IntegerField(default=0) # index of current UL
+    def get_lesson(self):
+        'get the current lesson'
+        return self.unit.unitlesson_set.get(order=self.order)
+    def set_lesson(self, ul):
+        'advance to specified lesson, but prevent skipping on first run'
+        if ul.order > self.order:
+            if not self.endTime and ul.order > self.order + 1:
+                return self.start_next_lesson() # prevent skipping ahead
+            self.order = ul.order
+            self.save()
+        return ul
+    def done(self):
+        'reset to start of sequence, and set endTime if not already'
+        self.order = 0 # reset in case user wants to repeat
+        if not self.endTime:
+            self.endTime = timezone.now() # mark as done
+            self.save()
+            return True        
+        self.save()
+    def start_next_lesson(self):
+        'advance to the next lesson, if any, else return None'
+        self.order += 1
+        try:
+            ul = self.get_lesson()
+            self.save()
+            return ul
+        except UnitLesson.DoesNotExist:
+            self.done()
+            return None
 
 ##############################################################
 # time utilities

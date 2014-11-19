@@ -24,10 +24,10 @@
         allowfullscreen></iframe>
 {% endif %}
 
-{% if nextLessonURL %}
-<button type="button" onclick="location.href='{{ nextLessonURL }}'">
-Next
-</button>
-{% endif %}
+<form action="{{ actionTarget }}" method="post">
+{% csrf_token %}
+<input type="hidden" name="task" value="next" />
+<input type="submit" value="Next" />
+</form>
 
 {% endblock %}
