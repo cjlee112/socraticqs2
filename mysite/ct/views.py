@@ -1495,20 +1495,48 @@ def resolutions_student(request, course_id, unit_id, ul_id):
                        lessonTable=lessonTable))
 
 @login_required
+def ul_faq_student(request, course_id, unit_id, ul_id):
+    'UI for user to add or write remediations for a specific error'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
+                                         'FAQ')
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            r = save_response(form, ul, request.user, course_id,
+                              kind=Response.STUDENT_QUESTION, needsEval=True)
+    else:
+        form = CommentForm()
+    faqs = ul.response_set.filter(kind=Response.STUDENT_QUESTION) \
+         .order_by('atime')
+    faqTable = []
+    for r in faqs:
+        faqTable.append((r, InquiryCount.objects.filter(response=r).count()))
+    return render(request, 'ct/faq_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       faqTable=faqTable, form=form))
+
+def save_response(form, ul, user, course_id, **kwargs):
+    course = get_object_or_404(Course, pk=course_id)
+    r = form.save(commit=False)
+    r.lesson = ul.lesson
+    r.unitLesson = ul
+    r.course = course
+    r.author = user
+    for k,v in kwargs.items():
+        setattr(r, k, v)
+    r.save()
+    return r
+
+@login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
-    course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
-            r = form.save(commit=False)
-            r.lesson = ul.lesson
-            r.unitLesson = ul
-            r.course = course
-            r.author = request.user
-            r.save()
+            r = save_response(form, ul, request.user, course_id)
             return HttpResponseRedirect(reverse('ct:assess',
                     args=(course_id, unit_id, ul_id, r.id,)))
     else:

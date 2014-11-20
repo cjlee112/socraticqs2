@@ -1,0 +1,72 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle" />Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="FAQTabDiv">
+
+{% if faqTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Frequently Asked Questions About This Lesson</th>
+</tr></thead>
+<tbody>
+{% for r,c in faqTable %}
+  <tr>
+    <td><a href="/ct/people/{{ r.author.pk }}/">
+    {{ r.author.get_full_name }}</a>
+    {% if c %}
+    (and {{ c }} other people)
+    {% endif %}
+    : {{ r.atime|display_datetime }}
+    {{ r.text|md2html }}
+        <a href="{{ actionTarget }}{{ r.pk }}/">(View Responses)</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if form %}
+<h3>Post a new question</h3>
+<div class="container-fluid">
+{% crispy form %}
+</div>
+{% endif %}
+
+  </div><!-- @end #FAQTabDiv -->
+</div>
+{% endblock %}

@@ -18,6 +18,18 @@ class ResponseForm(forms.ModelForm):
         fields = ['text', 'confidence']
         labels = dict(text=_('Your answer'))
 
+class CommentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CommentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-responseForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Save'))
+    class Meta:
+        model = Response
+        fields = ['text', 'confidence']
+        labels = dict(text=_('Your question'))
+
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES)
     status = forms.ChoiceField(choices=(('', '----'),) + STATUS_CHOICES)
