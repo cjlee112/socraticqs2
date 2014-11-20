@@ -662,6 +662,10 @@ class StudentError(models.Model):
             l.append((UnitLesson.objects.get(pk=d['errorModel']), d['c']))
         l.sort(lambda x,y:cmp(x[1], y[1]), reverse=True)
         return [(t[0],fmt_count(t[1], n)) for t in l]
+    @classmethod
+    def get_ul_errors(klass, ul, **kwargs):
+        'get StudentErrors for a specific question'
+        return klass.objects.filter(response__unitLesson=ul, **kwargs)
 
 def errormodel_table(target, n, fmt='%d (%.0f%%)', includeAll=False, attr=''):
     if n == 0: # prevent div by zero error

@@ -24,6 +24,11 @@ class SelfAssessForm(forms.Form):
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False)
 
+class AssessErrorsForm(forms.Form):
+    status = forms.ChoiceField(choices=(('', '----'),) + STATUS_CHOICES)
+    emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                       required=False)
+
 
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),

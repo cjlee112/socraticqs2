@@ -54,6 +54,8 @@ urlpatterns = patterns('',
         ul_respond, name='ul_respond'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/assess/$',
         assess, name='assess'),
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/errors/$',
+        assess_errors, name='assess_errors'),
     # deprecated
     url(r'^courses/$', courses, name='courses'),
     url(r'^courses/(?P<course_id>\d+)/$', course, name='course'),

@@ -1454,17 +1454,23 @@ def ul_tasks_student(request, course_id, unit_id, ul_id):
     if ul.lesson.kind == Lesson.ORCT_QUESTION:
         pageData.isQuestion = True
         for r in ul.response_set.filter(author=request.user).order_by('atime'):
+            pageData.isAnswered = True
             step = r.get_next_step()
             if step:
                 responseTable.append((r, step[0], step[1]))
-            else:
-                responseTable.append((r, None, None))
+            ## else:
+            ##     responseTable.append((r, None, None))
+        d = {}
+        for se in StudentError.get_ul_errors(ul, response__author=request.user):
+            if se.status != DONE_STATUS:
+                d[se.errorModel] = se
+        errorTable = d.values()
     else:
-        pageData.isQuestion = False
+        pageData.isQuestion = errorTable = False
     return render(request, 'ct/lesson_tasks.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData,
-                       responseTable=responseTable))
+                       responseTable=responseTable, errorTable=errorTable))
     
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
@@ -1492,35 +1498,50 @@ def ul_respond(request, course_id, unit_id, ul_id):
                        user=request.user))
 
 @login_required
-def assess(request, course_id, unit_id, ul_id, resp_id):
+def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
+           redirectURL=None):
     'student self-assessment'
     r = get_object_or_404(Response, pk=resp_id)
     choices = [(e.id, e.lesson.title) for e in r.unitLesson.get_errors()]
+    if doSelfEval:
+        formClass = SelfAssessForm
+    else:
+        formClass = AssessErrorsForm
     if request.method == 'POST':
-        form = SelfAssessForm(request.POST)
+        form = formClass(request.POST)
         form.fields['emlist'].choices = choices
         if form.is_valid():
-            r.selfeval = form.cleaned_data['selfeval']
-            r.status = form.cleaned_data['status']
-            r.save()
+            if doSelfEval:
+                r.selfeval = form.cleaned_data['selfeval']
+                r.status = form.cleaned_data['status']
+                r.save()
             for emID in form.cleaned_data['emlist']:
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,
-                        author=request.user, status=r.status)
-            return redirect_next_lesson(request, r.unitLesson)
+                    author=request.user, status=form.cleaned_data['status'])
+            if redirectURL:
+                return HttpResponseRedirect(redirectURL)
+            else:
+                return redirect_next_lesson(request, r.unitLesson)
     else:
-        form = SelfAssessForm()
+        form = formClass()
         form.fields['emlist'].choices = choices
     try:
         answer = r.unitLesson.get_answers()[0]
     except IndexError:
-        answer = ''
+        answer = '(author has not provided an answer)'
     else:
         answer = md2html(answer.lesson.text)
     return render(request, 'ct/assess.html',
                   dict(response=r, qtext=md2html(r.lesson.text),
                        answer=answer, form=form, actionTarget=request.path,
-                       user=request.user))
+                       user=request.user, doSelfEval=doSelfEval))
+
+def assess_errors(request, course_id, unit_id, ul_id, resp_id):
+    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    redirectURL = get_object_url(request.path, ul, subpath='tasks')
+    return assess(request, course_id, unit_id, ul_id, resp_id, False,
+           redirectURL)
 
 ###########################################################
 # student UI for courses

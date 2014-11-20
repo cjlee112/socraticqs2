@@ -39,9 +39,14 @@ $( "#headtoggle" ).click(function() {
 
 {% if pageData.isQuestion %}
 
-{% if responseTable %}
+{% if pageData.isAnswered %}
 Thanks for answering this question!  Here are some suggested next
 steps:
+{% else %}
+First, answer this question by clicking the <b>Study</b> tab.
+{% endif %}
+
+{% if responseTable %}
 <table class="table table-striped">
 <thead><tr>
   <th>For Your Answer</th><th>Next Step</th>
@@ -61,9 +66,27 @@ steps:
 {% endfor %}
 </tbody>
 </table>
-{% else %}
-First, answer this question by clicking the <b>Study</b> tab.
+{% endif %}
 
+{% if errorTable %}
+<h3>Unresolved errors</h3>
+Click any of your errors below for more information on how you
+can overcome it.
+<table class="table table-striped">
+<thead><tr>
+  <th>Error</th><th>Status</th>
+</tr></thead>
+<tbody>
+{% for se in errorTable %}
+  <tr>
+    <td>
+    <a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
+    </td>
+    <td>{{ se.get_status_display }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
 {% endif %}
 
 {% else %}
