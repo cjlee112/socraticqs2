@@ -1426,9 +1426,14 @@ def redirect_next_lesson(request, ul):
     
         
 def redirect_if_next(request, ul):
-    'if POST:task=next, redirect to the next UnitLesson in this sequence'
-    if request.method == 'POST'  and request.POST.get('task') == 'next':
-        return redirect_next_lesson(request, ul)
+    'if POST next, redirect to the next UnitLesson in this sequence'
+    if request.method == 'POST':
+        nextForm = NextLikeForm(request.POST)
+        if nextForm.is_valid():
+            if nextForm.cleaned_data['liked']:
+                liked = Liked(unitLesson=ul, addedBy=request.user)
+                liked.save()
+            return redirect_next_lesson(request, ul)
 
     
 def lesson(request, course_id, unit_id, ul_id):
@@ -1441,9 +1446,11 @@ def lesson(request, course_id, unit_id, ul_id):
         return HttpResponseRedirect(request.path + 'ask/')
     pageData = PageData(title=ul.lesson.title,
                         navTabs=lesson_tabs(request.path, 'Study', ul))
+    nextForm = NextLikeForm()
     return render(request, 'ct/lesson_student.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, unit=unit, pageData=pageData))
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       nextForm=nextForm))
 
 def ul_concepts_student(request, course_id, unit_id, ul_id):
     'use lesson tabs even if UL is a concept'
@@ -1593,6 +1600,10 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
                 r.selfeval = form.cleaned_data['selfeval']
                 r.status = form.cleaned_data['status']
                 r.save()
+                if form.cleaned_data['liked']:
+                    liked = Liked(unitLesson=r.unitLesson,
+                                  addedBy=request.user)
+                    liked.save()
             for emID in form.cleaned_data['emlist']:
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,

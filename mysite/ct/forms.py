@@ -33,6 +33,9 @@ class ReplyForm(ResponseForm):
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES)
     status = forms.ChoiceField(choices=(('', '----'),) + STATUS_CHOICES)
+    liked = forms.BooleanField(required=False,
+                label='''Check here if this lesson really showed
+                you something you were missing before.''')
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False)
 
@@ -41,6 +44,18 @@ class AssessErrorsForm(forms.Form):
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False)
 
+class NextLikeForm(forms.Form):
+    liked = forms.BooleanField(required=False,
+                label='''Check here if this lesson really showed
+                you something you were missing before.''')
+    def __init__(self, *args, **kwargs):
+        super(NextLikeForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-nextlikeForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Next'))
+    
 
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),

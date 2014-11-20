@@ -37,11 +37,10 @@
         allowfullscreen></iframe>
 {% endif %}
 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-<input type="hidden" name="task" value="next" />
-<input type="submit" value="Next" />
-</form>
+<hr>
+<div class="container-fluid">
+{% crispy nextForm %}
+</div>
 
   </div><!-- @end #LessonsTabDiv -->
 </div>

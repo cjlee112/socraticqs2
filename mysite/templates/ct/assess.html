@@ -59,6 +59,13 @@ $( "#headtoggle" ).click(function() {
   {{ form.status }}
 </div>
 
-<p><input type="submit" value="Go" /></p>
+<div class="fieldWrapper">
+  {{ form.liked.errors }}
+  {{ form.liked }}
+  <label for="id_liked">Check here if this lesson really showed
+                you something you were missing before.</label><br>
+</div>
+
+<p><input type="submit" value="Next" /></p>
 </form>
 {% endblock %}
