@@ -40,7 +40,8 @@ $( "#headtoggle" ).click(function() {
 (View <a href="{{ actionTarget |get_object_url:unitLesson }}faq/">
 all FAQs for this lesson</a>)<br>
 <input type="checkbox" id="inqtoggle" checked="" />
-Show original post by {{ inquiry.author.get_full_name }}
+Show original post by 
+<a href="/ct/people/{{ inquiry.author.pk }}/">{{ inquiry.author.get_full_name }}</a>
 ({{ inquiry.atime|display_datetime }}):
 {{ pageData.numPeople }} other people also have this question.
 {% if user != inquiry.author %}
@@ -124,7 +125,19 @@ If you would like to try the exercise, click on its title here:
     {% endif %}
     : {{ r.atime|display_datetime }}
     {{ r.text|md2html }}
+    {% if errors %}
+      <b>This reply includes the following error(s)</b>:
+      <ul>
+      {% for se in errors %}
+        <li><a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
+        (evaluated by 
+        <a href="/ct/people/{{ se.author.pk }}/">{{ se.author.get_full_name }}</a>)
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
         <a href="{{ actionTarget|get_object_url:r }}assess/">(Assess errors)</a>
+    {% endif %}
     </td>
   </tr>
 {% endfor %}
