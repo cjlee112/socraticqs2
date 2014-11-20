@@ -1240,7 +1240,7 @@ def copy_error_ul(ul, concept, unit, addedBy, parentUL):
 
 
 @login_required
-def ul_errors(request, course_id, unit_id, ul_id):
+def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Errors')
     n = Response.objects.filter(unitLesson=ul,
                                 selfeval__isnull=False).count()
@@ -1248,6 +1248,9 @@ def ul_errors(request, course_id, unit_id, ul_id):
     if n > 0:
         query = Q(response__unitLesson=ul, response__selfeval__isnull=False)
         seTable = StudentError.get_counts(query, n)
+    else:
+        seTable = []
+    if n > 0 and showNETable:
         neArgs = {}
         if request.method == 'GET' and 'selfeval' in request.GET:
             neForm = ResponseFilterForm(request.GET)
@@ -1263,7 +1266,7 @@ def ul_errors(request, course_id, unit_id, ul_id):
             neForm = ResponseFilterForm(request.GET)
         novelErrors = Response.get_novel_errors(ul, **neArgs)
     else:
-        seTable = novelErrors = []
+        novelErrors = ()
         neForm = False
     cLinks = list(ul.get_linked_concepts())
     if cLinks:
@@ -1472,6 +1475,9 @@ def ul_tasks_student(request, course_id, unit_id, ul_id):
                        unitLesson=ul, unit=unit, pageData=pageData,
                        responseTable=responseTable, errorTable=errorTable))
     
+def ul_errors_student(request, course_id, unit_id, ul_id):
+    return ul_errors(request, course_id, unit_id, ul_id, showNETable=False)
+
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
