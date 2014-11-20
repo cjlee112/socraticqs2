@@ -42,6 +42,9 @@ urlpatterns = patterns('',
         unit_lessons_student, name='unit_lessons_student'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/$',
         unit_concepts_student, name='unit_concepts_student'),
+    # lesson tabs
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/concepts/$',
+        ul_concepts_student, name='ul_concepts_student'),
     # study pages
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/$',
         lesson, name='lesson'),

@@ -767,9 +767,14 @@ def lesson_tabs(path, current, unitLesson,
     return outTabs
 
 def auto_tabs(path, current, unitLesson, **kwargs):
-    tabFunc = {IS_ERROR:error_tabs,
-               IS_CONCEPT:concept_tabs,
-               IS_LESSON:lesson_tabs}
+    if is_teacher_url(path):
+        tabFunc = {IS_ERROR:error_tabs,
+                   IS_CONCEPT:concept_tabs,
+                   IS_LESSON:lesson_tabs}
+    else:
+        tabFunc = {IS_ERROR:error_tabs,
+                   IS_CONCEPT:concept_tabs,
+                   IS_LESSON:lesson_tabs}
     return tabFunc[unitLesson.get_type()](path, current, unitLesson, **kwargs)
     
 
@@ -788,11 +793,14 @@ class PageData(object):
         for k,v in kwargs.items():
             setattr(self, k, v)
 
-def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True):
+def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
+                 tabFunc=None):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
+    if not tabFunc:
+        tabFunc = auto_tabs
     pageData = PageData(title=ul.lesson.title,
-                        navTabs=auto_tabs(request.path, currentTab, ul))
+                        navTabs=tabFunc(request.path, currentTab, ul))
     if includeText:
         pageData.headText = md2html(ul.lesson.text)
         ulType = ul.get_type()
@@ -972,10 +980,10 @@ def unit_concepts(request, course_id, unit_id):
     return r
 
 @login_required
-def ul_concepts(request, course_id, unit_id, ul_id):
+def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
     'page for viewing or adding concept links to this UnitLesson'
     unit, unitLesson, _, pageData = ul_page_data(request, unit_id, ul_id,
-                                                 'Concepts')
+                                                 'Concepts', tabFunc=tabFunc)
     cLinks = ConceptLink.objects.filter(lesson=unitLesson.lesson)
     clTable = ConceptLinkTable(cLinks, headers=('This lesson...', 'Concept'),
                                title='Concepts Linked to this Lesson')
@@ -1433,6 +1441,10 @@ def lesson(request, course_id, unit_id, ul_id):
     return render(request, 'ct/lesson_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData))
+
+def ul_concepts_student(request, course_id, unit_id, ul_id):
+    return ul_concepts(request, course_id, unit_id, ul_id, lesson_tabs)
+
     
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
