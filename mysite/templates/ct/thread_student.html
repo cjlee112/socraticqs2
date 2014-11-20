@@ -1,0 +1,145 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle" />Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="FAQTabDiv">
+
+(View <a href="{{ actionTarget |get_object_url:unitLesson }}faq/">
+all FAQs for this lesson</a>)<br>
+<input type="checkbox" id="inqtoggle" checked="" />
+Show original post by {{ inquiry.author.get_full_name }}
+({{ inquiry.atime|display_datetime }})<BR>
+<div id="inqdiv">
+{{ inquiry.text|md2html }}
+<a href="{{ actionTarget|get_object_url:inquiry }}assess/">(Assess errors in original post)</a>
+</div>
+
+<script>
+$( "#inqtoggle" ).click(function() {
+  $( "#inqdiv" ).toggle();
+});
+</script>
+
+{% if errorTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>The original post includes the following error(s)</th><th>
+</tr></thead>
+<tbody>
+{% for se in errorTable %}
+  <tr>
+    <td>
+    <a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if faqTable %}
+The instructor has created an exercise based on this question.
+If you would like to try the exercise, click on its title here:
+<table class="table table-striped">
+<thead><tr>
+  <th>Exercise</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for ul in faqTable %}
+  <tr>
+    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
+    </td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% if replyTable %}
+<input type="checkbox" id="reptoggle" />Show replies<BR>
+<div id="repdiv" style="display: none">
+{% else %}
+<div id="repdiv">
+{% endif %}
+{% else %}
+<div id="repdiv">
+{% endif %}
+
+{% if replyTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Replies</th>
+</tr></thead>
+<tbody>
+{% for r,errors in replyTable %}
+  <tr>
+    <td><a href="/ct/people/{{ r.author.pk }}/">
+    {{ r.author.get_full_name }}</a>
+    {% if c %}
+    (and {{ c }} other people)
+    {% endif %}
+    : {{ r.atime|display_datetime }}
+    {{ r.text|md2html }}
+        <a href="{{ actionTarget|get_object_url:r }}assess/">(Assess errors)</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+There are no replies yet.
+{% endif %}
+
+{% if form %}
+<h3>Reply to this discussion</h3>
+<div class="container-fluid">
+{% crispy form %}
+</div>
+{% endif %}
+</div><!-- @end #repdiv -->
+
+{% if faqTable %}
+<script>
+$( "#reptoggle" ).click(function() {
+  $( "#repdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+
+  </div><!-- @end #FAQTabDiv -->
+</div>
+{% endblock %}

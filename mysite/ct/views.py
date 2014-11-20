@@ -716,8 +716,8 @@ def make_tabs(path, current, tabs):
             tail = label[i + 1:]
             label = label[:i]
         if label == current:
-             if tail and path.endswith(tail):
-                path = path[:-len(tail)]
+             if tail:
+                path = path[:path.rindex(tail)]
              tail = '#%sTabDiv' % label
         outTabs.append((label, tail))
     for i,t in enumerate(outTabs):
@@ -1459,14 +1459,15 @@ def ul_tasks_student(request, course_id, unit_id, ul_id):
         for r in ul.response_set.filter(author=request.user).order_by('atime'):
             pageData.isAnswered = True
             step = r.get_next_step()
-            if step:
+            if step and (r.kind == Response.ORCT_RESPONSE or
+                         step == Response.CLASSIFY_STEP):
                 responseTable.append((r, step[0], step[1]))
             ## else:
             ##     responseTable.append((r, None, None))
         d = {}
-        for se in StudentError.get_ul_errors(ul, response__author=request.user):
-            if se.status != DONE_STATUS:
-                d[se.errorModel] = se
+        for se in StudentError.get_ul_errors(ul,
+                response__author=request.user).exclude(status=DONE_STATUS):
+            d[se.errorModel] = se
         errorTable = d.values()
     else:
         pageData.isQuestion = errorTable = False
@@ -1496,7 +1497,7 @@ def resolutions_student(request, course_id, unit_id, ul_id):
 
 @login_required
 def ul_faq_student(request, course_id, unit_id, ul_id):
-    'UI for user to add or write remediations for a specific error'
+    'UI for student to view or write inquiry about this lesson'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
                                          'FAQ')
     if request.method == 'POST':
@@ -1510,11 +1511,35 @@ def ul_faq_student(request, course_id, unit_id, ul_id):
          .order_by('atime')
     faqTable = []
     for r in faqs:
-        faqTable.append((r, InquiryCount.objects.filter(response=r).count()))
+        faqTable.append((r, r.inquirycount_set.count()))
     return render(request, 'ct/faq_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData,
                        faqTable=faqTable, form=form))
+
+@login_required
+def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
+    'UI for student to view or comment on discussion of an inquiry'
+    inquiry = get_object_or_404(Response, pk=resp_id)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
+                                         'FAQ')
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        if form.is_valid():
+            reply = save_response(form, ul, request.user, course_id,
+                              kind=Response.COMMENT, needsEval=True,
+                              parent=inquiry)
+    else:
+        form = ReplyForm()
+    replyTable = [(r, r.studenterror_set.all())
+                  for r in inquiry.response_set.all().order_by('atime')]
+    faqTable = inquiry.faq_set.all() # ORCT created for this thread
+    errorTable = inquiry.studenterror_set.all()
+    return render(request, 'ct/thread_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       faqTable=faqTable, form=form, inquiry=inquiry,
+                       errorTable=errorTable, replyTable=replyTable))
 
 def save_response(form, ul, user, course_id, **kwargs):
     course = get_object_or_404(Course, pk=course_id)

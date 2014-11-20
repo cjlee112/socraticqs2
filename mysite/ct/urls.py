@@ -51,6 +51,8 @@ urlpatterns = patterns('',
         ul_errors_student, name='ul_errors_student'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/faq/$',
         ul_faq_student, name='ul_faq_student'),
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/faq/(?P<resp_id>\d+)/$',
+        ul_thread_student, name='ul_thread_student'),
     # error tabs
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/errors/(?P<ul_id>\d+)/resolutions/$',
         resolutions_student, name='resolutions_student'),
