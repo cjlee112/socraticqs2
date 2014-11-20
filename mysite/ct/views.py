@@ -1523,14 +1523,17 @@ def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
     inquiry = get_object_or_404(Response, pk=resp_id)
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
                                          'FAQ')
+    form = ReplyForm()
     if request.method == 'POST':
-        form = ReplyForm(request.POST)
-        if form.is_valid():
-            reply = save_response(form, ul, request.user, course_id,
-                              kind=Response.COMMENT, needsEval=True,
-                              parent=inquiry)
-    else:
-        form = ReplyForm()
+        if request.POST.get('task') == 'meToo':
+            inquiry.inquirycount_set.create(addedBy=request.user)
+        else:
+            form = ReplyForm(request.POST)
+            if form.is_valid():
+                reply = save_response(form, ul, request.user, course_id,
+                                  kind=Response.COMMENT, needsEval=True,
+                                  parent=inquiry)
+    pageData.numPeople = inquiry.inquirycount_set.count()
     replyTable = [(r, r.studenterror_set.all())
                   for r in inquiry.response_set.all().order_by('atime')]
     faqTable = inquiry.faq_set.all() # ORCT created for this thread

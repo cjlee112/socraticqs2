@@ -41,10 +41,19 @@ $( "#headtoggle" ).click(function() {
 all FAQs for this lesson</a>)<br>
 <input type="checkbox" id="inqtoggle" checked="" />
 Show original post by {{ inquiry.author.get_full_name }}
-({{ inquiry.atime|display_datetime }})<BR>
+({{ inquiry.atime|display_datetime }}):
+{{ pageData.numPeople }} other people also have this question.
+{% if user != inquiry.author %}
+  <form action="{{ actionTarget }}" method="post"
+   style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="meToo" />
+  <input type="submit" value="Me too!" />
+  </form>
+{% endif %}
+<BR>
 <div id="inqdiv">
 {{ inquiry.text|md2html }}
-<a href="{{ actionTarget|get_object_url:inquiry }}assess/">(Assess errors in original post)</a>
 </div>
 
 <script>
@@ -68,6 +77,8 @@ $( "#inqtoggle" ).click(function() {
 {% endfor %}
 </tbody>
 </table>
+{% else %}
+<p><a href="{{ actionTarget|get_object_url:inquiry }}assess/">(Assess errors in original post)</a></p>
 {% endif %}
 
 {% if faqTable %}
@@ -120,7 +131,7 @@ If you would like to try the exercise, click on its title here:
 </tbody>
 </table>
 {% else %}
-There are no replies yet.
+<p>There are no replies yet.</p>
 {% endif %}
 
 {% if form %}
