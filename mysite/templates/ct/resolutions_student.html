@@ -1,0 +1,62 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle" CHECKED="" />Show {{ pageData.headLabel }}<BR>
+<div id="headdiv">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="ResolutionsTabDiv">
+
+{% if lessonTable %}
+Here are some materials you can review to overcome this error.
+<table class="table table-striped">
+<thead><tr>
+  <th>Suggested Lesson</th><th>Type</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for ul in lessonTable %}
+  <tr>
+    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
+    </td>
+    <td>{{ ul.lesson.get_kind_display }}</td>
+    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+
+  </div><!-- @end #ResolutionsTabDiv -->
+</div>
+{% endblock %}

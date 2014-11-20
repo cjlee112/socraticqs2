@@ -1479,6 +1479,22 @@ def ul_errors_student(request, course_id, unit_id, ul_id):
     return ul_errors(request, course_id, unit_id, ul_id, showNETable=False)
 
 @login_required
+def resolutions_student(request, course_id, unit_id, ul_id):
+    'UI for user to add or write remediations for a specific error'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
+                                         'Resolutions')
+    em, lessonTable = ul.get_em_resolutions()
+    concepts = UnitLesson.objects.filter(kind=UnitLesson.COMPONENT,
+        lesson__concept__relatedFrom__fromConcept=em,
+        lesson__concept__relatedFrom__relationship=ConceptGraph.MISUNDERSTANDS)
+    for conceptUL in distinct_subset(concepts):
+        lessonTable.append(conceptUL)
+    return render(request, 'ct/resolutions_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       lessonTable=lessonTable))
+
+@login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
     course = get_object_or_404(Course, pk=course_id)
