@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 import glob
-from datetime import timedelta
 
 
 def import_plugin(path):
@@ -568,6 +567,8 @@ class Response(models.Model):
         (UNSURE, 'Not quite sure'),
         (SURE, 'Pretty sure'),
     )
+    SELFEVAL_STEP = 'assess'
+    CLASSIFY_STEP = 'errors'
     lesson = models.ForeignKey(Lesson) # exact version this applies to
     unitLesson = models.ForeignKey(UnitLesson)
     course = models.ForeignKey('Course')
@@ -631,6 +632,15 @@ class Response(models.Model):
             tail = ''
         return '%slessons/%d/responses/%d/%s' % (basePath, self.unitLesson_id,
                                                  self.pk, tail)
+    def get_next_step(self):
+        'indicate what task student should do next'
+        if not self.selfeval:
+            return self.SELFEVAL_STEP, 'self-assess your answer'
+        if self.selfeval == self.DIFFERENT or self.status == NEED_HELP_STATUS:
+            if self.studenterror_set.count() == 0:
+                return self.CLASSIFY_STEP, 'classify your error(s)'
+
+        
 
 class StudentError(models.Model):
     'identification of a specific error model made by a student'
@@ -795,31 +805,6 @@ class UnitStatus(models.Model):
         except UnitLesson.DoesNotExist:
             self.done()
             return None
-
-##############################################################
-# time utilities
-
-timeUnits = (('seconds', timedelta(minutes=1), lambda t:int(t.seconds)),
-             ('minutes', timedelta(hours=1), lambda t:int(t.seconds / 60)),
-             ('hours', timedelta(1), lambda t:int(t.seconds / 3600)),
-             ('days', timedelta(7), lambda t:t.days))
-
-monthStrings = ('Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.',
-                'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.')
-
-def display_datetime(dt):
-    'get string that sidesteps timezone issues thus: 27 minutes ago'
-    def singularize(i, s):
-        if i == 1:
-            return s[:-1]
-        return s
-    diff = timezone.now() - dt
-    for unit, td, f in timeUnits:
-        if diff < td:
-            n = f(diff)
-            return '%d %s ago' % (n, singularize(n, unit))
-    return '%s %d, %d' % (monthStrings[dt.month - 1], dt.day, dt.year)
-
 
 ##################################################################
 # activity stack FSM

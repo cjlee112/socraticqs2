@@ -4,6 +4,8 @@ from django import template
 import re
 import pypandoc
 from django.contrib.staticfiles.templatetags import staticfiles
+from django.utils import timezone
+from datetime import timedelta
 
 register = template.Library()
 
@@ -141,3 +143,30 @@ def get_object_url(actionTarget, o, forceDefault=False, subpath=None):
 @register.filter(name='get_forced_url')
 def get_forced_url(actionTarget, o, subpath=None):
     return get_object_url(actionTarget, o, True, subpath)
+
+##############################################################
+# time utilities
+
+timeUnits = (('seconds', timedelta(minutes=1), lambda t:int(t.seconds)),
+             ('minutes', timedelta(hours=1), lambda t:int(t.seconds / 60)),
+             ('hours', timedelta(1), lambda t:int(t.seconds / 3600)),
+             ('days', timedelta(7), lambda t:t.days))
+
+monthStrings = ('Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.',
+                'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.')
+
+@register.filter(name='display_datetime')
+def display_datetime(dt):
+    'get string that sidesteps timezone issues thus: 27 minutes ago'
+    def singularize(i, s):
+        if i == 1:
+            return s[:-1]
+        return s
+    diff = timezone.now() - dt
+    for unit, td, f in timeUnits:
+        if diff < td:
+            n = f(diff)
+            return '%d %s ago' % (n, singularize(n, unit))
+    return '%s %d, %d' % (monthStrings[dt.month - 1], dt.day, dt.year)
+
+

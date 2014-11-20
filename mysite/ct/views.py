@@ -10,7 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
-from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url
+from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime
 from ct.fsm import FSMStack
 
 ######################################################
@@ -753,7 +753,7 @@ def lesson_tabs(path, current, unitLesson,
                  tabs=('Home:', 'Concepts', 'Errors', 'Edit'),
                  answerTabs=('Home', 'Edit'), **kwargs):
     if not is_teacher_url(path):
-        tabs = ('Study:', 'Status', 'Concepts', 'Errors', 'FAQ')
+        tabs = ('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
         outTabs = filter_tabs(outTabs, answerTabs)
@@ -1443,8 +1443,28 @@ def lesson(request, course_id, unit_id, ul_id):
                        unitLesson=ul, unit=unit, pageData=pageData))
 
 def ul_concepts_student(request, course_id, unit_id, ul_id):
+    'use lesson tabs even if UL is a concept'
     return ul_concepts(request, course_id, unit_id, ul_id, lesson_tabs)
 
+def ul_tasks_student(request, course_id, unit_id, ul_id):
+    'suggest next steps on this question'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Tasks',
+                                         tabFunc=lesson_tabs)
+    responseTable = []
+    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+        pageData.isQuestion = True
+        for r in ul.response_set.filter(author=request.user).order_by('atime'):
+            step = r.get_next_step()
+            if step:
+                responseTable.append((r, step[0], step[1]))
+            else:
+                responseTable.append((r, None, None))
+    else:
+        pageData.isQuestion = False
+    return render(request, 'ct/lesson_tasks.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       responseTable=responseTable))
     
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):

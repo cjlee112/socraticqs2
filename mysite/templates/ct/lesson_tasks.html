@@ -1,0 +1,87 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="TasksTabDiv">
+
+{% if pageData.isQuestion %}
+
+{% if responseTable %}
+Thanks for answering this question!  Here are some suggested next
+steps:
+<table class="table table-striped">
+<thead><tr>
+  <th>For Your Answer</th><th>Next Step</th>
+</tr></thead>
+<tbody>
+{% for r,step,label in responseTable %}
+  <tr>
+    <td>{{ r.atime|display_datetime }}</td>
+    <td>
+    {% if step %}
+    <a href="{{ actionTarget |get_object_url:r }}{{ step }}/">{{ label }}</a>
+    {% else %}
+    Done: {{ r.get_selfeval_display }}; {{ r.get_status_display }}
+    {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+First, answer this question by clicking the <b>Study</b> tab.
+
+{% endif %}
+
+{% else %}
+You can study this lesson by clicking the <b>Study</b> tab.
+{% endif %}
+
+<h2>Review Suggestions</h2>
+<ul>
+<li>Click on the <b>Concepts</b> tab to build a list of glossary
+terms associated with this lesson.  You can add to the list by
+searching our terms database (including Wikipedia) for terms
+you want to add, or if you are unable to find a good match in
+the database, you can enter a new term definition on that tab.</li>
+
+<li>If you have a question about this lesson, click the <b>FAQ</b>
+tab to see if it has been addressed.  If not, you can post your
+question on that tab, for the instructors to answer.</li>
+</ul>
+  </div><!-- @end #TasksTabDiv -->
+</div>
+{% endblock %}

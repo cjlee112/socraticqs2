@@ -43,6 +43,8 @@ urlpatterns = patterns('',
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/$',
         unit_concepts_student, name='unit_concepts_student'),
     # lesson tabs
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/tasks/$',
+        ul_tasks_student, name='ul_tasks_student'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/concepts/$',
         ul_concepts_student, name='ul_concepts_student'),
     # study pages
@@ -50,7 +52,7 @@ urlpatterns = patterns('',
         lesson, name='lesson'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/ask/$',
         ul_respond, name='ul_respond'),
-    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/$',
+    url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/assess/$',
         assess, name='assess'),
     # deprecated
     url(r'^courses/$', courses, name='courses'),
