@@ -724,13 +724,14 @@ def make_tabs(path, current, tabs, tail=4):
     return outTabs
 
 def concept_tabs(path, current, unitLesson,
-                 tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
+                 tabs=('Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                 **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'Edit'), **kwargs):
+               tabs=('Resolutions:', 'FAQ', 'Edit'), **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
@@ -752,8 +753,8 @@ def filter_tabs(tabs, filterLabels):
     return [t for t in tabs if t[0] in filterLabels]
     
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Concepts', 'Errors', 'Edit'),
-                 answerTabs=('Home', 'Edit'), **kwargs):
+                 tabs=('Home:', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                 answerTabs=('Home', 'FAQ', 'Edit'), **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)

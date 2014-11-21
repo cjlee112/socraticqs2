@@ -73,6 +73,8 @@ $( "#inqtoggle" ).click(function() {
   <tr>
     <td>
     <a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
+    (evaluated by 
+        <a href="/ct/people/{{ se.author.pk }}/">{{ se.author.get_full_name }}</a>)
     </td>
   </tr>
 {% endfor %}
