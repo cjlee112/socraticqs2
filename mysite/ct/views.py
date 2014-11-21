@@ -725,6 +725,8 @@ def make_tabs(path, current, tabs, tail=4):
 
 def concept_tabs(path, current, unitLesson,
                  tabs=('Lessons', 'Concepts', 'Errors', 'Edit'), **kwargs):
+    if not is_teacher_url(path):
+        tabs = ('Study:', 'Lessons', 'FAQ')
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
@@ -767,12 +769,7 @@ def lesson_tabs(path, current, unitLesson,
     return outTabs
 
 def auto_tabs(path, current, unitLesson, **kwargs):
-    if is_teacher_url(path):
-        tabFuncs = {'errors':error_tabs,
-                   'concepts':concept_tabs,
-                   'lessons':lesson_tabs}
-    else:
-        tabFuncs = {'errors':error_tabs,
+    tabFuncs = {'errors':error_tabs,
                    'concepts':concept_tabs,
                    'lessons':lesson_tabs}
     currentType = get_path_type(path)
