@@ -1485,6 +1485,17 @@ def ul_errors_student(request, course_id, unit_id, ul_id):
     return ul_errors(request, course_id, unit_id, ul_id, showNETable=False)
 
 @login_required
+def study_concept(request, course_id, unit_id, ul_id):
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Study')
+    defsTable = distinct_subset(UnitLesson.objects
+        .filter(lesson__concept=concept).exclude(treeID=ul.treeID))
+    return render(request, 'ct/concept_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, pageData=pageData,
+                       defsTable=defsTable))
+
+@login_required
 def concept_lessons_student(request, course_id, unit_id, ul_id):
     unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
                                                'Lessons')

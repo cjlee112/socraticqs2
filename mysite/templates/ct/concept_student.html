@@ -1,0 +1,62 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  Teacher's overview of a lesson
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="StudyTabDiv">
+
+{{ unitLesson.lesson.text |md2html }}
+{% if unitLesson.lesson.sourceDB == 'youtube' %}
+<iframe width="560" height="315"
+        src="http://www.youtube.com/embed/{{ unitLesson.lesson.sourceID }}?rel=0"
+        frameborder="0" allowfullscreen></iframe>
+{% elif unitLesson.lesson.sourceDB == 'vimeo' %}
+<iframe width="500" height="281"
+        src="http://player.vimeo.com/video/{{ unitLesson.lesson.sourceID }}"
+        frameborder="0" webkitallowfullscreen mozallowfullscreen
+        allowfullscreen></iframe>
+{% endif %}
+
+<hr>
+
+{% if defsTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Alternative definitions of this concept</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for ul in defsTable %}
+  <tr>
+    <td><a href="{{ actionTarget |get_object_url:ul }}">
+        {{ ul.lesson.title }}</a></td>
+    <td><a href="/ct/people/{{ r.author.pk }}/">
+    {{ ul.addedBy.get_full_name }}</a></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+  </div><!-- @end #StudyTabDiv -->
+</div>
+{% endblock %}
