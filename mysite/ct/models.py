@@ -227,6 +227,10 @@ class Lesson(models.Model):
             pass
         dataClass = klass._sourceDBdict[sourceDB]
         data = dataClass(sourceID)
+        try: # attribute authorship to the sourceDB
+            user = User.objects.get(username=sourceDB)
+        except User.DoesNotExist:
+            pass
         lesson = klass(title=data.title, url=data.url, sourceDB=sourceDB,
                        sourceID=sourceID, addedBy=user, text=data.description)
         lesson.save_root()
