@@ -84,7 +84,7 @@ class Concept(models.Model):
         objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
         if self.isError: # default settings
             head = 'errors'
-            tail = 'resolutions/'
+            tail = ''
         else:
             head = 'concepts'
             tail = 'lessons/'
