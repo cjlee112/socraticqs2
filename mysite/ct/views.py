@@ -1063,7 +1063,7 @@ def create_unit_lesson(lesson, concept, unit, parentUL):
 
 def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
-             unit=None, actionLabel='Add to This Unit',
+             unit=None, actionLabel='Add to This Courselet',
              allowSearch=True, creationInstructions=None,
              templateFile='ct/lessons.html',
              createULFunc=create_unit_lesson, selectULFunc=None,
