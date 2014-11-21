@@ -89,10 +89,9 @@ $( "#headtoggle" ).click(function() {
 
 {{ msg }}
 {% if searchForm %}
-<form action="{{ actionTarget }}" method="get">
-{{ searchForm }}
-<input type="submit" value="Search" />
-</form>
+<div class="container-fluid">
+{% crispy searchForm %}
+</div>
 {% endif %}
 
 {% if lessonSet %}
