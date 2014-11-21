@@ -397,7 +397,7 @@ class UnitLesson(models.Model):
     def search_text(klass, s, searchType=IS_LESSON, dedupe=True, **kwargs):
         'search lessons, concepts or errors for title and text'
         if searchType == IS_LESSON:
-            kwargs['lesson__concept__isnull'] = True
+            kwargs['kind'] = klass.COMPONENT
         elif searchType == IS_ERROR:
             kwargs['lesson__concept__isnull'] = False
             kwargs['kind'] = klass.MISUNDERSTANDS
