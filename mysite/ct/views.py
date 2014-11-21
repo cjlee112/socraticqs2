@@ -716,15 +716,17 @@ def make_tabs(path, current, tabs, tail=4):
         else: # use specified URL tail
             tail = label[i + 1:]
             label = label[:i]
-        if label == current:
-            tail = '#%sTabDiv' % label
+        labels = label.split(',')
+        label = labels[0]
+        if current in labels:
+            tail = '#%sTabDiv' % current
             outTabs.append((label, tail))
         else:
             outTabs.append((label, path + tail))
     return outTabs
 
 def concept_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                 tabs=('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
                  **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
