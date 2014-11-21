@@ -1186,7 +1186,8 @@ def unit_resources(request, course_id, unit_id):
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
-    query = Q(unitLesson=ul, selfeval__isnull=False)
+    query = Q(unitLesson=ul, selfeval__isnull=False,
+              kind=Response.ORCT_RESPONSE)
     statusTable, evalTable, n = Response.get_counts(query)
     if request.method == 'POST' and request.POST.get('task') == 'append' \
             and ul.unit != unit:
