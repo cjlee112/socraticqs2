@@ -152,6 +152,12 @@ def get_object_url(actionTarget, o, forceDefault=False, subpath=None):
 def get_forced_url(actionTarget, o, subpath=None):
     return get_object_url(actionTarget, o, True, subpath)
 
+@register.filter(name='get_thread_url')
+def get_thread_url(actionTarget, r):
+    'get URL for FAQ thread for this student inquiry'
+    return get_object_url(actionTarget, r.unitLesson,
+                          subpath='faq/%d' % r.pk)
+
 ##############################################################
 # time utilities
 
