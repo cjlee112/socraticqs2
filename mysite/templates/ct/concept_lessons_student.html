@@ -1,0 +1,59 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="LessonsTabDiv">
+
+{% if clTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th><th>...this concept</th>
+</tr></thead>
+<tbody>
+{% for cl in clTable %}
+  <tr>
+    <td><a href="{{ actionTarget |get_object_url:cl.unitLesson }}">
+        {{ cl.lesson.title }}</a></td>
+    <td>{{ cl.get_relationship_display }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+  </div><!-- @end #LessonsTabDiv -->
+</div>
+{% endblock %}

@@ -1488,6 +1488,17 @@ def ul_errors_student(request, course_id, unit_id, ul_id):
     return ul_errors(request, course_id, unit_id, ul_id, showNETable=False)
 
 @login_required
+def concept_lessons_student(request, course_id, unit_id, ul_id):
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Lessons')
+    clTable = UnitLesson.get_conceptlinks(concept, unit)
+    return render(request, 'ct/concept_lessons_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, unit=unit, pageData=pageData,
+                       clTable=clTable))
+
+
+@login_required
 def resolutions_student(request, course_id, unit_id, ul_id):
     'UI for user to add or write remediations for a specific error'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
