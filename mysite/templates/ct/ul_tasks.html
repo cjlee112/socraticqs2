@@ -1,0 +1,76 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+{% comment %}
+  View or edit a course
+{% endcomment %}
+
+{% block title %}
+  {{ pageData.title }}
+{% endblock %}
+
+{% block content %}
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="TasksTabDiv">
+
+<table class="table table-striped">
+<thead><tr>
+  <th>Next Steps to work on</th>
+</tr></thead>
+<tbody>
+
+{% if pageData.isQuestion %}
+
+{% if errorTable %}
+  {% for em,nres in errorTable %}
+    {% if not nres %}
+      <tr><td>Suggest exercises for overcoming error:
+          <a href="{{ actionTarget|get_object_url:em }}">{{ em.lesson.title }}</a>
+      </td></tr>
+    {% endif %}
+  {% endfor %}
+{% else %}
+  <tr><td>Write error models by clicking on the <b>Errors</b> tab</td></tr>
+{% endif %}
+
+{% endif %}
+
+{% for r in newInquiries %}
+  <tr><td>Assess and respond</a> to 
+  <a href="{{ actionTarget|get_object_url:unitLesson }}faq/{{ r.pk }}/">new 
+  question about this lesson</a> from
+  <a href="/ct/people/{{ r.author.pk }}/">{{ unitLesson.lesson.addedBy.get_full_name }}</a>
+  ({{ r.atime|display_datetime }})
+  </td></tr>
+{% endfor %}
+
+</tbody>
+</table>
+
+  </div><!-- @end #TasksTabDiv -->
+</div>
+{% endblock %}

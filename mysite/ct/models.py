@@ -438,6 +438,9 @@ class UnitLesson(models.Model):
                   lesson__conceptlink__relationship=ConceptLink.RESOLVES,
                   lesson__conceptlink__concept=em)
         return em, distinct_subset(UnitLesson.objects.filter(query))
+    def get_new_inquiries(self):
+        return self.response_set.filter(kind=Response.STUDENT_QUESTION,
+                                        needsEval=True)
     def get_next_lesson(self):
         return self.unit.unitlesson_set.get(order=self.order + 1)
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):

@@ -753,7 +753,7 @@ def filter_tabs(tabs, filterLabels):
     return [t for t in tabs if t[0] in filterLabels]
     
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                 tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
                  answerTabs=('Home', 'FAQ', 'Edit'), **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ')
@@ -1174,6 +1174,7 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
             pageData=pageData, unit=unit, lessonTable=lessonTable)
     return r
 
+@login_required
 def unit_resources(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     lessonTable = list(unit.unitlesson_set \
@@ -1181,6 +1182,7 @@ def unit_resources(request, course_id, unit_id):
     return unit_lessons(request, course_id, unit_id, lessonTable, 'Resources')
 
 
+@login_required
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
@@ -1195,7 +1197,30 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, pageData=pageData, unit=unit,
                        statusTable=statusTable, evalTable=evalTable))
+
+@login_required
+def ul_tasks(request, course_id, unit_id, ul_id):
+    'suggest next steps on this question'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Tasks')
+    newInquiries = list(ul.get_new_inquiries())
+    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+        pageData.isQuestion = True
+        errorModels = list(ul.get_errors())
+        for em in errorModels:
+            newInquiries += list(em.get_new_inquiries())
+        for em in ul.get_answers():
+            newInquiries += list(em.get_new_inquiries())
+        errorTable = [(em, len(em.get_em_resolutions()[1]))
+                      for em in errorModels]
+    else:
+        errorTable = ()
+    return render(request, 'ct/ul_tasks.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       unitLesson=ul, pageData=pageData, unit=unit,
+                       errorTable=errorTable, newInquiries=newInquiries))
+
     
+@login_required
 def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
