@@ -350,6 +350,7 @@ IS_LESSON = 2
 class UnitLesson(models.Model):
     'pointer to a Lesson as part of a Unit branch'
     _headURL = 'lessons'
+    _tasksPath = {IS_ERROR:'faq', IS_CONCEPT:'faq', IS_LESSON:'tasks'}
     COMPONENT = 'part'
     ANSWERS = 'answers'
     MISUNDERSTANDS = 'errmod'
@@ -527,6 +528,19 @@ class Unit(models.Model):
             if i != ex.order: # order changed, have to update
                 ex.order = i
                 ex.save()
+    def get_new_inquiry_uls(self, **kwargs):
+        return distinct_subset(self.unitlesson_set
+            .filter(response__kind=Response.STUDENT_QUESTION,
+                    response__needsEval=True, **kwargs))
+    def get_errorless_uls(self, **kwargs):
+        return distinct_subset(self.unitlesson_set
+            .filter(lesson__kind=Lesson.ORCT_QUESTION,  **kwargs)
+            .exclude(unitlesson__kind=UnitLesson.MISUNDERSTANDS))
+    def get_resoless_uls(self, **kwargs):
+        return distinct_subset(self.unitlesson_set
+            .filter(Q(unitlesson__kind=UnitLesson.MISUNDERSTANDS, **kwargs)
+            & ~Q(unitlesson__lesson__concept__conceptlink__relationship=
+                 ConceptLink.RESOLVES)))
     def __unicode__(self):
         return self.title
 

@@ -781,7 +781,7 @@ def auto_tabs(path, current, unitLesson, **kwargs):
 
     
 def unit_tabs(path, current,
-              tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
+              tabs=('Concepts', 'Tasks', 'Lessons', 'Resources', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def unit_tabs_student(path, current,
@@ -819,6 +819,7 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 
 ###########################################################
 # WelcomeMat refactored views
+
 
 def update_concept_link(request, conceptLinks):
     cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
@@ -1147,6 +1148,30 @@ def concept_lessons(request, course_id, unit_id, ul_id):
             pageData=pageData, unit=unit, allowSearch=False,
             creationInstructions=creationInstructions)
     return r
+
+@login_required
+def unit_tasks(request, course_id, unit_id):
+    'suggest next steps on this courselet'
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs(request.path, 'Tasks'))
+    newInquiryULs = frozenset(unit.get_new_inquiry_uls())
+    ulDict = {}
+    for ul in newInquiryULs:
+        ulDict[ul] = ['inquiry']
+    for ul in unit.get_errorless_uls():
+        ulDict.setdefault(ul, []).append('em')
+    for ul in unit.get_resoless_uls():
+        ulDict.setdefault(ul, []).append('reso')
+    taskTable = [(ul, ulDict[ul]) for ul in newInquiryULs]
+    taskTable += [(ul, ulDict[ul]) for ul in ulDict
+                  if ul not in newInquiryULs]
+    return render(request, 'ct/unit_tasks.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       pageData=pageData, unit=unit, taskTable=taskTable))
+
+    
+
 
 def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
     'copy lesson and append to this unit'

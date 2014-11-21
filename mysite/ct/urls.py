@@ -5,6 +5,8 @@ urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
     # instructor UI
     # courselet tabs
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/tasks/$',
+        unit_tasks, name='unit_tasks'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/$',
         unit_concepts, name='unit_concepts'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/$',
