@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES
+from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
@@ -29,6 +29,12 @@ class ReplyForm(ResponseForm):
         model = Response
         fields = ['text', 'confidence']
         labels = dict(text=_('Your reply'))
+
+class ErrorStatusForm(ResponseForm):
+    class Meta:
+        model = StudentError
+        fields = ['status']
+        labels = dict(status=_('How well have you overcome this error?'))
         
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES)

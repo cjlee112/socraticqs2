@@ -56,6 +56,13 @@ Here are some materials you can review to overcome this error.
 </table>
 {% endif %}
 
+{% if statusForm %}
+<h3>Update your status for overcoming this error</h3>
+<div class="container-fluid">
+{% crispy statusForm %}
+</div>
+
+{% endif %}
 
   </div><!-- @end #ResolutionsTabDiv -->
 </div>

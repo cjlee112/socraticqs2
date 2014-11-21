@@ -1500,10 +1500,22 @@ def resolutions_student(request, course_id, unit_id, ul_id):
         lesson__concept__relatedFrom__relationship=ConceptGraph.MISUNDERSTANDS)
     for conceptUL in distinct_subset(concepts):
         lessonTable.append(conceptUL)
+    try:
+        se = ul.studenterror_set.filter(author=request.user) \
+          .order_by('-atime')[0]
+    except IndexError:
+        form = None
+    else:
+        if request.method == 'POST':
+            form = ErrorStatusForm(request.POST, instance=se)
+            if form.is_valid():
+                form.save()
+        else:
+            form = ErrorStatusForm(instance=se)
     return render(request, 'ct/resolutions_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData,
-                       lessonTable=lessonTable))
+                       lessonTable=lessonTable, statusForm=form))
 
 @login_required
 def ul_faq_student(request, course_id, unit_id, ul_id):
