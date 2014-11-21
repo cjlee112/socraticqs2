@@ -118,6 +118,14 @@ def get_base_url(path, extension=[], baseToken='units', tail=2):
             return '/'.join(l[:i + tail] + extension) + '/'
     raise ValueError('baseToken not found in path')
 
+def get_path_type(path, baseToken='units', typeOffset=2):
+    l = path.split('/')
+    for i, s in enumerate(l[:-typeOffset]):
+        if s == baseToken:
+            return l[i + typeOffset]
+    raise ValueError('baseToken not found in path')
+
+
 def is_teacher_url(path):
     return path.startswith('/ct/teach/')
 

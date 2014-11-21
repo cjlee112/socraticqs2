@@ -450,7 +450,7 @@ class UnitLesson(models.Model):
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'get URL path for this UL'
-        pathDict = {IS_ERROR:('errors', 'resolutions/'),
+        pathDict = {IS_ERROR:('errors', ''),
                     IS_CONCEPT:('concepts', 'lessons/'),
                     IS_LESSON:('lessons', ''),}
         if forceDefault:

@@ -10,7 +10,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
-from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime
+from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
 from ct.fsm import FSMStack
 
 ######################################################
@@ -728,7 +728,9 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Tests', 'Examples', 'Resolutions', 'Edit'), **kwargs):
+               tabs=('Resolutions:', 'Edit'), **kwargs):
+    if not is_teacher_url(path):
+        tabs = ('Resolutions:', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.parent:
         outTabs.append(make_tab(path, current, 'Question',
@@ -766,14 +768,15 @@ def lesson_tabs(path, current, unitLesson,
 
 def auto_tabs(path, current, unitLesson, **kwargs):
     if is_teacher_url(path):
-        tabFunc = {IS_ERROR:error_tabs,
-                   IS_CONCEPT:concept_tabs,
-                   IS_LESSON:lesson_tabs}
+        tabFuncs = {'errors':error_tabs,
+                   'concepts':concept_tabs,
+                   'lessons':lesson_tabs}
     else:
-        tabFunc = {IS_ERROR:error_tabs,
-                   IS_CONCEPT:concept_tabs,
-                   IS_LESSON:lesson_tabs}
-    return tabFunc[unitLesson.get_type()](path, current, unitLesson, **kwargs)
+        tabFuncs = {'errors':error_tabs,
+                   'concepts':concept_tabs,
+                   'lessons':lesson_tabs}
+    currentType = get_path_type(path)
+    return tabFuncs[currentType](path, current, unitLesson, **kwargs)
     
 
     
@@ -1442,7 +1445,7 @@ def redirect_if_next(request, ul):
     
 def lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            checkUnitStatus=True, tabFunc=lesson_tabs, includeText=False)
+            checkUnitStatus=True, includeText=False)
     r = redirect_if_next(request, ul)
     if r:
         return r
@@ -1455,14 +1458,9 @@ def lesson(request, course_id, unit_id, ul_id):
                        unitLesson=ul, unit=unit, pageData=pageData,
                        nextForm=nextForm))
 
-def ul_concepts_student(request, course_id, unit_id, ul_id):
-    'use lesson tabs even if UL is a concept'
-    return ul_concepts(request, course_id, unit_id, ul_id, lesson_tabs)
-
 def ul_tasks_student(request, course_id, unit_id, ul_id):
     'suggest next steps on this question'
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Tasks',
-                                         tabFunc=lesson_tabs)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Tasks')
     responseTable = []
     if ul.lesson.kind == Lesson.ORCT_QUESTION:
         pageData.isQuestion = True
