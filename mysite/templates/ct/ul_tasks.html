@@ -43,6 +43,15 @@ $( "#headtoggle" ).click(function() {
 </tr></thead>
 <tbody>
 
+{% for r in newInquiries %}
+  <tr><td>Assess and respond</a> to 
+  <a href="{{ actionTarget|get_thread_url:r }}">new 
+  question about this lesson</a> from
+  <a href="/ct/people/{{ r.author.pk }}/">{{ r.author.get_full_name }}</a>
+  ({{ r.atime|display_datetime }})
+  </td></tr>
+{% endfor %}
+
 {% if pageData.isQuestion %}
 
 {% if errorTable %}
@@ -58,15 +67,6 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
 {% endif %}
-
-{% for r in newInquiries %}
-  <tr><td>Assess and respond</a> to 
-  <a href="{{ actionTarget|get_object_url:unitLesson }}faq/{{ r.pk }}/">new 
-  question about this lesson</a> from
-  <a href="/ct/people/{{ r.author.pk }}/">{{ unitLesson.lesson.addedBy.get_full_name }}</a>
-  ({{ r.atime|display_datetime }})
-  </td></tr>
-{% endfor %}
 
 </tbody>
 </table>
