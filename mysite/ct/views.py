@@ -795,12 +795,13 @@ class PageData(object):
             setattr(self, k, v)
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
-                 tabFunc=None, checkUnitStatus=False, includeNavTabs=True):
+                 tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
+                 **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if not tabFunc:
         tabFunc = auto_tabs
-    pageData = PageData(title=ul.lesson.title)
+    pageData = PageData(title=ul.lesson.title, **kwargs)
     if checkUnitStatus and not UnitStatus.is_done(unit, request.user):
         includeNavTabs = False
     if includeNavTabs:
@@ -1043,8 +1044,8 @@ def concept_errors(request, course_id, unit_id, ul_id):
                                                'Errors')
     errorModels = list(concept.relatedFrom
       .filter(relationship=ConceptGraph.MISUNDERSTANDS))
-    r = _concepts(request, '''To add a concept link, start by
-    typing a search for relevant concepts. ''', errorModels=errorModels,
+    r = _concepts(request, '''To add an error model to this concept, start by
+    typing a search for relevant errors.''', errorModels=errorModels,
                   pageData=pageData, unit=unit,
                   createConceptFunc=create_em_concept)
     if isinstance(r, Concept):
@@ -1386,7 +1387,7 @@ def link_resolution_ul(ul, em, unit, addedBy, parentUL):
 def resolutions(request, course_id, unit_id, ul_id):
     'UI for user to add or write remediations for a specific error'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,
-                                         'Resolutions')
+                                         'Resolutions', showHead=True)
     em, lessonTable = ul.get_em_resolutions()
     msg = '''This page lists lessons, exercises, or review
     suggested for students who make this error, to help them

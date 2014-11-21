@@ -12,8 +12,16 @@
 {% block content %}
 
 {% if pageData.headText %}
-<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<input type="checkbox" id="headtoggle"
+{% if pageData.showHead %}
+CHECKED=""
+{% endif %}
+/>Show {{ pageData.headLabel }}<BR>
+{% if pageData.showHead %}
+<div id="headdiv">
+{% else %}
 <div id="headdiv" style="display: none">
+{% endif %}
 {{ pageData.headText }}
 </div>
 
