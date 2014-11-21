@@ -724,7 +724,7 @@ def make_tabs(path, current, tabs, tail=4):
     return outTabs
 
 def concept_tabs(path, current, unitLesson,
-                 tabs=('Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                 tabs=('Home:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
                  **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
