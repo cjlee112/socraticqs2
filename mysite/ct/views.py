@@ -705,7 +705,8 @@ def concepts(request):
 ###########################################################
 # WelcomeMat refactored utilities
 
-def make_tabs(path, current, tabs):
+def make_tabs(path, current, tabs, tail=4):
+    path = get_base_url(path, tail=tail)
     outTabs = []
     for label in tabs:
         try:
@@ -716,13 +717,10 @@ def make_tabs(path, current, tabs):
             tail = label[i + 1:]
             label = label[:i]
         if label == current:
-             if tail:
-                path = path[:path.rindex(tail)]
-             tail = '#%sTabDiv' % label
-        outTabs.append((label, tail))
-    for i,t in enumerate(outTabs):
-        if not t[1].startswith('#'): # add URL prefix
-            outTabs[i] = (t[0], path + t[1])
+            tail = '#%sTabDiv' % label
+            outTabs.append((label, tail))
+        else:
+            outTabs.append((label, path + tail))
     return outTabs
 
 def concept_tabs(path, current, unitLesson,
@@ -781,11 +779,11 @@ def auto_tabs(path, current, unitLesson, **kwargs):
     
 def unit_tabs(path, current,
               tabs=('Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
+    return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def unit_tabs_student(path, current,
               tabs=('Study:', 'Lessons', 'Concepts'), **kwargs):
-    return make_tabs(path, current, tabs, **kwargs)
+    return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 
 class PageData(object):
@@ -794,13 +792,16 @@ class PageData(object):
             setattr(self, k, v)
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
-                 tabFunc=None):
+                 tabFunc=None, checkUnitStatus=False, includeNavTabs=True):
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if not tabFunc:
         tabFunc = auto_tabs
-    pageData = PageData(title=ul.lesson.title,
-                        navTabs=tabFunc(request.path, currentTab, ul))
+    pageData = PageData(title=ul.lesson.title)
+    if checkUnitStatus and not UnitStatus.is_done(unit, request.user):
+        includeNavTabs = False
+    if includeNavTabs:
+        pageData.navTabs = tabFunc(request.path, currentTab, ul)
     if includeText:
         pageData.headText = md2html(ul.lesson.text)
         ulType = ul.get_type()
@@ -1363,13 +1364,16 @@ def study_unit(request, course_id, unit_id):
             unitStatus.save()
         nextUL = unitStatus.get_lesson()
         return HttpResponseRedirect(get_study_url(request.path, nextUL))
+    pageData = PageData(title=unit.title)
     if unitStatus:
         nextUL = unitStatus.get_lesson()
+        if unitStatus.endTime: # already completed unit
+            pageData.navTabs = unit_tabs_student(request.path, 'Study')
     else:
         nextUL = None
     return render(request, 'ct/study_unit.html',
                   dict(user=request.user, actionTarget=request.path,
-                       unitLesson=nextUL, unit=unit))
+                       unitLesson=nextUL, unit=unit, pageData=pageData))
 
 def unit_lessons_student(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
@@ -1437,16 +1441,15 @@ def redirect_if_next(request, ul):
 
     
 def lesson(request, course_id, unit_id, ul_id):
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
+            checkUnitStatus=True, tabFunc=lesson_tabs, includeText=False)
     r = redirect_if_next(request, ul)
     if r:
         return r
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return HttpResponseRedirect(request.path + 'ask/')
-    pageData = PageData(title=ul.lesson.title,
-                        navTabs=lesson_tabs(request.path, 'Study', ul))
     nextForm = NextLikeForm()
+    set_crispy_action(request.path, nextForm)
     return render(request, 'ct/lesson_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData,
@@ -1566,8 +1569,8 @@ def save_response(form, ul, user, course_id, **kwargs):
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
-    unit = get_object_or_404(Unit, pk=unit_id)
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
+            checkUnitStatus=True, includeText=False)
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
@@ -1580,12 +1583,13 @@ def ul_respond(request, course_id, unit_id, ul_id):
     return render(request, 'ct/ask.html',
                   dict(unitLesson=ul, qtext=md2html(ul.lesson.text),
                        form=form, actionTarget=request.path,
-                       user=request.user))
+                       user=request.user, pageData=pageData))
 
 @login_required
 def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
            redirectURL=None):
     'student self-assessment'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
     r = get_object_or_404(Response, pk=resp_id)
     choices = [(e.id, e.lesson.title) for e in r.unitLesson.get_errors()]
     if doSelfEval:
@@ -1622,7 +1626,7 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
     else:
         answer = md2html(answer.lesson.text)
     return render(request, 'ct/assess.html',
-                  dict(response=r, qtext=md2html(r.lesson.text),
+                  dict(response=r, pageData=pageData,
                        answer=answer, form=form, actionTarget=request.path,
                        user=request.user, doSelfEval=doSelfEval))
 

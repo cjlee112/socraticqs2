@@ -775,11 +775,14 @@ class UnitStatus(models.Model):
     endTime = models.DateTimeField('time ended', null=True)
     order = models.IntegerField(default=0) # index of current UL
     @classmethod
-    def get_or_none(klass, unit, user):
+    def get_or_none(klass, unit, user, **kwargs):
         try:
-            return klass.objects.get(unit=unit, user=user)
+            return klass.objects.get(unit=unit, user=user, **kwargs)
         except UnitStatus.DoesNotExist:
             return None
+    @classmethod
+    def is_done(klass, unit, user):
+        return klass.get_or_none(unit, user, endTime__isnull=False)
     def get_lesson(self):
         'get the current lesson'
         return self.unit.unitlesson_set.get(order=self.order)
