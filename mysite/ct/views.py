@@ -1068,14 +1068,18 @@ def _lessons(request, concept=None, msg='',
              templateFile='ct/lessons.html',
              createULFunc=create_unit_lesson, selectULFunc=None,
              newLessonFormClass=NewLessonForm,
-             searchArgs={}, parentUL=None, **kwargs):
+             searchType=None, parentUL=None, **kwargs):
     'search or create a Lesson'
     if creationInstructions:
         lessonForm = newLessonFormClass()
     else:
         lessonForm = None
+    if searchType == IS_ERROR:
+        searchFormClass = ErrorSearchForm
+    else:
+        searchFormClass = LessonSearchForm
     if allowSearch:
-        searchForm = LessonSearchForm()
+        searchForm = searchFormClass()
     else:
         searchForm = None
     lessonSet = ()
@@ -1101,10 +1105,12 @@ def _lessons(request, concept=None, msg='',
             return 'please write POST error message'
 
     elif allowSearch and 'search' in request.GET:
-        searchForm = LessonSearchForm(request.GET)
+        searchForm = searchFormClass(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            lessonSet = UnitLesson.search_text(s, **searchArgs)
+            if searchType is None:
+                searchType = searchForm.cleaned_data['searchType']
+            lessonSet = UnitLesson.search_text(s, searchType)
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path,
@@ -1342,7 +1348,7 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
     errorModels = set([t[0] for t in seTable])
     for em in ul.get_errors():
         if em not in errorModels:
-            seTable.append((em, fmt_count(0, n)))
+            seTable.append((em, fmt_count(0, n or 1)))
     r = _lessons(request, concept, msg, pageData=pageData, unit=unit, 
                   seTable=seTable, templateFile='ct/errors.html',
                   showNovelErrors=showNovelErrors,
@@ -1350,8 +1356,7 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
                   creationInstructions=creationInstructions,
                   newLessonFormClass=NewErrorForm, parentUL=ul,
                   createULFunc=create_error_ul, selectULFunc=copy_error_ul,
-                  searchArgs=dict(searchType=IS_ERROR),
-                  actionLabel='Add error model')
+                  searchType=IS_ERROR, actionLabel='Add error model')
     if isinstance(r, UnitLesson):
         seTable.append((r, fmt_count(0, n)))
         return _lessons(request, concept, msg='''Successfully added error

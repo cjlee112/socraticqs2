@@ -205,17 +205,26 @@ class NewErrorForm(forms.ModelForm):
         model = Lesson
         fields = ['title', 'text']
 
-class LessonSearchForm(forms.Form):
-    ## def __init__(self, *args, **kwargs):
-    ##     super(LessonSearchForm, self).__init__(*args, **kwargs)
-    ##     self.helper = FormHelper(self)
-    ##     self.helper.form_id = 'id-lessonSearchForm'
-    ##     self.helper.form_method = 'get'
-    ##     self.helper.form_class = 'form-inline'
-    ##     self.helper.field_template = 'bootstrap3/layout/inline_field.html'
-    ##     self.helper.add_input(StrictButton('Search', css_class='btn-default'))
+class SearchFormBase(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(SearchFormBase, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-lessonSearchForm'
+        self.helper.form_method = 'get'
+        self.helper.form_class = 'form-inline'
+    ##    self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+        self.helper.add_input(Submit('submit', 'Search'))
+    ##    self.helper.add_input(StrictButton('Search', css_class='btn-default'))
     ## sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
     ##                              label='Search Courselets.org and')
-    search = forms.CharField(label='Search for lessons containing')
+
+class LessonSearchForm(SearchFormBase):
+    searchType = forms.ChoiceField(choices=(('lesson', 'lessons'),
+                                      ('question', 'questions'),),
+                             label='Search for')
+    search = forms.CharField(label='containing')
+    
+class ErrorSearchForm(SearchFormBase):
+    search = forms.CharField(label='Search for errors containing')
     
 

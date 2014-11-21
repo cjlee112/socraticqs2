@@ -394,19 +394,29 @@ class UnitLesson(models.Model):
         ul.save()
         return ul
     @classmethod
-    def search_text(klass, s, searchType=IS_LESSON, dedupe=True, **kwargs):
+    def search_text(klass, s, searchType=IS_LESSON, dedupe=True,
+                    excludeArgs={}, **kwargs):
         'search lessons, concepts or errors for title and text'
-        if searchType == IS_LESSON:
+        if searchType == 'lesson': # exclude questions
+            kwargs['kind'] = klass.COMPONENT
+            excludeArgs = excludeArgs.copy()
+            excludeArgs['lesson__kind'] = Lesson.ORCT_QUESTION
+        elif searchType == 'question':
+            kwargs['kind'] = klass.COMPONENT
+            kwargs['lesson__kind'] = Lesson.ORCT_QUESTION
+        elif searchType == IS_LESSON: # anything but answer, error etc.
             kwargs['kind'] = klass.COMPONENT
         elif searchType == IS_ERROR:
             kwargs['lesson__concept__isnull'] = False
             kwargs['kind'] = klass.MISUNDERSTANDS
-        else: # search for regular concepts
+        else: # search for regular concepts (not an error)
             kwargs['lesson__concept__isnull'] = False
             kwargs['lesson__concept__isError'] = False
         out = klass.objects.filter((Q(lesson__title__icontains=s) |
                                     Q(lesson__text__icontains=s)) &
                                    Q(**kwargs)).distinct()
+        if excludeArgs:
+            out = out.exclude(**excludeArgs)
         if dedupe:
             out = distinct_subset(out)
         return out
@@ -501,6 +511,11 @@ class Unit(models.Model):
             return 0
         else:
             return n + 1
+    def no_lessons(self):
+        return not self.unitlesson_set.filter(order__isnull=False).count()
+    def no_orct(self):
+        return not self.unitlesson_set.filter(order__isnull=False,
+                        lesson__kind=Lesson.ORCT_QUESTION).count()
     def create_lesson(self, title, text, author=None, **kwargs):
         if author is None:
             author = self.addedBy
