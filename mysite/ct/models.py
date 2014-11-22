@@ -566,6 +566,27 @@ class Unit(models.Model):
             .filter(Q(unitlesson__kind=UnitLesson.MISUNDERSTANDS, **kwargs)
             & ~Q(unitlesson__lesson__concept__conceptlink__relationship=
                  ConceptLink.RESOLVES)))
+    def get_unanswered_uls(self, user=None, **kwargs):
+        if user:
+            kwargs['response__author'] = user
+        return distinct_subset(self.unitlesson_set
+          .filter(lesson__kind=Lesson.ORCT_QUESTION)
+          .exclude(response__kind=Response.ORCT_RESPONSE, **kwargs))
+    def get_selfeval_uls(self, user=None, **kwargs):
+        if user:
+            kwargs['response__author'] = user
+        else: # ensure it finds Response
+            kwargs['response__isnull'] = False
+        return distinct_subset(self.unitlesson_set
+            .filter(response__selfeval__isnull=True,
+                    response__kind=Response.ORCT_RESPONSE, **kwargs))
+    def get_serrorless_uls(self, user=None, **kwargs):
+        if user:
+            kwargs['response__author'] = user
+        return distinct_subset(self.unitlesson_set
+            .filter((Q(response__selfeval=Response.DIFFERENT) |
+                     Q(response__status=NEED_HELP_STATUS)) &
+                    Q(response__studenterror__isnull=True, **kwargs)))
     def __unicode__(self):
         return self.title
 

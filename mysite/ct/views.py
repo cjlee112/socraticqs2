@@ -785,7 +785,7 @@ def unit_tabs(path, current,
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def unit_tabs_student(path, current,
-              tabs=('Study:', 'Lessons', 'Concepts'), **kwargs):
+              tabs=('Study:', 'Tasks', 'Lessons', 'Concepts'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 
@@ -1448,6 +1448,22 @@ def study_unit(request, course_id, unit_id):
     return render(request, 'ct/study_unit.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=nextUL, unit=unit, pageData=pageData))
+
+@login_required
+def unit_tasks_student(request, course_id, unit_id):
+    'suggest next steps on this courselet'
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs(request.path, 'Tasks'))
+    taskTable = [(ul, 'start')
+                 for ul in unit.get_unanswered_uls(request.user)]
+    taskTable += [(ul, 'selfeval')
+                  for ul in unit.get_selfeval_uls(request.user)]
+    taskTable += [(ul, 'classify')
+                  for ul in unit.get_serrorless_uls(request.user)]
+    return render(request, 'ct/unit_tasks_student.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       pageData=pageData, unit=unit, taskTable=taskTable))
 
 def unit_lessons_student(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
