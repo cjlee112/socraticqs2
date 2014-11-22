@@ -1454,7 +1454,7 @@ def unit_tasks_student(request, course_id, unit_id):
     'suggest next steps on this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(title=unit.title,
-                        navTabs=unit_tabs(request.path, 'Tasks'))
+                        navTabs=unit_tabs_student(request.path, 'Tasks'))
     taskTable = [(ul, 'start')
                  for ul in unit.get_unanswered_uls(request.user)]
     taskTable += [(ul, 'selfeval')
