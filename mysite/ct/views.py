@@ -458,50 +458,6 @@ def courses(request):
     return render(request, 'ct/courses.html', dict(courses=courseSet))
 
 
-@login_required
-def course(request, course_id):
-    'instructor UI for managing a course'
-    course = get_object_or_404(Course, pk=course_id)
-    notInstructor = check_instructor_auth(course, request)
-    if notInstructor: # redirect students to live session or student page
-        return redirect_live(request,
-          HttpResponseRedirect(reverse('ct:course_study', args=(course.id,))))
-    courseletform = NewCourseletTitleForm()
-    titleform = CourseTitleForm(instance=course)
-    fsmStack = FSMStack(request)
-    if request.method == 'POST':
-        if 'access' in request.POST: # update course attrs
-            titleform = CourseTitleForm(request.POST, instance=course)
-            if titleform.is_valid():
-                titleform.save()
-        elif 'title' in request.POST: # create new courselet
-            courseletform = NewCourseletTitleForm(request.POST)
-            if courseletform.is_valid():
-                courselet = courseletform.save(commit=False)
-                courselet.course = course
-                courselet.addedBy = request.user
-                courselet.save()
-                return HttpResponseRedirect(reverse('ct:courselet',
-                                                    args=(courselet.id,)))
-        elif request.POST.get('task') == 'delete': # delete me
-            course.delete()
-            return HttpResponseRedirect(reverse('ct:teach'))
-        elif request.POST.get('task') == 'livestart': # create live session
-            liveSession = LiveSession(course=course, addedBy=request.user)
-            liveSession.save()
-            fsmStack.push(request, 'liveInstructor',
-                          dict(liveSession=liveSession))
-        elif request.POST.get('task') == 'liveend': # end live session
-            liveSession = fsmStack.state.liveSession
-            liveSession.liveQuestion = None
-            liveSession.endTime = timezone.now() # mark as completed
-            liveSession.save()
-            fsmStack.pop(request)
-    set_crispy_action(request.path, courseletform, titleform)
-    return render(request, 'ct/course.html',
-                  dict(course=course, actionTarget=request.path,
-                       titleform=titleform, fsmStack=fsmStack,
-                       courseletform=courseletform))
 
 def get_slform(courselet, user):
     questions = Question.objects.filter(Q(studylist__user=user) |
@@ -705,8 +661,8 @@ def concepts(request):
 ###########################################################
 # WelcomeMat refactored utilities
 
-def make_tabs(path, current, tabs, tail=4):
-    path = get_base_url(path, tail=tail)
+def make_tabs(path, current, tabs, tail=4, **kwargs):
+    path = get_base_url(path, tail=tail, **kwargs)
     outTabs = []
     for label in tabs:
         try:
@@ -781,12 +737,16 @@ def auto_tabs(path, current, unitLesson, **kwargs):
 
     
 def unit_tabs(path, current,
-              tabs=('Concepts', 'Tasks', 'Lessons', 'Resources', 'Edit'), **kwargs):
+              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def unit_tabs_student(path, current,
               tabs=('Study:', 'Tasks', 'Lessons', 'Concepts'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
+    
+def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
+    return make_tabs(path, current, tabs, tail=2, baseToken='courses',
+                     **kwargs)
     
 
 class PageData(object):
@@ -819,7 +779,41 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 
 
 ###########################################################
-# WelcomeMat refactored views
+# WelcomeMat refactored instructor views
+
+# course views
+
+@login_required
+def course(request, course_id):
+    'instructor UI for managing a course'
+    course = get_object_or_404(Course, pk=course_id)
+    if is_teacher_url(request.path):
+        notInstructor = check_instructor_auth(course, request)
+        if notInstructor: # redirect students to live session or student page
+            return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
+        navTabs = course_tabs(request.path, 'Home')
+        courseletform = NewUnitTitleForm()
+    else:
+        courseletform = None
+        navTabs = ()
+    pageData = PageData(title=course.title, headLabel='course description',
+                        headText=md2html(course.description), navTabs=navTabs)
+    #titleform = CourseTitleForm(instance=course)
+    if request.method == 'POST': # create new courselet
+        courseletform = NewUnitTitleForm(request.POST)
+        if courseletform.is_valid():
+            title = courseletform.cleaned_data['title']
+            unit = course.create_unit(title, request.user)
+            return HttpResponseRedirect(reverse('ct:unit_tasks',
+                        args=(course_id, unit.id,)))
+    unitTable = [cu.unit
+                 for cu in course.courseunit_set.all().order_by('order')]
+    if courseletform:
+        set_crispy_action(request.path, courseletform)
+    return render(request, 'ct/course.html',
+                  dict(course=course, actionTarget=request.path,
+                       courseletform=courseletform, unitTable=unitTable,
+                       pageData=pageData))
 
 
 def update_concept_link(request, conceptLinks):

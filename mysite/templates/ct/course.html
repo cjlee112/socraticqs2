@@ -10,55 +10,63 @@
 {% endblock %}
 
 {% block content %}
-<input type="checkbox" id="edittoggle"/>Edit.<BR>
-<div class="container-fluid" id="editform" style="display: none">
-{% crispy titleform %}
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-<input type="hidden" name="task" value="delete" />
-<input type="submit" value="Delete this Course" />
-</form>
+
+{% if pageData.headText %}
+<input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
+<div id="headdiv" style="display: none">
+{{ pageData.headText }}
 </div>
 
 <script>
-$( "#edittoggle" ).click(function() {
-  $( "#editform" ).toggle();
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
 });
 </script>
-
-{% if fsmStack.state.liveSession %}
-You are now teaching this course as a <b>live (classroom) session</b>. 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-<input type="hidden" name="task" value="liveend" />
-<input type="submit" value="End Live Session" />
-</form>
-{% else %}
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-<input type="hidden" name="task" value="livestart" />
-<input type="submit" value="Start Live Session" />
-</form>
 {% endif %}
 
-{% if course.courselet_set.count > 0 %}
-<h2>Courselets in this Course</h2>
-<ul>
-{% for courselet in course.courselet_set.all %}
-  <li><a href="{% url 'ct:courselet' courselet.id %}">{{ courselet.title }}</a>:
-  {% if courselet.coursequestion_set.count > 0 %}
-    ({{ courselet.coursequestion_set.count }} exercises)
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
   {% endif %}
-  </li>
-{% endfor %}
+  {% endfor %}
 </ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="HomeTabDiv">
+
+{% if unitTable %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Courselets in this course</th><th>Instructor</th>
+</tr></thead>
+<tbody>
+{% for unit in unitTable %}
+  <tr>
+    <td>
+    <a href="{{ actionTarget }}units/{{ unit.pk}}/">{{ unit.title }}</a>
+    </td>
+    <td>
+    <a href="/ct/people/{{ unit.addedBy.pk }}/">{{ unit.addedBy.get_full_name }}</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
 {% endif %}
 
-<h2>Add a New Courselet</h2>
+
+{% if courseletform %}
+<h3>Add a New Courselet</h3>
 
 <div class="container-fluid">
 {% crispy courseletform %}
 </div>
+{% endif %}
 
+  </div><!-- @end #HomeTabDiv -->
+</div>
 {% endblock %}
 

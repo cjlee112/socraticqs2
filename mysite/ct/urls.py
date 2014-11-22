@@ -4,8 +4,10 @@ from ct.views import *
 urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
     # instructor UI
+    # course tabs
+    url(r'^teach/courses/(?P<course_id>\d+)/$', course, name='course'),
     # courselet tabs
-    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/tasks/$',
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         unit_tasks, name='unit_tasks'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/$',
         unit_concepts, name='unit_concepts'),
@@ -59,6 +61,8 @@ urlpatterns = patterns('',
         assess, name='assess_teach'),
 
     # student UI
+    # course tabs
+    url(r'^courses/(?P<course_id>\d+)/$', course, name='course_student'),
     # unit tabs
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         study_unit, name='study_unit'),
@@ -108,7 +112,6 @@ urlpatterns = patterns('',
         assess_errors, name='assess_errors'),
     # deprecated
     url(r'^courses/$', courses, name='courses'),
-    url(r'^courses/(?P<course_id>\d+)/$', course, name='course'),
     url(r'^teach/$', teach, name='teach'),
     url(r'^live/$', live_session, name='live'),
     url(r'^live/start/$', live_start, name='livestart'),
