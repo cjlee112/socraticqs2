@@ -1046,7 +1046,7 @@ def concept_errors(request, course_id, unit_id, ul_id):
       .filter(relationship=ConceptGraph.MISUNDERSTANDS))
     r = _concepts(request, '''To add an error model to this concept, start by
     typing a search for relevant errors.''', errorModels=errorModels,
-                  pageData=pageData, unit=unit,
+                  pageData=pageData, unit=unit, showConceptAction=True,
                   createConceptFunc=create_em_concept)
     if isinstance(r, Concept):
         cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
