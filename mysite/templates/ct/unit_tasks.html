@@ -43,6 +43,28 @@ $( "#headtoggle" ).click(function() {
 </tr></thead>
 <tbody>
 
+{% if unit.no_lessons %}
+  <tr><td>(your first lesson: define a concept you want to teach)</td>
+  <td><ul>
+    <li>To search for existing lessons to add,
+        click the <b>Lessons</b> tab.</li>
+    <li>To write a new lesson,
+        click the <b>Concepts</b> tab to search for relevant concept
+        definitions (or write a new concept definition).</li>
+  </ul></td></tr>
+{% elif unit.no_orct %}
+  <tr><td>(your first question: test understanding of the concept(s)
+           you defined)</td>
+  <td><ul>
+    <li>To search for existing questions to add,
+        click the <b>Lessons</b> tab, and set the <b>Search for</b>
+        menu to <b>questions</b>.</li>
+    <li>To write a new question,
+        click the <b>Concepts</b> tab to search for relevant concept
+        definitions (or write a new concept definition).</li>
+  </ul></td></tr>
+{% endif %}
+
 {% for ul,tasks in taskTable %}
   <tr>
   <td>
