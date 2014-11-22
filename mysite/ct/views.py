@@ -733,9 +733,9 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'FAQ', 'Edit'), **kwargs):
+               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), **kwargs):
     if not is_teacher_url(path):
-        tabs = ('Resolutions:', 'FAQ')
+        tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.parent:
         outTabs.append(make_tab(path, current, 'Question',
@@ -1410,6 +1410,20 @@ def resolutions(request, course_id, unit_id, ul_id):
                   actionLabel='Add to suggestion list',
                   creationInstructions=creationInstructions)
     return r
+
+@login_required
+def error_resources(request, course_id, unit_id, ul_id):
+    unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
+                                               'Resources')
+    toConcepts = concept.relatedTo.all()
+    fromConcepts = concept.relatedFrom.all()
+    testLessons = concept.get_error_tests()
+    alternativeDefs = ul.get_alternative_defs()
+    return render(request, 'ct/error_resources.html',
+                  dict(user=request.user, actionTarget=request.path,
+                       pageData=pageData, toConcepts=toConcepts,
+                       fromConcepts=fromConcepts, testLessons=testLessons,
+                       alternativeDefs=alternativeDefs))
 
 ###########################################################
 # welcome mat refactored student UI for courses

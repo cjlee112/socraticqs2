@@ -93,6 +93,12 @@ class Concept(models.Model):
         elif subpath == '':
             tail = ''
         return '%s%s/%d/%s' % (basePath, head, objID, tail)
+    def get_error_tests(self, **kwargs):
+        'get questions that test this error model'
+        return distinct_subset(UnitLesson.objects
+            .filter(kind=UnitLesson.COMPONENT,
+                    unitlesson__kind=UnitLesson.MISUNDERSTANDS,
+                    unitlesson__lesson__concept=self, **kwargs))
     def __unicode__(self):
         return self.title
             
@@ -452,6 +458,10 @@ class UnitLesson(models.Model):
     def get_new_inquiries(self):
         return self.response_set.filter(kind=Response.STUDENT_QUESTION,
                                         needsEval=True)
+    def get_alternative_defs(self, **kwargs):
+        return distinct_subset(self.__class__.objects
+            .filter(lesson__concept=self.lesson.concept)
+            .exclude(treeID=self.treeID))
     def get_next_lesson(self):
         return self.unit.unitlesson_set.get(order=self.order + 1)
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
