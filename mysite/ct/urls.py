@@ -6,6 +6,8 @@ urlpatterns = patterns('',
     # instructor UI
     # course tabs
     url(r'^teach/courses/(?P<course_id>\d+)/$', course, name='course'),
+    url(r'^teach/courses/(?P<course_id>\d+)/edit/$',
+        edit_course, name='edit_course'),
     # courselet tabs
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         unit_tasks, name='unit_tasks'),

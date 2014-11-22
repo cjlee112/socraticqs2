@@ -785,7 +785,7 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 
 @login_required
 def course(request, course_id):
-    'instructor UI for managing a course'
+    'show courselets in a course'
     course = get_object_or_404(Course, pk=course_id)
     if is_teacher_url(request.path):
         notInstructor = check_instructor_auth(course, request)
@@ -814,6 +814,28 @@ def course(request, course_id):
                   dict(course=course, actionTarget=request.path,
                        courseletform=courseletform, unitTable=unitTable,
                        pageData=pageData))
+
+@login_required
+def edit_course(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    notInstructor = check_instructor_auth(course, request)
+    if notInstructor: # redirect students to live session or student page
+        return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
+
+    pageData = PageData(title=course.title,
+                        navTabs=course_tabs(request.path, 'Edit'))
+    if request.method == 'POST': # create new courselet
+        courseform = CourseTitleForm(request.POST, instance=course)
+        if courseform.is_valid():
+            courseform.save()
+            return HttpResponseRedirect(reverse('ct:course',
+                                                args=(course.id,)))
+    else:
+        courseform = CourseTitleForm(instance=course)
+    set_crispy_action(request.path, courseform)
+    return render(request, 'ct/edit_course.html',
+                  dict(course=course, actionTarget=request.path,
+                       courseform=courseform, pageData=pageData))
 
 
 def update_concept_link(request, conceptLinks):

@@ -98,7 +98,7 @@ class CourseTitleForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Course
-        fields = ['title', 'access']
+        fields = ['title', 'access', 'description']
 
 class NewCourseTitleForm(CourseTitleForm):
     submitLabel = 'Add'
