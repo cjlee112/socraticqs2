@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load ct_extras %}
 {% comment %}
   This is the main template for all portal pages.
 {% endcomment %}
@@ -52,8 +53,9 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          {% block navbar %}{% endblock %}
           <li><a href="/ct/about/">About</a></li>
+          {{ actionTarget|get_dummy_navbar }}
+          {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-right">
           {% if user %}

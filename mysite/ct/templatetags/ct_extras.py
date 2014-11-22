@@ -164,6 +164,22 @@ def get_tasks_url(actionTarget, ul):
     subpath = ul._tasksPath[ul.get_type()]
     return get_object_url(actionTarget, ul, subpath=subpath)
 
+@register.filter(name='get_dummy_navbar')
+def get_dummy_navbar(actionTarget, baseToken='courses'):
+    l = actionTarget.split('/')
+    try:
+        i = l.index(baseToken)
+    except ValueError:
+        return ''
+    m = []
+    for j, label in ((i + 2, 'Course'), (i + 4, 'Courselet')):
+        if j + 2 < len(l):
+            m.append('<li><a href="%s/">%s</a></li>'
+                     % ('/'.join(l[:j]), label))
+    return mark_safe('\n'.join(m))
+        
+
+
 ##############################################################
 # time utilities
 
