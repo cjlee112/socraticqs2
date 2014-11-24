@@ -1726,7 +1726,8 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
     'student self-assessment'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
     r = get_object_or_404(Response, pk=resp_id)
-    choices = [(e.id, e.lesson.title) for e in r.unitLesson.get_errors()]
+    allErrors = list(r.unitLesson.get_errors()) + unit.get_aborts()
+    choices = [(e.id, e.lesson.title) for e in allErrors]
     if doSelfEval:
         formClass = SelfAssessForm
     else:

@@ -553,6 +553,20 @@ class Unit(models.Model):
             if i != ex.order: # order changed, have to update
                 ex.order = i
                 ex.save()
+    def get_aborts(self):
+        'get query set with errors + generic ABORT, FAIL errors'
+        aborts = list(self.unitlesson_set
+            .filter(kind=UnitLesson.MISUNDERSTANDS, parent__isnull=True))
+        if not aborts: # need to add ABORTs etc. to this unit
+            aborts = []
+            for errorLesson in distinct_subset(Lesson.objects
+                .filter(kind=Lesson.ERROR_MODEL, concept__alwaysAsk=True)):
+                em = self.unitlesson_set.create(lesson=errorLesson,
+                        kind=UnitLesson.MISUNDERSTANDS,
+                        addedBy=errorLesson.addedBy,
+                        treeID=errorLesson.treeID)
+                aborts.append(em)
+        return aborts
     def get_new_inquiry_uls(self, **kwargs):
         return distinct_subset(self.unitlesson_set
             .filter(response__kind=Response.STUDENT_QUESTION,
