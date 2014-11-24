@@ -1082,9 +1082,9 @@ def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
              unit=None, actionLabel='Add to This Courselet',
              allowSearch=True, creationInstructions=None,
-             templateFile='ct/lessons.html',
+             templateFile='ct/lessons.html', lessonTable=(),
              createULFunc=create_unit_lesson, selectULFunc=None,
-             newLessonFormClass=NewLessonForm,
+             newLessonFormClass=NewLessonForm, showReorderForm=False,
              searchType=None, parentUL=None, **kwargs):
     'search or create a Lesson'
     if creationInstructions:
@@ -1103,6 +1103,13 @@ def _lessons(request, concept=None, msg='',
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks)
+        elif 'newOrder' in request.POST:
+            reorderForm = ReorderForm(0, len(lessonTable), request.POST)
+            if reorderForm.is_valid():
+                oldOrder = int(reorderForm.cleaned_data['oldOrder'])
+                newOrder = int(reorderForm.cleaned_data['newOrder'])
+                lessonTable = unit.reorder_exercise(oldOrder, newOrder,
+                                                    lessonTable)
         elif 'ulID' in request.POST:
             ul = UnitLesson.objects.get(pk=int(request.POST.get('ulID')))
             if selectULFunc:
@@ -1128,13 +1135,18 @@ def _lessons(request, concept=None, msg='',
             if searchType is None:
                 searchType = searchForm.cleaned_data['searchType']
             lessonSet = UnitLesson.search_text(s, searchType)
+    if showReorderForm and lessonTable:
+        for ul in lessonTable:
+            ul.reorderForm = ReorderForm(ul.order, len(lessonTable))
     if lessonForm:
         set_crispy_action(request.path, lessonForm)
     kwargs.update(dict(lessonSet=lessonSet, actionTarget=request.path,
                        searchForm=searchForm, msg=msg,
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, user=request.user,
-                       creationInstructions=creationInstructions))
+                       creationInstructions=creationInstructions,
+                       lessonTable=lessonTable,
+                       showReorderForm=showReorderForm))
     return render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
@@ -1215,12 +1227,12 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     r = _lessons(request, msg='''You can search for a lesson to add
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
-                  pageData=pageData, unit=unit,
+                  pageData=pageData, unit=unit, showReorderForm=True,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
         lessonTable.append(r)
         return _lessons(request, msg='''Successfully added lesson.
-            Thank you!''', ignorePOST=True, 
+            Thank you!''', ignorePOST=True, showReorderForm=True,
             pageData=pageData, unit=unit, lessonTable=lessonTable)
     return r
 

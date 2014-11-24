@@ -543,9 +543,10 @@ class Unit(models.Model):
         l = list(self.unitlesson_set.filter(order__isnull=False))
         l.sort(lambda x,y:cmp(x.order, y.order))
         return l
-    def reorder_exercise(self, old, new):
+    def reorder_exercise(self, old, new, l=()):
         'renumber exercises to move an exercise from old -> new position'
-        l = self.get_exercises()
+        if not l:
+            l = self.get_exercises()
         ex = l[old] # select desired exercise by old position
         l = l[:old] + l[old + 1:] # exclude this exercise
         l = l[:new] + [ex] + l[new:] # insert ex in new position
@@ -553,6 +554,7 @@ class Unit(models.Model):
             if i != ex.order: # order changed, have to update
                 ex.order = i
                 ex.save()
+        return l # hand back the reordered list
     def get_aborts(self):
         'get query set with errors + generic ABORT, FAIL errors'
         aborts = list(self.unitlesson_set

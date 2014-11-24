@@ -52,6 +52,16 @@ class AssessErrorsForm(forms.Form):
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False)
 
+class ReorderForm(forms.Form):
+    newOrder = forms.ChoiceField()
+    oldOrder = forms.CharField()
+    def __init__(self, initial, total, *args, **kwargs):
+        super(ReorderForm, self).__init__(*args, **kwargs)
+        self.fields['newOrder'].initial = str(initial)
+        self.fields['newOrder'].choices = [(str(i),str(i + 1))
+                                           for i in range(total)]
+        
+
 class NextLikeForm(forms.Form):
     liked = forms.BooleanField(required=False,
                 label='''Check here if this lesson really showed

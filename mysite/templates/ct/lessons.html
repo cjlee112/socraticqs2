@@ -48,7 +48,12 @@ $( "#headtoggle" ).click(function() {
 {% if lessonTable %}
 <table class="table table-striped">
 <thead><tr>
-  <th>Lesson</th><th>Type</th><th>Author</th>
+  <th>Lesson</th><th>Type</th>
+  {% if showReorderForm %}
+  <th>Order</th>
+  {% else %}
+  <th>Author</th>
+  {% endif %}
 </tr></thead>
 <tbody>
 {% for ul in lessonTable %}
@@ -56,7 +61,17 @@ $( "#headtoggle" ).click(function() {
     <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
+    {% if ul.reorderForm %}
+    <td><form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ ul.reorderForm.newOrder }}
+    <input type="hidden" name="oldOrder" value="{{ ul.order }}" />
+    <input type="submit" value="Move" />
+    </form></td>
+    {% else %}
     <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+    {% endif %}
   </tr>
 {% endfor %}
 </tbody>
