@@ -499,6 +499,20 @@ class UnitLesson(models.Model):
                 return IS_CONCEPT
         return IS_LESSON
 
+def reorder_exercise(self, old, new, l=()):
+    'renumber exercises to move an exercise from old -> new position'
+    if not l:
+        l = self.get_exercises()
+    ex = l[old] # select desired exercise by old position
+    l = l[:old] + l[old + 1:] # exclude this exercise
+    l = l[:new] + [ex] + l[new:] # insert ex in new position
+    for i, ex in enumerate(l):
+        if i != ex.order: # order changed, have to update
+            ex.order = i
+            ex.save()
+    return l # hand back the reordered list
+
+    
 class Unit(models.Model):
     'a container of exercises performed together'
     COURSELET = 'unit'
@@ -542,18 +556,7 @@ class Unit(models.Model):
         'ordered list of lessons for this courselet'
         return  list(self.unitlesson_set.filter(order__isnull=False)
                      .order_by('order'))
-    def reorder_exercise(self, old, new, l=()):
-        'renumber exercises to move an exercise from old -> new position'
-        if not l:
-            l = self.get_exercises()
-        ex = l[old] # select desired exercise by old position
-        l = l[:old] + l[old + 1:] # exclude this exercise
-        l = l[:new] + [ex] + l[new:] # insert ex in new position
-        for i, ex in enumerate(l):
-            if i != ex.order: # order changed, have to update
-                ex.order = i
-                ex.save()
-        return l # hand back the reordered list
+    reorder_exercise = reorder_exercise
     def get_aborts(self):
         'get query set with errors + generic ABORT, FAIL errors'
         aborts = list(self.unitlesson_set
@@ -820,6 +823,10 @@ class Course(models.Model):
             return l[0]
         else:
             return l
+    def get_course_units(self):
+        'ordered list of cunits for this course'
+        return  list(self.courseunit_set.all().order_by('order'))
+    reorder_course_unit = reorder_exercise
     def __unicode__(self):
         return self.title
 

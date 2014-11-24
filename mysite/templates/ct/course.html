@@ -40,16 +40,28 @@ $( "#headtoggle" ).click(function() {
 {% if unitTable %}
 <table class="table table-striped">
 <thead><tr>
+  {% if showReorderForm %}
+  <th>Order</th>
+  {% endif %}
   <th>Courselets in this course</th><th>Instructor</th>
 </tr></thead>
 <tbody>
-{% for unit in unitTable %}
+{% for cu in unitTable %}
   <tr>
+    {% if cu.reorderForm %}
+    <td><form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    {{ cu.reorderForm.newOrder }}
+    <input type="hidden" name="oldOrder" value="{{ cu.order }}" />
+    <input type="submit" value="Move" />
+    </form></td>
+    {% endif %}
     <td>
-    <a href="{{ actionTarget }}units/{{ unit.pk}}/">{{ unit.title }}</a>
+    <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title }}</a>
     </td>
     <td>
-    <a href="/ct/people/{{ unit.addedBy.pk }}/">{{ unit.addedBy.get_full_name }}</a>
+    <a href="/ct/people/{{ cu.unit.addedBy.pk }}/">{{ cu.unit.addedBy.get_full_name }}</a>
     </td>
   </tr>
 {% endfor %}

@@ -793,27 +793,40 @@ def course(request, course_id):
             return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
         navTabs = course_tabs(request.path, 'Home')
         courseletform = NewUnitTitleForm()
+        showReorderForm = True
     else:
-        courseletform = None
+        courseletform = showReorderForm = None
         navTabs = ()
     pageData = PageData(title=course.title, headLabel='course description',
                         headText=md2html(course.description), navTabs=navTabs)
     #titleform = CourseTitleForm(instance=course)
+    unitTable = course.get_course_units()
     if request.method == 'POST': # create new courselet
-        courseletform = NewUnitTitleForm(request.POST)
-        if courseletform.is_valid():
-            title = courseletform.cleaned_data['title']
-            unit = course.create_unit(title, request.user)
-            return HttpResponseRedirect(reverse('ct:unit_tasks',
-                        args=(course_id, unit.id,)))
-    unitTable = [cu.unit
-                 for cu in course.courseunit_set.all().order_by('order')]
+        if 'oldOrder' in request.POST and not notInstructor:
+            reorderForm = ReorderForm(0, len(unitTable), request.POST)
+            if reorderForm.is_valid():
+                oldOrder = int(reorderForm.cleaned_data['oldOrder'])
+                newOrder = int(reorderForm.cleaned_data['newOrder'])
+                unitTable = course.reorder_course_unit(oldOrder, newOrder,
+                                                       unitTable)
+        else:
+            courseletform = NewUnitTitleForm(request.POST)
+            if courseletform.is_valid():
+                title = courseletform.cleaned_data['title']
+                unit = course.create_unit(title, request.user)
+                return HttpResponseRedirect(reverse('ct:unit_tasks',
+                            args=(course_id, unit.id,)))
     if courseletform:
         set_crispy_action(request.path, courseletform)
+    if len(unitTable) < 2:
+        showReorderForm = False
+    if showReorderForm:
+        for cu in unitTable:
+            cu.reorderForm = ReorderForm(cu.order, len(unitTable))
     return render(request, 'ct/course.html',
                   dict(course=course, actionTarget=request.path,
                        courseletform=courseletform, unitTable=unitTable,
-                       pageData=pageData))
+                       pageData=pageData, showReorderForm=showReorderForm))
 
 @login_required
 def edit_course(request, course_id):
