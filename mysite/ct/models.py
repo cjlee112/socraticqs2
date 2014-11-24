@@ -540,9 +540,8 @@ class Unit(models.Model):
         return lesson
     def get_exercises(self):
         'ordered list of lessons for this courselet'
-        l = list(self.unitlesson_set.filter(order__isnull=False))
-        l.sort(lambda x,y:cmp(x.order, y.order))
-        return l
+        return  list(self.unitlesson_set.filter(order__isnull=False)
+                     .order_by('order'))
     def reorder_exercise(self, old, new, l=()):
         'renumber exercises to move an exercise from old -> new position'
         if not l:

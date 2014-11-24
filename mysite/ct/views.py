@@ -1221,9 +1221,7 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     pageData = PageData(title=unit.title,
                         navTabs=unit_tabs(request.path, currentTab))
     if lessonTable is None:
-        lessonTable = list(unit.unitlesson_set
-            .filter(kind=UnitLesson.COMPONENT, order__isnull=False)
-            .order_by('order'))
+        lessonTable = unit.get_exercises()
     r = _lessons(request, msg='''You can search for a lesson to add
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
