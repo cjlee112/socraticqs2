@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.http import HttpResponseRedirect, HttpResponse
@@ -782,6 +783,21 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 
 ###########################################################
 # WelcomeMat refactored instructor views
+
+def person_profile(request, user_id):
+    'stub for basic user info page'
+    person = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST': # signout
+        if request.POST.get('task') == 'logout':
+            logout(request)
+            return HttpResponseRedirect(reverse('ct:home'))
+    if request.user == person: # button for user to logout
+        logoutForm = LogoutForm()
+    else:
+        logoutForm = None
+    return render(request, 'ct/person.html',
+                  dict(course=course, user=request.user, person=person,
+                       logoutForm=logoutForm))
 
 # course views
 

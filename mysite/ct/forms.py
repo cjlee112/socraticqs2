@@ -237,4 +237,13 @@ class LessonSearchForm(SearchFormBase):
 class ErrorSearchForm(SearchFormBase):
     search = forms.CharField(label='Search for errors containing')
     
+class LogoutForm(forms.Form):
+    task = forms.CharField(initial='logout', widget=forms.HiddenInput)
+    def __init__(self, *args, **kwargs):
+        super(LogoutForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-logoutForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Sign out'))
+
 
