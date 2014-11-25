@@ -4,10 +4,12 @@
 {% endcomment %}
 
 {% block title %}
-  Courselets.org
+  Welcome
 {% endblock %}
 
 {% block content %}
+  Courselets.org is currently in a private alpha release.
+  Access to the private alpha is by invitation only.
   <section>
 {% if user.is_authenticated and user.role_set.count > 0 %}
     {% if fsmStack.state.liveSession %}
@@ -35,13 +37,21 @@
       {% endfor %}
       </ul>
     {% endif %}
-    <h2>{{ user.get_full_name }}'s Classes</h2>
-    <ul>
+<table class="table table-striped">
+<thead><tr><th>Your classes</th><th>Role</th></tr></thead>
+<tbody>
     {% for role in user.role_set.all %}
-    <li><a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
-      ({{ role.get_role_display }})</li>
+    <tr><td>
+    {% if role.role == 'not-prof' %}
+    <a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
+    {% else %}
+    <a href="{% url 'ct:course_student' role.course.id %}">{{ role.course.title }}</a>
+    {% endif %}
+    </td>
+    <td>{{ role.get_role_display }}</td>
+    </tr>
     {% endfor %}
-    </ul>
+</tbody></table>
 {% elif user.is_authenticated %}
 <a href="/ct/teach/">Homepage for Instructors</a>
 {% else %}
