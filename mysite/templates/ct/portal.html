@@ -59,7 +59,7 @@ function toggleInterest(o, targeturl, csrftoken)
         </ul>
         <ul class="nav navbar-right">
           {% if user %}
-          <li><a href="/ct/people/{{ user.username }}/">{{ user.get_full_name }}</a></li>
+          <li><a href="/ct/people/{{ user.pk }}/">{{ user.get_full_name }}</a></li>
           {% else %}
           <li><a href="/login/?next=/ct/">Sign in</a></li>
           {% endif %}
