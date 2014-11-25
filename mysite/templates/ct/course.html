@@ -11,6 +11,12 @@
 
 {% block content %}
 
+<b>Instructor</b>:
+{% for u in course.get_users %}
+  <a href="/ct/people/{{ u.pk }}/">{{ u.get_full_name }}</a>  
+{% endfor %}
+<br>
+
 {% if pageData.headText %}
 <input type="checkbox" id="headtoggle"/>Show {{ pageData.headLabel }}<BR>
 <div id="headdiv" style="display: none">

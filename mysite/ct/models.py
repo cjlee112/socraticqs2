@@ -831,6 +831,10 @@ class Course(models.Model):
         'ordered list of cunits for this course'
         return  list(self.courseunit_set.all().order_by('order'))
     reorder_course_unit = reorder_exercise
+    def get_users(self, role=None):
+        if not role:
+            role = Role.INSTRUCTOR
+        return User.objects.filter(role__role=role, role__course=self)
     def __unicode__(self):
         return self.title
 
