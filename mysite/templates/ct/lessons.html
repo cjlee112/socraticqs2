@@ -58,7 +58,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for ul in lessonTable %}
   <tr>
-    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
+    <td><a href="{{ actionTarget |get_home_url:ul }}">{{ ul.lesson.title }}</a>
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
     {% if ul.reorderForm %}

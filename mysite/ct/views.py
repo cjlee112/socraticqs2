@@ -686,6 +686,8 @@ def concept_tabs(path, current, unitLesson,
                  **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
+    if unitLesson.order is not None:
+        tabs = tabs[:1] + ('Tasks',) + tabs[1:]
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,

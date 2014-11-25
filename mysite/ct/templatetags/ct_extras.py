@@ -148,9 +148,9 @@ def get_object_url(actionTarget, o, forceDefault=False, subpath=None):
         return urlFunc(basePath, forceDefault, subpath,
                        is_teacher_url(basePath))
     
-@register.filter(name='get_forced_url')
-def get_forced_url(actionTarget, o, subpath=None):
-    return get_object_url(actionTarget, o, True, subpath)
+@register.filter(name='get_home_url')
+def get_home_url(actionTarget, o):
+    return get_object_url(actionTarget, o, subpath='')
 
 @register.filter(name='get_thread_url')
 def get_thread_url(actionTarget, r):

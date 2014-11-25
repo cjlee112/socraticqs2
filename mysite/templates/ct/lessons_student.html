@@ -45,7 +45,7 @@ $( "#headtoggle" ).click(function() {
 <tbody>
 {% for ul in lessonTable %}
   <tr>
-    <td><a href="{{ actionTarget |get_forced_url:ul }}">{{ ul.lesson.title }}</a>
+    <td><a href="{{ actionTarget |get_home_url:ul }}">{{ ul.lesson.title }}</a>
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
     <td>{{ ul.lesson.addedBy.get_full_name }}</td>
