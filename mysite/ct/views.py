@@ -799,6 +799,9 @@ def person_profile(request, user_id):
                   dict(course=course, user=request.user, person=person,
                        logoutForm=logoutForm))
 
+def about(request):
+    return render(request, 'ct/about.html', dict(user=request.user))
+
 # course views
 
 @login_required

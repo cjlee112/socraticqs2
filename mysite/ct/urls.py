@@ -3,6 +3,7 @@ from ct.views import *
 
 urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
+    url(r'^about/$', about, name='about'),
     url(r'^people/(?P<user_id>\d+)/$', person_profile, name='person_profile'),
     # instructor UI
     # course tabs
