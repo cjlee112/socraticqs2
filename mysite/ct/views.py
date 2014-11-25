@@ -872,6 +872,31 @@ def edit_course(request, course_id):
                        courseform=courseform, pageData=pageData))
 
 
+@login_required
+def edit_unit(request, course_id, unit_id):
+    course = get_object_or_404(Course, pk=course_id)
+    unit = get_object_or_404(Unit, pk=unit_id)
+    notInstructor = check_instructor_auth(course, request)
+    if notInstructor: # redirect students to live session or student page
+        return HttpResponseRedirect(reverse('ct:study_unit',
+                                        args=(course_id, unit_id)))
+
+    pageData = PageData(title=unit.title,
+                        navTabs=unit_tabs(request.path, 'Edit'))
+    if request.method == 'POST': # create new courselet
+        unitform = UnitTitleForm(request.POST, instance=unit)
+        if unitform.is_valid():
+            unitform.save()
+            return HttpResponseRedirect(reverse('ct:unit_tasks',
+                                        args=(course.id, unit_id)))
+    else:
+        unitform = UnitTitleForm(instance=unit)
+    set_crispy_action(request.path, unitform)
+    return render(request, 'ct/edit_unit.html',
+                  dict(unit=unit, actionTarget=request.path,
+                       unitform=unitform, pageData=pageData))
+
+
 def update_concept_link(request, conceptLinks):
     cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
     clform = ConceptLinkForm(request.POST, instance=cl)
