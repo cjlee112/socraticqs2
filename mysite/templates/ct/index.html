@@ -42,7 +42,7 @@
 <tbody>
     {% for role in user.role_set.all %}
     <tr><td>
-    {% if role.role == 'not-prof' %}
+    {% if role.role == 'prof' %}
     <a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
     {% else %}
     <a href="{% url 'ct:course_student' role.course.id %}">{{ role.course.title }}</a>
