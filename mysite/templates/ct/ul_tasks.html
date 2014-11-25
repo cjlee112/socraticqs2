@@ -66,6 +66,16 @@ $( "#headtoggle" ).click(function() {
   <tr><td>Write error models by clicking on the <b>Errors</b> tab</td></tr>
 {% endif %}
 
+{% else %}
+  {% if unitLesson.lesson.concept %}
+    <tr><td>Write an Open Response Concept Test question for
+            this concept (click the <b>Lessons</b> tab)</td></tr>
+  {% endif %}
+  {% for c in unitLesson.get_concepts %}
+    <tr><td>Consider adding an Open Response Concept Test question for concept
+            <a href="{{ actionTarget|get_object_url:c }}">{{ c.title }}</a>
+    </td></tr>
+  {% endfor %}
 {% endif %}
 
 </tbody>

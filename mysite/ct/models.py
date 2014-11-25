@@ -446,8 +446,12 @@ class UnitLesson(models.Model):
         'get query set with errors if any'
         return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS)
     def get_linked_concepts(self):
-        'get all concept links to this lesson'
+        'get all concept links (including errors) to this lesson'
         return self.lesson.conceptlink_set.all()
+    def get_concepts(self):
+        'get all concepts (not errors) linked to this lesson'
+        return Concept.objects.filter(conceptlink__lesson=self.lesson,
+                                      isError=False)
     def get_em_resolutions(self):
         'get deduped list of resolution UL for this error UL'
         em = self.lesson.concept
