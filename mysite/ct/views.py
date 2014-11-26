@@ -1095,7 +1095,8 @@ def concept_concepts(request, course_id, unit_id, ul_id):
                     title='Concepts Linking to this Concept')
     r = _concepts(request, '''To add a concept link, start by
     typing a search for relevant concepts. ''', toTable=toTable,
-                  fromTable=fromTable, unit=unit, pageData=pageData)
+                  fromTable=fromTable, unit=unit, pageData=pageData,
+                  showConceptAction=True)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
         toTable.append(cg)
