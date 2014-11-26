@@ -37,6 +37,28 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="ConceptsTabDiv">
 
+{% if unitConcepts %}
+<table class="table table-striped">
+<thead><tr>
+  <th>This courselet...</th><th>Concept</th>
+</tr></thead>
+<tbody>
+{% for concept,conceptLinks in unitConcepts %}
+  <tr>
+    <td>
+    {% for cl in conceptLinks %}
+      <a href="{{ actionTarget |get_home_url:cl.unitLesson }}">
+      {{ cl.get_relationship_display }}</a>...
+    {% endfor %}
+    </td>
+    <td><a href="{{ actionTarget |get_object_url:concept }}">
+        {{ concept.title }}</a></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
 {% if conceptLinks.data %}
 <table class="table table-striped">
 <thead><tr>

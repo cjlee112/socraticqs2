@@ -556,6 +556,25 @@ class Unit(models.Model):
         lesson.treeID = lesson.pk
         lesson.save()
         return lesson
+    def get_main_concepts(self):
+        'get dict of concepts linked to main lesson sequence of this unit'
+        d = {}
+        for ul in self.unitlesson_set.filter(lesson__concept__isnull=False,
+                kind=UnitLesson.COMPONENT, order__isnull=False):
+            cl = ConceptLink(lesson=ul.lesson, concept=ul.lesson.concept)
+            cl.unitLesson = ul
+            d[cl.concept] = [cl]
+        for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
+            lesson__unitlesson__kind=UnitLesson.COMPONENT,
+            lesson__unitlesson__order__isnull=False) \
+            .values('concept', 'relationship', 'lesson__unitlesson'):
+            concept = Concept.objects.get(pk=cld['concept'])
+            ul = UnitLesson.objects.get(pk=cld['lesson__unitlesson'])
+            cl = ConceptLink(concept=concept,
+                             relationship=cld['relationship'])
+            cl.unitLesson = ul
+            d.setdefault(cl.concept, []).append(cl)
+        return d
     def get_exercises(self):
         'ordered list of lessons for this courselet'
         return  list(self.unitlesson_set.filter(order__isnull=False)

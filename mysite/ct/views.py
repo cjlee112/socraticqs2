@@ -1045,15 +1045,9 @@ def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
-    cLinks = ConceptLink.objects.filter(lesson__unitlesson__unit=unit,
-        lesson__unitlesson__kind=UnitLesson.COMPONENT,
-        lesson__unitlesson__order__isnull=False)
-    cLinks = distinct_subset(cLinks, lambda cl:cl.concept)
-    clTable = ConceptLinkTable(cLinks, noEdit=True,
-                        headers=('This courselet...', 'Concept'),
-                        title='Concepts Linked to this Courselet')
+    unitConcepts = unit.get_main_concepts().items()
     r = _concepts(request, '''To add a concept to this courselet, start by
-    typing a search for relevant concepts. ''', conceptLinks=clTable,
+    typing a search for relevant concepts. ''', unitConcepts=unitConcepts,
                   unit=unit, pageData=pageData,
                   actionLabel='Add to courselet')
     if isinstance(r, Concept): # newly created concept
