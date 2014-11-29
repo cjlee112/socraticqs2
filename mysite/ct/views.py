@@ -1130,7 +1130,8 @@ def concept_errors(request, course_id, unit_id, ul_id):
 def create_unit_lesson(lesson, concept, unit, parentUL):
     'save new lesson, bind to concept, and append to this unit'
     lesson.save_root(concept)
-    return UnitLesson.create_from_lesson(lesson, unit, order='APPEND')
+    return UnitLesson.create_from_lesson(lesson, unit, order='APPEND',
+                                         addAnswer=True)
 
 def _lessons(request, concept=None, msg='',
              ignorePOST=False, conceptLinks=None,
@@ -1223,14 +1224,9 @@ def concept_lessons(request, course_id, unit_id, ul_id):
         if r.lesson.kind == Lesson.ORCT_QUESTION:
             if r.get_errors().count() == 0: # copy error models from concept
                 concept.copy_error_models(r)
-            if r.get_answers().count() == 0: # add empty answer to edit
-                answer = Lesson(title='Answer', text='write an answer',
-                                addedBy=r.addedBy, kind=Lesson.ANSWER)
-                answer.save_root()
-                ul = UnitLesson.create_from_lesson(answer, unit,
-                            kind=UnitLesson.ANSWERS, parent=r)
+            if getattr(r, '_answer', None): # redirect to edit empty answer
                 return HttpResponseRedirect(reverse('ct:edit_lesson',
-                                args=(course_id, unit_id, ul.id,)))
+                                args=(course_id, unit_id, r._answer.id,)))
         clTable = make_cl_table(concept, unit) # refresh table
         return _lessons(request, concept, '''Successfully added lesson.
             Thank you!''', ignorePOST=True, conceptLinks=clTable,
@@ -1451,7 +1447,7 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
 def create_resolution_ul(lesson, em, unit, parentUL):
     'create UnitLesson as resolution linked to error model'
     lesson.save_root(em, ConceptLink.RESOLVES) # link as resolution
-    return UnitLesson.create_from_lesson(lesson, unit,
+    return UnitLesson.create_from_lesson(lesson, unit, addAnswer=True,
                                          kind=UnitLesson.RESOLVES)
 
 def link_resolution_ul(ul, em, unit, addedBy, parentUL):

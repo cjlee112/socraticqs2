@@ -389,7 +389,7 @@ class UnitLesson(models.Model):
     ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,
-                           **kwargs):
+                           addAnswer=False, **kwargs):
         if not kind:
             kindMap = {Lesson.ANSWER:klass.ANSWERS,
                     Lesson.ERROR_MODEL:klass.MISUNDERSTANDS}
@@ -399,6 +399,12 @@ class UnitLesson(models.Model):
         ul = klass(unit=unit, lesson=lesson, addedBy=lesson.addedBy,
                    treeID=lesson.treeID, order=order, kind=kind, **kwargs)
         ul.save()
+        if addAnswer and lesson.kind == Lesson.ORCT_QUESTION:
+            answer = Lesson(title='Answer', text='write an answer',
+                            addedBy=lesson.addedBy, kind=Lesson.ANSWER)
+            answer.save_root()
+            ul._answer = klass.create_from_lesson(answer, unit,
+                        kind=klass.ANSWERS, parent=ul)
         return ul
     @classmethod
     def search_text(klass, s, searchType=IS_LESSON, dedupe=True,
