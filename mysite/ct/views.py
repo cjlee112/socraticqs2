@@ -1266,7 +1266,7 @@ def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
 
 @login_required
 def unit_lessons(request, course_id, unit_id, lessonTable=None,
-                 currentTab='Lessons'):
+                 currentTab='Lessons', showReorderForm=True):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(title=unit.title,
                         navTabs=unit_tabs(request.path, currentTab))
@@ -1275,12 +1275,13 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     r = _lessons(request, msg='''You can search for a lesson to add
           to this courselet, or write a new lesson for a concept by
           clicking on the Concepts tab.''', 
-                  pageData=pageData, unit=unit, showReorderForm=True,
+                  pageData=pageData, unit=unit,
+                  showReorderForm=showReorderForm,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
         lessonTable.append(r)
         return _lessons(request, msg='''Successfully added lesson.
-            Thank you!''', ignorePOST=True, showReorderForm=True,
+            Thank you!''', ignorePOST=True, showReorderForm=showReorderForm,
             pageData=pageData, unit=unit, lessonTable=lessonTable)
     return r
 
@@ -1289,7 +1290,8 @@ def unit_resources(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     lessonTable = list(unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
-    return unit_lessons(request, course_id, unit_id, lessonTable, 'Resources')
+    return unit_lessons(request, course_id, unit_id, lessonTable,
+                        'Resources', showReorderForm=False)
 
 
 @login_required
