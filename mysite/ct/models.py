@@ -238,7 +238,8 @@ class Lesson(models.Model):
         except User.DoesNotExist:
             pass
         lesson = klass(title=data.title, url=data.url, sourceDB=sourceDB,
-                       sourceID=sourceID, addedBy=user, text=data.description)
+                       sourceID=sourceID, addedBy=user, text=data.description,
+                       kind=klass.EXPLANATION)
         lesson.save_root()
         lesson._sourceDBdata = data
         return lesson
