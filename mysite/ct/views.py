@@ -1355,6 +1355,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                                                                ul))
             elif request.POST.get('task') == 'delete':
                 ul.delete()
+                unit.reorder_exercise() # renumber all lessons
                 return HttpResponseRedirect(reverse('ct:unit_lessons',
                                 args=(course_id, unit_id,)))
         set_crispy_action(request.path, titleform)

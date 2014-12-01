@@ -510,10 +510,12 @@ class UnitLesson(models.Model):
                 return IS_CONCEPT
         return IS_LESSON
 
-def reorder_exercise(self, old, new, l=()):
+def reorder_exercise(self, old=0, new=0, l=()):
     'renumber exercises to move an exercise from old -> new position'
     if not l:
         l = self.get_exercises()
+    if not l: # no lessons, so nothing to do
+        return l
     ex = l[old] # select desired exercise by old position
     l = l[:old] + l[old + 1:] # exclude this exercise
     l = l[:new] + [ex] + l[new:] # insert ex in new position
