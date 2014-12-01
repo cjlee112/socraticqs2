@@ -637,6 +637,13 @@ class Unit(models.Model):
             .filter((Q(response__selfeval=Response.DIFFERENT) |
                      Q(response__status=NEED_HELP_STATUS)) &
                     Q(response__studenterror__isnull=True, **kwargs)))
+    def get_unresolved_uls(self, user=None, **kwargs):
+        'get ORCT with errors not yet DONE_STATUS'
+        if user:
+            kwargs['response__author'] = user
+        return distinct_subset(self.unitlesson_set
+            .filter(response__studenterror__status__in=
+                    [NEED_HELP_STATUS, NEED_REVIEW_STATUS], **kwargs))
     def __unicode__(self):
         return self.title
 

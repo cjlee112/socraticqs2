@@ -1543,6 +1543,8 @@ def unit_tasks_student(request, course_id, unit_id):
                   for ul in unit.get_selfeval_uls(request.user)]
     taskTable += [(ul, 'classify')
                   for ul in unit.get_serrorless_uls(request.user)]
+    taskTable += [(ul, 'resolve')
+                  for ul in unit.get_unresolved_uls(request.user)]
     return render(request, 'ct/unit_tasks_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        pageData=pageData, unit=unit, taskTable=taskTable))
@@ -1589,7 +1591,7 @@ def next_lesson_url(path, unitLesson, unitStatus=None):
     except UnitLesson.DoesNotExist:
         if unitStatus: # record completion of lesson sequence
             unitStatus.done()
-        return get_base_url(path)
+        return get_base_url(path, ['tasks']) # exit to unit tasks view
     if unitStatus: # record move to next lesson; prevent skipping
         nextUL = unitStatus.set_lesson(nextUL)
     return get_study_url(path, nextUL)
