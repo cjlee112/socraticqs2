@@ -25,6 +25,14 @@
 <div class="tab-content">
   <div class="tab-pane active" id="StudyTabDiv">
 
+{% if pageData.navTabs %}
+<p>Congratulations!  You have answered the questions in this courselet.
+To see suggested next steps to study, click the <b>Tasks</b> tab.
+You can also repeat the lessons in this courselet at any time
+by clicking the <b>Next</b> button below, or study individual
+lessons by clicking the <b>Lessons</b> tab.</p>
+{% endif %}
+
 {% if unitLesson %}
 Your current lesson in this courselet is:
 <b>{{ unitLesson.lesson.title }}</b>.
