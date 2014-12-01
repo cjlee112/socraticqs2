@@ -75,12 +75,6 @@ def live_session(request):
 #############################################################
 # instructor CourseQuestion live session UI
     
-def check_instructor_auth(course, request):
-    role = course.get_user_role(request.user)
-    if role != Role.INSTRUCTOR:
-        return HttpResponse("Only the instructor can access this",
-                            status_code=403)
-
 def check_liveinst_auth(request):
     fsmStack = FSMStack(request)
     liveSession = fsmStack.state.liveSession
@@ -661,6 +655,13 @@ def concepts(request):
 
 ###########################################################
 # WelcomeMat refactored utilities
+
+def check_instructor_auth(course, request):
+    'return 403 if not course instructor, else None'
+    role = course.get_user_role(request.user)
+    if role != Role.INSTRUCTOR:
+        return HttpResponse("Only the instructor can access this",
+                            status_code=403)
 
 def make_tabs(path, current, tabs, tail=4, **kwargs):
     path = get_base_url(path, tail=tail, **kwargs)
