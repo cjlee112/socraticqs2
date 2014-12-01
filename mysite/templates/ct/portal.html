@@ -37,7 +37,11 @@ function toggleInterest(o, targeturl, csrftoken)
 
 {% block refresher %}{% endblock %}
 
-  <title>Socraticqs Online</title>
+{% if pageData %}
+  <title>{{ pageData.title }} - Courselets</title>
+{% else %}
+  <title>Courselets</title>
+{% endif %}
 {% endblock %}
 
 {% block body %}
