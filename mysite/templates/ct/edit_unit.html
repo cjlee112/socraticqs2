@@ -28,11 +28,21 @@
 {% crispy unitform %}
 </div>
 
-
-<p>
-Added by: {{ unit.addedBy.get_full_name }}, 
-          {{ unit.atime|display_datetime }}
-</p>
+<hr>
+Courselet created by: 
+<a href="/ct/people/{{ user.pk }}/">{{ unit.addedBy.get_full_name }}</a>, 
+{{ unit.atime|display_datetime }}
+{% if courseUnit.releaseTime %}
+  (published {{ courseUnit.releaseTime|display_datetime }})
+{% else %}
+  <br><b>This courselet has not yet been published for student access.</b>
+    <form action="{{ actionTarget }}" method="post"
+          style=" display:inline!important;">
+    {% csrf_token %}
+    <input type="hidden" name="task" value="release" />
+    <input type="submit" value="Publish" />
+    </form>
+{% endif %}
 
   </div><!-- @end #EditTabDiv -->
 </div>

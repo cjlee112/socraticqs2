@@ -862,9 +862,14 @@ class Course(models.Model):
             return l[0]
         else:
             return l
-    def get_course_units(self):
+    def get_course_units(self, publishedOnly=True):
         'ordered list of cunits for this course'
-        return  list(self.courseunit_set.all().order_by('order'))
+        if publishedOnly: # only those already released
+            return  list(self.courseunit_set
+                .filter(releaseTime__isnull=False,
+                        releaseTime__lt=timezone.now()).order_by('order'))
+        else:
+            return  list(self.courseunit_set.all().order_by('order'))
     reorder_course_unit = reorder_exercise
     def get_users(self, role=None):
         if not role:
@@ -880,6 +885,9 @@ class CourseUnit(models.Model):
     order = models.IntegerField()
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    releaseTime = models.DateTimeField('time released', null=True)
+    def is_published(self):
+        return self.releaseTime and self.releaseTime < timezone.now()
     
 class Role(models.Model):
     'membership of a user in a course'

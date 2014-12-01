@@ -37,6 +37,11 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="TasksTabDiv">
 
+{% if not courseUnit.releaseTime %}
+<p><b>This courselet has not yet been published for student access.</b>
+When you are ready to publish it, click the <b>Edit</b> tab.</p>
+{% endif %}
+
 <table class="table table-striped">
 <thead><tr>
   <th>Lesson</th><th>Next Steps to work on</th>

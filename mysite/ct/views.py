@@ -816,13 +816,13 @@ def course(request, course_id):
         navTabs = course_tabs(request.path, 'Home')
         courseletform = NewUnitTitleForm()
         showReorderForm = True
+        unitTable = course.get_course_units(publishedOnly=False)
     else:
         courseletform = showReorderForm = None
         navTabs = ()
+        unitTable = course.get_course_units()
     pageData = PageData(title=course.title, headLabel='course description',
                         headText=md2html(course.description), navTabs=navTabs)
-    #titleform = CourseTitleForm(instance=course)
-    unitTable = course.get_course_units()
     if request.method == 'POST': # create new courselet
         if 'oldOrder' in request.POST and not notInstructor:
             reorderForm = ReorderForm(0, len(unitTable), request.POST)
@@ -884,17 +884,21 @@ def edit_unit(request, course_id, unit_id):
 
     pageData = PageData(title=unit.title,
                         navTabs=unit_tabs(request.path, 'Edit'))
+    cu = course.courseunit_set.get(unit=unit)
+    unitform = UnitTitleForm(instance=unit)
     if request.method == 'POST': # create new courselet
-        unitform = UnitTitleForm(request.POST, instance=unit)
-        if unitform.is_valid():
-            unitform.save()
-            return HttpResponseRedirect(reverse('ct:unit_tasks',
-                                        args=(course.id, unit_id)))
-    else:
-        unitform = UnitTitleForm(instance=unit)
+        if request.POST.get('task') == 'release':
+            cu.releaseTime = timezone.now()
+            cu.save() # publish for student access
+        else:
+            unitform = UnitTitleForm(request.POST, instance=unit)
+            if unitform.is_valid():
+                unitform.save()
+                return HttpResponseRedirect(reverse('ct:unit_tasks',
+                                            args=(course.id, unit_id)))
     set_crispy_action(request.path, unitform)
     return render(request, 'ct/edit_unit.html',
-                  dict(unit=unit, actionTarget=request.path,
+                  dict(unit=unit, actionTarget=request.path, courseUnit=cu,
                        unitform=unitform, pageData=pageData))
 
 
@@ -1238,7 +1242,9 @@ def concept_lessons(request, course_id, unit_id, ul_id):
 @login_required
 def unit_tasks(request, course_id, unit_id):
     'suggest next steps on this courselet'
+    course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
+    cu = course.courseunit_set.get(unit=unit)
     pageData = PageData(title=unit.title,
                         navTabs=unit_tabs(request.path, 'Tasks'))
     newInquiryULs = frozenset(unit.get_new_inquiry_uls())
@@ -1254,7 +1260,8 @@ def unit_tasks(request, course_id, unit_id):
                   if ul not in newInquiryULs]
     return render(request, 'ct/unit_tasks.html',
                   dict(user=request.user, actionTarget=request.path,
-                       pageData=pageData, unit=unit, taskTable=taskTable))
+                       pageData=pageData, unit=unit, taskTable=taskTable,
+                       courseUnit=cu))
 
     
 

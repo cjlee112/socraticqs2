@@ -65,6 +65,9 @@ $( "#headtoggle" ).click(function() {
     {% endif %}
     <td>
     <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title }}</a>
+    {% if not cu.is_published %}
+      (not yet published)
+    {% endif %}
     </td>
     <td>
     <a href="/ct/people/{{ cu.unit.addedBy.pk }}/">{{ cu.unit.addedBy.get_full_name }}</a>
