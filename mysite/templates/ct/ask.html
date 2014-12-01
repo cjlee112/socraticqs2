@@ -29,10 +29,16 @@
   </section>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<br>
-    Briefly state your answer to the question in the box below.<br>
-    You may enter latex equations by bracketing them as follows
-    <PRE>\[\sum_{\alpha}{p(\alpha|Z)}=1\]</PRE>
+<hr>
+    <b>Type your answer in the box below</b>.
+    If you want to use formatting features such as italics or
+    equations, follow the simple
+    <a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">
+    reStructuredText</a> guidelines.  For example, to
+    enter a LaTeX equation, type text lines like this (note that the
+    equation is indented by typing three spaces):<br>
+<pre>.. math::
+   c^2=a^2+b^2</pre>
     <br>
 
 <div class="container-fluid">
