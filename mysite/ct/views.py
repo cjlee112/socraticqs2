@@ -1338,7 +1338,10 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
     if ul.get_type() == IS_LESSON:
-        formClass = LessonForm
+        if ul.lesson.kind == Lesson.ANSWER:
+            formClass = AnswerLessonForm
+        else:
+            formClass = LessonForm
     else:
         formClass = ErrorForm
     if request.user == ul.addedBy:

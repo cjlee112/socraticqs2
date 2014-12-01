@@ -179,6 +179,13 @@ class LessonForm(forms.ModelForm):
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'),
                       changeLog=_('Comment on your revisions'))
 
+class AnswerLessonForm(LessonForm):
+    class Meta:
+        model = Lesson
+        fields = ['title', 'text', 'medium', 'url', 'changeLog']
+        labels = dict(medium=_('Delivery medium'),
+                      changeLog=_('Comment on your revisions'))
+
 class NewLessonForm(LessonForm):
     submitLabel = 'Add'
 
