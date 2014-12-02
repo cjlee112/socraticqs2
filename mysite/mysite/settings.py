@@ -86,7 +86,7 @@ STATICFILES_FINDERS = (
 LOGIN_URL = '/login/'
 
 
-# Make this unique, and don't share it with anybody.
+# this key is only used for dev localhost testing, not for production
 SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
 
 # List of callables that know how to import templates from various sources.
