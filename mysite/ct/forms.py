@@ -254,3 +254,12 @@ class LogoutForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Sign out'))
 
 
+###############################################################
+# utility functions
+
+def set_crispy_action(actionTarget, *forms):
+    'set the form.helper.form_action for one or more forms'
+    for form in forms:
+        form.helper.form_action = actionTarget
+    
+    
