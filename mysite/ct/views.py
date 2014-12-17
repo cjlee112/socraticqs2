@@ -1090,6 +1090,7 @@ def resolutions_student(request, course_id, unit_id, ul_id):
             form = ErrorStatusForm(request.POST, instance=se)
             if form.is_valid():
                 form.save()
+                form = ErrorStatusForm(instance=se) # clear the form
         else:
             form = ErrorStatusForm(instance=se)
     return render(request, 'ct/resolutions_student.html',
@@ -1107,6 +1108,7 @@ def ul_faq_student(request, course_id, unit_id, ul_id):
         if form.is_valid():
             r = save_response(form, ul, request.user, course_id,
                               kind=Response.STUDENT_QUESTION, needsEval=True)
+            form = CommentForm() # clear the form
     else:
         form = CommentForm()
     faqs = ul.response_set.filter(kind=Response.STUDENT_QUESTION) \
@@ -1135,6 +1137,7 @@ def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
                 reply = save_response(form, ul, request.user, course_id,
                                   kind=Response.COMMENT, needsEval=True,
                                   parent=inquiry)
+                form = ReplyForm() # clear the form
     pageData.numPeople = inquiry.inquirycount_set.count()
     replyTable = [(r, r.studenterror_set.all())
                   for r in inquiry.response_set.all().order_by('atime')]
