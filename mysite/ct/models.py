@@ -59,6 +59,19 @@ class Concept(models.Model):
     def search_text(klass, s):
         'search Concept title'
         return klass.objects.filter(title__icontains=s).distinct()
+    @classmethod
+    def new_concept(klass, title, text, unit, user, isError=False):
+        'add a new concept with associated Lesson, UnitLesson'
+        lesson = Lesson(title=title, text=text, addedBy=user)
+        concept = klass(title=title, addedBy=user)
+        if isError:
+            concept.isError = True
+            lesson.kind = lesson.ERROR_MODEL
+        concept.save()
+        lesson.concept = concept
+        lesson.save_root()
+        UnitLesson.create_from_lesson(lesson, unit)
+        return concept
     def create_error_model(self, addedBy, **kwargs):
         'create a new error model for this concept'
         em = self.__class__(isError=True, addedBy=addedBy, **kwargs)

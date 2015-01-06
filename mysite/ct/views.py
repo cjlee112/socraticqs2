@@ -290,19 +290,10 @@ def update_concept_link(request, conceptLinks):
         clform.save()
         conceptLinks.replace(cl, clform)
 
-def create_concept(concept, lesson, unit):
-    'save concept with newly created UnitLesson representing it'
-    concept.save()
-    lesson.concept = concept
-    lesson.save_root()
-    UnitLesson.create_from_lesson(lesson, unit)
-    return concept
-
-    
 def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, unit=None,
               actionLabel='Link to this Concept',
-              errorModels=None, createConceptFunc=create_concept, **kwargs):
+              errorModels=None, isError=False, **kwargs):
     'search or create a Concept'
     cset = wset = ()
     if errorModels is not None:
@@ -342,12 +333,9 @@ def _concepts(request, msg='', ignorePOST=False, conceptLinks=None,
         elif 'title' in request.POST: # create new concept
             conceptForm = NewConceptForm(request.POST)
             if conceptForm.is_valid():
-                lesson = Lesson(title=conceptForm.cleaned_data['title'],
-                    text=conceptForm.cleaned_data['description'],
-                    addedBy=request.user)
-                concept = Concept(title=conceptForm.cleaned_data['title'],
-                                  addedBy=request.user)
-                return createConceptFunc(concept, lesson, unit)
+                return Concept.new_concept(conceptForm.cleaned_data['title'],
+                            conceptForm.cleaned_data['description'],
+                            unit, request.user, isError)
         else:
             return 'please write POST error message'
     elif 'search' in request.GET:
@@ -485,15 +473,6 @@ def concept_concepts(request, course_id, unit_id, ul_id):
             fromTable=fromTable, unit=unit, pageData=pageData)
     return r
 
-def create_em_concept(concept, lesson, unit):
-    concept.isError = True
-    lesson.kind = lesson.ERROR_MODEL
-    concept.save()
-    lesson.concept = concept
-    lesson.save_root()
-    UnitLesson.create_from_lesson(lesson, unit)
-    return concept
-
 @login_required
 def concept_errors(request, course_id, unit_id, ul_id):
     unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
@@ -503,7 +482,7 @@ def concept_errors(request, course_id, unit_id, ul_id):
     r = _concepts(request, '''To add an error model to this concept, start by
     typing a search for relevant errors.''', errorModels=errorModels,
                   pageData=pageData, unit=unit, showConceptAction=True,
-                  createConceptFunc=create_em_concept)
+                  isError=True)
     if isinstance(r, Concept):
         cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
                                     relationship=ConceptGraph.MISUNDERSTANDS)
