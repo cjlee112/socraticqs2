@@ -8,6 +8,7 @@ Replace this with more appropriate tests for your application.
 from django.contrib.auth.models import User
 from django.test import TestCase
 from ct.models import *
+from ct import views
 
 class ConceptMethodTests(TestCase):
     def setUp(self):
@@ -54,6 +55,23 @@ class ConceptMethodTests(TestCase):
         self.assertEqual(lesson.kind, Lesson.ERROR_MODEL)
         ul = UnitLesson.objects.get(lesson=lesson)
         self.assertEqual(ul.kind, UnitLesson.MISUNDERSTANDS)
+    def test_error_models(self):
+        'check creation and copying of error models'
+        concept = Concept.new_concept('big', 'idea', self.unit, self.user)
+        emUL1 = views.create_error_ul(Lesson(title='oops', addedBy=self.user,
+                                    text='foo'), concept, self.unit, None)
+        emUL2 = views.create_error_ul(Lesson(title='oops', addedBy=self.user,
+                                    text='foo'), concept, self.unit, None)
+        parent = UnitLesson.objects.get(lesson__concept=concept)
+        ulList = concept.copy_error_models(parent)
+        self.assertEqual(len(ulList), 2)
+        lessons = [ul.lesson for ul in ulList]
+        self.assertIn(emUL1.lesson, lessons)
+        self.assertIn(emUL2.lesson, lessons)
+        self.assertEqual(parent, ulList[0].parent)
+        self.assertEqual(parent, ulList[1].parent)
+        
+        
 
 
 class LessonMethodTests(TestCase):
