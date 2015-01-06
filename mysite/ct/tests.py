@@ -15,6 +15,8 @@ class ConceptMethodTests(TestCase):
                                              password='top_secret')
         self.wikiUser = User.objects.create_user(username='wikipedia', email='wiki@_',
                                              password='top_secret')
+        self.unit = Unit(title='My Courselet', addedBy=self.user)
+        self.unit.save()
     def test_sourceDB(self):
         'check wikipedia concept retrieval'
         c, lesson = Concept.get_from_sourceDB('New York City', self.user)
@@ -30,6 +32,28 @@ class ConceptMethodTests(TestCase):
         self.assertEqual(c2.pk, c.pk)
         self.assertEqual(l2.pk, lesson.pk)
         self.assertIn(c, list(Concept.search_text('new york')))
+    def test_new_concept(self):
+        'check standard creation of a concept bound to a UnitLesson'
+        title = 'Important Concept'
+        text = 'This concept is very important.'
+        concept = Concept.new_concept(title, text, self.unit, self.user)
+        self.assertEqual(concept.title, title)
+        self.assertFalse(concept.isError)
+        lesson = Lesson.objects.get(concept=concept)
+        self.assertEqual(lesson.text, text)
+        self.assertEqual(lesson.kind, Lesson.BASE_EXPLANATION)
+        ul = UnitLesson.objects.get(lesson=lesson)
+        self.assertIs(ul.order, None)
+        self.assertEqual(ul.treeID, lesson.treeID)
+        self.assertEqual(ul.kind, UnitLesson.COMPONENT)
+        # check creation of error model
+        concept = Concept.new_concept(title, text, self.unit, self.user,
+                                      isError=True)
+        self.assertTrue(concept.isError)
+        lesson = Lesson.objects.get(concept=concept)
+        self.assertEqual(lesson.kind, Lesson.ERROR_MODEL)
+        ul = UnitLesson.objects.get(lesson=lesson)
+        self.assertEqual(ul.kind, UnitLesson.MISUNDERSTANDS)
 
 
 class LessonMethodTests(TestCase):
