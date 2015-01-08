@@ -93,7 +93,7 @@ class ConceptMethodTests(TestCase):
                          .relationship, ConceptLink.DEFINES)
         self.assertEqual([cl for cl in clList if cl.lesson == l2][0]
                          .relationship, ConceptLink.TESTS)
-        
+        self.assertEqual(distinct_subset([ul1, ul2, ul3]), [ul1, ul2])
 
 
 class LessonMethodTests(TestCase):
