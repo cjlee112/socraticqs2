@@ -33,6 +33,12 @@ TIME_ZONE = 'America/Los_Angeles'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+# grr, Django testing framework stupidly uses this as signal that
+# code is pre-1.6, whereas it STILL seems to be required for app to run.
+SITE_ID = 1
+
+# required to stop false positive warning messages
+SILENCED_SYSTEM_CHECKS = ['1_6.W001']
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
