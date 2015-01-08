@@ -70,7 +70,29 @@ class ConceptMethodTests(TestCase):
         self.assertIn(emUL2.lesson, lessons)
         self.assertEqual(parent, ulList[0].parent)
         self.assertEqual(parent, ulList[1].parent)
-        
+    def test_get_conceptlinks(self):
+        'test ConceptLink creation and retrieval'
+        concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        l1 = Lesson(title='ugh', text='brr', addedBy=self.user)
+        l1.save_root(concept)
+        ul1 = UnitLesson.create_from_lesson(l1, self.unit)
+        l2 = Lesson(title='foo', text='bar', addedBy=self.user,
+                    kind=Lesson.ORCT_QUESTION)
+        l2.save_root(concept)
+        ul2 = UnitLesson.create_from_lesson(l2, self.unit)
+        # create a second commit of this lesson in a different unit
+        l3 = Lesson(title='wunder', text='bar', addedBy=self.user,
+                    kind=Lesson.ORCT_QUESTION, treeID=l2.treeID)
+        l3.save_root(concept)
+        unit3 = Unit(title='Another Courselet', addedBy=self.user)
+        unit3.save()
+        ul3 = UnitLesson.create_from_lesson(l3, unit3)
+        clList = concept.get_conceptlinks(self.unit) # should get l1, l2
+        self.assertEqual(len(clList), 2)
+        self.assertEqual([cl for cl in clList if cl.lesson == l1][0]
+                         .relationship, ConceptLink.DEFINES)
+        self.assertEqual([cl for cl in clList if cl.lesson == l2][0]
+                         .relationship, ConceptLink.TESTS)
         
 
 
