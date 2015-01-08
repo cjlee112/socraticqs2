@@ -70,6 +70,16 @@ class ConceptMethodTests(TestCase):
         self.assertIn(emUL2.lesson, lessons)
         self.assertEqual(parent, ulList[0].parent)
         self.assertEqual(parent, ulList[1].parent)
+        # test copying parent to a new unit
+        unit3 = Unit(title='Another Courselet', addedBy=self.user)
+        unit3.save()
+        ul3 = parent.copy(unit3, self.user)
+        self.assertEqual(ul3.unit, unit3)
+        children = list(ul3.get_errors())
+        self.assertEqual(len(children), 2)
+        lessons = [ul.lesson for ul in children]
+        self.assertIn(emUL1.lesson, lessons)
+        self.assertIn(emUL2.lesson, lessons)
     def test_get_conceptlinks(self):
         'test ConceptLink creation and retrieval'
         concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
