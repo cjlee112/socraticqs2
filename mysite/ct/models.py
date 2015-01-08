@@ -285,8 +285,9 @@ class Lesson(models.Model):
     ##     return lesson
     def save_root(self, concept=None, relationship=None):
         'create root commit by initializing treeID'
-        self.save()
-        self.treeID = self.pk
+        if self.treeID is None: # no tree ID, so save as root commit
+            self.save()
+            self.treeID = self.pk
         self.save()
         if concept:
             if relationship is None:
