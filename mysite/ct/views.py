@@ -570,7 +570,7 @@ def _lessons(request, concept=None, msg='',
     return render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
-    cLinks = UnitLesson.get_conceptlinks(concept, unit)
+    cLinks = concept.get_conceptlinks(unit)
     return ConceptLinkTable(cLinks, headers=('Lesson', '...this concept'),
                             title='Lessons Linked to this Concept')
 
@@ -1041,7 +1041,7 @@ def study_concept(request, course_id, unit_id, ul_id):
 def concept_lessons_student(request, course_id, unit_id, ul_id):
     unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
                                                'Lessons')
-    clTable = UnitLesson.get_conceptlinks(concept, unit)
+    clTable = concept.get_conceptlinks(unit)
     return render(request, 'ct/concept_lessons_student.html',
                   dict(user=request.user, actionTarget=request.path,
                        unitLesson=ul, unit=unit, pageData=pageData,

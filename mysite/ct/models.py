@@ -112,6 +112,18 @@ class Concept(models.Model):
             .filter(kind=UnitLesson.COMPONENT,
                     unitlesson__kind=UnitLesson.MISUNDERSTANDS,
                     unitlesson__lesson__concept=self, **kwargs))
+    def get_conceptlinks(self, unit):
+        'get list of conceptLinks deduped on (treeID, relationship)'
+        d = {}
+        for cl in ConceptLink.objects.filter(concept=self):
+            for ul in UnitLesson.objects.filter(lesson=cl.lesson):
+                t = (ul.treeID, cl.relationship)
+                if t not in d or ul.unit == unit:
+                    cl.unitLesson = ul # add attribute to keep this info
+                    d[t] = cl
+        l = d.values()
+        l.sort(lambda x,y:cmp(x.relationship, y.relationship))
+        return l
     def __unicode__(self):
         return self.title
             
@@ -446,19 +458,6 @@ class UnitLesson(models.Model):
         if dedupe:
             out = distinct_subset(out)
         return out
-    @classmethod
-    def get_conceptlinks(klass, concept, unit):
-        'get list of conceptLinks deduped on treeID, relationship'
-        d = {}
-        for cl in ConceptLink.objects.filter(concept=concept):
-            for ul in klass.objects.filter(lesson=cl.lesson):
-                t = (ul.treeID, cl.relationship)
-                if t not in d or ul.unit == unit:
-                    cl.unitLesson = ul # add attribute to keep this info
-                    d[t] = cl
-        l = d.values()
-        l.sort(lambda x,y:cmp(x.relationship, y.relationship))
-        return l
     def get_answers(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
