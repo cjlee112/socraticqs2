@@ -1025,6 +1025,20 @@ def load_json_data(self, attr='data'):
     else:
         return {}
 
+
+def call_plugin(self, fsmStack, eventName, request, prefix='ct.fsm_plugin.',
+                **kwargs):
+    'import and call plugin func for this object'
+    import importlib
+    if not self.funcName:
+        raise ValueError('invalid call_plugin() with no funcName!')
+    i = self.funcName.rindex('.')
+    modName = prefix + self.funcName[:i]
+    funcName = self.funcName[i + 1:]
+    mod = importlib.import_module(modName)
+    func = getattr(mod, funcName)
+    return func(self, fsmStack, eventName, request, **kwargs)
+    
 ##################################################################
 # activity stack FSM
 
@@ -1096,6 +1110,7 @@ class FSMNode(models.Model):
     funcName = models.CharField(max_length=200, null=True)
     load_json_data = load_json_data
     save_json_data = save_json_data
+    call_plugin = call_plugin
     def get_path(self, **kwargs):
         return reverse(self.path, kwargs=kwargs)
 
@@ -1117,6 +1132,7 @@ class FSMEdge(models.Model):
     _funcDict = {}
     load_json_data = load_json_data
     save_json_data = save_json_data
+    call_plugin = call_plugin
     def get_path(self, **kwargs):
         if self.funcName:
             try:

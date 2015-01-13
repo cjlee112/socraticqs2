@@ -128,7 +128,8 @@ class LessonMethodTests(TestCase):
         
 
 fsmDict = dict(name='test', title='try this')
-nodeDict = dict(START=dict(title='start here', path='/ct/'),
+nodeDict = dict(START=dict(title='start here', path='/ct/',
+                           funcName='testme.trivial'),
                 END=dict(title='end here', path='/ct/nowhere'),
     )
 edgeDict = (
@@ -215,3 +216,7 @@ class FSMTests(TestCase):
         self.assertEqual(request.session['fsmID'], fsmStack.state.pk)
         self.assertEqual(fsmStack.state.load_json_data(), fsmData)
         self.assertEqual(result.url, '/ct/')
+    def test_trivial_plugin(self):
+        'check trivial plugin import and call'
+        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        self.assertEqual(f.startNode.call_plugin(0, 0, 0), 'trivial result')
