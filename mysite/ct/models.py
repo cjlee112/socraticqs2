@@ -1025,6 +1025,7 @@ def load_json_data(self, attr='data'):
     else:
         return {}
 
+PLUGIN_IMPORT_TEST = 'IMPORT TEST'
 
 def call_plugin(self, fsmStack, eventName, request, prefix='ct.fsm_plugin.',
                 **kwargs):
@@ -1037,6 +1038,8 @@ def call_plugin(self, fsmStack, eventName, request, prefix='ct.fsm_plugin.',
     funcName = self.funcName[i + 1:]
     mod = importlib.import_module(modName)
     func = getattr(mod, funcName)
+    if eventName == PLUGIN_IMPORT_TEST:
+        return True
     return func(self, fsmStack, eventName, request, **kwargs)
     
 ##################################################################
@@ -1083,6 +1086,8 @@ class FSM(models.Model):
             nodes = {}
             for name, nodeDict in nodeData.items(): # save nodes
                 node = FSMNode(name=name, fsm=f, addedBy=user, **nodeDict)
+                if node.funcName: # make sure plugin imports successfully
+                    node.call_plugin(0, PLUGIN_IMPORT_TEST, 0)
                 node.save()
                 nodes[name] = node
                 if name == 'START':
@@ -1093,6 +1098,8 @@ class FSM(models.Model):
                 edgeDict['fromNode'] = nodes[edgeDict['fromNode']]
                 edgeDict['toNode'] = nodes[edgeDict['toNode']]
                 e = FSMEdge(addedBy=user, **edgeDict)
+                if e.funcName: # make sure plugin imports successfully
+                    e.call_plugin(0, PLUGIN_IMPORT_TEST, 0)
                 e.save()
         return f
 

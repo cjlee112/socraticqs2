@@ -133,8 +133,7 @@ nodeDict = dict(START=dict(title='start here', path='/ct/',
                 END=dict(title='end here', path='/ct/nowhere'),
     )
 edgeDict = (
-    dict(name='next', fromNode='START', toNode='END', funcName='simple_test',
-         title='go go go'),
+    dict(name='next', fromNode='START', toNode='END', title='go go go'),
     )
 
 class FakeRequest(object):
@@ -220,3 +219,17 @@ class FSMTests(TestCase):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
         self.assertEqual(f.startNode.call_plugin(0, 0, 0), 'trivial result')
+    def test_bad_funcName(self):
+        'check that FSM.save_graph() catches bad plugin funcName'
+        edgeDictBad = (
+            dict(name='next', fromNode='START', toNode='END',
+                 funcName='testme.invalid', title='go go go'),
+        )
+        try:
+            f = FSM.save_graph(fsmDict, nodeDict, edgeDictBad, 'jacob')
+        except AttributeError:
+            pass
+        else:
+            raise AssertionError('FSM.save_graph() failed to catch bad plugin funcName')
+            
+            
