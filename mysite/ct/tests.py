@@ -178,7 +178,10 @@ class FSMTests(TestCase):
         d = f.startNode.load_json_data()
         self.assertEqual(d, {})
         d['fruity'] = self.unit
+        d['anumber'] = 3
+        d['astring'] = 'jeff'
         f.startNode.save_json_data(d)
         node = FSMNode.objects.get(pk=f.startNode.pk)
         d2 = node.load_json_data()
-        self.assertEqual(d2, {'fruity': self.unit})
+        self.assertEqual(d2, {'fruity': self.unit, 'anumber': 3,
+                              'astring': 'jeff'})

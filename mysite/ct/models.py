@@ -982,10 +982,22 @@ def dump_json_id_dict(d):
     'get json representation of dict of db objects'
     data = {}
     for k, v in d.items():
-        name, pk = dump_json_id(v, k)
-        data[name] = pk
+        if v.__class__.__name__ in klassNameDict: # save db object id
+            name, pk = dump_json_id(v, k)
+            data[name] = pk
+        else: # just copy literal value, assuming JSON can serialize it
+            data[k] = v
     return json.dumps(data)
 
+def save_json_data(self, d, attr='data'):
+    'save dict of object refs back to db blob field'
+    if d:
+        s = dump_json_id_dict(d)
+    else:
+        s = None
+    setattr(self, attr, s)
+    self.save()
+        
 # index of types that can be saved in json blobs
 klassNameDict = dict(
     Concept=Concept, ConceptGraph=ConceptGraph,
@@ -1008,8 +1020,11 @@ def load_json_id_dict(s):
     data = json.loads(s)
     d = {}
     for k, v in data.items():
-        name, obj = load_json_id(k, v)
-        d[name] = obj
+        if k.endswith('_id'): # retrieve db object
+            name, obj = load_json_id(k, v)
+            d[name] = obj
+        else: # just copy literal value
+            d[k] = v
     return d
 
 def load_json_data(self, attr='data'):
@@ -1020,15 +1035,6 @@ def load_json_data(self, attr='data'):
     else:
         return {}
 
-def save_json_data(self, d, attr='data'):
-    'save dict of object refs back to db blob field'
-    if d:
-        s = dump_json_id_dict(d)
-    else:
-        s = None
-    setattr(self, attr, s)
-    self.save()
-        
 ##################################################################
 # activity stack FSM
 
@@ -1043,7 +1049,7 @@ class FSM(models.Model):
     @classmethod
     def load_graph(klass, fsmData, nodeData, edgeData, username,
                   oldLabel='OLD'):
-        '''load FSM specification from JSON file by renaming any existing
+        '''load FSM specification from node, edge graph by renaming any existing
         FSM with the same name, and creating new FSM.
         Note that ongoing activities
         using the old FSM will continue to work (following the old FSM spec),
