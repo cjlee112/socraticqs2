@@ -124,3 +124,30 @@ class LessonMethodTests(TestCase):
         self.assertIn('New York City', [t[0] for t in results])
         self.assertEqual(len(results[0]), 3)
         
+
+fsmDict = dict(name='test', title='try this')
+nodeDict = dict(START=dict(title='start here', path='/ct/'),
+                END=dict(title='end here', path='/ct/nowhere'),
+    )
+edgeDict = (
+    dict(name='next', fromNode='START', toNode='END', funcName='simple_test',
+         title='go go go'),
+    )
+        
+class FSMTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='jacob', email='jacob@_',
+                                             password='top_secret')
+    def test_load(self):
+        'check loading an FSM graph, and replacing it'
+        f = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        self.assertEqual(f.fsmnode_set.count(), 2)
+        self.assertEqual(f.startNode.name, 'START')
+        self.assertEqual(f.startNode.outgoing.count(), 1)
+        e = f.startNode.outgoing.all()[0]
+        self.assertEqual(e.name, 'next')
+        self.assertEqual(e.toNode.name, 'END')
+        f2 = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob') # replace
+        self.assertEqual(FSM.objects.get(pk=f.pk).name, 'testOLD') # renamed
+        self.assertNotEqual(f.startNode, f2.startNode)
+        self.assertEqual(f.startNode.name, f2.startNode.name)

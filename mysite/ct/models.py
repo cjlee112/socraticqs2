@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
@@ -974,9 +974,52 @@ class FSM(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     help = models.TextField(null=True)
-    startNode = models.ForeignKey('FSMNode', related_name='+')
+    startNode = models.ForeignKey('FSMNode', related_name='+', null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    @classmethod
+    def load_graph(klass, fsmData, nodeData, edgeData, username,
+                  oldLabel='OLD'):
+        '''load FSM specification from JSON file by renaming any existing
+        FSM with the same name, and creating new FSM.
+        Note that ongoing activities
+        using the old FSM will continue to work (following the old FSM spec),
+        but any new activities will be created using the new FSM spec
+        (since they request it by name).'''
+        user = User.objects.get(username=username)
+        name = fsmData['name']
+        oldName = name + oldLabel
+        with transaction.atomic(): # rollback if db error occurs
+            try: # delete nameOLD FSM if any
+                old = klass.objects.get(name=oldName)
+            except klass.DoesNotExist:
+                pass
+            else:
+                old.delete()
+            try: # rename current to nameOLD
+                old = klass.objects.get(name=name)
+            except klass.DoesNotExist:
+                pass
+            else:
+                old.name = oldName
+                old.save()
+            f = klass(addedBy=user, **fsmData) # create new FSM
+            f.save()
+            nodes = {}
+            for name, nodeDict in nodeData.items(): # save nodes
+                node = FSMNode(name=name, fsm=f, addedBy=user, **nodeDict)
+                node.save()
+                nodes[name] = node
+                if name == 'START':
+                    f.startNode = node
+                    f.save()
+            for edgeDict in edgeData: # save edges
+                edgeDict = edgeDict.copy() # don't modify input dict!
+                edgeDict['fromNode'] = nodes[edgeDict['fromNode']]
+                edgeDict['toNode'] = nodes[edgeDict['toNode']]
+                e = FSMEdge(addedBy=user, **edgeDict)
+                e.save()
+        return f
 
 class FSMNode(models.Model):
     fsm = models.ForeignKey(FSM)
@@ -984,10 +1027,11 @@ class FSMNode(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     help = models.TextField(null=True)
-    path = models.CharField(max_length=200)
+    path = models.CharField(max_length=200, null=True)
     data = models.TextField(null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    funcName = models.CharField(max_length=200, null=True)
     def get_path(self, **kwargs):
         return reverse(self.path, kwargs=kwargs)
 
@@ -1031,6 +1075,7 @@ class FSMState(models.Model):
     linkState = models.ForeignKey('FSMState', null=True,
                                   related_name='linkChildren')
     unitLesson = models.ForeignKey(UnitLesson, null=True)
+    path = models.CharField(max_length=200)
     data = models.TextField(null=True)
     isModal = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
