@@ -1160,6 +1160,11 @@ class FSMState(models.Model):
     atime = models.DateTimeField('time started', default=timezone.now)
     load_json_data = load_json_data
     save_json_data = save_json_data
+    def event(self, fsmStack, eventName, request, **kwargs):
+        'trigger proper consequences if any for this event'
+        if eventName == 'START':
+            return '/ct/'
+        raise ValueError('no code for handling this event yet!')
     def transition(self, name='next', **kwargs):
         try:
             edge = FSMEdge.objects.get(fromNode=self.fsmNode,

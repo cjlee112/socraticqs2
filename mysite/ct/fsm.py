@@ -2,6 +2,7 @@ import models
 from django.http import HttpResponseRedirect
 
 class FSMStack(object):
+    'main interface to our current FSM if any'
     def __init__(self, request, **kwargs):
         try:
             fsmID = request.session['fsmID']
@@ -18,14 +19,17 @@ class FSMStack(object):
             return self.pop(request, **kwargs)
         if path:
             return HttpResponseRedirect(path)
-    def push(self, request, fsmName, stateArgs, **kwargs):
+    def push(self, request, fsmName, stateArgs={}, stateData={}, **kwargs):
         fsm = models.FSM.objects.get(name=fsmName)
         state = models.FSMState(user=request.user, fsmNode=fsm.startNode,
                                 parentState=self.state, **stateArgs)
-        state.save()
+        if stateData:
+            state.save_json_data(stateData) # serialize & save to db
+        else:
+            state.save() # just save to db
         self.state = state
         request.session['fsmID'] = state.pk
-        path = fsm.startNode.get_path(**kwargs)
+        path = state.event(self, 'START', request, **kwargs)
         return HttpResponseRedirect(path)
     def pop(self, request, **kwargs):
         if request.user != self.state.user:

@@ -7,8 +7,9 @@ Replace this with more appropriate tests for your application.
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.http import HttpResponseRedirect
 from ct.models import *
-from ct import views
+from ct import views, fsm
 
 class ConceptMethodTests(TestCase):
     def setUp(self):
@@ -134,7 +135,19 @@ edgeDict = (
     dict(name='next', fromNode='START', toNode='END', funcName='simple_test',
          title='go go go'),
     )
-        
+
+class FakeRequest(object):
+    'trivial holder for request data to pass to test calls'
+    def __init__(self, user, sessionDict=None, method='POST', dataDict=None):
+        self.user = user
+        self.method = method
+        if not sessionDict:
+            sessionDict = {}
+        self.session = sessionDict
+        if not dataDict:
+            dataDict = {}
+        setattr(self, method, dataDict)
+            
 class FSMTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
@@ -185,3 +198,20 @@ class FSMTests(TestCase):
         d2 = node.load_json_data()
         self.assertEqual(d2, {'fruity': self.unit, 'anumber': 3,
                               'astring': 'jeff'})
+    def test_start(self):
+        'check basic startup of new FSM instance'
+        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        fsmData = dict(unit=self.unit, foo='bar')
+        request = FakeRequest(self.user)
+        fsmStack = fsm.FSMStack(request)
+        self.assertIsNone(fsmStack.state)
+        try:
+            result = fsmStack.push(request, 'invalid', stateData=fsmData)
+        except FSM.DoesNotExist:
+            pass
+        else:
+            raise AssertionError('failed to catch bad FSM query')
+        result = fsmStack.push(request, 'test', stateData=fsmData)
+        self.assertEqual(request.session['fsmID'], fsmStack.state.pk)
+        self.assertEqual(fsmStack.state.load_json_data(), fsmData)
+        self.assertEqual(result.url, '/ct/')
