@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 import glob
+import json
 
 
 def import_plugin(path):
@@ -966,6 +967,68 @@ class UnitStatus(models.Model):
             self.done()
             return None
 
+
+##################################################################
+# json blob utility functions
+
+def dump_json_id(o, name=None):
+    l = []
+    if name:
+        l.append(name)
+    name = '_'.join(l + [o.__class__.__name__, 'id'])
+    return (name, o.pk)
+
+def dump_json_id_dict(d):
+    'get json representation of dict of db objects'
+    data = {}
+    for k, v in d.items():
+        name, pk = dump_json_id(v, k)
+        data[name] = pk
+    return json.dumps(data)
+
+# index of types that can be saved in json blobs
+klassNameDict = dict(
+    Concept=Concept, ConceptGraph=ConceptGraph,
+    Lesson=Lesson, ConceptLink=ConceptLink,
+    UnitLesson=UnitLesson, Unit=Unit,
+    Response=Response, StudentError=StudentError, 
+    Course=Course, CourseUnit=CourseUnit, Role=Role, UnitStatus=UnitStatus,
+    )
+
+
+def load_json_id(name, pk):
+    'get the specified object as (label, obj) tuple'
+    l = name.split('_')
+    klassName = l[-2]
+    o = klassNameDict[klassName].objects.get(pk=pk)
+    return (l[0], o)
+
+def load_json_id_dict(s):
+    'get dict of db objects from json blob representation'
+    data = json.loads(s)
+    d = {}
+    for k, v in data.items():
+        name, obj = load_json_id(k, v)
+        d[name] = obj
+    return d
+
+def load_json_data(self, attr='data'):
+    'get dict of db objects from json blob field'
+    s = getattr(self, attr)
+    if s:
+        return load_json_id_dict(s)
+    else:
+        return {}
+
+def save_json_data(self, d, attr='data'):
+    'save dict of object refs back to db blob field'
+    if d:
+        s = dump_json_id_dict(d)
+    else:
+        s = None
+    setattr(self, attr, s)
+    self.save()
+        
 ##################################################################
 # activity stack FSM
 
@@ -1032,6 +1095,8 @@ class FSMNode(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     funcName = models.CharField(max_length=200, null=True)
+    load_json_data = load_json_data
+    save_json_data = save_json_data
     def get_path(self, **kwargs):
         return reverse(self.path, kwargs=kwargs)
 
@@ -1050,6 +1115,8 @@ class FSMEdge(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     _funcDict = {}
+    load_json_data = load_json_data
+    save_json_data = save_json_data
     def get_path(self, **kwargs):
         if self.funcName:
             try:
@@ -1079,6 +1146,8 @@ class FSMState(models.Model):
     data = models.TextField(null=True)
     isModal = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
+    load_json_data = load_json_data
+    save_json_data = save_json_data
     def transition(self, name='next', **kwargs):
         try:
             edge = FSMEdge.objects.get(fromNode=self.fsmNode,

@@ -106,6 +106,7 @@ class ConceptMethodTests(TestCase):
         self.assertEqual(distinct_subset([ul1, ul2, ul3]), [ul1, ul2])
 
 
+
 class LessonMethodTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
@@ -138,6 +139,8 @@ class FSMTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
+        self.unit = Unit(title='My Courselet', addedBy=self.user)
+        self.unit.save()
     def test_load(self):
         'check loading an FSM graph, and replacing it'
         f = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob')
@@ -151,3 +154,31 @@ class FSMTests(TestCase):
         self.assertEqual(FSM.objects.get(pk=f.pk).name, 'testOLD') # renamed
         self.assertNotEqual(f.startNode, f2.startNode)
         self.assertEqual(f.startNode.name, f2.startNode.name)
+    def test_json_blob(self):
+        'check roundtrip dump/load via json blob data'
+        name, pk = dump_json_id(self.unit)
+        label, obj = load_json_id(name, pk)
+        self.assertEqual(self.unit, obj)
+        self.assertEqual(label, 'Unit')
+    def test_json_blob2(self):
+        'check roundtrip dump/load via named json blob data'
+        name, pk = dump_json_id(self.unit, 'fruity')
+        self.assertEqual(name, 'fruity_Unit_id')
+        label, obj = load_json_id(name, pk)
+        self.assertEqual(self.unit, obj)
+        self.assertEqual(label, 'fruity')
+    def test_json_blob3(self):
+        'check roundtrip dump/load via json blob string'
+        s = dump_json_id_dict(dict(fruity=self.unit))
+        d = load_json_id_dict(s)
+        self.assertEqual(d.items(), [('fruity', self.unit)])
+    def test_json_blob4(self):
+        'check roundtrip dump/load via db storage'
+        f = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        d = f.startNode.load_json_data()
+        self.assertEqual(d, {})
+        d['fruity'] = self.unit
+        f.startNode.save_json_data(d)
+        node = FSMNode.objects.get(pk=f.startNode.pk)
+        d2 = node.load_json_data()
+        self.assertEqual(d2, {'fruity': self.unit})
