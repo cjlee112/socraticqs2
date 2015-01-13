@@ -8,28 +8,6 @@ import glob
 import json
 
 
-def import_plugin(path):
-    if path.endswith('.py'):
-        path = path[:-3]
-    modname = '.'.join(path.split('/'))
-    try:
-        mod = __import__(modname, globals(), locals(), ['LessonDoc'])
-    except ImportError:
-        raise ImportError('plugin %s not found, or missing LessonDoc class!' % modname)
-    return mod.LessonDoc
-
-def import_sourcedb_plugins(pattern='sourcedb_plugin/[a-z]*.py'):
-    i = __file__.rfind('/')
-    if i >= 0:
-        pattern = __file__[:i + 1] + pattern
-    d = {}
-    for path in glob.glob(pattern):
-        klass = import_plugin(path[i + 1:])
-        d[klass.sourceDB] = klass
-    return d
-
-
-
 ########################################################
 # Concept ID and graph -- not version controlled
 
@@ -227,7 +205,7 @@ class Lesson(models.Model):
         (DATABASE, 'Database'),
         (SOFTWARE, SOFTWARE),
     )
-    _sourceDBdict = import_sourcedb_plugins()
+    _sourceDBdict = {}
     title = models.CharField(max_length=100)
     text = models.TextField(null=True)
     data = models.TextField(null=True) # JSON DATA
@@ -252,12 +230,23 @@ class Lesson(models.Model):
     commitTime = models.DateTimeField('time committed', null=True)
 
     @classmethod
+    def get_sourceDB_plugin(klass, sourceDB):
+        try:
+            return klass._sourceDBdict[sourceDB]
+        except KeyError:
+            import importlib
+            mod = importlib.import_module('ct.sourcedb_plugin.%s_plugin'
+                                          % sourceDB)
+            dataClass = mod.LessonDoc
+            klass._sourceDBdict[sourceDB] = dataClass
+            return dataClass
+    @classmethod
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
         try:
             return klass.objects.get(sourceDB=sourceDB, sourceID=sourceID)
         except klass.DoesNotExist:
             pass
-        dataClass = klass._sourceDBdict[sourceDB]
+        dataClass = klass.get_sourceDB_plugin(sourceDB)
         data = dataClass(sourceID)
         try: # attribute authorship to the sourceDB
             user = User.objects.get(username=sourceDB)
@@ -272,7 +261,7 @@ class Lesson(models.Model):
 
     @classmethod
     def search_sourceDB(klass, query, sourceDB='wikipedia', **kwargs):
-        dataClass = klass._sourceDBdict[sourceDB]
+        dataClass = klass.get_sourceDB_plugin(sourceDB)
         return dataClass.search(query, **kwargs)
 
     ## @classmethod
@@ -1178,41 +1167,5 @@ class FSMState(models.Model):
             return path
 
         
-##################################################################
-# discussion
-
-## class Comment(models.Model):
-##     QUESTION = 'q'
-##     ANSWER = 'a'
-##     COMMENT = 'c'
-##     ISSUE_REPORT = 'i'
-##     PULL_REQUEST = 'p'
-##     KIND_CHOICES = (
-##         (QUESTION, 'Question'),
-##         (ANSWER, 'Answer'),
-##         (COMMENT, 'Comment'),
-##         (ISSUE_REPORT, 'Issue Report'),
-##         (PULL_REQUEST, 'Pull Request'),
-##     )
-##     HIDDEN = 0
-##     CLOSED = 1
-##     OPEN = 2
-##     kind = models.CharField(max_length=2, choices=KIND_CHOICES,
-##                             default=COMMENT)
-##     status = models.IntegerField(default=OPEN)
-##     title = models.TextField(null=True)
-##     text = models.TextField()
-##     thread = models.ForeignKey('self', null=True)
-##     atime = models.DateTimeField('time submitted')
-##     author = models.ForeignKey(User)
-##     concept = models.ForeignKey(Concept, null=True)
-##     lesson = models.ForeignKey(Lesson, null=True)
-##     commonError = models.ForeignKey(Lesson, null=True)
-##     question = models.ForeignKey(Lesson, null=True)
-##     errorModel = models.ForeignKey(Lesson, null=True)
-##     remediation = models.ForeignKey(Lesson, null=True)
-##     counterExample = models.ForeignKey(Lesson, null=True)
-##     course = models.ForeignKey(Lesson, null=True)
-##     conceptTerm = models.ForeignKey(Lesson, null=True)
     
 
