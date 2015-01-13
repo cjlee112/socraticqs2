@@ -972,6 +972,7 @@ class UnitStatus(models.Model):
 # json blob utility functions
 
 def dump_json_id(o, name=None):
+    'produce tuple of form ("NAME_Response_id", o.pk)'
     l = []
     if name:
         l.append(name)
@@ -1039,6 +1040,7 @@ def load_json_data(self, attr='data'):
 # activity stack FSM
 
 class FSM(models.Model):
+    'Finite State Machine top-level state-graph container'
     name = models.CharField(max_length=64, unique=True)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
@@ -1047,9 +1049,10 @@ class FSM(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     @classmethod
-    def load_graph(klass, fsmData, nodeData, edgeData, username,
+    def save_graph(klass, fsmData, nodeData, edgeData, username,
                   oldLabel='OLD'):
-        '''load FSM specification from node, edge graph by renaming any existing
+        '''store FSM specification from node, edge graph
+        by renaming any existing
         FSM with the same name, and creating new FSM.
         Note that ongoing activities
         using the old FSM will continue to work (following the old FSM spec),
@@ -1091,6 +1094,7 @@ class FSM(models.Model):
         return f
 
 class FSMNode(models.Model):
+    'stores one node of an FSM state-graph'
     fsm = models.ForeignKey(FSM)
     name = models.CharField(max_length=64)
     title = models.CharField(max_length=200)
@@ -1110,6 +1114,7 @@ class FSMDone(ValueError):
     pass
 
 class FSMEdge(models.Model):
+    'stores one edge of an FSM state-graph'
     name = models.CharField(max_length=64)
     fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
     toNode = models.ForeignKey(FSMNode, related_name='incoming')
@@ -1141,6 +1146,7 @@ class FSMEdge(models.Model):
         return self.toNode.get_path(**kwargs)
 
 class FSMState(models.Model):
+    'stores current state of a running FSM instance'
     user = models.ForeignKey(User)
     fsmNode = models.ForeignKey(FSMNode)
     parentState = models.ForeignKey('FSMState', null=True,

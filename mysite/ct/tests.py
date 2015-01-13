@@ -143,14 +143,14 @@ class FSMTests(TestCase):
         self.unit.save()
     def test_load(self):
         'check loading an FSM graph, and replacing it'
-        f = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
         self.assertEqual(f.fsmnode_set.count(), 2)
         self.assertEqual(f.startNode.name, 'START')
         self.assertEqual(f.startNode.outgoing.count(), 1)
         e = f.startNode.outgoing.all()[0]
         self.assertEqual(e.name, 'next')
         self.assertEqual(e.toNode.name, 'END')
-        f2 = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob') # replace
+        f2 = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob') # replace
         self.assertEqual(FSM.objects.get(pk=f.pk).name, 'testOLD') # renamed
         self.assertNotEqual(f.startNode, f2.startNode)
         self.assertEqual(f.startNode.name, f2.startNode.name)
@@ -174,7 +174,7 @@ class FSMTests(TestCase):
         self.assertEqual(d.items(), [('fruity', self.unit)])
     def test_json_blob4(self):
         'check roundtrip dump/load via db storage'
-        f = FSM.load_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
         d = f.startNode.load_json_data()
         self.assertEqual(d, {})
         d['fruity'] = self.unit
