@@ -44,9 +44,12 @@
 
 <b>Author</b>: <a href="/ct/people/{{ unitLesson.lesson.addedBy.pk }}/">{{ unitLesson.lesson.addedBy.get_full_name }}</a>
 <hr>
+
+{% if pageData.nextForm %}
 <div class="container-fluid">
-{% crispy nextForm %}
+{% crispy pageData.nextForm %}
 </div>
+{% endif %}
 
   </div><!-- @end #LessonsTabDiv -->
 </div>

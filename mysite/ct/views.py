@@ -116,9 +116,32 @@ def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
     
 
 class PageData(object):
+    'generic holder for page UI elements such as tabs'
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
             setattr(self, k, v)
+    def fsm_redirect(self, request, eventName=None, addNextButton=False,
+                     **kwargs):
+        'check whether fsm intercepts this event and returns redirect'
+        fsmStack = FSMStack(request)
+        if not fsmStack.state: # no FSM running, so nothing to do
+            return
+        if not eventName and addNextButton: # must supply Next form
+            if request.method == 'POST':
+                eventName = 'next' # tell FSM this is next event
+            else:
+                self.nextForm = NextForm()
+                set_crispy_action(request.path, self.nextForm)
+        return fsmStack.event(request, eventName, **kwargs)
+    def show(self, request, templatefile, templateArgs, **kwargs):
+        'let fsm adjust view / redirect prior to rendering'
+        templateArgs = templateArgs.copy()
+        templateArgs['user'] = request.user
+        templateArgs['actionTarget'] = request.path
+        templateArgs['pageData'] = self
+        return self.fsm_redirect(request) \
+            or render(request, templatefile, templateArgs, **kwargs)
+            
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
@@ -887,7 +910,7 @@ def study_unit(request, course_id, unit_id):
             unitStatus = UnitStatus(unit=unit, user=request.user)
             unitStatus.save()
         nextUL = unitStatus.get_lesson()
-        return HttpResponseRedirect(get_study_url(request.path, nextUL))
+        return HttpResponseRedirect(nextUL.get_study_url(request.path))
     pageData = PageData(title=unit.title)
     if unitStatus:
         nextUL = unitStatus.get_lesson()
@@ -946,56 +969,36 @@ def unit_concepts_student(request, course_id, unit_id):
                   dict(user=request.user, actionTarget=request.path,
                        pageData=pageData, conceptTable=conceptTable))
 
-def get_study_url(path, nextUL):
-    if nextUL.lesson.kind == Lesson.ORCT_QUESTION:
-        return get_base_url(path, ['lessons', str(nextUL.pk), 'ask'])
-    else:
-        return get_base_url(path, ['lessons', str(nextUL.pk)])
-
-def next_lesson_url(path, unitLesson, unitStatus=None):
-    'get URL for unit lesson following this one, and record on unitStatus'
-    try:
-        nextUL = unitLesson.get_next_lesson()
-    except UnitLesson.DoesNotExist:
-        if unitStatus: # record completion of lesson sequence
-            unitStatus.done()
-        return get_base_url(path, ['tasks']) # exit to unit tasks view
-    if unitStatus: # record move to next lesson; prevent skipping
-        nextUL = unitStatus.set_lesson(nextUL)
-    return get_study_url(path, nextUL)
 
 def redirect_next_lesson(request, ul):
     'get redirect to the next lesson, and record on UnitStatus if any'
-    unitStatus = UnitStatus.get_or_none(ul.unit, request.user)
-    url = next_lesson_url(request.path, ul, unitStatus)
-    return HttpResponseRedirect(url)
+    try:
+        nextUL = ul.get_next_lesson()
+    except UnitLesson.DoesNotExist:
+        url = get_base_url(request.path, ['tasks']) # exit to unit tasks view
+        return HttpResponseRedirect(url)
+    return HttpResponseRedirect(nextUL.get_study_url(request.path))
     
         
-def redirect_if_next(request, ul):
-    'if POST next, redirect to the next UnitLesson in this sequence'
+def lesson(request, course_id, unit_id, ul_id):
+    'show student a reading assignment'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
+            checkUnitStatus=True, includeText=False)
     if request.method == 'POST':
         nextForm = NextLikeForm(request.POST)
         if nextForm.is_valid():
             if nextForm.cleaned_data['liked']:
                 liked = Liked(unitLesson=ul, addedBy=request.user)
                 liked.save()
-            return redirect_next_lesson(request, ul)
-
-    
-def lesson(request, course_id, unit_id, ul_id):
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            checkUnitStatus=True, includeText=False)
-    r = redirect_if_next(request, ul)
-    if r:
-        return r
+            # let fsm redirect this event if it wishes
+            return pageData.fsm_redirect(request, 'next') \
+                or redirect_next_lesson(request, ul)
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return HttpResponseRedirect(request.path + 'ask/')
-    nextForm = NextLikeForm()
-    set_crispy_action(request.path, nextForm)
-    return render(request, 'ct/lesson_student.html',
-                  dict(user=request.user, actionTarget=request.path,
-                       unitLesson=ul, unit=unit, pageData=pageData,
-                       nextForm=nextForm))
+    pageData.nextForm = NextLikeForm()
+    set_crispy_action(request.path, pageData.nextForm)
+    return pageData.show(request, 'ct/lesson_student.html',
+                         dict(unitLesson=ul, unit=unit))
 
 def ul_tasks_student(request, course_id, unit_id, ul_id):
     'suggest next steps on this question'

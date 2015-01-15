@@ -75,6 +75,16 @@ class NextLikeForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Next'))
     
 
+class NextForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(NextForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-nextForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Next'))
+    
+
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),
                                           ('100', '100')))

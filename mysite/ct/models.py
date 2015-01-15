@@ -512,6 +512,13 @@ class UnitLesson(models.Model):
             else:
                 return IS_CONCEPT
         return IS_LESSON
+    def get_study_url(self, path):
+        'return URL for student to read lesson or answer question'
+        from ct.templatetags.ct_extras import get_base_url
+        if self.lesson.kind == Lesson.ORCT_QUESTION:
+            return get_base_url(path, ['lessons', str(self.pk), 'ask'])
+        else:
+            return get_base_url(path, ['lessons', str(self.pk)])
 
 def reorder_exercise(self, old=0, new=0, l=()):
     'renumber exercises to move an exercise from old -> new position'
@@ -1160,8 +1167,8 @@ class FSMNode(models.Model):
             func = getattr(self._plugin, eventName + '_event', None)
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
-        # default: call transition with matching name
-        return fsmStack.state.transition(request, eventName, **kwargs)
+        if eventName: # default: call transition with matching name
+            return fsmStack.state.transition(request, eventName, **kwargs)
     def get_path(self, state, request, **kwargs):
         'get URL for this page'
         try:
@@ -1225,10 +1232,10 @@ class FSMState(models.Model):
         'initialize new FSM by calling START node and saving state data to db'
         if stateData:
             self.save_json_data(stateData, doSave=False) # cache
-        path = self.event(fsmStack, request, 'start', **kwargs)
+        self.path = self.event(fsmStack, request, 'start', **kwargs)
         self.save_json_data(doSave=False) # serialize to json blob
         self.save()
-        return path
+        return self.path
     def transition(self, request, name, **kwargs):
         'execute the specified transition and return destination URL'
         try:
@@ -1236,8 +1243,9 @@ class FSMState(models.Model):
         except FSMEdge.DoesNotExist:
             return None # FSM does not handle this event, return control
         self.fsmNode = e.transition(self, request, **kwargs)
+        self.path = self.fsmNode.get_path(self, request)
         self.save()
-        return self.fsmNode.get_path(self, request)
+        return self.path
 
         
     
