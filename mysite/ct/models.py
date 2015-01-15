@@ -1121,6 +1121,22 @@ class FSM(models.Model):
                 e.save()
         return f
 
+class PluginDescriptor(object):
+    'self-caching plugin access property'
+    def __get__(self, obj, objtype):
+        try:
+            return self.plugin
+        except AttributeError:
+            if not obj.funcName:
+                raise AttributeError('no plugin funcName')
+            klass = get_plugin(obj.funcName)
+            self.plugin = klass()
+            return self.plugin
+    def __set__(self, obj, val):
+        raise AttributeError('read only attribute!')
+            
+
+    
 class FSMNode(models.Model):
     'stores one node of an FSM state-graph'
     fsm = models.ForeignKey(FSM)
@@ -1137,18 +1153,24 @@ class FSMNode(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
+    _plugin = PluginDescriptor() # provide access to plugin code if any
     def event(self, fsmStack, request, eventName, **kwargs):
         'process event using plugin if available, otherwise generic processing'
         if self.funcName: # use plugin to process event
-            klass = get_plugin(self.funcName)
-            plugin = klass()
-            func = getattr(plugin, eventName, None)
+            func = getattr(self._plugin, eventName, None)
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
-        # perform generic event processing here
-        raise ValueError('need to implement event handling')
-    def get_path(self, **kwargs):
-        return reverse(self.path, kwargs=kwargs)
+        # default: call transition with matching name
+        return fsmStack.state.transition(request, eventName, **kwargs)
+    def get_path(self, state, request, **kwargs):
+        'get URL for this page'
+        try:
+            func = self._plugin.get_path
+        except AttributeError: # just use default path
+            return reverse(self.path, kwargs=kwargs)
+        else: # use the plugin
+            return func(self, state, request, **kwargs)
+
 
 class FSMDone(ValueError):
     pass
@@ -1170,22 +1192,14 @@ class FSMEdge(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
-    def get_path(self, **kwargs):
-        if self.funcName:
-            try:
-                func = self._funcDict[self.funcName]
-            except KeyError:
-                modname, funcname = self.funcName.split('.')
-                mod = __import__('fsm_plugin.' + modname, globals(),
-                                 locals(), [funcname])
-                func = self._funcDict[self.funcName] = getattr(mod, funcname)
-            try:
-                kwargs = func(self.fromNode, self.toNode, self.data, **kwargs)
-            except ValueError:
-                return
-        if not self.toNode:
-            raise FSMDone()
-        return self.toNode.get_path(**kwargs)
+    def transition(self, state, request, **kwargs):
+        'execute edge plugin code if any and return destination node'
+        try:
+            func = getattr(self.fromNode._plugin, self.name + '_edge')
+        except AttributeError: # just return target node
+            return self.toNode
+        else:
+            return func(self, state, request, **kwargs)
 
 class FSMState(models.Model):
     'stores current state of a running FSM instance'
@@ -1205,7 +1219,7 @@ class FSMState(models.Model):
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
     def event(self, fsmStack, request, eventName, **kwargs):
-        'trigger proper consequences if any for this event'
+        'trigger proper consequences if any for this event, return URL if any'
         return self.fsmNode.event(fsmStack, request, eventName, **kwargs)
     def start_fsm(self, fsmStack, request, stateData, **kwargs):
         'initialize new FSM by calling START node and saving state data to db'
@@ -1215,17 +1229,15 @@ class FSMState(models.Model):
         self.save_json_data(doSave=False) # serialize to json blob
         self.save()
         return path
-    def transition(self, name='next', **kwargs):
+    def transition(self, request, name, **kwargs):
+        'execute the specified transition and return destination URL'
         try:
-            edge = FSMEdge.objects.get(fromNode=self.fsmNode,
-                                              name=name)
+            e = self.fsmNode.outgoing.get(name=name)
         except FSMEdge.DoesNotExist:
-            raise
-        path = edge.get_path(**kwargs)
-        if path:
-            self.fsmNode = edge.toNode
-            self.save()
-            return path
+            return None # FSM does not handle this event, return control
+        self.fsmNode = e.transition(self, request, **kwargs)
+        self.save()
+        return self.fsmNode.get_path(self, request)
 
         
     

@@ -11,15 +11,19 @@ class FSMStack(object):
             return
         self.state = models.FSMState.objects.get(pk=fsmID)
     def event(self, request, eventName='next', **kwargs):
-        'top-level interface for passing event to a running FSM instance'
+        '''top-level interface for passing event to a running FSM instance.
+        If FSM handles this event, return a redirect that over-rides
+        the generic UI behavior.  Otherwise return None,
+        indicating NO over-ride of generic UI behavior.'''
         if self.state is None: # no ongoing activity
             return
         try:
             path = self.state.event(self, request, eventName, **kwargs)
         except models.FSMDone:
             return self.pop(request, **kwargs)
-        if path:
+        if path: # FSM intercepts this event, so redirect accordingly
             return HttpResponseRedirect(path)
+        
     def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
         'start running a new FSM instance (layer)'
         fsm = models.FSM.objects.get(name=fsmName)

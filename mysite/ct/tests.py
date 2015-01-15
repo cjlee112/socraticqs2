@@ -219,6 +219,7 @@ class FSMTests(TestCase):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
         self.assertEqual(f.startNode.event(0, 0, 'start'), '/ct/trivial/')
+        self.assertEqual(f.startNode.get_path(0, 0), '/ct/some/where/else/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'
         edgeDictBad = (
