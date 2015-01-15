@@ -1049,22 +1049,16 @@ def get_data_attr(self, attr):
     d = self.load_json_data()
     return d[attr]
     
-PLUGIN_IMPORT_TEST = 'IMPORT TEST'
-
-def call_plugin(self, fsmStack, request, eventName, prefix='ct.fsm_plugin.',
-                **kwargs):
+def get_plugin(funcName, prefix='ct.fsm_plugin.'):
     'import and call plugin func for this object'
     import importlib
-    if not self.funcName:
+    if not funcName:
         raise ValueError('invalid call_plugin() with no funcName!')
-    i = self.funcName.rindex('.')
-    modName = prefix + self.funcName[:i]
-    funcName = self.funcName[i + 1:]
+    i = funcName.rindex('.')
+    modName = prefix + funcName[:i]
+    funcName = funcName[i + 1:]
     mod = importlib.import_module(modName)
-    func = getattr(mod, funcName)
-    if eventName == PLUGIN_IMPORT_TEST:
-        return True
-    return func(self, fsmStack, request, eventName, **kwargs)
+    return  getattr(mod, funcName)
     
 ##################################################################
 # activity stack FSM
@@ -1111,7 +1105,7 @@ class FSM(models.Model):
             for name, nodeDict in nodeData.items(): # save nodes
                 node = FSMNode(name=name, fsm=f, addedBy=user, **nodeDict)
                 if node.funcName: # make sure plugin imports successfully
-                    node.call_plugin(0, PLUGIN_IMPORT_TEST, 0)
+                    get_plugin(node.funcName)
                 node.save()
                 nodes[name] = node
                 if name == 'START':
@@ -1123,7 +1117,7 @@ class FSM(models.Model):
                 edgeDict['toNode'] = nodes[edgeDict['toNode']]
                 e = FSMEdge(addedBy=user, **edgeDict)
                 if e.funcName: # make sure plugin imports successfully
-                    e.call_plugin(0, PLUGIN_IMPORT_TEST, 0)
+                    get_plugin(e.funcName)
                 e.save()
         return f
 
@@ -1143,11 +1137,14 @@ class FSMNode(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
-    call_plugin = call_plugin
     def event(self, fsmStack, request, eventName, **kwargs):
         'process event using plugin if available, otherwise generic processing'
         if self.funcName: # use plugin to process event
-            return self.call_plugin(fsmStack, request, eventName, **kwargs)
+            klass = get_plugin(self.funcName)
+            plugin = klass()
+            func = getattr(plugin, eventName, None)
+            if func is not None:
+                return func(self, fsmStack, request, **kwargs)
         # perform generic event processing here
         raise ValueError('need to implement event handling')
     def get_path(self, **kwargs):
@@ -1173,7 +1170,6 @@ class FSMEdge(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
-    call_plugin = call_plugin
     def get_path(self, **kwargs):
         if self.funcName:
             try:

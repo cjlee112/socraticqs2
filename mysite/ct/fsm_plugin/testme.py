@@ -1,3 +1,5 @@
 
-def trivial(self, fsmStack, request, eventName, **kwargs):
-    return '/ct/trivial/'
+class Trivial(object):
+    'for automated test suite testing only'
+    def start(self, node, fsmStack, request, **kwargs):
+        return '/ct/trivial/'

@@ -129,7 +129,7 @@ class LessonMethodTests(TestCase):
 
 fsmDict = dict(name='test', title='try this')
 nodeDict = dict(START=dict(title='start here', path='/ct/',
-                           funcName='testme.trivial'),
+                           funcName='testme.Trivial'),
                 END=dict(title='end here', path='/ct/nowhere'),
     )
 edgeDict = (
@@ -218,7 +218,7 @@ class FSMTests(TestCase):
     def test_trivial_plugin(self):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
-        self.assertEqual(f.startNode.call_plugin(0, 0, 0), '/ct/trivial/')
+        self.assertEqual(f.startNode.event(0, 0, 'start'), '/ct/trivial/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'
         edgeDictBad = (
