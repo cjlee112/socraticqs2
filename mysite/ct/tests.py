@@ -128,9 +128,10 @@ class LessonMethodTests(TestCase):
         
 
 fsmDict = dict(name='test', title='try this')
-nodeDict = dict(START=dict(title='start here', path='/ct/',
-                           funcName='testme.Trivial'),
-                END=dict(title='end here', path='/ct/nowhere'),
+nodeDict = dict(START=dict(title='start here', path='ct:home',
+                           funcName='testme.START'),
+                MID=dict(title='in the middle', path='ct:about'),
+                END=dict(title='end here', path='ct:home'),
     )
 edgeDict = (
     dict(name='next', fromNode='START', toNode='END', title='go go go'),
@@ -157,7 +158,7 @@ class FSMTests(TestCase):
     def test_load(self):
         'check loading an FSM graph, and replacing it'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
-        self.assertEqual(f.fsmnode_set.count(), 2)
+        self.assertEqual(f.fsmnode_set.count(), 3)
         self.assertEqual(f.startNode.name, 'START')
         self.assertEqual(f.startNode.outgoing.count(), 1)
         e = f.startNode.outgoing.all()[0]
@@ -214,11 +215,17 @@ class FSMTests(TestCase):
         result = fsmStack.push(request, 'test', stateData=fsmData)
         self.assertEqual(request.session['fsmID'], fsmStack.state.pk)
         self.assertEqual(fsmStack.state.load_json_data(), fsmData)
-        self.assertEqual(result.url, '/ct/trivial/')
+        self.assertEqual(fsmStack.state.fsmNode.name, 'MID')
+        self.assertEqual(fsmStack.state.fsmNode.path, 'ct:about')
+        self.assertEqual(fsmStack.state.fsmNode.get_path(0, 0), '/ct/about/')
+        self.assertEqual(result.url, '/ct/about/')
     def test_trivial_plugin(self):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
-        self.assertEqual(f.startNode.event(0, 0, 'start'), '/ct/trivial/')
+        request = FakeRequest(self.user)
+        fsmStack = fsm.FSMStack(request)
+        fsmStack.state = FSMState(user=self.user, fsmNode=f.startNode)
+        self.assertEqual(f.startNode.event(fsmStack, 0, 'start'), '/ct/about/')
         self.assertEqual(f.startNode.get_path(0, 0), '/ct/some/where/else/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'

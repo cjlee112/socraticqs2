@@ -1125,13 +1125,13 @@ class PluginDescriptor(object):
     'self-caching plugin access property'
     def __get__(self, obj, objtype):
         try:
-            return self.plugin
+            return obj._pluginData
         except AttributeError:
             if not obj.funcName:
                 raise AttributeError('no plugin funcName')
             klass = get_plugin(obj.funcName)
-            self.plugin = klass()
-            return self.plugin
+            obj._pluginData = klass()
+            return obj._pluginData
     def __set__(self, obj, val):
         raise AttributeError('read only attribute!')
             
@@ -1157,7 +1157,7 @@ class FSMNode(models.Model):
     def event(self, fsmStack, request, eventName, **kwargs):
         'process event using plugin if available, otherwise generic processing'
         if self.funcName: # use plugin to process event
-            func = getattr(self._plugin, eventName, None)
+            func = getattr(self._plugin, eventName + '_event', None)
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
         # default: call transition with matching name
