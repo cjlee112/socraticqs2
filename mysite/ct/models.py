@@ -1175,14 +1175,19 @@ class FSMNode(models.Model):
                 return func(self, fsmStack, request, **kwargs)
         if eventName: # default: call transition with matching name
             return fsmStack.state.transition(request, eventName, **kwargs)
-    def get_path(self, state, request, **kwargs):
+    def get_path(self, state, request, defaultURL=None, **kwargs):
         'get URL for this page'
         try:
             func = self._plugin.get_path
         except AttributeError: # just use default path
+            if not self.path:
+                if defaultURL:
+                    return defaultURL
+                else:
+                    raise ValueError('node has no path, and no defaultURL')
             return reverse(self.path, kwargs=kwargs.get('reverseArgs', {}))
         else: # use the plugin
-            return func(self, state, request, **kwargs)
+            return func(self, state, request, defaultURL=defaultURL, **kwargs)
 
 
 class FSMDone(ValueError):

@@ -120,19 +120,23 @@ class PageData(object):
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
             setattr(self, k, v)
-    def fsm_redirect(self, request, eventName=None, addNextButton=False,
-                     **kwargs):
+    def fsm_redirect(self, request, eventName=None, defaultURL=None,
+                     addNextButton=False, **kwargs):
         'check whether fsm intercepts this event and returns redirect'
         fsmStack = FSMStack(request)
         if not fsmStack.state: # no FSM running, so nothing to do
-            return
+            return defaultURL and HttpResponseRedirect(defaultURL)
         if not eventName and addNextButton: # must supply Next form
             if request.method == 'POST':
                 eventName = 'next' # tell FSM this is next event
             else:
                 self.nextForm = NextForm()
                 set_crispy_action(request.path, self.nextForm)
-        return fsmStack.event(request, eventName, **kwargs)
+        r = fsmStack.event(request, eventName, defaultURL=defaultURL, **kwargs)
+        if r: # let FSM override the default URL
+            return r
+        elif defaultURL: # otherwise follow the default
+            return HttpResponseRedirect(defaultURL)
     def render(self, request, templatefile, templateArgs, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         templateArgs = templateArgs.copy()
@@ -970,14 +974,13 @@ def unit_concepts_student(request, course_id, unit_id):
                        pageData=pageData, conceptTable=conceptTable))
 
 
-def redirect_next_lesson(request, ul):
-    'get redirect to the next lesson, and record on UnitStatus if any'
+def lesson_next_url(request, ul):
+    'get URL for the next lesson, or URL to exit to courselet tasks view'
     try:
         nextUL = ul.get_next_lesson()
     except UnitLesson.DoesNotExist:
-        url = get_base_url(request.path, ['tasks']) # exit to unit tasks view
-        return HttpResponseRedirect(url)
-    return HttpResponseRedirect(nextUL.get_study_url(request.path))
+        return get_base_url(request.path, ['tasks']) # exit to unit tasks view
+    return nextUL.get_study_url(request.path)
     
         
 def lesson(request, course_id, unit_id, ul_id):
@@ -990,9 +993,9 @@ def lesson(request, course_id, unit_id, ul_id):
             if nextForm.cleaned_data['liked']:
                 liked = Liked(unitLesson=ul, addedBy=request.user)
                 liked.save()
+            defaultURL = lesson_next_url(request, ul)
             # let fsm redirect this event if it wishes
-            return pageData.fsm_redirect(request, 'next') \
-                or redirect_next_lesson(request, ul)
+            return pageData.fsm_redirect(request, 'next', defaultURL)
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return HttpResponseRedirect(request.path + 'ask/')
     pageData.nextForm = NextLikeForm()
@@ -1154,9 +1157,9 @@ def ul_respond(request, course_id, unit_id, ul_id):
             r = save_response(form, ul, request.user, course_id)
             kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul_id,
                           resp_id=r.id)
-            return pageData.fsm_redirect(request, 'next', reverseArgs=kwargs,
-                                         response=r) \
-                or HttpResponseRedirect(reverse('ct:assess', kwargs=kwargs))
+            defaultURL = reverse('ct:assess', kwargs=kwargs)
+            return pageData.fsm_redirect(request, 'next', defaultURL,
+                                         reverseArgs=kwargs, response=r)
     else:
         form = ResponseForm()
     set_crispy_action(request.path, form)
@@ -1191,13 +1194,9 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,
                     author=request.user, status=form.cleaned_data['status'])
-            red = pageData.fsm_redirect(request, 'next')
-            if red:
-                return red
-            elif redirectURL:
-                return HttpResponseRedirect(redirectURL)
-            else:
-                return redirect_next_lesson(request, r.unitLesson)
+            if not redirectURL: # default: go to next lesson
+                redirectURL = lesson_next_url(request, r.unitLesson)
+            return pageData.fsm_redirect(request, 'next', redirectURL)
     else:
         form = formClass()
         form.fields['emlist'].choices = choices
