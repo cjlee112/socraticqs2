@@ -519,6 +519,9 @@ class UnitLesson(models.Model):
             return get_base_url(path, ['lessons', str(self.pk), 'ask'])
         else:
             return get_base_url(path, ['lessons', str(self.pk)])
+    def is_question(self):
+        'is this a question?'
+        return self.lesson.kind == Lesson.ORCT_QUESTION
 
 def reorder_exercise(self, old=0, new=0, l=()):
     'renumber exercises to move an exercise from old -> new position'
@@ -1127,6 +1130,9 @@ class FSM(models.Model):
                     get_plugin(e.funcName)
                 e.save()
         return f
+    def get_node(self, name):
+        'get node in this FSM with specified name'
+        return self.fsmnode_set.get(name=name)
 
 class PluginDescriptor(object):
     'self-caching plugin access property'
@@ -1174,7 +1180,7 @@ class FSMNode(models.Model):
         try:
             func = self._plugin.get_path
         except AttributeError: # just use default path
-            return reverse(self.path, kwargs=kwargs)
+            return reverse(self.path, kwargs=kwargs.get('reverseArgs', {}))
         else: # use the plugin
             return func(self, state, request, **kwargs)
 
@@ -1243,7 +1249,7 @@ class FSMState(models.Model):
         except FSMEdge.DoesNotExist:
             return None # FSM does not handle this event, return control
         self.fsmNode = e.transition(self, request, **kwargs)
-        self.path = self.fsmNode.get_path(self, request)
+        self.path = self.fsmNode.get_path(self, request, **kwargs)
         self.save()
         return self.path
 

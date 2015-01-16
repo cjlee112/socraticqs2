@@ -133,7 +133,7 @@ class PageData(object):
                 self.nextForm = NextForm()
                 set_crispy_action(request.path, self.nextForm)
         return fsmStack.event(request, eventName, **kwargs)
-    def show(self, request, templatefile, templateArgs, **kwargs):
+    def render(self, request, templatefile, templateArgs, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         templateArgs = templateArgs.copy()
         templateArgs['user'] = request.user
@@ -997,8 +997,8 @@ def lesson(request, course_id, unit_id, ul_id):
         return HttpResponseRedirect(request.path + 'ask/')
     pageData.nextForm = NextLikeForm()
     set_crispy_action(request.path, pageData.nextForm)
-    return pageData.show(request, 'ct/lesson_student.html',
-                         dict(unitLesson=ul, unit=unit))
+    return pageData.render(request, 'ct/lesson_student.html',
+                           dict(unitLesson=ul, unit=unit))
 
 def ul_tasks_student(request, course_id, unit_id, ul_id):
     'suggest next steps on this question'
@@ -1152,15 +1152,16 @@ def ul_respond(request, course_id, unit_id, ul_id):
         form = ResponseForm(request.POST)
         if form.is_valid():
             r = save_response(form, ul, request.user, course_id)
-            return HttpResponseRedirect(reverse('ct:assess',
-                    args=(course_id, unit_id, ul_id, r.id,)))
+            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul_id,
+                          resp_id=r.id)
+            return pageData.fsm_redirect(request, 'next', reverseArgs=kwargs,
+                                         response=r) \
+                or HttpResponseRedirect(reverse('ct:assess', kwargs=kwargs))
     else:
         form = ResponseForm()
     set_crispy_action(request.path, form)
-    return render(request, 'ct/ask.html',
-                  dict(unitLesson=ul, qtext=md2html(ul.lesson.text),
-                       form=form, actionTarget=request.path,
-                       user=request.user, pageData=pageData))
+    return pageData.render(request, 'ct/ask.html',
+                  dict(unitLesson=ul, qtext=md2html(ul.lesson.text), form=form))
 
 @login_required
 def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
@@ -1190,7 +1191,10 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,
                     author=request.user, status=form.cleaned_data['status'])
-            if redirectURL:
+            red = pageData.fsm_redirect(request, 'next')
+            if red:
+                return red
+            elif redirectURL:
                 return HttpResponseRedirect(redirectURL)
             else:
                 return redirect_next_lesson(request, r.unitLesson)
@@ -1203,10 +1207,9 @@ def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
         answer = '(author has not provided an answer)'
     else:
         answer = md2html(answer.lesson.text)
-    return render(request, 'ct/assess.html',
-                  dict(response=r, pageData=pageData,
-                       answer=answer, form=form, actionTarget=request.path,
-                       user=request.user, doSelfEval=doSelfEval))
+    return pageData.render(request, 'ct/assess.html',
+                  dict(response=r, answer=answer, form=form,
+                       doSelfEval=doSelfEval))
 
 def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     ul = get_object_or_404(UnitLesson, pk=ul_id)

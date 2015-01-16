@@ -202,6 +202,15 @@ class FSMTests(TestCase):
     def test_start(self):
         'check basic startup of new FSM instance'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        self.do_start(f)
+    def test_start2(self):
+        'check basic startup of new FSM instance using FSMSpecification'
+        from ct.fsm_plugin.testme import get_specs
+        spec = get_specs()[0]
+        f = spec.save_graph('jacob')
+        self.do_start(f)
+    def do_start(self, f):
+        'run tests of basic startup of new FSM instance'
         fsmData = dict(unit=self.unit, foo='bar')
         request = FakeRequest(self.user)
         fsmStack = fsm.FSMStack(request)
