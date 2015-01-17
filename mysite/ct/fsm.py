@@ -1,5 +1,4 @@
 import models
-from django.http import HttpResponseRedirect
 
 class FSMStack(object):
     'main interface to our current FSM if any'
@@ -17,13 +16,10 @@ class FSMStack(object):
         indicating NO over-ride of generic UI behavior.'''
         if self.state is None: # no ongoing activity
             return
-        try:
-            path = self.state.event(self, request, eventName, **kwargs)
-        except models.FSMDone:
-            return self.pop(request, **kwargs)
-        if path: # FSM intercepts this event, so redirect accordingly
-            return HttpResponseRedirect(path)
-        
+        path = self.state.event(self, request, eventName, **kwargs)
+        if self.state.fsmNode.name == 'END': # reached terminal state
+            self.pop(request)
+        return path
     def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
         'start running a new FSM instance (layer)'
         fsm = models.FSM.objects.get(name=fsmName)
@@ -31,17 +27,13 @@ class FSMStack(object):
                                 parentState=self.state, **kwargs)
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
-        return HttpResponseRedirect(path)
+        return path
     def pop(self, request, **kwargs):
-        if request.user != self.state.user:
-            raise ValueError('user mismatch for FSMStack.pop()')
         nextState = self.state.parentState
         self.state.delete()
         self.state = nextState
         if nextState is not None:
             request.session['fsmID'] = nextState.pk
-            path = nextState.fsmNode.get_path(**kwargs)
-            return HttpResponseRedirect(path)
         else:
             del request.session['fsmID']
         

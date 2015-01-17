@@ -227,7 +227,7 @@ class FSMTests(TestCase):
         self.assertEqual(fsmStack.state.fsmNode.name, 'MID')
         self.assertEqual(fsmStack.state.fsmNode.path, 'ct:about')
         self.assertEqual(fsmStack.state.fsmNode.get_path(0, 0), '/ct/about/')
-        self.assertEqual(result.url, '/ct/about/')
+        self.assertEqual(result, '/ct/about/')
     def test_trivial_plugin(self):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')

@@ -134,7 +134,7 @@ class PageData(object):
                 set_crispy_action(request.path, self.nextForm)
         r = fsmStack.event(request, eventName, defaultURL=defaultURL, **kwargs)
         if r: # let FSM override the default URL
-            return r
+            return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
             return HttpResponseRedirect(defaultURL)
     def render(self, request, templatefile, templateArgs, **kwargs):

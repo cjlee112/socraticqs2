@@ -12,11 +12,11 @@ class START(object):
         'example event plugin method to intercept start event.'
         # do whatever analysis you want...
         # then if you want to trigger a transition, call it directly
-        return fsmStack.state.transition(request, 'next', **kwargs)
+        return fsmStack.state.transition(fsmStack, request, 'next', **kwargs)
         # otherwise just return None to indicate that generic UI
         # behavior should just continue as normal (i.e. your FSM is
         # not intercepting and redirecting this event.
-    def next_edge(self, edge, state, request, **kwargs):
+    def next_edge(self, edge, fsmStack, request, **kwargs):
         'example edge plugin method to execute named transition'
         # do whatever processing you want...
         fsm = edge.fromNode.fsm
@@ -41,3 +41,25 @@ def get_specs():
         )
     return (spec,)
 
+
+
+# sub-FSM example code
+
+class CALLER(object):
+    def call_edge(self, edge, fsmStack, request, **kwargs):
+        node = edge.toNode
+        node._path = fsmStack.push(request, 'SUBFSMNAME')
+        return node
+    edges = (
+        dict(name='call', toNode='WAITER', title='start a sub-fsm'),
+        )
+
+class WAITER(object):
+    def get_path(self, node, state, request, **kwargs):
+        'hand back stored URL of our sub-FSM'
+        return self._path
+    edges = (
+        dict(name='subfsmdone', toNode='SOMENODE',
+             title='continue after sub-fsm done'),
+        )
+ 

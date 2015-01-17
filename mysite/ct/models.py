@@ -1174,7 +1174,8 @@ class FSMNode(models.Model):
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
         if eventName: # default: call transition with matching name
-            return fsmStack.state.transition(request, eventName, **kwargs)
+            return fsmStack.state.transition(fsmStack, request, eventName,
+                                             **kwargs)
     def get_path(self, state, request, defaultURL=None, **kwargs):
         'get URL for this page'
         try:
@@ -1210,14 +1211,14 @@ class FSMEdge(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
-    def transition(self, state, request, **kwargs):
+    def transition(self, fsmStack, request, **kwargs):
         'execute edge plugin code if any and return destination node'
         try:
             func = getattr(self.fromNode._plugin, self.name + '_edge')
         except AttributeError: # just return target node
             return self.toNode
         else:
-            return func(self, state, request, **kwargs)
+            return func(self, fsmStack, request, **kwargs)
 
 class FSMState(models.Model):
     'stores current state of a running FSM instance'
@@ -1247,13 +1248,13 @@ class FSMState(models.Model):
         self.save_json_data(doSave=False) # serialize to json blob
         self.save()
         return self.path
-    def transition(self, request, name, **kwargs):
+    def transition(self, fsmStack, request, name, **kwargs):
         'execute the specified transition and return destination URL'
         try:
             e = self.fsmNode.outgoing.get(name=name)
         except FSMEdge.DoesNotExist:
             return None # FSM does not handle this event, return control
-        self.fsmNode = e.transition(self, request, **kwargs)
+        self.fsmNode = e.transition(fsmStack, request, **kwargs)
         self.path = self.fsmNode.get_path(self, request, **kwargs)
         self.save()
         return self.path
