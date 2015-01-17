@@ -36,5 +36,8 @@ class FSMStack(object):
             request.session['fsmID'] = nextState.pk
         else:
             del request.session['fsmID']
-        
+    def get_current_url(self):
+        'get URL for resuming at current FSM state'
+        if self.state:
+            return self.state.path
         

@@ -1170,7 +1170,10 @@ class FSMNode(models.Model):
     def event(self, fsmStack, request, eventName, **kwargs):
         'process event using plugin if available, otherwise generic processing'
         if self.funcName: # use plugin to process event
-            func = getattr(self._plugin, eventName + '_event', None)
+            if eventName:
+                func = getattr(self._plugin, eventName + '_event', None)
+            else: # let plugin intercept render event
+                func = getattr(self._plugin, 'render_event', None)
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
         if eventName: # default: call transition with matching name

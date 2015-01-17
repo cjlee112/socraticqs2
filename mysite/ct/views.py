@@ -121,9 +121,10 @@ class PageData(object):
         for k,v in kwargs.items():
             setattr(self, k, v)
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
-                     addNextButton=False, **kwargs):
+                     addNextButton=False, fsmStack=None, **kwargs):
         'check whether fsm intercepts this event and returns redirect'
-        fsmStack = FSMStack(request)
+        if fsmStack is None:
+            fsmStack = FSMStack(request)
         if not fsmStack.state: # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
         if not eventName and addNextButton: # must supply Next form
@@ -139,13 +140,21 @@ class PageData(object):
             return HttpResponseRedirect(defaultURL)
     def render(self, request, templatefile, templateArgs, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
+        fsmStack = FSMStack(request)
+        if fsmStack.state and fsmStack.state.isModal: # turn off tab interface
+            self.navTabs = ()
         templateArgs = templateArgs.copy()
         templateArgs['user'] = request.user
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
-        return self.fsm_redirect(request) \
+        templateArgs['fsmStack'] = fsmStack
+        return self.fsm_redirect(request, pageData=self, fsmStack=fsmStack) \
             or render(request, templatefile, templateArgs, **kwargs)
-            
+    def fsm_push(self, request, name, *args, **kwargs):
+        'create a new FSM and redirect to its START page'
+        fsmStack = FSMStack(request)
+        url = fsmStack.push(request, name, *args, **kwargs)
+        return HttpResponseRedirect(url)
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
@@ -908,14 +917,10 @@ def error_resources(request, course_id, unit_id, ul_id):
 @login_required
 def study_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
-    unitStatus = UnitStatus.get_or_none(unit, request.user)
-    if request.method == 'POST'  and request.POST.get('task') == 'next':
-        if not unitStatus:
-            unitStatus = UnitStatus(unit=unit, user=request.user)
-            unitStatus.save()
-        nextUL = unitStatus.get_lesson()
-        return HttpResponseRedirect(nextUL.get_study_url(request.path))
+    unitStatus = None
     pageData = PageData(title=unit.title)
+    if request.method == 'POST'  and request.POST.get('task') == 'next':
+        return pageData.fsm_push(request, 'lessonseq', dict(unit=unit))
     if unitStatus:
         nextUL = unitStatus.get_lesson()
         if unitStatus.endTime: # already completed unit
@@ -1216,3 +1221,8 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     return assess(request, course_id, unit_id, ul_id, resp_id, False,
            redirectURL)
 
+###############################################################
+# FSM user interface
+
+
+    

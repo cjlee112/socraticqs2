@@ -59,6 +59,9 @@ function toggleInterest(o, targeturl, csrftoken)
         <ul class="nav navbar-nav">
           <li><a href="/ct/about/">About</a></li>
           {{ actionTarget|get_dummy_navbar }}
+          {% if fsmStack.state %}
+          <li><a href='/ct/'>{{ fsmStack.state.fsmNode.fsm.title }}</a></li>
+          {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-right">
