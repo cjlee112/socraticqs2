@@ -138,14 +138,17 @@ class PageData(object):
             return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
             return HttpResponseRedirect(defaultURL)
-    def render(self, request, templatefile, templateArgs, **kwargs):
+    def render(self, request, templatefile, templateArgs=None, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         self.path = request.path
         fsmStack = FSMStack(request)
         self.fsmState = fsmStack.state
         if fsmStack.state and fsmStack.state.isModal: # turn off tab interface
             self.navTabs = ()
-        templateArgs = templateArgs.copy()
+        if templateArgs: # avoid side-effects of modifying caller's dict
+            templateArgs = templateArgs.copy()
+        else:
+            templateArgs = {}
         templateArgs['user'] = request.user
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
@@ -192,21 +195,8 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 @login_required
 def main_page(request):
     'generic home page'
-    fsmStack = FSMStack(request)
-    if request.method == 'POST':
-        if 'liveID' in request.POST:
-            liveID = int(request.POST['liveID'])
-            liveSession = LiveSession.objects.get(pk=liveID) # make sure it exists
-            return fsmStack.push(request, 'liveStudent',
-                  dict(liveSession=liveSession,
-                       liveQuestion=liveSession.liveQuestion))
-        elif request.POST.get('task') == 'liveend': # end live session
-            rm_live_user(request, fsmStack.state.liveSession)
-            return fsmStack.pop(request)
-    return render(request, 'ct/index.html',
-                  dict(liveSessions=(),
-                       actionTarget=request.path, fsmStack=fsmStack,
-                       user=request.user))
+    pageData = PageData()
+    return pageData.render(request, 'ct/index.html')
 
 def person_profile(request, user_id):
     'stub for basic user info page'
@@ -225,7 +215,7 @@ def person_profile(request, user_id):
 
 def about(request):
     pageData = PageData()
-    return pageData.render(request, 'ct/about.html', dict(user=request.user))
+    return pageData.render(request, 'ct/about.html')
 
 # course views
 
