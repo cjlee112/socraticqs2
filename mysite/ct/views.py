@@ -140,7 +140,9 @@ class PageData(object):
             return HttpResponseRedirect(defaultURL)
     def render(self, request, templatefile, templateArgs, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
+        self.path = request.path
         fsmStack = FSMStack(request)
+        self.fsmState = fsmStack.state
         if fsmStack.state and fsmStack.state.isModal: # turn off tab interface
             self.navTabs = ()
         templateArgs = templateArgs.copy()
@@ -155,10 +157,14 @@ class PageData(object):
         fsmStack = FSMStack(request)
         url = fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
+    def fsm_on_path(self):
+        'True if we are on same page as current FSMState'
+        return self.path == self.fsmState.path
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
                  **kwargs):
+    'generate standard set of page data for a unitLesson'
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if not tabFunc:
@@ -218,7 +224,8 @@ def person_profile(request, user_id):
                        logoutForm=logoutForm))
 
 def about(request):
-    return render(request, 'ct/about.html', dict(user=request.user))
+    pageData = PageData()
+    return pageData.render(request, 'ct/about.html', dict(user=request.user))
 
 # course views
 

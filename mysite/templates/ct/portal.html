@@ -74,10 +74,29 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
     </div>
   </nav>
+
+  {% if fsmStack.state %}
+    {% if pageData.fsm_on_path %}
+      {% if fsmStack.state.fsmNode.help %}
+        {{ fsmStack.state.fsmNode.help }}
+        <br>
+      {% endif %}
+    {% else %}
+      <b>Note</b>: you are currently in the middle of an activity:
+      <b>{{ fsmStack.state.fsmNode.fsm.title }}</b>.
+      When you're done viewing other pages such as this one,
+      you can resume the next step of that activity by clicking on
+      the Resume Activity button.
+      <button type="button" onclick="location.href='{{ fsmStack.state.path }}'">
+      Resume Activity
+      </button>
+      <br>
+    {% endif %}
+  {% endif %}
+
   <header>
     <h1>{% block title %}{% endblock %}</h1>
   </header>
-
 
   {% block content %}{% endblock %}
 
