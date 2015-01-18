@@ -201,6 +201,7 @@ def main_page(request):
 def person_profile(request, user_id):
     'stub for basic user info page'
     person = get_object_or_404(User, pk=user_id)
+    pageData = PageData()
     if request.method == 'POST': # signout
         if request.POST.get('task') == 'logout':
             logout(request)
@@ -209,9 +210,8 @@ def person_profile(request, user_id):
         logoutForm = LogoutForm()
     else:
         logoutForm = None
-    return render(request, 'ct/person.html',
-                  dict(course=course, user=request.user, person=person,
-                       logoutForm=logoutForm))
+    return pageData.render(request, 'ct/person.html',
+                           dict(person=person, logoutForm=logoutForm))
 
 def about(request):
     pageData = PageData()
@@ -220,7 +220,7 @@ def about(request):
 # course views
 
 @login_required
-def course(request, course_id):
+def course_view(request, course_id):
     'show courselets in a course'
     course = get_object_or_404(Course, pk=course_id)
     if is_teacher_url(request.path):
@@ -259,10 +259,9 @@ def course(request, course_id):
     if showReorderForm:
         for cu in unitTable:
             cu.reorderForm = ReorderForm(cu.order, len(unitTable))
-    return render(request, 'ct/course.html',
-                  dict(course=course, actionTarget=request.path,
-                       courseletform=courseletform, unitTable=unitTable,
-                       pageData=pageData, showReorderForm=showReorderForm))
+    return pageData.render(request, 'ct/course.html',
+                  dict(course=course, courseletform=courseletform,
+                       unitTable=unitTable, showReorderForm=showReorderForm))
 
 @login_required
 def edit_course(request, course_id):

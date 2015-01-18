@@ -7,7 +7,7 @@ urlpatterns = patterns('',
     url(r'^people/(?P<user_id>\d+)/$', person_profile, name='person_profile'),
     # instructor UI
     # course tabs
-    url(r'^teach/courses/(?P<course_id>\d+)/$', course, name='course'),
+    url(r'^teach/courses/(?P<course_id>\d+)/$', course_view, name='course'),
     url(r'^teach/courses/(?P<course_id>\d+)/edit/$',
         edit_course, name='edit_course'),
     # courselet tabs
@@ -70,7 +70,7 @@ urlpatterns = patterns('',
 
     # student UI
     # course tabs
-    url(r'^courses/(?P<course_id>\d+)/$', course, name='course_student'),
+    url(r'^courses/(?P<course_id>\d+)/$', course_view, name='course_student'),
     # unit tabs
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         study_unit, name='study_unit'),
