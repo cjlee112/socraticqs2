@@ -335,6 +335,13 @@ class ConceptLink(models.Model):
                                     default=DEFINES)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    def annotate_ul(self, unit):
+        'add unitLesson attribute within the specified unit'
+        try:
+            self.unitLesson = UnitLesson.objects.filter(unit=unit,
+                                                        lesson=self.lesson)[0]
+        except IndexError:
+            raise UnitLesson.DoesNotExist('unitLesson not in this unit')
 
 DEFAULT_RELATION_MAP = {
     Lesson.BASE_EXPLANATION:ConceptLink.DEFINES,
@@ -930,8 +937,8 @@ class UnitStatus(models.Model):
     @classmethod
     def get_or_none(klass, unit, user, **kwargs):
         try:
-            return klass.objects.get(unit=unit, user=user, **kwargs)
-        except UnitStatus.DoesNotExist:
+            return klass.objects.filter(unit=unit, user=user, **kwargs)[0]
+        except IndexError:
             return None
     @classmethod
     def is_done(klass, unit, user):

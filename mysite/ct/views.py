@@ -133,7 +133,15 @@ class PageData(object):
             else:
                 self.nextForm = NextForm()
                 set_crispy_action(request.path, self.nextForm)
-        r = fsmStack.event(request, eventName, defaultURL=defaultURL, **kwargs)
+        # now we check here whether event is actually from path matching
+        # this node
+        referer = request.META['HTTP_REFERER']
+        referer = referer[referer.find('/ct/'):]
+        if referer == fsmStack.state.path: # event from current node's page
+            r = fsmStack.event(request, eventName, defaultURL=defaultURL,
+                               **kwargs)
+        else: # don't even call FSM with events from other pages.
+            r = None
         if r: # let FSM override the default URL
             return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
@@ -245,13 +253,19 @@ def course_view(request, course_id):
                 newOrder = int(reorderForm.cleaned_data['newOrder'])
                 unitTable = course.reorder_course_unit(oldOrder, newOrder,
                                                        unitTable)
+                red = pageData.fsm_redirect(request, 'reorder',
+                                            defaultURL=None, course=course)
+                if red: # let FSM redirect us if desired
+                    return red
         else:
             courseletform = NewUnitTitleForm(request.POST)
             if courseletform.is_valid():
                 title = courseletform.cleaned_data['title']
                 unit = course.create_unit(title, request.user)
-                return HttpResponseRedirect(reverse('ct:unit_tasks',
-                            args=(course_id, unit.id,)))
+                kwargs = dict(course_id=course_id, unit_id=unit.id)
+                defaultURL = reverse('ct:unit_tasks', kwargs=kwargs)
+                return pageData.fsm_redirect(request, 'create', defaultURL,
+                                             reverseArgs=kwargs, unit=unit)
     if courseletform:
         set_crispy_action(request.path, courseletform)
     if len(unitTable) < 2:
@@ -272,12 +286,14 @@ def edit_course(request, course_id):
 
     pageData = PageData(title=course.title,
                         navTabs=course_tabs(request.path, 'Edit'))
-    if request.method == 'POST': # create new courselet
+    if request.method == 'POST': # update course description
         courseform = CourseTitleForm(request.POST, instance=course)
         if courseform.is_valid():
             courseform.save()
-            return HttpResponseRedirect(reverse('ct:course',
-                                                args=(course.id,)))
+            kwargs = dict(course_id=course_id)
+            defaultURL = reverse('ct:course', kwargs=kwargs)
+            return pageData.fsm_redirect(request, 'update', defaultURL,
+                                         reverseArgs=kwargs, course=course) 
     else:
         courseform = CourseTitleForm(instance=course)
     set_crispy_action(request.path, courseform)
@@ -298,23 +314,30 @@ def edit_unit(request, course_id, unit_id):
                         navTabs=unit_tabs(request.path, 'Edit'))
     cu = course.courseunit_set.get(unit=unit)
     unitform = UnitTitleForm(instance=unit)
-    if request.method == 'POST': # create new courselet
+    if request.method == 'POST':
         if request.POST.get('task') == 'release':
             cu.releaseTime = timezone.now()
             cu.save() # publish for student access
-        else:
+            red = pageData.fsm_redirect(request, 'release', defaultURL=None,
+                                        courseUnit=cu)
+            if red: # let FSM redirect us if desired
+                return red
+        else: # update unit description
             unitform = UnitTitleForm(request.POST, instance=unit)
             if unitform.is_valid():
                 unitform.save()
-                return HttpResponseRedirect(reverse('ct:unit_tasks',
-                                            args=(course.id, unit_id)))
+                kwargs = dict(course_id=course_id, unit_id=unit_id)
+                defaultURL = reverse('ct:unit_tasks', kwargs=kwargs)
+                return pageData.fsm_redirect(request, 'update', defaultURL,
+                                             reverseArgs=kwargs, unit=unit)
     set_crispy_action(request.path, unitform)
     return pageData.render(request, 'ct/edit_unit.html',
                   dict(unit=unit, courseUnit=cu, unitform=unitform))
 
 
-def update_concept_link(request, conceptLinks):
+def update_concept_link(request, conceptLinks, unit):
     cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
+    cl.annotate_ul(unit) # add unitLesson attribute
     clform = ConceptLinkForm(request.POST, instance=cl)
     if clform.is_valid():
         clform.save()
@@ -341,7 +364,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                                              addedBy=concept.addedBy)
             return concept
         elif 'clID' in request.POST:
-            update_concept_link(request, conceptLinks)
+            update_concept_link(request, conceptLinks, unit)
         elif request.POST.get('task') == 'reverse' and 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
@@ -453,7 +476,8 @@ def unit_concepts(request, course_id, unit_id):
     typing a search for relevant concepts. ''', unitConcepts=unitConcepts,
                   unit=unit, actionLabel='Add to courselet')
     if isinstance(r, Concept): # newly created concept
-        return HttpResponseRedirect(get_object_url(request.path, r))
+        defaultURL = get_object_url(request.path, r)
+        return pageData.fsm_redirect(request, 'create', defaultURL, concept=r)
     return r
 
 @login_required
@@ -471,6 +495,10 @@ def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
     if isinstance(r, Concept):
         cl = unitLesson.lesson.conceptlink_set.create(concept=r,
                                                       addedBy=request.user)
+        red = pageData.fsm_redirect(request, 'link', defaultURL=None,
+                                    conceptLink=cl)
+        if red: # let FSM redirect us if desired
+            return red
         clTable.append(cl)
         return _concepts(request, pageData,
                          'Successfully added concept.  Thank you!',
@@ -496,6 +524,10 @@ def concept_concepts(request, course_id, unit_id, ul_id):
                   fromTable=fromTable, unit=unit, showConceptAction=True)
     if isinstance(r, Concept):
         cg = concept.relatedTo.create(toConcept=r, addedBy=request.user)
+        red = pageData.fsm_redirect(request, 'link', defaultURL=None,
+                                    conceptGraph=cg)
+        if red: # let FSM redirect us if desired
+            return red
         toTable.append(cg)
         return _concepts(request, pageData, '''Successfully added concept.
             Thank you!''', ignorePOST=True, toTable=toTable,
@@ -515,6 +547,10 @@ def concept_errors(request, course_id, unit_id, ul_id):
     if isinstance(r, Concept):
         cg = concept.relatedFrom.create(fromConcept=r, addedBy=request.user,
                                     relationship=ConceptGraph.MISUNDERSTANDS)
+        red = pageData.fsm_redirect(request, 'create', defaultURL=None,
+                                    conceptGraph=cg)
+        if red: # let FSM redirect us if desired
+            return red
         errorModels.append(cg)
         return _concepts(request, pageData,
                          'Successfully added error model. Thank you!',
@@ -551,7 +587,7 @@ def _lessons(request, pageData, concept=None, msg='',
     lessonSet = ()
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
-            update_concept_link(request, conceptLinks)
+            update_concept_link(request, conceptLinks, unit)
         elif 'newOrder' in request.POST:
             reorderForm = ReorderForm(0, len(lessonTable), request.POST)
             if reorderForm.is_valid():
@@ -612,13 +648,17 @@ def concept_lessons(request, course_id, unit_id, ul_id):
     r = _lessons(request, pageData, concept, conceptLinks=clTable,
                  unit=unit, allowSearch=False,
                  creationInstructions=creationInstructions)
-    if isinstance(r, UnitLesson):
+    if isinstance(r, UnitLesson): # created new lesson
+        defaultURL = None
         if r.lesson.kind == Lesson.ORCT_QUESTION:
             if r.get_errors().count() == 0: # copy error models from concept
                 concept.copy_error_models(r)
             if getattr(r, '_answer', None): # redirect to edit empty answer
-                return HttpResponseRedirect(reverse('ct:edit_lesson',
-                                args=(course_id, unit_id, r._answer.id,)))
+                defaultURL = reverse('ct:edit_lesson',
+                                     args=(course_id, unit_id, r._answer.id,))
+        red = pageData.fsm_redirect(request, 'create', defaultURL, unitLesson=r)
+        if red: # let FSM redirect us if desired
+            return red
         clTable = make_cl_table(concept, unit) # refresh table
         return _lessons(request, pageData, concept,
             'Successfully added lesson. Thank you!', ignorePOST=True,
@@ -672,6 +712,10 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
                   unit=unit, showReorderForm=showReorderForm,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
+        red = pageData.fsm_redirect(request, 'add', defaultURL=None,
+                                    unitLesson=r)
+        if red: # let FSM redirect us if desired
+            return red
         lessonTable.append(r)
         return _lessons(request, pageData, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, showReorderForm=showReorderForm,
@@ -697,8 +741,10 @@ def ul_teach(request, course_id, unit_id, ul_id):
     if request.method == 'POST' and request.POST.get('task') == 'append' \
             and ul.unit != unit:
         ulNew = ul.copy(unit, request.user, order='APPEND')
-        return HttpResponseRedirect(reverse('ct:ul_teach',
-                                args=(course_id, unit_id, ulNew.pk)))
+        kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
+        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+        return pageData.fsm_redirect(request, 'add', defaultURL,
+                                     reverseArgs=kwargs, unitLesson=ulNew)
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable))
@@ -742,13 +788,16 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 titleform = formClass(request.POST, instance=ul.lesson)
                 if titleform.is_valid():
                     titleform.save()
-                    return HttpResponseRedirect(get_object_url(request.path,
-                                                               ul))
+                    defaultURL = get_object_url(request.path, ul)
+                    return pageData.fsm_redirect(request, 'update', defaultURL,
+                                                 unitLesson=ul)
             elif request.POST.get('task') == 'delete':
                 ul.delete()
                 unit.reorder_exercise() # renumber all lessons
-                return HttpResponseRedirect(reverse('ct:unit_lessons',
-                                args=(course_id, unit_id,)))
+                kwargs = dict(course_id=course_id, unit_id=unit_id)
+                defaultURL = reverse('ct:unit_lessons', kwargs=kwargs)
+                return pageData.fsm_redirect(request, 'delete', defaultURL,
+                                             reverseArgs=kwargs, unit=unit)
         set_crispy_action(request.path, titleform)
     else:
         titleform = None
@@ -831,6 +880,10 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
                   createULFunc=create_error_ul, selectULFunc=copy_error_ul,
                   searchType=IS_ERROR, actionLabel='Add error model')
     if isinstance(r, UnitLesson):
+        red = pageData.fsm_redirect(request, 'create', defaultURL=None,
+                                    unitLesson=r)
+        if red: # let FSM redirect us if desired
+            return red
         seTable.append((r, fmt_count(0, n)))
         return _lessons(request, pageData, concept,
             msg='Successfully added error model.  Thank you!',
@@ -873,6 +926,10 @@ def resolutions(request, course_id, unit_id, ul_id):
                  createULFunc=create_resolution_ul,
                  selectULFunc=link_resolution_ul)
     if isinstance(r, UnitLesson):
+        red = pageData.fsm_redirect(request, 'create', defaultURL=None,
+                                    unitLesson=r)
+        if red: # let FSM redirect us if desired
+            return red
         if r not in lessonTable:
             lessonTable.append(r)
         return _lessons(request, pageData, em,
@@ -1057,6 +1114,10 @@ def resolutions_student(request, course_id, unit_id, ul_id):
             if form.is_valid():
                 form.save()
                 form = ErrorStatusForm(instance=se) # clear the form
+                red = pageData.fsm_redirect(request, 'update', defaultURL=None,
+                                            studentError=se)
+                if red: # let FSM redirect us if desired
+                    return red
         else:
             form = ErrorStatusForm(instance=se)
     return pageData.render(request, 'ct/resolutions_student.html',
@@ -1073,6 +1134,10 @@ def ul_faq_student(request, course_id, unit_id, ul_id):
         if form.is_valid():
             r = save_response(form, ul, request.user, course_id,
                               kind=Response.STUDENT_QUESTION, needsEval=True)
+            red = pageData.fsm_redirect(request, 'create', defaultURL=None,
+                                        response=r)
+            if red: # let FSM redirect us if desired
+                return red
             form = CommentForm() # clear the form
     else:
         form = CommentForm()
@@ -1101,6 +1166,10 @@ def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
                 reply = save_response(form, ul, request.user, course_id,
                                   kind=Response.COMMENT, needsEval=True,
                                   parent=inquiry)
+                red = pageData.fsm_redirect(request, 'reply', defaultURL=None,
+                                            response=reply)
+                if red: # let FSM redirect us if desired
+                    return red
                 form = ReplyForm() # clear the form
     pageData.numPeople = inquiry.inquirycount_set.count()
     replyTable = [(r, r.studenterror_set.all())
