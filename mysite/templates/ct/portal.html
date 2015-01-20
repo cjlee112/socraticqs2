@@ -57,10 +57,12 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/ct/about/">About</a></li>
-          {{ actionTarget|get_dummy_navbar }}
+          {% if not fsmStack.state or not fsmStack.state.hideNav %}
+            <li><a href="/ct/about/">About</a></li>
+            {{ actionTarget|get_dummy_navbar }}
+          {% endif %}
           {% if fsmStack.state %}
-          <li><a href='/ct/'>{{ fsmStack.state.fsmNode.fsm.title }}</a></li>
+          <li><a href='/ct/'>{{ fsmStack.state.title }}</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
@@ -83,7 +85,7 @@ function toggleInterest(o, targeturl, csrftoken)
       {% endif %}
     {% else %}
       <b>Note</b>: you are currently in the middle of an activity:
-      <b>{{ fsmStack.state.fsmNode.fsm.title }}</b>.
+      <b>{{ fsmStack.state.title }}</b>.
       When you're done viewing other pages such as this one,
       you can resume the next step of that activity by clicking on
       the Resume Activity button.
