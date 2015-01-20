@@ -28,6 +28,7 @@ class START(object):
     def start_event(self, node, fsmStack, request, **kwargs):
         'event handler for START node'
         unit = fsmStack.state.get_data_attr('unit')
+        fsmStack.state.title = 'Study: %s' % unit.title
         unitStatus = UnitStatus(unit=unit, user=request.user)
         unitStatus.save()
         fsmStack.state.set_data_attr('unitStatus', unitStatus)
@@ -68,7 +69,7 @@ class ASSESS(object):
 
 def get_specs():
     'get FSM specifications stored in this file'
-    spec = FSMSpecification(name='lessonseq',
+    spec = FSMSpecification(name='lessonseq', hideTabs=True,
             title='Take the courselet core lessons',
             pluginNodes=[START, LESSON, ASK, ASSESS], # nodes w/ plugin code
             nodeDict=dict( # all other nodes
