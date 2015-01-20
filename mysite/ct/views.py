@@ -137,11 +137,11 @@ class PageData(object):
         # this node
         referer = request.META['HTTP_REFERER']
         referer = referer[referer.find('/ct/'):]
-        if referer == fsmStack.state.path: # event from current node's page
+        if request.method == 'POST' and referer != fsmStack.state.path:
+            r = None # don't even call FSM with POST events from other pages.
+        else: # event from current node's page
             r = fsmStack.event(request, eventName, defaultURL=defaultURL,
                                **kwargs)
-        else: # don't even call FSM with events from other pages.
-            r = None
         if r: # let FSM override the default URL
             return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
