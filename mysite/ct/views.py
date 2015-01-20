@@ -135,7 +135,7 @@ class PageData(object):
                 set_crispy_action(request.path, self.nextForm)
         # now we check here whether event is actually from path matching
         # this node
-        referer = request.META['HTTP_REFERER']
+        referer = request.META.get('HTTP_REFERER', '')
         referer = referer[referer.find('/ct/'):]
         if request.method == 'POST' and referer != fsmStack.state.path:
             r = None # don't even call FSM with POST events from other pages.
@@ -151,7 +151,7 @@ class PageData(object):
         self.path = request.path
         fsmStack = FSMStack(request)
         self.fsmState = fsmStack.state
-        if fsmStack.state and fsmStack.state.isModal: # turn off tab interface
+        if fsmStack.state and fsmStack.state.hideTabs: # turn off tab interface
             self.navTabs = ()
         if templateArgs: # avoid side-effects of modifying caller's dict
             templateArgs = templateArgs.copy()
