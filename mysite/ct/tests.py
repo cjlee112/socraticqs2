@@ -248,5 +248,10 @@ class FSMTests(TestCase):
             pass
         else:
             raise AssertionError('FSM.save_graph() failed to catch bad plugin funcName')
-            
-            
+    def test_bad_fsmID(self):
+        'make sure FSMStack silently handles bad fsmID'
+        request = FakeRequest(self.user, dict(fsmID=99))
+        fsmStack = fsm.FSMStack(request)
+        self.assertEqual(request.session, {})
+        self.assertIsNone(fsmStack.state)
+        

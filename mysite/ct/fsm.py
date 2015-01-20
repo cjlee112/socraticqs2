@@ -8,7 +8,11 @@ class FSMStack(object):
         except KeyError:
             self.state = None
             return
-        self.state = models.FSMState.objects.get(pk=fsmID)
+        try:
+            self.state = models.FSMState.objects.get(pk=fsmID)
+        except models.FSMState.DoesNotExist:
+            del request.session['fsmID']
+            self.state = None
     def event(self, request, eventName='next', **kwargs):
         '''top-level interface for passing event to a running FSM instance.
         If FSM handles this event, return a redirect that over-rides
