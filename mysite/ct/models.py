@@ -1087,6 +1087,9 @@ class FSM(models.Model):
     description = models.TextField(null=True)
     help = models.TextField(null=True)
     startNode = models.ForeignKey('FSMNode', related_name='+', null=True)
+    hideTabs = models.BooleanField(default=False)
+    hideLinks = models.BooleanField(default=False)
+    hideNav = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     @classmethod
@@ -1239,9 +1242,12 @@ class FSMState(models.Model):
     linkState = models.ForeignKey('FSMState', null=True,
                                   related_name='linkChildren')
     unitLesson = models.ForeignKey(UnitLesson, null=True)
+    title = models.CharField(max_length=200)
     path = models.CharField(max_length=200)
     data = models.TextField(null=True)
-    isModal = models.BooleanField(default=False)
+    hideTabs = models.BooleanField(default=False)
+    hideLinks = models.BooleanField(default=False)
+    hideNav = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
     load_json_data = load_json_data
     save_json_data = save_json_data
