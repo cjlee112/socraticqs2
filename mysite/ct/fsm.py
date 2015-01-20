@@ -28,7 +28,8 @@ class FSMStack(object):
         'start running a new FSM instance (layer)'
         fsm = models.FSM.objects.get(name=fsmName)
         self.state = models.FSMState(user=request.user, fsmNode=fsm.startNode,
-                                parentState=self.state, **kwargs)
+                parentState=self.state, title=fsm.title, hideTabs=fsm.hideTabs,
+                hideLinks=fsm.hideLinks, hideNav=fsm.hideNav, **kwargs)
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
         return path
