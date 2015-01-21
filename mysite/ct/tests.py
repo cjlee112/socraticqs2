@@ -137,6 +137,22 @@ edgeDict = (
     dict(name='next', fromNode='START', toNode='END', title='go go go'),
     )
 
+def load_fsm2(username):
+    'load an FSM that displays a standard node page'
+    fsmDict = dict(name='test2', title='try this')
+    nodeDict = dict(START=dict(title='Welcome, Stranger', path='ct:fsm_node',
+                               description='Thanks for your valuable input!'),
+                    END=dict(title='end here', path='ct:home'),
+        )
+    edgeDict = (
+        dict(name='next', fromNode='START', toNode='END',
+             title='Write an Amazing Question',
+             description='''Your mission, should you choose to accept it,
+             is to write an amazing question that yields wonderful insights.'''),
+        )
+    return FSM.save_graph(fsmDict, nodeDict, edgeDict, username)
+
+    
 class FakeRequest(object):
     'trivial holder for request data to pass to test calls'
     def __init__(self, user, sessionDict=None, method='POST', dataDict=None):

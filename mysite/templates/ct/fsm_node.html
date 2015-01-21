@@ -1,0 +1,26 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  FSM explanation node page
+{% endcomment %}
+
+{% block title %}
+  {{ fsmStack.state.fsmNode.title }}
+{% endblock %}
+
+{% block content %}
+
+{{ fsmStack.state.fsmNode.description }}
+
+{% if pageData.nextForm %}
+  {% for e in fsmStack.state.fsmNode.outgoing.all %}
+    <h3>Next Steps: {{ e.title }}</h3>
+    {{ e.description }}
+  {% endfor %}
+
+  {% crispy pageData.nextForm %}
+{% endif %}
+
+{% endblock %}

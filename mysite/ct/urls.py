@@ -121,5 +121,8 @@ urlpatterns = patterns('',
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/errors/$',
         assess_errors, name='assess_errors'),
 
+    # FSM node pages
+    url(r'^nodes/(?P<node_id>\d+)/$', fsm_node, name='fsm_node'),
+
 )
 

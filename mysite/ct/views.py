@@ -117,15 +117,14 @@ def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
 
 class PageData(object):
     'generic holder for page UI elements such as tabs'
-    def __init__(self, **kwargs):
+    def __init__(self, request, **kwargs):
+        self.fsmStack = FSMStack(request)
         for k,v in kwargs.items():
             setattr(self, k, v)
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
-                     addNextButton=False, fsmStack=None, **kwargs):
+                     addNextButton=False, **kwargs):
         'check whether fsm intercepts this event and returns redirect'
-        if fsmStack is None:
-            fsmStack = FSMStack(request)
-        if not fsmStack.state: # no FSM running, so nothing to do
+        if not self.fsmStack.state: # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
         if not eventName and addNextButton: # must supply Next form
             if request.method == 'POST':
@@ -137,21 +136,21 @@ class PageData(object):
         # this node
         referer = request.META.get('HTTP_REFERER', '')
         referer = referer[referer.find('/ct/'):]
-        if request.method == 'POST' and referer != fsmStack.state.path:
+        if request.method == 'POST' and referer != self.fsmStack.state.path:
             r = None # don't even call FSM with POST events from other pages.
         else: # event from current node's page
-            r = fsmStack.event(request, eventName, defaultURL=defaultURL,
-                               **kwargs)
+            r = self.fsmStack.event(request, eventName, defaultURL=defaultURL,
+                                    **kwargs)
         if r: # let FSM override the default URL
             return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
             return HttpResponseRedirect(defaultURL)
-    def render(self, request, templatefile, templateArgs=None, **kwargs):
+    def render(self, request, templatefile, templateArgs=None,
+               addNextButton=False, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         self.path = request.path
-        fsmStack = FSMStack(request)
-        self.fsmState = fsmStack.state
-        if fsmStack.state and fsmStack.state.hideTabs: # turn off tab interface
+        if self.fsmStack.state and \
+          self.fsmStack.state.hideTabs: # turn off tab interface
             self.navTabs = ()
         if templateArgs: # avoid side-effects of modifying caller's dict
             templateArgs = templateArgs.copy()
@@ -160,17 +159,17 @@ class PageData(object):
         templateArgs['user'] = request.user
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
-        templateArgs['fsmStack'] = fsmStack
-        return self.fsm_redirect(request, pageData=self, fsmStack=fsmStack) \
+        templateArgs['fsmStack'] = self.fsmStack
+        return self.fsm_redirect(request, pageData=self,
+                                 addNextButton=addNextButton) \
             or render(request, templatefile, templateArgs, **kwargs)
     def fsm_push(self, request, name, *args, **kwargs):
         'create a new FSM and redirect to its START page'
-        fsmStack = FSMStack(request)
-        url = fsmStack.push(request, name, *args, **kwargs)
+        url = self.fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
     def fsm_on_path(self):
         'True if we are on same page as current FSMState'
-        return self.path == self.fsmState.path
+        return self.path == self.fsmStack.state.path
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
@@ -180,7 +179,7 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if not tabFunc:
         tabFunc = auto_tabs
-    pageData = PageData(title=ul.lesson.title, **kwargs)
+    pageData = PageData(request, title=ul.lesson.title, **kwargs)
     if checkUnitStatus and not UnitStatus.is_done(unit, request.user):
         includeNavTabs = False
     if includeNavTabs:
@@ -203,13 +202,13 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 @login_required
 def main_page(request):
     'generic home page'
-    pageData = PageData()
+    pageData = PageData(request)
     return pageData.render(request, 'ct/index.html')
 
 def person_profile(request, user_id):
     'stub for basic user info page'
     person = get_object_or_404(User, pk=user_id)
-    pageData = PageData()
+    pageData = PageData(request)
     if request.method == 'POST': # signout
         if request.POST.get('task') == 'logout':
             logout(request)
@@ -222,7 +221,7 @@ def person_profile(request, user_id):
                            dict(person=person, logoutForm=logoutForm))
 
 def about(request):
-    pageData = PageData()
+    pageData = PageData(request)
     return pageData.render(request, 'ct/about.html')
 
 # course views
@@ -243,7 +242,8 @@ def course_view(request, course_id):
         courseletform = showReorderForm = None
         navTabs = ()
         unitTable = course.get_course_units()
-    pageData = PageData(title=course.title, headLabel='course description',
+    pageData = PageData(request, title=course.title,
+                        headLabel='course description',
                         headText=md2html(course.description), navTabs=navTabs)
     if request.method == 'POST': # create new courselet
         if 'oldOrder' in request.POST and not notInstructor:
@@ -284,7 +284,7 @@ def edit_course(request, course_id):
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
 
-    pageData = PageData(title=course.title,
+    pageData = PageData(request, title=course.title,
                         navTabs=course_tabs(request.path, 'Edit'))
     if request.method == 'POST': # update course description
         courseform = CourseTitleForm(request.POST, instance=course)
@@ -310,7 +310,7 @@ def edit_unit(request, course_id, unit_id):
         return HttpResponseRedirect(reverse('ct:study_unit',
                                         args=(course_id, unit_id)))
 
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Edit'))
     cu = course.courseunit_set.get(unit=unit)
     unitform = UnitTitleForm(instance=unit)
@@ -468,7 +468,7 @@ class ConceptLinkTable(object):
 def unit_concepts(request, course_id, unit_id):
     'page for viewing or adding concepts relevant to this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     unitConcepts = unit.get_main_concepts().items()
     r = _concepts(request, pageData,
@@ -672,7 +672,7 @@ def unit_tasks(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
     cu = course.courseunit_set.get(unit=unit)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Tasks'))
     newInquiryULs = frozenset(unit.get_new_inquiry_uls())
     ulDict = {}
@@ -702,7 +702,7 @@ def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
 def unit_lessons(request, course_id, unit_id, lessonTable=None,
                  currentTab='Lessons', showReorderForm=True):
     unit = get_object_or_404(Unit, pk=unit_id)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, currentTab))
     if lessonTable is None:
         lessonTable = unit.get_exercises()
@@ -959,7 +959,7 @@ def error_resources(request, course_id, unit_id, ul_id):
 def study_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     unitStatus = None
-    pageData = PageData(title=unit.title)
+    pageData = PageData(request, title=unit.title)
     if request.method == 'POST'  and request.POST.get('task') == 'next':
         return pageData.fsm_push(request, 'lessonseq', dict(unit=unit))
     if unitStatus:
@@ -975,7 +975,7 @@ def study_unit(request, course_id, unit_id):
 def unit_tasks_student(request, course_id, unit_id):
     'suggest next steps on this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs_student(request.path, 'Tasks'))
     taskTable = [(ul, 'start')
                  for ul in unit.get_unanswered_uls(request.user)]
@@ -990,7 +990,7 @@ def unit_tasks_student(request, course_id, unit_id):
 
 def unit_lessons_student(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs_student(request.path, 'Lessons'))
     lessonTable = unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=False) \
@@ -1002,7 +1002,7 @@ def unit_lessons_student(request, course_id, unit_id):
 def unit_concepts_student(request, course_id, unit_id):
     'student concept glossary for  this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    pageData = PageData(title=unit.title,
+    pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs_student(request.path, 'Concepts'))
     l1 = list(UnitLesson.objects.filter(kind=UnitLesson.COMPONENT,
         lesson__concept__conceptlink__lesson__unitlesson__unit=unit)
@@ -1267,4 +1267,13 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
 # FSM user interface
 
 
-    
+@login_required
+def fsm_node(request, node_id):
+    'display standard FSM node explanation & next steps page' 
+    pageData = PageData(request)
+    if not pageData.fsmStack.state or \
+      pageData.fsmStack.state.fsmNode.pk != int(node_id):
+        return HttpResponseRedirect('/ct/')
+    addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
+    return pageData.render(request, 'ct/fsm_node.html',
+                           addNextButton=addNextButton)

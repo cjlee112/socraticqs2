@@ -1186,11 +1186,15 @@ class FSMNode(models.Model):
                 func = getattr(self._plugin, 'render_event', None)
             if func is not None:
                 return func(self, fsmStack, request, **kwargs)
-        if eventName: # default: call transition with matching name
+        if eventName == 'start': # default: just return our path
+            return self.get_path(fsmStack.state, request, **kwargs)
+        elif eventName: # default: call transition with matching name
             return fsmStack.state.transition(fsmStack, request, eventName,
                                              **kwargs)
     def get_path(self, state, request, defaultURL=None, **kwargs):
         'get URL for this page'
+        if self.path.startswith('ct:fsm_'): # serve fsm node view
+            return reverse(self.path, kwargs=dict(node_id=self.pk))
         try:
             func = self._plugin.get_path
         except AttributeError: # just use default path
