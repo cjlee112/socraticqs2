@@ -1,0 +1,54 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  FSM explanation node page
+{% endcomment %}
+
+{% block title %}
+  Activity Center
+{% endblock %}
+
+{% block content %}
+
+{% if fsmStack.state %}
+  You are currently in the middle of an activity:
+  <b>{{ fsmStack.state.title }}</b>.
+
+{% if fsmStack.state.fsmNode.fsm.description %}
+<input type="checkbox" id="headtoggle"/>Show Description<BR>
+<div id="headdiv" style="display: none">
+{{ fsmStack.state.fsmNode.fsm.description }}
+</div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+{% endif %}
+
+  <h3>Next Steps: {{ fsmStack.state.fsmNode.title }}</h3>
+  {{ fsmStack.state.fsmNode.description }}
+
+  <h3>Options</h3>
+  <ul>
+    <li>  You can resume the next step of this activity by clicking on
+      the Resume Activity button.
+      <button type="button" onclick="location.href='{{ fsmStack.state.path }}'">
+      Resume Activity
+      </button>
+    </li>
+    {% if cancelForm %}
+    <li>You can cancel this activity.
+      {% crispy cancelForm %}
+    </li>
+    {% endif %}
+    <li>You can logout and resume this activity at another time.</li>
+  </ul>
+{% else %}
+  You currently have no ongoing activities.
+{% endif %}
+
+{% endblock %}

@@ -123,6 +123,7 @@ urlpatterns = patterns('',
 
     # FSM node pages
     url(r'^nodes/(?P<node_id>\d+)/$', fsm_node, name='fsm_node'),
+    url(r'^nodes/$', fsm_status, name='fsm_status'),
 
 )
 

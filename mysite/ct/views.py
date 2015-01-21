@@ -170,6 +170,8 @@ class PageData(object):
     def fsm_on_path(self):
         'True if we are on same page as current FSMState'
         return self.path == self.fsmStack.state.path
+    def fsm_off_path(self):
+        return not self.fsm_on_path() and self.path != '/ct/nodes/'
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
@@ -1277,3 +1279,8 @@ def fsm_node(request, node_id):
     addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
     return pageData.render(request, 'ct/fsm_node.html',
                            addNextButton=addNextButton)
+
+def fsm_status(request):
+    'display Activity Center UI'
+    pageData = PageData(request)
+    return pageData.render(request, 'ct/fsm_status.html')

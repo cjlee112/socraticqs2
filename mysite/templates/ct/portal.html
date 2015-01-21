@@ -62,7 +62,7 @@ function toggleInterest(o, targeturl, csrftoken)
             {{ actionTarget|get_dummy_navbar }}
           {% endif %}
           {% if fsmStack.state %}
-          <li><a href='/ct/'>{{ fsmStack.state.title }}</a></li>
+          <li><a href='/ct/nodes/'>{{ fsmStack.state.title }}</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
@@ -83,7 +83,7 @@ function toggleInterest(o, targeturl, csrftoken)
         {{ fsmStack.state.fsmNode.help }}
         <br>
       {% endif %}
-    {% else %}
+    {% elif pageData.fsm_off_path %}
       <b>Note</b>: you are currently in the middle of an activity:
       <b>{{ fsmStack.state.title }}</b>.
       When you're done viewing other pages such as this one,

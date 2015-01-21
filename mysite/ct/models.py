@@ -1193,7 +1193,7 @@ class FSMNode(models.Model):
                                              **kwargs)
     def get_path(self, state, request, defaultURL=None, **kwargs):
         'get URL for this page'
-        if self.path.startswith('ct:fsm_'): # serve fsm node view
+        if self.path and self.path.startswith('ct:fsm_'): # serve fsm node view
             return reverse(self.path, kwargs=dict(node_id=self.pk))
         try:
             func = self._plugin.get_path
