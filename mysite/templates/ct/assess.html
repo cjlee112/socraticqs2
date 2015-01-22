@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
 {% load ct_extras %}
 {% comment %}
   Assess a student answer
@@ -43,47 +44,24 @@ $( "#headtoggle" ).click(function() {
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<h3>Assessment</h3>
-
-<form action="{{ actionTarget }}" method="post">
-{{ form.non_field_errors }}
-{% csrf_token %}
-
-{% if doSelfEval %}
-<div class="fieldWrapper">
-  {{ form.selfeval.errors }}
-  <label for="id_selfeval">
-  How does this answer compare with the right answer?</label><br>
-  {{ form.selfeval }}
-</div>
-
-<div class="fieldWrapper">
-  {{ form.status.errors }}
-  <label for="id_status">
-  How well do you feel you understand this concept now?</label><br>
-  {{ form.status }}
-</div>
-
-<div class="fieldWrapper">
-  {{ form.liked.errors }}
-  {{ form.liked }}
-  <label for="id_liked">Check here if this lesson really showed
-                you something you were missing before.</label><br>
-</div>
+{% if assessForm %}
+  <h3>Assessment</h3>
+  {% crispy assessForm %}
 
 {% else %}
-  Did
+  <h3>Did
   {% if response.author == user %}
     your
   {% else %} 
     this submitted 
   {% endif %}
-  answer make one of the following common errors?<br>
-  {{ form }}
+  answer make one of the following common errors?</h3>
+  <form action="{{ actionTarget }}" method="post">
+    {% csrf_token %}
+    {{ emForm }}
+    <p><input type="submit" value="Next" /></p>
+  </form>
 {% endif %}
-
-<p><input type="submit" value="Next" /></p>
-</form>
 
   </div><!-- @end #StudyTabDiv -->
 </div>

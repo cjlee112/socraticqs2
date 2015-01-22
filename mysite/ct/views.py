@@ -1249,8 +1249,9 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
     else:
         form = SelfAssessForm()
     answer = get_answer_html(r.unitLesson)
+    set_crispy_action(request.path, form)
     return pageData.render(request, 'ct/assess.html',
-                dict(response=r, answer=answer, form=form, doSelfEval=True))
+                dict(response=r, answer=answer, assessForm=form))
 
 @login_required
 def assess_errors(request, course_id, unit_id, ul_id, resp_id):
@@ -1278,7 +1279,7 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
         form.fields['emlist'].choices = choices
     answer = get_answer_html(r.unitLesson)
     return pageData.render(request, 'ct/assess.html',
-                dict(response=r, answer=answer, form=form, doSelfEval=False))
+                dict(response=r, answer=answer, emForm=form))
 
 ###############################################################
 # FSM user interface
