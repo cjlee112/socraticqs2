@@ -56,15 +56,6 @@ $( "#headtoggle" ).click(function() {
   How does this answer compare with the right answer?</label><br>
   {{ form.selfeval }}
 </div>
-{% endif %}
-
-<div class="fieldWrapper">
-  {{ form.emlist.errors }}
-  <label for="id_emlist">
-  Did this submitted answer make one of the following common errors?
-  </label><br>
-  {{ form.emlist }}
-</div>
 
 <div class="fieldWrapper">
   {{ form.status.errors }}
@@ -73,13 +64,22 @@ $( "#headtoggle" ).click(function() {
   {{ form.status }}
 </div>
 
-{% if doSelfEval %}
 <div class="fieldWrapper">
   {{ form.liked.errors }}
   {{ form.liked }}
   <label for="id_liked">Check here if this lesson really showed
                 you something you were missing before.</label><br>
 </div>
+
+{% else %}
+  Did
+  {% if response.author == user %}
+    your
+  {% else %} 
+    this submitted 
+  {% endif %}
+  answer make one of the following common errors?<br>
+  {{ form }}
 {% endif %}
 
 <p><input type="submit" value="Next" /></p>

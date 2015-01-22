@@ -1215,55 +1215,70 @@ def ul_respond(request, course_id, unit_id, ul_id):
     return pageData.render(request, 'ct/ask.html',
                   dict(unitLesson=ul, qtext=md2html(ul.lesson.text), form=form))
 
+def get_answer_html(unitLesson):
+    'get HTML text for answer associated with this lesson, if any'
+    try:
+        answer = unitLesson.get_answers()[0]
+    except IndexError:
+        return '(author has not provided an answer)'
+    else:
+        return md2html(answer.lesson.text)
+
+
 @login_required
-def assess(request, course_id, unit_id, ul_id, resp_id, doSelfEval=True,
-           redirectURL=None):
+def assess(request, course_id, unit_id, ul_id, resp_id):
     'student self-assessment'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
+    r = get_object_or_404(Response, pk=resp_id)
+    if request.method == 'POST':
+        form = SelfAssessForm(request.POST)
+        if form.is_valid():
+            r.selfeval = form.cleaned_data['selfeval']
+            r.status = form.cleaned_data['status']
+            r.save()
+            if form.cleaned_data['liked']:
+                liked = Liked(unitLesson=r.unitLesson,
+                              addedBy=request.user)
+                liked.save()
+            if r.selfeval == Response.CORRECT: # just go on to next lesson
+                defaultURL = lesson_next_url(request, r.unitLesson)
+            else: # ask student to assess their errors
+                defaultURL = reverse('ct:assess_errors',
+                    args=(course_id, unit_id, ul_id, resp_id))
+            return pageData.fsm_redirect(request, 'next', defaultURL)
+    else:
+        form = SelfAssessForm()
+    answer = get_answer_html(r.unitLesson)
+    return pageData.render(request, 'ct/assess.html',
+                dict(response=r, answer=answer, form=form, doSelfEval=True))
+
+@login_required
+def assess_errors(request, course_id, unit_id, ul_id, resp_id):
+    'classify error(s) in a given student response'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
     r = get_object_or_404(Response, pk=resp_id)
     allErrors = list(r.unitLesson.get_errors()) + unit.get_aborts()
     choices = [(e.id, e.lesson.title) for e in allErrors]
-    if doSelfEval:
-        formClass = SelfAssessForm
-    else:
-        formClass = AssessErrorsForm
     if request.method == 'POST':
-        form = formClass(request.POST)
+        form = AssessErrorsForm(request.POST)
         form.fields['emlist'].choices = choices
         if form.is_valid():
-            if doSelfEval:
-                r.selfeval = form.cleaned_data['selfeval']
-                r.status = form.cleaned_data['status']
-                r.save()
-                if form.cleaned_data['liked']:
-                    liked = Liked(unitLesson=r.unitLesson,
-                                  addedBy=request.user)
-                    liked.save()
+            if request.user == r.author:
+                status = r.status
+            else:
+                status = NEED_REVIEW_STATUS
             for emID in form.cleaned_data['emlist']:
                 em = get_object_or_404(UnitLesson, pk=emID)
                 se = r.studenterror_set.create(errorModel=em,
-                    author=request.user, status=form.cleaned_data['status'])
-            if not redirectURL: # default: go to next lesson
-                redirectURL = lesson_next_url(request, r.unitLesson)
-            return pageData.fsm_redirect(request, 'next', redirectURL)
+                    author=request.user, status=status)
+            defaultURL = get_object_url(request.path, ul, subpath='tasks')
+            return pageData.fsm_redirect(request, 'next', defaultURL)
     else:
-        form = formClass()
+        form = AssessErrorsForm()
         form.fields['emlist'].choices = choices
-    try:
-        answer = r.unitLesson.get_answers()[0]
-    except IndexError:
-        answer = '(author has not provided an answer)'
-    else:
-        answer = md2html(answer.lesson.text)
+    answer = get_answer_html(r.unitLesson)
     return pageData.render(request, 'ct/assess.html',
-                  dict(response=r, answer=answer, form=form,
-                       doSelfEval=doSelfEval))
-
-def assess_errors(request, course_id, unit_id, ul_id, resp_id):
-    ul = get_object_or_404(UnitLesson, pk=ul_id)
-    redirectURL = get_object_url(request.path, ul, subpath='tasks')
-    return assess(request, course_id, unit_id, ul_id, resp_id, False,
-           redirectURL)
+                dict(response=r, answer=answer, form=form, doSelfEval=False))
 
 ###############################################################
 # FSM user interface

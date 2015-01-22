@@ -44,13 +44,10 @@ class SelfAssessForm(forms.Form):
     liked = forms.BooleanField(required=False,
                 label='''Check here if this lesson really showed
                 you something you were missing before.''')
-    emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                       required=False)
 
 class AssessErrorsForm(forms.Form):
-    status = forms.ChoiceField(choices=(('', '----'),) + STATUS_CHOICES)
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                       required=False)
+                                       required=False, label='Common errors')
 
 class ReorderForm(forms.Form):
     newOrder = forms.ChoiceField()
