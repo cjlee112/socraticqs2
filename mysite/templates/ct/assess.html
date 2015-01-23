@@ -35,8 +35,25 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="StudyTabDiv">
 
+<input type="checkbox" id="anstoggle"
+{% if showAnswer %}
+CHECKED=""
+{% endif %}
+/>Show Author's Answer<BR>
+{% if showAnswer %}
+<div id="ansdiv">
+{% else %}
+<div id="ansdiv" style="display: none">
+{% endif %}
 <h3>Author's answer</h3> 
 {{ answer }}
+</div>
+
+<script>
+$( "#anstoggle" ).click(function() {
+  $( "#ansdiv" ).toggle();
+});
+</script>
 
 <h3>Submitted answer</h3> 
 {{ response.text |md2html }}
@@ -58,7 +75,19 @@ $( "#headtoggle" ).click(function() {
   answer make one of the following common errors?</h3>
   <form action="{{ actionTarget }}" method="post">
     {% csrf_token %}
-    {{ emForm }}
+<table class="table table-striped">
+<thead><tr>
+  <th>Common Errors</th>
+</tr></thead>
+<tbody>
+{% for em in errorModels %}
+  <tr>
+    <td><input type="checkbox" name="emlist" value="{{ em.id }}"/>
+        {{ em.lesson.title }}</a></td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
     <p><input type="submit" value="Next" /></p>
   </form>
 {% endif %}

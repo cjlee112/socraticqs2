@@ -1251,7 +1251,8 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
     answer = get_answer_html(r.unitLesson)
     set_crispy_action(request.path, form)
     return pageData.render(request, 'ct/assess.html',
-                dict(response=r, answer=answer, assessForm=form))
+                dict(response=r, answer=answer, assessForm=form,
+                     showAnswer=True))
 
 @login_required
 def assess_errors(request, course_id, unit_id, ul_id, resp_id):
@@ -1259,27 +1260,21 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
     r = get_object_or_404(Response, pk=resp_id)
     allErrors = list(r.unitLesson.get_errors()) + unit.get_aborts()
-    choices = [(e.id, e.lesson.title) for e in allErrors]
-    if request.method == 'POST':
-        form = AssessErrorsForm(request.POST)
-        form.fields['emlist'].choices = choices
-        if form.is_valid():
-            if request.user == r.author:
-                status = r.status
-            else:
-                status = NEED_REVIEW_STATUS
-            for emID in form.cleaned_data['emlist']:
-                em = get_object_or_404(UnitLesson, pk=emID)
-                se = r.studenterror_set.create(errorModel=em,
-                    author=request.user, status=status)
-            defaultURL = get_object_url(request.path, ul, subpath='tasks')
-            return pageData.fsm_redirect(request, 'next', defaultURL)
-    else:
-        form = AssessErrorsForm()
-        form.fields['emlist'].choices = choices
+    if request.method == 'POST' and 'emlist' in request.POST:
+        if request.user == r.author:
+            status = r.status
+        else:
+            status = NEED_REVIEW_STATUS
+        for emID in request.POST.getlist('emlist', []):
+            em = get_object_or_404(UnitLesson, pk=int(emID))
+            se = r.studenterror_set.create(errorModel=em, author=request.user,
+                                           status=status)
+        defaultURL = get_object_url(request.path, ul, subpath='tasks')
+        return pageData.fsm_redirect(request, 'next', defaultURL)
     answer = get_answer_html(r.unitLesson)
     return pageData.render(request, 'ct/assess.html',
-                dict(response=r, answer=answer, emForm=form))
+                dict(response=r, answer=answer, errorModels=allErrors,
+                     showAnswer=False))
 
 ###############################################################
 # FSM user interface
