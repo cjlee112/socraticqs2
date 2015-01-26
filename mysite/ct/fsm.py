@@ -33,12 +33,13 @@ class FSMStack(object):
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
         return path
-    def pop(self, request, **kwargs):
+    def pop(self, request, eventName='pop', **kwargs):
         nextState = self.state.parentState
         self.state.delete()
         self.state = nextState
         if nextState is not None:
             request.session['fsmID'] = nextState.pk
+            return self.event(request, eventName, **kwargs)
         else:
             del request.session['fsmID']
     def get_current_url(self):

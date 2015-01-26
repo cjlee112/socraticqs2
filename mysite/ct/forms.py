@@ -269,6 +269,15 @@ class LogoutForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', 'Sign out'))
 
+class CancelForm(forms.Form):
+    task = forms.CharField(initial='abort', widget=forms.HiddenInput)
+    def __init__(self, *args, **kwargs):
+        super(CancelForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-cancelForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Cancel this activity'))
+
 
 ###############################################################
 # utility functions

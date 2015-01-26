@@ -1294,4 +1294,13 @@ def fsm_node(request, node_id):
 def fsm_status(request):
     'display Activity Center UI'
     pageData = PageData(request)
-    return pageData.render(request, 'ct/fsm_status.html')
+    if request.method == 'POST':
+        if not pageData.fsmStack.state:
+            pageData.errorMessage = 'No activity ongoing currently!'
+        elif 'abort' == request.POST.get('task', None):
+            pageData.fsmStack.pop(request, eventName='abort')
+            pageData.statusMessage = 'Activity canceled.'
+    cancelForm = CancelForm()
+    set_crispy_action(request.path, cancelForm)
+    return pageData.render(request, 'ct/fsm_status.html',
+                           dict(cancelForm=cancelForm))
