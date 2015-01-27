@@ -12,12 +12,6 @@
 
 {% block content %}
 
-{% if pageData.errorMessage %}
-  <p><b>{{ pageData.errorMessage }}</b></p>
-{% elif pageData.statusMessage %}
-  <p><b>{{ pageData.statusMessage }}</b></p>
-{% endif %}
-
 {% if fsmStack.state %}
   You are currently in the middle of an activity:
   <b>{{ fsmStack.state.title }}</b>.

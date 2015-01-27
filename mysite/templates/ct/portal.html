@@ -77,6 +77,12 @@ function toggleInterest(o, targeturl, csrftoken)
     </div>
   </nav>
 
+  {% if pageData.errorMessage %}
+    <p><b>{{ pageData.errorMessage }}</b></p>
+  {% elif pageData.statusMessage %}
+    <p><b>{{ pageData.statusMessage }}</b></p>
+  {% endif %}
+
   {% if fsmStack.state %}
     {% if pageData.fsm_on_path %}
       {% if fsmStack.state.fsmNode.help %}
