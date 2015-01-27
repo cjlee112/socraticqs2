@@ -1266,8 +1266,16 @@ class FSMState(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
-    def event(self, fsmStack, request, eventName, **kwargs):
+    def event(self, fsmStack, request, eventName, unitLesson=False, **kwargs):
         'trigger proper consequences if any for this event, return URL if any'
+        if unitLesson is not False: # store new lesson binding
+            self.unitLesson = kwargs['unitLesson'] = unitLesson
+            self.save()
+        elif eventName.startswith('select_'): # store selected object
+            className = eventName[7:]
+            attr = className[0].lower() + className[1:]
+            self.set_data_attr(attr, kwargs[attr])
+            self.save_json_data()
         return self.fsmNode.event(fsmStack, request, eventName, **kwargs)
     def start_fsm(self, fsmStack, request, stateData, **kwargs):
         'initialize new FSM by calling START node and saving state data to db'

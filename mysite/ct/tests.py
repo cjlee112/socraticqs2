@@ -171,6 +171,10 @@ class FSMTests(TestCase):
                                              password='top_secret')
         self.unit = Unit(title='My Courselet', addedBy=self.user)
         self.unit.save()
+        self.lesson = Lesson(title='Big Deal', text='very interesting info',
+                             addedBy=self.user)
+        self.lesson.save_root()
+        self.unitLesson = UnitLesson.create_from_lesson(self.lesson, self.unit)
     def test_load(self):
         'check loading an FSM graph, and replacing it'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
@@ -225,25 +229,35 @@ class FSMTests(TestCase):
         spec = get_specs()[0]
         f = spec.save_graph('jacob')
         self.do_start(f)
-    def do_start(self, f):
+    def test_start3(self):
+        'check that FSMState saves unitLesson, select_ data'
+        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        fsmStack = self.do_start(f, unitLesson=self.unitLesson)
+        self.assertEqual(fsmStack.state.unitLesson, self.unitLesson)
+        request = FakeRequest(self.user)
+        # now try a select_ event
+        fsmStack.event(request, 'select_Lesson', lesson=self.lesson)
+        self.assertEqual(fsmStack.state.get_data_attr('lesson'), self.lesson)
+    def do_start(self, f, **kwargs):
         'run tests of basic startup of new FSM instance'
         fsmData = dict(unit=self.unit, foo='bar')
         request = FakeRequest(self.user)
         fsmStack = fsm.FSMStack(request)
         self.assertIsNone(fsmStack.state)
         try:
-            result = fsmStack.push(request, 'invalid', stateData=fsmData)
+            result = fsmStack.push(request, 'invalid', stateData=fsmData, **kwargs)
         except FSM.DoesNotExist:
             pass
         else:
             raise AssertionError('failed to catch bad FSM query')
-        result = fsmStack.push(request, 'test', stateData=fsmData)
+        result = fsmStack.push(request, 'test', stateData=fsmData, **kwargs)
         self.assertEqual(request.session['fsmID'], fsmStack.state.pk)
         self.assertEqual(fsmStack.state.load_json_data(), fsmData)
         self.assertEqual(fsmStack.state.fsmNode.name, 'MID')
         self.assertEqual(fsmStack.state.fsmNode.path, 'ct:about')
         self.assertEqual(fsmStack.state.fsmNode.get_path(0, 0), '/ct/about/')
         self.assertEqual(result, '/ct/about/')
+        return fsmStack
     def test_trivial_plugin(self):
         'check trivial plugin import and call'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
