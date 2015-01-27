@@ -65,16 +65,34 @@ class ASSESS(object):
     title = 'Assess your answer'
     edges = (
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
+class ERRORS(object):
+    next_edge = next_lesson
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    edges = (
+            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+        )
+
+class END(object):
+    def get_path(self, node, state, request, **kwargs):
+        'get URL for next steps in this unit'
+        unitStatus = state.get_data_attr('unitStatus')
+        return unitStatus.unit.get_study_url(request.path)
+    # node specification data goes here
+    title = 'Courselet core lessons completed'
+    help = '''Congratulations!  You have completed the core lessons for this
+    courselet.  See below for suggested next steps for what to study now in
+    this courselet.'''
+
+        
 def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='lessonseq', hideTabs=True,
             title='Take the courselet core lessons',
-            pluginNodes=[START, LESSON, ASK, ASSESS], # nodes w/ plugin code
-            nodeDict=dict( # all other nodes
-                END=dict(title='end here', path='ct:home'),
-            ),
+            pluginNodes=[START, LESSON, ASK, ASSESS, ERRORS, END],
         )
     return (spec,)
 

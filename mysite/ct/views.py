@@ -121,6 +121,11 @@ class PageData(object):
         self.fsmStack = FSMStack(request)
         for k,v in kwargs.items():
             setattr(self, k, v)
+        try:
+            self.statusMessage = request.session['statusMessage']
+            del request.session['statusMessage']
+        except KeyError:
+            pass
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
                      addNextButton=False, **kwargs):
         'check whether fsm intercepts this event and returns redirect'
@@ -1241,11 +1246,13 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
                               addedBy=request.user)
                 liked.save()
             if r.selfeval == Response.CORRECT: # just go on to next lesson
+                eventName = 'next'
                 defaultURL = lesson_next_url(request, r.unitLesson)
             else: # ask student to assess their errors
+                eventName = 'error' # student made an error
                 defaultURL = reverse('ct:assess_errors',
                     args=(course_id, unit_id, ul_id, resp_id))
-            return pageData.fsm_redirect(request, 'next', defaultURL)
+            return pageData.fsm_redirect(request, eventName, defaultURL)
     else:
         form = SelfAssessForm()
     answer = get_answer_html(r.unitLesson)
