@@ -2,11 +2,13 @@ from ct.models import FSM
 
 class FSMSpecification(object):
     'convenience class for specifying an FSM graph, loading it'
-    def __init__(self, name, title, nodeDict, edges=None,
+    def __init__(self, name, title, nodeDict=None, edges=None,
                  pluginNodes=(), **kwargs):
         kwargs['name'] = name
         kwargs['title'] = title
         self.fsmData = kwargs
+        if not nodeDict:
+            nodeDict = {}
         if not edges:
             edges = []
         for node in pluginNodes: # expect list of node class objects
@@ -18,7 +20,7 @@ class FSMSpecification(object):
             d['path'] = getattr(node, 'path', None)
             d['data'] = getattr(node, 'data', None)
             nodeDict[name] = d
-            for e in node.edges:
+            for e in getattr(node, 'edges', ()):
                 e['fromNode'] = name
                 edges.append(e)
         self.nodeData = nodeDict
