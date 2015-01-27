@@ -664,6 +664,10 @@ class Unit(models.Model):
         return distinct_subset(self.unitlesson_set
             .filter(response__studenterror__status__in=
                     [NEED_HELP_STATUS, NEED_REVIEW_STATUS], **kwargs))
+    def get_study_url(self, path):
+        'return URL for next study tasks on this unit'
+        from ct.templatetags.ct_extras import get_base_url
+        return get_base_url(path, ['tasks'])
     def __unicode__(self):
         return self.title
 
