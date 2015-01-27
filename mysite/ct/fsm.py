@@ -22,7 +22,11 @@ class FSMStack(object):
             return
         path = self.state.event(self, request, eventName, **kwargs)
         if self.state.fsmNode.name == 'END': # reached terminal state
-            self.pop(request)
+            if self.state.fsmNode.help: # save its help message
+                request.session['statusMessage'] = self.state.fsmNode.help
+            parentPath = self.pop(request)
+            if parentPath: # let parent FSM redirect us to its current state
+                return parentPath
         return path
     def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
         'start running a new FSM instance (layer)'
@@ -34,6 +38,7 @@ class FSMStack(object):
         request.session['fsmID'] = self.state.pk
         return path
     def pop(self, request, eventName='pop', **kwargs):
+        'pop current FSM state and pass event to next stack state if any'
         nextState = self.state.parentState
         self.state.delete()
         self.state = nextState
