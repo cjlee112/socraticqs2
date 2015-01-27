@@ -1,4 +1,4 @@
-import models
+from models import FSM, FSMState, FSMBadUserError, FSMStackResumeError
 
 class FSMStack(object):
     'main interface to our current FSM if any'
@@ -9,8 +9,8 @@ class FSMStack(object):
             self.state = None
             return
         try:
-            self.state = models.FSMState.objects.get(pk=fsmID)
-        except models.FSMState.DoesNotExist:
+            self.state = FSMState.objects.get(pk=fsmID)
+        except FSMState.DoesNotExist:
             del request.session['fsmID']
             self.state = None
     def event(self, request, eventName='next', **kwargs):
@@ -26,8 +26,8 @@ class FSMStack(object):
         return path
     def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
         'start running a new FSM instance (layer)'
-        fsm = models.FSM.objects.get(name=fsmName)
-        self.state = models.FSMState(user=request.user, fsmNode=fsm.startNode,
+        fsm = FSM.objects.get(name=fsmName)
+        self.state = FSMState(user=request.user, fsmNode=fsm.startNode,
                 parentState=self.state, title=fsm.title, hideTabs=fsm.hideTabs,
                 hideLinks=fsm.hideLinks, hideNav=fsm.hideNav, **kwargs)
         path = self.state.start_fsm(self, request, stateData, **startArgs)
@@ -42,6 +42,16 @@ class FSMStack(object):
             return self.event(request, eventName, **kwargs)
         else:
             del request.session['fsmID']
+    def resume(self, request, stateID):
+        'resume an orphaned activity'
+        state = FSMState.objects.get(pk=int(stateID))
+        if state.user != request.user:
+            raise FSMBadUserError('user mismatch!!')
+        elif state.children.count() > 0:
+            raise FSMStackResumeError('can only resume innermost stack level')
+        self.state = state
+        request.session['fsmID'] = self.state.pk
+        return self.get_current_url()
     def get_current_url(self):
         'get URL for resuming at current FSM state'
         if self.state:

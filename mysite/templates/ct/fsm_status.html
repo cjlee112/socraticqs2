@@ -55,6 +55,30 @@ $( "#headtoggle" ).click(function() {
   </ul>
 {% else %}
   You currently have no ongoing activities.
+  {% if unfinished %}
+    <h3>Unfinished Activities</h3>
+    If you wish, you can resume (or cancel) one of the following 
+    unfinished activities begun in a previous login session:
+<table class="table table-striped">
+<thead><tr>
+  <th>Unfinished activities</th>
+</tr></thead>
+<tbody>
+{% for state in unfinished %}
+  <tr>
+    <td><b>{{ state.title }}</b> (started {{ state.atime|display_datetime }}):
+        {{ state.description }}
+        <form action="{{ actionTarget }}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="fsmstate_id" value="{{ state.id }}"/>
+        <input type="submit" value="Resume this activity" />
+     </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+    
+  {% endif %}
 {% endif %}
 
 {% endblock %}

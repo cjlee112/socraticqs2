@@ -1210,6 +1210,11 @@ class FSMNode(models.Model):
 
 class FSMDone(ValueError):
     pass
+class FSMBadUserError(ValueError):
+    'request.user does not match state.user'
+    pass
+class FSMStackResumeError(ValueError):
+    pass
 
 class FSMEdge(models.Model):
     'stores one edge of an FSM state-graph'

@@ -1295,12 +1295,29 @@ def fsm_status(request):
     'display Activity Center UI'
     pageData = PageData(request)
     if request.method == 'POST':
-        if not pageData.fsmStack.state:
+        if 'fsmstate_id' in request.POST:
+            try:
+                url = pageData.fsmStack.resume(request,
+                                               request.POST['fsmstate_id'])
+            except FSMBadUserError:
+                pageData.errorMessage = 'Cannot access activity belonging to another user'
+            except FSMStackResumeError:
+                pageData.errorMessage = 'This activity is waiting for a sub-activity to complete, and hence cannot be resumed (you should complete or cancel the sub-activity first).'
+            except FSMState.DoesNotExist:
+                pageData.errorMessage = 'Activity not found!'
+            else: # redirect to this activity
+                return HttpResponseRedirect(url)
+        elif not pageData.fsmStack.state:
             pageData.errorMessage = 'No activity ongoing currently!'
         elif 'abort' == request.POST.get('task', None):
             pageData.fsmStack.pop(request, eventName='abort')
             pageData.statusMessage = 'Activity canceled.'
+    if not pageData.fsmStack.state: # search for unfinished activities
+        unfinished = FSMState.objects.filter(user=request.user,
+                                             children__isnull=True)
+    else:
+        unfinished = None
     cancelForm = CancelForm()
     set_crispy_action(request.path, cancelForm)
     return pageData.render(request, 'ct/fsm_status.html',
-                           dict(cancelForm=cancelForm))
+                           dict(cancelForm=cancelForm, unfinished=unfinished))
