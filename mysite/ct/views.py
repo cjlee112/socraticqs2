@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.utils.safestring import mark_safe
 from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -131,12 +131,6 @@ class PageData(object):
         'check whether fsm intercepts this event and returns redirect'
         if not self.fsmStack.state: # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
-        if not eventName and addNextButton: # must supply Next form
-            if request.method == 'POST':
-                eventName = 'next' # tell FSM this is next event
-            else:
-                self.nextForm = NextForm()
-                set_crispy_action(request.path, self.nextForm)
         # now we check here whether event is actually from path matching
         # this node
         referer = request.META.get('HTTP_REFERER', '')
@@ -144,6 +138,30 @@ class PageData(object):
         if request.method == 'POST' and referer != self.fsmStack.state.path:
             r = None # don't even call FSM with POST events from other pages.
         else: # event from current node's page
+            if not eventName: # handle Next and Select POST requests
+                if request.method == 'POST':
+                    task = request.POST.get('task', '')
+                    if 'next' == task:
+                        eventName = 'next' # tell FSM this is next event
+                    elif task.startswith('select_'):
+                        className = task[7:]
+                        attr = className[0].lower() + className[1:]
+                        try:
+                            klass = klassNameDict[className]
+                            selectID = int(request.POST['selectID'])
+                        except (KeyError,ValueError):
+                            return HttpResponse('bad select', status=400)
+                        eventName = task # pass event and object to FSM
+                        kwargs[attr] = get_object_or_404(klass, pk=selectID)
+                    elif not task:
+                        return HttpResponse('''POST not processed by view?
+                                               null eventName''', status=400)
+                    else:
+                        return HttpResponse('invalid fsm task: %s' % task,
+                                            status=400)
+                elif addNextButton: # must supply Next form
+                    self.nextForm = NextForm()
+                    set_crispy_action(request.path, self.nextForm)
             r = self.fsmStack.event(request, eventName, defaultURL=defaultURL,
                                     **kwargs)
         if r: # let FSM override the default URL

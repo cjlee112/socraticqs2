@@ -13,6 +13,10 @@ class FSMStack(object):
         except FSMState.DoesNotExist:
             del request.session['fsmID']
             self.state = None
+            return
+        for e in self.state.fsmNode.outgoing.all(): # detect selection edges
+            if e.name.startswith('select_'):
+                setattr(self, e.name, e) # make available to HTML templates
     def event(self, request, eventName='next', **kwargs):
         '''top-level interface for passing event to a running FSM instance.
         If FSM handles this event, return a redirect that over-rides
