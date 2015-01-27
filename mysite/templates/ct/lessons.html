@@ -59,6 +59,16 @@ $( "#headtoggle" ).click(function() {
 {% for ul in lessonTable %}
   <tr>
     <td><a href="{{ actionTarget |get_home_url:ul }}">{{ ul.lesson.title }}</a>
+    {% if fsmStack.select_UnitLesson %}
+      <form action="{{ actionTarget }}" method="post"
+            style=" display:inline!important;">
+      {% csrf_token %}
+      <input type="hidden" name="task" value="select_UnitLesson" />
+      <input type="hidden" name="selectID" value="{{ ul.pk }}" />
+      <input type="submit" value="{{ fsmStack.select_UnitLesson.title }}"
+             title="{{ fsmStack.select_UnitLesson.help }}" />
+      </form>
+    {% endif %}
     </td>
     <td>{{ ul.lesson.get_kind_display }}</td>
     {% if ul.reorderForm %}
