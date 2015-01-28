@@ -130,11 +130,12 @@ class LessonMethodTests(TestCase):
 fsmDict = dict(name='test', title='try this')
 nodeDict = dict(START=dict(title='start here', path='ct:home',
                            funcName='testme.START'),
-                MID=dict(title='in the middle', path='ct:about'),
+                MID=dict(title='in the middle', path='ct:about', doLogging=True),
                 END=dict(title='end here', path='ct:home'),
     )
 edgeDict = (
     dict(name='next', fromNode='START', toNode='END', title='go go go'),
+    dict(name='select_Lesson', fromNode='MID', toNode='MID', title='go go go'),
     )
 
 def load_fsm2(username):
@@ -230,14 +231,28 @@ class FSMTests(TestCase):
         f = spec.save_graph('jacob')
         self.do_start(f)
     def test_start3(self):
-        'check that FSMState saves unitLesson, select_ data'
+        'check that FSMState saves unitLesson, select_ data, and logging'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
         fsmStack = self.do_start(f, unitLesson=self.unitLesson)
         self.assertEqual(fsmStack.state.unitLesson, self.unitLesson)
+        request = FakeRequest(self.user, method='GET')
+        # check logging on the MID node
+        fsmStack.event(request, None) # send a render event to log
+        self.assertEqual(fsmStack.state.activity.fsmName, 'test')
+        ae = fsmStack.state.activityEvent
+        self.assertEqual(ae.nodeName, 'MID')
+        self.assertEqual(ae.unitLesson, self.unitLesson)
+        self.assertIsNotNone(ae.startTime)
+        self.assertIsNone(ae.endTime)
         request = FakeRequest(self.user)
         # now try a select_ event
         fsmStack.event(request, 'select_Lesson', lesson=self.lesson)
         self.assertEqual(fsmStack.state.get_data_attr('lesson'), self.lesson)
+        # check that exit from MID node was logged
+        self.assertIsNotNone(ae.endTime)
+        self.assertTrue(ae.endTime > ae.startTime)
+        self.assertEqual(ae.exitEvent, 'select_Lesson')
+        self.assertIsNone(fsmStack.state.activityEvent)
     def do_start(self, f, **kwargs):
         'run tests of basic startup of new FSM instance'
         fsmData = dict(unit=self.unit, foo='bar')

@@ -733,6 +733,7 @@ class Response(models.Model):
     author = models.ForeignKey(User)
     needsEval = models.BooleanField(default=False)
     parent = models.ForeignKey('Response', null=True) # reply-to
+    activity = models.ForeignKey('ActivityLog', null=True)
     def __unicode__(self):
         return 'answer by ' + self.author.username
     @classmethod
@@ -798,6 +799,7 @@ class StudentError(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
                               blank=False, null=True)
     author = models.ForeignKey(User)
+    activity = models.ForeignKey('ActivityLog', null=True)
     def __unicode__(self):
         return 'eval by ' + self.author.username
     @classmethod
@@ -1176,6 +1178,7 @@ class FSMNode(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     funcName = models.CharField(max_length=200, null=True)
+    doLogging = models.BooleanField(default=False)
     load_json_data = load_json_data
     save_json_data = save_json_data
     get_data_attr = get_data_attr
@@ -1261,14 +1264,19 @@ class FSMState(models.Model):
     hideTabs = models.BooleanField(default=False)
     hideLinks = models.BooleanField(default=False)
     hideNav = models.BooleanField(default=False)
+    isLiveSession = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
+    activity = models.ForeignKey('ActivityLog', null=True)
+    activityEvent = models.ForeignKey('ActivityEvent', null=True)
     load_json_data = load_json_data
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
     def event(self, fsmStack, request, eventName, unitLesson=False, **kwargs):
         'trigger proper consequences if any for this event, return URL if any'
-        if unitLesson is not False: # store new lesson binding
+        if not eventName: # render event
+            self.log_entry()
+        elif unitLesson is not False: # store new lesson binding
             self.unitLesson = kwargs['unitLesson'] = unitLesson
             self.save()
         elif eventName.startswith('select_'): # store selected object
@@ -1291,11 +1299,59 @@ class FSMState(models.Model):
             e = self.fsmNode.outgoing.get(name=name)
         except FSMEdge.DoesNotExist:
             return None # FSM does not handle this event, return control
+        if self.activityEvent: # record exit from this node
+            self.activityEvent.log_exit_event(name)
+            self.activityEvent = None
         self.fsmNode = e.transition(fsmStack, request, **kwargs)
         self.path = self.fsmNode.get_path(self, request, **kwargs)
         self.save()
         return self.path
+    def log_entry(self):
+        'record entry to this node if fsmNode.doLogging True'
+        if not self.fsmNode.doLogging:
+            return
+        if self.activityEvent and self.activityEvent.nodeName == self.fsmNode.name:
+            return
+        # NB: should probably extract unitLesson ID from request.path!!
+        if self.activity: # record to existing activity
+            self.activityEvent = ActivityEvent(activity=self.activity,
+                            nodeName=fsmNode.name, unitLesson=self.unitLesson)
+            self.activityEvent.save()
+        else: # create new activity log
+            self.activityEvent = ActivityLog.log_node_entry(self.fsmNode,
+                                                            self.unitLesson)
+            self.activity = self.activityEvent.activity
+        self.save()
 
         
-    
+class ActivityLog(models.Model):
+    'a category of FSM activity to log'    
+    fsmName = models.CharField(max_length=64)
+    startTime = models.DateTimeField('time created', default=timezone.now)
+    endTime = models.DateTimeField('time ended', null=True)
+    course = models.ForeignKey(Course, null=True)
+    @classmethod
+    def log_node_entry(klass, fsmNode, unitLesson=None):
+        'record entry to this node, creating ActivityLog if needed'
+        try:
+            a = klass.objects.get(fsmName=fsmNode.fsm.name)
+        except klass.DoesNotExist:
+            a = klass(fsmName=fsmNode.fsm.name)
+            a.save()
+        ae = ActivityEvent(activity=a, nodeName=fsmNode.name,
+                           unitLesson=unitLesson)
+        ae.save()
+        return ae
 
+class ActivityEvent(models.Model):
+    'log FSM node entry/exit times'
+    activity = models.ForeignKey(ActivityLog)
+    nodeName = models.CharField(max_length=64)
+    unitLesson = models.ForeignKey(UnitLesson, null=True)
+    startTime = models.DateTimeField('time created', default=timezone.now)
+    endTime = models.DateTimeField('time ended', null=True)
+    exitEvent = models.CharField(max_length=64)
+    def log_exit_event(self, eventName):
+        self.exitEvent = eventName
+        self.endTime = timezone.now()
+        self.save()
