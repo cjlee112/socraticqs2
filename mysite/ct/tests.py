@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from ct.models import *
-from ct import views, fsm
+from ct import views, fsm, ct_util
 
 class ConceptMethodTests(TestCase):
     def setUp(self):
@@ -300,3 +300,20 @@ class FSMTests(TestCase):
         self.assertEqual(request.session, {})
         self.assertIsNone(fsmStack.state)
         
+class ReversePathTests(TestCase):
+    def test_home(self):
+        'test trimming of args not needed for target'
+        url = ct_util.reverse_path_args('ct:home',
+                        '/ct/teach/courses/21/units/33/errors/2/')
+        self.assertEqual(url, reverse('ct:home'))
+    def test_ul_teach(self):
+        'check proper extraction of args from path'
+        url = ct_util.reverse_path_args('ct:ul_teach',
+                        '/ct/teach/courses/21/units/33/errors/2/')
+        self.assertEqual(url, reverse('ct:ul_teach', args=(21, 33, 2)))
+    def test_ul_id(self):
+        'test handling of ID kwargs'
+        url = ct_util.reverse_path_args('ct:ul_teach',
+                        '/ct/teach/courses/21/units/33/', ul_id=2)
+        self.assertEqual(url, reverse('ct:ul_teach', args=(21, 33, 2)))
+                                     
