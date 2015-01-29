@@ -33,13 +33,38 @@ def get_path_kwargs(path):
 # use this as the default arglist: valid for any unitlesson path
 unitLessonDefaultArgs = ('course_id', 'unit_id', 'ul_id')
 # standard arglists for different types of data
+COURSEARGS = ('course_id',)
 UNITARGS = ('course_id', 'unit_id')
+RESPONSE_ARGS = ('course_id', 'unit_id', 'ul_id', 'resp_id')
 
 # must specify what args each target expects, or reverse() will crash
 reverseArgLists = {
+    # instructor UI
     'ct:home':(),
     'ct:about':(),
+    'ct:person_profile':('user_id',),
+    'ct:course':COURSEARGS,
+    'ct:edit_course':COURSEARGS,
+    'ct:unit_tasks':UNITARGS,
+    'ct:unit_concepts':UNITARGS,
     'ct:unit_lessons':UNITARGS,
+    'ct:unit_resources':UNITARGS,
+    'ct:edit_unit':UNITARGS,
+    'ct:ul_thread':RESPONSE_ARGS,
+    'ct:concept_thread':RESPONSE_ARGS,
+    'ct:error_thread':RESPONSE_ARGS,
+    'ct:assess_teach':RESPONSE_ARGS,
+    # student UI
+    'ct:course_student':COURSEARGS,
+    'ct:study_unit':UNITARGS,
+    'ct:unit_tasks_student':UNITARGS,
+    'ct:unit_lessons_student':UNITARGS,
+    'ct:unit_concepts_student':UNITARGS,
+    'ct:ul_thread_student':RESPONSE_ARGS,
+    'ct:concept_thread_student':RESPONSE_ARGS,
+    'ct:error_thread_student':RESPONSE_ARGS,
+    'ct:assess':RESPONSE_ARGS,
+    'ct:assess_errors':RESPONSE_ARGS,
 }
 
 def reverse_path_args(target, path, **kwargs):
