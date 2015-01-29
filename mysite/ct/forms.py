@@ -82,7 +82,7 @@ class NextLikeForm(forms.Form):
     
 
 class NextForm(forms.Form):
-    task = forms.CharField(initial='next', widget=forms.HiddenInput)
+    fsmtask = forms.CharField(initial='next', widget=forms.HiddenInput)
     def __init__(self, *args, **kwargs):
         super(NextForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)

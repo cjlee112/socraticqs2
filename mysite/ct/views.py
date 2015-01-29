@@ -140,7 +140,7 @@ class PageData(object):
         else: # event from current node's page
             if not eventName: # handle Next and Select POST requests
                 if request.method == 'POST':
-                    task = request.POST.get('task', '')
+                    task = request.POST.get('fsmtask', '')
                     if 'next' == task:
                         eventName = 'next' # tell FSM this is next event
                     elif task.startswith('select_'):
@@ -153,10 +153,7 @@ class PageData(object):
                             return HttpResponse('bad select', status=400)
                         eventName = task # pass event and object to FSM
                         kwargs[attr] = get_object_or_404(klass, pk=selectID)
-                    elif not task:
-                        return HttpResponse('''POST not processed by view?
-                                               null eventName''', status=400)
-                    else:
+                    elif task:
                         return HttpResponse('invalid fsm task: %s' % task,
                                             status=400)
                 elif addNextButton: # must supply Next form

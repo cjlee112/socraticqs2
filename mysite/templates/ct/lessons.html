@@ -63,7 +63,7 @@ $( "#headtoggle" ).click(function() {
       <form action="{{ actionTarget }}" method="post"
             style=" display:inline!important;">
       {% csrf_token %}
-      <input type="hidden" name="task" value="select_UnitLesson" />
+      <input type="hidden" name="fsmtask" value="select_UnitLesson" />
       <input type="hidden" name="selectID" value="{{ ul.pk }}" />
       <input type="submit" value="{{ fsmStack.select_UnitLesson.title }}"
              title="{{ fsmStack.select_UnitLesson.help }}" />
