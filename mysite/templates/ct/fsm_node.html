@@ -12,15 +12,42 @@
 
 {% block content %}
 
-{{ fsmStack.state.fsmNode.description }}
+{% if fsmStack.state.fsmNode.description %}
+  {{ fsmStack.state.fsmNode.description }}
+{% else %}
+  This page will give you one or more options for next steps
+  in this activity.  For additional options (e.g. end or cancel
+  this activity), click the activity link above on the navigation bar.
+{% endif %}
 
 {% if pageData.nextForm %}
   {% for e in fsmStack.state.fsmNode.outgoing.all %}
-    <h3>Next Steps: {{ e.title }}</h3>
-    {{ e.description }}
+    <h3>Next: {{ e.title }}</h3>
+    {% if e.description %}
+      {{ e.description }}
+    {% else %}
+      Click the Next button to advance to this step.
+    {% endif %}
   {% endfor %}
 
   {% crispy pageData.nextForm %}
+
+{% else %}
+ edges: {{ fsmStack.state.fsmNode.outgoing.count }}
+  <h2>Possible Next Steps</h2>
+  {% for e in fsmStack.state.fsmNode.outgoing.all %}
+    <h3>{{ e.title }}</h3>
+    {% if e.description %}
+      {{ e.description }}
+    {% else %}
+      Click the button to advance to this step.
+    {% endif %}
+    <form action="{{ actionTarget }}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="fsmtask" value="{{ e.name }}" />
+    <input type="submit" value="{{ e.title }}" />
+    </form>
+  {% endfor %}
 {% endif %}
 
 {% endblock %}
