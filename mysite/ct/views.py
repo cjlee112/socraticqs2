@@ -772,7 +772,22 @@ def ul_teach(request, course_id, unit_id, ul_id):
                                      reverseArgs=kwargs, unitLesson=ulNew)
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable))
+                       evalTable=evalTable), addNextButton=True)
+
+@login_required
+def live_question(request, course_id, unit_id, ul_id):
+    'show response progress during live question'
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
+                                         False)
+    query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
+              kind=Response.ORCT_RESPONSE)
+    n = pageData.fsmStack.state.linkChildren.count() # live session students
+    statusTable, n = Response.get_counts(query, n=n, tableKey='confidence',
+                                         simpleTable=True)
+    return pageData.render(request, 'ct/live_question.html',
+                  dict(unitLesson=ul, unit=unit, statusTable=statusTable),
+                  addNextButton=True)
+
 
 @login_required
 def ul_tasks(request, course_id, unit_id, ul_id):
