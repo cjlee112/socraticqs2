@@ -10,6 +10,12 @@
   {{ pageData.title }}
 {% endblock %}
 
+{% block refresher %}
+{% if refreshInterval %}
+<meta http-equiv="Refresh" content="{{ refreshInterval }}; url={{ actionTarget }}">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 
 <ul class="nav nav-tabs">
@@ -50,6 +56,10 @@ this courselet by clicking the Add button below.</b>
 {% if unitLesson.lesson.url %}
 <b>Read <a href="{{ unitLesson.lesson.url }}">more information here</a></b>.
 <br>
+{% endif %}
+
+{% if elapsedTime %}
+  <b>Time Elapsed:</b> {{ elapsedTime }}<br>
 {% endif %}
 
 <b>Author</b>: <a href="/ct/people/{{ unitLesson.lesson.addedBy.pk }}/">{{ unitLesson.lesson.addedBy.get_full_name }}</a>
