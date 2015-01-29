@@ -680,6 +680,25 @@ class Unit(models.Model):
 def fmt_count(c, n):
     return '%.0f%% (%d)' % (c * 100. / n, c)
 
+class CountsTable(object):
+    'simple holder for one row of pretty-printed counts w/ headings & title'
+    def __init__(self, title, choices, n, countDict):
+        self.title = title
+        self.headings = []
+        counts = []
+        for k, heading in choices:
+            self.headings.append(heading)
+            counts.append(countDict.get(k, 0))
+        self.headings.append('(not yet)')
+        total = sum(counts)
+        if total > 0:
+            counts.append(n - total)
+            self.data = [fmt_count(i, n) for i in counts]
+        else:
+            self.data = ()
+    def __len__(self):
+        return len(self.data)
+
 NEED_HELP_STATUS = 'help'
 NEED_REVIEW_STATUS = 'review'
 DONE_STATUS = 'done'
@@ -687,6 +706,11 @@ STATUS_CHOICES = (
     (NEED_HELP_STATUS, 'Still confused, need help'),
     (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
     (DONE_STATUS, 'Solidly'),
+)
+STATUS_TABLE_LABELS = (
+    (NEED_HELP_STATUS, 'Still confused, need help'),
+    (NEED_REVIEW_STATUS, 'OK, but need review'),
+    (DONE_STATUS, 'Solid understanding'),
 )
 
         
@@ -739,7 +763,8 @@ class Response(models.Model):
         return 'answer by ' + self.author.username
     @classmethod
     def get_counts(klass, query, fmt_count=fmt_count, n=0, tableKey='status',
-                   simpleTable=False):
+                   simpleTable=False,
+                   title='Student Status for Understanding This Lesson'):
         'generate display tables for Response data'
         querySet = klass.objects.filter(query)
         statusDict = {}
@@ -749,17 +774,11 @@ class Response(models.Model):
             n = querySet.count()
         if not n: # prevent DivideByZero
             return (), (), 0
-        choices = dict(status=STATUS_CHOICES,
+        choices = dict(status=STATUS_TABLE_LABELS,
                        confidence=klass.CONF_CHOICES)[tableKey]
-        statusTable = [statusDict.get(k, 0) for k,_ in choices]
-        nStatus = sum(statusTable)
-        if nStatus > 0: # construct table to display
-            statusTable.append(n - nStatus)
-            statusTable = [fmt_count(i, n) for i in statusTable]
-        else: # no data
-            statusTable = ()
+        statusTable = CountsTable(title, choices, n, statusDict)
         if simpleTable: # caller only wants statusTable
-            return statusTable, n
+            return statusTable, n, None
         evalDict = {}
         for d in querySet.values('confidence', 'selfeval') \
           .annotate(dcount=Count('confidence')):

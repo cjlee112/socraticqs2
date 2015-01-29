@@ -60,21 +60,23 @@ this courselet by clicking the Add button below.</b>
 
 {% if elapsedTime %}
   <b>Time Elapsed:</b> {{ elapsedTime }}<br>
+{% elif startForm %}
+  When ready, click here to start the lesson timer:
+  {% crispy startForm %}
 {% endif %}
 
 <b>Author</b>: <a href="/ct/people/{{ unitLesson.lesson.addedBy.pk }}/">{{ unitLesson.lesson.addedBy.get_full_name }}</a>
 {% if statusTable %}
-<h2>Student Status for Understanding This Lesson</h2>
+<h2>{{ statusTable.title }}</h2>
 
 <table class="table table-striped">
   <thead><tr>
-    <th>Still confused, need help</th>
-    <th>OK, but need review</th>
-    <th>Solid understanding</th>
-    <th>(not yet)</th>
+    {% for c in statusTable.headings %}
+      <th>{{ c }}</th>
+    {% endfor %}
   </tr></thead>
   <tbody><tr>
-    {% for c in statusTable %}
+    {% for c in statusTable.data %}
     <td>{{ c }}</td>
     {% endfor %}
   </tr></tbody>

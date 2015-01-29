@@ -803,9 +803,9 @@ def live_question(request, course_id, unit_id, ul_id):
     query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
               kind=Response.ORCT_RESPONSE)
     n = pageData.fsmStack.state.linkChildren.count() # live session students
-    statusTable, n = Response.get_counts(query, n=n, tableKey='confidence',
-                                         simpleTable=True)
-    return pageData.render(request, 'ct/live_question.html',
+    statusTable = Response.get_counts(query, n=n, tableKey='confidence',
+                    simpleTable=True, title='Student Responses')[0]
+    return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        startForm=startForm), addNextButton=True)
 
