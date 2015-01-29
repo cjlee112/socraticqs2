@@ -60,6 +60,8 @@ this courselet by clicking the Add button below.</b>
 
 {% if elapsedTime %}
   <b>Time Elapsed:</b> {{ elapsedTime }}<br>
+  When you are ready to present the answer to the students, click Next:
+  {% crispy pageData.nextForm %}
 {% elif startForm %}
   When ready, click here to start the lesson timer:
   {% crispy startForm %}
@@ -81,6 +83,8 @@ this courselet by clicking the Add button below.</b>
     {% endfor %}
   </tr></tbody>
 </table>
+{% else %}
+  <p>No students have responded yet.</p>
 {% endif %}
 
 {% if evalTable %}
