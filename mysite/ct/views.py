@@ -184,7 +184,7 @@ class PageData(object):
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
         if 'timerStart' in request.session:
-            templateArgs['timerDuration'] = self.get_refresh_timer(request)
+            templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
         return self.fsm_redirect(request, pageData=self,
                                  addNextButton=addNextButton) \
