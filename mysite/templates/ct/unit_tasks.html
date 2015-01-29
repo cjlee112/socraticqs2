@@ -40,6 +40,10 @@ $( "#headtoggle" ).click(function() {
 {% if not courseUnit.releaseTime %}
 <p><b>This courselet has not yet been published for student access.</b>
 When you are ready to publish it, click the <b>Edit</b> tab.</p>
+{% elif startForm %}
+  You can begin teaching this courselet in a live classroom session
+  by clicking Start:
+  {% crispy startForm %}
 {% endif %}
 
 <table class="table table-striped">

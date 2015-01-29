@@ -29,23 +29,19 @@
 <p>Congratulations!  You have answered the questions in this courselet.
 To see suggested next steps to study, click the <b>Tasks</b> tab.
 You can also repeat the lessons in this courselet at any time
-by clicking the <b>Next</b> button below, or study individual
+by clicking the <b>Start</b> button below, or study individual
 lessons by clicking the <b>Lessons</b> tab.</p>
 {% endif %}
 
 {% if unitLesson %}
 Your current lesson in this courselet is:
 <b>{{ unitLesson.lesson.title }}</b>.
-Click <b>Next</b> to resume this lesson.
+Click <b>Start</b> to resume this lesson.
 {% else %}
-Welcome!  To start this courselet, click <b>Next</b>.
+Welcome!  To start this courselet, click <b>Start</b>.
 {% endif %}
 
-<form action="{{ actionTarget }}" method="post">
-{% csrf_token %}
-<input type="hidden" name="task" value="next" />
-<input type="submit" value="Next" />
-</form>
+{% crispy startForm %}
 
   </div><!-- @end #StudyTabDiv -->
 </div>

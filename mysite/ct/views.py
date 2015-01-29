@@ -713,6 +713,9 @@ def unit_tasks(request, course_id, unit_id):
     cu = course.courseunit_set.get(unit=unit)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Tasks'))
+    startForm = push_button(request)
+    if not startForm: # user clicked Start
+        return pageData.fsm_push(request, 'liveteach', dict(unit=unit))
     newInquiryULs = frozenset(unit.get_new_inquiry_uls())
     ulDict = {}
     for ul in newInquiryULs:
@@ -726,7 +729,7 @@ def unit_tasks(request, course_id, unit_id):
                   if ul not in newInquiryULs]
     return pageData.render(request, 'ct/unit_tasks.html',
                            dict(unit=unit, taskTable=taskTable,
-                                courseUnit=cu))
+                                courseUnit=cu, startForm=startForm))
 
     
 
@@ -788,6 +791,15 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable), addNextButton=True)
 
+def push_button(request, taskName='start', formClass=StartForm):
+    'return None if button was pressed, otherwise return button form'
+    if request.method == 'POST' and request.POST.get('task', '') == taskName:
+        return None
+    else: # provide START button for instructor
+        startForm = StartForm()
+        set_crispy_action(request.path, startForm)
+        return startForm
+
 @login_required
 def live_question(request, course_id, unit_id, ul_id):
     'show response progress during live question'
@@ -795,11 +807,9 @@ def live_question(request, course_id, unit_id, ul_id):
                                          False)
     startForm = None
     if not pageData.has_refresh_timer(request):
-        if request.method == 'POST' and request.POST.get('task', '') == 'start':
+        startForm = push_button(request)
+        if not startForm:
             pageData.set_refresh_timer(request) # start the timer
-        else: # provide START button for instructor
-            startForm = StartForm()
-            set_crispy_action(request.path, startForm)
     query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
               kind=Response.ORCT_RESPONSE)
     n = pageData.fsmStack.state.linkChildren.count() # live session students
@@ -1021,7 +1031,8 @@ def study_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     unitStatus = None
     pageData = PageData(request, title=unit.title)
-    if request.method == 'POST'  and request.POST.get('task') == 'next':
+    startForm = push_button(request)
+    if not startForm: # user clicked Start
         return pageData.fsm_push(request, 'lessonseq', dict(unit=unit))
     if unitStatus:
         nextUL = unitStatus.get_lesson()
@@ -1030,7 +1041,7 @@ def study_unit(request, course_id, unit_id):
     else:
         nextUL = None
     return pageData.render(request, 'ct/study_unit.html',
-                           dict(unitLesson=nextUL, unit=unit))
+                dict(unitLesson=nextUL, unit=unit, startForm=startForm))
 
 @login_required
 def unit_tasks_student(request, course_id, unit_id):
