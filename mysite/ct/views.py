@@ -1366,6 +1366,7 @@ def fsm_node(request, node_id):
 def fsm_status(request):
     'display Activity Center UI'
     pageData = PageData(request)
+    cancelForm = quitForm = None
     if request.method == 'POST':
         if 'fsmstate_id' in request.POST:
             try:
@@ -1387,9 +1388,13 @@ def fsm_status(request):
     if not pageData.fsmStack.state: # search for unfinished activities
         unfinished = FSMState.objects.filter(user=request.user,
                                              children__isnull=True)
-    else:
+    else: # provide options to cancel or quit this activity
         unfinished = None
-    cancelForm = CancelForm()
-    set_crispy_action(request.path, cancelForm)
+        cancelForm = CancelForm()
+        set_crispy_action(request.path, cancelForm)
+        if pageData.fsmStack.state.fsmNode.outgoing.filter(name='quit').count():
+            quitForm = QuitForm()
+            set_crispy_action(request.path, quitForm)
     return pageData.render(request, 'ct/fsm_status.html',
-                           dict(cancelForm=cancelForm, unfinished=unfinished))
+                           dict(cancelForm=cancelForm, unfinished=unfinished,
+                                quitForm=quitForm))

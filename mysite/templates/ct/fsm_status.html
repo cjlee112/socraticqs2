@@ -40,8 +40,16 @@ $( "#headtoggle" ).click(function() {
       Resume Activity
       </button>
     </li>
+    {% if quitForm %}
+    <li>You can end this activity, as no more steps are required
+        to complete it:
+      {% crispy cancelForm %}
+    </li>
+    {% endif %}
     {% if cancelForm %}
-    <li>You can cancel this activity.
+    <li>You can cancel this activity, without finishing the remaining
+        steps for completing it.  The work that you have already done
+        will be saved.
       {% crispy cancelForm %}
     </li>
     {% endif %}
