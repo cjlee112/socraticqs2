@@ -13,7 +13,7 @@ from ct.models import *
 from ct.forms import *
 from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
 from ct.fsm import FSMStack
-
+import time
 
 ###########################################################
 # WelcomeMat refactored utilities
@@ -183,6 +183,9 @@ class PageData(object):
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
+        if 'timerStart' in request.session:
+            templateArgs['timerDuration'] = self.get_refresh_timer(request)
+            templateArgs['refreshInterval'] = 15
         return self.fsm_redirect(request, pageData=self,
                                  addNextButton=addNextButton) \
             or render(request, templatefile, templateArgs, **kwargs)
@@ -195,6 +198,17 @@ class PageData(object):
         return self.path == self.fsmStack.state.path
     def fsm_off_path(self):
         return not self.fsm_on_path() and self.path != '/ct/nodes/'
+    def set_refresh_timer(self, request, timer=True):
+        'start or end refresh timer'
+        if timer:
+            request.session['timerStart'] = time.time()
+        else:
+            del request.session['timerStart']
+    def get_refresh_timer(self, request):
+        'return duration string in format 1:03'
+        secs = int(time.time() - request.session['timerStart'])
+        return '%d:%02d' % (secs / 60, secs % 60)
+
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
                  tabFunc=None, checkUnitStatus=False, includeNavTabs=True,

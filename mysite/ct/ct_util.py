@@ -38,6 +38,7 @@ UNITARGS = ('course_id', 'unit_id')
 # must specify what args each target expects, or reverse() will crash
 reverseArgLists = {
     'ct:home':(),
+    'ct:about':(),
     'ct:unit_lessons':UNITARGS,
 }
 

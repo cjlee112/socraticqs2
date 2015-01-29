@@ -10,6 +10,7 @@ from django.test import TestCase
 from django.http import HttpResponseRedirect
 from ct.models import *
 from ct import views, fsm, ct_util
+import time
 
 class ConceptMethodTests(TestCase):
     def setUp(self):
@@ -156,8 +157,10 @@ def load_fsm2(username):
     
 class FakeRequest(object):
     'trivial holder for request data to pass to test calls'
-    def __init__(self, user, sessionDict=None, method='POST', dataDict=None):
+    def __init__(self, user, sessionDict=None, method='POST', dataDict=None,
+                 path='/ct/somewhere/'):
         self.user = user
+        self.path = path
         self.method = method
         if not sessionDict:
             sessionDict = {}
@@ -270,7 +273,8 @@ class FSMTests(TestCase):
         self.assertEqual(fsmStack.state.load_json_data(), fsmData)
         self.assertEqual(fsmStack.state.fsmNode.name, 'MID')
         self.assertEqual(fsmStack.state.fsmNode.path, 'ct:about')
-        self.assertEqual(fsmStack.state.fsmNode.get_path(0, 0), '/ct/about/')
+        self.assertEqual(fsmStack.state.fsmNode.get_path(fsmStack.state,
+                                                    request), '/ct/about/')
         self.assertEqual(result, '/ct/about/')
         return fsmStack
     def test_trivial_plugin(self):
@@ -279,8 +283,10 @@ class FSMTests(TestCase):
         request = FakeRequest(self.user)
         fsmStack = fsm.FSMStack(request)
         fsmStack.state = FSMState(user=self.user, fsmNode=f.startNode)
-        self.assertEqual(f.startNode.event(fsmStack, 0, 'start'), '/ct/about/')
-        self.assertEqual(f.startNode.get_path(0, 0), '/ct/some/where/else/')
+        self.assertEqual(f.startNode.event(fsmStack, request, 'start'),
+                         '/ct/about/')
+        self.assertEqual(f.startNode.get_path(fsmStack.state, request),
+                         '/ct/some/where/else/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'
         edgeDictBad = (
@@ -317,3 +323,16 @@ class ReversePathTests(TestCase):
                         '/ct/teach/courses/21/units/33/', ul_id=2)
         self.assertEqual(url, reverse('ct:ul_teach', args=(21, 33, 2)))
                                      
+class PageDataTests(TestCase):
+    def test_refresh_timer(self):
+        'check refresh timer behavior'
+        request = FakeRequest(None)
+        pageData = views.PageData(request)
+        pageData.set_refresh_timer(request)
+        s = pageData.get_refresh_timer(request)
+        self.assertEqual(s, '0:00')
+        time.sleep(2)
+        s = pageData.get_refresh_timer(request)
+        self.assertNotEqual(s, '0:00')
+        self.assertEqual(s[:3], '0:0')
+    
