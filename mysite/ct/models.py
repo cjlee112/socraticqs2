@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 import glob
 import json
+import ct_util
 
 
 ########################################################
@@ -664,10 +665,10 @@ class Unit(models.Model):
         return distinct_subset(self.unitlesson_set
             .filter(response__studenterror__status__in=
                     [NEED_HELP_STATUS, NEED_REVIEW_STATUS], **kwargs))
-    def get_study_url(self, path):
+    def get_study_url(self, path, extension=['tasks']):
         'return URL for next study tasks on this unit'
         from ct.templatetags.ct_extras import get_base_url
-        return get_base_url(path, ['tasks'])
+        return get_base_url(path, extension)
     def __unicode__(self):
         return self.title
 
@@ -737,22 +738,28 @@ class Response(models.Model):
     def __unicode__(self):
         return 'answer by ' + self.author.username
     @classmethod
-    def get_counts(klass, query, fmt_count=fmt_count):
+    def get_counts(klass, query, fmt_count=fmt_count, n=0, tableKey='status',
+                   simpleTable=False):
         'generate display tables for Response data'
         querySet = klass.objects.filter(query)
         statusDict = {}
-        for d in querySet.values('status').annotate(dcount=Count('status')):
-            statusDict[d['status']] = d['dcount']
-        n = querySet.count()
+        for d in querySet.values(tableKey).annotate(dcount=Count(tableKey)):
+            statusDict[d[tableKey]] = d['dcount']
+        if not n:
+            n = querySet.count()
         if not n: # prevent DivideByZero
             return (), (), 0
-        statusTable = [statusDict.get(k, 0) for k,_ in STATUS_CHOICES]
+        choices = dict(status=STATUS_CHOICES,
+                       confidence=klass.CONF_CHOICES)[tableKey]
+        statusTable = [statusDict.get(k, 0) for k,_ in choices]
         nStatus = sum(statusTable)
         if nStatus > 0: # construct table to display
             statusTable.append(n - nStatus)
             statusTable = [fmt_count(i, n) for i in statusTable]
         else: # no data
             statusTable = ()
+        if simpleTable: # caller only wants statusTable
+            return statusTable, n
         evalDict = {}
         for d in querySet.values('confidence', 'selfeval') \
           .annotate(dcount=Count('confidence')):
@@ -1204,13 +1211,14 @@ class FSMNode(models.Model):
             return reverse(self.path, kwargs=dict(node_id=self.pk))
         try:
             func = self._plugin.get_path
-        except AttributeError: # just use default path
-            if not self.path:
+        except AttributeError: # use self.path with clever reverse()
+            if not self.path: # just use default path
                 if defaultURL:
                     return defaultURL
                 else:
                     raise ValueError('node has no path, and no defaultURL')
-            return reverse(self.path, kwargs=kwargs.get('reverseArgs', {}))
+            kwargs.update(state.get_all_state_data()) # pass state data too
+            return ct_util.reverse_path_args(self.path, request.path, **kwargs)
         else: # use the plugin
             return func(self, state, request, defaultURL=defaultURL, **kwargs)
 
@@ -1272,6 +1280,12 @@ class FSMState(models.Model):
     save_json_data = save_json_data
     get_data_attr = get_data_attr
     set_data_attr = set_data_attr
+    def get_all_state_data(self):
+        'get dict of all our state data including unitLesson'
+        d = self.load_json_data().copy() # copy to avoid side-effects
+        if self.unitLesson:
+            d['unitLesson'] = self.unitLesson
+        return d
     def event(self, fsmStack, request, eventName, unitLesson=False, **kwargs):
         'trigger proper consequences if any for this event, return URL if any'
         if not eventName: # render event
@@ -1322,6 +1336,11 @@ class FSMState(models.Model):
                                                             self.unitLesson)
             self.activity = self.activityEvent.activity
         self.save()
+    @classmethod
+    def find_live_sessions(klass, user):
+        'get live sessions relevant to this user'
+        return klass.objects.filter(isLiveSession=True,
+                                    activity__course__role__user=user)
 
         
 class ActivityLog(models.Model):
