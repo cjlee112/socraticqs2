@@ -33,7 +33,6 @@
   {% crispy pageData.nextForm %}
 
 {% else %}
- edges: {{ fsmStack.state.fsmNode.outgoing.count }}
   <h2>Possible Next Steps</h2>
   {% for e in fsmStack.state.fsmNode.outgoing.all %}
     <h3>{{ e.title }}</h3>
