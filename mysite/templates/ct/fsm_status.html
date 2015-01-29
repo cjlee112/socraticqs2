@@ -30,7 +30,11 @@ $( "#headtoggle" ).click(function() {
 {% endif %}
 
   <h3>Next Steps: {{ fsmStack.state.fsmNode.title }}</h3>
-  {{ fsmStack.state.fsmNode.description }}
+  {% if fsmStack.state.fsmNode.description %}
+    {{ fsmStack.state.fsmNode.description }}
+  {% else %}
+    At this stage of your activity, you have several options:
+  {% endif %}
 
   <h3>Options</h3>
   <ul>
@@ -43,7 +47,7 @@ $( "#headtoggle" ).click(function() {
     {% if quitForm %}
     <li>You can end this activity, as no more steps are required
         to complete it:
-      {% crispy cancelForm %}
+      {% crispy quitForm %}
     </li>
     {% endif %}
     {% if cancelForm %}
