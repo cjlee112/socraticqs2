@@ -180,7 +180,7 @@ class PageData(object):
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
-        if 'timerStart' in request.session:
+        if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
         return self.fsm_redirect(request, pageData=self,
@@ -196,7 +196,7 @@ class PageData(object):
     def fsm_off_path(self):
         return not self.fsm_on_path() and self.path != '/ct/nodes/'
     def set_refresh_timer(self, request, timer=True):
-        'start or end refresh timer'
+        'start or end the refresh timer'
         if timer:
             request.session['timerStart'] = time.time()
         else:
@@ -205,6 +205,9 @@ class PageData(object):
         'return duration string in format 1:03'
         secs = int(time.time() - request.session['timerStart'])
         return '%d:%02d' % (secs / 60, secs % 60)
+    def has_refresh_timer(self, request):
+        'return True if timer running'
+        return 'timerStart' in request.session
 
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
@@ -790,14 +793,21 @@ def live_question(request, course_id, unit_id, ul_id):
     'show response progress during live question'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
+    startForm = None
+    if not pageData.has_refresh_timer(request):
+        if request.method == 'POST' and request.POST.get('task', '') == 'start':
+            pageData.set_refresh_timer(request) # start the timer
+        else: # provide START button for instructor
+            startForm = StartForm()
+            set_crispy_action(request.path, startForm)
     query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
               kind=Response.ORCT_RESPONSE)
     n = pageData.fsmStack.state.linkChildren.count() # live session students
     statusTable, n = Response.get_counts(query, n=n, tableKey='confidence',
                                          simpleTable=True)
     return pageData.render(request, 'ct/live_question.html',
-                  dict(unitLesson=ul, unit=unit, statusTable=statusTable),
-                  addNextButton=True)
+                  dict(unitLesson=ul, unit=unit, statusTable=statusTable,
+                       startForm=startForm), addNextButton=True)
 
 
 @login_required
