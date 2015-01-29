@@ -135,7 +135,9 @@ class PageData(object):
         # this node
         referer = request.META.get('HTTP_REFERER', '')
         referer = referer[referer.find('/ct/'):]
-        if request.method == 'POST' and referer != self.fsmStack.state.path:
+        vagueEvents = ('next',)
+        if request.method == 'POST' and referer != self.fsmStack.state.path \
+             and eventName in vagueEvents:
             r = None # don't even call FSM with POST events from other pages.
         else: # event from current node's page
             if not eventName: # handle Next and Select POST requests
@@ -428,8 +430,6 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                 return Concept.new_concept(conceptForm.cleaned_data['title'],
                             conceptForm.cleaned_data['description'],
                             unit, request.user, isError)
-        else:
-            return 'please write POST error message'
     elif 'search' in request.GET:
         searchForm = ConceptSearchForm(request.GET)
         if searchForm.is_valid():
@@ -649,9 +649,6 @@ def _lessons(request, pageData, concept=None, msg='',
                 lesson = lessonForm.save(commit=False)
                 lesson.addedBy = request.user
                 return createULFunc(lesson, concept, unit, parentUL)
-        else:
-            return 'please write POST error message'
-
     elif allowSearch and 'search' in request.GET:
         searchForm = searchFormClass(request.GET)
         if searchForm.is_valid():
@@ -715,7 +712,8 @@ def unit_tasks(request, course_id, unit_id):
                         navTabs=unit_tabs(request.path, 'Tasks'))
     startForm = push_button(request)
     if not startForm: # user clicked Start
-        return pageData.fsm_push(request, 'liveteach', dict(unit=unit))
+        return pageData.fsm_push(request, 'liveteach',
+                                 dict(unit=unit, course=course))
     newInquiryULs = frozenset(unit.get_new_inquiry_uls())
     ulDict = {}
     for ul in newInquiryULs:
@@ -777,9 +775,15 @@ def unit_resources(request, course_id, unit_id):
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
-    query = Q(unitLesson=ul, selfeval__isnull=False,
-              kind=Response.ORCT_RESPONSE)
-    statusTable, evalTable, n = Response.get_counts(query)
+    if pageData.fsmStack.state and pageData.fsmStack.state.isLiveSession:
+        query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
+                  selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
+        n = pageData.fsmStack.state.linkChildren.count() # livesession students
+        statusTable, evalTable, n = Response.get_counts(query, n=n)
+    else: # default: all responses w/ selfeval
+        query = Q(unitLesson=ul, selfeval__isnull=False,
+                  kind=Response.ORCT_RESPONSE)
+        statusTable, evalTable, n = Response.get_counts(query)
     if request.method == 'POST' and request.POST.get('task') == 'append' \
             and ul.unit != unit:
         ulNew = ul.copy(unit, request.user, order='APPEND')
@@ -1359,6 +1363,8 @@ def fsm_node(request, node_id):
     if not pageData.fsmStack.state or \
       pageData.fsmStack.state.fsmNode.pk != int(node_id):
         return HttpResponseRedirect('/ct/')
+    if request.method == 'POST' and 'fsmtask' in request.POST:
+        return pageData.fsm_redirect(request, request.POST['fsmtask'])
     addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
     return pageData.render(request, 'ct/fsm_node.html',
                            addNextButton=addNextButton)
@@ -1385,6 +1391,8 @@ def fsm_status(request):
         elif 'abort' == request.POST.get('task', None):
             pageData.fsmStack.pop(request, eventName='abort')
             pageData.statusMessage = 'Activity canceled.'
+        elif 'quit' == request.POST.get('task', None):
+            return pageData.fsm_redirect(request, 'quit')
     if not pageData.fsmStack.state: # search for unfinished activities
         unfinished = FSMState.objects.filter(user=request.user,
                                              children__isnull=True)
