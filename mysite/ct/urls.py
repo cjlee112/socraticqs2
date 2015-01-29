@@ -36,6 +36,8 @@ urlpatterns = patterns('',
         ul_thread_student, name='ul_thread'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/edit/$',
         edit_lesson, name='edit_lesson'),
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/live/$',
+        live_question, name='live_question'),
     # concept tabs
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<ul_id>\d+)/$',
         study_concept, name='concept_teach'),
