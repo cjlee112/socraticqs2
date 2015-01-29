@@ -35,7 +35,9 @@ function toggleInterest(o, targeturl, csrftoken)
 }
 </script>
 
-{% block refresher %}{% endblock %}
+{% if refreshInterval %}
+<meta http-equiv="Refresh" content="{{ refreshInterval }}; url={{ actionTarget }}">
+{% endif %}
 
 {% if pageData %}
   <title>{{ pageData.title }} - Courselets</title>
