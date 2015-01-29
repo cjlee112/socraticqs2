@@ -21,6 +21,7 @@ class FSMSpecification(object):
             d['data'] = getattr(node, 'data', None)
             nodeDict[name] = d
             for e in getattr(node, 'edges', ()):
+                e = e.copy() # prevent side effects
                 e['fromNode'] = name
                 edges.append(e)
         self.nodeData = nodeDict
