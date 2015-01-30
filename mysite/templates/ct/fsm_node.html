@@ -43,7 +43,7 @@
     {% endif %}
     <form action="{{ actionTarget }}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="fsmtask" value="{{ e.name }}" />
+    <input type="hidden" name="fsmedge" value="{{ e.name }}" />
     <input type="submit" value="{{ e.title }}" />
     </form>
   {% endfor %}

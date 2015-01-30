@@ -244,7 +244,12 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 def main_page(request):
     'generic home page'
     pageData = PageData(request)
-    return pageData.render(request, 'ct/index.html')
+    if request.method == 'POST' and 'liveID' in request.POST:
+        linkState = get_object_or_404(FSMState, pk=int(request.POST['liveID']))
+        return pageData.fsm_push(request, 'livestudent', linkState=linkState)
+    liveSessions = FSMState.find_live_sessions(request.user)
+    return pageData.render(request, 'ct/index.html',
+                           dict(liveSessions=liveSessions))
 
 def person_profile(request, user_id):
     'stub for basic user info page'
@@ -1277,7 +1282,10 @@ def ul_respond(request, course_id, unit_id, ul_id):
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
-            r = save_response(form, ul, request.user, course_id)
+            activity = pageData.fsmStack.state and \
+                       pageData.fsmStack.state.activity
+            r = save_response(form, ul, request.user, course_id,
+                              activity=activity)
             kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul_id,
                           resp_id=r.id)
             defaultURL = reverse('ct:assess', kwargs=kwargs)
@@ -1343,8 +1351,10 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
             status = NEED_REVIEW_STATUS
         for emID in request.POST.getlist('emlist', []):
             em = get_object_or_404(UnitLesson, pk=int(emID))
+            activity = pageData.fsmStack.state and \
+                       pageData.fsmStack.state.activity
             se = r.studenterror_set.create(errorModel=em, author=request.user,
-                                           status=status)
+                                           status=status, activity=activity)
         defaultURL = get_object_url(request.path, ul, subpath='tasks')
         return pageData.fsm_redirect(request, 'next', defaultURL)
     answer = get_answer_html(r.unitLesson)
@@ -1363,8 +1373,8 @@ def fsm_node(request, node_id):
     if not pageData.fsmStack.state or \
       pageData.fsmStack.state.fsmNode.pk != int(node_id):
         return HttpResponseRedirect('/ct/')
-    if request.method == 'POST' and 'fsmtask' in request.POST:
-        return pageData.fsm_redirect(request, request.POST['fsmtask'])
+    if request.method == 'POST' and 'fsmedge' in request.POST:
+        return pageData.fsm_redirect(request, request.POST['fsmedge'])
     addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
     return pageData.render(request, 'ct/fsm_node.html',
                            addNextButton=addNextButton)

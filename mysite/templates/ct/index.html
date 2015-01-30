@@ -1,4 +1,6 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
+
 {% comment %}
   Main page of the portal.
 {% endcomment %}
@@ -12,33 +14,33 @@
   Access to the private alpha is by invitation only.
   <section>
 {% if user.is_authenticated and user.role_set.count > 0 %}
-    {% if fsmStack.state.liveSession %}
-      <p>You are currently in a live session.  Either click here
-      to <a href="{% url 'ct:live' %}">go to its exercises</a> or else
-      <form action="{{ actionTarget }}" method="post"
-       style=" display:inline!important;">
-      {% csrf_token %}
-      <input type="hidden" name="task" value="liveend" />
-      <input type="submit" value="Exit Live Exercise" />
-      </form>
-      </p>
-    {% elif liveSessions %}
+    {% if liveSessions %}
       <h2>Live Sessions</h2>
-      <ul>
+      You can join the following live classroom session(s) by clicking
+      the Join button below:
+      <table class="table table-striped">
+      <thead><tr><th>Course</th><th>Instructor</th><th>Started</th></tr></thead>
+      <tbody>
       {% for liveSession in liveSessions.all %}
-        <li>{{ liveSession }}
+        <tr><td>{{ liveSession.activity.course.title }}
           <form action="{{ actionTarget }}" method="post"
            style=" display:inline!important;">
           {% csrf_token %}
           <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
           <input type="submit" value="Join" />
           </form>
-        </li>
+          </td>
+          <td>{{ liveSession.user.get_full_name }}</td>
+          <td>{{ liveSession.activity.startTime|display_datetime }}</td>
+        </tr>
       {% endfor %}
-      </ul>
+      </tbody></table>
     {% endif %}
+
+<h2>Your Classes</h2>
+Click on any of the following courses to start working on it!
 <table class="table table-striped">
-<thead><tr><th>Your classes</th><th>Role</th></tr></thead>
+<thead><tr><th>Course</th><th>Role</th></tr></thead>
 <tbody>
     {% for role in user.role_set.all %}
     <tr><td>
