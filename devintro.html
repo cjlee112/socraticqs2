@@ -1,0 +1,429 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started with Socraticqs2 Development &mdash; Socraticqs2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Welcome to Socraticqs2’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Socraticqs2’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started-with-socraticqs2-development">
+<h1>Getting Started with Socraticqs2 Development<a class="headerlink" href="#getting-started-with-socraticqs2-development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation-and-setup">
+<h2>Installation and setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pre-requisites">
+<h3>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h3>
+<p>To run the Socraticqs2 development/test server on your computer,
+you need:</p>
+<ul class="simple">
+<li>Python 2.7</li>
+<li>Django 1.7 or higher</li>
+<li>Pandoc (currently used for converting text to HTML): you can download
+this for Mac OS X; most linux package managers can install it automatically.</li>
+<li>several Python packages installable by pip: pypandoc, django-crispy-forms,
+wikipedia</li>
+</ul>
+<p>We also use Git as our version control; if you don&#8217;t already have it,
+you can download either Github for Windows or Github for Mac;
+most linux package managers can install Git for you automatically.</p>
+</div>
+<div class="section" id="optional-use-virtualenv-to-create-an-isolated-test-environment">
+<h3>Optional: use virtualenv to create an isolated test environment<a class="headerlink" href="#optional-use-virtualenv-to-create-an-isolated-test-environment" title="Permalink to this headline">¶</a></h3>
+<p>I find it convenient to isolate my development environment from
+any other Python installation, by using virtualenv.
+To create an empty virtualenv (replace the path with whatever you want):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">virtualenv</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">put</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">new</span><span class="o">/</span><span class="n">ve</span>
+</pre></div>
+</div>
+<p>To start working with this virtualenv in a given terminal session
+(either to install pip packages into it as below, or to actually use it),
+type (again replace the path with what you used in the previous step):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">source</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">put</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">new</span><span class="o">/</span><span class="n">ve</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-django-etc">
+<h3>Installing Django etc.<a class="headerlink" href="#installing-django-etc" title="Permalink to this headline">¶</a></h3>
+<p>Assuming you have Python and Pandoc installed:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install Django
+pip install pypandoc
+pip install django-crispy-forms
+pip install wikipedia
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-the-socraticqs2-source-code">
+<h3>Getting the Socraticqs2 source code<a class="headerlink" href="#getting-the-socraticqs2-source-code" title="Permalink to this headline">¶</a></h3>
+<p>To do development work, first go to our Github repository
+<a class="reference external" href="https://github.com/cjlee112/socraticqs2">https://github.com/cjlee112/socraticqs2</a>
+and Fork the repository (you&#8217;ll need a Github account to do this).
+This creates your own repository in your Github account, which you
+can make changes to, and issue pull requests for us to incorporate
+your changes.</p>
+<p>If you use Github for Windows or Mac, you can just click the Clone to Desktop
+link on the webpage for your fork (repository).  Otherwise you can just
+click github&#8217;s HTTPS clone URL box for the repo, and clone the repo
+to your computer in your usual way, e.g. via the command line:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/cjlee112/socraticqs2.git
+</pre></div>
+</div>
+</div>
+<div class="section" id="update-paths-in-settings-py">
+<h3>Update paths in settings.py<a class="headerlink" href="#update-paths-in-settings-py" title="Permalink to this headline">¶</a></h3>
+<p>Unfortunately, Django obligates us to give absolute paths to
+the database and template files, which are of course specific
+to an individual computer.  Hence you will have to edit the
+file <tt class="docutils literal"><span class="pre">socraticqs2/mysite/mysite/settings.py</span></tt>: search for
+the string <tt class="docutils literal"><span class="pre">/home/user</span></tt> (two instances) and replace with a
+path appropriate for your computer.</p>
+</div>
+<div class="section" id="run-the-test-suite">
+<h3>Run the test suite<a class="headerlink" href="#run-the-test-suite" title="Permalink to this headline">¶</a></h3>
+<p>To make sure your setup is working properly, try running the
+test suite:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd socraticqs2/mysite
+python manage.py test ct
+</pre></div>
+</div>
+<p>You should see a series of tests pass successfully.</p>
+</div>
+<div class="section" id="running-a-test-web-server">
+<h3>Running a test web server<a class="headerlink" href="#running-a-test-web-server" title="Permalink to this headline">¶</a></h3>
+<p>You need to create a database, load it with some data, and
+run the development web server.  You first create the
+database:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py migrate
+</pre></div>
+</div>
+<p>Next load it with some example data that we supply in the
+repository:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py loaddata dumpdata/debug.json
+</pre></div>
+</div>
+<p>Finally, start up the development web server:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py runserver
+</pre></div>
+</div>
+<p>Start a web browser and point it at <a class="reference external" href="http://localhost:8000/ct/">http://localhost:8000/ct/</a></p>
+<p>It will prompt you to log in; the default development tester
+username is <tt class="docutils literal"><span class="pre">admin</span></tt> with password <tt class="docutils literal"><span class="pre">testonly</span></tt>.</p>
+<p>You can stop the web server by simply typing Control-C.</p>
+<p>Security notes:</p>
+<ul class="simple">
+<li>you should not allow any outside access to localhost port 8000
+as this is insecure (e.g. an outsider could log in with the default
+credentials above and modify data in your development server).</li>
+</ul>
+</div>
+</div>
+<div class="section" id="basic-developer-operations">
+<h2>Basic Developer Operations<a class="headerlink" href="#basic-developer-operations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pulling-the-latest-code-using-github-for-windows-mac">
+<h3>Pulling the latest code using Github for Windows / Mac<a class="headerlink" href="#pulling-the-latest-code-using-github-for-windows-mac" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="using-github-for-windows-mac">
+<h4>Using Github for Windows / Mac<a class="headerlink" href="#using-github-for-windows-mac" title="Permalink to this headline">¶</a></h4>
+<p>Github for Windows / Mac doesn&#8217;t work with multiple remotes &#8211;
+it only synchronizes against your Github fork.  Hence, to get
+the latest code updates from <em>our</em> fork, you&#8217;ll need to first
+pull them into your fork using Github&#8217;s web interface.  The basic procedure
+is to go to the webpage for your fork, view changes in our repository
+(vs. your fork as the base), then send a Pull Request
+for these changes (to yourself!).  When you view the Pull Request
+on Github it will give you an option to merge the changes into your
+fork.  Do that.  Finally on your Github for Windows / Mac, click
+the synchronize button to pull those changes into
+your local repo (on your computer).</p>
+</div>
+<div class="section" id="using-standard-git">
+<h4>Using standard Git<a class="headerlink" href="#using-standard-git" title="Permalink to this headline">¶</a></h4>
+<p>Using a standard Git setup, this process is much easier.  Assuming
+that you cloned our repo (so that Git&#8217;s <tt class="docutils literal"><span class="pre">remote</span></tt> repo points to
+our repo), you can pull our latest changes by simply typing:</p>
+<div class="highlight-python"><div class="highlight"><pre>git pull origin master
+</pre></div>
+</div>
+<p>Or if you want simply to fetch our latest changes (without actually
+merging them into your current branch), so that you can look at them,
+just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git fetch origin
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="database-operations">
+<h3>Database Operations<a class="headerlink" href="#database-operations" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="updating-your-database-schema">
+<h4>Updating your database schema<a class="headerlink" href="#updating-your-database-schema" title="Permalink to this headline">¶</a></h4>
+<p>If upstream code changes (i.e. made by someone else, and pulled
+into your local repo) alter the database schema, you will have to
+update your developer database to match.  You will typically notice this
+in two ways:</p>
+<ul class="simple">
+<li>upstream code changes introduced new migration files in <tt class="docutils literal"><span class="pre">ct/migrations/</span></tt>.
+These files tell Django how to update your database schema.</li>
+<li>when you try to run the testsuite or <tt class="docutils literal"><span class="pre">runserver</span></tt>, you will get
+an error message saying that your database schema does not match
+the current data models.</li>
+</ul>
+<p>To migrate your database to the new schema, type:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py migrate ct
+</pre></div>
+</div>
+</div>
+<div class="section" id="altering-the-database-schema-models-yourself">
+<h4>Altering the database schema (models) yourself<a class="headerlink" href="#altering-the-database-schema-models-yourself" title="Permalink to this headline">¶</a></h4>
+<p>If you change the database fields for a data model in <tt class="docutils literal"><span class="pre">models.py</span></tt>,
+you will of course also have to change your database to match.
+(Note that this means changes to the data fields that are
+stored in the database; changing or adding method code on
+the data classes does not change the database schema).</p>
+<p>Django 1.7 makes this easy via its <tt class="docutils literal"><span class="pre">makemigrations</span></tt> command.</p>
+<p>First make a backup copy of your current database (this is important,
+because it&#8217;s not obvious whether there is any easy way to &#8220;undo&#8221; a migration):</p>
+<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
+</pre></div>
+</div>
+<p>Then simply type:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py makemigrations ct
+</pre></div>
+</div>
+<p>This will create a new migration file in <tt class="docutils literal"><span class="pre">ct/migrations</span></tt>.  You then apply
+this migration to your database exactly as we did in the previous section:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py migrate ct
+</pre></div>
+</div>
+<p>At this point you should be able to run the testsuite, <tt class="docutils literal"><span class="pre">runserver</span></tt>, etc.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>You must commit your new migration file at the same time
+as you commit your schema changes in <tt class="docutils literal"><span class="pre">models.py</span></tt>, so that others can
+update their database to match the new models.  E.g. using command-line
+Git, you&#8217;d type something like:</p>
+<div class="highlight-python"><div class="highlight"><pre>git add ct/models.py
+git add ct/migrations/0005_unitstatus.py
+git commit -m &#39;added UnitStatus to models&#39;
+</pre></div>
+</div>
+<p class="last">where <tt class="docutils literal"><span class="pre">ct/migrations/0005_unitstatus.py</span></tt> is the new migration file
+created by <tt class="docutils literal"><span class="pre">makemigrations</span></tt> to represent the changes you made to
+<tt class="docutils literal"><span class="pre">models.py</span></tt>.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>There are several limitations that make migrations somewhat unwieldy.
+You need to be aware of the following &#8220;gotchas&#8221; lurking here:</p>
+<ul class="last simple">
+<li>once you change a model in <tt class="docutils literal"><span class="pre">models.py</span></tt>, your code will no longer
+run until you successfully run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> + <tt class="docutils literal"><span class="pre">migrate</span></tt>.
+So you cannot actually test your changes until you run both those steps.</li>
+<li>every time you run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> ANOTHER migration file
+is added, and they ALL are required for the migration to work.
+Multiple migration files increase the risk of errors either in
+your committing them or other people attempting to apply them.
+So ideally, when you change the models to introduce a new feature,
+you want that to be represented by a single new migration file.</li>
+<li>Because of this, in theory you shouldn&#8217;t
+run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> / <tt class="docutils literal"><span class="pre">migrate</span></tt> until
+<em>after</em> you are pretty sure your model changes are final.
+But you can&#8217;t even test your changes until after both steps.
+This is an unpleasant catch-22.</li>
+<li>Once you change your database schema (via <tt class="docutils literal"><span class="pre">migrate</span></tt>), all other
+code (i.e. not matching the new models) will NOT run.
+This would destroy the key virtue of Git &#8211; your ability to
+have many different code branches and switch between them
+effortlessly.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="recommended-migration-best-practices">
+<h4>Recommended Migration Best Practices<a class="headerlink" href="#recommended-migration-best-practices" title="Permalink to this headline">¶</a></h4>
+<p>For all these reasons, I suggest you follow a simple discipline
+whenever you are about to make model changes that will require
+migration:</p>
+<ul>
+<li><p class="first">BEFORE making those changes, save a copy of your current
+database file and checkout a <em>new</em> Git branch, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
+git checkout -b bigchange
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">previous</span></tt> is the name of your previous branch,
+and <tt class="docutils literal"><span class="pre">bigchange</span></tt> is the name of your new branch.
+You should also do this if you are starting to work with
+someone else&#8217;s experimental model changes, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
+git checkout -b bigchange
+git pull fred bigchange
+</pre></div>
+</div>
+<p>Then, if you ever want to switch back to your <tt class="docutils literal"><span class="pre">previous</span></tt>
+branch, you can simply switch back to the database file
+that worked with <tt class="docutils literal"><span class="pre">previous</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout previous
+cp mysite.db.previous mysite.db
+</pre></div>
+</div>
+<p>Note that I do NOT recommend adding <tt class="docutils literal"><span class="pre">mysite.db</span></tt> to Git
+version control.</p>
+</li>
+<li><p class="first">Now you can freely run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> + <tt class="docutils literal"><span class="pre">migrate</span></tt>
+whenever you like, so you can test your changes.</p>
+</li>
+<li><p class="first">If it turns out that you need to make <em>more</em> model
+changes (i.e. your model changes turned out to be inadequate
+for the feature you&#8217;re implementing, and you haven&#8217;t yet committed
+the inadequate models/migration),
+the best practice is to UNDO your migration
+and REGENERATE a new migration to replace it, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>rm ct/migrations/0005_unitstatus.py
+cp mysite.db.previous mysite.db
+python manage.py makemigrations ct
+python manage.py migrate ct
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">ct/migrations/0005_unitstatus.py</span></tt> is your new
+migration file, and <tt class="docutils literal"><span class="pre">mysite.db.previous</span></tt> is a copy of
+your database file from before you applied this new migration.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="backing-up-flushing-and-restoring-your-local-database">
+<h4>Backing up, flushing, and restoring your local database<a class="headerlink" href="#backing-up-flushing-and-restoring-your-local-database" title="Permalink to this headline">¶</a></h4>
+<p>You may wish to make and reload snapshots of your local database
+as part of your development and testing process.  This is easy.</p>
+<p>You can save a snapshot of your current database to a file, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py dumpdata &gt; dumpdata/mysnap.json
+</pre></div>
+</div>
+<p>You can flush (delete all data) from your database like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py sqlflush|python manage.py dbshell
+</pre></div>
+</div>
+<p>You can then restore a particular snapshot like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py loaddata dumpdata/mysnap.json
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started with Socraticqs2 Development</a><ul>
+<li><a class="reference internal" href="#installation-and-setup">Installation and setup</a><ul>
+<li><a class="reference internal" href="#pre-requisites">Pre-requisites</a></li>
+<li><a class="reference internal" href="#optional-use-virtualenv-to-create-an-isolated-test-environment">Optional: use virtualenv to create an isolated test environment</a></li>
+<li><a class="reference internal" href="#installing-django-etc">Installing Django etc.</a></li>
+<li><a class="reference internal" href="#getting-the-socraticqs2-source-code">Getting the Socraticqs2 source code</a></li>
+<li><a class="reference internal" href="#update-paths-in-settings-py">Update paths in settings.py</a></li>
+<li><a class="reference internal" href="#run-the-test-suite">Run the test suite</a></li>
+<li><a class="reference internal" href="#running-a-test-web-server">Running a test web server</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-developer-operations">Basic Developer Operations</a><ul>
+<li><a class="reference internal" href="#pulling-the-latest-code-using-github-for-windows-mac">Pulling the latest code using Github for Windows / Mac</a><ul>
+<li><a class="reference internal" href="#using-github-for-windows-mac">Using Github for Windows / Mac</a></li>
+<li><a class="reference internal" href="#using-standard-git">Using standard Git</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-operations">Database Operations</a><ul>
+<li><a class="reference internal" href="#updating-your-database-schema">Updating your database schema</a></li>
+<li><a class="reference internal" href="#altering-the-database-schema-models-yourself">Altering the database schema (models) yourself</a></li>
+<li><a class="reference internal" href="#recommended-migration-best-practices">Recommended Migration Best Practices</a></li>
+<li><a class="reference internal" href="#backing-up-flushing-and-restoring-your-local-database">Backing up, flushing, and restoring your local database</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Socraticqs2&#8217;s documentation!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/devintro.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Socraticqs2’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
