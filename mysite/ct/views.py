@@ -784,10 +784,12 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
         n = pageData.fsmStack.state.linkChildren.count() # livesession students
         statusTable, evalTable, n = Response.get_counts(query, n=n)
+        answer = ul.get_answers().all()[0]
     else: # default: all responses w/ selfeval
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
+        answer = None
     if request.method == 'POST' and request.POST.get('task') == 'append' \
             and ul.unit != unit:
         ulNew = ul.copy(unit, request.user, order='APPEND')
@@ -797,7 +799,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
                                      reverseArgs=kwargs, unitLesson=ulNew)
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable), addNextButton=True)
+                       evalTable=evalTable, answer=answer), addNextButton=True)
 
 def push_button(request, taskName='start', formClass=StartForm):
     'return None if button was pressed, otherwise return button form'

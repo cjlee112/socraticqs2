@@ -41,7 +41,13 @@ this courselet by clicking the Add button below.</b>
   </form>
 {% endif %}
 
+{% if answer %}
+  <input type="checkbox" id="headtoggle"/>Show Question<BR>
+  <div id="headdiv" style="display: none">
+{% endif %}
+
 {{ unitLesson.lesson.text |md2html }}
+
 {% if unitLesson.lesson.sourceDB == 'youtube' %}
 <iframe width="560" height="315"
         src="http://www.youtube.com/embed/{{ unitLesson.lesson.sourceID }}?rel=0"
@@ -58,9 +64,26 @@ this courselet by clicking the Add button below.</b>
 <br>
 {% endif %}
 
+{% if answer %}
+  </div>
+
+<script>
+$( "#headtoggle" ).click(function() {
+  $( "#headdiv" ).toggle();
+});
+</script>
+
+  <h3>Answer</h3>
+  {{ answer.lesson.text |md2html }}
+{% endif %}
+
 {% if elapsedTime %}
   <b>Time Elapsed:</b> {{ elapsedTime }}<br>
-  When you are ready to present the answer to the students, click Next:
+  {% if answer %}
+    When you are done presenting this answer, click Next:
+  {% else %}
+    When you are ready to present the answer to the students, click Next:
+  {% endif %}
   {% if pageData.nextForm %}
     {% crispy pageData.nextForm %}
   {% endif %}
