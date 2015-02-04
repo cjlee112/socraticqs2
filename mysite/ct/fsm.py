@@ -17,15 +17,17 @@ class FSMStack(object):
         for e in self.state.fsmNode.outgoing.all(): # detect selection edges
             if e.name.startswith('select_'):
                 setattr(self, e.name, e) # make available to HTML templates
-    def event(self, request, eventName='next', **kwargs):
+    def event(self, request, eventName='next', pageData=None, **kwargs):
         '''top-level interface for passing event to a running FSM instance.
         If FSM handles this event, return a redirect that over-rides
         the generic UI behavior.  Otherwise return None,
         indicating NO over-ride of generic UI behavior.'''
         if self.state is None: # no ongoing activity
             return
-        path = self.state.event(self, request, eventName, **kwargs)
+        path = self.state.event(self, request, eventName, pageData=pageData,
+                                **kwargs)
         if self.state.fsmNode.name == 'END': # reached terminal state
+            pageData.set_refresh_timer(request, False) # reset timer if on
             if self.state.fsmNode.help: # save its help message
                 request.session['statusMessage'] = self.state.fsmNode.help
             parentPath = self.pop(request)

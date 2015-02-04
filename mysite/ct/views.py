@@ -141,8 +141,8 @@ class PageData(object):
             r = None # don't even call FSM with POST events from other pages.
         else: # event from current node's page
             if not eventName: # handle Next and Select POST requests
-                if request.method == 'POST':
-                    task = request.POST.get('fsmtask', '')
+                if request.method == 'POST' and 'fsmtask' in request.POST:
+                    task = request.POST['fsmtask']
                     if 'next' == task:
                         eventName = 'next' # tell FSM this is next event
                     elif task.startswith('select_'):
@@ -155,14 +155,14 @@ class PageData(object):
                             return HttpResponse('bad select', status=400)
                         eventName = task # pass event and object to FSM
                         kwargs[attr] = get_object_or_404(klass, pk=selectID)
-                    elif task:
+                    else:
                         return HttpResponse('invalid fsm task: %s' % task,
                                             status=400)
                 elif addNextButton: # must supply Next form
                     self.nextForm = NextForm()
                     set_crispy_action(request.path, self.nextForm)
             r = self.fsmStack.event(request, eventName, defaultURL=defaultURL,
-                                    **kwargs)
+                                    pageData=self, **kwargs)
         if r: # let FSM override the default URL
             return HttpResponseRedirect(r)
         elif defaultURL: # otherwise follow the default
@@ -185,8 +185,7 @@ class PageData(object):
         if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
-        return self.fsm_redirect(request, pageData=self,
-                                 addNextButton=addNextButton) \
+        return self.fsm_redirect(request, addNextButton=addNextButton) \
             or render(request, templatefile, templateArgs, **kwargs)
     def fsm_push(self, request, name, *args, **kwargs):
         'create a new FSM and redirect to its START page'
@@ -201,7 +200,7 @@ class PageData(object):
         'start or end the refresh timer'
         if timer:
             request.session['timerStart'] = time.time()
-        else:
+        elif 'timerStart' in request.session:
             del request.session['timerStart']
     def get_refresh_timer(self, request):
         'return duration string in format 1:03'

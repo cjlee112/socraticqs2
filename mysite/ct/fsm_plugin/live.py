@@ -1,7 +1,7 @@
 from ct.models import *
 from fsmspec import FSMSpecification
 
-def quit_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+def quit_edge(self, edge, fsmStack, request, **kwargs):
     'edge method that terminates this live-session'
     for studentState in fsmStack.state.linkChildren.all():
         studentState.linkState = None # detach from our state
@@ -82,6 +82,10 @@ class ANSWER(object):
 class RECYCLE(object):
     '''You have completed presenting this question.  Do you want to
     ask the students another question, or end this live session?'''
+    def next_edge(self, edge, fsmStack, request, pageData=None, **kwargs):
+        'make sure timer is reset before going to another question'
+        pageData.set_refresh_timer(request, False)
+        return edge.toNode
     path = 'ct:fsm_node'
     title = 'Do you want to ask another question?'
     edges = (
