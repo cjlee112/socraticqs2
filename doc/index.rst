@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 2
 
    devintro
-
+   fsm
 
 Indices and tables
 ==================
