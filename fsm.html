@@ -1,0 +1,683 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Writing Guided Activities (Finite State Machines) &mdash; Socraticqs2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Getting Started with Socraticqs2 Development" href="devintro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="writing-guided-activities-finite-state-machines">
+<h1>Writing Guided Activities (Finite State Machines)<a class="headerlink" href="#writing-guided-activities-finite-state-machines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-a-guided-activity">
+<h2>What is a Guided Activity?<a class="headerlink" href="#what-is-a-guided-activity" title="Permalink to this headline">¶</a></h2>
+<p>A guided activity is a series of steps that guides a user through
+a process in a specified way.  Some examples:</p>
+<ul class="simple">
+<li>a <em>lesson sequence</em>: presents the lessons in a courselet to
+the student one at a time, in order, while minimizing distractions
+from the rest of the generic courselets interface.</li>
+<li>a <em>live session</em>: an instructor presents a series of exercises
+to students in a classroom.  The whole class does the exercises
+at the same time, synchronized by what the instructor chooses,
+in real-time.</li>
+<li>a <em>randomized trial</em> protocol: two distinct ways of teaching
+the same thing are defined as &#8220;treatments&#8221;.  A randomized
+trial randomizes students to either one treatment or the other,
+and compares their learning gains.  Note that this depends
+strongly on controlling exactly what sequence of materials
+each student gets shown, according to the &#8220;treatment&#8221; they
+were assigned to.</li>
+</ul>
+<div class="section" id="drawing-a-guided-activity-as-a-graph-of-views-and-transitions">
+<h3>Drawing a Guided Activity as a Graph of Views and Transitions<a class="headerlink" href="#drawing-a-guided-activity-as-a-graph-of-views-and-transitions" title="Permalink to this headline">¶</a></h3>
+<p>A guided activity can be thought of as a pathway through
+some set of views (web pages) within the generic Socraticqs2 interface.</p>
+<p>Specifically, a guided activity in Socraticqs2 is defined as a Finite State
+Machine (FSM) consisting of a <em>graph</em> of <em>nodes</em> connected by <em>edges</em>:</p>
+<ul class="simple">
+<li>its <em>nodes</em> are pages or &#8220;views&#8221;, that is, each node shows one
+view from the generic Socraticqs2 interface.  Each node in a FSM
+has a distinct <em>name</em>.  An FSM always begins at its
+<tt class="docutils literal"><span class="pre">START</span></tt> node, and terminates when it reaches its <tt class="docutils literal"><span class="pre">END</span></tt> node.
+An <tt class="docutils literal"><span class="pre">FSMNode</span></tt> instance always has an <tt class="docutils literal"><span class="pre">fsm</span></tt> attribute that
+points to the <tt class="docutils literal"><span class="pre">FSM</span></tt> that it is part of.</li>
+<li>its <em>edges</em> are transitions from one view (node) to another.
+Concretely, on a given page there may be one or more possible
+<em>events</em> such as the user submitting an answer to a question,
+clicking the Next button, etc.  Each event in the generic interface
+has a defined name such as <tt class="docutils literal"><span class="pre">next</span></tt>, <tt class="docutils literal"><span class="pre">add</span></tt>, etc.
+A node can define what events will trigger which edge.
+Each edge has a distinct <em>name</em>.
+An <tt class="docutils literal"><span class="pre">FSMEdge</span></tt> instance always has <tt class="docutils literal"><span class="pre">fromNode</span></tt> and <tt class="docutils literal"><span class="pre">toNode</span></tt>
+attributes that point to the nodes that it connects.</li>
+<li>while an FSM is running, it is represented by an <tt class="docutils literal"><span class="pre">FSMState</span></tt>
+record that points to the current node, and stores any data
+associated with this running FSM instance.  An <tt class="docutils literal"><span class="pre">FSMState</span></tt>
+instance always keeps an <tt class="docutils literal"><span class="pre">fsmNode</span></tt> attribute that points to
+the current <tt class="docutils literal"><span class="pre">FSMNode</span></tt>.</li>
+</ul>
+<p>An FSM works by intercepting events from the current view, and
+redirecting the user to a different next view (node) than the
+generic interface&#8217;s default next view.</p>
+</div>
+<div class="section" id="controlling-what-happens-next">
+<h3>Controlling What Happens Next<a class="headerlink" href="#controlling-what-happens-next" title="Permalink to this headline">¶</a></h3>
+<p>Node and edge behavior can either be defined <em>statically</em>, i.e.
+a specific node always shows a fixed path, or <em>dynamically</em>,
+by writing plug-in code that decides on the fly what it will do.</p>
+<div class="section" id="static-edge-behavior">
+<h4>Static edge behavior<a class="headerlink" href="#static-edge-behavior" title="Permalink to this headline">¶</a></h4>
+<p>The simplest way to control what happens next at a given node
+is simply to provide a static edge that says what node a given event
+should transition to.  When an event occurs, the FSM will look for
+an outgoing edge with the same name as that event, and will transition
+to whatever node that edge points to.
+Events with no matching edge will be ignored; i.e. no transition
+will occur, and the view will remain at the current page (node).</p>
+</div>
+<div class="section" id="dynamic-edge-behavior">
+<h4>Dynamic edge behavior<a class="headerlink" href="#dynamic-edge-behavior" title="Permalink to this headline">¶</a></h4>
+<p>Alternatively, an edge can decide dynamically what node it will
+transition to, if plug-in code is provided for that edge.  The
+plug-in code can do whatever processing it wants, and then simply
+returns a node to transition to.
+Note that this is also useful for implementing
+<em>consequences</em> of an event, even if the edge always transitions to
+the same target node.</p>
+</div>
+<div class="section" id="dynamic-event-mapping">
+<h4>Dynamic Event Mapping<a class="headerlink" href="#dynamic-event-mapping" title="Permalink to this headline">¶</a></h4>
+<p>In some cases it may be useful to dynamically redirect a given event
+to different edges under different circumstances.  A node can do
+this by supplying plug-in code for that <em>event</em>; its plug-in code
+do whatever processing it wants and call whatever edge it wants.
+Note this can also be used for implementing consequences of an event.</p>
+</div>
+</div>
+<div class="section" id="an-fsm-can-call-other-fsms-as-subroutines">
+<h3>An FSM can call other FSMs as &#8220;subroutines&#8221;<a class="headerlink" href="#an-fsm-can-call-other-fsms-as-subroutines" title="Permalink to this headline">¶</a></h3>
+<p>Our FSM design is <em>hierarchical</em>, that is, an FSM node can
+&#8220;call&#8221; another FSM guided activity as a &#8220;subroutine&#8221;.
+This is important for modular FSM design.
+For example, a randomized trial FSM (that compares the effectiveness
+of two &#8220;treatments&#8221;) would not itself need to know how
+to perform either of the treatments, because it could just call a &#8220;treatment
+FSM&#8221; that performs the specified treatment, and when finished returns
+control to randomized trial FSM.</p>
+<p>This hierarchical &#8220;subroutine calling&#8221; capability is handled
+by the <tt class="docutils literal"><span class="pre">FSMStack</span></tt> class, which acts as the main interface
+between Socraticqs2 code and FSM code.  An <tt class="docutils literal"><span class="pre">FSMStack</span></tt> instance always
+keeps a <tt class="docutils literal"><span class="pre">state</span></tt> attribute that points to the current
+<tt class="docutils literal"><span class="pre">FSMState</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="an-example-lesson-sequence-fsm">
+<h2>An Example: Lesson Sequence FSM<a class="headerlink" href="#an-example-lesson-sequence-fsm" title="Permalink to this headline">¶</a></h2>
+<p>To make this tangible, let&#8217;s look at an example.  The <tt class="docutils literal"><span class="pre">lessonseq</span></tt> FSM
+shows the student the sequence of core lessons for a courselet,
+in the order set by the instructor.</p>
+<p>It consists of four nodes:
+<tt class="docutils literal"><span class="pre">LESSON</span></tt>, <tt class="docutils literal"><span class="pre">ASK</span></tt>, <tt class="docutils literal"><span class="pre">ASSESS</span></tt>, <tt class="docutils literal"><span class="pre">ERRORS</span></tt> (in addition to the
+mandatory <tt class="docutils literal"><span class="pre">START</span></tt> and <tt class="docutils literal"><span class="pre">END</span></tt>).</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">LESSON</span></tt>: presents an explanation.</li>
+<li><tt class="docutils literal"><span class="pre">ASK</span></tt>: asks the student a question</li>
+<li><tt class="docutils literal"><span class="pre">ASSESS</span></tt>: shows the answer and prompts the student for a self-assessment
+of their own answer.</li>
+<li><tt class="docutils literal"><span class="pre">ERRORS</span></tt>: prompts the student to categorize what error(s) they made
+in their answer.</li>
+</ul>
+<p>Edges:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">next</span></tt>: Typically, the <tt class="docutils literal"><span class="pre">next</span></tt> edge must see whether the next lesson is an
+explanation (<tt class="docutils literal"><span class="pre">LESSON</span></tt>) or question (<tt class="docutils literal"><span class="pre">ASK</span></tt>), or whether we&#8217;ve reached
+the <tt class="docutils literal"><span class="pre">END</span></tt>.  This dynamic edge behavior is implemented by supplying
+a plug-in method <tt class="docutils literal"><span class="pre">next_edge()</span></tt>.  By convention, plug-in edge methods
+always consist of the <em>name of the edge</em> followed by <tt class="docutils literal"><span class="pre">_edge</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">error</span></tt>: if the student self-assessment indicates they got the
+answer wrong, the <tt class="docutils literal"><span class="pre">error</span></tt> event is directed to take the student
+to the <tt class="docutils literal"><span class="pre">ERRORS</span></tt> page.</li>
+</ul>
+<p>Behind the scenes, there is a <tt class="docutils literal"><span class="pre">UnitStatus</span></tt> data structure that
+knows how to follow the sequence of lessons in that &#8220;unit&#8221; (courselet).</p>
+<p>An FSM is written as a simple set of class definitions for nodes,
+with outgoing edges defined for each node.  Here is minimalist code for
+the Lesson Sequence FSM:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">START</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Initialize data for viewing a courselet, and go immediately</span>
+<span class="sd">    to first lesson. &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">start_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&#39;event handler for START node&#39;</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">get_data_attr</span><span class="p">(</span><span class="s">&#39;unit&#39;</span><span class="p">)</span>
+        <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Study: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">unit</span><span class="o">.</span><span class="n">title</span>
+        <span class="n">unitStatus</span> <span class="o">=</span> <span class="n">UnitStatus</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">unitStatus</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set_data_attr</span><span class="p">(</span><span class="s">&#39;unitStatus&#39;</span><span class="p">,</span> <span class="n">unitStatus</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="s">&#39;next&#39;</span><span class="p">,</span>
+                                         <span class="n">useCurrent</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">next_edge</span> <span class="o">=</span> <span class="n">next_lesson</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Start This Courselet&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;next&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;LESSON&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;View Next Lesson&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">LESSON</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;View a lesson explanation. &#39;&#39;&#39;</span>
+    <span class="n">next_edge</span> <span class="o">=</span> <span class="n">next_lesson</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;ct:lesson&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;View an explanation&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;next&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;LESSON&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;View Next Lesson&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ASK</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;ct:ul_respond&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Answer this question&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;next&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;ASSESS&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Go to self-assessment&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ASSESS</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">next_edge</span> <span class="o">=</span> <span class="n">next_lesson</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;ct:assess&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Assess your answer&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;next&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;LESSON&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;View Next Lesson&#39;</span><span class="p">),</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;error&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;ERRORS&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;Classify your error&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ERRORS</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">next_edge</span> <span class="o">=</span> <span class="n">next_lesson</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;ct:assess_errors&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Classify your error(s)&#39;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;next&#39;</span><span class="p">,</span> <span class="n">toNode</span><span class="o">=</span><span class="s">&#39;LESSON&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;View Next Lesson&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">END</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># node specification data goes here</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&#39;ct:unit_tasks_student&#39;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Courselet core lessons completed&#39;</span>
+    <span class="n">help</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Congratulations!  You have completed the core lessons for this</span>
+<span class="s">    courselet.  See below for suggested next steps for what to study now in</span>
+<span class="s">    this courselet.&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><em>start event</em>: whenever an FSM first starts, its <tt class="docutils literal"><span class="pre">START</span></tt> node is sent
+a <tt class="docutils literal"><span class="pre">start</span></tt> event.  This FSM defines a <tt class="docutils literal"><span class="pre">start_event()</span></tt> method on
+its <tt class="docutils literal"><span class="pre">START</span></tt> node, to receive this event and perform initialization
+of the data which the FSM must store (on its <tt class="docutils literal"><span class="pre">FSMState</span></tt> data).
+Specifically the method uses the <tt class="docutils literal"><span class="pre">FSMState</span></tt> <tt class="docutils literal"><span class="pre">get_data_attr()</span></tt>
+and <tt class="docutils literal"><span class="pre">set_data_attr()</span></tt> methods for binding data to the <tt class="docutils literal"><span class="pre">FSMState</span></tt>.</li>
+<li>Note that this code represents a <em>specification</em> of the FSM,
+not the actual storage of the FSM in the database.  Specifically,
+the nodes need do nothing more than specify what data needs
+to be saved for each node, and provide its plug-in code.
+Hence these are just generic Python class objects, not
+<tt class="docutils literal"><span class="pre">FSMNode</span></tt> objects.  We will describe later how to <em>load</em>
+such an FSM specification into the database.</li>
+<li>outgoing edges from a node <em>must</em> be specified in its <tt class="docutils literal"><span class="pre">edges</span></tt> attribute.
+Providing plug-in code for an edge is <em>optional</em>, and always follows
+the naming convention <tt class="docutils literal"><span class="pre">EDGENAME_edge()</span></tt>, where <tt class="docutils literal"><span class="pre">EDGENAME</span></tt> is the
+name of the edge.</li>
+<li>a node typically specifies which generic view it will display
+via its <tt class="docutils literal"><span class="pre">path</span></tt> attribute.  Paths are given using the Django
+URL &#8220;name&#8221; convention <tt class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></tt>; in our case <tt class="docutils literal"><span class="pre">ct</span></tt>
+is the name of our Django app, and the set of all VIEW names are listed in
+<tt class="docutils literal"><span class="pre">ct/urls.py</span></tt>.</li>
+<li>note that a full-blown FSM specification would typically give
+a lot more useful node attributes such as a docstring description, <tt class="docutils literal"><span class="pre">help</span></tt>
+etc. that provide the user helpful guidance.  See the <tt class="docutils literal"><span class="pre">FSMNode</span></tt>
+reference docs below for details.</li>
+</ul>
+<p>Here is the code for the <tt class="docutils literal"><span class="pre">next_lesson()</span></tt> edge method used by many of
+these nodes.  It uses <tt class="docutils literal"><span class="pre">UnitStatus</span></tt> and <tt class="docutils literal"><span class="pre">UnitLesson</span></tt> methods to
+determine what the next view should be:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">next_lesson</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">useCurrent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="s">&#39;edge method that moves us to right state for next lesson (or END)&#39;</span>
+    <span class="n">fsm</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">fromNode</span><span class="o">.</span><span class="n">fsm</span>
+    <span class="n">unitStatus</span> <span class="o">=</span> <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">get_data_attr</span><span class="p">(</span><span class="s">&#39;unitStatus&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">useCurrent</span><span class="p">:</span>
+        <span class="n">nextUL</span> <span class="o">=</span> <span class="n">unitStatus</span><span class="o">.</span><span class="n">get_lesson</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nextUL</span> <span class="o">=</span> <span class="n">unitStatus</span><span class="o">.</span><span class="n">start_next_lesson</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nextUL</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fsm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;END&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">nextUL</span><span class="o">.</span><span class="n">is_question</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">fsm</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;ASK&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># just a lesson to read</span>
+        <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">toNode</span>
+</pre></div>
+</div>
+<p>Finally, an FSM specification typically ends with a brief
+<tt class="docutils literal"><span class="pre">FSMSpecification</span></tt> initialization that makes it easy to load
+the specification into the database.  Here is an example for
+the <tt class="docutils literal"><span class="pre">lessonseq</span></tt> specification:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_specs</span><span class="p">():</span>
+    <span class="s">&#39;get FSM specifications stored in this file&#39;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">FSMSpecification</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;lessonseq&#39;</span><span class="p">,</span> <span class="n">hideTabs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s">&#39;Take the courselet core lessons&#39;</span><span class="p">,</span>
+            <span class="n">pluginNodes</span><span class="o">=</span><span class="p">[</span><span class="n">START</span><span class="p">,</span> <span class="n">LESSON</span><span class="p">,</span> <span class="n">ASK</span><span class="p">,</span> <span class="n">ASSESS</span><span class="p">,</span> <span class="n">ERRORS</span><span class="p">,</span> <span class="n">END</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">spec</span><span class="p">,)</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">this first provides a number of <tt class="docutils literal"><span class="pre">FSM</span></tt> attributes such as its
+<em>name</em>, user interface properties (in this case it specifies that
+the tabbed interface should be hidden while this FSM is running), etc.</p>
+</li>
+<li><p class="first">it also lists the complete set of nodes in the FSM.</p>
+</li>
+<li><p class="first">to actually load an <tt class="docutils literal"><span class="pre">FSMSpecification</span></tt> into the database,
+simply call its <tt class="docutils literal"><span class="pre">save_graph()</span></tt> method with the username who should
+&#8220;own&#8221; this FSM.  (Typically, this would be an admin user):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fsmSpec</span><span class="o">.</span><span class="n">save_graph</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Any time an FSM structure or attributes changes, it must be reloaded
+to the database this way, to take effect.</p>
+</li>
+<li><p class="first">note that FSM specifications and plug in code must be stored in
+Python source code files in the <tt class="docutils literal"><span class="pre">mysite/ct/fsm_plugin/</span></tt> directory.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="fsm-reference-documentation">
+<h2>FSM Reference Documentation<a class="headerlink" href="#fsm-reference-documentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fsm">
+<h3>FSM<a class="headerlink" href="#fsm" title="Permalink to this headline">¶</a></h3>
+<p><strong>Important attributes to set in your FSM specification:</strong></p>
+<dl class="attribute">
+<dt id="name">
+<tt class="descname">name</tt><a class="headerlink" href="#name" title="Permalink to this definition">¶</a></dt>
+<dd><p>the ID by which the FSM will be called.  That is, FSMs are invoked
+by name.  For example, when the user indicates they want to study
+the sequence of lessons in a courselet, the generic Socraticqs2
+UI searches for an FSM named <tt class="docutils literal"><span class="pre">lessonseq</span></tt>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="title">
+<tt class="descname">title</tt><a class="headerlink" href="#title" title="Permalink to this definition">¶</a></dt>
+<dd><p>The title which will be displayed by default for the FSM,
+unless its plug-in code <tt class="docutils literal"><span class="pre">start_event()</span></tt> explicitly overrides that
+by writing a new value to the <tt class="docutils literal"><span class="pre">FSMState.title</span></tt> for this running
+FSM instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="description">
+<tt class="descname">description</tt><a class="headerlink" href="#description" title="Permalink to this definition">¶</a></dt>
+<dd><p>An explanation of what this Guided Activity does for the user,
+to be displayed in the Activity Center UI etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="help">
+<tt class="descname">help</tt><a class="headerlink" href="#help" title="Permalink to this definition">¶</a></dt>
+<dd><p>More detailed info to help the user understand what this FSM is for.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hideTabs">
+<tt class="descname">hideTabs</tt><a class="headerlink" href="#hideTabs" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set True, hide the generic tabbed interface while this FSM is running.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hideLinks">
+<tt class="descname">hideLinks</tt><a class="headerlink" href="#hideLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set True, block hyperlinks from being clickable while this FSM is running.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hideNav">
+<tt class="descname">hideNav</tt><a class="headerlink" href="#hideNav" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set True, hide the generic navigation bar options while this FSM
+is running.</p>
+</dd></dl>
+
+<p><strong>Useful methods</strong>:</p>
+<dl class="method">
+<dt id="get_node">
+<tt class="descname">get_node</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#get_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get node in this FSM with specified <em>name</em>.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="save_graph">
+<em class="property">classmethod </em><tt class="descname">save_graph</tt><big>(</big><em>klass</em>, <em>fsmData</em>, <em>nodeData</em>, <em>edgeData</em>, <em>username</em>, <em>oldLabel='OLD'</em><big>)</big><a class="headerlink" href="#save_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>this is a low-level call; in general you should use the higher
+level call FSMSpecification.save_graph() instead</strong>.
+Store FSM specification from node, edge graph
+by renaming any existing
+FSM with the same name, and creating new FSM.
+Note that ongoing activities
+using the old FSM will continue to work (following the old FSM spec),
+but any new activities will be created using the new FSM spec
+(since they request it by name).
+Returns the newly created <tt class="docutils literal"><span class="pre">FSM</span></tt> object.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="fsmnode">
+<h3>FSMNode<a class="headerlink" href="#fsmnode" title="Permalink to this headline">¶</a></h3>
+<p><strong>Important attributes to set in your FSM specification:</strong></p>
+<dl class="attribute">
+<dt>
+<tt class="descname">name</tt></dt>
+<dd><p>Note that you set this in an FSM specification by simply
+naming the class definition that you write for a node.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">description</tt></dt>
+<dd><p>Provides an explanation of what this step in the Guided Activity
+does for the user, to display in the Activity Center UI, etc.
+Note that you set this by simply giving a <strong>docstring</strong> in
+the class definition that you write for a node.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">title</tt></dt>
+<dd><p>Title for the current step to be displayed in the Activity Center
+UI etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">help</tt></dt>
+<dd><p>Instructions for this step that will be displayed to the user
+as an overlay at the top of the current page, <em>in addition</em> to
+the generic instructions that are always shown on that page.
+This enables you to customize very clearly what you want the
+user to look at and do when performing this step.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="path">
+<tt class="descname">path</tt><a class="headerlink" href="#path" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies which generic view it will display
+via its <tt class="docutils literal"><span class="pre">path</span></tt> attribute.  Paths are given using the Django
+URL &#8220;name&#8221; convention <tt class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></tt>; in our case <tt class="docutils literal"><span class="pre">ct</span></tt>
+is the name of our Django app, and the set of all VIEW names are listed in
+<tt class="docutils literal"><span class="pre">ct/urls.py</span></tt>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="doLogging">
+<tt class="descname">doLogging</tt><a class="headerlink" href="#doLogging" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set True, records entry and exit timestamps for the user&#8217;s
+visit to this view.  Log data are saved as <tt class="docutils literal"><span class="pre">ActivityEvent</span></tt>
+records.  If the current FSMState instance already has
+an <tt class="docutils literal"><span class="pre">activity</span></tt> attribute pointing to the current <tt class="docutils literal"><span class="pre">ActivityLog</span></tt>,
+the event will be marked as part of that <tt class="docutils literal"><span class="pre">ActivityLog</span></tt>.
+Otherwise, an <tt class="docutils literal"><span class="pre">ActivityLog</span></tt> whose name matches the current
+FSM will be used (or created, if it does not already exist),
+and also set as the current <tt class="docutils literal"><span class="pre">FSMState.activity</span></tt>.</p>
+<p>Note that <tt class="docutils literal"><span class="pre">Response</span></tt> and <tt class="docutils literal"><span class="pre">StudentError</span></tt> data created
+while an FSM is running are also automatically time stamped
+and bound to the current <tt class="docutils literal"><span class="pre">FSMState.activity</span></tt>.</p>
+</dd></dl>
+
+<p><strong>Plug-in code</strong>:</p>
+<p>You can supply three types of plug-in methods on a Node specification
+class:</p>
+<ul>
+<li><p class="first"><strong>path method</strong>: if a node must determine its URL dynamically, you
+can supply a <tt class="docutils literal"><span class="pre">get_path()</span></tt> method to do so.  It must return a
+URL string of the form <tt class="docutils literal"><span class="pre">'/ct/some/path/'</span></tt>.  Note the trailing
+<tt class="docutils literal"><span class="pre">/</span></tt>, required by convention in Django.  The method definition must be
+of the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&#39;get URL for next steps in this unit&#39;</span>
+        <span class="n">unitStatus</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get_data_attr</span><span class="p">(</span><span class="s">&#39;unitStatus&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unitStatus</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">get_study_url</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>event method</strong>: if a node needs to determine dynamically
+what edge to trigger in response to a given event, you can
+supply a method named <tt class="docutils literal"><span class="pre">EVENTNAME_event()</span></tt> to do so
+(where <tt class="docutils literal"><span class="pre">EVENTNAME</span></tt> is the name of the event you want it
+to intercept).  It should call the desired edge transition
+directly, and return the result.  The method definition must be
+of the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">start_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="s">&#39;event handler for START node&#39;</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">get_data_attr</span><span class="p">(</span><span class="s">&#39;unit&#39;</span><span class="p">)</span>
+        <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Study: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">unit</span><span class="o">.</span><span class="n">title</span>
+        <span class="n">unitStatus</span> <span class="o">=</span> <span class="n">UnitStatus</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">unitStatus</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set_data_attr</span><span class="p">(</span><span class="s">&#39;unitStatus&#39;</span><span class="p">,</span> <span class="n">unitStatus</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fsmStack</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="s">&#39;next&#39;</span><span class="p">,</span>
+                                         <span class="n">useCurrent</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>edge method</strong>: if an edge needs to do something (such as save
+state data or decide dynamically what node to transition to),
+you can do so by supplying a method named <tt class="docutils literal"><span class="pre">EDGENAME_edge()</span></tt>,
+where <tt class="docutils literal"><span class="pre">EDGENAME</span></tt> is the name of the edge it should intercept.
+It must return an <tt class="docutils literal"><span class="pre">FSMNode</span></tt> to transition to.
+The method definition must be of the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">next_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># ... do some processing here, save some data on fsmStack.state...</span>
+        <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">toNode</span> <span class="c"># finally return target node</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="fsmstate">
+<h3>FSMState<a class="headerlink" href="#fsmstate" title="Permalink to this headline">¶</a></h3>
+<p>Represents the current state of a running FSM instance.</p>
+<p><strong>useful attributes you can read / write from plug-in code</strong>:</p>
+<dl class="attribute">
+<dt id="user">
+<tt class="descname">user</tt><a class="headerlink" href="#user" title="Permalink to this definition">¶</a></dt>
+<dd><p>The user running this FSM instance.  Do not change this directly.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fsmNode">
+<tt class="descname">fsmNode</tt><a class="headerlink" href="#fsmNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The current node.  Do not change this directly.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="activity">
+<tt class="descname">activity</tt><a class="headerlink" href="#activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The current <tt class="docutils literal"><span class="pre">ActivityLog</span></tt> for logging timestamp data to.
+You can set this directly, e.g. in <tt class="docutils literal"><span class="pre">start</span></tt> event plug-in code.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">title</tt></dt>
+<dd><p>The title which will be displayed for the FSM.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">hideTabs</tt></dt>
+<dd><p>If set True, hide the generic tabbed interface while this FSM is running.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">hideLinks</tt></dt>
+<dd><p>If set True, block hyperlinks from being clickable while this FSM is running.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">hideNav</tt></dt>
+<dd><p>If set True, hide the generic navigation bar options while this FSM
+is running.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="unitLesson">
+<tt class="descname">unitLesson</tt><a class="headerlink" href="#unitLesson" title="Permalink to this definition">¶</a></dt>
+<dd><p>records what lesson or question the FSM is currently working
+with.  This is so useful that it is part of the database definition
+of <tt class="docutils literal"><span class="pre">FSMState</span></tt>.</p>
+<p>Other arbitrary data can be saved using
+the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt> JSON blob storage using the following methods.</p>
+</dd></dl>
+
+<p><strong>useful methods you can call from plug-in code</strong>:</p>
+<dl class="method">
+<dt id="get_data_attr">
+<tt class="descname">get_data_attr</tt><big>(</big><em>attr</em><big>)</big><a class="headerlink" href="#get_data_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the named attribute <em>attr</em> from the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt>
+JSON blob, or <tt class="docutils literal"><span class="pre">KeyError</span></tt> if it does not exist.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="set_data_attr">
+<tt class="descname">set_data_attr</tt><big>(</big><em>attr</em>, <em>value</em><big>)</big><a class="headerlink" href="#set_data_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store <em>value</em> as the named attribute <em>attr</em> on the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt>
+JSON blob.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="get_all_state_data">
+<tt class="descname">get_all_state_data</tt><big>(</big><big>)</big><a class="headerlink" href="#get_all_state_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a dictionary of named attributes from the current state,
+including both the <tt class="docutils literal"><span class="pre">unitLesson</span></tt> attribute, and attributes
+stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt> JSON blob.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Writing Guided Activities (Finite State Machines)</a><ul>
+<li><a class="reference internal" href="#what-is-a-guided-activity">What is a Guided Activity?</a><ul>
+<li><a class="reference internal" href="#drawing-a-guided-activity-as-a-graph-of-views-and-transitions">Drawing a Guided Activity as a Graph of Views and Transitions</a></li>
+<li><a class="reference internal" href="#controlling-what-happens-next">Controlling What Happens Next</a><ul>
+<li><a class="reference internal" href="#static-edge-behavior">Static edge behavior</a></li>
+<li><a class="reference internal" href="#dynamic-edge-behavior">Dynamic edge behavior</a></li>
+<li><a class="reference internal" href="#dynamic-event-mapping">Dynamic Event Mapping</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#an-fsm-can-call-other-fsms-as-subroutines">An FSM can call other FSMs as &#8220;subroutines&#8221;</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#an-example-lesson-sequence-fsm">An Example: Lesson Sequence FSM</a></li>
+<li><a class="reference internal" href="#fsm-reference-documentation">FSM Reference Documentation</a><ul>
+<li><a class="reference internal" href="#fsm">FSM</a></li>
+<li><a class="reference internal" href="#fsmnode">FSMNode</a></li>
+<li><a class="reference internal" href="#fsmstate">FSMState</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="devintro.html"
+                        title="previous chapter">Getting Started with Socraticqs2 Development</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/fsm.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
+             >previous</a> |</li>
+        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
