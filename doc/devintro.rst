@@ -161,7 +161,7 @@ ways to get the latest updates from *our* code on Windows / Mac:
 
 * **Using GitHub desktop client**
 
-  Unfortunately, this is less user friendly. However, you can achieve the same goad by doing following:
+  Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:
 
 #. Go to the setting tab of your fork.
 
