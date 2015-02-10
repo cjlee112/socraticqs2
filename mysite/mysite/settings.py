@@ -2,6 +2,13 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+# Set template_path and template_dir
+TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
+TEMPLATE_DIRS = (TEMPLATE_PATH,)
+# Set databases_name
+DATABASES_NAME = os.path.join(BASE_DIR, 'mysite.db')
 
 ADMINS = (
     ('Christopher Lee', 'leec@chem.ucla.edu'),
@@ -10,7 +17,7 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/home/user/projects/djtest/mysite/mysite.db',                      # Or path to database file if using sqlite3.
+        'NAME': DATABASES_NAME,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -114,12 +121,6 @@ ROOT_URLCONF = 'mysite.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    '/home/user/projects/djtest/mysite/templates',
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',

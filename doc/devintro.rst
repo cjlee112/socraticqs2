@@ -127,16 +127,50 @@ Using Github for Windows / Mac
 ++++++++++++++++++++++++++++++++
 
 Github for Windows / Mac doesn't work with multiple remotes --
-it only synchronizes against your Github fork.  Hence, to get
-the latest code updates from *our* fork, you'll need to first
-pull them into your fork using Github's web interface.  The basic procedure
-is to go to the webpage for your fork, view changes in our repository
-(vs. your fork as the base), then send a Pull Request
-for these changes (to yourself!).  When you view the Pull Request 
-on Github it will give you an option to merge the changes into your
-fork.  Do that.  Finally on your Github for Windows / Mac, click
-the synchronize button to pull those changes into
-your local repo (on your computer).
+it only synchronizes against your GitHub fork. There are two
+ways to get the latest updates from *our* code on Windows / Mac:
+
+* **Through terminal**
+
+#. On GitHub, navigate to our cjlee112/socraticqs2 repository.
+
+#. In the right sidebar of the repository page, copy the clone URL for the repository.
+
+#. Open Terminal and change directories to the location of the fork you cloned.
+
+#. Add a new remote named 'upstream' using the origin repository::
+
+    git remote add upstream https://github.com/cjlee112/socraticqs2.git
+
+#. To verify the new upstream repository you've specified for your fork, use command line::
+
+    git remote -v
+
+   you suppose to see the following lines::
+
+     upstream  https://github.com/cjlee112/socraticqs2.git (fetch)
+     upstream  https://github.com/cjlee112/socraticqs2.git (push)
+
+#. Now you are able to fetch the branches and their respective commits from the upstream repository::
+
+    $ git fetch upstream
+
+   Also, you can merge the change from upstream/master to your local master branch. This brings your fork's master branch into sync with the upstream repository::
+
+    $ git merge upstream/master
+
+* **Using GitHub desktop client**
+
+  Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:
+
+#. Go to the setting tab of your fork.
+
+#. Change the "Primary remote repository" to the upstream repo you want to use.(ie, https://github.com/cjlee112/socraticqs2.git)
+
+#. Press "Update Remote"
+#. Press "Sync Branch"
+#. Change the "Primary remote repository" back to the original forked repo you were using.
+#. Press "Update Remote"
 
 Using standard Git
 +++++++++++++++++++
