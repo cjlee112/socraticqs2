@@ -24,6 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="next" title="Writing Guided Activities (Finite State Machines)" href="fsm.html" />
     <link rel="prev" title="Welcome to Socraticqs2’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -33,6 +34,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="fsm.html" title="Writing Guided Activities (Finite State Machines)"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to Socraticqs2’s documentation!"
              accesskey="P">previous</a> |</li>
@@ -90,30 +94,54 @@ pip install wikipedia
 </pre></div>
 </div>
 </div>
+<div class="section" id="git-version-control-software">
+<h3>Git version control software<a class="headerlink" href="#git-version-control-software" title="Permalink to this headline">¶</a></h3>
+<p>We use <a class="reference external" href="http://www.git-scm.com">Git</a> and
+<a class="reference external" href="https://github.com">GitHub</a> for working on Socraticqs2 development.
+You&#8217;ll first need to get Git:</p>
+<ul class="simple">
+<li>for Windows and Mac, you can download it from
+<a class="reference external" href="http://www.git-scm.com">the Git website</a> (command-line interface,
+recommended).  We also recommend installing a graphical
+interface for viewing Git code revision history such as
+<a class="reference external" href="http://www.sourcetreeapp.com">SourceTree</a>.</li>
+<li>Alternatively, you can download the
+GitHub for Windows / Mac app from GitHub (more limited, in our humble
+opinion).</li>
+<li>On Linux, your package manager can install (and update) Git
+for you automatically.  We recommend installing both the command
+line tools (<tt class="docutils literal"><span class="pre">git</span></tt>) and a graphical interface (<tt class="docutils literal"><span class="pre">gitg</span></tt>).</li>
+</ul>
+</div>
 <div class="section" id="getting-the-socraticqs2-source-code">
 <h3>Getting the Socraticqs2 source code<a class="headerlink" href="#getting-the-socraticqs2-source-code" title="Permalink to this headline">¶</a></h3>
-<p>To do development work, first go to our Github repository
+<p>To get your own copy of the Socraticqs2 code,
+first go to our Github repository
 <a class="reference external" href="https://github.com/cjlee112/socraticqs2">https://github.com/cjlee112/socraticqs2</a>
 and Fork the repository (you&#8217;ll need a Github account to do this).
 This creates your own repository in your Github account, which you
 can make changes to, and issue pull requests for us to incorporate
-your changes.</p>
-<p>If you use Github for Windows or Mac, you can just click the Clone to Desktop
-link on the webpage for your fork (repository).  Otherwise you can just
-click github&#8217;s HTTPS clone URL box for the repo, and clone the repo
-to your computer in your usual way, e.g. via the command line:</p>
-<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/cjlee112/socraticqs2.git
+your changes.  Next clone the repository to your local computer,
+one of two ways:</p>
+<ul>
+<li><p class="first"><strong>via the command line</strong>: click the &#8220;HTTPS clone URL&#8221; <em>copy to clipboard</em>
+button on your GitHub repository page, and paste it into a terminal
+command like so (substitute your correct clone URL):</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/YOURNAME/socraticqs2.git
 </pre></div>
 </div>
+<p>This will clone the repository to a new directory <tt class="docutils literal"><span class="pre">socraticqs2/</span></tt>
+in your current directory.  We recommend you also add our main
+repository as a &#8220;remote&#8221; repository called <tt class="docutils literal"><span class="pre">upstream</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd socraticqs2
+git remote add upstream https://github.com/cjlee112/socraticqs2.git
+</pre></div>
 </div>
-<div class="section" id="update-paths-in-settings-py">
-<h3>Update paths in settings.py<a class="headerlink" href="#update-paths-in-settings-py" title="Permalink to this headline">¶</a></h3>
-<p>Unfortunately, Django obligates us to give absolute paths to
-the database and template files, which are of course specific
-to an individual computer.  Hence you will have to edit the
-file <tt class="docutils literal"><span class="pre">socraticqs2/mysite/mysite/settings.py</span></tt>: search for
-the string <tt class="docutils literal"><span class="pre">/home/user</span></tt> (two instances) and replace with a
-path appropriate for your computer.</p>
+</li>
+<li><p class="first"><strong>via Github for Windows or Mac</strong>: you can just click the Clone to Desktop
+link on the webpage for your fork (repository).</p>
+</li>
+</ul>
 </div>
 <div class="section" id="run-the-test-suite">
 <h3>Run the test suite<a class="headerlink" href="#run-the-test-suite" title="Permalink to this headline">¶</a></h3>
@@ -156,36 +184,155 @@ credentials above and modify data in your development server).</li>
 </div>
 <div class="section" id="basic-developer-operations">
 <h2>Basic Developer Operations<a class="headerlink" href="#basic-developer-operations" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="pulling-the-latest-code-using-github-for-windows-mac">
-<h3>Pulling the latest code using Github for Windows / Mac<a class="headerlink" href="#pulling-the-latest-code-using-github-for-windows-mac" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="using-github-for-windows-mac">
-<h4>Using Github for Windows / Mac<a class="headerlink" href="#using-github-for-windows-mac" title="Permalink to this headline">¶</a></h4>
-<p>Github for Windows / Mac doesn&#8217;t work with multiple remotes &#8211;
-it only synchronizes against your Github fork.  Hence, to get
-the latest code updates from <em>our</em> fork, you&#8217;ll need to first
-pull them into your fork using Github&#8217;s web interface.  The basic procedure
-is to go to the webpage for your fork, view changes in our repository
-(vs. your fork as the base), then send a Pull Request
-for these changes (to yourself!).  When you view the Pull Request
-on Github it will give you an option to merge the changes into your
-fork.  Do that.  Finally on your Github for Windows / Mac, click
-the synchronize button to pull those changes into
-your local repo (on your computer).</p>
-</div>
+<div class="section" id="pulling-the-latest-code-updates">
+<h3>Pulling the latest code updates<a class="headerlink" href="#pulling-the-latest-code-updates" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="using-standard-git">
 <h4>Using standard Git<a class="headerlink" href="#using-standard-git" title="Permalink to this headline">¶</a></h4>
-<p>Using a standard Git setup, this process is much easier.  Assuming
-that you cloned our repo (so that Git&#8217;s <tt class="docutils literal"><span class="pre">remote</span></tt> repo points to
-our repo), you can pull our latest changes by simply typing:</p>
-<div class="highlight-python"><div class="highlight"><pre>git pull origin master
+<p>Assuming you used our Git setup instructions above
+(so that your local repository&#8217;s <tt class="docutils literal"><span class="pre">upstream</span></tt> remote points to
+our repo), you can pull our latest changes from a specific branch
+(e.g. <tt class="docutils literal"><span class="pre">master</span></tt>) by simply typing:</p>
+<div class="highlight-python"><div class="highlight"><pre>git pull upstream master
 </pre></div>
 </div>
 <p>Or if you want simply to fetch our latest changes (without actually
 merging them into your current branch), so that you can look at them,
 just type:</p>
-<div class="highlight-python"><div class="highlight"><pre>git fetch origin
+<div class="highlight-python"><div class="highlight"><pre>git fetch upstream
 </pre></div>
 </div>
+<p>You can then use your graphical viewer (e.g. <tt class="docutils literal"><span class="pre">gitg</span></tt> or SourceTree)
+to view the latest <tt class="docutils literal"><span class="pre">upstream</span></tt> commits prior to merging them into
+your own branch(es).</p>
+</div>
+<div class="section" id="using-github-for-windows-mac">
+<h4>Using Github for Windows / Mac<a class="headerlink" href="#using-github-for-windows-mac" title="Permalink to this headline">¶</a></h4>
+<p>Github for Windows / Mac doesn&#8217;t work with multiple remotes &#8211;
+it only synchronizes against your GitHub fork. Working around
+this limitation, there are two
+ways to get the latest updates from <em>our</em> GitHub fork:</p>
+<div class="section" id="via-the-command-line">
+<h5>via the command line<a class="headerlink" href="#via-the-command-line" title="Permalink to this headline">¶</a></h5>
+<ol class="arabic">
+<li><p class="first">If this is the first time you are pulling from our repository,
+you will need to add a &#8220;remote&#8221; telling Git the URL of our
+repository, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>git remote add upstream https://github.com/cjlee112/socraticqs2.git
+</pre></div>
+</div>
+<p>You can verify the new <tt class="docutils literal"><span class="pre">upstream</span></tt> repository has been added,
+by listing all the existing remotes:</p>
+<div class="highlight-python"><div class="highlight"><pre>git remote -v
+</pre></div>
+</div>
+<p>You should see the following lines (in addition to your other remotes):</p>
+<div class="highlight-python"><div class="highlight"><pre>upstream  https://github.com/cjlee112/socraticqs2.git (fetch)
+upstream  https://github.com/cjlee112/socraticqs2.git (push)
+</pre></div>
+</div>
+</li>
+<li><p class="first">Now you are able to pull or fetch the branches and their respective
+commits from the upstream repository, using the standard Git commands
+listed in the previous section, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git fetch upstream
+</pre></div>
+</div>
+<p>Once you&#8217;ve fetched <tt class="docutils literal"><span class="pre">upstream</span></tt> commits, you can merge them
+(e.g. from <tt class="docutils literal"><span class="pre">upstream/master</span></tt>) to your current local branch:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git merge upstream/master
+</pre></div>
+</div>
+<p>This brings your current branch into sync with <tt class="docutils literal"><span class="pre">upstream/master</span></tt>.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="using-github-desktop-client">
+<h5>Using GitHub desktop client<a class="headerlink" href="#using-github-desktop-client" title="Permalink to this headline">¶</a></h5>
+<p>Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:</p>
+<ol class="arabic simple">
+<li>Go to the setting tab of your fork.</li>
+<li>Change the &#8220;Primary remote repository&#8221; to the upstream repo you want to use.(ie, <a class="reference external" href="https://github.com/cjlee112/socraticqs2.git">https://github.com/cjlee112/socraticqs2.git</a>)</li>
+<li>Press &#8220;Update Remote&#8221;</li>
+<li>Press &#8220;Sync Branch&#8221;</li>
+<li>Change the &#8220;Primary remote repository&#8221; back to the original forked repo you were using.</li>
+<li>Press &#8220;Update Remote&#8221;</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="making-source-code-changes">
+<h3>Making source-code changes<a class="headerlink" href="#making-source-code-changes" title="Permalink to this headline">¶</a></h3>
+<p>We strongly recommend that you take advantage of Git&#8217;s easy
+revision control &#8220;branches&#8221; to create a new &#8220;experimental&#8221; branch
+for any changes you want to try, e.g. via the command-line:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout -b try
+</pre></div>
+</div>
+<p>This creates a new branch called <tt class="docutils literal"><span class="pre">try</span></tt>, forked from your
+current branch (for the purpose of argument, let&#8217;s assume it
+was called <tt class="docutils literal"><span class="pre">previous</span></tt>).  Now make and commit whatever
+changes you want.</p>
+<ul>
+<li><p class="first">As long as your latest changes have been committed, you can
+instantly switch to another branch, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout previous
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide you want to merge your changes from <tt class="docutils literal"><span class="pre">try</span></tt> into
+your current branch, just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git merge try
+</pre></div>
+</div>
+<p>If you now have no further need for <tt class="docutils literal"><span class="pre">try</span></tt>, because all its commits
+have been merged into your current branch, type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git branch -d try
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide you want to abandon (completely delete)
+the changes you made on <tt class="docutils literal"><span class="pre">try</span></tt>, just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git branch -D try
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide to abandon your latest commit (undo its changes, and
+delete the commit), you can type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git reset --hard HEAD^
+</pre></div>
+</div>
+<p>In general, if you want to &#8220;reset&#8221; your branch to a previous commit
+(abandoning subsequent changes), just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git reset --hard 7a529
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">7a529</span></tt> is the commit ID you want to go back to.</p>
+</li>
+</ul>
+<p>See a Git tutorial to learn more about all its great capabilities.</p>
+<div class="section" id="some-best-practices-to-follow">
+<h4>Some best practices to follow<a class="headerlink" href="#some-best-practices-to-follow" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">don&#8217;t push &#8220;junk&#8221; commits to your public (GitHub) repository.
+Instead clean up your branch to get rid of unwanted commits
+(using methods like the above), before pushing it to GitHub.</p>
+</li>
+<li><p class="first">once your branch is &#8220;clean&#8221;, make sure the test suite passes
+before you push your branch to GitHub.</p>
+</li>
+<li><p class="first">When you branch is clean and all tests pass, you can push
+it to GitHub so others can access it.  For example, to push
+your <tt class="docutils literal"><span class="pre">try</span></tt> branch:</p>
+<div class="highlight-python"><div class="highlight"><pre>git push origin try
+</pre></div>
+</div>
+</li>
+<li><p class="first">Git can do just about anything to help you clean up or reorganize
+your branches, but its complexities may initially seem
+mystifying.  When in doubt about how to get Git to do what you
+want, search Google for a tutorial, or ask us for help.</p>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="database-operations">
@@ -254,8 +401,10 @@ You need to be aware of the following &#8220;gotchas&#8221; lurking here:</p>
 <li>once you change a model in <tt class="docutils literal"><span class="pre">models.py</span></tt>, your code will no longer
 run until you successfully run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> + <tt class="docutils literal"><span class="pre">migrate</span></tt>.
 So you cannot actually test your changes until you run both those steps.</li>
-<li>every time you run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> ANOTHER migration file
-is added, and they ALL are required for the migration to work.
+<li>every time you run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> on another change to
+your data models, ANOTHER migration file
+will be added, and EVERY migration file will be
+required for the migration to work.
 Multiple migration files increase the risk of errors either in
 your committing them or other people attempting to apply them.
 So ideally, when you change the models to introduce a new feature,
@@ -265,8 +414,9 @@ run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> / 
 <em>after</em> you are pretty sure your model changes are final.
 But you can&#8217;t even test your changes until after both steps.
 This is an unpleasant catch-22.</li>
-<li>Once you change your database schema (via <tt class="docutils literal"><span class="pre">migrate</span></tt>), all other
-code (i.e. not matching the new models) will NOT run.
+<li>Once you change your database schema (via <tt class="docutils literal"><span class="pre">migrate</span></tt>), all <em>other</em>
+code versions (i.e. not matching the new schema stored in your
+database) will NOT run.
 This would destroy the key virtue of Git &#8211; your ability to
 have many different code branches and switch between them
 effortlessly.</li>
@@ -301,7 +451,7 @@ that worked with <tt class="docutils literal"><span class="pre">previous</span><
 cp mysite.db.previous mysite.db
 </pre></div>
 </div>
-<p>Note that I do NOT recommend adding <tt class="docutils literal"><span class="pre">mysite.db</span></tt> to Git
+<p>Note that you should NOT add <tt class="docutils literal"><span class="pre">mysite.db</span></tt> to Git
 version control.</p>
 </li>
 <li><p class="first">Now you can freely run <tt class="docutils literal"><span class="pre">makemigrations</span></tt> + <tt class="docutils literal"><span class="pre">migrate</span></tt>
@@ -359,16 +509,24 @@ as part of your development and testing process.  This is easy.</p>
 <li><a class="reference internal" href="#pre-requisites">Pre-requisites</a></li>
 <li><a class="reference internal" href="#optional-use-virtualenv-to-create-an-isolated-test-environment">Optional: use virtualenv to create an isolated test environment</a></li>
 <li><a class="reference internal" href="#installing-django-etc">Installing Django etc.</a></li>
+<li><a class="reference internal" href="#git-version-control-software">Git version control software</a></li>
 <li><a class="reference internal" href="#getting-the-socraticqs2-source-code">Getting the Socraticqs2 source code</a></li>
-<li><a class="reference internal" href="#update-paths-in-settings-py">Update paths in settings.py</a></li>
 <li><a class="reference internal" href="#run-the-test-suite">Run the test suite</a></li>
 <li><a class="reference internal" href="#running-a-test-web-server">Running a test web server</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#basic-developer-operations">Basic Developer Operations</a><ul>
-<li><a class="reference internal" href="#pulling-the-latest-code-using-github-for-windows-mac">Pulling the latest code using Github for Windows / Mac</a><ul>
-<li><a class="reference internal" href="#using-github-for-windows-mac">Using Github for Windows / Mac</a></li>
+<li><a class="reference internal" href="#pulling-the-latest-code-updates">Pulling the latest code updates</a><ul>
 <li><a class="reference internal" href="#using-standard-git">Using standard Git</a></li>
+<li><a class="reference internal" href="#using-github-for-windows-mac">Using Github for Windows / Mac</a><ul>
+<li><a class="reference internal" href="#via-the-command-line">via the command line</a></li>
+<li><a class="reference internal" href="#using-github-desktop-client">Using GitHub desktop client</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-source-code-changes">Making source-code changes</a><ul>
+<li><a class="reference internal" href="#some-best-practices-to-follow">Some best practices to follow</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#database-operations">Database Operations</a><ul>
@@ -387,6 +545,9 @@ as part of your development and testing process.  This is easy.</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to Socraticqs2&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="fsm.html"
+                        title="next chapter">Writing Guided Activities (Finite State Machines)</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/devintro.txt"
@@ -415,6 +576,9 @@ as part of your development and testing process.  This is easy.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="fsm.html" title="Writing Guided Activities (Finite State Machines)"
+             >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to Socraticqs2’s documentation!"
              >previous</a> |</li>
