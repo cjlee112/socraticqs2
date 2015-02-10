@@ -47,32 +47,52 @@ Assuming you have Python and Pandoc installed::
   pip install django-crispy-forms
   pip install wikipedia
 
+Git version control software
+.....................................
+
+We use `Git <http://www.git-scm.com>`_ and 
+`GitHub <https://github.com>`_ for working on Socraticqs2 development.
+You'll first need to get Git: 
+
+* for Windows and Mac, you can download it from
+  `the Git website <http://www.git-scm.com>`_ (command-line interface,
+  recommended).  We also recommend installing a graphical
+  interface for viewing Git code revision history such as
+  `SourceTree <http://www.sourcetreeapp.com>`_.
+* Alternatively, you can download the 
+  GitHub for Windows / Mac app from GitHub (more limited, in our humble
+  opinion).
+* On Linux, your package manager can install (and update) Git
+  for you automatically.  We recommend installing both the command
+  line tools (``git``) and a graphical interface (``gitg``).
+
 Getting the Socraticqs2 source code
 .....................................
 
-To do development work, first go to our Github repository 
+To get your own copy of the Socraticqs2 code, 
+first go to our Github repository 
 https://github.com/cjlee112/socraticqs2
 and Fork the repository (you'll need a Github account to do this).  
 This creates your own repository in your Github account, which you
 can make changes to, and issue pull requests for us to incorporate
-your changes.
+your changes.  Next clone the repository to your local computer,
+one of two ways:
 
-If you use Github for Windows or Mac, you can just click the Clone to Desktop
-link on the webpage for your fork (repository).  Otherwise you can just
-click github's HTTPS clone URL box for the repo, and clone the repo
-to your computer in your usual way, e.g. via the command line::
+* **via the command line**: click the "HTTPS clone URL" *copy to clipboard*
+  button on your GitHub repository page, and paste it into a terminal
+  command like so (substitute your correct clone URL)::
 
-  git clone https://github.com/cjlee112/socraticqs2.git
+    git clone https://github.com/YOURNAME/socraticqs2.git
 
-Update paths in settings.py
-.............................
+  This will clone the repository to a new directory ``socraticqs2/``
+  in your current directory.  We recommend you also add our main
+  repository as a "remote" repository called ``upstream``::
 
-Unfortunately, Django obligates us to give absolute paths to
-the database and template files, which are of course specific
-to an individual computer.  Hence you will have to edit the
-file ``socraticqs2/mysite/mysite/settings.py``: search for
-the string ``/home/user`` (two instances) and replace with a
-path appropriate for your computer.
+    cd socraticqs2
+    git remote add upstream https://github.com/cjlee112/socraticqs2.git
+
+* **via Github for Windows or Mac**: you can just click the Clone to Desktop
+  link on the webpage for your fork (repository).
 
 Run the test suite
 ....................
@@ -120,48 +140,73 @@ Security notes:
 Basic Developer Operations
 ---------------------------
 
-Pulling the latest code using Github for Windows / Mac
+Pulling the latest code updates
 .......................................................
+
+Using standard Git
++++++++++++++++++++
+
+Assuming you used our Git setup instructions above
+(so that your local repository's ``upstream`` remote points to 
+our repo), you can pull our latest changes from a specific branch
+(e.g. ``master``) by simply typing::
+
+  git pull upstream master
+
+Or if you want simply to fetch our latest changes (without actually
+merging them into your current branch), so that you can look at them,
+just type::
+
+  git fetch upstream
+
+You can then use your graphical viewer (e.g. ``gitg`` or SourceTree)
+to view the latest ``upstream`` commits prior to merging them into
+your own branch(es).
 
 Using Github for Windows / Mac
 ++++++++++++++++++++++++++++++++
 
 Github for Windows / Mac doesn't work with multiple remotes --
-it only synchronizes against your GitHub fork. There are two
-ways to get the latest updates from *our* code on Windows / Mac:
+it only synchronizes against your GitHub fork. Working around
+this limitation, there are two
+ways to get the latest updates from *our* GitHub fork:
 
-* **Through terminal**
+via the command line
+:::::::::::::::::::::::
 
-#. On GitHub, navigate to our cjlee112/socraticqs2 repository.
+#. If this is the first time you are pulling from our repository,
+   you will need to add a "remote" telling Git the URL of our
+   repository, like so::
 
-#. In the right sidebar of the repository page, copy the clone URL for the repository.
+     git remote add upstream https://github.com/cjlee112/socraticqs2.git
 
-#. Open Terminal and change directories to the location of the fork you cloned.
+   You can verify the new ``upstream`` repository has been added,
+   by listing all the existing remotes::
 
-#. Add a new remote named 'upstream' using the origin repository::
+     git remote -v
 
-    git remote add upstream https://github.com/cjlee112/socraticqs2.git
-
-#. To verify the new upstream repository you've specified for your fork, use command line::
-
-    git remote -v
-
-   you suppose to see the following lines::
+   You should see the following lines (in addition to your other remotes)::
 
      upstream  https://github.com/cjlee112/socraticqs2.git (fetch)
      upstream  https://github.com/cjlee112/socraticqs2.git (push)
 
-#. Now you are able to fetch the branches and their respective commits from the upstream repository::
+#. Now you are able to pull or fetch the branches and their respective
+   commits from the upstream repository, using the standard Git commands
+   listed in the previous section, e.g.::
 
-    $ git fetch upstream
+     $ git fetch upstream
 
-   Also, you can merge the change from upstream/master to your local master branch. This brings your fork's master branch into sync with the upstream repository::
+   Once you've fetched ``upstream`` commits, you can merge them
+   (e.g. from ``upstream/master``) to your current local branch::
 
-    $ git merge upstream/master
+     $ git merge upstream/master
 
-* **Using GitHub desktop client**
+   This brings your current branch into sync with ``upstream/master``.
 
-  Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:
+Using GitHub desktop client
+:::::::::::::::::::::::::::::::
+
+Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:
 
 #. Go to the setting tab of your fork.
 
@@ -171,21 +216,6 @@ ways to get the latest updates from *our* code on Windows / Mac:
 #. Press "Sync Branch"
 #. Change the "Primary remote repository" back to the original forked repo you were using.
 #. Press "Update Remote"
-
-Using standard Git
-+++++++++++++++++++
-
-Using a standard Git setup, this process is much easier.  Assuming
-that you cloned our repo (so that Git's ``remote`` repo points to 
-our repo), you can pull our latest changes by simply typing::
-
-  git pull origin master
-
-Or if you want simply to fetch our latest changes (without actually
-merging them into your current branch), so that you can look at them,
-just type::
-
-  git fetch origin
 
 Database Operations
 .....................
