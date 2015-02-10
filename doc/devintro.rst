@@ -289,8 +289,10 @@ At this point you should be able to run the testsuite, ``runserver``, etc.
      run until you successfully run ``makemigrations`` + ``migrate``.
      So you cannot actually test your changes until you run both those steps.
 
-   * every time you run ``makemigrations`` ANOTHER migration file
-     is added, and they ALL are required for the migration to work.
+   * every time you run ``makemigrations`` on another change to
+     your data models, ANOTHER migration file
+     will be added, and EVERY migration file will be
+     required for the migration to work.
      Multiple migration files increase the risk of errors either in 
      your committing them or other people attempting to apply them.
      So ideally, when you change the models to introduce a new feature,
@@ -302,8 +304,9 @@ At this point you should be able to run the testsuite, ``runserver``, etc.
      But you can't even test your changes until after both steps.
      This is an unpleasant catch-22.
 
-   * Once you change your database schema (via ``migrate``), all other
-     code (i.e. not matching the new models) will NOT run.
+   * Once you change your database schema (via ``migrate``), all *other*
+     code versions (i.e. not matching the new schema stored in your
+     database) will NOT run.
      This would destroy the key virtue of Git -- your ability to 
      have many different code branches and switch between them 
      effortlessly.
@@ -337,7 +340,7 @@ migration:
     git checkout previous
     cp mysite.db.previous mysite.db
 
-  Note that I do NOT recommend adding ``mysite.db`` to Git
+  Note that you should NOT add ``mysite.db`` to Git
   version control.
 
 * Now you can freely run ``makemigrations`` + ``migrate``
