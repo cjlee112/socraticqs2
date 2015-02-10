@@ -217,6 +217,74 @@ Unfortunately, this is less user friendly. However, you can achieve the same goa
 #. Change the "Primary remote repository" back to the original forked repo you were using.
 #. Press "Update Remote"
 
+Making source-code changes
+............................
+
+We strongly recommend that you take advantage of Git's easy
+revision control "branches" to create a new "experimental" branch
+for any changes you want to try, e.g. via the command-line::
+
+  git checkout -b try
+
+This creates a new branch called ``try``, forked from your
+current branch (for the purpose of argument, let's assume it
+was called ``previous``).  Now make and commit whatever
+changes you want.  
+
+* As long as your latest changes have been committed, you can
+  instantly switch to another branch, like so::
+
+    git checkout previous
+
+* If you decide you want to merge your changes from ``try`` into
+  your current branch, just type::
+
+    git merge try
+
+  If you now have no further need for ``try``, because all its commits
+  have been merged into your current branch, type::
+
+    git branch -d try
+
+* If you decide you want to abandon (completely delete)
+  the changes you made on ``try``, just type::
+
+    git branch -D try
+
+* If you decide to abandon your latest commit (undo its changes, and
+  delete the commit), you can type::
+
+    git reset --hard HEAD^
+
+  In general, if you want to "reset" your branch to a previous commit
+  (abandoning subsequent changes), just type::
+
+    git reset --hard 7a529
+
+  where ``7a529`` is the commit ID you want to go back to.
+
+See a Git tutorial to learn more about all its great capabilities.
+
+Some best practices to follow
++++++++++++++++++++++++++++++++
+
+* don't push "junk" commits to your public (GitHub) repository.
+  Instead clean up your branch to get rid of unwanted commits
+  (using methods like the above), before pushing it to GitHub.
+* once your branch is "clean", make sure the test suite passes
+  before you push your branch to GitHub.
+* When you branch is clean and all tests pass, you can push
+  it to GitHub so others can access it.  For example, to push
+  your ``try`` branch::
+
+    git push origin try
+
+* Git can do just about anything to help you clean up or reorganize
+  your branches, but its complexities may initially seem
+  mystifying.  When in doubt about how to get Git to do what you
+  want, search Google for a tutorial, or ask us for help.
+  
+
 Database Operations
 .....................
 
