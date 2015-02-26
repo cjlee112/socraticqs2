@@ -1369,13 +1369,18 @@ class ActivityLog(models.Model):
     endTime = models.DateTimeField('time ended', null=True)
     course = models.ForeignKey(Course, null=True)
     @classmethod
+    def get_or_create(klass, name):
+        'get log with specified name if it exists, or create it'
+        try:
+            return klass.objects.get(fsmName=name)
+        except klass.DoesNotExist:
+            a = klass(fsmName=name)
+            a.save()
+            return a
+    @classmethod
     def log_node_entry(klass, fsmNode, user, unitLesson=None):
         'record entry to this node, creating ActivityLog if needed'
-        try:
-            a = klass.objects.get(fsmName=fsmNode.fsm.name)
-        except klass.DoesNotExist:
-            a = klass(fsmName=fsmNode.fsm.name)
-            a.save()
+        a = klass.get_or_create(fsmNode.fsm.name)
         ae = ActivityEvent(activity=a, user=user, nodeName=fsmNode.name,
                            unitLesson=unitLesson)
         ae.save()
