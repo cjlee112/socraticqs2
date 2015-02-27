@@ -1400,7 +1400,7 @@ def fsm_status(request):
         elif not pageData.fsmStack.state:
             pageData.errorMessage = 'No activity ongoing currently!'
         elif 'abort' == request.POST.get('task', None):
-            pageData.fsmStack.pop(request, eventName='abort')
+            pageData.fsmStack.pop(request, eventName='exceptCancel')
             pageData.statusMessage = 'Activity canceled.'
         elif 'quit' == request.POST.get('task', None):
             return pageData.fsm_redirect(request, 'quit')

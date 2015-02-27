@@ -44,7 +44,7 @@ class FSMStack(object):
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
         return path
-    def pop(self, request, eventName='pop', **kwargs):
+    def pop(self, request, eventName='return', **kwargs):
         'pop current FSM state and pass event to next stack state if any'
         nextState = self.state.parentState
         self.state.delete()

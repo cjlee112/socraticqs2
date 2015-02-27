@@ -31,3 +31,9 @@ class FSMSpecification(object):
         return FSM.save_graph(self.fsmData, self.nodeData, self.edgeData,
                                    *args, **kwargs)
             
+class CallerNode(object):
+    'base class for node representing a call to a sub-FSM'
+    def get_path(self, node, state, request, **kwargs):
+        'echo the sub-FSM path saved on our current state'
+        return state.path
+    
