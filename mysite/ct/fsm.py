@@ -37,11 +37,14 @@ class FSMStack(object):
             if parentPath: # let parent FSM redirect us to its current state
                 return parentPath
         return path
-    def push(self, request, fsmName, stateData={}, startArgs={}, **kwargs):
+    def push(self, request, fsmName, stateData={}, startArgs={},
+             activity=None, **kwargs):
         'start running a new FSM instance (layer)'
         fsm = FSM.objects.get(name=fsmName)
+        if not activity and self.state:
+            activity = self.state.activity
         self.state = FSMState(user=request.user, fsmNode=fsm.startNode,
-                parentState=self.state, activity=self.state.activity,
+                parentState=self.state, activity=activity,
                 title=fsm.title, hideTabs=fsm.hideTabs,
                 hideLinks=fsm.hideLinks, hideNav=fsm.hideNav, **kwargs)
         path = self.state.start_fsm(self, request, stateData, **startArgs)
