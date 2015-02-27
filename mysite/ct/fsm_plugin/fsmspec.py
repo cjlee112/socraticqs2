@@ -33,7 +33,8 @@ class FSMSpecification(object):
             
 class CallerNode(object):
     'base class for node representing a call to a sub-FSM'
-    def get_path(self, node, state, request, **kwargs):
-        'echo the sub-FSM path saved on our current state'
-        return state.path
+    def exceptCancel_edge(self, edge, fsmStack, request, **kwargs):
+        'implements default behavior: if sub-FSM cancelled, we cancel too'
+        fsmStack.pop(request, eventName='exceptCancel') # cancel this FSM
+        return edge.toNode
     
