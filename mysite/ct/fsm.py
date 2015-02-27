@@ -24,8 +24,11 @@ class FSMStack(object):
         indicating NO over-ride of generic UI behavior.'''
         if self.state is None: # no ongoing activity
             return
+        state = self.state # remember current state
         path = self.state.event(self, request, eventName, pageData=pageData,
                                 **kwargs)
+        if self.state and self.state != state: # pushed or popped
+            path = self.state.path # use path of new FSM
         if self.state.fsmNode.name == 'END': # reached terminal state
             pageData.set_refresh_timer(request, False) # reset timer if on
             if self.state.fsmNode.help: # save its help message
