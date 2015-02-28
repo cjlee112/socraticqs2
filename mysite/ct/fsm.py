@@ -33,7 +33,7 @@ class FSMStack(object):
             pageData.set_refresh_timer(request, False) # reset timer if on
             if self.state.fsmNode.help: # save its help message
                 request.session['statusMessage'] = self.state.fsmNode.help
-            parentPath = self.pop(request)
+            parentPath = self.pop(request, pageData=pageData)
             if parentPath: # let parent FSM redirect us to its current state
                 return parentPath
         return path
@@ -50,14 +50,14 @@ class FSMStack(object):
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
         return path
-    def pop(self, request, eventName='return', **kwargs):
+    def pop(self, request, eventName='return', pageData=None, **kwargs):
         'pop current FSM state and pass event to next stack state if any'
         nextState = self.state.parentState
         self.state.delete()
         self.state = nextState
         if nextState is not None:
             request.session['fsmID'] = nextState.pk
-            return self.event(request, eventName, **kwargs)
+            return self.event(request, eventName, pageData, **kwargs)
         else:
             del request.session['fsmID']
     def resume(self, request, stateID):
