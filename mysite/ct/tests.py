@@ -168,17 +168,38 @@ class FakeRequest(object):
         if not dataDict:
             dataDict = {}
         setattr(self, method, dataDict)
-            
+
+def create_question_unit(user, utitle='Ask Me some questions',
+                         qtitle='What is your quest?',
+                         text="(That's a rather personal question.)"):
+    unit = Unit(title=utitle, addedBy=user)
+    unit.save()
+    question = Lesson(title=qtitle, text=text,
+                      kind=Lesson.ORCT_QUESTION, addedBy=user)
+    question.save_root()
+    ul = UnitLesson.create_from_lesson(question, unit, addAnswer=True,
+                                       order='APPEND')
+    return ul
+                    
 class FSMTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
+        # have to login or Django self.client.session storage won't work
+        self.client.login(username='jacob', password='top_secret')
+        self.course = Course(title='Great Course', description='the bestest',
+                             addedBy=self.user)
+        self.course.save()
         self.unit = Unit(title='My Courselet', addedBy=self.user)
         self.unit.save()
         self.lesson = Lesson(title='Big Deal', text='very interesting info',
                              addedBy=self.user)
         self.lesson.save_root()
-        self.unitLesson = UnitLesson.create_from_lesson(self.lesson, self.unit)
+        self.unitLesson = UnitLesson.create_from_lesson(self.lesson, self.unit,
+                                                        order='APPEND')
+        self.ulQ = create_question_unit(self.user)
+        self.ulQ2 = create_question_unit(self.user, 'Pretest', 'Scary Question',
+                                         'Tell me something.')
     def test_load(self):
         'check loading an FSM graph, and replacing it'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
@@ -305,6 +326,68 @@ class FSMTests(TestCase):
         fsmStack = fsm.FSMStack(request)
         self.assertEqual(request.session, {})
         self.assertIsNone(fsmStack.state)
+    def test_randomtrial(self):
+        'basic randomized trial'
+        self.assertEqual(self.ulQ.order, 0)
+        from ct.fsm_plugin.lessonseq import get_specs
+        f = get_specs()[0].save_graph(self.user.username) # load FSM spec
+        from ct.fsm_plugin.randomtrial import get_specs
+        f = get_specs()[0].save_graph(self.user.username) # load FSM spec
+        self.assertEqual(ActivityLog.objects.count(), 0)
+        request = FakeRequest(self.user)
+        request.session = self.client.session
+        fsmStack = fsm.FSMStack(request)
+        fsmData = dict(testFSM='lessonseq', treatmentFSM='lessonseq',
+                       treatment1=self.ulQ.unit, treatment2=self.ulQ.unit,
+                       testUnit=self.ulQ2.unit, course=self.course)
+        result = fsmStack.push(request, 'randomtrial', fsmData,
+                               dict(trialName='test'))
+        request.session.save()
+        self.assertEqual(self.client.session['fsmID'], fsmStack.state.pk)
+        self.assertEqual(result, '/ct/nodes/%d/' % f.startNode.pk)
+        self.assertEqual(ActivityLog.objects.count(), 1)
+        # rt FSM start page
+        response = self.client.get(result)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'answer a few preliminary questions')
+        url = '/ct/courses/%d/units/%d/lessons/%d/ask/' \
+              % (self.course.pk, self.ulQ2.unit.pk, self.ulQ2.pk)
+        self.check_post_get(result, dict(fsmtask='next'), url, 'Scary Question')
+        # pretest Q 
+        postdata = dict(text='i dunno', confidence=Response.GUESS)
+        url = self.check_post_get(url, postdata, '/assess/', 'write an answer')
+        # pretest assess
+        assessPOST = dict(selfeval=Response.CORRECT, status=DONE_STATUS,
+                        liked='')
+        url2 = '/ct/courses/%d/units/%d/lessons/%d/ask/' \
+              % (self.course.pk, self.ulQ.unit.pk, self.ulQ.pk)
+        self.check_post_get(url, assessPOST, url2, 'your quest')
+        # treatment Q
+        postdata = dict(text='i like rats', confidence=Response.GUESS)
+        url = self.check_post_get(url2, postdata, '/assess/', 'write an answer')
+        # treatment assess 
+        url2 = '/ct/courses/%d/units/%d/lessons/%d/ask/' \
+              % (self.course.pk, self.ulQ2.unit.pk, self.ulQ2.pk)
+        self.check_post_get(url, assessPOST, url2, 'Scary Question')
+        # posttest Q 
+        postdata = dict(text='i still dunno', confidence=Response.GUESS)
+        url = self.check_post_get(url2, postdata, '/assess/', 'write an answer')
+        # posttest assess
+        url2 = '/ct/courses/%d/units/%d/tasks/' \
+              % (self.course.pk, self.ulQ.unit.pk)
+        self.check_post_get(url, assessPOST, url2, 'Next Step to work on')
+
+    def check_post_get(self, url, postdata, urlTail, expected):
+        response = self.client.post(url, postdata, HTTP_REFERER=url)
+        self.assertEqual(response.status_code, 302)
+        print 'redirect', response['Location']
+        url = response['Location']
+        self.assertTrue(url.endswith(urlTail))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected)
+        return url
+
         
 class ReversePathTests(TestCase):
     def test_home(self):
