@@ -1038,12 +1038,14 @@ def error_resources(request, course_id, unit_id, ul_id):
 
 @login_required
 def study_unit(request, course_id, unit_id):
+    course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
     unitStatus = None
     pageData = PageData(request, title=unit.title)
     startForm = push_button(request)
     if not startForm: # user clicked Start
-        return pageData.fsm_push(request, 'lessonseq', dict(unit=unit))
+        return pageData.fsm_push(request, 'lessonseq',
+                                 dict(unit=unit, course=course))
     if unitStatus:
         nextUL = unitStatus.get_lesson()
         if unitStatus.endTime: # already completed unit
@@ -1098,13 +1100,13 @@ def unit_concepts_student(request, course_id, unit_id):
                            dict(conceptTable=conceptTable))
 
 
-def lesson_next_url(request, ul):
+def lesson_next_url(request, ul, course_id):
     'get URL for the next lesson, or URL to exit to courselet tasks view'
     try:
         nextUL = ul.get_next_lesson()
     except UnitLesson.DoesNotExist:
         return get_base_url(request.path, ['tasks']) # exit to unit tasks view
-    return nextUL.get_study_url(request.path)
+    return nextUL.get_study_url(course_id)
     
         
 def lesson(request, course_id, unit_id, ul_id):
@@ -1117,7 +1119,7 @@ def lesson(request, course_id, unit_id, ul_id):
             if nextForm.cleaned_data['liked']:
                 liked = Liked(unitLesson=ul, addedBy=request.user)
                 liked.save()
-            defaultURL = lesson_next_url(request, ul)
+            defaultURL = lesson_next_url(request, ul, course_id)
             # let fsm redirect this event if it wishes
             return pageData.fsm_redirect(request, 'next', defaultURL)
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
@@ -1325,7 +1327,7 @@ def assess(request, course_id, unit_id, ul_id, resp_id):
                 liked.save()
             if r.selfeval == Response.CORRECT: # just go on to next lesson
                 eventName = 'next'
-                defaultURL = lesson_next_url(request, r.unitLesson)
+                defaultURL = lesson_next_url(request, r.unitLesson, course_id)
             else: # ask student to assess their errors
                 eventName = 'error' # student made an error
                 defaultURL = reverse('ct:assess_errors',

@@ -520,13 +520,13 @@ class UnitLesson(models.Model):
             else:
                 return IS_CONCEPT
         return IS_LESSON
-    def get_study_url(self, path):
+    def get_study_url(self, course_id):
         'return URL for student to read lesson or answer question'
-        from ct.templatetags.ct_extras import get_base_url
         if self.lesson.kind == Lesson.ORCT_QUESTION:
-            return get_base_url(path, ['lessons', str(self.pk), 'ask'])
+            path = 'ct:ul_respond'
         else:
-            return get_base_url(path, ['lessons', str(self.pk)])
+            path = 'ct:lesson'
+        return reverse(path, args=(course_id, self.unit.pk, self.pk))
     def is_question(self):
         'is this a question?'
         return self.lesson.kind == Lesson.ORCT_QUESTION

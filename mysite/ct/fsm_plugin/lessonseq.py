@@ -18,9 +18,10 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
 
 def get_lesson_url(self, node, state, request, **kwargs):
     'get URL for any lesson'
+    course = state.get_data_attr('course')
     unitStatus = state.get_data_attr('unitStatus')
     ul = unitStatus.get_lesson()
-    return ul.get_study_url(request.path)
+    return ul.get_study_url(course.pk)
     
 class START(object):
     '''Initialize data for viewing a courselet, and go immediately

@@ -5,9 +5,10 @@ import random
 
 def push_unit_fsm(self, edge, fsmStack, request, **kwargs):
     'edge method that launches FSM w/ a unit e.g. for pre/post-test'
+    course = fsmStack.state.get_data_attr('course')
     unit = fsmStack.state.get_data_attr(self._unitAttr)
     fsmName = fsmStack.state.get_data_attr(self._fsmAttr) # FSM to run
-    fsmStack.push(request, fsmName, dict(unit=unit)) # start it
+    fsmStack.push(request, fsmName, dict(unit=unit, course=course)) # start it
     return edge.toNode
 
 class START(object):
@@ -74,7 +75,7 @@ class POSTTEST(CallerNode):
 
 class END(object):
     # node specification data goes here
-    path = 'ct:unit_tasks'
+    path = 'ct:unit_tasks_student'
     title = 'Courselet completed'
     help = '''You have successfully completed this courselet.
     See below for suggested next steps for what you can work on next
