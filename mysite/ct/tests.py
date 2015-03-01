@@ -376,11 +376,15 @@ class FSMTests(TestCase):
         url2 = '/ct/courses/%d/units/%d/tasks/' \
               % (self.course.pk, self.ulQ.unit.pk)
         self.check_post_get(url, assessPOST, url2, 'Next Step to work on')
+        self.assertEqual(Response.objects.filter(activity__isnull=False,
+                                                 confidence=Response.GUESS).
+                         count(), 3) # check responses logged to RT activity
 
     def check_post_get(self, url, postdata, urlTail, expected):
+        '''do POST and associated redirect to GET.  Check the redirect
+        target and GET response content '''
         response = self.client.post(url, postdata, HTTP_REFERER=url)
         self.assertEqual(response.status_code, 302)
-        print 'redirect', response['Location']
         url = response['Location']
         self.assertTrue(url.endswith(urlTail))
         response = self.client.get(url)
