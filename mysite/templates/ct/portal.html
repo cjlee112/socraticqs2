@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
-{% load ct_extras %}
+{% load ct_extras social_tags %}
+
 {% comment %}
   This is the main template for all portal pages.
 {% endcomment %}
@@ -43,6 +44,24 @@ function toggleInterest(o, targeturl, csrftoken)
 {% else %}
   <title>Courselets</title>
 {% endif %}
+
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css" rel="stylesheet">
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<style>
+  h1 { padding: 0 30px; }
+  .col-md-2 { width: 18.6667%; }
+  .buttons { display: block; table-layout: fixed; border-radius: 7px; border: 1px solid #ccc;
+             margin: 20px; background: #eee; padding: 30px; }
+  .buttons > div a { margin: 5px 10px; }
+  .buttons > div:not(:first-child) { margin-top: 10px; border-top: 1px solid #ccc;
+                                     padding-top: 10px; text-align: center; }
+  .user-details { text-align: center; font-size: 16px; font-weight: bold; }
+  .disconnect-form { padding: 0; margin: 0px 10px; }
+  .disconnect-form > a { display: block; margin: 5px 0 !important; }
+  ul.messages > li { color: red; }
+</style>
+
 {% endblock %}
 
 {% block body %}
@@ -57,6 +76,9 @@ function toggleInterest(o, targeturl, csrftoken)
         <a class="navbar-brand" href="/ct/">Courselets.org</a>
       </div>
       <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li><a href="/ct/courses/">Courses</a></li>
+        </ul>
         <ul class="nav navbar-nav">
           {% if not fsmStack.state or not fsmStack.state.hideNav %}
             <li><a href="/ct/about/">About</a></li>
@@ -76,20 +98,27 @@ function toggleInterest(o, targeturl, csrftoken)
           {% endif %}
           {% if fsmStack.state %}
           <li><a href='/ct/nodes/'>{{ fsmStack.state.title }}</a></li>
+          {% elif user.is_authenticated %}
+          <li><a href='/ct/nodes/'>Activity Center</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-right">
-          {% if user %}
-          <li><a href="/ct/people/{{ user.pk }}/">{{ user.get_full_name }}</a></li>
+          {% if user and user.is_authenticated %}
+            <li><a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
+            {% if user.get_full_name %}
+                {{ user.get_full_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}</a></li>
           {% else %}
-          <li><a href="/login/?next=/ct/">Sign in</a></li>
+            <li><a href="/login/?next=/ct/">Stranger</a></li>
           {% endif %}
         </ul>
       </div>
     </div>
-  </nav>
 
+  </nav>
   {% if pageData.errorMessage %}
     <p><b>{{ pageData.errorMessage }}</b></p>
   {% elif pageData.statusMessage %}
@@ -118,5 +147,256 @@ function toggleInterest(o, targeturl, csrftoken)
   </header>
 
   {% block content %}{% endblock %}
+
+    <div id="email-required-modal_2" class="modal fade">
+        <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Re-send activation link</h4>
+              </div>
+
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="control-label" for="email">Email address:</label>
+                  <input class="form-control" id="email" type="email" name="email"
+                  value="{{ user.anonymemail_set.all.0.email }}" />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Continue</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    <div id="email-modal" class="modal fade">
+      <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title">Email Authentication</h4>
+            </div>
+
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="control-label" for="email">Email address:</label>
+                <input class="form-control" id="email" type="email" name="email" value="" />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Login</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if tmp_email_ask %}
+      <div id="email-required-modal" class="modal fade">
+        <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Email required</h4>
+              </div>
+
+              <div class="modal-body">
+                <p>An email address is required.</p>
+                <div class="form-group">
+                  <label class="control-label" for="email">Email address:</label>
+                  <input class="form-control" id="email" type="email" name="email"
+                  value="{{ user.anonymemail_set.all.0.email }}" />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Continue</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+
+    <div id="validation-sent-modal" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Email Validation Sent</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>An email validation was sent{% if email %} to <code>{{ email }}</code>{% endif %}.</p>
+            <p>Click the link sent to finish the authentication process.</p>
+            {% if social_propose %}
+                <p>You email is associated with the following list of social auth providers and you can login with one of them:</p>
+                {% for social in social_list %}
+                  <li>{{ social|presentation_name }}</li>
+                {% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="alert-popup" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Attention</h4>
+          </div>
+
+          <div class="modal-body">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="https://plus.google.com/js/client:plusone.js?onload=start" type="text/javascript"></script>
+    <script src="https://login.persona.org/include.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+      var signInCallback = function (result) {
+          if (result['error']) {
+            alert('An error happened:', result['error']);
+          } else {
+            $('#code').attr('value', result['code']);
+            $('#at').attr('value', result['access_token']);
+            $('#google-plus').submit();
+          }
+      };
+
+      var modalDialog = function (modalId, modalLinkName, submitHandler) {
+        var $modal;
+
+        $modal = $(modalId).modal({show: false});
+
+        $modal.on('click', '.btn-primary', submitHandler || function (event) {
+          event.preventDefault();
+          $modal.find('form').submit();
+        });
+
+        if (modalLinkName) {
+          $('a[name="' + modalLinkName + '"]').on('click', function (event) {
+            event.preventDefault();
+            $modal.modal('toggle');
+          });
+        }
+
+        return $modal;
+      };
+
+      $(function () {
+        var $validationModal, $emailRequired, $alertPopup;
+
+        modalDialog('#livejournal-modal', 'livejournal');
+        modalDialog('#openid-modal', 'openid');
+        modalDialog('#email-modal', 'email');
+        modalDialog('#email-required-modal_2', 'email-required-modal_2');
+        modalDialog('#username-modal', 'username');
+        modalDialog('#set-pass', 'set-pass');
+        $mergeConfirm = modalDialog('#merge-confirm');
+        $validationModal = modalDialog('#validation-sent-modal');
+        $passChanged = modalDialog('#password-changed');
+        $emailRequired = modalDialog('#email-required-modal');
+        $passException = modalDialog('#exception');
+        $alertPopup = modalDialog('#alert-popup');
+
+        modalDialog('#ajax-login-modal', 'ajax-login', function (event) {
+          var $backend, $accessToken, $accessTokenSecret, $fields, $result;
+          event.preventDefault();
+
+          $modal = $(this).closest('.modal');
+          $form = $modal.find('form');
+          $backend = $modal.find('[name="backend"]');
+          $accessToken = $modal.find('[name="access_token"]');
+          $accessTokenSecret = $modal.find('[name="access_token_secret"]');
+          $result = $modal.find('.login-result');
+
+          $.get('/ajax-auth/' + $backend.val() + '/', {
+            access_token: $accessToken.val(),
+            access_token_secret: $accessTokenSecret.val(),
+          }, function (data, xhr, response) {
+            $result.find('.user-id').html(data.id);
+            $result.find('.user-username').html(data.username);
+            $form.hide();
+            $result.show();
+            setTimeout(function () { window.location = '/'; }, 10000);
+          }, 'json')
+        });
+
+        modalDialog('#persona-modal', 'persona', function (event) {
+          var $form;
+          event.preventDefault();
+
+          $form = $(this).closest('form');
+          navigator.id.get(function (assertion) {
+            if (assertion) {
+              $form.find('[name="assertion"]').val(assertion)
+              $form.submit();
+            } else {
+              alert('An error occurred while getting your assertion, try again.');
+            }
+          });
+        });
+
+        $('.disconnect-form').on('click', 'a.btn', function (event) {
+          event.preventDefault();
+          $(event.target).closest('form').submit();
+        });
+
+        {% if validation_sent %}
+          $validationModal.modal('show');
+        {% endif %}
+
+        {% if tmp_email_ask %}
+          $emailRequired.modal('show');
+        {% endif %}
+
+        {% if changed %}
+          $passChanged.modal('show');
+        {% endif %}
+
+        {% if exception %}
+          $passException.modal('show');
+        {% endif %}
+
+        {% if merge_confirm %}
+          $mergeConfirm.modal('show');
+        {% endif %}
+
+        {% if messages %}
+          $alertPopup.modal('show');
+        {% endif %}
+
+      });
+    </script>
 
 {% endblock %}

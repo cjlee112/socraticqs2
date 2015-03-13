@@ -1,6 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
+from django.contrib.auth.models import  AnonymousUser
+from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -16,16 +19,23 @@ from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_
 from ct.fsm import FSMStack
 import time
 import urllib
+from datetime import datetime, timedelta
+
+from django.conf import settings
+from social.backends.utils import load_backends
+
 
 ###########################################################
 # WelcomeMat refactored utilities
 
 def check_instructor_auth(course, request):
     'return 403 if not course instructor, else None'
-    role = course.get_user_role(request.user)
-    if role != Role.INSTRUCTOR:
+    role = course.get_user_role(request.user, justOne=False)
+    if not isinstance(role, list):
+        role = [role]
+    if not Role.INSTRUCTOR in role:
         return HttpResponse("Only the instructor can access this",
-                            status_code=403)
+                            status=403)
 
 def make_tabs(path, current, tabs, tail=4, **kwargs):
     path = get_base_url(path, tail=tail, **kwargs)
@@ -115,7 +125,7 @@ def unit_tabs_student(path, current,
 def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, baseToken='courses',
                      **kwargs)
-    
+
 
 class PageData(object):
     'generic holder for page UI elements such as tabs'
@@ -202,6 +212,7 @@ class PageData(object):
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
+        templateArgs['target'] = request.session.get('target', '_self')
         if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
@@ -282,7 +293,10 @@ def person_profile(request, user_id):
     else:
         logoutForm = None
     return pageData.render(request, 'ct/person.html',
-                           dict(person=person, logoutForm=logoutForm))
+                           dict(person=person, logoutForm=logoutForm,
+                                next=request.path,
+                                available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
+
 
 def about(request):
     pageData = PageData(request)
@@ -362,7 +376,44 @@ def edit_course(request, course_id):
         courseform = CourseTitleForm(instance=course)
     set_crispy_action(request.path, courseform)
     return pageData.render(request, 'ct/edit_course.html',
-                  dict(course=course, courseform=courseform))
+                  dict(course=course, courseform=courseform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
+
+
+def courses(request):
+    user = request.user
+    courses = Course.objects.all()
+    if isinstance(user, AnonymousUser) or 'anonymous' in user.username:
+        courses = courses.filter(access='public')
+    pageData = PageData(request)
+    return pageData.render(request, 'ct/courses.html',
+                           dict(courses=courses))
+
+
+def courses_subscribe(request, course_id):
+    _id = int(time.mktime(datetime.now().timetuple()))
+    user = request.user
+    tmp_user = False
+    if isinstance(user, AnonymousUser):
+        tmp_user = True
+        # TODO Implement User OneToOne profile with BoolField is_temporary
+        # TODO or move username to settings.py
+        user = User.objects.get_or_create(username='anonymous' + str(_id),
+                                          first_name='Temporary User')[0]
+
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        # Set expiry time to year in future
+        request.session.set_expiry(timedelta(days=365))
+    course = Course.objects.get(id=course_id)
+    # role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
+    role = 'self'
+    Role.objects.get_or_create(course=course,
+                               user=user,
+                               role=role)
+    if tmp_user:
+        return HttpResponseRedirect('/tmp-email-ask/')
+    return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
 
 
 @login_required
@@ -396,7 +447,8 @@ def edit_unit(request, course_id, unit_id):
                                 defaultURL, reverseArgs=kwargs, unit=unit)
     set_crispy_action(request.path, unitform)
     return pageData.render(request, 'ct/edit_unit.html',
-                  dict(unit=unit, courseUnit=cu, unitform=unitform))
+                  dict(unit=unit, courseUnit=cu, unitform=unitform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
 
 
 def update_concept_link(request, conceptLinks, unit):

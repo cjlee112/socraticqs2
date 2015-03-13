@@ -1,22 +1,160 @@
 {% extends "ct/portal.html" %}
-{% load crispy_forms_tags %}
-
-{% comment %}
-  homepage for a user
-{% endcomment %}
+{% load social_tags %}
 
 {% block title %}
-  {{ person.get_full_name }}
+User profile page
 {% endblock %}
-
 {% block content %}
-During the private alpha, no instructor information is displayed.
+{% if person and user.id == person.id %}
 
-{% if logoutForm %}
-<div class="container-fluid">
-{% crispy logoutForm %}
-</div>
+    <div id="set-pass" class="modal fade">
+      <form action="/set-pass/" method="post" role="form">{% csrf_token %}
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title">Setting password</h4>
+            </div>
+
+            <div class="modal-body">
+              <p>Enter password to set/change</p>
+              <div class="form-group">
+                <label class="control-label" for="pass">Password:</label>
+                <input class="form-control" id="pass" type="password" name="pass" value="" />
+                <label class="control-label" for="confirm">Confim:</label>
+                <input class="form-control" id="confirm" type="password" name="confirm" value="" />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Continue</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if changed %}
+    <div id="password-changed" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Password was changed</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>Your password was changed.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if exception %}
+    <div id="exception" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Exception</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>Something goes wrong.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div id="merge-confirm" class="modal fade">
+      <form action="{{ request.path }}" method="post" role="form">{% csrf_token %}
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title">Setting password</h4>
+            </div>
+
+            <div class="modal-body">
+              <p>Target username <b>{{ target_name }}</b>
+            is different from your username <b>{{ own_name }}</b>!
+            Do you want to proceed?</p>
+              <div class="form-group">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}" />
+                <input type="radio" name="confirm" value="no" checked> No
+                <input type="radio" name="confirm" value="yes"> Yes
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">Continue</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+
+    <div class="buttons">
+      {% if user.is_authenticated and not 'anonymous' in user.username %}
+        <div class="user-details">
+          You are logged in as <code>{{ user.username }}</code>!
+        </div>
+      {% endif %}
+      {% if user and 'anonymous' in user.username %}
+      <h4>You are in a temporary anonymous session.</h4>
+      <h4>Please confirm your email to be able to restore progress.</h4>
+      <h4>This session may expire without email confirmation.</h4>
+      <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
+      <i class="fa fa-envelope"></i>
+      re-send
+      </a>
+      </h4>
+      {% endif %}
+
+
+      {% if user and not 'anonymous' in user.username %}
+      You can associate social account, email or set/change password as this page.
+      <div class="social">
+        {% include 'psa/social_backends.html' %}
+      </div>
+      <br>
+      <a class="btn btn-default" name="set-pass">
+      Set password
+      </a>
+
+      <div class="legacy">
+        {% include 'psa/legacy_backends.html' %}
+      </div>
+      {% endif %}
+      {% if user and not 'anonymous' in user.username %}
+      <div class="container-fluid">
+        {% include 'psa/user_details.html' %}
+      </div>
+      {% endif %}
+      <div>
+        <a class="btn btn-primary" href="/logout/">
+          <i class="fa fa-sign-out"></i>
+          {% if user and 'anonymous' in user.username %}
+          Leave anonymous session
+          {% else %}
+          Logout
+          {% endif %}
+        </a>
+      </div>
+      </div>
+
 {% endif %}
-
 {% endblock %}
-

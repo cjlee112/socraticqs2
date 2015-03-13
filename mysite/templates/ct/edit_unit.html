@@ -29,6 +29,13 @@
 </div>
 
 <hr>
+<p>
+Copy course URL
+<input class="textinput textInput form-control" id="id_title" maxlength="200" name="title" type="text" value="{{ domain }}/lti{% url 'ct:study_unit' courseUnit.course.id unit.id %}">
+</p>
+
+
+<hr>
 Courselet created by: 
 <a href="/ct/people/{{ user.pk }}/">{{ unit.addedBy.get_full_name }}</a>, 
 {{ unit.atime|display_datetime }}

@@ -1,0 +1,54 @@
+{% extends "ct/portal.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+<div class="buttons">
+{% if not user.is_authenticated %}
+<h4>Hello Stranger!</h4>
+<h4>You can enroll to course via <a href="/ct/courses/">Course</a> link to test some courses.</h4>
+<h4>In this page you can login or register using you email, plain username/password pair or social accounts.</h4>
+{% endif %}
+
+{% include "psa/social_backends.html" %}
+
+<br>
+<div class="container-fluid">
+  {% include "psa/legacy_backends.html" %}
+</div>
+<br>
+
+<div id="login">
+    <form class="form-horizontal" name="LoginForm" action="/login/" method="post">
+    {% csrf_token %}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    <div class="control-group">
+        <label class="control-label" for="username">Username</label>
+        <div class="controls">
+            <input type="text" id="username" name="username"  placeholder="Username">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+            <input type="password" name="password" id="password" placeholder="Password">
+        </div>
+    </div>
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Login</button>
+        </div>
+    </div>
+    </form>
+</div>
+
+{% if DEBUG %}
+    {% include "psa/user_details.html" %}
+{% endif %}
+
+{% endblock %}
