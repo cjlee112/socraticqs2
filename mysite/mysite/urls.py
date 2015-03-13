@@ -23,4 +23,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    # LTI
+    url(r'^lti/', include('lti.urls')),
 )
