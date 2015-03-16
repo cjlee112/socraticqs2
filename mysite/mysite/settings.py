@@ -139,28 +139,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
-    # LTI
-    'lti',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-
-
-## LTI Parameters
-X_FRAME_OPTIONS = 'ALLOW-FROM: *'
-LTI_DEBUG = True
-CONSUMER_KEY = "__consumer_key__"
-LTI_SECRET = "__lti_secret__"
-LTI_URL_FIX = {
-        "https://localhost:8000/":"http://localhost:8000/",
-        'https://edx.raccoongang.com': "http://edx.raccoongang.com"
-}
-## Heroku SSL proxy fix
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -190,3 +173,10 @@ LOGGING = {
         },
     }
 }
+
+
+try:
+    from settings_local import *
+except Exception as e:
+    print e
+    pass

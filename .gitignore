@@ -58,3 +58,4 @@ target/
 .Trash-1000/
 .env/
 *.db
+settings_local.py
