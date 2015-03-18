@@ -6,10 +6,9 @@ Socraticqs2 is the web engine for courselets.org.
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 
 
-
-Example setting_local.py to add 'lti' and 'python-social-auth'
---------------------------------------------------------------
+Example setting_local.py to add 'lti' and 'python-social-auth':
 ::
+
     # coding: utf-8
 
     from settings import INSTALLED_APPS
@@ -47,7 +46,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth'
 
 
     ## LTI Parameters
-    X_FRAME_OPTIONS = 'ALLOW-FROM: *'
+    X_FRAME_OPTIONS = "ALLOW-FROM: *"
     LTI_DEBUG = True
     CONSUMER_KEY = "__consumer_key__"
     LTI_SECRET = "__lti_secret__"
