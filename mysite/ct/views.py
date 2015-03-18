@@ -1055,6 +1055,19 @@ def study_unit(request, course_id, unit_id):
     return pageData.render(request, 'ct/study_unit.html',
                 dict(unitLesson=nextUL, unit=unit, startForm=startForm))
 
+
+def slideshow(request, course_id, unit_id):
+    'launcher for viewing courselet as a slideshow'
+    course = get_object_or_404(Course, pk=course_id)
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(request, title=unit.title)
+    startForm = push_button(request)
+    if not startForm: # user clicked Start
+        return pageData.fsm_push(request, 'slideshow',
+                                 dict(unit=unit, course=course))
+    return pageData.render(request, 'ct/study_unit.html',
+                dict(unit=unit, startForm=startForm))
+
 @login_required
 def unit_tasks_student(request, course_id, unit_id):
     'suggest next steps on this courselet'
@@ -1122,8 +1135,8 @@ def lesson(request, course_id, unit_id, ul_id):
             defaultURL = lesson_next_url(request, ul, course_id)
             # let fsm redirect this event if it wishes
             return pageData.fsm_redirect(request, 'next', defaultURL)
-    elif ul.lesson.kind == Lesson.ORCT_QUESTION:
-        return HttpResponseRedirect(request.path + 'ask/')
+    ## elif ul.lesson.kind == Lesson.ORCT_QUESTION:
+    ##     return HttpResponseRedirect(request.path + 'ask/')
     pageData.nextForm = NextLikeForm()
     set_crispy_action(request.path, pageData.nextForm)
     return pageData.render(request, 'ct/lesson_student.html',
