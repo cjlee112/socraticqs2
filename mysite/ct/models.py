@@ -485,7 +485,10 @@ class UnitLesson(models.Model):
             .filter(lesson__concept=self.lesson.concept)
             .exclude(treeID=self.treeID))
     def get_next_lesson(self):
-        return self.unit.unitlesson_set.get(order=self.order + 1)
+        if self.order is not None:
+            return self.unit.unitlesson_set.get(order=self.order + 1)
+        else:
+            raise self.__class__.DoesNotExist
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
         'copy self and children to new unit'
         if order == 'APPEND':
