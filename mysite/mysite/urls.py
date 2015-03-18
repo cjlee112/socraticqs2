@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from django.apps import apps
 from mysite.views import *
 
 # Uncomment the next two lines to enable the admin:
@@ -23,13 +24,10 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+    url('', include('social.apps.django_app.urls', namespace='social')),
 )
 
-try:
-    import lti
-except ImportError:
-    pass
-else:
+if apps.is_installed('lti'):
     urlpatterns += patterns('',
         url(r'^lti/', include('lti.urls')),
     )
