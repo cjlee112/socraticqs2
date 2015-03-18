@@ -334,15 +334,11 @@ class FSMTests(TestCase):
         from ct.fsm_plugin.randomtrial import get_specs
         f = get_specs()[0].save_graph(self.user.username) # load FSM spec
         self.assertEqual(ActivityLog.objects.count(), 0)
-        request = FakeRequest(self.user)
-        request.session = self.client.session
-        fsmStack = fsm.FSMStack(request)
         fsmData = dict(testFSM='lessonseq', treatmentFSM='lessonseq',
                        treatment1=self.ulQ.unit, treatment2=self.ulQ.unit,
                        testUnit=self.ulQ2.unit, course=self.course)
-        result = fsmStack.push(request, 'randomtrial', fsmData,
-                               dict(trialName='test'))
-        request.session.save()
+        request, fsmStack, result = self.get_fsm_request('randomtrial',
+                                        fsmData, dict(trialName='test'))
         self.assertEqual(self.client.session['fsmID'], fsmStack.state.pk)
         self.assertEqual(result, '/ct/nodes/%d/' % f.startNode.pk)
         self.assertEqual(ActivityLog.objects.count(), 1)
@@ -380,6 +376,34 @@ class FSMTests(TestCase):
                                                  confidence=Response.GUESS).
                          count(), 3) # check responses logged to RT activity
 
+    def test_slideshow(self):
+        'basic slide show FSM'
+        from ct.fsm_plugin.slideshow import get_specs
+        f = get_specs()[0].save_graph(self.user.username) # load FSM spec
+        fsmData = dict(unit=self.ulQ2.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request('slideshow', fsmData)
+        # start page = question
+        response = self.client.get(result)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Scary Question')
+        # answer page
+        answer = self.ulQ2.get_answers()[0]
+        url = '/ct/courses/%d/units/%d/lessons/%d/' \
+              % (self.course.pk, self.ulQ2.unit.pk, answer.pk)
+        self.check_post_get(result, dict(fsmtask='next'), url, 'an answer')
+        # end of slide show should dump us on concepts page
+        url2 = '/ct/courses/%d/units/%d/concepts/' \
+              % (self.course.pk, self.ulQ2.unit.pk)
+        self.check_post_get(url, dict(fsmtask='next'), url2, 'Pretest')
+        
+    def get_fsm_request(self, fsmName, stateData, startArgs={}, **kwargs):
+        'create request, fsmStack and start specified FSM'
+        request = FakeRequest(self.user)
+        request.session = self.client.session
+        fsmStack = fsm.FSMStack(request)
+        result = fsmStack.push(request, fsmName, stateData, startArgs, **kwargs)
+        request.session.save()
+        return request, fsmStack, result
     def check_post_get(self, url, postdata, urlTail, expected):
         '''do POST and associated redirect to GET.  Check the redirect
         target and GET response content '''
