@@ -1394,12 +1394,14 @@ def fsm_node(request, node_id):
     addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
     return pageData.render(request, 'ct/fsm_node.html',
                            addNextButton=addNextButton)
-
+@login_required
 def fsm_status(request):
     'display Activity Center UI'
     pageData = PageData(request)
-    cancelForm = quitForm = None
+    cancelForm = logoutForm = None
+    nextSteps = ()
     if request.method == 'POST':
+        task = request.POST.get('task', '')
         if 'fsmstate_id' in request.POST:
             try:
                 url = pageData.fsmStack.resume(request,
@@ -1414,11 +1416,12 @@ def fsm_status(request):
                 return HttpResponseRedirect(url)
         elif not pageData.fsmStack.state:
             pageData.errorMessage = 'No activity ongoing currently!'
-        elif 'abort' == request.POST.get('task', None):
+        elif 'abort' == task:
             pageData.fsmStack.pop(request, eventName='exceptCancel')
             pageData.statusMessage = 'Activity canceled.'
-        elif 'quit' == request.POST.get('task', None):
-            return pageData.fsm_redirect(request, 'quit')
+        elif task.startswith('+') and pageData.fsmStack.state.fsmNode. \
+          outgoing.filter(name=task).count() > 0: # follow this optional edge
+            return pageData.fsm_redirect(request, task)
     if not pageData.fsmStack.state: # search for unfinished activities
         unfinished = FSMState.objects.filter(user=request.user,
                                              children__isnull=True)
@@ -1426,9 +1429,11 @@ def fsm_status(request):
         unfinished = None
         cancelForm = CancelForm()
         set_crispy_action(request.path, cancelForm)
-        if pageData.fsmStack.state.fsmNode.outgoing.filter(name='quit').count():
-            quitForm = QuitForm()
-            set_crispy_action(request.path, quitForm)
+        nextSteps = pageData.fsmStack.state.fsmNode.outgoing. \
+                         filter(name__startswith='+')
+        logoutForm = LogoutForm()
+        set_crispy_action(reverse('ct:person_profile', args=(request.user.id,)),
+                          logoutForm)
     return pageData.render(request, 'ct/fsm_status.html',
                            dict(cancelForm=cancelForm, unfinished=unfinished,
-                                quitForm=quitForm))
+                                logoutForm=logoutForm, nextSteps=nextSteps))

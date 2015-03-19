@@ -103,17 +103,6 @@ class StartForm(forms.Form):
         self.helper.add_input(Submit('submit', 'Start'))
     
 
-class QuitForm(forms.Form):
-    task = forms.CharField(initial='quit', widget=forms.HiddenInput)
-    def __init__(self, *args, **kwargs):
-        super(QuitForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_id = 'id-quitForm'
-        self.helper.form_class = 'form-vertical'
-        self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'End this Activity'))
-    
-
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),
                                           ('100', '100')))

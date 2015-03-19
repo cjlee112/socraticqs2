@@ -9,7 +9,7 @@ def quit_edge(self, edge, fsmStack, request, **kwargs):
     return edge.toNode
 
 QuitEdgeData = dict(
-    name='quit', toNode='END', title='End this live-session',
+    name='+quit', toNode='END', title='End this live-session',
     description='''If you have no more questions to ask, end
     this live session.''',
     help='''Click here to end this live-session. '''
