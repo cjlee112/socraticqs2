@@ -5,13 +5,19 @@ def next_lesson(self, edge, fsmStack, request, unit=None, **kwargs):
     'edge method that moves us to right state for next lesson (or END)'
     fsm = edge.fromNode.fsm
     if unit: # get first lesson
-        nextUL = unit.get_exercises()[0]
+        fsmStack.state.unitLesson = unit.get_exercises()[0]
     else:
-        try:
-            nextUL = fsmStack.state.unitLesson.get_next_lesson()
-        except UnitLesson.DoesNotExist:
-            return fsm.get_node('END')
-    fsmStack.state.unitLesson = nextUL # set the lesson to display
+        ul = fsmStack.state.unitLesson
+        answers = ul.get_answers()
+        if ul.is_question() and len(answers) > 0: # get the answer
+            fsmStack.state.unitLesson = answers[0]
+        else:
+            if ul.parent: # if ul is answer, use its linked question
+                ul = ul.parent
+            try:
+                fsmStack.state.unitLesson = ul.get_next_lesson()
+            except UnitLesson.DoesNotExist:
+                return fsm.get_node('END')
     return edge.toNode # just show it as a LESSON slide
 
 class START(object):
@@ -32,16 +38,7 @@ class START(object):
 
 class LESSON(object):
     '''View a lesson explanation. '''
-    def next_edge(self, edge, fsmStack, request, **kwargs):
-        'go to ANSWER if present, or just call next_lesson()'
-        fsm = edge.fromNode.fsm
-        ul = fsmStack.state.unitLesson
-        answers = ul.get_answers()
-        if ul.is_question() and len(answers) > 0: # get the answer
-            fsmStack.state.unitLesson = answers[0]
-            return fsm.get_node(name='ANSWER')
-        else:
-            return next_lesson(self, edge, fsmStack, request, **kwargs)
+    next_edge = next_lesson
     # node specification data goes here
     path = 'ct:lesson'
     title = 'View an explanation or question'
@@ -49,18 +46,6 @@ class LESSON(object):
             dict(name='next', toNode='LESSON', title='View Next Slide'),
         )
     
-class ANSWER(object):
-    '''View answer slide '''
-    def next_edge(self, edge, fsmStack, request, **kwargs):
-        fsmStack.state.unitLesson = fsmStack.state.unitLesson.parent
-        return next_lesson(self, edge, fsmStack, request, **kwargs)
-    # node specification data goes here
-    path = 'ct:lesson'
-    title = 'View an answer'
-    edges = (
-            dict(name='next', toNode='LESSON', title='View Next Slide'),
-        )
-
 class END(object):
     # node specification data goes here
     path = 'ct:unit_concepts_student'
@@ -74,7 +59,7 @@ def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='slideshow', hideTabs=True,
             title='View courselet as a slide show',
-            pluginNodes=[START, LESSON, ANSWER, END],
+            pluginNodes=[START, LESSON, END],
         )
     return (spec,)
 
