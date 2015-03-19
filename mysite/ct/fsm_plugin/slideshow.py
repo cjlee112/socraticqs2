@@ -1,19 +1,18 @@
 from ct.models import *
 from fsmspec import FSMSpecification
 
-def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+def next_lesson(self, edge, fsmStack, request, unit=None, **kwargs):
     'edge method that moves us to right state for next lesson (or END)'
     fsm = edge.fromNode.fsm
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
-    if useCurrent:
-        nextUL = unitStatus.get_lesson()
+    if unit: # get first lesson
+        nextUL = unit.get_exercises()[0]
     else:
-        nextUL = unitStatus.start_next_lesson()
-    if not nextUL:
-        return fsm.get_node('END')
-    else: # just show it as a LESSON slide
-        fsmStack.state.unitLesson = nextUL # set the lesson to display
-        return edge.toNode
+        try:
+            nextUL = fsmStack.state.unitLesson.get_next_lesson()
+        except UnitLesson.DoesNotExist:
+            return fsm.get_node('END')
+    fsmStack.state.unitLesson = nextUL # set the lesson to display
+    return edge.toNode # just show it as a LESSON slide
 
 class START(object):
     '''Initialize data for viewing a courselet, and go immediately
@@ -22,11 +21,8 @@ class START(object):
         'event handler for START node'
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Slideshow: %s' % unit.title
-        unitStatus = UnitStatus(unit=unit, user=request.user)
-        unitStatus.save()
-        fsmStack.state.set_data_attr('unitStatus', unitStatus)
         return fsmStack.state.transition(fsmStack, request, 'next',
-                                         useCurrent=True, **kwargs)
+                                         unit=unit, **kwargs)
     next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
@@ -39,8 +35,7 @@ class LESSON(object):
     def next_edge(self, edge, fsmStack, request, **kwargs):
         'go to ANSWER if present, or just call next_lesson()'
         fsm = edge.fromNode.fsm
-        unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        ul = unitStatus.get_lesson()
+        ul = fsmStack.state.unitLesson
         answers = ul.get_answers()
         if ul.is_question() and len(answers) > 0: # get the answer
             fsmStack.state.unitLesson = answers[0]
@@ -55,7 +50,10 @@ class LESSON(object):
         )
     
 class ANSWER(object):
-    next_edge = next_lesson
+    '''View answer slide '''
+    def next_edge(self, edge, fsmStack, request, **kwargs):
+        fsmStack.state.unitLesson = fsmStack.state.unitLesson.parent
+        return next_lesson(self, edge, fsmStack, request, **kwargs)
     # node specification data goes here
     path = 'ct:lesson'
     title = 'View an answer'
