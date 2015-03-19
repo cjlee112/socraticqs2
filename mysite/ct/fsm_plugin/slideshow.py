@@ -20,6 +20,12 @@ def next_lesson(self, edge, fsmStack, request, unit=None, **kwargs):
                 return fsm.get_node('END')
     return edge.toNode # just show it as a LESSON slide
 
+QuitEdgeData = dict(
+    name='+quit', toNode='END', title='End this slideshow',
+    description="If you don't want to view any more slides, exit the slideshow",
+    help='''Click here to end this slideshow. '''
+)
+
 class START(object):
     '''Initialize data for viewing a courselet, and go immediately
     to first lesson. '''
@@ -44,8 +50,34 @@ class LESSON(object):
     title = 'View an explanation or question'
     edges = (
             dict(name='next', toNode='LESSON', title='View Next Slide'),
+            dict(name='+contents', toNode='CHOOSE',
+                 title='View Table of Contents',
+                 description='overview of all slides in the slideshow',
+                 help='Click here to view the Table of Contents'),
+            QuitEdgeData,
         )
     
+class CHOOSE(object):
+    '''Overview list of slides, for you to jump to any slide in the slideshow'''
+    # node specification data goes here
+    path = 'ct:unit_lessons_student'
+    title = 'Slideshow Table of Contents'
+    help = '''View the table of contents below,
+    choose a slide you want to view,
+    then click its Jump to this slide button.
+    Alternatively, click the Slideshow menu item above for more options,
+    such as returning to your current slide.'''
+    edges = (
+            dict(name='select_UnitLesson', toNode='LESSON',
+                 title='Jump to this slide',
+                 help='''Click here to jump to this slide.'''),
+            dict(name='+resume', toNode='LESSON',
+                 title='Resume slideshow at the current slide',
+                 description='return to the last slide you viewed',
+                 help='''Click here to resume the slideshow.'''),
+            QuitEdgeData,
+        )
+        
 class END(object):
     # node specification data goes here
     path = 'ct:unit_concepts_student'
@@ -59,7 +91,7 @@ def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='slideshow', hideTabs=True,
             title='View courselet as a slide show',
-            pluginNodes=[START, LESSON, END],
+            pluginNodes=[START, LESSON, CHOOSE, END],
         )
     return (spec,)
 
