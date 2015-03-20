@@ -420,18 +420,18 @@ naming the class definition that you write for a node.</p>
 
 <dl class="attribute">
 <dt>
+<tt class="descname">title</tt></dt>
+<dd><p>Title for the current step to be displayed in the Activity Center
+UI etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
 <tt class="descname">description</tt></dt>
 <dd><p>Provides an explanation of what this step in the Guided Activity
 does for the user, to display in the Activity Center UI, etc.
 Note that you set this by simply giving a <strong>docstring</strong> in
 the class definition that you write for a node.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt>
-<tt class="descname">title</tt></dt>
-<dd><p>Title for the current step to be displayed in the Activity Center
-UI etc.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -521,6 +521,53 @@ The method definition must be of the following form:</p>
 </div>
 </li>
 </ul>
+</div>
+<div class="section" id="fsmedge">
+<h3>FSMEdge<a class="headerlink" href="#fsmedge" title="Permalink to this headline">¶</a></h3>
+<p><strong>Important attributes to set in your FSM specification:</strong></p>
+<dl class="attribute">
+<dt>
+<tt class="descname">name</tt></dt>
+<dd><p>Name of this edge.  Must be unique among the set of outgoing edges
+from a given node.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="toNode">
+<tt class="descname">toNode</tt><a class="headerlink" href="#toNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>The destination node of this edge.  Must be specified as a string
+node name in an edge dict input to <tt class="docutils literal"><span class="pre">FSMSpecification</span></tt>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">title</tt></dt>
+<dd><p>Title for this edge to be displayed in the Activity Center
+UI etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">description</tt></dt>
+<dd><p>Provides an explanation of what this transition
+does for the user, to display in the Activity Center UI, etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<tt class="descname">help</tt></dt>
+<dd><p>If provided, displayed as a tool-tip for the Activity Center
+button that will trigger this edge.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="showOption">
+<tt class="descname">showOption</tt><a class="headerlink" href="#showOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set <tt class="docutils literal"><span class="pre">True</span></tt>, this edge will be listed as an additional option
+on the Activity Center view.  This is an easy way to give the
+user multiple choices for &#8220;next steps&#8221; from a given node.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="fsmstate">
 <h3>FSMState<a class="headerlink" href="#fsmstate" title="Permalink to this headline">¶</a></h3>
@@ -631,6 +678,7 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
 <li><a class="reference internal" href="#fsm-reference-documentation">FSM Reference Documentation</a><ul>
 <li><a class="reference internal" href="#fsm">FSM</a></li>
 <li><a class="reference internal" href="#fsmnode">FSMNode</a></li>
+<li><a class="reference internal" href="#fsmedge">FSMEdge</a></li>
 <li><a class="reference internal" href="#fsmstate">FSMState</a></li>
 </ul>
 </li>
