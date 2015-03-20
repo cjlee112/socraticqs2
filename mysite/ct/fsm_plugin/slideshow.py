@@ -21,9 +21,16 @@ def next_lesson(self, edge, fsmStack, request, unit=None, **kwargs):
     return edge.toNode # just show it as a LESSON slide
 
 QuitEdgeData = dict(
-    name='+quit', toNode='END', title='End this slideshow',
+    name='quit', toNode='END', title='End this slideshow', showOption=True,
     description="If you don't want to view any more slides, exit the slideshow",
     help='''Click here to end this slideshow. '''
+)
+
+ContentsEdgeData = dict(
+    name='contents', toNode='CHOOSE', showOption=True,
+    title='View Table of Contents',
+    description='overview of all slides in the slideshow',
+    help='Click here to view the Table of Contents'
 )
 
 class START(object):
@@ -48,12 +55,36 @@ class LESSON(object):
     # node specification data goes here
     path = 'ct:lesson'
     title = 'View an explanation or question'
+    help = '''After viewing this slide, click Next to move to the next slide,
+    or click the Slideshow menu above for more options such as discussion
+    of this slide, Table of Contents, etc.'''
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Slide'),
-            dict(name='+contents', toNode='CHOOSE',
-                 title='View Table of Contents',
-                 description='overview of all slides in the slideshow',
-                 help='Click here to view the Table of Contents'),
+            dict(name='next', toNode='LESSON', title='View Next Slide',
+                 showOption=True),
+            dict(name='faq', toNode='FAQ', showOption=True,
+                 title='Discussion of this slide',
+                 description='Comment on or view discussion of this slide',
+                 help='Click here to join the discussion'),
+            ContentsEdgeData,
+            QuitEdgeData,
+        )
+    
+class FAQ(object):
+    '''Discussion of this slide.'''
+    create_edge = next_lesson
+    # node specification data goes here
+    path = 'ct:ul_faq_student'
+    title = 'Comment on or view discussion of the last slide you viewed'
+    help = '''You can click on discussion threads on this page, if any,
+    or write a new comment / question about this slide.  Or you can click
+    the Slideshow menu above for more options.'''
+    edges = (
+            dict(name='create', toNode='LESSON', title='Go to Next Slide',
+                 showOption=True),
+            dict(name='slide', toNode='LESSON', showOption=True,
+                 title='Return to this slide',
+                 description='Go back to the last slide you viewed'),
+            ContentsEdgeData,
             QuitEdgeData,
         )
     
@@ -71,7 +102,7 @@ class CHOOSE(object):
             dict(name='select_UnitLesson', toNode='LESSON',
                  title='Jump to this slide',
                  help='''Click here to jump to this slide.'''),
-            dict(name='+resume', toNode='LESSON',
+            dict(name='resume', toNode='LESSON', showOption=True,
                  title='Resume slideshow at the current slide',
                  description='return to the last slide you viewed',
                  help='''Click here to resume the slideshow.'''),
@@ -91,7 +122,7 @@ def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='slideshow', hideTabs=True,
             title='View courselet as a slide show',
-            pluginNodes=[START, LESSON, CHOOSE, END],
+            pluginNodes=[START, LESSON, FAQ, CHOOSE, END],
         )
     return (spec,)
 
