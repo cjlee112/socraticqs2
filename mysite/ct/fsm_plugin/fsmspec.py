@@ -3,7 +3,8 @@ from ct.models import FSM
 class FSMSpecification(object):
     'convenience class for specifying an FSM graph, loading it'
     def __init__(self, name, title, nodeDict=None, edges=None,
-                 pluginNodes=(), **kwargs):
+                 pluginNodes=(), attrs=('help', 'path', 'data', 'doLogging'),
+                 **kwargs):
         kwargs['name'] = name
         kwargs['title'] = title
         self.fsmData = kwargs
@@ -14,11 +15,11 @@ class FSMSpecification(object):
         for node in pluginNodes: # expect list of node class objects
             modName = node.__module__.split('.')[-1]
             name = node.__name__
-            d = dict(title=node.title, funcName=modName + '.' + name)
-            d['description'] = getattr(node, '__doc__', None)
-            d['help'] = getattr(node, 'help', None)
-            d['path'] = getattr(node, 'path', None)
-            d['data'] = getattr(node, 'data', None)
+            d = dict(title=node.title, funcName=modName + '.' + name,
+                     description=getattr(node, '__doc__', None))
+            for attr in attrs: # save node attributes
+                if hasattr(node, attr):
+                    d[attr] = getattr(node, attr)
             nodeDict[name] = d
             for e in getattr(node, 'edges', ()):
                 e = e.copy() # prevent side effects
