@@ -253,6 +253,8 @@ class FSMTests(TestCase):
         from ct.fsm_plugin.testme import get_specs
         spec = get_specs()[0]
         f = spec.save_graph('jacob')
+        self.assertTrue(f.startNode.doLogging)
+        self.assertFalse(f.get_node('MID').doLogging)
         self.do_start(f)
     def test_start3(self):
         'check that FSMState saves unitLesson, select_ data, and logging'

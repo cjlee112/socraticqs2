@@ -25,6 +25,7 @@ class START(object):
     # node specification data goes here
     title = 'start here'
     path = 'ct:home'
+    doLogging = True
     edges = (
             dict(name='next', toNode='END', title='go go go'),
         )
