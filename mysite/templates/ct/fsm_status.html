@@ -45,12 +45,19 @@ $( "#headtoggle" ).click(function() {
   <h3>Options</h3>
   <ul>
     {% for e in nextSteps %}
-      <li>{{ e.title }}: {{ e.description }}
+      <li>
+        {% if e.description %}
+          {{ e.description }}:
+        {% endif %}
         <form action="{{ actionTarget }}" method="post"
           style=" display:inline!important;">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{ e.name }}"/>
-        <input type="submit" value="{{ e.title }}" title="{{ e.help }}"/>
+        <input type="submit" value="{{ e.title }}" 
+        {% if e.help %}
+          title="{{ e.help }}"
+        {% endif %}
+        />
         </form>
       </li>
     {% endfor %} 

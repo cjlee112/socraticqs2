@@ -127,7 +127,7 @@ class PageData(object):
         except KeyError:
             pass
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
-                     addNextButton=False, **kwargs):
+                     addNextButton=False, vagueEvents=('next',), **kwargs):
         'check whether fsm intercepts this event and returns redirect'
         if not self.fsmStack.state: # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
@@ -135,7 +135,6 @@ class PageData(object):
         # this node
         referer = request.META.get('HTTP_REFERER', '')
         referer = referer[referer.find('/ct/'):]
-        vagueEvents = ('next',)
         if request.method == 'POST' and referer != self.fsmStack.state.path \
              and eventName in vagueEvents:
             r = None # don't even call FSM with POST events from other pages.
@@ -1419,9 +1418,9 @@ def fsm_status(request):
         elif 'abort' == task:
             pageData.fsmStack.pop(request, eventName='exceptCancel')
             pageData.statusMessage = 'Activity canceled.'
-        elif task.startswith('+') and pageData.fsmStack.state.fsmNode. \
+        elif pageData.fsmStack.state.fsmNode. \
           outgoing.filter(name=task).count() > 0: # follow this optional edge
-            return pageData.fsm_redirect(request, task)
+            return pageData.fsm_redirect(request, task, vagueEvents=())
     if not pageData.fsmStack.state: # search for unfinished activities
         unfinished = FSMState.objects.filter(user=request.user,
                                              children__isnull=True)
@@ -1429,8 +1428,9 @@ def fsm_status(request):
         unfinished = None
         cancelForm = CancelForm()
         set_crispy_action(request.path, cancelForm)
-        nextSteps = pageData.fsmStack.state.fsmNode.outgoing. \
-                         filter(name__startswith='+')
+        edges = pageData.fsmStack.state.fsmNode.outgoing
+        nextSteps = list(edges.filter(name='next')) \
+          + list(edges.filter(name__startswith='+'))
         logoutForm = LogoutForm()
         set_crispy_action(reverse('ct:person_profile', args=(request.user.id,)),
                           logoutForm)
