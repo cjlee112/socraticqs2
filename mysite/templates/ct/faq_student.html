@@ -58,10 +58,12 @@ $( "#headtoggle" ).click(function() {
 {% endfor %}
 </tbody>
 </table>
+{% else %}
+  No discussions about this {{ pageData.headLabel }} have been started yet.
 {% endif %}
 
 {% if form %}
-<h3>Post a new question</h3>
+<h3>Post a new question or comment</h3>
 <div class="container-fluid">
 {% crispy form %}
 </div>
