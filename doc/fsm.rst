@@ -376,17 +376,17 @@ FSMNode
    Note that you set this in an FSM specification by simply
    naming the class definition that you write for a node.
 
+.. attribute:: title
+
+   Title for the current step to be displayed in the Activity Center
+   UI etc.
+
 .. attribute:: description
 
    Provides an explanation of what this step in the Guided Activity
    does for the user, to display in the Activity Center UI, etc.
    Note that you set this by simply giving a **docstring** in
    the class definition that you write for a node.
-
-.. attribute:: title
-
-   Title for the current step to be displayed in the Activity Center
-   UI etc.
 
 .. attribute:: help
 
@@ -467,6 +467,43 @@ class:
         def next_edge(self, edge, fsmStack, request, **kwargs):
             # ... do some processing here, save some data on fsmStack.state...
             return edge.toNode # finally return target node
+
+FSMEdge
+..........
+
+**Important attributes to set in your FSM specification:**
+
+.. attribute:: name
+
+   Name of this edge.  Must be unique among the set of outgoing edges
+   from a given node.
+
+.. attribute:: toNode
+
+   The destination node of this edge.  Must be specified as a string
+   node name in an edge dict input to ``FSMSpecification``.
+
+.. attribute:: title
+
+   Title for this edge to be displayed in the Activity Center
+   UI etc.
+
+.. attribute:: description
+
+   Provides an explanation of what this transition
+   does for the user, to display in the Activity Center UI, etc.
+
+.. attribute:: help
+
+   If provided, displayed as a tool-tip for the Activity Center
+   button that will trigger this edge.
+
+.. attribute:: showOption
+
+   If set ``True``, this edge will be listed as an additional option
+   on the Activity Center view.  This is an easy way to give the
+   user multiple choices for "next steps" from a given node.
+
 
 
 FSMState
