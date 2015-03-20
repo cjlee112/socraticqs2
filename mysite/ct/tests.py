@@ -310,12 +310,11 @@ class FSMTests(TestCase):
                          '/ct/some/where/else/')
     def test_bad_funcName(self):
         'check that FSM.save_graph() catches bad plugin funcName'
-        edgeDictBad = (
-            dict(name='next', fromNode='START', toNode='END',
-                 funcName='testme.invalid', title='go go go'),
-        )
+        nodeDictBad = dict(START=dict(title='start here', path='ct:home',
+                           funcName='testme.invalid'))
+
         try:
-            f = FSM.save_graph(fsmDict, nodeDict, edgeDictBad, 'jacob')
+            f = FSM.save_graph(fsmDict, nodeDictBad, (), 'jacob')
         except AttributeError:
             pass
         else:

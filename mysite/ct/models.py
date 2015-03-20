@@ -1171,8 +1171,6 @@ class FSM(models.Model):
                 edgeDict['fromNode'] = nodes[edgeDict['fromNode']]
                 edgeDict['toNode'] = nodes[edgeDict['toNode']]
                 e = FSMEdge(addedBy=user, **edgeDict)
-                if e.funcName: # make sure plugin imports successfully
-                    get_plugin(e.funcName)
                 e.save()
         return f
     def get_node(self, name):
@@ -1258,10 +1256,10 @@ class FSMEdge(models.Model):
     name = models.CharField(max_length=64)
     fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
     toNode = models.ForeignKey(FSMNode, related_name='incoming')
-    funcName = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     help = models.TextField(null=True)
+    showOption = models.BooleanField(default=False)
     data = models.TextField(null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)

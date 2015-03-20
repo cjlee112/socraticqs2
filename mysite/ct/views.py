@@ -1429,8 +1429,7 @@ def fsm_status(request):
         cancelForm = CancelForm()
         set_crispy_action(request.path, cancelForm)
         edges = pageData.fsmStack.state.fsmNode.outgoing
-        nextSteps = list(edges.filter(name='next')) \
-          + list(edges.filter(name__startswith='+'))
+        nextSteps = edges.filter(showOption=True)
         logoutForm = LogoutForm()
         set_crispy_action(reverse('ct:person_profile', args=(request.user.id,)),
                           logoutForm)
