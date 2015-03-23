@@ -17,6 +17,9 @@ from ct.fsm import FSMStack
 import time
 import urllib
 
+from django.conf import settings
+from social.backends.utils import load_backends
+
 ###########################################################
 # WelcomeMat refactored utilities
 
@@ -282,7 +285,9 @@ def person_profile(request, user_id):
     else:
         logoutForm = None
     return pageData.render(request, 'ct/person.html',
-                           dict(person=person, logoutForm=logoutForm))
+                           dict(person=person, logoutForm=logoutForm,
+                           available_backends=load_backends(settings.AUTHENTICATION_BACKENDS),
+                           next=request.path))
 
 def about(request):
     pageData = PageData(request)

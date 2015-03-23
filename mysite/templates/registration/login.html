@@ -23,17 +23,4 @@
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
 
-<div>
-<br>
- <h1>... or you can login via third-party authentication providers:</h1>
-
- <p>
-   <ul>
-     <li>
-       <a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Login with Twitter</a>
-     </li>
-   </ul>
- </p>
- </div>
-
 {% endblock %}
