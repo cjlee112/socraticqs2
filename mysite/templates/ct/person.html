@@ -36,6 +36,14 @@ During the private alpha, no instructor information is displayed.
 </div>
 
 <br>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    <br>
+{% endif %}
 <div class="container-fluid">
 {% for sublist in available_backends|social_backends %}
   <div class="row">
