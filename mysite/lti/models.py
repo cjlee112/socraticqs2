@@ -26,10 +26,13 @@ class LTIUser(models.Model):
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '')
-        django_user, created = User.objects.get_or_create(username=username,
-                                                          first_name=first_name,
-                                                          last_name=last_name,
-                                                          email=email)
+
+        django_user = User.objects.get_or_create(username=username,
+                                                 defaults={
+                                                 'first_name':first_name,
+                                                 'last_name':last_name,
+                                                 'email':email
+                                                 })[0]
         self.django_user = django_user
         self.save()
 

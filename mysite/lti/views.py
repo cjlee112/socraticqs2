@@ -56,9 +56,9 @@ def lti_init(request):
         return render_to_response("error.html",  RequestContext(request))
     course_id = int(course_id)
 
-    user, created = LTIUser.objects.get_or_create(user_id=user_id,
-                                                  consumer=consumer_name,
-                                                  course_id=course_id)
+    user = LTIUser.objects.get_or_create(user_id=user_id,
+                                         consumer=consumer_name,
+                                         course_id=course_id)[0]
     user.extra_data = json.dumps(request_dict) # TODO exclude not needed params
     user.save()
 
