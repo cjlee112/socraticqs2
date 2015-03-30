@@ -58,6 +58,9 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
+          <li><a href="/ct/courses/">Courses</a></li>
+        </ul>
+        <ul class="nav navbar-nav">
           {% if not fsmStack.state or not fsmStack.state.hideNav %}
             <li><a href="/ct/about/">About</a></li>
             {{ actionTarget|get_dummy_navbar }}
@@ -81,15 +84,24 @@ function toggleInterest(o, targeturl, csrftoken)
         </ul>
         <ul class="nav navbar-right">
           {% if user %}
-          <li><a href="/ct/people/{{ user.pk }}/">{{ user.get_full_name }}</a></li>
+            {% if 'anonymous' in user.username %}
+                To be able to restore progress in future enter <a href="/login/email/">email here</a><li><a href="/login/?next=/ct/">Login/Register</a></li>
+            {% else %}
+                <a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
+                {% if user.get_full_name %}
+                    {{ user.get_full_name }}
+                {% else %}
+                    {{ user.username }}
+                {% endif %}</a>
+            {% endif %}
           {% else %}
-          <li><a href="/login/?next=/ct/">Sign in</a></li>
+              <a href="/login/?next=/ct/">Login/Register</a>
           {% endif %}
         </ul>
       </div>
     </div>
-  </nav>
 
+  </nav>
   {% if pageData.errorMessage %}
     <p><b>{{ pageData.errorMessage }}</b></p>
   {% elif pageData.statusMessage %}

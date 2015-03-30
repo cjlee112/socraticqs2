@@ -22,7 +22,7 @@ class LTIUser(models.Model):
 
     def create_links(self):
         extra_data = json.loads(self.extra_data)
-        username = extra_data.get('lis_person_name_given', self.user_id)
+        username = extra_data.get('lis_person_name_full', self.user_id)
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '')

@@ -27,6 +27,7 @@ def lti_init(request):
         tool = DjangoToolProvider(consumer_key, secret, request.POST)
         is_valid = tool.is_valid_request(request)
         session['message'] = "We are cool!"
+        session['target'] = '_blank'
     except oauth2.MissingSignature, e:
         is_valid = False
         session['message'] = "{}".format(e)
@@ -72,6 +73,7 @@ def lti_init(request):
     if settings.LTI_DEBUG:
         print "session: is_valid = {}".format( session['is_valid'])
         print "session: message = {}".format( session['message'])
+        print(session['target'])
     if not is_valid:
         return render_to_response("error.html",  RequestContext(request))
 

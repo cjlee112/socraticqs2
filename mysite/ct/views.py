@@ -1,6 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
+from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
+from django.contrib.auth.models import  AnonymousUser
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -205,6 +207,7 @@ class PageData(object):
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
+        templateArgs['target'] = request.session.get('target', '_self')
         if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
@@ -286,8 +289,9 @@ def person_profile(request, user_id):
         logoutForm = None
     return pageData.render(request, 'ct/person.html',
                            dict(person=person, logoutForm=logoutForm,
-                           available_backends=load_backends(settings.AUTHENTICATION_BACKENDS),
-                           next=request.path))
+                                next=request.path,
+                                available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
+
 
 def about(request):
     pageData = PageData(request)
@@ -368,6 +372,29 @@ def edit_course(request, course_id):
     set_crispy_action(request.path, courseform)
     return pageData.render(request, 'ct/edit_course.html',
                   dict(course=course, courseform=courseform))
+
+
+def courses(request):
+    user = request.user
+    courses = Course.objects.all()
+    if isinstance(user, AnonymousUser) or 'anonymous' in user.username:
+        courses = courses.filter(access='public')
+    pageData = PageData(request)
+    return pageData.render(request, 'ct/courses.html',
+                           dict(courses=courses))
+
+
+def courses_subscribe(request, course_id):
+    sessionid = request.META.get('HTTP_COOKIE').split(';')[0].split('=')[1]
+    user = User.objects.get_or_create(username='anonymouse' + sessionid,
+                                      first_name='Anonymous student')[0]
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
+    course = Course.objects.get(id=course_id)
+    r, created = Role.objects.get_or_create(course = course,
+                                            user = user,
+                                            role = 'self')
+    return HttpResponseRedirect(reverse('ct:home'))
 
 
 @login_required

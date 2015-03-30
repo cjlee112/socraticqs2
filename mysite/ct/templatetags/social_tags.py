@@ -48,6 +48,7 @@ def social_backends(backends):
     backends = [(name, backend) for name, backend in backends.items()
                     if name not in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
+
     return [backends[n:n + 10] for n in range(0, len(backends), 10)]
 
 
@@ -56,7 +57,16 @@ def legacy_backends(backends):
     backends = [(name, backend) for name, backend in backends.items()
                     if name in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
-    return backends
+
+    return [backends[n:n + 10] for n in range(0, len(backends), 10)]
+
+
+@register.filter
+def all_backends(backends):
+    backends = [(name, backend) for name, backend in backends.items()]
+    backends.sort(key=lambda b: b[0])
+
+    return [backends[n:n + 10] for n in range(0, len(backends), 10)]
 
 
 @register.filter
