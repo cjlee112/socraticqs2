@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     (r'^ct/', include('ct.urls', namespace='ct')),
 
     # Login / logout.
-    (r'^login/$', 'django.contrib.auth.views.login'),
+    (r'^login/$', 'psa.views.custom_login'),
     (r'^logout/$', logout_page),
 
 
@@ -25,9 +25,8 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
+
     url(r'^email-sent/$', 'psa.views.validation_sent'),
-    url(r'^email-primary/(?P<usa_id>\d+)/$', 'psa.views.primary_email',
-        name='primary_email'),
     url('', include('social.apps.django_app.urls', namespace='social')),
 )
 

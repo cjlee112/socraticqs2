@@ -1,9 +1,4 @@
 {% extends "ct/portal.html" %}
-{% load crispy_forms_tags %}
-
-{% comment %}
-  homepage for a user
-{% endcomment %}
 
 {% block head %}
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -25,38 +20,47 @@
 {% endblock %}
 
 {% block content %}
-During the private alpha, no instructor information is displayed.
 
-<br>
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    <br>
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
 {% endif %}
+
+    <div id="login">
+        <form class="form-horizontal" name="LoginForm" action="/login/" method="post">
+        {% csrf_token %}
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+        {% endif %}
+        <div class="control-group">
+            <label class="control-label" for="username">Username</label>
+            <div class="controls">
+                <input type="text" id="username" name="username"  placeholder="Username">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input type="password" name="password" id="password" placeholder="Password">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Login</button>
+            </div>
+        </div>
+        </form>
+    </div>
+    
+<br>
 <div class="container-fluid">
-  {% include "psa/social_backends.html" %}
   {% include "psa/legacy_backends.html" %}
 </div>
-
-<div class="container-fluid">
-{% include "psa/user_details.html" %}
-</div>
-
 <br>
-{% if logoutForm %}
-<div class="container-fluid">
-{% crispy logoutForm %}
-</div>
+
+{% if DEBUG %}
+    {% include "psa/social_backends.html" %}
+    {% include "psa/user_details.html" %}
 {% endif %}
 
-<script type="text/javascript">
-  $('.disconnect-form').on('click', 'a.btn', function (event) {
-    event.preventDefault();
-    $(event.target).closest('form').submit();
-  });
-</script>
 
 {% endblock %}

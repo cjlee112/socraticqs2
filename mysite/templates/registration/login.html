@@ -1,5 +1,4 @@
 {% extends "ct/portal.html" %}
-{% load social_tags %}
 
 {% block head %}
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -45,68 +44,14 @@
 </form>
 <br>
 <div class="container-fluid">
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"><i class="fa fa-envelope"></i>
-  Email
-</button>
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Email submiting</h4>
-        </div>
-        <div class="modal-body">
-          <form action="{% url 'social:complete' "email" %}" method="post">{% csrf_token %}
-            <p>
-              <label for="email">E-mail:</label>
-              <input id="email" type="email" name="email" value="" />
-            </p>
-            <button class="btn btn-primary">Submit email</button>
-        </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  {% include "psa/legacy_backends.html" %}
 </div>
 <br>
 
 {% if DEBUG %}
-
-<div class="container-fluid">
-  <div class="row">
-  <a class="btn btn-info" name="facebook" href="{% url "social:begin" backend="facebook" %}?next={{ next }}">
-    <i class="fa fa-facebook"></i>
-    Facebook
-  </a>
-  </div>
-  <br>
-  <div class="row">
-  <a class="btn btn-info" name="linkedin" href="{% url "social:begin" backend="linkedin-oauth2" %}?next={{ next }}">
-    <i class="fa fa-linkedin"></i>
-    Linkedin
-  </a>
-  </div>
-  <br>
-  <div class="row">
-  <a class="btn btn-info" name="google" href="{% url "social:begin" backend="google-oauth2" %}?next={{ next }}">
-    <i class="fa fa-google"></i>
-    Google
-  </a>
-  </div>
-  <br>
-  <div class="row">
-  <a class="btn btn-info" name="twitter" href="{% url "social:begin" backend="twitter" %}?next={{ next }}">
-    <i class="fa fa-twitter"></i>
-    Twitter
-  </a>
-  </div>
-
-</div>
-
-{% include "psa/user_details.html" %}
-
+    {% include "psa/social_backends.html" %}
+    {% include "psa/user_details.html" %}
 {% endif %}
+
 
 {% endblock %}
