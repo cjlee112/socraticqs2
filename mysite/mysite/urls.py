@@ -28,6 +28,12 @@ urlpatterns = patterns('',
 
     url(r'^email-sent/$', 'psa.views.validation_sent'),
     url('', include('social.apps.django_app.urls', namespace='social')),
+
+    url(r'^anonymous-email/$', 'psa.views.change_anonym_email'),
+    url(r'^anonymous-restore/$', 'psa.views.anonym_restore'),
+    url(r'^email-change/$', 'psa.views.change_anonym_email'),
+    
+
 )
 
 if apps.is_installed('lti'):

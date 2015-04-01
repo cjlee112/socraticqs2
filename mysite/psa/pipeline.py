@@ -7,6 +7,7 @@ from django.conf import settings
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthAlreadyAssociated
 from ct.models import Role
+from psa.models import AnonymEmail
 
 
 
@@ -26,9 +27,10 @@ def password_check(strategy, user, *args, **kwargs):
 @partial
 def password_ask(strategy, details, user=None, is_new=False, *args, **kwargs):
     print('password_ask')
+    print(user)
     print(details)
     print(kwargs)
-    if is_new or 'anonymous' in user.username:
+    if is_new or 'anonymous' in user.username and not kwargs.get('without_pass'):
         email = user.email or details.get('email')
         if strategy.request.POST.get('password'):
             if 'anonymous' in user.username:
@@ -92,7 +94,12 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
     print(user)
     print(kwargs)
     print(kwargs.get('anonym'))
+
+    if user and 'anonymous' in user.username:
+        return {'without_pass': True}
+
     if user:
+        print('return None')
         return None
 
     email = details.get('email')
@@ -101,14 +108,23 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
         # only if it's a single object. AuthException is raised if multiple
         # objects are returned.
         users = list(backend.strategy.storage.user.get_users_by_email(email))
+        print('USERS: ',users)
         if len(users) == 0:
+            print(1)
+            emails = AnonymEmail.objects.filter(email=email)
+            print('trying to find anonimous user')
+            if emails:
+                return {'user': emails[0].user,
+                        'without_pass': True}
             return None
         elif len(users) > 1:
+            print(2)
             raise AuthException(
                 backend,
                 'The given email address is associated with another account'
             )
         else:
+            print(3)
             return {'user': users[0]}
 
 
@@ -119,6 +135,7 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     print(kwargs)
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
+    # if social and not 'anonymous' in social.user.username:
     if social:
         if user and not 'anonymous' in user.username and social.user != user:
             print(1)
@@ -127,6 +144,8 @@ def social_user(backend, uid, user=None, *args, **kwargs):
         elif not user or 'anonymous' in user.username:
             print(2)
             user = social.user
+    # else:
+    #     social = None
 
     return {'social': social,
             'user': user,

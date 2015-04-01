@@ -4,9 +4,14 @@ from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.conf import settings
+from django.db import IntegrityError
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, Http404
 
 from .utils import render_to, clear_all_social_accounts
 from social.backends.utils import load_backends
+from psa.models import AnonymEmail
+
+from datetime import datetime
 
 
 @render_to('psa/validation_sent.html')
@@ -16,8 +21,8 @@ def validation_sent(request):
 
 def custom_login(request):
     username = password = ''
+    logout(request)
     if request.POST:
-        logout(request)
         username = request.POST['username']
         password = request.POST['password']
 
@@ -31,3 +36,24 @@ def custom_login(request):
                               {
                                   'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
                               }))
+
+
+@login_required
+def change_anonym_email(request):
+    if request.POST:
+        email = request.POST.get('email').lower()
+        user = request.user
+        try:
+            email = AnonymEmail(user=user, email=email, date=datetime.now())
+            email.save()
+        except IntegrityError:
+            return HttpResponseBadRequest('Improperly configured request.')
+        return redirect('/ct/')
+    else:
+        return render_to_response('psa/anonym-email-change.html',
+                              context_instance=RequestContext(request))
+
+
+def anonym_restore(request):
+    return render_to_response('psa/anonym-restore.html',
+                               context_instance=RequestContext(request))

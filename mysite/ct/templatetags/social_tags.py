@@ -89,3 +89,11 @@ def associated(context, backend):
         except IndexError:
             pass
     return ''
+
+
+@register.simple_tag(takes_context=True)
+def anonym_email(context):
+    email = context['user'].anonymemail_set.all()
+    if email:
+        context['a_email'] = email[0].email
+    return ''

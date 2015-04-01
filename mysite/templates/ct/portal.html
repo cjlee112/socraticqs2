@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+
 {% load crispy_forms_tags %}
-{% load ct_extras %}
+{% load ct_extras social_tags %}
+
 {% comment %}
   This is the main template for all portal pages.
 {% endcomment %}
@@ -83,9 +85,15 @@ function toggleInterest(o, targeturl, csrftoken)
           {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-right">
-          {% if user %}
+          {% if user and user.is_authenticated %}
             {% if 'anonymous' in user.username %}
-                To be able to restore progress in future enter <a href="/login/email/">email here</a><li><a href="/login/?next=/ct/">Login/Register</a></li>
+                {% anonym_email %}
+                {% if a_email %}
+                  Your saved email is {{ a_email }}
+                  <li><a href="/login/?next=/ct/">Login/Register</a></li>
+                {% else %}
+                To be able to restore progress in future enter <a href="/anonymous-email/">email</a><li><a href="/login/?next=/ct/">Login/Register</a></li>
+                {% endif %}
             {% else %}
                 <a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
                 {% if user.get_full_name %}
@@ -95,7 +103,8 @@ function toggleInterest(o, targeturl, csrftoken)
                 {% endif %}</a>
             {% endif %}
           {% else %}
-              <a href="/login/?next=/ct/">Login/Register</a>
+          To restore anonymous session enter <a href="/anonymous-restore/">email</a>
+              <li><a href="/login/?next=/ct/">Login/Register</a></li>
           {% endif %}
         </ul>
       </div>

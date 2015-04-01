@@ -53,5 +53,11 @@
     {% include "psa/user_details.html" %}
 {% endif %}
 
+<script type="text/javascript">
+  $('.disconnect-form').on('click', 'a.btn', function (event) {
+    event.preventDefault();
+    $(event.target).closest('form').submit();
+  });
+</script>
 
 {% endblock %}
