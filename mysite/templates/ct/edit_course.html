@@ -1,6 +1,6 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
-{% load ct_extras %}
+{% load ct_extras %} 
 
 {% comment %}
   Show materials relevant for a given concept
@@ -32,6 +32,9 @@
 <p>
 Added by: {{ course.addedBy.get_full_name }}, 
           {{ course.atime|display_datetime }}
+</p>
+<p>
+  Copy course URL <input type="text" value="{{ domain }}/lti{% url 'ct:course_student' course.id %}"> <button id="urlCoppier">Copy</button>
 </p>
 
   </div><!-- @end #EditTabDiv -->

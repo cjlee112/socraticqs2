@@ -15,9 +15,9 @@ def validation_sent(request):
 
 
 def custom_login(request):
-    logout(request)
     username = password = ''
     if request.POST:
+        logout(request)
         username = request.POST['username']
         password = request.POST['password']
 

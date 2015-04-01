@@ -12,7 +12,7 @@ from lti import app_settings as settings
 
 
 @csrf_exempt
-def lti_init(request):
+def lti_init(request, course_id=None, unit_id=None):
     if settings.LTI_DEBUG:
         print "META"
         print request.META
@@ -51,7 +51,6 @@ def lti_init(request):
     consumer_name = request_dict.get('ext_lms', 'lti')
 
     user_id = request_dict.get('user_id', None)
-    course_id = request_dict.get('custom_course', None)
     roles = request_dict.get('roles', None)
     if not user_id or not course_id:
         return render_to_response("error.html",  RequestContext(request))
@@ -79,6 +78,9 @@ def lti_init(request):
 
     if user.is_enrolled(roles, course_id):
         # Redirect to course page
-        return redirect(reverse('ct:course_student', args=(course_id,)))
+        if not unit_id:
+            return redirect(reverse('ct:course_student', args=(course_id,)))
+        else:
+            return redirect(reverse('ct:study_unit', args=(course_id, unit_id)))
     else:
         return redirect(reverse('ct:home'))

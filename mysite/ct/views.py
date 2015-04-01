@@ -3,6 +3,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import  AnonymousUser
+from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -371,7 +372,8 @@ def edit_course(request, course_id):
         courseform = CourseTitleForm(instance=course)
     set_crispy_action(request.path, courseform)
     return pageData.render(request, 'ct/edit_course.html',
-                  dict(course=course, courseform=courseform))
+                  dict(course=course, courseform=courseform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
 
 
 def courses(request):
