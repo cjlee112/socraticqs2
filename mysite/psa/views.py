@@ -14,15 +14,24 @@ from psa.models import AnonymEmail
 from datetime import datetime
 
 
-@render_to('psa/validation_sent.html')
+def context(**extra):
+    return dict({
+        'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
+    }, **extra)
+
+
+@render_to('ct/person.html')
 def validation_sent(request):
-    return {'email': request.session.get('email_validation_address')}
+    return context(
+        validation_sent=True,
+        email=request.session.get('email_validation_address')
+    )
 
 
 def custom_login(request):
     username = password = ''
+    logout(request)
     if request.POST:
-        logout(request)
         username = request.POST['username']
         password = request.POST['password']
 
@@ -59,3 +68,10 @@ def change_anonym_email(request):
 def anonym_restore(request):
     return render_to_response('psa/anonym-restore.html',
                                context_instance=RequestContext(request))
+
+
+@login_required
+@render_to('ct/person.html')
+def done(request):
+    """Login complete view, displays user data"""
+    return context()

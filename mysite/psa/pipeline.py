@@ -10,7 +10,6 @@ from ct.models import Role
 from psa.models import AnonymEmail
 
 
-
 @partial
 def password_check(strategy, user, *args, **kwargs):
     if not user.has_usable_password() and user.social_auth.count() == 1:
@@ -39,13 +38,15 @@ def password_ask(strategy, details, user=None, is_new=False, *args, **kwargs):
             username = user.username
             password = strategy.request.POST.get('password')
             user.set_password(password)
+            print(user.username)
             user.save()
-            send_mail('Account is created',
-                      'Account is created.\nUsername: {0}\nPassword: {1}'.format(username,
-                                                                                 password),
-                      settings.EMAIL_FROM,
-                      [email],
-                      fail_silently=False)
+            if email:
+                send_mail('Account is created',
+                          'Account is created.\nUsername: {0}\nPassword: {1}'.format(username,
+                                                                                     password),
+                          settings.EMAIL_FROM,
+                          [email],
+                          fail_silently=False)
         else:
             return render_to_response('psa/require_password.html', {
                 'request': strategy.request,
@@ -65,6 +66,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                       (is_new or backend.setting('PASSWORDLESS', False))
 
     if requires_validation and send_validation and backend.name == 'email':
+        print('trying to send email to {0}'.format(backend.name))
         data = backend.strategy.request_data()
         if 'verification_code' in data:
             print(kwargs)

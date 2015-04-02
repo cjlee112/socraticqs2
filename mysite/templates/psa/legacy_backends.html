@@ -1,42 +1,20 @@
 {% load social_tags %}
 
 {% for sublist in available_backends|legacy_backends %}
-    <div class="row">
-    {% for name, backend in sublist %}
-      {% associated backend %}
-      {% if association %}
-        <form class="disconnect-form col-md-2" action="{% url "social:disconnect_individual" backend=association.provider association_id=association.id %}" method="post">{% csrf_token %}
-          <a class="btn btn-danger" name="{{ backend|backend_class }}" href="#">
-            <i class="fa fa-{{ name|icon_name }}"></i>
-            Disconnect {{ backend|backend_name }}
-          </a>
-        </form>
-      {% else %}
-      <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"><i class="fa fa-{{ name|icon_name }}"></i>
-        Email
-      </button>
-        <!-- Modal -->
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Email submiting</h4>
-              </div>
-              <div class="modal-body">
-                <form action="{% url 'social:complete' "email" %}" method="post">{% csrf_token %}
-                  <p>
-                    <label for="email">E-mail:</label>
-                    <input id="email" type="email" name="email" value="" />
-                  </p>
-                  <button class="btn btn-primary">Submit email</button>
-              </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-    </div>
-    {% endfor %}
+{% for name, backend in sublist %}
+  {% associated backend %}
+  {% if association %}
+    <form class="disconnect-form" action="{% url "social:disconnect_individual" backend=association.provider association_id=association.id %}" method="post">{% csrf_token %}
+      <a class="btn btn-danger" name="{{ backend|backend_class }}" href="#">
+        <i class="fa fa-{{ name|icon_name }}"></i>
+        Disconnect {{ backend|backend_name }}
+      </a>
+    </form>
+  {% else %}
+    <a class="btn btn-default" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}">
+      <i class="fa fa-{{ name|icon_name }}"></i>
+      {{ backend|backend_name }}
+    </a>
+  {% endif %}
+  {% endfor %}
 {% endfor %}

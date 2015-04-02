@@ -90,9 +90,9 @@ function toggleInterest(o, targeturl, csrftoken)
                 {% anonym_email %}
                 {% if a_email %}
                   Your saved email is {{ a_email }}
-                  <li><a href="/login/?next=/ct/">Login/Register</a></li>
+                  <li><a href="/ct/people/{{ user.pk }}/">Register</a></li>
                 {% else %}
-                To be able to restore progress in future enter <a href="/anonymous-email/">email</a><li><a href="/login/?next=/ct/">Login/Register</a></li>
+                To be able to restore progress in future enter <a href="/anonymous-email/">email</a><li><a href="/ct/people/{{ user.pk }}/">Register</a></li>
                 {% endif %}
             {% else %}
                 <a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
