@@ -21,8 +21,8 @@ def validation_sent(request):
 
 def custom_login(request):
     username = password = ''
-    logout(request)
     if request.POST:
+        logout(request)
         username = request.POST['username']
         password = request.POST['password']
 
@@ -38,6 +38,8 @@ def custom_login(request):
                               }))
 
 
+
+# TODO Rewrite to user django-rest APIView
 @login_required
 def change_anonym_email(request):
     if request.POST:

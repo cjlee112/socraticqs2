@@ -56,6 +56,7 @@ def password_ask(strategy, details, user=None, is_new=False, *args, **kwargs):
 @partial
 def custom_mail_validation(backend, details, user=None, is_new=False, *args, **kwargs):
     print('custom_email_validation')
+    print(user)
     print(kwargs)
     print(details)
     requires_validation = backend.REQUIRES_EMAIL_VALIDATION or \
@@ -91,12 +92,7 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
     default.
     """
     print('associate_by_email')
-    print(user)
-    print(kwargs)
-    print(kwargs.get('anonym'))
-
-    if user and 'anonymous' in user.username:
-        return {'without_pass': True}
+    print('user: ', user)
 
     if user:
         print('return None')
@@ -114,6 +110,7 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
             emails = AnonymEmail.objects.filter(email=email)
             print('trying to find anonimous user')
             if emails:
+                print(emails)
                 return {'user': emails[0].user,
                         'without_pass': True}
             return None
@@ -162,6 +159,8 @@ def role_set(strategy, details, user=None, *args, **kwargs):
 
 
 def create_user(strategy, details, user=None, *args, **kwargs):
+    print('create_user')
+    print(user)
     print(details)
     if user:
         username = user.username
@@ -178,3 +177,25 @@ def create_user(strategy, details, user=None, *args, **kwargs):
         'is_new': True,
         'user': strategy.create_user(**fields)
     }
+
+
+def associate_user(backend, uid, user=None, social=None, *args, **kwargs):
+    print('associate_user')
+    print(user)
+
+    if user and not social:
+        try:
+            social = backend.strategy.storage.user.create_social_auth(
+                user, uid, backend.name
+            )
+        except Exception as err:
+            if not backend.strategy.storage.is_integrity_error(err):
+                raise
+            # Protect for possible race condition, those bastard with FTL
+            # clicking capabilities, check issue #131:
+            #   https://github.com/omab/django-social-auth/issues/131
+            return social_user(backend, uid, user, *args, **kwargs)
+        else:
+            return {'social': social,
+                    'user': social.user,
+                    'new_association': True}

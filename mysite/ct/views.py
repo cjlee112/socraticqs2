@@ -19,7 +19,7 @@ from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_
 from ct.fsm import FSMStack
 import time
 import urllib
-
+from datetime import datetime
 from django.conf import settings
 from social.backends.utils import load_backends
 
@@ -387,9 +387,10 @@ def courses(request):
 
 
 def courses_subscribe(request, course_id):
-    sessionid = request.META.get('HTTP_COOKIE').split(';')[0].split('=')[1]
-    user = User.objects.get_or_create(username='anonymouse' + sessionid,
+    _id = int(time.mktime(datetime.now().timetuple()))
+    user = User.objects.get_or_create(username='anonymouse' + str(_id),
                                       first_name='Anonymous student')[0]
+
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
     course = Course.objects.get(id=course_id)
