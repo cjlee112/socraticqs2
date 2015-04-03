@@ -436,7 +436,8 @@ def edit_unit(request, course_id, unit_id):
                                 defaultURL, reverseArgs=kwargs, unit=unit)
     set_crispy_action(request.path, unitform)
     return pageData.render(request, 'ct/edit_unit.html',
-                  dict(unit=unit, courseUnit=cu, unitform=unitform))
+                  dict(unit=unit, courseUnit=cu, unitform=unitform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
 
 
 def update_concept_link(request, conceptLinks, unit):
