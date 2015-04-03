@@ -20,7 +20,7 @@ def context(**extra):
     }, **extra)
 
 
-@render_to('ct/person.html')
+@render_to('psa/custom_login.html')
 def validation_sent(request):
     return context(
         validation_sent=True,
@@ -74,4 +74,4 @@ def anonym_restore(request):
 @render_to('ct/person.html')
 def done(request):
     """Login complete view, displays user data"""
-    return context()
+    return context(person=request.user)

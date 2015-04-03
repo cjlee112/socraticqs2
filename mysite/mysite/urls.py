@@ -16,7 +16,7 @@ urlpatterns = patterns('',
 
     # Login / logout.
     (r'^login/$', 'psa.views.custom_login'),
-    (r'^logout/$', logout_page),
+    (r'^logout/$', logout_page, {'next_page': '/login/'}),
 
 
     # Uncomment the admin/doc line below to enable admin documentation:

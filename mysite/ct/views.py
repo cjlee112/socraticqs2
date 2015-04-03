@@ -19,7 +19,8 @@ from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_
 from ct.fsm import FSMStack
 import time
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from social.backends.utils import load_backends
 
@@ -388,16 +389,20 @@ def courses(request):
 
 def courses_subscribe(request, course_id):
     _id = int(time.mktime(datetime.now().timetuple()))
-    user = User.objects.get_or_create(username='anonymouse' + str(_id),
-                                      first_name='Anonymous student')[0]
+    user = request.user
+    if isinstance(user, AnonymousUser):
+        user = User.objects.get_or_create(username='anonymouse' + str(_id),
+                                          first_name='Anonymous student')[0]
 
-    user.backend = 'django.contrib.auth.backends.ModelBackend'
-    login(request, user)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        # Set expiry time to year in future
+        request.session.set_expiry(timedelta(days=365))
     course = Course.objects.get(id=course_id)
     r, created = Role.objects.get_or_create(course = course,
                                             user = user,
                                             role = 'self')
-    return HttpResponseRedirect(reverse('ct:home'))
+    return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
 
 
 @login_required

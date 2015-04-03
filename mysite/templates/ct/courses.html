@@ -13,14 +13,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-{% for course in courses %}
-  <li>{{ course.title }}
-  <a href="{% url 'ct:subscribe' course.id %}"> subscribe
-  </a>
-  </li>
-{% endfor %}
-</div>
-
+<table class="table table-striped">
+<thead><tr><th>Course</th><th>Course id</th></tr></thead>
+<tbody>
+    {% for course in courses %}
+    <tr><td>
+    <a href="{% url 'ct:subscribe' course.id %}">{{ course.title }}</a>
+    </td>
+    <td>{{ course.id }}</td>
+    </tr>
+    {% endfor %}
+</tbody></table>
 
 {% endblock %}
