@@ -75,3 +75,30 @@ def anonym_restore(request):
 def done(request):
     """Login complete view, displays user data"""
     return context(person=request.user)
+
+
+@login_required
+@render_to('ct/index.html')
+def ask_stranger(request):
+    return context(tmp_email_ask=True)
+
+
+@login_required
+@render_to('ct/person.html')
+def set_pass(request):
+    changed = False
+    user = request.user
+    if user.is_authenticated():
+        if request.POST:
+            password = request.POST['pass']
+            confirm = request.POST['confirm']
+            if password == confirm:
+                user.set_password(password)
+                user.save()
+                changed = True
+                print('Good.')
+
+    if changed:
+        return context(changed=True, person=user)
+    else:
+        return context(exception='Something goes wrong...', person=user)

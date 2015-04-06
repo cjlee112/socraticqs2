@@ -4,8 +4,6 @@ from django.core.urlresolvers import reverse
 
 
 def send_validation(strategy, backend, code):
-    print(code)
-    print(code.email)
     url = reverse('social:complete', args=(backend.name,)) + \
             '?verification_code=' + code.code
     url = strategy.request.build_absolute_uri(url)

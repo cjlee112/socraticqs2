@@ -103,32 +103,14 @@ function toggleInterest(o, targeturl, csrftoken)
         </ul>
         <ul class="nav navbar-right">
           {% if user and user.is_authenticated %}
-            {% if 'anonymous' in user.username %}
-                {% anonym_email %}
-                {% if a_email %}
-                  Your saved email is {{ a_email }}
-                  <li><a href="/ct/people/{{ user.pk }}/">Register</a></li>
-                {% else %}
-                To be able to restore progress in future enter <a class="btn btn-default" name="anonymous-email" href="{% url "social:begin" backend="email" %}">
-                  <i class="fa fa-envelope"></i>
-                  email
-                </a>
-                <li><a href="/ct/people/{{ user.pk }}/">Register</a></li>
-                {% endif %}
+            <li><a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
+            {% if user.get_full_name %}
+                {{ user.get_full_name }}
             {% else %}
-                <a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
-                {% if user.get_full_name %}
-                    {{ user.get_full_name }}
-                {% else %}
-                    {{ user.username }}
-                {% endif %}</a>
-            {% endif %}
+                {{ user.username }}
+            {% endif %}</a></li>
           {% else %}
-          To restore anonymous session enter <a class="btn btn-default" name="anonymous-email" href="{% url "social:begin" backend="email" %}">
-            <i class="fa fa-envelope"></i>
-            email
-          </a>
-              <li><a href="/login/?next=/ct/">Login/Register</a></li>
+            <li><a href="/login/?next=/ct/">Login/Register</a></li>
           {% endif %}
         </ul>
       </div>
@@ -164,48 +146,31 @@ function toggleInterest(o, targeturl, csrftoken)
 
   {% block content %}{% endblock %}
 
-    <div id="anonymous-email-modal" class="modal fade">
-      <form action=
-        {% if user and user.is_authenticated and 'anonymous' in user.username %}
-          "/email-change/" 
-        {% elif not user.is_authenticated %}
-          "{% url 'social:complete' "email" %}" 
-        {% endif %}
-        method="post" role="form">{% csrf_token %}
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h4 class="modal-title">
-              {% if user and user.is_authenticated and 'anonymous' in user.username %}
-              Anonymous Email Saving
-              {% elif not user.is_authenticated %}
-              Anonymous Session Restoring
-              {% endif %}
-              </h4>
-            </div>
+    <div id="email-required-modal_2" class="modal fade">
+        <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Re-send activation link</h4>
+              </div>
 
-            <div class="modal-body">
-              <div class="form-group">
-                <label class="control-label" for="email">Email address:</label>
-                <input class="form-control" id="email" type="email" name="email" value="" />
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="control-label" for="email">Email address:</label>
+                  <input class="form-control" id="email" type="email" name="email"
+                  value="{{ user.anonymemail_set.all.0.email }}" />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Continue</button>
               </div>
             </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">
-              {% if user and user.is_authenticated and 'anonymous' in user.username %}
-              Save
-              {% elif not user.is_authenticated %}
-              Restore
-              {% endif %}
-              </button>
-            </div>
           </div>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
 
     <div id="email-modal" class="modal fade">
       <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
@@ -232,6 +197,35 @@ function toggleInterest(o, targeturl, csrftoken)
       </form>
     </div>
 
+    {% if tmp_email_ask %}
+      <div id="email-required-modal" class="modal fade">
+        <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Email required</h4>
+              </div>
+
+              <div class="modal-body">
+                <p>An email address is required.</p>
+                <div class="form-group">
+                  <label class="control-label" for="email">Email address:</label>
+                  <input class="form-control" id="email" type="email" name="email"
+                  value="{{ user.anonymemail_set.all.0.email }}" />
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Continue</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    {% endif %}
+
     <div id="validation-sent-modal" class="modal fade">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -252,7 +246,7 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
     </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="https://plus.google.com/js/client:plusone.js?onload=start" type="text/javascript"></script>
     <script src="https://login.persona.org/include.js" type="text/javascript"></script>
@@ -294,10 +288,13 @@ function toggleInterest(o, targeturl, csrftoken)
         modalDialog('#livejournal-modal', 'livejournal');
         modalDialog('#openid-modal', 'openid');
         modalDialog('#email-modal', 'email');
-        modalDialog('#anonymous-email-modal', 'anonymous-email');
+        modalDialog('#email-required-modal_2', 'email-required-modal_2');
         modalDialog('#username-modal', 'username');
+        modalDialog('#set-pass', 'set-pass');
         $validationModal = modalDialog('#validation-sent-modal');
+        $passChanged = modalDialog('#password-changed');
         $emailRequired = modalDialog('#email-required-modal');
+        $passException = modalDialog('#exception');
 
         modalDialog('#ajax-login-modal', 'ajax-login', function (event) {
           var $backend, $accessToken, $accessTokenSecret, $fields, $result;
@@ -346,9 +343,18 @@ function toggleInterest(o, targeturl, csrftoken)
           $validationModal.modal('show');
         {% endif %}
 
-        {% if email_required %}
+        {% if tmp_email_ask %}
           $emailRequired.modal('show');
         {% endif %}
+
+        {% if changed %}
+          $passChanged.modal('show');
+        {% endif %}
+
+        {% if exception %}
+          $passException.modal('show');
+        {% endif %}
+
       });
     </script>
 

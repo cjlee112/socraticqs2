@@ -31,7 +31,8 @@ urlpatterns = patterns('',
 
     url(r'^anonymous-email/$', 'psa.views.change_anonym_email'),
     url(r'^anonymous-restore/$', 'psa.views.anonym_restore'),
-    url(r'^email-change/$', 'psa.views.change_anonym_email'),
+    url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),
+    url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done'),
     

@@ -390,9 +390,11 @@ def courses(request):
 def courses_subscribe(request, course_id):
     _id = int(time.mktime(datetime.now().timetuple()))
     user = request.user
+    tmp_user = False
     if isinstance(user, AnonymousUser):
+        tmp_user = True
         user = User.objects.get_or_create(username='anonymouse' + str(_id),
-                                          first_name='Anonymous student')[0]
+                                          first_name='Temporary User')[0]
 
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
@@ -402,6 +404,9 @@ def courses_subscribe(request, course_id):
     r, created = Role.objects.get_or_create(course = course,
                                             user = user,
                                             role = 'self')
+    if tmp_user:
+        print('redirect to email asking page')
+        return HttpResponseRedirect('/tmp-email-ask/')
     return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
 
 

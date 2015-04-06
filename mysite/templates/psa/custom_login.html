@@ -6,7 +6,18 @@
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 <div class="buttons">
-    <div id="login">
+
+{% if DEBUG %}
+    {% include "psa/social_backends.html" %}
+{% endif %}
+
+<br>
+<div class="container-fluid">
+  {% include "psa/legacy_backends.html" %}
+</div>
+<br>
+
+<div id="login">
         <form class="form-horizontal" name="LoginForm" action="/login/" method="post">
         {% csrf_token %}
         {% if next %}
@@ -31,15 +42,8 @@
         </div>
         </form>
     </div>
-    
-<br>
-<div class="container-fluid">
-  {% include "psa/legacy_backends.html" %}
-</div>
-<br>
 
 {% if DEBUG %}
-    {% include "psa/social_backends.html" %}
     {% include "psa/user_details.html" %}
 {% endif %}
 

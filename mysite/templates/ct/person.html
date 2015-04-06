@@ -6,6 +6,73 @@ User profile page
 {% endblock %}
 {% block content %}
 {% if person and user.id == person.id %}
+
+    <div id="set-pass" class="modal fade">
+      <form action="/set-pass/" method="post" role="form">{% csrf_token %}
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title">Setting password</h4>
+            </div>
+
+            <div class="modal-body">
+              <p>Enter password to set/change</p>
+              <div class="form-group">
+                <label class="control-label" for="pass">Password:</label>
+                <input class="form-control" id="pass" type="password" name="pass" value="" />
+                <label class="control-label" for="confirm">Confim:</label>
+                <input class="form-control" id="confirm" type="password" name="confirm" value="" />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Continue</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="password-changed" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Password was changed</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>Your password was changed.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="exception" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Exception</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>Something goes wrong.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="buttons">
       {% if user.is_authenticated and not 'anonymous' in user.username %}
         <div class="user-details">
@@ -13,10 +80,16 @@ User profile page
         </div>
       {% endif %}
       {% if user and 'anonymous' in user.username %}
-      <h3>You are in a temporary anonymous session.</h3>
+      <h4>You are in a temporary anonymous session.</h4>
+
+      <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
+      <i class="fa fa-envelope"></i>
+      re-send
+      </a>
+      </h4>
       <p>You can login with you social account to create real account.</p>
       {% endif %}
-      {% if not user.email %}
+      {% if 'anonymous' in user.username %}
       Also you can provide your email to create real account.
       {% endif %}
       {% if messages %}
@@ -28,16 +101,25 @@ User profile page
         <br>
       {% endif %}
 
+      {% if user and not 'anonymous' in user.username %}
+        <a class="btn btn-default" name="set-pass">
+        Set password
+        </a>
       <div class="social">
         {% include 'psa/social_backends.html' %}
       </div>
-
-      {% if user and not 'anonymous' in user.username or not user.email %}
       <div class="legacy">
         {% include 'psa/legacy_backends.html' %}
       </div>
-      {% endif %}
+      
 
+      <div class="container-fluid">
+        {% include 'psa/user_details.html' %}
+      </div>
+      {% endif %}
+      <div class="social">
+        {% include 'psa/social_backends.html' %}
+      </div>
       <div>
         <a class="btn btn-primary" href="/logout/">
           <i class="fa fa-sign-out"></i>
@@ -48,7 +130,7 @@ User profile page
           {% endif %}
         </a>
       </div>
-    </div>
+      </div>
 
 {% endif %}    
 {% endblock %}
