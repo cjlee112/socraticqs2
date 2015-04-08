@@ -1,13 +1,13 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
 
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthAlreadyAssociated
-from ct.models import Role
+from ct.models import Role, UnitStatus, FSMState, Response
 from psa.models import AnonymEmail
 from datetime import datetime
 
@@ -64,17 +64,65 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
             )
 
 
-def role_set(strategy, details, user=None, *args, **kwargs):
-    if 'anonymous' in user.username:
-        print('anonym_role_set')
-        # user.role_set.all().update(user=user)
+def union_merge(tmp_user, user):
+    """
+       Reassigning Roles
+       Doing UNION megre to not repeat roles to the same course
+       with the save role
+    """
+    roles_to_reset = (role for role in tmp_user.role_set.all()
+                      if not user.role_set.filter(course=role.course,
+                                                  role=role.role))
+    for role in roles_to_reset:
+        role.user = user
+        role.save()
+    """
+       Reassigning UnitStatuses
+       TODO think about filter() for UNION instead all()
+       maybe we need fresh unitstatuses instead of all to reassing
+    """
+    unitstatus_to_reset = (us for us in tmp_user.unitstatus_set.all())
+    for ut in unitstatus_to_reset:
+        ut.user = user
+        ut.save()
+    """ Reassigning FSMStates """
+    tmp_user.fsmstate_set.all().update(user=user)
+    """ Reassigning Responses """
+    tmp_user.response_set.all().update(author = user)
+    """ Reassigning StudentErrors """
+    tmp_user.studenterror_set.all().update(author = user)
 
 
 def validated_user_details(strategy, details, user=None, is_new=False, *args, **kwargs):
     if user and 'anonymous' in user.username:
-        try:
-            user.username = details.get('username')
-            user.first_name = ''
-            user.save()
-        except IntegrityError as e:
-            raise AuthAlreadyAssociated(kwargs.get('backend'), str(e))
+        social = kwargs.get('social')
+        if social:
+            tmp_user = user
+            logout(strategy.request)
+            user = social.user
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(strategy.request, user)
+            union_merge(tmp_user, user)
+        else:
+            try:
+                user.username = details.get('username')
+                user.first_name = ''
+                user.save()
+            except IntegrityError as e:
+                raise AuthAlreadyAssociated(kwargs.get('backend'), str(e))
+
+
+def social_user(backend, uid, user=None, *args, **kwargs):
+    provider = backend.name
+    social = backend.strategy.storage.user.get_social_auth(provider, uid)
+    if social:
+        if (user and not 'anonymous' in user.username
+            and social.user != user):
+            msg = 'This {0} account is already in use.'.format(provider)
+            raise AuthAlreadyAssociated(backend, msg)
+        elif not user or 'anonymous' in user.username:
+            user = social.user
+    return {'social': social,
+            'user': user,
+            'is_new': user is None,
+            'new_association': False}

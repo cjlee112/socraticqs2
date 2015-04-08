@@ -405,7 +405,6 @@ def courses_subscribe(request, course_id):
                                             user = user,
                                             role = 'self')
     if tmp_user:
-        print('redirect to email asking page')
         return HttpResponseRedirect('/tmp-email-ask/')
     return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
 

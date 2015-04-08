@@ -101,25 +101,25 @@ User profile page
         <br>
       {% endif %}
 
+
+
+      <div class="social">
+        {% include 'psa/social_backends.html' %}
+      </div>
       {% if user and not 'anonymous' in user.username %}
         <a class="btn btn-default" name="set-pass">
         Set password
         </a>
-      <div class="social">
-        {% include 'psa/social_backends.html' %}
-      </div>
+
       <div class="legacy">
         {% include 'psa/legacy_backends.html' %}
       </div>
-      
-
+      {% endif %}
+      {% if user and not 'anonymous' in user.username %}
       <div class="container-fluid">
         {% include 'psa/user_details.html' %}
       </div>
       {% endif %}
-      <div class="social">
-        {% include 'psa/social_backends.html' %}
-      </div>
       <div>
         <a class="btn btn-primary" href="/logout/">
           <i class="fa fa-sign-out"></i>
