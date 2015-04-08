@@ -81,17 +81,15 @@ User profile page
       {% endif %}
       {% if user and 'anonymous' in user.username %}
       <h4>You are in a temporary anonymous session.</h4>
-
+      <h4>Please confirm your email to be able to restore progress.</h4>
+      <h4>This session may expire without email confirmation.</h4>
       <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
       <i class="fa fa-envelope"></i>
       re-send
       </a>
       </h4>
-      <p>You can login with you social account to create real account.</p>
       {% endif %}
-      {% if 'anonymous' in user.username %}
-      Also you can provide your email to create real account.
-      {% endif %}
+
       {% if messages %}
         <ul class="messages">
             {% for message in messages %}
@@ -102,11 +100,12 @@ User profile page
       {% endif %}
 
 
-
+      {% if user and not 'anonymous' in user.username %}
+      You can associate social account, email or set/change password as this page.
       <div class="social">
         {% include 'psa/social_backends.html' %}
       </div>
-      {% if user and not 'anonymous' in user.username %}
+
         <a class="btn btn-default" name="set-pass">
         Set password
         </a>

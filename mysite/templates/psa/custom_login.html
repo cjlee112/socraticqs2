@@ -6,6 +6,11 @@
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 <div class="buttons">
+{% if not user.is_authenticated %}
+<h4>Hello Stranger!</h4>
+<h4>You can enroll to course via <a href="/ct/courses/">Course</a> link to test some courses.</h4>
+<h4>In this page you can login or register using you email, plain username/password pair or social accounts.</h4>
+{% endif %}
 
 {% if DEBUG %}
     {% include "psa/social_backends.html" %}
