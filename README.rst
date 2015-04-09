@@ -11,6 +11,8 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
 
     # coding: utf-8
 
+    import os
+    from datetime import timedelta
     from settings import INSTALLED_APPS
 
 
@@ -20,6 +22,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
 
         # Socials
         'social.apps.django_app.default',
+        'psa',
     )
 
     INSTALLED_APPS += INSTALLED_APPS_LOCAL
@@ -35,6 +38,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
        'django.contrib.messages.context_processors.messages',
        'social.apps.django_app.context_processors.backends',
        'social.apps.django_app.context_processors.login_redirect',
+       'psa.context_processors.debug_settings',
     )
 
     AUTHENTICATION_BACKENDS = (
@@ -42,7 +46,34 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
        'social.backends.facebook.FacebookOAuth2',
        'social.backends.google.GoogleOAuth2',
        'social.backends.linkedin.LinkedinOAuth2',
+       'social.backends.khanacademy.KhanAcademyOAuth1',
+       'social.backends.email.EmailAuth',
        'django.contrib.auth.backends.ModelBackend',
+    )
+
+
+    SOCIAL_AUTH_PIPELINE = (
+        'social.pipeline.social_auth.social_details',
+        'social.pipeline.social_auth.social_uid',
+        'social.pipeline.social_auth.auth_allowed',
+        'psa.pipeline.social_user',
+        'social.pipeline.user.get_username',
+        'psa.pipeline.custom_mail_validation',
+        # 'social.pipeline.social_auth.associate_by_email',
+        'social.pipeline.user.create_user',
+        'psa.pipeline.validated_user_details',
+        # 'psa.pipeline.password_ask',
+        'social.pipeline.social_auth.associate_user',
+        'social.pipeline.social_auth.load_extra_data',
+        'social.pipeline.user.user_details',
+    )
+
+    SOCIAL_AUTH_DISCONNECT_PIPELINE = (
+        # 'psa.pipeline.password_check',
+        'social.pipeline.disconnect.allowed_to_disconnect',
+        'social.pipeline.disconnect.get_entries',
+        'social.pipeline.disconnect.revoke_tokens',
+        'social.pipeline.disconnect.disconnect'
     )
 
     PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'email']
@@ -54,7 +85,8 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
     CONSUMER_KEY = "__consumer_key__"
     LTI_SECRET = "__lti_secret__"
     LTI_URL_FIX = {
-            "https://localhost:8000/":"http://localhost:8000/"
+            "https://localhost:8000/":"http://localhost:8000/",
+            'https://edx.raccoongang.com': "http://edx.raccoongang.com"
     }
     ## Heroku SSL proxy fix
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -67,6 +99,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
 
     SOCIAL_AUTH_FACEBOOK_KEY = ''
     SOCIAL_AUTH_FACEBOOK_SECRET = ''
+    SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
     SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = ''
     SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = ''
@@ -84,12 +117,67 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
 
     SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
     SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+    SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
 
 
-    import os
+    SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
+    SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/email-sent/'
+    SOCIAL_AUTH_EMAIL_FORM_HTML = 'psa/email_signup.html'
+    SOCIAL_AUTH_USERNAME_FORM_HTML = 'psa/username_signup.html'
+
+    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+    # LOGIN_URL = '/custom-login/'
+    LOGIN_REDIRECT_URL = '/'
+    URL_PATH = ''
+    SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
+    SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
+    SOCIAL_AUTH_GOOGLE_OAUTH_SCOPE = [
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
+
+
+    SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY = ''
+    SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET = ''
+
     SESSION_COOKIE_SECURE = True
     STATIC_ROOT = os.path.join(os.path.dirname(
                     os.path.abspath(__file__)), 'static')
 
     # URL prefix for static files.
+    # Example: "http://media.lawrence.com/static/"
     STATIC_URL = '/static/'
+
+
+
+    # Use GMail for testing purpose
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_PORT = 587
+    EMAIL_FROM = 'no-reply@gmail.com'
+
+    FORCE_EMAIL_VALIDATION = True
+    PASSWORDLESS = True
+
+    # DEBUG = False
+
+    LOGIN_URL = '/login/'
+    LOGIN_REDIRECT_URL = '/done/'
+    URL_PATH = ''
+
+    BROKER_URL = 'amqp://'
+    CELERY_RESULT_BACKEND = 'amqp://'
+    CELERY_TIMEZONE = 'UTC'
+
+    CELERYBEAT_SCHEDULE = {
+        'check_anonymous': {
+            'task': 'mysite.celery.check_anonymous',
+            'schedule': timedelta(days=1),
+        }
+    }

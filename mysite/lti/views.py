@@ -47,7 +47,7 @@ def lti_init(request, course_id=None, unit_id=None):
         request_dict[r] = request.POST[r]
     session['LTI_POST'] = pickle.dumps(request_dict)
 
-    '-------------------------------------------------------------------------------'
+    '------------------------------------------------------------------------'
     consumer_name = request_dict.get('ext_lms', 'lti')
 
     user_id = request_dict.get('user_id', None)
@@ -67,7 +67,7 @@ def lti_init(request, course_id=None, unit_id=None):
 
     user.login(request)
     user.enroll(roles, course_id)
-    '-------------------------------------------------------------------------------'
+    '------------------------------------------------------------------------'
 
     if settings.LTI_DEBUG:
         print "session: is_valid = {}".format( session['is_valid'])
@@ -81,6 +81,7 @@ def lti_init(request, course_id=None, unit_id=None):
         if not unit_id:
             return redirect(reverse('ct:course_student', args=(course_id,)))
         else:
-            return redirect(reverse('ct:study_unit', args=(course_id, unit_id)))
+            return redirect(reverse('ct:study_unit',
+                                    args=(course_id, unit_id)))
     else:
         return redirect(reverse('ct:home'))

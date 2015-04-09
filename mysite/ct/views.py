@@ -393,7 +393,7 @@ def courses_subscribe(request, course_id):
     tmp_user = False
     if isinstance(user, AnonymousUser):
         tmp_user = True
-        user = User.objects.get_or_create(username='anonymouse' + str(_id),
+        user = User.objects.get_or_create(username='anonymous' + str(_id),
                                           first_name='Temporary User')[0]
 
         user.backend = 'django.contrib.auth.backends.ModelBackend'
