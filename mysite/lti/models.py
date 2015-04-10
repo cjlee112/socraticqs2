@@ -3,12 +3,15 @@ from django.db import models
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
+from social.apps.django_app.default.models import UserSocialAuth
+
 from ct.models import Role, Course
 
 
 class LTIUser(models.Model):
-    """
-    Model for LTI user. Created for Moodle LMS.
+    """Model for LTI user
+
+    Created for Moodle LMS.
     Intended to link to Django user in socraticqs2.
     """
     user_id = models.CharField(max_length=255, blank=False)
@@ -20,19 +23,36 @@ class LTIUser(models.Model):
     class Meta:
         unique_together = ('user_id', 'consumer', 'course_id')
 
-    def create_links(self):
+    def create_links(self, request):
         extra_data = json.loads(self.extra_data)
         username = extra_data.get('lis_person_name_full', self.user_id)
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '')
 
-        django_user = User.objects.get_or_create(username=username,
-                                                 defaults={
-                                                 'first_name':first_name,
-                                                 'last_name':last_name,
-                                                 'email':email
-                                                 })[0]
+        social = False
+        if email:
+            social= UserSocialAuth.objects.filter(provider='email',
+                                                  uid=email)
+
+        if social:
+            django_user = social[0].user
+        else:
+            # TODO check for django_user email (primary and secondary)
+            # but before need to implement
+            # 'associate_by_email' pipeline correctly
+            django_user = User.objects.get_or_create(username=username,
+                                                     defaults={
+                                                     'first_name':first_name,
+                                                     'last_name':last_name,
+                                                     'email':email
+                                                     })[0]
+            social = UserSocialAuth(user=django_user,
+                                    provider='email',
+                                    uid=email,
+                                    extra_data=extra_data)
+            social.save()
+
         self.django_user = django_user
         self.save()
 
