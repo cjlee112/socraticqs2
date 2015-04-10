@@ -13,6 +13,11 @@ from lti import app_settings as settings
 
 @csrf_exempt
 def lti_init(request, course_id=None, unit_id=None):
+    ROLES = {
+        'Instructor': 'prof',
+        'Leaner': 'student',
+    }
+
     if settings.LTI_DEBUG:
         print "META"
         print request.META
@@ -52,6 +57,7 @@ def lti_init(request, course_id=None, unit_id=None):
 
     user_id = request_dict.get('user_id', None)
     roles = request_dict.get('roles', None)
+    roles = ROLES.get(roles, 'student')
     if not user_id or not course_id:
         return render_to_response("error.html",  RequestContext(request))
     course_id = int(course_id)
