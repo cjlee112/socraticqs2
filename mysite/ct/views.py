@@ -29,10 +29,12 @@ from social.backends.utils import load_backends
 
 def check_instructor_auth(course, request):
     'return 403 if not course instructor, else None'
-    role = course.get_user_role(request.user)
-    if role != Role.INSTRUCTOR:
+    role = course.get_user_role(request.user, justOne=False)
+    if not isinstance(role, list):
+        role = [role]
+    if not Role.INSTRUCTOR in role:
         return HttpResponse("Only the instructor can access this",
-                            status_code=403)
+                            status=403)
 
 def make_tabs(path, current, tabs, tail=4, **kwargs):
     path = get_base_url(path, tail=tail, **kwargs)
