@@ -1,15 +1,18 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import login, logout
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
+from datetime import datetime
 
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthAlreadyAssociated
+
+from social.apps.django_app.default.models import UserSocialAuth
 from ct.models import Role, UnitStatus, FSMState, Response
 from psa.models import AnonymEmail
-from datetime import datetime
 
 
 @partial
@@ -88,14 +91,23 @@ def union_merge(tmp_user, user):
     """ Reassigning FSMStates """
     tmp_user.fsmstate_set.all().update(user=user)
     """ Reassigning Responses """
-    tmp_user.response_set.all().update(author = user)
+    tmp_user.response_set.all().update(author=user)
     """ Reassigning StudentErrors """
-    tmp_user.studenterror_set.all().update(author = user)
+    tmp_user.studenterror_set.all().update(author=user)
+
+
+def social_merge(tmp_user, user):
+    tmp_user.social_auth.all().update(user=user)
+    tmp_user.lti_auth.all().update(django_user=user)
 
 
 def validated_user_details(strategy, details, user=None, is_new=False, *args, **kwargs):
+    """Merge actions
+
+    Make different merge actions based on user type.
+    """
+    social = kwargs.get('social')
     if user and 'anonymous' in user.username:
-        social = kwargs.get('social')
         if social:
             tmp_user = user
             logout(strategy.request)
@@ -103,6 +115,8 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(strategy.request, user)
             union_merge(tmp_user, user)
+            tmp_user.delete()
+            return {'user': user}
         else:
             try:
                 user.username = details.get('username')
@@ -110,6 +124,16 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
                 user.save()
             except IntegrityError as e:
                 raise AuthAlreadyAssociated(kwargs.get('backend'), str(e))
+    elif user and social and social.user != user:
+        tmp_user = user
+        logout(strategy.request)
+        user = social.user
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(strategy.request, user)
+        union_merge(tmp_user, user)
+        social_merge(tmp_user, user)
+        tmp_user.delete()
+        return {'user': user}
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
@@ -118,8 +142,9 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     if social:
         if (user and not 'anonymous' in user.username
             and social.user != user):
-            msg = 'This {0} account is already in use.'.format(provider)
-            raise AuthAlreadyAssociated(backend, msg)
+            if provider == 'email':
+                msg = 'This {0} account is already in use.'.format(provider)
+                raise AuthAlreadyAssociated(backend, msg)
         elif not user or 'anonymous' in user.username:
             user = social.user
     return {'social': social,

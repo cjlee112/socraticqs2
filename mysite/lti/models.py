@@ -17,7 +17,7 @@ class LTIUser(models.Model):
     user_id = models.CharField(max_length=255, blank=False)
     consumer = models.CharField(max_length=64, blank=True)
     extra_data = models.TextField(max_length=1024, blank=False)
-    django_user = models.ForeignKey(User, null=True)
+    django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
     course_id = models.IntegerField()
 
     class Meta:
