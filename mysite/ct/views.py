@@ -792,7 +792,8 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
     return pageData.render(request, 'ct/wikipedia.html',
-                           dict(lesson=lesson, addForm=addForm))
+                           dict(lesson=lesson, addForm=addForm,
+                                sourceURL=lesson._sourceDBdata.url))
 
 @login_required
 def ul_teach(request, course_id, unit_id, ul_id):
