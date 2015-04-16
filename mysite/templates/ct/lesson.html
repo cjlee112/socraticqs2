@@ -31,14 +31,10 @@
 <div class="tab-content">
   <div class="tab-pane active" id="TeachTabDiv">
 
-{% if unitLesson.unit != unit %}
+{% if addForm %}
 <b>This lesson is not part of this courselet.  You can add it to
 this courselet by clicking the Add button below.</b>
-  <form action="{{ actionTarget }}" method="post">
-  {% csrf_token %}
-  <input type="hidden" name="task" value="append" />
-  <input type="submit" value="Add to this Courselet" />
-  </form>
+  {% crispy addForm %}
 {% endif %}
 
 {% if answer %}

@@ -65,9 +65,9 @@ class ConceptMethodTests(OurTestCase):
         self.check_post_get(url, dict(task='add'), '/', 'City of New York')
         ul = UnitLesson.objects.get(lesson__concept__title='New York City',
                                     unit=self.unit) # check UL & concept added
-        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City'))
+        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City')[0])
         self.assertTrue(ul in UnitLesson.search_sourceDB('New York City',
-                                                         unit=self.unit))
+                                                         unit=self.unit)[0])
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
         title = 'Important Concept'

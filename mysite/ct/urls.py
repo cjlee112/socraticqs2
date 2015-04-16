@@ -42,7 +42,7 @@ urlpatterns = patterns('',
         live_question, name='live_question'),
     # concept tabs
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<ul_id>\d+)/$',
-        study_concept, name='concept_teach'),
+        ul_teach, name='concept_teach'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<ul_id>\d+)/tasks/$',
         ul_tasks, name='concept_tasks'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/(?P<ul_id>\d+)/concepts/$',

@@ -393,7 +393,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
               actionLabel='Link to this Concept',
               errorModels=None, isError=False, **kwargs):
     'search or create a Concept'
-    cset = wset = ()
+    cset = ()
     if errorModels is not None:
         conceptForm = NewConceptForm()
     else:
@@ -439,14 +439,22 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
             if errorModels is not None: # search errors only
-                cset = UnitLesson.search_text(s, IS_ERROR)
+                cset = [(ul.lesson.title, get_object_url(request.path, ul))
+                        for ul in UnitLesson.search_text(s, IS_ERROR)]
             else: # search correct concepts only
                 cset = UnitLesson.search_text(s, IS_CONCEPT)
-                wset = Lesson.search_sourceDB(s)
+                cset2, wset = UnitLesson.search_sourceDB(s, unit=unit)
+                cset = distinct_subset(cset2 + cset, lambda x:x.lesson.concept)
+                cset = [(ul.lesson.title, get_object_url(request.path, ul, subpath=''),
+                         ul) for ul in cset]
+                cset += [(t[0], '%swikipedia/%s/'
+                          % (request.path, urllib.quote(t[0], '')), None)
+                          for t in wset]
+                cset.sort()
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
-    kwargs.update(dict(cset=cset, msg=msg, searchForm=searchForm, wset=wset,
+    kwargs.update(dict(cset=cset, msg=msg, searchForm=searchForm,
                        toTable=toTable, fromTable=fromTable,
                        conceptForm=conceptForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, errorModels=errorModels))
@@ -799,6 +807,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
+    addForm = answer = None
     if pageData.fsmStack.state and pageData.fsmStack.state.isLiveSession:
         query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
@@ -809,17 +818,18 @@ def ul_teach(request, course_id, unit_id, ul_id):
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
-        answer = None
-    if request.method == 'POST' and request.POST.get('task') == 'append' \
-            and ul.unit != unit:
-        ulNew = ul.copy(unit, request.user, order='APPEND')
-        kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
-        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
-        return pageData.fsm_redirect(request, 'add', defaultURL,
-                                     reverseArgs=kwargs, unitLesson=ulNew)
+    if ul.unit != unit:
+        addForm = push_button(request, 'add', 'Add to this Courselet') 
+        if not addForm:
+            ulNew = ul.copy(unit, request.user, order='APPEND')
+            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
+            defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+            return pageData.fsm_redirect(request, 'add', defaultURL,
+                                         reverseArgs=kwargs, unitLesson=ulNew)
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable, answer=answer), addNextButton=True)
+                       evalTable=evalTable, answer=answer, addForm=addForm),
+                       addNextButton=True)
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'

@@ -465,6 +465,7 @@ class UnitLesson(models.Model):
     def search_sourceDB(klass, query, sourceDB='wikipedia', unit=None,
                         **kwargs):
         'get sourceDB search results, represented by existing ULs if any'
+        resultsUL = []
         results = []
         for t in Lesson.search_sourceDB(query, sourceDB, **kwargs):
             queryArgs = dict(lesson__sourceDB=sourceDB, lesson__sourceID=t[1])
@@ -472,14 +473,14 @@ class UnitLesson(models.Model):
             if unit:
                 hits = klass.objects.filter(unit=unit, **queryArgs)
             try: # use UL from this unit if any
-                results.append(hits[0])
+                resultsUL.append(hits[0])
             except IndexError:
                 hits = klass.objects.filter(**queryArgs)
                 try: # otherwise use any UL matching this sourceID
-                    results.append(hits[0])
+                    resultsUL.append(hits[0])
                 except IndexError: # no UL so just return tuple
                     results.append(t)
-        return results
+        return resultsUL, results
     def get_answers(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
