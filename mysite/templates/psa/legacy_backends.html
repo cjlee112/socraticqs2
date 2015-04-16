@@ -1,20 +1,22 @@
 {% load social_tags %}
 
 {% for sublist in available_backends|legacy_backends %}
-{% for name, backend in sublist %}
-  {% associated backend %}
-  {% if association %}
-    <form class="disconnect-form" action="{% url "social:disconnect_individual" backend=association.provider association_id=association.id %}" method="post">{% csrf_token %}
-      <a class="btn btn-danger" name="{{ backend|backend_class }}" href="#">
+<div class="row">
+  {% for name, backend in sublist %}
+    {% associated backend %}
+    {% if association %}
+      <form class="disconnect-form col-md-2" action="{% url "social:disconnect_individual" backend=association.provider association_id=association.id %}" method="post">{% csrf_token %}
+        <a class="btn btn-danger" name="{{ backend|backend_class }}" href="#">
+          <i class="fa fa-{{ name|icon_name }}"></i>
+          Disconnect {{ backend|backend_name }}
+        </a>
+      </form>
+    {% else %}
+      <a class="btn btn-default col-md-2" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}">
         <i class="fa fa-{{ name|icon_name }}"></i>
-        Disconnect {{ backend|backend_name }}
+        {{ backend|backend_name }}
       </a>
-    </form>
-  {% else %}
-    <a class="btn btn-default" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}">
-      <i class="fa fa-{{ name|icon_name }}"></i>
-      {{ backend|backend_name }}
-    </a>
-  {% endif %}
+    {% endif %}
   {% endfor %}
+</div>
 {% endfor %}

@@ -114,6 +114,7 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
             user = social.user
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(strategy.request, user)
+            tmp_user.role_set.filter(role='self').update(role='student')
             union_merge(tmp_user, user)
             tmp_user.delete()
             return {'user': user}
@@ -122,6 +123,7 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
                 user.username = details.get('username')
                 user.first_name = ''
                 user.save()
+                user.role_set.filter(role='self').update(role='student')
             except IntegrityError as e:
                 raise AuthAlreadyAssociated(kwargs.get('backend'), str(e))
     elif user and social and social.user != user:

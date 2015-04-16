@@ -39,8 +39,6 @@ class LTIUser(models.Model):
             django_user = social[0].user
         else:
             # TODO check for django_user email (primary and secondary)
-            # but before need to implement
-            # 'associate_by_email' pipeline correctly
             django_user = User.objects.get_or_create(username=username,
                                                      defaults={
                                                      'first_name':first_name,
@@ -58,7 +56,7 @@ class LTIUser(models.Model):
 
     def login(self, request):
         if self.django_user:
-            # TODO Follow a more djangonic way to login users
+            # TODO Follow a more django way to login users
             self.django_user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, self.django_user)
 

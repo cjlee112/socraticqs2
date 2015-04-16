@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.contrib.auth.signals import user_logged_in
 
+
 class AnonymEmail(models.Model):
     """Temporary anonymous user emails
 

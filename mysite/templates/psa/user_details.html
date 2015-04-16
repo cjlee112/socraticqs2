@@ -1,7 +1,7 @@
 {% if user.is_authenticated and not 'anonymous' in user.username %}
   <section>
     <header><h1>User details</h1></header>
-    <div>
+    <div style="text-align: left">
       <p>You are logged in as <strong>{{ user.username }}</strong>!</p>
       <p>Associated accounts:</p>
       <ul>

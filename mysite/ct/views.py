@@ -403,9 +403,10 @@ def courses_subscribe(request, course_id):
         # Set expiry time to year in future
         request.session.set_expiry(timedelta(days=365))
     course = Course.objects.get(id=course_id)
-    r, created = Role.objects.get_or_create(course = course,
-                                            user = user,
-                                            role = 'self')
+    role = 'self' if tmp_user else 'student'
+    r, created = Role.objects.get_or_create(course=course,
+                                            user=user,
+                                            role=role)
     if tmp_user:
         return HttpResponseRedirect('/tmp-email-ask/')
     return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
