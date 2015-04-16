@@ -63,9 +63,11 @@ class ConceptMethodTests(OurTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'City of New York')
         self.check_post_get(url, dict(task='add'), '/', 'City of New York')
-        self.assertEqual(UnitLesson.objects.
-                         filter(lesson__concept__title='New York City',
-                                unit=self.unit).count(), 1) # UL added?
+        ul = UnitLesson.objects.get(lesson__concept__title='New York City',
+                                    unit=self.unit) # check UL & concept added
+        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City'))
+        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City',
+                                                         unit=self.unit))
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
         title = 'Important Concept'

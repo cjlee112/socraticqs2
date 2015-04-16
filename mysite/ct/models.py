@@ -265,6 +265,7 @@ class Lesson(models.Model):
 
     @classmethod
     def search_sourceDB(klass, query, sourceDB='wikipedia', **kwargs):
+        'get [(title, sourceID, url)] for query from sourceDB using plugin'
         dataClass = klass.get_sourceDB_plugin(sourceDB)
         return dataClass.search(query, **kwargs)
 
@@ -460,6 +461,25 @@ class UnitLesson(models.Model):
         if dedupe:
             out = distinct_subset(out)
         return out
+    @classmethod
+    def search_sourceDB(klass, query, sourceDB='wikipedia', unit=None,
+                        **kwargs):
+        'get sourceDB search results, represented by existing ULs if any'
+        results = []
+        for t in Lesson.search_sourceDB(query, sourceDB, **kwargs):
+            queryArgs = dict(lesson__sourceDB=sourceDB, lesson__sourceID=t[1])
+            hits = ()
+            if unit:
+                hits = klass.objects.filter(unit=unit, **queryArgs)
+            try: # use UL from this unit if any
+                results.append(hits[0])
+            except IndexError:
+                hits = klass.objects.filter(**queryArgs)
+                try: # otherwise use any UL matching this sourceID
+                    results.append(hits[0])
+                except IndexError: # no UL so just return tuple
+                    results.append(t)
+        return results
     def get_answers(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
