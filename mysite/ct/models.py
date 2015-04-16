@@ -242,7 +242,9 @@ class Lesson(models.Model):
             klass._sourceDBdict[sourceDB] = dataClass
             return dataClass
     @classmethod
-    def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia'):
+    def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia',
+                          doSave=True):
+        'get or create Lesson linked to sourceDB:sourceID external ref'
         try:
             return klass.objects.get(sourceDB=sourceDB, sourceID=sourceID)
         except klass.DoesNotExist:
@@ -256,7 +258,8 @@ class Lesson(models.Model):
         lesson = klass(title=data.title, url=data.url, sourceDB=sourceDB,
                        sourceID=sourceID, addedBy=user, text=data.description,
                        kind=klass.EXPLANATION)
-        lesson.save_root()
+        if doSave: # not just temporary, but save as permanent record
+            lesson.save_root()
         lesson._sourceDBdata = data
         return lesson
 

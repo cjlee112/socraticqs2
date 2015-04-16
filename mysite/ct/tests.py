@@ -35,6 +35,12 @@ class ConceptMethodTests(TestCase):
         self.assertEqual(c2.pk, c.pk)
         self.assertEqual(l2.pk, lesson.pk)
         self.assertIn(c, list(Concept.search_text('new york')))
+    def test_sourceDB_temp(self):
+        'check wikipedia temporary document retrieval'
+        lesson = Lesson.get_from_sourceDB('New York City', self.user,
+                                          doSave=False)
+        self.assertIn('City of New York', lesson.text) # got the text?
+        self.assertEqual(Lesson.objects.count(), 0) # nothing saved?
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
         title = 'Important Concept'
