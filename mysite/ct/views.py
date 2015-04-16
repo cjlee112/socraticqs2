@@ -14,6 +14,7 @@ from ct.forms import *
 from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
 from ct.fsm import FSMStack
 import time
+import urllib
 
 ###########################################################
 # WelcomeMat refactored utilities
@@ -775,6 +776,25 @@ def unit_resources(request, course_id, unit_id):
 
 
 @login_required
+def wikipedia_concept(request, course_id, unit_id, source_id):
+    'page for viewing or adding Wikipedia concept to this courselet'
+    unit = get_object_or_404(Unit, pk=unit_id)
+    sourceID = urllib.unquote(source_id)
+    pageData = PageData(request, title=unit.title,
+                        navTabs=unit_tabs(request.path, 'Concepts'))
+    addForm = push_button(request, 'add', 'Add to this courselet')
+    if not addForm: # user clicked Add
+        concept, lesson = Concept.get_from_sourceDB(sourceID, request.user)
+        ul = UnitLesson.create_from_lesson(lesson, unit)
+        kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul.pk)
+        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+        return pageData.fsm_redirect(request, 'add', defaultURL,
+                                     reverseArgs=kwargs, unitLesson=ul)
+    lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
+    return pageData.render(request, 'ct/wikipedia.html',
+                           dict(lesson=lesson, addForm=addForm))
+
+@login_required
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
@@ -800,14 +820,14 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable, answer=answer), addNextButton=True)
 
-def push_button(request, taskName='start', formClass=StartForm):
+def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'
     if request.method == 'POST' and request.POST.get('task', '') == taskName:
         return None
-    else: # provide START button for instructor
-        startForm = StartForm()
-        set_crispy_action(request.path, startForm)
-        return startForm
+    else: # provide button for starting some POST action
+        taskForm = formClass(taskName, label)
+        set_crispy_action(request.path, taskForm)
+        return taskForm
 
 @login_required
 def live_question(request, course_id, unit_id, ul_id):

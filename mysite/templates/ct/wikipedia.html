@@ -1,0 +1,20 @@
+{% extends "ct/portal.html" %}
+{% load crispy_forms_tags %}
+{% load ct_extras %}
+
+{% comment %}
+  Show materials relevant for a given concept
+{% endcomment %}
+
+{% block title %}
+  {{ lesson.title }}
+{% endblock %}
+
+{% block content %}
+
+{{ lesson.text }}
+
+{% crispy addForm %}
+
+{% endblock %}
+

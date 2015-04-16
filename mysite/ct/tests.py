@@ -10,12 +10,26 @@ from django.test import TestCase
 from django.http import HttpResponseRedirect
 from ct.models import *
 from ct import views, fsm, ct_util
-import time
+import time, urllib
 
-class ConceptMethodTests(TestCase):
+class OurTestCase(TestCase):
+    def check_post_get(self, url, postdata, urlTail, expected):
+        '''do POST and associated redirect to GET.  Check the redirect
+        target and GET response content '''
+        response = self.client.post(url, postdata, HTTP_REFERER=url)
+        self.assertEqual(response.status_code, 302)
+        url = response['Location']
+        self.assertTrue(url.endswith(urlTail))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected)
+        return url
+
+class ConceptMethodTests(OurTestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
+        self.client.login(username='jacob', password='top_secret')
         self.wikiUser = User.objects.create_user(username='wikipedia', email='wiki@_',
                                              password='top_secret')
         self.unit = Unit(title='My Courselet', addedBy=self.user)
@@ -41,6 +55,17 @@ class ConceptMethodTests(TestCase):
                                           doSave=False)
         self.assertIn('City of New York', lesson.text) # got the text?
         self.assertEqual(Lesson.objects.count(), 0) # nothing saved?
+    def test_wikipedia_view(self):
+        'check wikipedia view and concept addition method'
+        url = '/ct/teach/courses/1/units/%d/concepts/wikipedia/%s/' \
+          % (self.unit.pk, urllib.quote('New York City'))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'City of New York')
+        self.check_post_get(url, dict(task='add'), '/', 'City of New York')
+        self.assertEqual(UnitLesson.objects.
+                         filter(lesson__concept__title='New York City',
+                                unit=self.unit).count(), 1) # UL added?
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
         title = 'Important Concept'
@@ -187,7 +212,7 @@ def create_question_unit(user, utitle='Ask Me some questions',
                                        order='APPEND')
     return ul
                     
-class FSMTests(TestCase):
+class FSMTests(OurTestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
@@ -411,17 +436,7 @@ class FSMTests(TestCase):
         result = fsmStack.push(request, fsmName, stateData, startArgs, **kwargs)
         request.session.save()
         return request, fsmStack, result
-    def check_post_get(self, url, postdata, urlTail, expected):
-        '''do POST and associated redirect to GET.  Check the redirect
-        target and GET response content '''
-        response = self.client.post(url, postdata, HTTP_REFERER=url)
-        self.assertEqual(response.status_code, 302)
-        url = response['Location']
-        self.assertTrue(url.endswith(urlTail))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, expected)
-        return url
+
 
         
 class ReversePathTests(TestCase):
