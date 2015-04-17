@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthAlreadyAssociated
@@ -120,12 +121,15 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
             return {'user': user}
         else:
             try:
+                # TODO try to search django user email
                 user.username = details.get('username')
                 user.first_name = ''
                 user.save()
                 user.role_set.filter(role='self').update(role='student')
             except IntegrityError as e:
-                raise AuthAlreadyAssociated(kwargs.get('backend'), str(e))
+                _id = int(time.mktime(datetime.now().timetuple()))
+                user.username = details.get('username') + str(_id)
+                user.save()
     elif user and social and social.user != user:
         tmp_user = user
         logout(strategy.request)
@@ -142,12 +146,7 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
-        if (user and not 'anonymous' in user.username
-            and social.user != user):
-            if provider == 'email':
-                msg = 'This {0} account is already in use.'.format(provider)
-                raise AuthAlreadyAssociated(backend, msg)
-        elif not user or 'anonymous' in user.username:
+        if not user or 'anonymous' in user.username:
             user = social.user
     return {'social': social,
             'user': user,

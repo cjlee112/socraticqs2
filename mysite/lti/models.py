@@ -28,7 +28,7 @@ class LTIUser(models.Model):
         username = extra_data.get('lis_person_name_full', self.user_id)
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
-        email = extra_data.get('lis_person_contact_email_primary', '')
+        email = extra_data.get('lis_person_contact_email_primary', '').lower()
 
         social = False
         if email:
@@ -38,13 +38,16 @@ class LTIUser(models.Model):
         if social:
             django_user = social[0].user
         else:
-            # TODO check for django_user email (primary and secondary)
-            django_user = User.objects.get_or_create(username=username,
-                                                     defaults={
-                                                     'first_name':first_name,
-                                                     'last_name':last_name,
-                                                     'email':email
-                                                     })[0]
+            django_user = User.objects.filter(email=email)
+            if django_user:
+                django_user = django_user[0]
+            else:
+                django_user = User.objects.get_or_create(username=username,
+                                                         defaults={
+                                                         'first_name':first_name,
+                                                         'last_name':last_name,
+                                                         'email':email
+                                                         })[0]
             social = UserSocialAuth(user=django_user,
                                     provider='email',
                                     uid=email,

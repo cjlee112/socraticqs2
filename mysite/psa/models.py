@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.contrib.auth.signals import user_logged_in
 
+from social.apps.django_app.default.models import UserSocialAuth
+
 
 class AnonymEmail(models.Model):
     """Temporary anonymous user emails
@@ -18,6 +20,17 @@ class AnonymEmail(models.Model):
     class Meta:
         unique_together = ('user', 'email')
         ordering = ['-date']
+
+
+# class SecondaryEmail(models.Model):
+#     """Model for storing secondary emails
+
+#     We can store emails there from social_auth
+#     or LTI logins.
+#     """
+#     user = models.ForeignKey(User)
+#     provider = models.ForeignKey(UserSocialAuth)
+#     email = models.EmailField(verbose_name='Secondary Email')
 
 
 class UserSession(models.Model):
