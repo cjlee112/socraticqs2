@@ -32,9 +32,8 @@
   <div class="tab-pane active" id="TeachTabDiv">
 
 {% if addForm %}
-<b>This lesson is not part of this courselet.  You can add it to
-this courselet by clicking the Add button below.</b>
-  {% crispy addForm %}
+  <b>This lesson is not part of this courselet.  You can add it to
+  this courselet by clicking the Add button below.</b>
 {% endif %}
 
 {% if answer %}
@@ -130,6 +129,14 @@ $( "#headtoggle" ).click(function() {
   </tbody>
 </table>
 {% endif %}
+
+{% if addForm %}
+  {% crispy addForm %}
+{% elif roleForm %}
+  {% crispy roleForm %}
+{% endif %}
+
+
 
   </div><!-- @end #TeachTabDiv -->
 </div>

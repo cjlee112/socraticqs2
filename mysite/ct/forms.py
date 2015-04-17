@@ -1,5 +1,5 @@
 from django import forms
-from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError
+from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError, UnitLesson
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field
@@ -102,6 +102,18 @@ class TaskForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', label))
+
+class LessonRoleForm(forms.Form):
+    role = forms.ChoiceField(choices=UnitLesson.ROLE_CHOICES,
+                             label='Role of this lesson in this courselet:')
+    def __init__(self, initial=UnitLesson.LESSON_ROLE, *args, **kwargs):
+        super(LessonRoleForm, self).__init__(*args, **kwargs)
+        self.fields['role'].initial = initial
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-startForm'
+        self.helper.form_class = 'form-vertical'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Change Role'))
     
 
 class ResponseListForm(forms.Form):

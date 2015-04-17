@@ -400,6 +400,12 @@ class UnitLesson(models.Model):
         (PRETEST_POSTTEST, 'Pre-test/Post-test for this courselet'),
         (SUBUNIT, 'Container for this courselet'),
     )
+    LESSON_ROLE = 'lesson'
+    RESOURCE_ROLE = 'resource'
+    ROLE_CHOICES = (
+        (LESSON_ROLE, "Show this lesson to all students as part of the courselet's main lesson sequence"),
+        (RESOURCE_ROLE, "Just list this as a follow-up study resource")
+    )
     unit = models.ForeignKey('Unit')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=COMPONENT)
@@ -696,6 +702,16 @@ class Unit(models.Model):
         'return URL for next study tasks on this unit'
         from ct.templatetags.ct_extras import get_base_url
         return get_base_url(path, extension)
+    def append(self, ul, user):
+        'append unitLesson to main lesson sequence'
+        if ul.unit == self:
+            if ul.order is None: # add to tail
+                ul.order = self.unitlesson_set.filter(order__isnull=False).count()
+                ul.save()
+                self.reorder_exercise()
+            return ul
+        else: # not in this unit so copy
+            return ul.copy(self, user, order='APPEND')
     def __unicode__(self):
         return self.title
 

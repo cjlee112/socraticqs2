@@ -807,7 +807,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
 def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
-    addForm = answer = None
+    addForm = roleForm = answer = None
     if pageData.fsmStack.state and pageData.fsmStack.state.isLiveSession:
         query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
@@ -821,15 +821,31 @@ def ul_teach(request, course_id, unit_id, ul_id):
     if ul.unit != unit:
         addForm = push_button(request, 'add', 'Add to this Courselet') 
         if not addForm:
-            ulNew = ul.copy(unit, request.user, order='APPEND')
+            ulNew = unit.append(ul, request.user)
             kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
             defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
             return pageData.fsm_redirect(request, 'add', defaultURL,
                                          reverseArgs=kwargs, unitLesson=ulNew)
+    else: # ul is part of this unit
+        if request.method == 'POST':
+            roleForm = LessonRoleForm('', request.POST)
+            if roleForm.is_valid():
+                if roleForm.cleaned_data['role'] == UnitLesson.RESOURCE_ROLE:
+                    ul.order = None
+                    ul.save()
+                    unit.reorder_exercise()
+                elif ul.order is None:
+                    unit.append(ul, request.user)
+        else:
+            if ul.order is not None:
+                initial = UnitLesson.LESSON_ROLE
+            else:
+                initial = UnitLesson.RESOURCE_ROLE
+            roleForm = LessonRoleForm(initial)
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable, answer=answer, addForm=addForm),
-                       addNextButton=True)
+                       evalTable=evalTable, answer=answer, addForm=addForm,
+                       roleForm=roleForm), addNextButton=True)
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'
