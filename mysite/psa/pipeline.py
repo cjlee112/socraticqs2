@@ -1,18 +1,15 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthException
 
-from social.apps.django_app.default.models import UserSocialAuth
-from ct.models import Role, UnitStatus, FSMState, Response
 from psa.models import AnonymEmail, SecondaryEmail
 
 
@@ -54,7 +51,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
         if 'verification_code' in data:
             backend.strategy.session_pop('email_validation_address')
             if not backend.strategy.validate_email(details['email'],
-                                           data['verification_code']):
+                                                   data['verification_code']):
                 raise InvalidEmail(backend)
         else:
             if user and 'anonymous' in user.username:
@@ -102,6 +99,7 @@ def social_merge(tmp_user, user):
     tmp_user.lti_auth.all().update(django_user=user)
 
 
+@partial
 def validated_user_details(strategy, backend, details, user=None, is_new=False, *args, **kwargs):
     """Merge actions
 
@@ -153,15 +151,28 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                 user.username = details.get('username') + str(_id)
                 user.save()
     elif user and social and social.user != user:
-        tmp_user = user
-        logout(strategy.request)
-        user = social.user
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(strategy.request, user)
-        union_merge(tmp_user, user)
-        social_merge(tmp_user, user)
-        tmp_user.delete()
-        return {'user': user}
+        confirm = strategy.request.POST.get('confirm')
+        if confirm and confirm == 'no':
+            return
+        elif (not user.get_full_name() == social.user.get_full_name() and
+                not strategy.request.POST.get('confirm')):
+            return render_to_response('psa/merge_confirm.html', {
+                'request': strategy.request,
+                'next': strategy.request.POST.get('next') or '',
+                'target_name': social.user.get_full_name(),
+                'own_name': user.get_full_name()
+            }, RequestContext(strategy.request))
+        elif (user.get_full_name() == social.user.get_full_name()
+              or confirm and confirm == 'yes'):
+            tmp_user = user
+            logout(strategy.request)
+            user = social.user
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(strategy.request, user)
+            union_merge(tmp_user, user)
+            social_merge(tmp_user, user)
+            tmp_user.delete()
+            return {'user': user}
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
@@ -188,7 +199,7 @@ def associate_user(backend, details, uid, user=None, social=None, *args, **kwarg
                 raise
             # Protect for possible race condition, those bastard with FTL
             # clicking capabilities, check issue #131:
-            #   https://github.com/omab/django-social-auth/issues/131
+            # https://github.com/omab/django-social-auth/issues/131
             return social_user(backend, uid, user, *args, **kwargs)
         else:
             if email and not user.email == email:

@@ -1,0 +1,21 @@
+{% extends "ct/portal.html" %}
+{% load url from future %}
+
+{% block content %}
+<div class="buttons">
+  <section>
+    <header><h4>Target username <b>{{ target_name }}</b>
+        is different from your username <b>{{ own_name }}</b>!</h4>
+        <h4>Do you want to proceed?</h4></header>
+      <hr>
+    <form method="post" action="{{ request.path }}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+      <input type="radio" name="confirm" value="no"> No
+      <input type="radio" name="confirm" value="yes"> Yes
+      <button>Confirm</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block home_link %}{% endblock %}
