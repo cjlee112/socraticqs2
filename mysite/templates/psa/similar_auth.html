@@ -6,11 +6,17 @@
 <h5>Your email <b>{{ person.email }}</b> is used in the following accounts.
     We recommend you to merge accounts to have all your study activities in one place. </h5>
 {% endif %}
+
 {% for similar, backends in similar_users.items %}
 <div class="row">
-    <h5><a href="/ct/people/{{ similar.pk }}/">{{ similar }}: </a></h5>
-    {% for backend in backends %}
-      <li>{{ backend|backend_name }}</li>
-    {% endfor %}
+  <h5><a href="/ct/people/{{ similar.pk }}/">{{ similar }}: </a></h5>
+  {% for name, backend in backends %}
+  <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}"
+     href="{% url "social:begin" backend=name %}">
+    <i class="fa fa-{{ name|icon_name }}"></i>
+    {{ backend|backend_name }}
+  </a>
+  {% endfor %}
 </div>
+
 {% endfor %}

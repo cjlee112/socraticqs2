@@ -153,7 +153,10 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
     elif user and social and social.user != user:
         confirm = strategy.request.POST.get('confirm')
         if confirm and confirm == 'no':
-            return
+            raise AuthException(
+                backend,
+                'You interrupted merge process.'
+            )
         elif (not user.get_full_name() == social.user.get_full_name() and
                 not strategy.request.POST.get('confirm')):
             return render_to_response('psa/merge_confirm.html', {

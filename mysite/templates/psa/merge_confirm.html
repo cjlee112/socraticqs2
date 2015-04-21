@@ -11,7 +11,7 @@
     <form method="post" action="{{ request.path }}">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next }}" />
-      <input type="radio" name="confirm" value="no"> No
+      <input type="radio" name="confirm" value="no" checked> No
       <input type="radio" name="confirm" value="yes"> Yes
       <button>Confirm</button>
     </form>

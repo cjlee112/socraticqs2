@@ -113,7 +113,8 @@ def similar_backends(context):
     similar_users = defaultdict(list)
 
     for secondary in secondary_users:
-        similar_users[secondary.user].append(backends.get(secondary.provider.provider))
+        similar_users[secondary.user].append((secondary.provider.provider,
+                                              backends.get(secondary.provider.provider)))
 
     similar_users = dict(similar_users)
     # for k, v in similar_users.iteritems():
