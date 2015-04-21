@@ -109,7 +109,7 @@ def similar_backends(context):
     backends = load_backends(settings.AUTHENTICATION_BACKENDS)
     user = context.get('user')
 
-    secondary_users = SecondaryEmail.objects.filter(email=user.email)
+    secondary_users = SecondaryEmail.objects.filter(email=user.email).exclude(user=user)
     similar_users = defaultdict(list)
 
     for secondary in secondary_users:

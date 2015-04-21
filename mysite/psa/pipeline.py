@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timedelta
 
 from social.pipeline.partial import partial
-from social.exceptions import InvalidEmail, AuthAlreadyAssociated
+from social.exceptions import InvalidEmail, AuthException
 
 from social.apps.django_app.default.models import UserSocialAuth
 from ct.models import Role, UnitStatus, FSMState, Response
@@ -102,12 +102,13 @@ def social_merge(tmp_user, user):
     tmp_user.lti_auth.all().update(django_user=user)
 
 
-def validated_user_details(strategy, details, user=None, is_new=False, *args, **kwargs):
+def validated_user_details(strategy, backend, details, user=None, is_new=False, *args, **kwargs):
     """Merge actions
 
     Make different merge actions based on user type.
     """
     social = kwargs.get('social')
+    email = details.get('email')
     if user and 'anonymous' in user.username:
         if social:
             tmp_user = user
@@ -121,11 +122,32 @@ def validated_user_details(strategy, details, user=None, is_new=False, *args, **
             return {'user': user}
         else:
             try:
-                # TODO try to search django user email
-                user.username = details.get('username')
-                user.first_name = ''
-                user.save()
-                user.role_set.filter(role='self').update(role='student')
+                new = False
+                if email:
+                    users = list(backend.strategy.storage.user.get_users_by_email(email))
+                    if len(users) == 0:
+                        pass
+                    elif len(users) > 1:
+                        raise AuthException(
+                            backend,
+                            'The given email address is associated with another account'
+                        )
+                    else:
+                        new = users[0]
+                if not new:
+                    user.username = details.get('username')
+                    user.first_name = ''
+                    user.save()
+                else:
+                    tmp_user = user
+                    logout(strategy.request)
+                    user = new
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    login(strategy.request, user)
+                    tmp_user.role_set.filter(role='self').update(role='student')
+                    union_merge(tmp_user, user)
+                    tmp_user.delete()
+                    return {'user': user}
             except IntegrityError as e:
                 _id = int(time.mktime(datetime.now().timetuple()))
                 user.username = details.get('username') + str(_id)
