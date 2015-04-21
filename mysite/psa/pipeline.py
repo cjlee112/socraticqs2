@@ -13,7 +13,7 @@ from social.exceptions import InvalidEmail, AuthAlreadyAssociated
 
 from social.apps.django_app.default.models import UserSocialAuth
 from ct.models import Role, UnitStatus, FSMState, Response
-from psa.models import AnonymEmail
+from psa.models import AnonymEmail, SecondaryEmail
 
 
 @partial
@@ -152,3 +152,28 @@ def social_user(backend, uid, user=None, *args, **kwargs):
             'user': user,
             'is_new': user is None,
             'new_association': False}
+
+
+def associate_user(backend, details, uid, user=None, social=None, *args, **kwargs):
+    email = details.get('email')
+    if user and not social:
+        try:
+            social = backend.strategy.storage.user.create_social_auth(
+                user, uid, backend.name
+            )
+        except Exception as err:
+            if not backend.strategy.storage.is_integrity_error(err):
+                raise
+            # Protect for possible race condition, those bastard with FTL
+            # clicking capabilities, check issue #131:
+            #   https://github.com/omab/django-social-auth/issues/131
+            return social_user(backend, uid, user, *args, **kwargs)
+        else:
+            if email and not user.email == email:
+                secondary = SecondaryEmail(user=user,
+                                           email=email,
+                                           provider=social)
+                secondary.save()
+            return {'social': social,
+                    'user': social.user,
+                    'new_association': True}

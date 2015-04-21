@@ -124,7 +124,7 @@ def unit_tabs_student(path, current,
 def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, baseToken='courses',
                      **kwargs)
-    
+
 
 class PageData(object):
     'generic holder for page UI elements such as tabs'

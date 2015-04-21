@@ -20,6 +20,14 @@
           <li>No associations</li>
         {% endfor %}
       </ul>
+      <h5>Primary email: {{ user.email }}</h5>
+      <h5>Secondary emails:</h5>
+      <ul>
+      {% for secondary in user.secondary.all %}
+        <li>From provider <b>{{ secondary.provider.provider }}: </b> {{ secondary.email }} </li>
+      {% endfor %}
+      </ul>
+      {% include 'psa/similar_auth.html' %}
     </div>
   </section>
 {% endif %}

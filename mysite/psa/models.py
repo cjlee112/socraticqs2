@@ -22,15 +22,18 @@ class AnonymEmail(models.Model):
         ordering = ['-date']
 
 
-# class SecondaryEmail(models.Model):
-#     """Model for storing secondary emails
+class SecondaryEmail(models.Model):
+    """Model for storing secondary emails
 
-#     We can store emails there from social_auth
-#     or LTI logins.
-#     """
-#     user = models.ForeignKey(User)
-#     provider = models.ForeignKey(UserSocialAuth)
-#     email = models.EmailField(verbose_name='Secondary Email')
+    We can store emails there from social_auth
+    or LTI login.
+    """
+    user = models.ForeignKey(User, related_name='secondary')
+    provider = models.ForeignKey(UserSocialAuth)
+    email = models.EmailField(verbose_name='Secondary Email')
+
+    class Meta:
+        unique_together = ('provider', 'email')
 
 
 class UserSession(models.Model):
