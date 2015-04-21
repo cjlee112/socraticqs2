@@ -901,6 +901,8 @@ def ul_tasks(request, course_id, unit_id, ul_id):
 def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
+    course = get_object_or_404(Course, pk=course_id)
+    notInstructor = check_instructor_auth(course, request)
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
             formClass = AnswerLessonForm
@@ -908,10 +910,13 @@ def edit_lesson(request, course_id, unit_id, ul_id):
             formClass = LessonForm
     else:
         formClass = ErrorForm
-    if request.user == ul.addedBy:
+    if notInstructor:
+        titleform = None
+    else: # let instructor edit this lesson
         titleform = formClass(instance=ul.lesson)
         if request.method == 'POST':
             if 'title' in request.POST:
+                ul.checkout(request.user)
                 titleform = formClass(request.POST, instance=ul.lesson)
                 if titleform.is_valid():
                     titleform.save()
@@ -926,8 +931,6 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 return pageData.fsm_redirect(request, 'delete', defaultURL,
                                              reverseArgs=kwargs, unit=unit)
         set_crispy_action(request.path, titleform)
-    else:
-        titleform = None
     return pageData.render(request, 'ct/edit_lesson.html',
                   dict(unitLesson=ul, atime=display_datetime(ul.atime),
                        titleform=titleform))

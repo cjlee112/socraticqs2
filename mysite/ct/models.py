@@ -230,6 +230,9 @@ class Lesson(models.Model):
     changeLog = models.TextField(null=True)
     commitTime = models.DateTimeField('time committed', null=True)
 
+    _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
+                   'sourceDB', 'sourceID', 'concept', 'treeID')
+
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):
         try:
@@ -289,6 +292,23 @@ class Lesson(models.Model):
                 relationship = DEFAULT_RELATION_MAP[self.kind]
             self.conceptlink_set.create(concept=concept,
                         addedBy=self.addedBy, relationship=relationship)
+    def is_committed(self):
+        'True if already committed'
+        return self.commitTime is not None
+    def commit(self):
+        'mark this Lesson as permanently committed (unmodifiable)'
+        if self.commitTime:
+            raise ValueError('Lesson already committed!!')
+        self.commitTime = timezone.now()
+        self.save()
+    def checkout(self, addedBy):
+        '''prepare to update.  If this required cloning, returns the
+        cloned Lesson object; caller must save()!!.  Otherwise returns None'''
+        if self.is_committed():
+            kwargs = {}
+            for attr in self._cloneAttrs: # clone our attributes
+                kwargs[attr] = getattr(self, attr)
+            return self.__class__(parent=self, addedBy=addedBy, **kwargs)
     def __unicode__(self):
         return self.title
     ## def get_url(self):
@@ -519,13 +539,24 @@ class UnitLesson(models.Model):
             return self.unit.unitlesson_set.get(order=self.order + 1)
         else:
             raise self.__class__.DoesNotExist
+    def checkout(self, addedBy):
+        '''prepare to update self.lesson.  Returns True if cloning it was
+        necessary'''
+        lesson = self.lesson.checkout(addedBy)
+        if lesson: # cloned Lesson, so must update database
+            lesson.save()
+            self.lesson = lesson
+            self.save()
+            return True
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
         'copy self and children to new unit'
+        if not self.lesson.is_committed(): # to fork it, must commit it!
+            self.lesson.commit()
         if order == 'APPEND':
             order = unit.next_order()
         ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
-                            kind=self.kind, treeID=self.treeID,
-                            parent=parent, order=order, **kwargs)
+                            kind=self.kind, treeID=self.treeID, parent=parent,
+                            order=order, branch=self.branch, **kwargs)
         ul.save()
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)

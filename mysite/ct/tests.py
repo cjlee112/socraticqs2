@@ -146,6 +146,9 @@ class LessonMethodTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
+        self.ul = create_question_unit(self.user)
+        self.unit2 = Unit(title='My Courselet', addedBy=self.user)
+        self.unit2.save()
     def test_creation_treeID(self):
         'treeID properly initialized to default?'
         lesson = Lesson(title='foo', text='bar', addedBy=self.user)
@@ -159,7 +162,22 @@ class LessonMethodTests(TestCase):
         self.assertTrue(len(results) >= 10)
         self.assertIn('New York City', [t[0] for t in results])
         self.assertEqual(len(results[0]), 3)
-        
+    def test_checkout(self):
+        'check Lesson commit and checkout'
+        self.assertFalse(self.ul.lesson.is_committed())
+        ul2 = self.ul.copy(self.unit2, self.user) # copy to new unit
+        self.assertTrue(self.ul.lesson.is_committed())
+        self.assertEqual(self.ul.lesson, ul2.lesson)
+        self.assertEqual(ul2.lesson.title, self.ul.lesson.title)
+        ul2.checkout(self.user)
+        self.assertEqual(ul2.lesson.title, self.ul.lesson.title)
+        ul2.lesson.text = 'Big bad wolf'
+        ul2.lesson.save()
+        ul2b = UnitLesson.objects.get(pk=ul2.pk)
+        self.assertEqual(ul2b.lesson.title, self.ul.lesson.title)
+        self.assertEqual(ul2b.lesson.text, 'Big bad wolf')
+        self.assertFalse(self.ul.lesson.pk == ul2b.lesson.pk)
+
 
 fsmDict = dict(name='test', title='try this')
 nodeDict = dict(START=dict(title='start here', path='ct:home',
