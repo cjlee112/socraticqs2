@@ -3,16 +3,31 @@
 {% similar_backends %}
 <hr>
 {% if similar_users %}
-<h5>Your email <b>{{ person.email }}</b> is used in the following accounts.
-    We recommend you to merge accounts to have all your study activities in one place. </h5>
+<h2>You appear to have multiple accounts.</h2>
+<h5>Your email <b>{{ person.email }}</b> is used in the following accounts:</h5>
+{% for similar, backends in similar_users.items %}
+{% if similar.get_full_name %}
+  <li>{{ similar.get_full_name }}</li>
+{% else %}
+  <li>{{ similar.username }}</li>
+{% endif %}
+{% endfor %}
+<h5>We recommend you to merge accounts to have all your study activities in one place.</h5>
 {% endif %}
 
 {% for similar, backends in similar_users.items %}
 <div class="row">
-  <h5><a href="/ct/people/{{ similar.pk }}/">{{ similar }}: </a></h5>
+  <p>To merge user <b>
+      {% if similar.get_full_name %}
+        {{ similar.get_full_name }}
+      {% else %}
+        {{ similar.username }}
+      {% endif %}
+  </b> login with following
+     social/email accounts using you primary email <b>{{ user.email }}</b></p>
   {% for name, backend in backends %}
   <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}"
-     href="{% url "social:begin" backend=name %}">
+     href="{% url 'social:begin' backend=name %}">
     <i class="fa fa-{{ name|icon_name }}"></i>
     {{ backend|backend_name }}
   </a>

@@ -31,6 +31,24 @@ def backend_class(backend):
 
 
 @register.filter
+def presentation_name(name):
+    return {
+        'stackoverflow': 'Stack-overflow',
+        'google-oauth': 'Google',
+        'google-oauth2': 'Google',
+        'google-openidconnect': 'Google',
+        'yahoo-oauth': 'Yahoo',
+        'facebook-app': 'Facebook',
+        'email': 'Email',
+        'vimeo': 'Vimeo-square',
+        'linkedin-oauth2': 'Linkedin',
+        'vk-oauth2': 'Vk',
+        'live': 'Windows',
+        'username': 'User',
+    }.get(name, name)
+
+
+@register.filter
 def icon_name(name):
     return {
         'stackoverflow': 'stack-overflow',
