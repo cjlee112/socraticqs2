@@ -41,6 +41,8 @@ class ConceptMethodTests(OurTestCase):
         self.assertEqual(c.addedBy, self.user)
         self.assertEqual(lesson.addedBy, self.wikiUser)
         self.assertEqual(lesson.concept, c)
+        self.assertTrue(lesson.is_committed())
+        self.assertEqual(lesson.changeLog, 'initial text from wikipedia')
         self.assertEqual(lesson.sourceDB, 'wikipedia')
         self.assertEqual(lesson.sourceID, 'New York City')
         self.assertIn('City of New York', lesson.text)
