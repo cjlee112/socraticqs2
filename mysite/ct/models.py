@@ -1344,7 +1344,15 @@ class FSMNode(models.Model):
             return ct_util.reverse_path_args(self.path, request.path, **kwargs)
         else: # use the plugin
             return func(self, state, request, defaultURL=defaultURL, **kwargs)
-
+    def get_help(self, state, request):
+        'Get FSM help message for current view, if any'
+        try: # use plugin if available
+            func = self._plugin.get_help
+        except AttributeError: # no plugin, so use default rule
+            if state.fsm_on_path(request.path): # on current node view?
+                return self.help # use node's help message if any
+        else:
+            return func(self, state, request)
 
 class FSMDone(ValueError):
     pass
@@ -1443,6 +1451,9 @@ class FSMState(models.Model):
         self.path = self.fsmNode.get_path(self, request, **kwargs)
         self.save()
         return self.path
+    def fsm_on_path(self, path):
+        'True if we are on same page as current node'
+        return self.path == path
     def log_entry(self, user):
         'record entry to this node if fsmNode.doLogging True'
         if not self.fsmNode.doLogging:

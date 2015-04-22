@@ -319,7 +319,17 @@ class FSMTests(OurTestCase):
         f = spec.save_graph('jacob')
         self.assertTrue(f.startNode.doLogging)
         self.assertFalse(f.get_node('MID').doLogging)
-        self.do_start(f)
+        fsmStack = self.do_start(f)
+        # test get_help() plugin functionality
+        request = FakeRequest(self.user, path='/ct/about/')
+        msg = fsmStack.state.fsmNode.get_help(fsmStack.state, request)
+        self.assertEqual(msg, 'here here!')
+        request = FakeRequest(self.user, path='/ct/courses/1/')
+        msg = fsmStack.state.fsmNode.get_help(fsmStack.state, request)
+        self.assertEqual(msg, 'there there')
+        request = FakeRequest(self.user)
+        msg = fsmStack.state.fsmNode.get_help(fsmStack.state, request)
+        self.assertEqual(msg, None)
     def test_start3(self):
         'check that FSMState saves unitLesson, select_ data, and logging'
         f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')

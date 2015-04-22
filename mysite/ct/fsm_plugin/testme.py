@@ -30,13 +30,21 @@ class START(object):
             dict(name='next', toNode='END', title='go go go'),
         )
 
+class MID(object):
+    def get_help(self, node, state, request):
+        d = {'/ct/about/': 'here here!', '/ct/courses/1/':'there there'}
+        return d.get(request.path, None)
+    title = 'in the middle'
+    path = 'ct:about'
+    edges = (
+            dict(name='next', toNode='END', title='go go go'),
+        )
 
 def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='test', title='try this',
-            pluginNodes=[START], # nodes w/ plugin code
+            pluginNodes=[START, MID], # nodes w/ plugin code
             nodeDict=dict( # all other nodes
-                MID=dict(title='in the middle', path='ct:about'),
                 END=dict(title='end here', path='ct:home'),
             ),
         )

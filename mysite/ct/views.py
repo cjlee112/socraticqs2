@@ -171,9 +171,11 @@ class PageData(object):
                addNextButton=False, **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         self.path = request.path
-        if self.fsmStack.state and \
-          self.fsmStack.state.hideTabs: # turn off tab interface
-            self.navTabs = ()
+        if self.fsmStack.state:
+            if self.fsmStack.state.hideTabs: # turn off tab interface
+                self.navTabs = ()
+            self.fsm_help_message = self.fsmStack.state.fsmNode \
+              .get_help(self.fsmStack.state, request)
         if templateArgs: # avoid side-effects of modifying caller's dict
             templateArgs = templateArgs.copy()
         else:
@@ -191,11 +193,10 @@ class PageData(object):
         'create a new FSM and redirect to its START page'
         url = self.fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
-    def fsm_on_path(self):
-        'True if we are on same page as current FSMState'
-        return self.path == self.fsmStack.state.path
     def fsm_off_path(self):
-        return not self.fsm_on_path() and self.path != '/ct/nodes/'
+        'True if not on current node view or Activity Center view'
+        return not self.fsmStack.state.fsm_on_path(self.path) and \
+          self.path != '/ct/nodes/'
     def set_refresh_timer(self, request, timer=True):
         'start or end the refresh timer'
         if timer:

@@ -84,11 +84,9 @@ function toggleInterest(o, targeturl, csrftoken)
   {% endif %}
 
   {% if fsmStack.state %}
-    {% if pageData.fsm_on_path %}
-      {% if fsmStack.state.fsmNode.help %}
-        {{ fsmStack.state.fsmNode.help }}
-        <br>
-      {% endif %}
+    {% if pageData.fsm_help_message %}
+      {{ pageData.fsm_help_message }}
+      <br>
     {% elif pageData.fsm_off_path %}
       <b>Note</b>: you are currently in the middle of an activity:
       <b>{{ fsmStack.state.title }}</b>.
