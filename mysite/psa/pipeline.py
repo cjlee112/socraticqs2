@@ -171,15 +171,12 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
         elif (user.get_full_name() == social.user.get_full_name()
               or confirm and confirm == 'yes'
               or user.email == social.user.email):
-            tmp_user = user
-            logout(strategy.request)
-            user = social.user
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(strategy.request, user)
-            union_merge(tmp_user, user)
-            social_merge(tmp_user, user)
-            tmp_user.delete()
-            return {'user': user}
+            union_merge(social.user, user)
+            social_merge(social.user, user)
+            social.user.delete()
+            social.user = user
+            return {'user': user,
+                    'social': social}
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
