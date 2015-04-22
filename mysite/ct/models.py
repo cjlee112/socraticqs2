@@ -306,8 +306,10 @@ class Lesson(models.Model):
     def checkout(self, addedBy):
         '''prepare to update.  If this required cloning, returns the
         cloned Lesson object; caller must save()!!.  Otherwise returns None'''
-        if self.addedBy != addedBy and not self.is_committed():
-            self.checkin(commit=True) # do not mix edits from different people
+        if not self.is_committed() and (self.addedBy != addedBy or
+                self.response_set.count() > 0):
+            # do not mix edits from different people, or lose response snapshot
+            self.checkin(commit=True)
         if self.is_committed():
             kwargs = self._clone_dict()
             return self.__class__(parent=self, addedBy=addedBy, **kwargs)
