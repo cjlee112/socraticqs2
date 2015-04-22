@@ -42,7 +42,8 @@ class Concept(models.Model):
     @classmethod
     def new_concept(klass, title, text, unit, user, isError=False):
         'add a new concept with associated Lesson, UnitLesson'
-        lesson = Lesson(title=title, text=text, addedBy=user)
+        lesson = Lesson(title=title, text=text, addedBy=user,
+                        commitTime=timezone.now(), changeLog='initial commit')
         concept = klass(title=title, addedBy=user)
         if isError:
             concept.isError = True
