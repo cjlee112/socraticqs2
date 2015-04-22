@@ -15,7 +15,7 @@ from psa.models import AnonymEmail, SecondaryEmail
 
 @partial
 def password_ask(strategy, details, user=None, is_new=False, *args, **kwargs):
-    if (is_new and kwargs.get('backend').name == 'email'):
+    if is_new and kwargs.get('backend').name == 'email':
         email = user.email or details.get('email')
         if strategy.request.POST.get('password'):
             if 'anonymous' in user.username:
@@ -114,7 +114,6 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
             user = social.user
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(strategy.request, user)
-            tmp_user.role_set.filter(role='self').update(role='student')
             union_merge(tmp_user, user)
             tmp_user.delete()
             return {'user': user}
@@ -142,7 +141,6 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                     user = new
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(strategy.request, user)
-                    tmp_user.role_set.filter(role='self').update(role='student')
                     union_merge(tmp_user, user)
                     tmp_user.delete()
                     return {'user': user}

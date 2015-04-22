@@ -23,7 +23,7 @@ class LTIUser(models.Model):
     class Meta:
         unique_together = ('user_id', 'consumer', 'course_id')
 
-    def create_links(self, request):
+    def create_links(self):
         extra_data = json.loads(self.extra_data)
         username = extra_data.get('lis_person_name_full', self.user_id)
         first_name = extra_data.get('lis_person_name_given', '')
@@ -32,8 +32,8 @@ class LTIUser(models.Model):
 
         social = False
         if email:
-            social= UserSocialAuth.objects.filter(provider='email',
-                                                  uid=email)
+            social = UserSocialAuth.objects.filter(provider='email',
+                                                   uid=email)
 
         if social:
             django_user = social[0].user
@@ -44,9 +44,9 @@ class LTIUser(models.Model):
             else:
                 django_user = User.objects.get_or_create(username=username,
                                                          defaults={
-                                                         'first_name':first_name,
-                                                         'last_name':last_name,
-                                                         'email':email
+                                                             'first_name': first_name,
+                                                             'last_name': last_name,
+                                                             'email': email
                                                          })[0]
             social = UserSocialAuth(user=django_user,
                                     provider='email',

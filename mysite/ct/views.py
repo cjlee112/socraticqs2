@@ -395,6 +395,7 @@ def courses_subscribe(request, course_id):
     tmp_user = False
     if isinstance(user, AnonymousUser):
         tmp_user = True
+        # TODO Implement User OneToOne profile with BoolField is_temporary
         user = User.objects.get_or_create(username='anonymous' + str(_id),
                                           first_name='Temporary User')[0]
 
@@ -403,10 +404,10 @@ def courses_subscribe(request, course_id):
         # Set expiry time to year in future
         request.session.set_expiry(timedelta(days=365))
     course = Course.objects.get(id=course_id)
-    role = 'self' if tmp_user else 'student'
-    r, created = Role.objects.get_or_create(course=course,
-                                            user=user,
-                                            role=role)
+    role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
+    Role.objects.get_or_create(course=course,
+                               user=user,
+                               role=role)
     if tmp_user:
         return HttpResponseRedirect('/tmp-email-ask/')
     return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))

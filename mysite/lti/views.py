@@ -69,7 +69,7 @@ def lti_init(request, course_id=None, unit_id=None):
     user.save()
 
     if not user.is_linked:
-        user.create_links(request)
+        user.create_links()
 
     user.login(request)
     user.enroll(roles, course_id)

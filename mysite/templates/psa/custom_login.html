@@ -12,9 +12,7 @@
 <h4>In this page you can login or register using you email, plain username/password pair or social accounts.</h4>
 {% endif %}
 
-{% if DEBUG %}
-    {% include "psa/social_backends.html" %}
-{% endif %}
+{% include "psa/social_backends.html" %}
 
 <br>
 <div class="container-fluid">
