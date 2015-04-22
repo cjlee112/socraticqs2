@@ -71,7 +71,7 @@ class LESSON(object):
     
 class FAQ(object):
     '''Discussion of this slide.'''
-    create_edge = next_lesson
+    create_Comment_edge = next_lesson
     # node specification data goes here
     path = 'ct:ul_faq_student'
     title = 'Comment on or view discussion of the last slide you viewed'
@@ -79,8 +79,8 @@ class FAQ(object):
     or write a new comment / question about this slide.  Or you can click
     the Slideshow menu above for more options.'''
     edges = (
-            dict(name='create', toNode='LESSON', title='Go to Next Slide',
-                 showOption=True),
+            dict(name='create_Comment', toNode='LESSON',
+                 title='Go to Next Slide', showOption=True),
             dict(name='slide', toNode='LESSON', showOption=True,
                  title='Return to this slide',
                  description='Go back to the last slide you viewed'),
