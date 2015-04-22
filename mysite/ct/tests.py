@@ -147,6 +147,9 @@ class LessonMethodTests(TestCase):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
         self.ul = create_question_unit(self.user)
+        concept = Concept.new_concept('bad', 'idea', self.ul.unit, self.user)
+        self.ul.lesson.concept = concept
+        self.ul.lesson.save()
         self.unit2 = Unit(title='My Courselet', addedBy=self.user)
         self.unit2.save()
     def test_creation_treeID(self):
@@ -165,18 +168,26 @@ class LessonMethodTests(TestCase):
     def test_checkout(self):
         'check Lesson commit and checkout'
         self.assertFalse(self.ul.lesson.is_committed())
+        self.ul.lesson.conceptlink_set.create(concept=self.ul.lesson.concept,
+                                              addedBy=self.user)
         ul2 = self.ul.copy(self.unit2, self.user) # copy to new unit
         self.assertTrue(self.ul.lesson.is_committed())
         self.assertEqual(self.ul.lesson, ul2.lesson)
+        self.assertNotEqual(self.ul.pk, ul2.pk)
         self.assertEqual(ul2.lesson.title, self.ul.lesson.title)
-        ul2.checkout(self.user)
-        self.assertEqual(ul2.lesson.title, self.ul.lesson.title)
-        ul2.lesson.text = 'Big bad wolf'
-        ul2.lesson.save()
+        lesson = ul2.checkout(self.user)
+        self.assertEqual(lesson.title, self.ul.lesson.title)
+        lesson.text = 'Big bad wolf'
+        lesson.changeLog = 'why I changed everything'
+        ul2.checkin(lesson)
         ul2b = UnitLesson.objects.get(pk=ul2.pk)
         self.assertEqual(ul2b.lesson.title, self.ul.lesson.title)
+        self.assertEqual(ul2b.lesson.concept, self.ul.lesson.concept)
         self.assertEqual(ul2b.lesson.text, 'Big bad wolf')
         self.assertFalse(self.ul.lesson.pk == ul2b.lesson.pk)
+        self.assertEqual(Concept.objects.get(conceptlink__lesson__unitlesson=ul2b),
+                         self.ul.lesson.concept)
+        self.assertTrue(ul2b.lesson.is_committed())
 
 
 fsmDict = dict(name='test', title='try this')

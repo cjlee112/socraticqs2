@@ -260,7 +260,8 @@ class Lesson(models.Model):
             pass
         lesson = klass(title=data.title, url=data.url, sourceDB=sourceDB,
                        sourceID=sourceID, addedBy=user, text=data.description,
-                       kind=klass.EXPLANATION)
+                       kind=klass.EXPLANATION, commitTime=timezone.now(),
+                       changeLog='initial text from %s' % sourceDB)
         if doSave: # not just temporary, but save as permanent record
             lesson.save_root()
         lesson._sourceDBdata = data
@@ -295,20 +296,30 @@ class Lesson(models.Model):
     def is_committed(self):
         'True if already committed'
         return self.commitTime is not None
-    def commit(self):
-        'mark this Lesson as permanently committed (unmodifiable)'
-        if self.commitTime:
-            raise ValueError('Lesson already committed!!')
-        self.commitTime = timezone.now()
-        self.save()
+    def _clone_dict(self):
+        'get dict of attrs to clone'
+        kwargs = {}
+        for attr in self._cloneAttrs: # clone our attributes
+            kwargs[attr] = getattr(self, attr)
+        return kwargs
     def checkout(self, addedBy):
         '''prepare to update.  If this required cloning, returns the
         cloned Lesson object; caller must save()!!.  Otherwise returns None'''
         if self.is_committed():
-            kwargs = {}
-            for attr in self._cloneAttrs: # clone our attributes
-                kwargs[attr] = getattr(self, attr)
+            kwargs = self._clone_dict()
             return self.__class__(parent=self, addedBy=addedBy, **kwargs)
+    def checkin(self, commit, doSave=True, copyLinks=False):
+        '''finish checkout process by saving cloned links,
+        permanent commit etc. as required'''
+        if commit:
+            if self.parent and not self.parent.is_committed():
+                self.parent.checkin(commit=True)
+            self.commitTime = timezone.now()
+        if commit or doSave:
+            self.save()
+        if copyLinks:
+            for cl in self.parent.conceptlink_set.all():
+                cl.copy(self)
     def __unicode__(self):
         return self.title
     ## def get_url(self):
@@ -360,8 +371,16 @@ class ConceptLink(models.Model):
                                     default=DEFINES)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    def copy(self, lesson):
+        'copy this conceptlink to a new lesson'
+        cl = self.__class__(concept=self.concept, lesson=lesson,
+                            relationship=self.relationship,
+                            addedBy=self.addedBy, atime=self.atime)
+        cl.save()
+        return cl
     def annotate_ul(self, unit):
-        'add unitLesson attribute within the specified unit'
+        '''add unitLesson as TEMPORARY attribute, within the specified unit.
+        Note this attribute is NOT stored in the database!!'''
         try:
             self.unitLesson = UnitLesson.objects.filter(unit=unit,
                                                         lesson=self.lesson)[0]
@@ -540,18 +559,25 @@ class UnitLesson(models.Model):
         else:
             raise self.__class__.DoesNotExist
     def checkout(self, addedBy):
-        '''prepare to update self.lesson.  Returns True if cloning it was
-        necessary'''
-        lesson = self.lesson.checkout(addedBy)
-        if lesson: # cloned Lesson, so must update database
-            lesson.save()
+        '''prepare to update self.lesson, returning new Lesson object if any'''
+        return self.lesson.checkout(addedBy)
+    def checkin(self, lesson, commit=None, doSave=True):
+        '''finalize update of lesson, committing if requested.
+        If lesson is not None, save it as self.lesson.
+        If lesson is None, checkin self.lesson.'''
+        newLesson = lesson
+        if not lesson:
+            lesson = self.lesson
+        if commit is None and lesson.changeLog:
+            commit = True
+        lesson.checkin(commit, doSave, newLesson)
+        if newLesson:
             self.lesson = lesson
             self.save()
-            return True
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
         'copy self and children to new unit'
         if not self.lesson.is_committed(): # to fork it, must commit it!
-            self.lesson.commit()
+            self.lesson.checkin(commit=True)
         if order == 'APPEND':
             order = unit.next_order()
         ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
