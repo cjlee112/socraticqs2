@@ -583,6 +583,10 @@ class UnitLesson(models.Model):
     def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
         'copy self and children to new unit'
         if not self.lesson.is_committed(): # to fork it, must commit it!
+            name = addedBy.get_full_name()
+            if not name:
+                name = addedBy.get_username()
+            self.lesson.changeLog = 'snapshot for fork by %s' % name
             self.lesson.checkin(commit=True)
         if order == 'APPEND':
             order = unit.next_order()

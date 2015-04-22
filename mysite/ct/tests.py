@@ -175,6 +175,7 @@ class LessonMethodTests(TestCase):
         ul2 = self.ul.copy(self.unit2, self.user) # copy to new unit
         self.assertTrue(self.ul.lesson.is_committed())
         self.assertEqual(self.ul.lesson, ul2.lesson)
+        self.assertEqual(self.ul.lesson.changeLog, 'snapshot for fork by jacob')
         self.assertNotEqual(self.ul.pk, ul2.pk)
         self.assertEqual(ul2.lesson.title, self.ul.lesson.title)
         lesson = ul2.checkout(self.user)
