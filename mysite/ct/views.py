@@ -659,6 +659,8 @@ def _lessons(request, pageData, concept=None, msg='',
             lessonForm = newLessonFormClass(request.POST)
             if lessonForm.is_valid():
                 lesson = lessonForm.save(commit=False)
+                lesson.commitTime = timezone.now()
+                lesson.changeLog = 'initial commit'
                 lesson.addedBy = request.user
                 return createULFunc(lesson, concept, unit, parentUL)
     elif allowSearch and 'search' in request.GET:
@@ -916,10 +918,11 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         titleform = formClass(instance=ul.lesson)
         if request.method == 'POST':
             if 'title' in request.POST:
-                ul.checkout(request.user)
-                titleform = formClass(request.POST, instance=ul.lesson)
+                lesson = ul.checkout(request.user)
+                titleform = formClass(request.POST, instance=lesson)
                 if titleform.is_valid():
-                    titleform.save()
+                    titleform.save(commit=False)
+                    ul.checkin(lesson)
                     defaultURL = get_object_url(request.path, ul)
                     return pageData.fsm_redirect(request, 'update', defaultURL,
                                                  unitLesson=ul)
