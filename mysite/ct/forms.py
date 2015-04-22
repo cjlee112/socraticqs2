@@ -204,53 +204,6 @@ class ConceptGraphForm(forms.ModelForm):
         model = ConceptGraph
         fields = ['relationship']
 
-class LessonForm(forms.ModelForm):
-    submitLabel = 'Update'
-    url = forms.CharField(required=False)
-    changeLog = forms.CharField(required=False, widget=forms.Textarea)
-    def __init__(self, *args, **kwargs):
-        super(LessonForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_id = 'id-lessonForm'
-        self.helper.form_class = 'form-vertical'
-        self.helper.add_input(Submit('submit', self.submitLabel))
-    class Meta:
-        model = Lesson
-        fields = ['title', 'kind', 'text', 'medium', 'url', 'changeLog']
-        labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'),
-                      changeLog=_('Comment on your revisions'))
-
-class AnswerLessonForm(LessonForm):
-    class Meta:
-        model = Lesson
-        fields = ['title', 'text', 'medium', 'url', 'changeLog']
-        labels = dict(medium=_('Delivery medium'),
-                      changeLog=_('Comment on your revisions'))
-
-class NewLessonForm(LessonForm):
-    submitLabel = 'Add'
-
-class ResponseFilterForm(forms.Form):
-    selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
-                choices=(('', '----'),) + Response.EVAL_CHOICES[:2])
-    status = forms.ChoiceField(required=False,
-                choices=(('', '----'),) + STATUS_CHOICES)
-    confidence = forms.ChoiceField(required=False,
-                choices=(('', '----'),) + Response.CONF_CHOICES)
-
-
-class ErrorForm(forms.ModelForm):
-    submitLabel = 'Update'
-    def __init__(self, *args, **kwargs):
-        super(ErrorForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
-        self.helper.form_id = 'id-errorForm'
-        self.helper.form_class = 'form-vertical'
-        self.helper.add_input(Submit('submit', self.submitLabel))
-    class Meta:
-        model = Lesson
-        fields = ['title', 'text', 'changeLog']
-
 class NewErrorForm(forms.ModelForm):
     submitLabel = 'Add'
     def __init__(self, *args, **kwargs):
@@ -262,6 +215,44 @@ class NewErrorForm(forms.ModelForm):
     class Meta:
         model = Lesson
         fields = ['title', 'text']
+
+class ErrorForm(NewErrorForm):
+    submitLabel = 'Update'
+    changeLog = forms.CharField(required=False, initial='',
+            label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
+    class Meta:
+        model = Lesson
+        fields = ['title', 'text', 'changeLog']
+
+class LessonForm(ErrorForm):
+    url = forms.CharField(required=False)
+    class Meta:
+        model = Lesson
+        fields = ['title', 'kind', 'text', 'medium', 'url', 'changeLog']
+        labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+
+class AnswerLessonForm(LessonForm):
+    class Meta:
+        model = Lesson
+        fields = ['title', 'text', 'medium', 'url', 'changeLog']
+        labels = dict(medium=_('Delivery medium'))
+
+class NewLessonForm(NewErrorForm):
+    submitLabel = 'Add'
+    url = forms.CharField(required=False)
+    class Meta:
+        model = Lesson
+        fields = ['title', 'kind', 'text', 'medium', 'url']
+        labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+
+class ResponseFilterForm(forms.Form):
+    selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
+                choices=(('', '----'),) + Response.EVAL_CHOICES[:2])
+    status = forms.ChoiceField(required=False,
+                choices=(('', '----'),) + STATUS_CHOICES)
+    confidence = forms.ChoiceField(required=False,
+                choices=(('', '----'),) + Response.CONF_CHOICES)
+
 
 class SearchFormBase(forms.Form):
     def __init__(self, *args, **kwargs):
