@@ -559,15 +559,16 @@ class UnitLesson(models.Model):
         else:
             raise self.__class__.DoesNotExist
     def checkout(self, addedBy):
-        '''prepare to update self.lesson, returning new Lesson object if any'''
-        return self.lesson.checkout(addedBy)
+        'get lesson object we can update (which may be a new object)'
+        lesson = self.lesson.checkout(addedBy)
+        if lesson:
+            return lesson
+        else:
+            return self.lesson
     def checkin(self, lesson, commit=None, doSave=True):
-        '''finalize update of lesson, committing if requested.
-        If lesson is not None, save it as self.lesson.
-        If lesson is None, checkin self.lesson.'''
-        newLesson = lesson
-        if not lesson:
-            lesson = self.lesson
+        '''finalize update of checked-out lesson, committing if requested.
+        If lesson != self.lesson, save it as self.lesson.'''
+        newLesson = (lesson != self.lesson)
         if commit is None and lesson.changeLog:
             commit = True
         lesson.checkin(commit, doSave, newLesson)
