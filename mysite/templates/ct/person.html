@@ -73,6 +73,36 @@ User profile page
       </div>
     </div>
 
+    <div id="merge-confirm" class="modal fade">
+      <form action="{{ request.path }}" method="post" role="form">{% csrf_token %}
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title">Setting password</h4>
+            </div>
+
+            <div class="modal-body">
+              <p>Target username <b>{{ target_name }}</b>
+            is different from your username <b>{{ own_name }}</b>!
+            Do you want to proceed?</p>
+              <div class="form-group">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}" />
+                <input type="radio" name="confirm" value="no" checked> No
+                <input type="radio" name="confirm" value="yes"> Yes
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">Continue</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+
     <div class="buttons">
       {% if user.is_authenticated and not 'anonymous' in user.username %}
         <div class="user-details">

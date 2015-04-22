@@ -294,6 +294,7 @@ function toggleInterest(o, targeturl, csrftoken)
         modalDialog('#email-required-modal_2', 'email-required-modal_2');
         modalDialog('#username-modal', 'username');
         modalDialog('#set-pass', 'set-pass');
+        $mergeConfirm = modalDialog('#merge-confirm');
         $validationModal = modalDialog('#validation-sent-modal');
         $passChanged = modalDialog('#password-changed');
         $emailRequired = modalDialog('#email-required-modal');
@@ -356,6 +357,10 @@ function toggleInterest(o, targeturl, csrftoken)
 
         {% if exception %}
           $passException.modal('show');
+        {% endif %}
+
+        {% if merge_confirm %}
+          $mergeConfirm.modal('show');
         {% endif %}
 
       });

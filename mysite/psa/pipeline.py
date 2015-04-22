@@ -9,6 +9,7 @@ from datetime import datetime
 
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthException
+from social.backends.utils import load_backends
 
 from psa.models import AnonymEmail, SecondaryEmail
 
@@ -156,15 +157,20 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                 'You interrupted merge process.'
             )
         elif (not user.get_full_name() == social.user.get_full_name() and
-                not strategy.request.POST.get('confirm')):
-            return render_to_response('psa/merge_confirm.html', {
+              not strategy.request.POST.get('confirm') and
+              not user.email == social.user.email):
+            return render_to_response('ct/person.html', {
+                'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
                 'request': strategy.request,
                 'next': strategy.request.POST.get('next') or '',
                 'target_name': social.user.get_full_name(),
-                'own_name': user.get_full_name()
+                'own_name': user.get_full_name(),
+                'person': user,
+                'merge_confirm': True
             }, RequestContext(strategy.request))
         elif (user.get_full_name() == social.user.get_full_name()
-              or confirm and confirm == 'yes'):
+              or confirm and confirm == 'yes'
+              or user.email == social.user.email):
             tmp_user = user
             logout(strategy.request)
             user = social.user
