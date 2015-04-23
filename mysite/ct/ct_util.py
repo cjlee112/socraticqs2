@@ -26,7 +26,7 @@ def get_path_kwargs(path):
         try:
             arg = pathKwargs[k]
             kwargs[arg] = int(l[i + 1])
-        except KeyError:
+        except (KeyError,ValueError):
             pass
     return kwargs
 
