@@ -39,11 +39,11 @@ $( "#headtoggle" ).click(function() {
 
 (View <a href="{{ actionTarget |get_object_url:unitLesson }}faq/">
 all FAQs for this lesson</a>)<br>
-<input type="checkbox" id="inqtoggle" checked="" />
-Show original post by 
-<a href="/ct/people/{{ inquiry.author.pk }}/">{{ inquiry.author.get_full_name }}</a>
-({{ inquiry.atime|display_datetime }}):
-{{ pageData.numPeople }} other people also have this question.
+
+<h2>Discussion: {{ inquiry.title }}</h2> 
+{% if pageData.numPeople %}
+  {{ pageData.numPeople }} other people also have this question.
+{% endif %}
 {% if user != inquiry.author %}
   <form action="{{ actionTarget }}" method="post"
    style=" display:inline!important;">
@@ -52,117 +52,110 @@ Show original post by
   <input type="submit" value="Me too!" />
   </form>
 {% endif %}
-<BR>
-<div id="inqdiv">
-{{ inquiry.text|md2html }}
-</div>
 
-<script>
-$( "#inqtoggle" ).click(function() {
-  $( "#inqdiv" ).toggle();
-});
-</script>
+<table class="table table-bordered">
+  <thead><tr class="info">
+    <th>
+    {{ inquiry.title }}
+    (<a href="/ct/people/{{ inquiry.author.pk }}/">
+    {{ inquiry.author.get_full_name }}</a>,
+    {{ inquiry.atime|display_datetime }})</th>
+  </tr></thead>
+  <tbody>
+  <tr class="active"><td>
+    {{ inquiry.text|md2html }}
+  <a href="{{ actionTarget|get_object_url:inquiry }}assess/">
+  (Assess errors)</a>
+  </td></tr>
+</tbody></table>
+
 
 {% if errorTable %}
-<table class="table table-striped">
-<thead><tr>
-  <th>The original post includes the following error(s)</th><th>
-</tr></thead>
-<tbody>
 {% for se in errorTable %}
-  <tr>
-    <td>
-    <a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
-    (evaluated by 
-        <a href="/ct/people/{{ se.author.pk }}/">{{ se.author.get_full_name }}</a>)
-    </td>
-  </tr>
+  <table class="table table-bordered">
+  <thead><tr class="info">
+    <th>
+    Caution: {{ se.errorModel.lesson.title }}
+    (<a href="/ct/people/{{ se.author.pk }}/">
+    {{ se.author.get_full_name }}</a>,
+    {{ se.atime|display_datetime }})</th>
+  </tr></thead>
+  <tbody>
+  <tr class="warning"><td>
+    Were you falling into the following error model?
+    {{ se.errorModel.lesson.text|md2html }}
+    (Click here to 
+    <a href="{{ actionTarget |get_object_url:se.errorModel }}">
+    learn more about this issue</a>).
+  </td></tr>
+  </tbody></table>
 {% endfor %}
-</tbody>
-</table>
-{% else %}
-<p><a href="{{ actionTarget|get_object_url:inquiry }}assess/">(Assess errors in original post)</a></p>
 {% endif %}
 
 {% if faqTable %}
-The instructor has created an exercise based on this question.
-If you would like to try the exercise, click on its title here:
-<table class="table table-striped">
-<thead><tr>
-  <th>Exercise</th><th>Author</th>
-</tr></thead>
-<tbody>
 {% for ul in faqTable %}
-  <tr>
-    <td><a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
-    </td>
-    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
-  </tr>
+  <table class="table table-bordered">
+  <thead><tr class="info">
+    <th>
+    Suggested Exercise: {{ ul.lesson.title }}
+    (<a href="/ct/people/{{ ul.addedBy.pk }}/">
+    {{ ul.addedBy.get_full_name }}</a>,
+    {{ ul.atime|display_datetime }})</th>
+  </tr></thead>
+  <tbody>
+  <tr class="success"><td>
+    This exercise may help you understand this issue better.
+    (Click here to 
+    <a href="{{ actionTarget |get_object_url:ul }}">
+    try the exercise</a>).
+  </td></tr>
+  </tbody></table>
 {% endfor %}
-</tbody>
-</table>
-
-{% if replyTable %}
-<input type="checkbox" id="reptoggle" />Show replies<BR>
-<div id="repdiv" style="display: none">
-{% else %}
-<div id="repdiv">
-{% endif %}
-{% else %}
-<div id="repdiv">
 {% endif %}
 
 {% if replyTable %}
-<table class="table table-striped">
-<thead><tr>
-  <th>Replies</th>
-</tr></thead>
-<tbody>
 {% for r,errors in replyTable %}
-  <tr>
-    <td><a href="/ct/people/{{ r.author.pk }}/">
-    {{ r.author.get_full_name }}</a>
-    {% if c %}
-    (and {{ c }} other people)
-    {% endif %}
-    : {{ r.atime|display_datetime }}
+  <table class="table table-bordered">
+  <thead><tr class="info">
+    <th>
+    {{ r.title }}
+    (<a href="/ct/people/{{ inquiry.author.pk }}/">{{ r.author.get_full_name }}</a>,
+    {{ r.atime|display_datetime }})</th>
+  </tr></thead>
+  <tbody>
+
+  <tr class="active"><td>
     {{ r.text|md2html }}
-    {% if errors %}
-      <b>This reply includes the following error(s)</b>:
-      <ul>
+    <a href="{{ actionTarget|get_object_url:r }}assess/">(Assess errors)</a>
+  </td></tr>
+
+  {% if errors %}
       {% for se in errors %}
-        <li><a href="{{ actionTarget |get_object_url:se.errorModel }}">{{ se.errorModel.lesson.title }}</a>
-        (evaluated by 
-        <a href="/ct/people/{{ se.author.pk }}/">{{ se.author.get_full_name }}</a>)
-        </li>
+        <tr class="warning"><td>
+        <b>Note to the commenter: {{ se.errorModel.lesson.title }}
+        (<a href="/ct/people/{{ se.author.pk }}/">
+        {{ se.author.get_full_name }}</a>,
+        {{ se.atime|display_datetime }})</b><br>
+        Were you falling into the following error model?
+        {{ se.errorModel.lesson.text|md2html }}
+        (Click here to 
+        <a href="{{ actionTarget |get_object_url:se.errorModel }}">
+        learn more about this issue</a>).
+        </td></tr>
       {% endfor %}
-      </ul>
-    {% else %}
-        <a href="{{ actionTarget|get_object_url:r }}assess/">(Assess errors)</a>
-    {% endif %}
-    </td>
-  </tr>
+  {% endif %}
+  </tbody></table>
 {% endfor %}
-</tbody>
-</table>
 {% else %}
-<p>There are no replies yet.</p>
+There are no replies yet.
 {% endif %}
+
 
 {% if form %}
 <h3>Reply to this discussion</h3>
 <div class="container-fluid">
 {% crispy form %}
 </div>
-{% endif %}
-</div><!-- @end #repdiv -->
-
-{% if faqTable %}
-<script>
-$( "#reptoggle" ).click(function() {
-  $( "#repdiv" ).toggle();
-});
-</script>
 {% endif %}
 
 

@@ -857,6 +857,7 @@ class Response(models.Model):
     course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
+    title = models.CharField(max_length=200, null=True)
     text = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
                                   blank=False, null=False)

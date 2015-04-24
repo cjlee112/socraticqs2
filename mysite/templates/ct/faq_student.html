@@ -40,7 +40,8 @@ $( "#headtoggle" ).click(function() {
 {% if faqTable %}
 <table class="table table-striped">
 <thead><tr>
-  <th>Frequently Asked Questions About This Lesson</th>
+  <th>Author</th>
+  <th>Questions and Comments About This Lesson</th>
 </tr></thead>
 <tbody>
 {% for r,c in faqTable %}
@@ -51,8 +52,9 @@ $( "#headtoggle" ).click(function() {
     (and {{ c }} other people)
     {% endif %}
     : {{ r.atime|display_datetime }}
-    {{ r.text|md2html }}
-        <a href="{{ actionTarget }}{{ r.pk }}/">(View Responses)</a>
+    </td>
+    <td>
+        <a href="{{ actionTarget }}{{ r.pk }}/">{{ r.title }}</a>
     </td>
   </tr>
 {% endfor %}

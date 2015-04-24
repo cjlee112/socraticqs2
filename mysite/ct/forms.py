@@ -21,14 +21,14 @@ class ResponseForm(forms.ModelForm):
 class CommentForm(ResponseForm):
     class Meta:
         model = Response
-        fields = ['text', 'confidence']
+        fields = ['title', 'text', 'confidence']
         labels = dict(text=_('Your question'),
                       confidence=_('How do you feel about this?'))
 
 class ReplyForm(ResponseForm):
     class Meta:
         model = Response
-        fields = ['text', 'confidence']
+        fields = ['title', 'text', 'confidence']
         labels = dict(text=_('Your reply'),
                       confidence=_('How do you feel about this?'))
 
