@@ -46,6 +46,8 @@ $( "#headtoggle" ).click(function() {
   <div class="tab-pane active" id="LessonsTabDiv">
 
 {% if lessonTable %}
+<input type="checkbox" id="lessonstoggle" CHECKED=""/>Show Current Lessons<BR>
+<div id="lessonsdiv">
 <table class="table table-striped">
 <thead><tr>
   <th>Lesson</th><th>Type</th>
@@ -86,6 +88,13 @@ $( "#headtoggle" ).click(function() {
 {% endfor %}
 </tbody>
 </table>
+</div>
+
+<script>
+$( "#lessonstoggle" ).click(function() {
+  $( "#lessonsdiv" ).toggle();
+});
+</script>
 {% endif %}
 
 {% if conceptLinks.data %}
@@ -152,6 +161,8 @@ please click <b>{{ actionLabel }}</b>.
 {% endfor %}
 </tbody>
 </table>
+{% elif foundNothing %}
+  <b>No matches found</b>.  Try another search, or write a new lesson.
 {% endif %}
 
 {% if lessonForm %}
