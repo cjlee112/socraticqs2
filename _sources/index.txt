@@ -14,6 +14,14 @@ Contents:
    devintro
    fsm
 
+Project Enhancement Proposals:
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   pep/*
+
 Indices and tables
 ==================
 

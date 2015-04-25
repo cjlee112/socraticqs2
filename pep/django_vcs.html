@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Django Version Collaboration System for Courselets &mdash; Socraticqs2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Socraticqs2 0.1 documentation" href="../index.html" />
+    <link rel="prev" title="Writing Guided Activities (Finite State Machines)" href="../fsm.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../fsm.html" title="Writing Guided Activities (Finite State Machines)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="django-version-collaboration-system-for-courselets">
+<h1>Django Version Collaboration System for Courselets<a class="headerlink" href="#django-version-collaboration-system-for-courselets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basic-goals">
+<h2>Basic goals<a class="headerlink" href="#basic-goals" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Git-like VCS for text+metadata rather than code</li>
+<li>Application model is community-remix-forest rather than code-pyramid.</li>
+<li>stored in standard database (rather than files)</li>
+<li>Integrates VCS capabilities into standard online platform (Django)</li>
+<li>KISS: sweetspot of core VCS benefits without Git&#8217;s complexity, for non-Git-users</li>
+<li>Designed for courselets active-learning materials, which consists of one datatype (Lesson) and two levels of container (Unit and Course), all three under VC.</li>
+</ul>
+</div>
+<div class="section" id="vcs-layers">
+<h2>VCS layers<a class="headerlink" href="#vcs-layers" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>Lesson</strong><ul>
+<li>Lesson is a <em>commit</em></li>
+<li>UnitLesson is a <em>branch</em> (HEAD pointer)</li>
+</ul>
+</li>
+<li><strong>Unit</strong>: a repository of UnitLessons<ul>
+<li>Unit is a commit</li>
+<li>CourseUnit is branch</li>
+</ul>
+</li>
+<li><strong>Course</strong>: a repository of CourseUnits<ul>
+<li>Course is a commit</li>
+<li>CourseBranch is a branch</li>
+</ul>
+</li>
+</ul>
+<p>Some simplifying assumptions:</p>
+<ul class="simple">
+<li>In general, we store VCS tree structure directly on commit objects (with <strong>parent</strong> and <strong>mergeParent</strong> pointers).</li>
+<li>In general, commits are &#8220;snapshots&#8221; of content (i.e. exact same form as the &#8220;working tree&#8221;), with no special attempt to compress or diff its storage.  Our content is typically a short text (&lt;8k?), so this seems like a reasonable simplification in the era of cheap big storage.</li>
+<li>it follows that branch (HEAD) can point to content that is not yet permanently committed, i.e. owner can go on modifying that content until they decide it&#8217;s ready to commit (or another event, e.g. fork, forces a commit).</li>
+</ul>
+</div>
+<div class="section" id="collaboration-philosophy">
+<h2>Collaboration Philosophy<a class="headerlink" href="#collaboration-philosophy" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Instructors are not expected to understand the Git version control model, especially complex concepts like branches and rebasing.</li>
+<li>instead, Unit provides intuitive freedom to modify a lesson however you want for this Unit, without affecting any other units.</li>
+<li>anyone can fork anything (creating new branch within that repository), but only the &#8220;master&#8221; branch owned by the instructor is shown to users as the &#8220;official version&#8221; of that repository.</li>
+<li>user can fork to create a new branch at several different levels<ul>
+<li>fork a Lesson either within same Unit or a different Unit.</li>
+<li>fork a Unit either within same Course or a different Course.  Forking a Unit in turn forks all the Lessons within that Unit.</li>
+<li>fork a Course either as new public course or private branch.  Forking a Course in turns forks all the Units within that Course.</li>
+</ul>
+</li>
+<li>in general, searches will operate only on &#8220;master&#8221; content (e.g. Lessons pointed to by UnitLessons with isMaster=True).</li>
+<li>following the Git model of &#8220;fine-grained&#8221; commit history will make automatic merge much more useful (by giving users easy control over what changes to accept).  This seems like the Git sweet-spot, i.e. the part that&#8217;s both easiest for users to understand, and most useful for them.  Besides, disk-space is not really an issue...  Policy:<ul>
+<li>if user provides a Commit Message after modifying an object, commit it permanently.</li>
+<li>various views should warn the instructor: &#8220;you have not committed a snapshot of the current version.  If you are done changing it (for the moment), please commit it by entering a Commit Message on the Edit tab&#8221;.</li>
+</ul>
+</li>
+<li>automatically commit when operationally appropriate.  While the user should be encouraged to commit fine-grained changes, we will commit automatically on various events:<ul>
+<li>checkout by someone other than Lesson owner (addedBy) will commit it, since otherwise changes by different people would get mixed in the same commit.</li>
+<li>fork</li>
+<li>publish</li>
+<li>Response</li>
+<li>course over (future commitTime): consider allowing commitTime to be set to a future date, so that it will automatically be considered committed at that time.  Also consider inheriting future commitTime from container (e.g. if Unit has future commitTime, creating a new UnitLesson in this Unit should inherit that future commitTime).</li>
+</ul>
+</li>
+<li>when someone first forks a lesson, ask them to review it carefully for typos or errors, and to make corrections (on the parent branch).  Hopefully this will mostly eliminate the need for propagating pull requests to &#8220;upstream&#8221; branches.  (Then ask them if they want to change the focus, audience or substance significantly, which adds a &#8220;cut&#8221; edge.)</li>
+<li>in general, everyone on &#8220;the same branch&#8221; (see bridge-cut description below) will receive pull requests for each other&#8217;s changes.</li>
+<li>goal is for auto-merge with manual resolution: top-down view of diffs lets you drill down.  If you need to intervene manually for some parts of the merge, you do so for those specific part(s).  Finally you can just accept the top-level merge and it will merge everything else automatically.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="proposed-data-model">
+<h1>Proposed data model<a class="headerlink" href="#proposed-data-model" title="Permalink to this headline">¶</a></h1>
+<ul>
+<li><p class="first"><strong>commitTime</strong> indicates commit status</p>
+<ul class="simple">
+<li>NULL indicates uncommitted</li>
+<li>commitTime in the future indicates uncommitted.  If container has future commitTime, new HEADs created in this container should inherit this future commitTime.</li>
+<li>commitTime in the past indicates committed.</li>
+</ul>
+</li>
+<li><p class="first"><strong>treeID, isMaster, branch</strong> multiple-HEAD model: within a given container (e.g. Unit) we can have many versions of something (with same treeID), one of which will have isMaster=True, and also distinguished by owner (addedBy) and branch name.  This model applies at several levels:</p>
+<ul class="simple">
+<li>UnitLesson: represents HEAD pointer for a Lesson</li>
+<li>CourseUnit: represents HEAD pointer for a Unit</li>
+<li>CourseBranch: represents HEAD pointer for a Course</li>
+</ul>
+</li>
+<li><p class="first">in a given course, master Unit, UnitLesson, Course IDs will not change.  I.e. when we add a Unit to a course with isMaster=True, we create a new Unit object (possibly cloned from an existing Unit in another course), and we keeping using that object in that course thereafter (unless of course the user deletes the unit from the course).  Similarly, whenever we add a UnitLesson with isMaster=True to a Unit (e.g. cloned from another Unit), we always add it as a newly created UnitLesson object, and we keep using that object in that Unit thereafter (unless of course the user deletes it).</p>
+</li>
+<li><p class="first">UnitLesson <strong>isMaster=True</strong> indicates what version will actually be shown in that Unit.  This allows many alternate versions (including student users&#8217;) in the same Unit, all but one of which have isMaster=False.  This field must be indexed in the db properly!!  Note that to keep public IDs stable, once a UnitLesson has isMaster=True, it becomes the public ID.  Another way of saying this: you will never reset it to isMaster=False (in order to set some other UnitLesson.isMaster=True), because that would change the public ID of this Lesson in this Unit.  Instead you just change what Lesson this UnitLesson points to (and possibly its branch name).</p>
+</li>
+<li><p class="first">Unit and Course should use <strong>commitID</strong> as the key value for pointing to parent(s), rather than just using primary key in the usual way.  This is a solid technical solution for allowing us to keep stable both the public ID and the parent pointer(s).  commitID rules:</p>
+<ul class="simple">
+<li>for an uncommitted object, commitID=NULL.</li>
+<li>for a newly committed object, commitID=self.pk</li>
+<li>when a committed object is cloned for checkout (see below), the commitID is copied to the commit-clone, and the original object (now checked out) is set to commitID=NULL to reflect that it is now checked out (uncommitted).</li>
+</ul>
+<p>We will have to supply a get_parent() method that looks up parent object by commitID.</p>
+<p>Note this issue does not apply to Lesson, because Lesson ID is never public (what&#8217;s publicly visible is the UnitLesson ID).</p>
+</li>
+<li><p class="first">Implies a fork-commit-checkout-clone pattern for Unit and Course if isMaster=True:</p>
+<ul class="simple">
+<li>when someone forks an object, we must commit it.</li>
+<li>when the owner wants to modify (checkout) the committed object, if it has isMaster=True, then we must clone it in a special way to preserve the HEAD ID.  Specifically, we create a clone of the committed HEAD object, remove the commit lock from our HEAD object, and make it point to the clone as its parent.  This preserves the tree structure while allowing us to continue editing the same HEAD ID.  Note that we only have to do this in the specific case where owner wants to modify (checkout) a <em>committed</em> isMaster=True object.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="structural-segmentation-policies">
+<h1>Structural Segmentation Policies<a class="headerlink" href="#structural-segmentation-policies" title="Permalink to this headline">¶</a></h1>
+<p>The Git/GitHub pull-request model is not suitable for Courselets, because its &#8220;code-pyramid&#8221; model is all about convergence to a &#8220;master&#8221; who can be relied on to decide what changes to accept.  In the Courselets community-remix-forest, by contrast, that will not work, because there is no such &#8220;master&#8221;; even more fundamentally, divergence (segmentation) is as valuable as convergence.  What we want is for segmentation to emerge naturally and with minimal effort from users, e.g. I should automatically receive pull-requests from within my &#8220;segment&#8221;, but not outside.</p>
+<p>We will achieve this via a mechanism of edges added onto a VCS tree that explicitly represent what &#8220;pull policy&#8221; a user wants to apply in the future to a given subtree:</p>
+<ul>
+<li><p class="first">emergent segmentation via bridge vs. cut edges: generalize Git&#8217;s concept of &#8220;merge strategy&#8221; to indicate whether you want to receive future pull requests or not.  E.g.</p>
+<ul class="simple">
+<li>suggest merging future pull-requests from this subtree (typically this would be associated with merging in last state of this subtree)</li>
+<li>offer option to merge ...</li>
+<li>hide ... (typically this would be associated with merge -s ours operation)</li>
+<li>NULL (no preference)</li>
+</ul>
+<p>You could also suggest flow the other direction:</p>
+<ul class="simple">
+<li>suggest merging my commits to this subtree</li>
+<li>offer option to merge ...</li>
+<li>hide ...</li>
+<li>NULL (no preference)</li>
+</ul>
+<p>For a given user considering possible things to merge into his branch, his PULL setting always overrides other people&#8217;s PUSH settings.</p>
+<p>Operates the same as recursive merge search, i.e. backtrack both HEADS until you find a common merge origin, bridge, or cut, whichever comes first.  Bridge propagates the pull-request; cut blocks it.</p>
+</li>
+<li><p class="first">useful to extract the clique-structure of which HEADs are convergent (get each other&#8217;s changes) vs. divergent (do not).</p>
+</li>
+<li><p class="first">can consider the PUSH-edge version of this to be a generalization of pull-requests.  That is, you can either suggest your changes to everyone (by adding PUSH edge from your HEAD to root of the tree), or to a specific branch / subtree.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="automatic-merge">
+<h1>Automatic Merge<a class="headerlink" href="#automatic-merge" title="Permalink to this headline">¶</a></h1>
+<p>Use my Word interval nested containment list 3-way merge algorithm.</p>
+<ul class="simple">
+<li>line-based diff (e.g. Git) cannot merge changes in the same paragraph</li>
+<li>Git cannot handle re-ordering / remixing; after a block of text is moved, changes within it can no longer be merged.</li>
+</ul>
+</div>
+<div class="section" id="vcs-user-interface">
+<h1>VCS User Interface<a class="headerlink" href="#vcs-user-interface" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>presumably there will be a new tab &#8220;Versions&#8221; or &#8220;History&#8221; that shows gitg-like diagram of commits and HEADs.  Allows user to click to view a diff, or switch branches etc.</li>
+<li>user who gets a pull-request can of course reject changes (selectively). (imagine this as table of commits with checkboxes so you can accept all, none, or subset.</li>
+<li>can propagate pull requests to downstream branches, but only if they map cleanly onto that branch.</li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Django Version Collaboration System for Courselets</a><ul>
+<li><a class="reference internal" href="#basic-goals">Basic goals</a></li>
+<li><a class="reference internal" href="#vcs-layers">VCS layers</a></li>
+<li><a class="reference internal" href="#collaboration-philosophy">Collaboration Philosophy</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#proposed-data-model">Proposed data model</a></li>
+<li><a class="reference internal" href="#structural-segmentation-policies">Structural Segmentation Policies</a></li>
+<li><a class="reference internal" href="#automatic-merge">Automatic Merge</a></li>
+<li><a class="reference internal" href="#vcs-user-interface">VCS User Interface</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../fsm.html"
+                        title="previous chapter">Writing Guided Activities (Finite State Machines)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/pep/django_vcs.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../fsm.html" title="Writing Guided Activities (Finite State Machines)"
+             >previous</a> |</li>
+        <li><a href="../index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

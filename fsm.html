@@ -24,6 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="next" title="Django Version Collaboration System for Courselets" href="pep/django_vcs.html" />
     <link rel="prev" title="Getting Started with Socraticqs2 Development" href="devintro.html" /> 
   </head>
   <body>
@@ -33,6 +34,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
              accesskey="P">previous</a> |</li>
@@ -332,8 +336,12 @@ Python source code files in the <tt class="docutils literal"><span class="pre">m
 </div>
 <div class="section" id="fsm-reference-documentation">
 <h2>FSM Reference Documentation<a class="headerlink" href="#fsm-reference-documentation" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="fsm">
-<h3>FSM<a class="headerlink" href="#fsm" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fsmspecification">
+<h3>FSMSpecification<a class="headerlink" href="#fsmspecification" title="Permalink to this headline">¶</a></h3>
+<p>Provides an interface for loading a Guided Activity specification
+into the database.  Displayed as an option in the
+<strong>Start Activity</strong> menu according to its <tt class="docutils literal"><span class="pre">fsmGroups</span></tt> attribute
+(see below).</p>
 <p><strong>Important attributes to set in your FSM specification:</strong></p>
 <dl class="attribute">
 <dt id="name">
@@ -347,7 +355,8 @@ UI searches for an FSM named <tt class="docutils literal"><span class="pre">less
 <dl class="attribute">
 <dt id="title">
 <tt class="descname">title</tt><a class="headerlink" href="#title" title="Permalink to this definition">¶</a></dt>
-<dd><p>The title which will be displayed by default for the FSM,
+<dd><p>Displayed in the Start Activity menu.</p>
+<p>Also sets the title which will be displayed by default for the FSM,
 unless its plug-in code <tt class="docutils literal"><span class="pre">start_event()</span></tt> explicitly overrides that
 by writing a new value to the <tt class="docutils literal"><span class="pre">FSMState.title</span></tt> for this running
 FSM instance.</p>
@@ -357,7 +366,21 @@ FSM instance.</p>
 <dt id="description">
 <tt class="descname">description</tt><a class="headerlink" href="#description" title="Permalink to this definition">¶</a></dt>
 <dd><p>An explanation of what this Guided Activity does for the user,
-to be displayed in the Activity Center UI etc.</p>
+to be displayed in the Activity Center UI, as a tooltip for this
+option in the Start Activity menu, etc.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fsmGroups">
+<tt class="descname">fsmGroups</tt><a class="headerlink" href="#fsmGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional.  A list of one or more <em>user interface group</em> names
+(just a string) that this FSM should be listed in, on the
+<strong>Start Activity</strong> menu.</p>
+<p>Currently, there are two user interface groups:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">'teach/unit_tasks'</span></tt>: displayed on the instructor <tt class="docutils literal"><span class="pre">unit_tasks</span></tt> page.</li>
+<li><tt class="docutils literal"><span class="pre">'teach/unit/published'</span></tt>: same as above, but only if unit published.</li>
+</ul>
 </dd></dl>
 
 <dl class="attribute">
@@ -375,7 +398,9 @@ to be displayed in the Activity Center UI etc.</p>
 <dl class="attribute">
 <dt id="hideLinks">
 <tt class="descname">hideLinks</tt><a class="headerlink" href="#hideLinks" title="Permalink to this definition">¶</a></dt>
-<dd><p>If set True, block hyperlinks from being clickable while this FSM is running.</p>
+<dd><p><strong>Not yet implemented: turning this option doesn&#8217;t actually do anything
+yet</strong>.  If set True, block hyperlinks from being clickable while this
+FSM is running.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -385,6 +410,20 @@ to be displayed in the Activity Center UI etc.</p>
 is running.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="save_graph">
+<tt class="descname">save_graph</tt><big>(</big><em>username</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#save_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load FSM specification into the database, owned by the specified
+<tt class="docutils literal"><span class="pre">username</span></tt>.  Arguments are passed to <tt class="docutils literal"><span class="pre">FSM.save_graph()</span></tt> (see below).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="fsm">
+<h3>FSM<a class="headerlink" href="#fsm" title="Permalink to this headline">¶</a></h3>
+<p>Database object representing a Guided Activity.  Displayed as an option in the
+<strong>Start Activity</strong> menu according to the <tt class="docutils literal"><span class="pre">fsmGroups</span></tt> attribute
+(see above).  Actually stores the attributes listed above for an FSM
+specification.  In addition, you can use the following in your code:</p>
 <p><strong>Useful methods</strong>:</p>
 <dl class="method">
 <dt id="get_node">
@@ -393,8 +432,8 @@ is running.</p>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="save_graph">
-<em class="property">classmethod </em><tt class="descname">save_graph</tt><big>(</big><em>klass</em>, <em>fsmData</em>, <em>nodeData</em>, <em>edgeData</em>, <em>username</em>, <em>oldLabel='OLD'</em><big>)</big><a class="headerlink" href="#save_graph" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">classmethod </em><tt class="descname">save_graph</tt><big>(</big><em>klass</em>, <em>fsmData</em>, <em>nodeData</em>, <em>edgeData</em>, <em>username</em>, <em>fsmGroups=()</em>, <em>oldLabel='OLD'</em><big>)</big></dt>
 <dd><p><strong>this is a low-level call; in general you should use the higher
 level call FSMSpecification.save_graph() instead</strong>.
 Store FSM specification from node, edge graph
@@ -471,9 +510,47 @@ and bound to the current <tt class="docutils literal"><span class="pre">FSMState
 </dd></dl>
 
 <p><strong>Plug-in code</strong>:</p>
-<p>You can supply three types of plug-in methods on a Node specification
+<p>You can supply four types of plug-in methods on a Node specification
 class:</p>
 <ul>
+<li><p class="first"><strong>help method</strong>: if a node needs to control exactly what help message
+should be displayed on <em>any</em> given view (page), you can supply a
+<tt class="docutils literal"><span class="pre">get_help()</span></tt> method to do so.  It must return a help message as a
+string, based on the current page that is being requested, or
+<tt class="docutils literal"><span class="pre">None</span></tt> if the current page should be considered &#8220;off-path&#8221; (in
+which case a default message will be displayed).</p>
+<p>Note that even
+<em>without</em> such a method, the node&#8217;s <tt class="docutils literal"><span class="pre">help</span></tt> attribute will automatically
+be shown as the help message for the view associated with this node,
+and the &#8220;off-path&#8221; message will be shown on all other views.  So
+the only case where you need to supply this method is when your
+node needs to supply help messages for multiple possible views.</p>
+<p>The <tt class="docutils literal"><span class="pre">get_help()</span></tt> method definition must be of the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="s">&#39;provide help messages for all views relevant to this stage.&#39;</span>
+        <span class="n">hits</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;ct:wikipedia_concept&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;If this definition approximately matches the concept you</span>
+<span class="sd">            want to teach about, click Add.  Otherwise click the browser</span>
+<span class="sd">            Back button to go back to the Search concepts page.&#39;&#39;&#39;</span><span class="p">,</span>
+
+            <span class="s">&#39;ct:concept_teach&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;If this definition approximately matches the concept you</span>
+<span class="sd">            want to teach about, click Add.  Otherwise click the browser</span>
+<span class="sd">            Back button to go back to the Search concepts page.&#39;&#39;&#39;</span><span class="p">,</span>
+
+            <span class="s">&#39;ct:concept_lessons&#39;</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;If this definition approximately matches the concept you</span>
+<span class="sd">            want to teach about, you can write a new Lesson about it</span>
+<span class="sd">            below.&#39;&#39;&#39;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">fsm_on_path</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">help</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">hits</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">resolver_match</span><span class="o">.</span><span class="n">view_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
 <li><p class="first"><strong>path method</strong>: if a node must determine its URL dynamically, you
 can supply a <tt class="docutils literal"><span class="pre">get_path()</span></tt> method to do so.  It must return a
 URL string of the form <tt class="docutils literal"><span class="pre">'/ct/some/path/'</span></tt>.  Note the trailing
@@ -676,6 +753,7 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
 </li>
 <li><a class="reference internal" href="#an-example-lesson-sequence-fsm">An Example: Lesson Sequence FSM</a></li>
 <li><a class="reference internal" href="#fsm-reference-documentation">FSM Reference Documentation</a><ul>
+<li><a class="reference internal" href="#fsmspecification">FSMSpecification</a></li>
 <li><a class="reference internal" href="#fsm">FSM</a></li>
 <li><a class="reference internal" href="#fsmnode">FSMNode</a></li>
 <li><a class="reference internal" href="#fsmedge">FSMEdge</a></li>
@@ -689,6 +767,9 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
   <h4>Previous topic</h4>
   <p class="topless"><a href="devintro.html"
                         title="previous chapter">Getting Started with Socraticqs2 Development</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pep/django_vcs.html"
+                        title="next chapter">Django Version Collaboration System for Courselets</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/fsm.txt"
@@ -717,6 +798,9 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             >next</a> |</li>
         <li class="right" >
           <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
              >previous</a> |</li>
