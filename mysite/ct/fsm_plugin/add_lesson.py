@@ -91,7 +91,10 @@ def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='add_lesson', hideTabs=True,
             title='Add a New Lesson',
+            description='''Guides you through the steps of adding a new
+            lesson to this courselet''',
             pluginNodes=[START, SEARCH, CONCEPTS, WRITE, END],
+            fsmGroups=('teach/unit_tasks',),
         )
     return (spec,)
 
