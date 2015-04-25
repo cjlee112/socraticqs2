@@ -111,6 +111,6 @@ def get_specs():
             description='''You can begin teaching this courselet in a
             live classroom session by clicking here:''',
             pluginNodes=[START, CHOOSE, QUESTION, ANSWER, RECYCLE, END],
-            fsmGroups=('teach/unit_tasks',),
+            fsmGroups=('teach/unit/published',),
         )
     return (spec,)

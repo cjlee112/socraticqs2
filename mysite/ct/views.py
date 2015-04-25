@@ -176,26 +176,27 @@ class PageData(object):
                addNextButton=False, fsmGroups=(), **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         self.path = request.path
+        self.fsmLauncher = {}
+        self.fsmData = {}
         if self.fsmStack.state:
             if self.fsmStack.state.hideTabs: # turn off tab interface
                 self.navTabs = ()
             self.fsm_help_message = self.fsmStack.state.fsmNode \
               .get_help(self.fsmStack.state, request)
+        else: # only show Start Activity menu if no FSM running
+            for groupName, data in fsmGroups: # set up fsmLauncher
+                for fsm in FSM.objects.filter(fsmgroup__group=groupName):
+                    if fsm.description:
+                        submitArgs = dict(title=fsm.description)
+                    else:
+                        submitArgs = {}
+                    self.fsmLauncher[fsm.name] = (LaunchFSMForm(fsm.name,
+                                    fsm.title, submitArgs=submitArgs), fsm)
+                    self.fsmData[fsm.name] = data
         if templateArgs: # avoid side-effects of modifying caller's dict
             templateArgs = templateArgs.copy()
         else:
             templateArgs = {}
-        self.fsmLauncher = {}
-        self.fsmData = {}
-        for groupName, data in fsmGroups: # set up fsmLauncher
-            for fsm in FSM.objects.filter(fsmgroup__group=groupName):
-                if fsm.description:
-                    submitArgs = dict(title=fsm.description)
-                else:
-                    submitArgs = {}
-                self.fsmLauncher[fsm.name] = (LaunchFSMForm(fsm.name,
-                                fsm.title, submitArgs=submitArgs), fsm)
-                self.fsmData[fsm.name] = data
         templateArgs['user'] = request.user
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
@@ -653,7 +654,7 @@ def _lessons(request, pageData, concept=None, msg='',
         searchForm = searchFormClass()
     else:
         searchForm = None
-    lessonSet = ()
+    lessonSet = foundNothing = ()
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks, unit)
@@ -688,6 +689,7 @@ def _lessons(request, pageData, concept=None, msg='',
             if searchType is None:
                 searchType = searchForm.cleaned_data['searchType']
             lessonSet = UnitLesson.search_text(s, searchType)
+            foundNothing = not lessonSet
     if showReorderForm and lessonTable:
         for ul in lessonTable:
             ul.reorderForm = ReorderForm(ul.order, len(lessonTable))
@@ -697,7 +699,8 @@ def _lessons(request, pageData, concept=None, msg='',
                        lessonForm=lessonForm, conceptLinks=conceptLinks,
                        actionLabel=actionLabel, lessonTable=lessonTable,
                        creationInstructions=creationInstructions,
-                       showReorderForm=showReorderForm))
+                       showReorderForm=showReorderForm,
+                       foundNothing=foundNothing))
     return pageData.render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
@@ -754,7 +757,11 @@ def unit_tasks(request, course_id, unit_id):
     taskTable = [(ul, ulDict[ul]) for ul in newInquiryULs]
     taskTable += [(ul, ulDict[ul]) for ul in ulDict
                   if ul not in newInquiryULs]
-    fsmGroups=(('teach/unit_tasks', dict(unit=unit, course=course)),)
+    fsmGroups=[('teach/unit_tasks', dict(unit=unit, course=course))]
+    if cu.releaseTime and cu.releaseTime < timezone.now() \
+      and not unit.no_lessons():
+        fsmGroups.append(('teach/unit/published',
+                          dict(unit=unit, course=course)))
     return pageData.render(request, 'ct/unit_tasks.html',
                            dict(unit=unit, taskTable=taskTable,
                                 courseUnit=cu), fsmGroups=fsmGroups)
