@@ -306,8 +306,13 @@ the ``lessonseq`` specification::
 FSM Reference Documentation
 -----------------------------
 
-FSM
-....
+FSMSpecification
+......................
+
+Provides an interface for loading a Guided Activity specification
+into the database.  Displayed as an option in the 
+**Start Activity** menu according to its ``fsmGroups`` attribute
+(see below).
 
 **Important attributes to set in your FSM specification:**
 
@@ -320,7 +325,9 @@ FSM
 
 .. attribute:: title
 
-   The title which will be displayed by default for the FSM,
+   Displayed in the Start Activity menu.
+
+   Also sets the title which will be displayed by default for the FSM,
    unless its plug-in code ``start_event()`` explicitly overrides that
    by writing a new value to the ``FSMState.title`` for this running
    FSM instance.
@@ -328,7 +335,19 @@ FSM
 .. attribute:: description
 
    An explanation of what this Guided Activity does for the user,
-   to be displayed in the Activity Center UI etc.
+   to be displayed in the Activity Center UI, as a tooltip for this
+   option in the Start Activity menu, etc.
+
+.. attribute:: fsmGroups
+
+   Optional.  A list of one or more *user interface group* names
+   (just a string) that this FSM should be listed in, on the
+   **Start Activity** menu.
+
+   Currently, there are two user interface groups:
+
+   * ``'teach/unit_tasks'``: displayed on the instructor ``unit_tasks`` page.
+   * ``'teach/unit/published'``: same as above, but only if unit published.
 
 .. attribute:: help
 
@@ -340,12 +359,27 @@ FSM
 
 .. attribute:: hideLinks
 
-   If set True, block hyperlinks from being clickable while this FSM is running.
+   **Not yet implemented: turning this option doesn't actually do anything
+   yet**.  If set True, block hyperlinks from being clickable while this
+   FSM is running.
 
 .. attribute:: hideNav
 
    If set True, hide the generic navigation bar options while this FSM
    is running.
+
+.. method:: save_graph(username, *args, **kwargs)
+
+   Load FSM specification into the database, owned by the specified 
+   ``username``.  Arguments are passed to ``FSM.save_graph()`` (see below).
+
+FSM
+....
+
+Database object representing a Guided Activity.  Displayed as an option in the 
+**Start Activity** menu according to the ``fsmGroups`` attribute
+(see above).  Actually stores the attributes listed above for an FSM
+specification.  In addition, you can use the following in your code:
 
 **Useful methods**:
 
@@ -353,7 +387,7 @@ FSM
 
    Get node in this FSM with specified *name*.
 
-.. classmethod:: save_graph(klass, fsmData, nodeData, edgeData, username, oldLabel='OLD')
+.. classmethod:: save_graph(klass, fsmData, nodeData, edgeData, username, fsmGroups=(), oldLabel='OLD')
 
    **this is a low-level call; in general you should use the higher
    level call FSMSpecification.save_graph() instead**.
@@ -422,8 +456,47 @@ FSMNode
 
 **Plug-in code**:
 
-You can supply three types of plug-in methods on a Node specification
+You can supply four types of plug-in methods on a Node specification
 class:
+
+* **help method**: if a node needs to control exactly what help message
+  should be displayed on *any* given view (page), you can supply a
+  ``get_help()`` method to do so.  It must return a help message as a
+  string, based on the current page that is being requested, or
+  ``None`` if the current page should be considered "off-path" (in
+  which case a default message will be displayed).
+
+  Note that even
+  *without* such a method, the node's ``help`` attribute will automatically
+  be shown as the help message for the view associated with this node,
+  and the "off-path" message will be shown on all other views.  So
+  the only case where you need to supply this method is when your
+  node needs to supply help messages for multiple possible views.
+
+  The ``get_help()`` method definition must be of the following form::
+
+    class FOO(object):
+        def get_help(self, node, state, request):
+            'provide help messages for all views relevant to this stage.'
+            hits = {'ct:wikipedia_concept':
+                '''If this definition approximately matches the concept you
+                want to teach about, click Add.  Otherwise click the browser
+                Back button to go back to the Search concepts page.''',
+            
+                'ct:concept_teach':
+                '''If this definition approximately matches the concept you
+                want to teach about, click Add.  Otherwise click the browser
+                Back button to go back to the Search concepts page.''',
+
+                'ct:concept_lessons':
+                '''If this definition approximately matches the concept you
+                want to teach about, you can write a new Lesson about it
+                below.'''
+            }
+            if state.fsm_on_path(request.path):
+                return node.help
+            if request.path.startswith(state.path):
+                return hits.get(request.resolver_match.view_name, None)
 
 * **path method**: if a node must determine its URL dynamically, you
   can supply a ``get_path()`` method to do so.  It must return a 
