@@ -1236,7 +1236,7 @@ class FSM(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     @classmethod
-    def save_graph(klass, fsmData, nodeData, edgeData, username,
+    def save_graph(klass, fsmData, nodeData, edgeData, username, fsmGroups=(),
                   oldLabel='OLD'):
         '''store FSM specification from node, edge graph
         by renaming any existing
@@ -1262,8 +1262,13 @@ class FSM(models.Model):
             else:
                 old.name = oldName
                 old.save()
+                for g in old.fsmgroup_set.all():
+                    g.delete()
+                ## old.fsmgroup_set.clear() # RelatedManager has no attribute clear
             f = klass(addedBy=user, **fsmData) # create new FSM
             f.save()
+            for groupName in fsmGroups:# register in specified groups
+                f.fsmgroup_set.create(group=groupName)
             nodes = {}
             for name, nodeDict in nodeData.items(): # save nodes
                 node = FSMNode(name=name, fsm=f, addedBy=user, **nodeDict)
@@ -1285,6 +1290,12 @@ class FSM(models.Model):
         'get node in this FSM with specified name'
         return self.fsmnode_set.get(name=name)
 
+class FSMGroup(models.Model):
+    'groups multiple FSMs into one named UI group'
+    fsm = models.ForeignKey(FSM)
+    group = models.CharField(max_length=64)
+
+    
 class PluginDescriptor(object):
     'self-caching plugin access property'
     def __get__(self, obj, objtype):

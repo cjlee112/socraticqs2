@@ -37,15 +37,6 @@ $( "#headtoggle" ).click(function() {
 <div class="tab-content">
   <div class="tab-pane active" id="TasksTabDiv">
 
-{% if not courseUnit.releaseTime %}
-<p><b>This courselet has not yet been published for student access.</b>
-When you are ready to publish it, click the <b>Edit</b> tab.</p>
-{% elif startForm %}
-  You can begin teaching this courselet in a live classroom session
-  by clicking Start:
-  {% crispy startForm %}
-{% endif %}
-
 <table class="table table-striped">
 <thead><tr>
   <th>Lesson</th><th>Next Steps to work on</th>
@@ -61,6 +52,7 @@ When you are ready to publish it, click the <b>Edit</b> tab.</p>
         click the <b>Concepts</b> tab to search for relevant concept
         definitions (or write a new concept definition).</li>
   </ul></td></tr>
+
 {% elif unit.no_orct %}
   <tr><td>(your first question: test understanding of the concept(s)
            you defined)</td>
@@ -72,6 +64,12 @@ When you are ready to publish it, click the <b>Edit</b> tab.</p>
         click the <b>Concepts</b> tab to search for relevant concept
         definitions (or write a new concept definition).</li>
   </ul></td></tr>
+
+{% elif not courseUnit.releaseTime %}
+  <tr class="warning">
+    <td><b>This courselet has not yet been published for student access.</b></td>
+    <td>When you are ready to publish it, click the <b>Edit</b> tab.</td>
+  </tr>
 {% endif %}
 
 {% for ul,tasks in taskTable %}

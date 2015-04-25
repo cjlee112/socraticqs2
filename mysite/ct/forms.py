@@ -82,15 +82,23 @@ class NextLikeForm(forms.Form):
     
 
 class NextForm(forms.Form):
-    fsmtask = forms.CharField(initial='next', widget=forms.HiddenInput)
-    def __init__(self, *args, **kwargs):
+    fsmtask = forms.CharField(widget=forms.HiddenInput)
+    def __init__(self, label='Next', fsmtask='next', submitArgs={},
+                 *args, **kwargs):
         super(NextForm, self).__init__(*args, **kwargs)
+        self.fields['fsmtask'].initial = fsmtask
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-nextForm'
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Next'))
-    
+        self.helper.add_input(Submit('submit', label, **submitArgs))
+
+class LaunchFSMForm(NextForm):
+    fsmName = forms.CharField(widget=forms.HiddenInput)
+    def __init__(self, fsmName, label, fsmtask='launch',
+                 *args, **kwargs):
+        super(LaunchFSMForm, self).__init__(label, fsmtask, *args, **kwargs)
+        self.fields['fsmName'].initial = fsmName
 
 class TaskForm(forms.Form):
     task = forms.CharField(widget=forms.HiddenInput)

@@ -130,6 +130,11 @@ class PageData(object):
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
                      addNextButton=False, vagueEvents=('next',), **kwargs):
         'check whether fsm intercepts this event and returns redirect'
+        if request.method == 'POST' and \
+              'launch' == request.POST.get('fsmtask', None):
+            fsmName = request.POST['fsmName'] # launch specified FSM
+            fsmArgs = self.fsmData[fsmName]
+            return self.fsm_push(request, fsmName, fsmArgs)
         if not self.fsmStack.state: # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
         # now we check here whether event is actually from path matching
@@ -168,7 +173,7 @@ class PageData(object):
         elif defaultURL: # otherwise follow the default
             return HttpResponseRedirect(defaultURL)
     def render(self, request, templatefile, templateArgs=None,
-               addNextButton=False, **kwargs):
+               addNextButton=False, fsmGroups=(), **kwargs):
         'let fsm adjust view / redirect prior to rendering'
         self.path = request.path
         if self.fsmStack.state:
@@ -180,6 +185,17 @@ class PageData(object):
             templateArgs = templateArgs.copy()
         else:
             templateArgs = {}
+        self.fsmLauncher = {}
+        self.fsmData = {}
+        for groupName, data in fsmGroups: # set up fsmLauncher
+            for fsm in FSM.objects.filter(fsmgroup__group=groupName):
+                if fsm.description:
+                    submitArgs = dict(title=fsm.description)
+                else:
+                    submitArgs = {}
+                self.fsmLauncher[fsm.name] = (LaunchFSMForm(fsm.name,
+                                fsm.title, submitArgs=submitArgs), fsm)
+                self.fsmData[fsm.name] = data
         templateArgs['user'] = request.user
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
@@ -727,10 +743,6 @@ def unit_tasks(request, course_id, unit_id):
     cu = course.courseunit_set.get(unit=unit)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Tasks'))
-    startForm = push_button(request)
-    if not startForm: # user clicked Start
-        return pageData.fsm_push(request, 'liveteach',
-                                 dict(unit=unit, course=course))
     newInquiryULs = frozenset(unit.get_new_inquiry_uls())
     ulDict = {}
     for ul in newInquiryULs:
@@ -742,9 +754,10 @@ def unit_tasks(request, course_id, unit_id):
     taskTable = [(ul, ulDict[ul]) for ul in newInquiryULs]
     taskTable += [(ul, ulDict[ul]) for ul in ulDict
                   if ul not in newInquiryULs]
+    fsmGroups=(('teach/unit_tasks', dict(unit=unit, course=course)),)
     return pageData.render(request, 'ct/unit_tasks.html',
                            dict(unit=unit, taskTable=taskTable,
-                                courseUnit=cu, startForm=startForm))
+                                courseUnit=cu), fsmGroups=fsmGroups)
 
     
 

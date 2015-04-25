@@ -108,6 +108,9 @@ def get_specs():
     'get FSM specifications stored in this file'
     spec = FSMSpecification(name='liveteach', 
             title='Teach a live (classroom) session',
+            description='''You can begin teaching this courselet in a
+            live classroom session by clicking here:''',
             pluginNodes=[START, CHOOSE, QUESTION, ANSWER, RECYCLE, END],
+            fsmGroups=('teach/unit_tasks',),
         )
     return (spec,)

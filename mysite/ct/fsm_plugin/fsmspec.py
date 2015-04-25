@@ -4,10 +4,11 @@ class FSMSpecification(object):
     'convenience class for specifying an FSM graph, loading it'
     def __init__(self, name, title, nodeDict=None, edges=None,
                  pluginNodes=(), attrs=('help', 'path', 'data', 'doLogging'),
-                 **kwargs):
+                 fsmGroups=(), **kwargs):
         kwargs['name'] = name
         kwargs['title'] = title
         self.fsmData = kwargs
+        self.fsmGroups = fsmGroups
         if not nodeDict:
             nodeDict = {}
         if not edges:
@@ -30,7 +31,7 @@ class FSMSpecification(object):
     def save_graph(self, *args, **kwargs):
         'load this FSM specification into the database'
         return FSM.save_graph(self.fsmData, self.nodeData, self.edgeData,
-                                   *args, **kwargs)
+                              fsmGroups=self.fsmGroups, *args, **kwargs)
             
 class CallerNode(object):
     'base class for node representing a call to a sub-FSM'
