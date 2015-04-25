@@ -1,5 +1,4 @@
 from ct.models import *
-from fsmspec import FSMSpecification
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     'edge method that moves us to right state for next lesson (or END)'
@@ -91,6 +90,7 @@ class END(object):
         
 def get_specs():
     'get FSM specifications stored in this file'
+    from fsmspec import FSMSpecification
     spec = FSMSpecification(name='lessonseq', hideTabs=True,
             title='Take the courselet core lessons',
             pluginNodes=[START, LESSON, ASK, ASSESS, ERRORS, END],

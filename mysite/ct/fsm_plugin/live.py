@@ -1,5 +1,4 @@
 from ct.models import *
-from fsmspec import FSMSpecification
 
 def quit_edge(self, edge, fsmStack, request, **kwargs):
     'edge method that terminates this live-session'
@@ -106,6 +105,7 @@ class END(object):
 
 def get_specs():
     'get FSM specifications stored in this file'
+    from fsmspec import FSMSpecification
     spec = FSMSpecification(name='liveteach', 
             title='Teach a live (classroom) session',
             description='''You can begin teaching this courselet in a

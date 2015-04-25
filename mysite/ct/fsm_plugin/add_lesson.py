@@ -1,5 +1,4 @@
 from ct.models import *
-from fsmspec import FSMSpecification
 
 class START(object):
     '''Typically this involves several steps:
@@ -89,6 +88,7 @@ class END(object):
         
 def get_specs():
     'get FSM specifications stored in this file'
+    from fsmspec import FSMSpecification
     spec = FSMSpecification(name='add_lesson', hideTabs=True,
             title='Add a New Lesson',
             description='''Guides you through the steps of adding a new
