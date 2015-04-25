@@ -40,3 +40,23 @@ class CallerNode(object):
         fsmStack.pop(request, eventName='exceptCancel') # cancel this FSM
         return edge.toNode
     
+def deploy(modname, username, prefix='ct.fsm_plugin.'):
+    'load FSM specifications found in the specified plugin module'
+    import importlib
+    mod = importlib.import_module(prefix + modname)
+    l = []
+    for fsmSpec in mod.get_specs():
+        l.append(fsmSpec.save_graph(username))
+    return l
+
+def deploy_all(username, ignore=('testme', '__init__', 'fsmspec'),
+               pattern='ct/fsm_plugin/*.py'):
+    'load all FSM specifications found via pattern but not ignore'
+    import glob
+    import os.path
+    l = []
+    for modpath in glob.glob(pattern):
+        modname = os.path.basename(modpath)[:-3]
+        if modname not in ignore:
+            l += deploy(modname, username)
+    return l
