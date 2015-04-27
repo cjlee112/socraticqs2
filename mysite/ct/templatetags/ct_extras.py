@@ -59,7 +59,7 @@ def audio_html(filename):
     i = filename.rfind('.')
     if i > 0: # remove file suffix
         filename = filename[:i]
-    return '<audio controls><source src="STATICIMAGE/%s.ogg" type="audio/ogg"><source src="STATICIMAGE/%s.mp3" type="audio/mpeg">no support for audio!</audio>' \
+    return '<audio controls><source src="%s.ogg" type="audio/ogg"><source src="%s.mp3" type="audio/mpeg">no support for audio!</audio>' \
       % (filename,filename)
     
 def video_html(filename):
