@@ -226,7 +226,7 @@ class NewErrorForm(forms.ModelForm):
 
 class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
-    changeLog = forms.CharField(required=False, initial='',
+    changeLog = forms.CharField(required=False,
             label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
     class Meta:
         model = Lesson

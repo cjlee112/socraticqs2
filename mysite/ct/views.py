@@ -942,7 +942,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     if notInstructor:
         titleform = None
     else: # let instructor edit this lesson
-        titleform = formClass(instance=ul.lesson)
+        titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
         if request.method == 'POST':
             if 'title' in request.POST:
                 lesson = ul.checkout(request.user)
