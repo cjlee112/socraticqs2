@@ -69,10 +69,10 @@ class LTIUser(models.Model):
         course = Course.objects.filter(id=course_id)
         if course:
             course = course[0]
-        for role in roles:
-            Role.objects.get_or_create(course=course,
-                                       user=self.django_user,
-                                       role=role)
+            for role in roles:
+                Role.objects.get_or_create(course=course,
+                                           user=self.django_user,
+                                           role=role)
 
     def is_enrolled(self, roles, course_id):
         if not isinstance(roles, list):

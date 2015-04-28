@@ -17,14 +17,13 @@
 
 {% for similar, backends in similar_users.items %}
 <div class="row">
-  <p>To merge user <b>
+  <p>In order to merge <b>
       {% if similar.get_full_name %}
-        {{ similar.get_full_name }}
+        "{{ similar.get_full_name }}"
       {% else %}
-        {{ similar.username }}
+        "{{ similar.username }}"
       {% endif %}
-  </b> login with following
-     social/email accounts using you primary email <b>{{ user.email }}</b></p>
+  </b> you should login using one of the suggested accounts using your primary email: <b>{{ user.email }}</b></p>
   {% for name, backend in backends %}
   <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}"
      href="{% url 'social:begin' backend=name %}">

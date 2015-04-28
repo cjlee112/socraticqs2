@@ -6,9 +6,7 @@ from django.contrib import messages
 
 
 class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
-    """
-    Handler for Social exceptions such as AuthAlreadyAssociated
-    """
+    """Handler for Social exceptions such as AuthAlreadyAssociated"""
     def process_exception(self, request, exception):
         if hasattr(social_exceptions, exception.__class__.__name__):
             user_id = request.user.id
