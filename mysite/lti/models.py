@@ -86,4 +86,4 @@ class LTIUser(models.Model):
 
     @property
     def is_linked(self):
-        return self.django_user
+        return bool(self.django_user)

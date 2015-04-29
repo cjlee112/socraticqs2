@@ -1,5 +1,7 @@
 # coding=utf-8
 
+import json
+import oauth2
 from mock import patch
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
@@ -196,3 +198,58 @@ class ParamsTest(LTITestCase):
             self.assertTrue(Role.objects.filter(role='student').exists())
             self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
                              social.user)
+
+
+class ExceptionTest(LTITestCase):
+    """Test raising exception."""
+    def test_missing_signature(self):
+        with patch('lti.views.DjangoToolProvider') as mocked:
+            mocked.return_value.is_valid_request.side_effect = oauth2.MissingSignature()
+            response = self.client.get('/lti/ct/courses/1/', follow=True)
+            self.assertTemplateUsed(response, template_name='error.html')
+
+    def test_oauth_error(self):
+        with patch('lti.views.DjangoToolProvider') as mocked:
+            mocked.return_value.is_valid_request.side_effect = oauth2.Error()
+            response = self.client.get('/lti/ct/courses/1/', follow=True)
+            self.assertTemplateUsed(response, template_name='error.html')
+
+    def test_key_error(self):
+        with patch('lti.views.DjangoToolProvider') as mocked:
+            mocked.return_value.is_valid_request.side_effect = KeyError()
+            response = self.client.get('/lti/ct/courses/1/', follow=True)
+            self.assertTemplateUsed(response, template_name='error.html')
+
+    def test_attribute_error(self):
+        with patch('lti.views.DjangoToolProvider') as mocked:
+            mocked.return_value.is_valid_request.side_effect = AttributeError()
+            response = self.client.get('/lti/ct/courses/1/', follow=True)
+            self.assertTemplateUsed(response, template_name='error.html')
+
+
+class ModelTest(LTITestCase):
+    """Test model LTIUser."""
+    def test_lti_user(self):
+        lti_user = LTIUser(user_id=1,
+                           consumer='test_consimer',
+                           extra_data=json.dumps(self.headers),
+                           django_user=self.user,
+                           course_id=1)
+        lti_user.save()
+
+        self.assertTrue(lti_user.is_linked)
+        self.assertFalse(lti_user.is_enrolled('student', 1))
+
+        lti_user.enroll('student', 1)
+        self.assertTrue(lti_user.is_enrolled('student', 1))
+
+    def test_lti_user_create_links(self):
+        lti_user = LTIUser(user_id=1,
+                           consumer='test_consimer',
+                           extra_data=json.dumps(self.headers),
+                           course_id=1)
+        lti_user.save()
+
+        self.assertFalse(lti_user.is_linked)
+        lti_user.create_links()
+        self.assertTrue(lti_user.is_linked)

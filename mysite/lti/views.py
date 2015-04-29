@@ -33,15 +33,10 @@ def lti_init(request, course_id=None, unit_id=None):
         is_valid = tool.is_valid_request(request)
         session['message'] = "We are cool!"
         session['target'] = '_blank'
-    except oauth2.MissingSignature, e:
-        is_valid = False
-        session['message'] = "{}".format(e)
-        pass
-    except oauth2.Error, e:
-        is_valid = False
-        session['message'] = "{}".format(e)
-        pass
-    except KeyError, e:
+    except (oauth2.MissingSignature,
+            oauth2.Error,
+            KeyError,
+            AttributeError) as e:
         is_valid = False
         session['message'] = "{}".format(e)
         pass
