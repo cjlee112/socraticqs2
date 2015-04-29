@@ -48,28 +48,6 @@ def custom_login(request):
                                                               }))
 
 
-# TODO Rewrite to user django-rest APIView
-@login_required
-def change_anonym_email(request):
-    if request.POST:
-        email = request.POST.get('email').lower()
-        user = request.user
-        try:
-            email = AnonymEmail(user=user, email=email, date=datetime.now())
-            email.save()
-        except IntegrityError:
-            return HttpResponseBadRequest('Improperly configured request.')
-        return redirect('/ct/')
-    else:
-        return render_to_response('psa/anonym-email-change.html',
-                                  context_instance=RequestContext(request))
-
-
-def anonym_restore(request):
-    return render_to_response('psa/anonym-restore.html',
-                              context_instance=RequestContext(request))
-
-
 @login_required
 @render_to('ct/person.html')
 def done(request):
@@ -96,8 +74,6 @@ def set_pass(request):
                 user.set_password(password)
                 user.save()
                 changed = True
-                print('Good.')
-
     if changed:
         return context(changed=True, person=user)
     else:

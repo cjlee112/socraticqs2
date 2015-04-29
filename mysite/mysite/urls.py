@@ -29,8 +29,6 @@ urlpatterns = patterns('',
     url(r'^email-sent/$', 'psa.views.validation_sent'),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
-    url(r'^anonymous-email/$', 'psa.views.change_anonym_email'),
-    url(r'^anonymous-restore/$', 'psa.views.anonym_restore'),
     url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
