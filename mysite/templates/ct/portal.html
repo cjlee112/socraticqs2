@@ -249,6 +249,29 @@ function toggleInterest(o, targeturl, csrftoken)
       </div>
     </div>
 
+
+    <div id="alert-popup" class="modal fade">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Attention</h4>
+          </div>
+
+          <div class="modal-body">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="https://plus.google.com/js/client:plusone.js?onload=start" type="text/javascript"></script>
@@ -286,7 +309,7 @@ function toggleInterest(o, targeturl, csrftoken)
       };
 
       $(function () {
-        var $validationModal, $emailRequired;
+        var $validationModal, $emailRequired, $alertPopup;
 
         modalDialog('#livejournal-modal', 'livejournal');
         modalDialog('#openid-modal', 'openid');
@@ -299,6 +322,7 @@ function toggleInterest(o, targeturl, csrftoken)
         $passChanged = modalDialog('#password-changed');
         $emailRequired = modalDialog('#email-required-modal');
         $passException = modalDialog('#exception');
+        $alertPopup = modalDialog('#alert-popup');
 
         modalDialog('#ajax-login-modal', 'ajax-login', function (event) {
           var $backend, $accessToken, $accessTokenSecret, $fields, $result;
@@ -361,6 +385,10 @@ function toggleInterest(o, targeturl, csrftoken)
 
         {% if merge_confirm %}
           $mergeConfirm.modal('show');
+        {% endif %}
+
+        {% if messages %}
+          $alertPopup.modal('show');
         {% endif %}
 
       });

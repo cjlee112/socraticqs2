@@ -120,15 +120,6 @@ User profile page
       </h4>
       {% endif %}
 
-      {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        <br>
-      {% endif %}
-
 
       {% if user and not 'anonymous' in user.username %}
       You can associate social account, email or set/change password as this page.

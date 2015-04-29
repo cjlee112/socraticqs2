@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 
 from social.pipeline.partial import partial
-from social.exceptions import InvalidEmail, AuthException
+from social.exceptions import InvalidEmail, AuthException, AuthAlreadyAssociated
 from social.backends.utils import load_backends
 
 from psa.models import AnonymEmail, SecondaryEmail
@@ -183,7 +183,10 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
-        if not user or 'anonymous' in user.username:
+        if user and social.user != user and 'anonymous' not in user.username:
+            msg = 'This {0} account is already in use.'.format(provider)
+            raise AuthAlreadyAssociated(backend, msg)
+        elif not user or 'anonymous' in user.username:
             user = social.user
     return {'social': social,
             'user': user,
