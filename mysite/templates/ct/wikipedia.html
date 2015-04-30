@@ -14,13 +14,13 @@
 
 <p>{{ lesson.text }}</p>
 
-{% if sourceURL %}
-<p>
-<b>Read <a href="{{ sourceURL }}">more information here</a></b>.
-</p>
+{% if lesson.url %}
+  <p><b>Read <a href="{{ lesson.url }}">more information here</a></b>.</p>
 {% endif %}
 
-{% crispy addForm %}
+{% if addForm %}
+  {% crispy addForm %}
+{% endif %}
 
 {% endblock %}
 

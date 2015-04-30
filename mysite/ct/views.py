@@ -468,7 +468,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                          ul) for ul in cset]
                 cset += [(t[0],
                     reverse_path_args('ct:wikipedia_concept', request.path,
-                                      source_id=urllib.quote(t[0], '')),
+                            source_id=urllib.quote(t[0].encode('utf-8'), '')),
                           None) for t in wset]
                 cset.sort()
             conceptForm = NewConceptForm() # let user define new concept
@@ -815,7 +815,7 @@ def unit_resources(request, course_id, unit_id):
 def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    sourceID = urllib.unquote(source_id)
+    sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     addForm = push_button(request, 'add', 'Add to this courselet')
@@ -827,9 +827,10 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
+    if lesson.pk is not None:
+        addForm = None
     return pageData.render(request, 'ct/wikipedia.html',
-                           dict(lesson=lesson, addForm=addForm,
-                                sourceURL=lesson._sourceDBdata.url))
+                           dict(lesson=lesson, addForm=addForm))
 
 @login_required
 def ul_teach(request, course_id, unit_id, ul_id):
