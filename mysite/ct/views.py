@@ -806,6 +806,7 @@ def unit_resources(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     lessonTable = list(unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+    lessonTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
     return unit_lessons(request, course_id, unit_id, lessonTable,
                         'Resources', showReorderForm=False)
 
