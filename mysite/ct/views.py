@@ -11,6 +11,7 @@ from django.db.models import Q
 import json
 from ct.models import *
 from ct.forms import *
+from ct.ct_util import reverse_path_args
 from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
 from ct.fsm import FSMStack
 import time
@@ -465,9 +466,10 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                 cset = distinct_subset(cset2 + cset, lambda x:x.lesson.concept)
                 cset = [(ul.lesson.title, get_object_url(request.path, ul, subpath=''),
                          ul) for ul in cset]
-                cset += [(t[0], '%swikipedia/%s/'
-                          % (request.path, urllib.quote(t[0], '')), None)
-                          for t in wset]
+                cset += [(t[0],
+                    reverse_path_args('ct:wikipedia_concept', request.path,
+                                      source_id=urllib.quote(t[0], '')),
+                          None) for t in wset]
                 cset.sort()
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:

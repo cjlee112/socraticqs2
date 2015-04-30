@@ -47,6 +47,7 @@ reverseArgLists = {
     'ct:edit_course':COURSEARGS,
     'ct:unit_tasks':UNITARGS,
     'ct:unit_concepts':UNITARGS,
+    'ct:wikipedia_concept':UNITARGS + ('source_id',),
     'ct:unit_lessons':UNITARGS,
     'ct:unit_resources':UNITARGS,
     'ct:edit_unit':UNITARGS,
