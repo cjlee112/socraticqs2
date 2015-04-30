@@ -179,13 +179,21 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                     'social': social}
 
 
+def is_allowed_to_merge(user, social_user):
+    # TODO implement user social_auth comparison
+    return False
+
+
 def social_user(backend, uid, user=None, *args, **kwargs):
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
         if user and social.user != user and 'anonymous' not in user.username:
-            msg = 'This {0} account is already in use.'.format(provider)
-            raise AuthAlreadyAssociated(backend, msg)
+            if is_allowed_to_merge(user, social.user):
+                user = social.user
+            else:
+                msg = 'This {0} account is already associated with another Courselets account.'.format(provider)
+                raise AuthAlreadyAssociated(backend, msg)
         elif not user or 'anonymous' in user.username:
             user = social.user
     return {'social': social,

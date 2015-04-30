@@ -14,16 +14,18 @@
 {% endfor %}
 <h5>We recommend you to merge accounts to have all your study activities in one place.</h5>
 {% endif %}
-
+<p>In order to merge one of the following account(s) you should click one of the button(s) below</p>
 {% for similar, backends in similar_users.items %}
 <div class="row">
-  <p>In order to merge <b>
+  <p>
+  <b>
       {% if similar.get_full_name %}
         "{{ similar.get_full_name }}"
       {% else %}
         "{{ similar.username }}"
       {% endif %}
-  </b> you should login using one of the suggested accounts using your primary email: <b>{{ user.email }}</b></p>
+  </b>
+  </p>
   {% for name, backend in backends %}
   <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}"
      href="{% url 'social:begin' backend=name %}">

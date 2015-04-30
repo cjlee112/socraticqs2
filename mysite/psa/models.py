@@ -48,8 +48,8 @@ class UserSession(models.Model):
 
 def user_logged_in_handler(sender, request, user, **kwargs):
     UserSession.objects.get_or_create(
-        user = user,
-        session_id = request.session.session_key
+        user=user,
+        session_id=request.session.session_key
     )
 
 

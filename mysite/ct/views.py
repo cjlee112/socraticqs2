@@ -404,7 +404,8 @@ def courses_subscribe(request, course_id):
         # Set expiry time to year in future
         request.session.set_expiry(timedelta(days=365))
     course = Course.objects.get(id=course_id)
-    role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
+    # role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
+    role = 'self'
     Role.objects.get_or_create(course=course,
                                user=user,
                                role=role)

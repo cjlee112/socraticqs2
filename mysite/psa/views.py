@@ -4,14 +4,9 @@ from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.conf import settings
-from django.db import IntegrityError
-from django.http import HttpResponseBadRequest
 
 from psa.utils import render_to
-from psa.models import AnonymEmail
 from social.backends.utils import load_backends
-
-from datetime import datetime
 
 
 def context(**extra):
