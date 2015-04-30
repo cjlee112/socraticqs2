@@ -132,7 +132,7 @@ $( "#headtoggle" ).click(function() {
 
 {% if addForm %}
   {% crispy addForm %}
-{% elif roleForm %}
+{% elif roleForm and not unitLesson.parent %}
   {% crispy roleForm %}
 {% endif %}
 
