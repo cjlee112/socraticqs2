@@ -1044,7 +1044,7 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
                                     defaultURL=None, unitLesson=r)
         if red: # let FSM redirect us if desired
             return red
-        seTable.append((r, fmt_count(0, n)))
+        seTable.append((r, fmt_count(0, n or 1)))
         return _lessons(request, pageData, concept,
             msg='Successfully added error model.  Thank you!',
             ignorePOST=True, unit=unit, seTable=seTable, 
