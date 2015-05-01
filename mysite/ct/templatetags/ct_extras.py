@@ -18,8 +18,11 @@ def md2html(txt, stripP=False):
     'converst ReST to HTML using pandoc, w/ audio support'
     txt, markers = add_temporary_markers(txt, find_audio)
     txt, videoMarkers = add_temporary_markers(txt, find_video, len(markers))
-    txt = pypandoc.convert(txt, 'html', format='rst',
-                           extra_args=('--mathjax',))
+    try:
+        txt = pypandoc.convert(txt, 'html', format='rst',
+                               extra_args=('--mathjax',))
+    except StandardError:
+        pass
     txt = replace_temporary_markers(txt, audio_html, markers)
     txt = replace_temporary_markers(txt, video_html, videoMarkers)
     txt = StaticImagePat.sub(staticfiles.static('ct/') + r'\1', txt)
