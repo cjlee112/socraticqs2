@@ -786,8 +786,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     if lessonTable is None:
         lessonTable = unit.get_exercises()
     r = _lessons(request, pageData, msg='''You can search for a lesson to add
-          to this courselet, or write a new lesson for a concept by
-          clicking on the Concepts tab.''', 
+          to this courselet by entering a search term below.
+          (To write a new lesson, click on the Concepts tab to identify
+          what concept your new lesson will be about).''', 
                   unit=unit, showReorderForm=showReorderForm,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
