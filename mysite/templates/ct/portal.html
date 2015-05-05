@@ -240,6 +240,12 @@ function toggleInterest(o, targeturl, csrftoken)
           <div class="modal-body">
             <p>An email validation was sent{% if email %} to <code>{{ email }}</code>{% endif %}.</p>
             <p>Click the link sent to finish the authentication process.</p>
+            {% if social_propose %}
+                <p>You email is associated with the following list of social auth providers and you can login with one of them:</p>
+                {% for social in social_list %}
+                  <li>{{ social }}</li>
+                {% endfor %}
+            {% endif %}
           </div>
 
           <div class="modal-footer">
