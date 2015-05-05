@@ -243,7 +243,7 @@ function toggleInterest(o, targeturl, csrftoken)
             {% if social_propose %}
                 <p>You email is associated with the following list of social auth providers and you can login with one of them:</p>
                 {% for social in social_list %}
-                  <li>{{ social }}</li>
+                  <li>{{ social|presentation_name }}</li>
                 {% endfor %}
             {% endif %}
           </div>

@@ -19,20 +19,23 @@ def context(**extra):
 
 @render_to('psa/custom_login.html')
 def validation_sent(request):
+    user = request.user
     social_propose = False
+    by_secondary = []
     email = request.session.get('email_validation_address')
-    by_secondary = [i.provider.provider for i in SecondaryEmail.objects.filter(email=email)
-                    if not i.provider.provider == u'email']
-    if by_secondary:
-        social_propose = True
+    if user and user.is_anonymous():
+        by_secondary = [i.provider.provider for i in SecondaryEmail.objects.filter(email=email)
+                        if not i.provider.provider == u'email']
+        if by_secondary:
+            social_propose = True
 
-    user_by_email = User.objects.filter(email=email)
+        user_by_email = User.objects.filter(email=email)
 
-    if len(user_by_email) == 1:
-        by_primary = [i.provider for i in user_by_email[0].social_auth.all()
-                      if not i.provider == u'email']
-        by_secondary.extend(by_primary)
-        social_propose = True
+        if len(user_by_email) == 1:
+            by_primary = [i.provider for i in user_by_email[0].social_auth.all()
+                          if not i.provider == u'email']
+            by_secondary.extend(by_primary)
+            social_propose = True
 
     return context(
         validation_sent=True,
