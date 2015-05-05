@@ -10,6 +10,7 @@ from datetime import datetime
 from social.pipeline.partial import partial
 from social.exceptions import InvalidEmail, AuthException, AuthAlreadyAssociated
 from social.backends.utils import load_backends
+from social.apps.django_app.default.models import UserSocialAuth
 
 from psa.models import AnonymEmail, SecondaryEmail
 
@@ -225,3 +226,38 @@ def associate_user(backend, details, uid, user=None, social=None, *args, **kwarg
             return {'social': social,
                     'user': social.user,
                     'new_association': True}
+
+
+def associate_by_email(backend, details, user=None, *args, **kwargs):
+    """
+    Associate current auth with a user with the same email address in the DB.
+
+    This pipeline entry is not 100% secure unless you know that the providers
+    enabled enforce email verification on their side, otherwise a user can
+    attempt to take over another user account by using the same (not validated)
+    email address on some provider.  This pipeline entry is disabled by
+    default.
+    """
+    if user:
+        return None
+
+    email = details.get('email')
+    if email:
+        # Try to associate accounts registered with the same email address,
+        # only if it's a single object. AuthException is raised if multiple
+        # objects are returned.
+        users = list(backend.strategy.storage.user.get_users_by_email(email))
+        if len(users) == 0:
+            socials = UserSocialAuth.objects.filter(uid=email,
+                                                    provider=u'email')
+            if socials:
+                return {'user': socials[0].user}
+            else:
+                return None
+        elif len(users) > 1:
+            raise AuthException(
+                backend,
+                'The given email address is associated with another account'
+            )
+        else:
+            return {'user': users[0]}
