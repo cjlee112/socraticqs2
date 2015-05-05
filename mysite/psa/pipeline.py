@@ -179,9 +179,11 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                     'social': social}
 
 
-def is_allowed_to_merge(user, social_user):
-    # TODO implement user social_auth comparison
-    return False
+def not_allowed_to_merge(user, social_user):
+    user_auths = set([i.provider for i in user.social_auth.all()])
+    social_user_auths = set([i.provider for i in social_user.social_auth.all()])
+
+    return user_auths.intersection(social_user_auths)
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
@@ -189,10 +191,8 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
         if user and social.user != user and 'anonymous' not in user.username:
-            if is_allowed_to_merge(user, social.user):
-                user = social.user
-            else:
-                msg = 'This {0} account is already associated with another Courselets account.'.format(provider)
+            if not_allowed_to_merge(user, social.user):
+                msg = 'Merge aborted due to providers intersection.'
                 raise AuthAlreadyAssociated(backend, msg)
         elif not user or 'anonymous' in user.username:
             user = social.user
