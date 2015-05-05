@@ -1111,17 +1111,11 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
 
 def create_resolution_ul(lesson, em, unit, parentUL):
     'create UnitLesson as resolution linked to error model'
-    lesson.save_root(em, ConceptLink.RESOLVES) # link as resolution
-    return UnitLesson.create_from_lesson(lesson, unit, addAnswer=True,
-                                         kind=UnitLesson.RESOLVES)
+    return parentUL.save_resolution(lesson)
 
 def link_resolution_ul(ul, em, unit, addedBy, parentUL):
     'link ul as resolution for error model'
-    if ul.lesson.conceptlink_set.filter(concept=em,
-                    relationship=ConceptLink.RESOLVES).count() == 0:
-        ul.lesson.conceptlink_set.create(concept=em, addedBy=addedBy,
-                                  relationship=ConceptLink.RESOLVES)
-    return ul
+    return parentUL.copy_resolution(ul, addedBy)
 
 
 @login_required
@@ -1140,7 +1134,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                  unit=unit, actionLabel='Add to suggestion list',
                  creationInstructions=creationInstructions,
                  createULFunc=create_resolution_ul,
-                 selectULFunc=link_resolution_ul)
+                 selectULFunc=link_resolution_ul, parentUL=ul)
     if isinstance(r, UnitLesson):
         red = pageData.fsm_redirect(request, 'create_Resolution',
                                     defaultURL=None, unitLesson=r)
@@ -1152,7 +1146,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                   msg='Successfully added resolution. Thank you!',
                   ignorePOST=True, lessonTable=lessonTable, unit=unit,
                   actionLabel='Add to suggestion list',
-                  creationInstructions=creationInstructions)
+                  creationInstructions=creationInstructions, parentUL=ul)
     return r
 
 @login_required
