@@ -2,16 +2,15 @@ import re
 
 from django import template
 from django.conf import settings
+from collections import defaultdict
 
 from social.backends.utils import load_backends
 from social.backends.oauth import OAuthAuth
 
 from psa.models import SecondaryEmail
 
-from collections import defaultdict
 
 register = template.Library()
-
 name_re = re.compile(r'([^O])Auth')
 
 
@@ -72,7 +71,7 @@ def icon_name(name):
 @register.filter
 def social_backends(backends):
     backends = [(name, backend) for name, backend in backends.items()
-                    if name not in ['username', 'email']]
+                if name not in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
 
     return [backends[n:n + 10] for n in range(0, len(backends), 10)]
@@ -81,26 +80,26 @@ def social_backends(backends):
 @register.filter
 def legacy_backends(backends):
     backends = [(name, backend) for name, backend in backends.items()
-                    if name in ['username', 'email']]
+                if name in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
 
     return [backends[n:n + 10] for n in range(0, len(backends), 10)]
 
 
-@register.filter
-def all_backends(backends):
-    backends = [(name, backend) for name, backend in backends.items()]
-    backends.sort(key=lambda b: b[0])
+# @register.filter
+# def all_backends(backends):
+#     backends = [(name, backend) for name, backend in backends.items()]
+#     backends.sort(key=lambda b: b[0])
+#
+#     return [backends[n:n + 10] for n in range(0, len(backends), 10)]
 
-    return [backends[n:n + 10] for n in range(0, len(backends), 10)]
 
-
-@register.filter
-def oauth_backends(backends):
-    backends = [(name, backend) for name, backend in backends.items()
-                    if issubclass(backend, OAuthAuth)]
-    backends.sort(key=lambda b: b[0])
-    return backends
+# @register.filter
+# def oauth_backends(backends):
+#     backends = [(name, backend) for name, backend in backends.items()
+#                 if issubclass(backend, OAuthAuth)]
+#     backends.sort(key=lambda b: b[0])
+#     return backends
 
 
 @register.simple_tag(takes_context=True)
@@ -117,12 +116,12 @@ def associated(context, backend):
     return ''
 
 
-@register.simple_tag(takes_context=True)
-def anonym_email(context):
-    email = context['user'].anonymemail_set.all()
-    if email:
-        context['a_email'] = email[0].email
-    return ''
+# @register.simple_tag(takes_context=True)
+# def anonym_email(context):
+#     email = context['user'].anonymemail_set.all()
+#     if email:
+#         context['a_email'] = email[0].email
+#     return ''
 
 
 @register.simple_tag(takes_context=True)
@@ -138,10 +137,5 @@ def similar_backends(context):
                                               backends.get(secondary.provider.provider)))
 
     similar_users = dict(similar_users)
-    # for k, v in similar_users.iteritems():
-    #     print(v)
-    #     v.sort(key=lambda b: b[0])
-    #     similar_users[k] = [v[n:n + 10] for n in range(0, len(v), 10)]
-
     context['similar_users'] = similar_users
     return ''

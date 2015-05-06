@@ -190,5 +190,6 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
     NOSE_ARGS = [
         '--with-coverage',
         '--cover-package=lti,psa',
+        '--cover-inclusive',
     ]
 
