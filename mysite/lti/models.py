@@ -62,7 +62,6 @@ class LTIUser(models.Model):
 
     def login(self, request):
         if self.django_user:
-            # TODO Follow a more django way to login users
             self.django_user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, self.django_user)
 

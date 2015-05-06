@@ -29,9 +29,9 @@ MOODLE_PARAMS = (
 @csrf_exempt
 def lti_init(request, course_id=None, unit_id=None):
     if settings.LTI_DEBUG:
-        print "META"
+        print('META')
         print request.META
-        print "PARAMS"
+        print('PARAMS')
         print request.POST
     session = request.session
     session.clear()
@@ -81,8 +81,8 @@ def lti_init(request, course_id=None, unit_id=None):
     user.enroll(roles, course_id)
     '------------------------------------------------------------------------'
     if settings.LTI_DEBUG:
-        print "session: is_valid = {}".format(session['is_valid'])
-        print "session: message = {}".format(session['message'])
+        print('session: is_valid = {}'.format(session['is_valid']))
+        print('session: message = {}'.format(session['message']))
     if not is_valid:
         return render_to_response('lti/error.html', RequestContext(request))
 

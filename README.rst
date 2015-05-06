@@ -23,6 +23,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
         # Socials
         'social.apps.django_app.default',
         'psa',
+        'django_nose',
     )
 
     INSTALLED_APPS += INSTALLED_APPS_LOCAL
@@ -59,11 +60,11 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
         'psa.pipeline.social_user',
         'social.pipeline.user.get_username',
         'psa.pipeline.custom_mail_validation',
-        # 'social.pipeline.social_auth.associate_by_email',
+        'psa.pipeline.associate_by_email',
         'social.pipeline.user.create_user',
         'psa.pipeline.validated_user_details',
         # 'psa.pipeline.password_ask',
-        'social.pipeline.social_auth.associate_user',
+        'psa.pipeline.associate_user',
         'social.pipeline.social_auth.load_extra_data',
         'social.pipeline.user.user_details',
     )
@@ -165,7 +166,7 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
     FORCE_EMAIL_VALIDATION = True
     PASSWORDLESS = True
 
-    # DEBUG = False
+    DEBUG = False
 
     LOGIN_URL = '/login/'
     LOGIN_REDIRECT_URL = '/done/'
@@ -181,3 +182,13 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
             'schedule': timedelta(days=1),
         }
     }
+
+    # Use nose to run all tests
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+    # Tell nose to measure coverage on the 'foo' and 'bar' apps
+    NOSE_ARGS = [
+        '--with-coverage',
+        '--cover-package=lti,psa',
+    ]
+

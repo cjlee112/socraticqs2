@@ -22,7 +22,6 @@ app = Celery('mysite')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
-
 from pytz import UTC
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -40,7 +39,7 @@ def check_anonymous():
     """
     now = datetime.utcnow().replace(tzinfo=UTC)
     user_sessions = UserSession.objects.filter(
-                        user__username__startswith='anonymous')
+        user__username__startswith='anonymous')
 
     # zombie_users - temporary students without session
     zombie_users = (user for user in

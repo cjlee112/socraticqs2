@@ -396,6 +396,7 @@ def courses_subscribe(request, course_id):
     if isinstance(user, AnonymousUser):
         tmp_user = True
         # TODO Implement User OneToOne profile with BoolField is_temporary
+        # TODO or move username to settings.py
         user = User.objects.get_or_create(username='anonymous' + str(_id),
                                           first_name='Temporary User')[0]
 
