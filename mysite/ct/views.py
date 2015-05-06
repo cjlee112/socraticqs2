@@ -875,7 +875,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         concept, lesson = Concept.get_from_sourceDB(sourceID, request.user)
         ul = UnitLesson.create_from_lesson(lesson, unit)
         kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul.pk)
-        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+        defaultURL = reverse('ct:concept_teach', kwargs=kwargs)
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
