@@ -87,12 +87,20 @@ def lti_init(request, course_id=None, unit_id=None):
         return render_to_response('lti/error.html', RequestContext(request))
 
     if user.is_enrolled(roles, course_id):
-        # Redirect to course page
+        # Redirect to course or unit page considering users role
         if not unit_id:
-            return redirect(reverse('ct:course_student',
-                                    args=(course_id,)))
+            if roles == 'prof':
+                return redirect(reverse('ct:course',
+                                        args=(course_id,)))
+            else:
+                return redirect(reverse('ct:course_student',
+                                        args=(course_id,)))
         else:
-            return redirect(reverse('ct:study_unit',
-                                    args=(course_id, unit_id)))
+            if roles == 'prof':
+                return redirect(reverse('ct:unit_tasks',
+                                        args=(course_id, unit_id)))
+            else:
+                return redirect(reverse('ct:study_unit',
+                                        args=(course_id, unit_id)))
     else:
         return redirect(reverse('ct:home'))
