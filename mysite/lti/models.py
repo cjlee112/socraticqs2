@@ -30,30 +30,33 @@ class LTIUser(models.Model):
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '').lower()
 
-        social = False
         if email:
             social = UserSocialAuth.objects.filter(provider='email',
                                                    uid=email)
-
-        if social:
-            django_user = social[0].user
-        else:
-            django_user = User.objects.filter(email=email)
-            if django_user:
-                django_user = django_user[0]
+            if social:
+                django_user = social[0].user
             else:
-                django_user = User.objects.get_or_create(username=username,
-                                                         defaults={
-                                                             'first_name': first_name,
-                                                             'last_name': last_name,
-                                                             'email': email
-                                                         })[0]
-            social = UserSocialAuth(user=django_user,
-                                    provider='email',
-                                    uid=email,
-                                    extra_data=extra_data)
-            social.save()
-
+                django_user = User.objects.filter(email=email)
+                if django_user:
+                    django_user = django_user[0]
+                else:
+                    django_user = User.objects.get_or_create(username=username,
+                                                             defaults={
+                                                                 'first_name': first_name,
+                                                                 'last_name': last_name,
+                                                                 'email': email
+                                                             })[0]
+                social = UserSocialAuth(user=django_user,
+                                        provider='email',
+                                        uid=email,
+                                        extra_data=extra_data)
+                social.save()
+        else:
+            django_user = User.objects.get_or_create(username=username,
+                                                     defaults={
+                                                         'first_name': first_name,
+                                                         'last_name': last_name,
+                                                     })[0]
         self.django_user = django_user
         self.save()
 

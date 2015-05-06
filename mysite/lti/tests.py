@@ -72,18 +72,19 @@ class MethodsTest(LTITestCase):
             response = self.client.post('/lti/ct/courses/1/',
                                         data=self.headers,
                                         follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_get(self):
         with patch('lti.views.DjangoToolProvider') as mocked:
             mocked.return_value.is_valid_request.return_value = True
             response = self.client.get('/lti/ct/courses/1/',
                                        follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
 
 class ParamsTest(LTITestCase):
     """Test different params handling."""
+
     def test_ext_lms(self):
         del self.headers[u'ext_lms']
         with patch('lti.views.DjangoToolProvider') as mocked:
@@ -118,7 +119,7 @@ class ParamsTest(LTITestCase):
             response = self.client.post('/lti/ct/courses/1/',
                                         data=self.headers,
                                         follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_roles_none(self):
         del self.headers[u'roles']
@@ -155,9 +156,8 @@ class ParamsTest(LTITestCase):
                              follow=True)
             self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
             self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                             UserSocialAuth.objects.get(id=1).user)
-            self.assertNotEqual(self.user, UserSocialAuth.objects.get(id=1).user)
+            self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                                User.objects.get(id=1))
 
     def test_lti_user_no_username_no_email(self):
         """Test for non-existent username field
@@ -174,9 +174,8 @@ class ParamsTest(LTITestCase):
                              follow=True)
             self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
             self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                             UserSocialAuth.objects.get(id=1).user)
-            self.assertNotEqual(self.user, UserSocialAuth.objects.get(id=1).user)
+            self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                                User.objects.get(id=1))
             self.assertEqual(LTIUser.objects.get(consumer='moodle-2').
                              django_user.username,
                              LTIUser.objects.get(consumer='moodle-2').user_id)
@@ -202,33 +201,35 @@ class ParamsTest(LTITestCase):
 
 class ExceptionTest(LTITestCase):
     """Test raising exception."""
+
     def test_missing_signature(self):
         with patch('lti.views.DjangoToolProvider') as mocked:
             mocked.return_value.is_valid_request.side_effect = oauth2.MissingSignature()
             response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_oauth_error(self):
         with patch('lti.views.DjangoToolProvider') as mocked:
             mocked.return_value.is_valid_request.side_effect = oauth2.Error()
             response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_key_error(self):
         with patch('lti.views.DjangoToolProvider') as mocked:
             mocked.return_value.is_valid_request.side_effect = KeyError()
             response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_attribute_error(self):
         with patch('lti.views.DjangoToolProvider') as mocked:
             mocked.return_value.is_valid_request.side_effect = AttributeError()
             response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='error.html')
+            self.assertTemplateUsed(response, template_name='lti/error.html')
 
 
 class ModelTest(LTITestCase):
     """Test model LTIUser."""
+
     def test_lti_user(self):
         lti_user = LTIUser(user_id=1,
                            consumer='test_consimer',

@@ -11,13 +11,23 @@ from lti.models import LTIUser
 from lti import app_settings as settings
 
 
+ROLES = {
+    'Instructor': 'prof',
+    'Leaner': 'student',
+}
+
+MOODLE_PARAMS = (
+    'user_id',
+    'ext_lms',
+    'lis_person_name_full',
+    'lis_person_name_given',
+    'lis_person_name_family',
+    'lis_person_contact_email_primary',
+)
+
+
 @csrf_exempt
 def lti_init(request, course_id=None, unit_id=None):
-    ROLES = {
-        'Instructor': 'prof',
-        'Leaner': 'student',
-        }
-
     if settings.LTI_DEBUG:
         print "META"
         print request.META
@@ -49,18 +59,19 @@ def lti_init(request, course_id=None, unit_id=None):
 
     '------------------------------------------------------------------------'
     consumer_name = request_dict.get('ext_lms', 'lti')
-
     user_id = request_dict.get('user_id', None)
     roles = request_dict.get('roles', None)
     roles = ROLES.get(roles, 'student')
     if not user_id or not course_id:
-        return render_to_response("error.html",  RequestContext(request))
+        return render_to_response('lti/error.html', RequestContext(request))
     course_id = int(course_id)
 
     user = LTIUser.objects.get_or_create(user_id=user_id,
                                          consumer=consumer_name,
                                          course_id=course_id)[0]
-    user.extra_data = json.dumps(request_dict)  # TODO exclude not needed params
+    extra_data = {k: v for (k, v) in request_dict.iteritems()
+                  if k in MOODLE_PARAMS}
+    user.extra_data = json.dumps(extra_data)
     user.save()
 
     if not user.is_linked:
@@ -70,15 +81,16 @@ def lti_init(request, course_id=None, unit_id=None):
     user.enroll(roles, course_id)
     '------------------------------------------------------------------------'
     if settings.LTI_DEBUG:
-        print "session: is_valid = {}".format( session['is_valid'])
-        print "session: message = {}".format( session['message'])
+        print "session: is_valid = {}".format(session['is_valid'])
+        print "session: message = {}".format(session['message'])
     if not is_valid:
-        return render_to_response("error.html",  RequestContext(request))
+        return render_to_response('lti/error.html', RequestContext(request))
 
     if user.is_enrolled(roles, course_id):
         # Redirect to course page
         if not unit_id:
-            return redirect(reverse('ct:course_student', args=(course_id,)))
+            return redirect(reverse('ct:course_student',
+                                    args=(course_id,)))
         else:
             return redirect(reverse('ct:study_unit',
                                     args=(course_id, unit_id)))

@@ -36,6 +36,8 @@ class ViewsUnitTest(TestCase):
         self.assertTrue('available_backends' in result)
 
     def test_validation_sent(self):
+        anonymous = AnonymousUser()
+        self.request.user = anonymous
         response = validation_sent(self.request)
         self.assertIsInstance(response, HttpResponse)
         self.assertTrue('test@test.com' in response.content)
