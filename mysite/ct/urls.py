@@ -129,11 +129,10 @@ urlpatterns = patterns('',
     # Public couses page for anonymous users
     url(r'^courses/$', courses, name='courses'),
     # Subscribe to course with particular id
-    url(r'^courses/subscribe/(?P<course_id>\d+)/$', courses_subscribe, name='subscribe'),
+    url(r'^courses/(?P<course_id>\d+)/subscribe/$', courses_subscribe, name='subscribe'),
 
     # FSM node pages
     url(r'^nodes/(?P<node_id>\d+)/$', fsm_node, name='fsm_node'),
     url(r'^nodes/$', fsm_status, name='fsm_status'),
 
 )
-
