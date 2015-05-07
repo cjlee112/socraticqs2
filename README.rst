@@ -83,8 +83,8 @@ Example setting_local.py to add 'lti' and 'python-social-auth':
     ## LTI Parameters
     X_FRAME_OPTIONS = "GOFORIT"
     LTI_DEBUG = True
-    CONSUMER_KEY = "__consumer_key__"
-    LTI_SECRET = "__lti_secret__"
+    CONSUMER_KEY = "__consumer_key__"  # can be any random python string with enough length for OAuth
+    LTI_SECRET = "__lti_secret__"  # can be any random python string with enough length for OAuth
     LTI_URL_FIX = {
             "https://localhost:8000/":"http://localhost:8000/",
             'https://edx.raccoongang.com': "http://edx.raccoongang.com"
