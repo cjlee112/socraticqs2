@@ -1,7 +1,7 @@
 # Django settings for mysite project.
 import os
 from datetime import timedelta
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Set template_path and template_dir
 TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
@@ -11,9 +11,6 @@ TEMPLATE_DIRS = (
 # Set databases_name
 DATABASES_NAME = os.path.join(BASE_DIR, 'mysite.db')
 
-
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Christopher Lee', 'leec@chem.ucla.edu'),
@@ -102,9 +99,6 @@ STATICFILES_FINDERS = (
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/done/'
 URL_PATH = ''
-
-# this key is only used for dev localhost testing, not for production
-SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -259,9 +253,6 @@ EMAIL_FROM = ''
 
 ## LTI Parameters
 X_FRAME_OPTIONS = "GOFORIT"
-LTI_DEBUG = True
-CONSUMER_KEY = "__consumer_key__"  # can be any random python string with enough length for OAuth
-LTI_SECRET = "__lti_secret__"  # can be any random python string with enough length for OAuth
 
 ## Heroku SSL proxy fix
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -306,8 +297,3 @@ LOGGING = {
     }
 }
 
-try:
-    from settings_local import *
-except Exception as e:
-    print e
-    pass
