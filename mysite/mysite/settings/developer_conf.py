@@ -1,3 +1,4 @@
+# coding: utf-8
 from defaults import *
 
 DEBUG = True
@@ -12,8 +13,26 @@ LTI_DEBUG = True
 CONSUMER_KEY = "__consumer_key__"  # can be any random python string with enough length for OAuth
 LTI_SECRET = "__lti_secret__"  # can be any random python string with enough length for OAuth
 
+INSTALLED_APPS_LOCAL = (
+    'django_nose',
+)
+
+INSTALLED_APPS += INSTALLED_APPS_LOCAL
+
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'lti' and 'psa' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=lti,psa',
+    '--cover-inclusive',
+]
+
+
 try:
     from local_conf import *
-except ImportError as e:
-    print 'No settings.local_conf loaded:', e
-    pass
+except ImportError:
+    print '''You must provide a settings/local_conf.py file,
+    e.g. by copying the provided local_conf_example.py'''
+    raise
