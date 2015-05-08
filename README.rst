@@ -6,7 +6,7 @@ Socraticqs2 is the web engine for courselets.org.
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 
 
-In setting_local.py we need to describe all needed KEY/SECRET for social-auth:
+In settings/local_conf.py we need to describe all needed KEY/SECRET for social-auth:
 ::
 
     # coding: utf-8
@@ -48,27 +48,5 @@ In setting_local.py we need to describe all needed KEY/SECRET for social-auth:
        'django.contrib.auth.backends.ModelBackend',
     )
 
-    # For production we need to set DEBUG to False
-    DEBUG = False
 
 
-For testing purposes we can add django-nose to setting_local.py:
-::
-
-    from settings import INSTALLED_APPS
-
-    INSTALLED_APPS_LOCAL = (
-        'django_nose',
-    )
-
-    INSTALLED_APPS += INSTALLED_APPS_LOCAL
-
-    # Use nose to run all tests
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-    # Tell nose to measure coverage on the 'lti' and 'psa' apps
-    NOSE_ARGS = [
-        '--with-coverage',
-        '--cover-package=lti,psa',
-        '--cover-inclusive',
-    ]
