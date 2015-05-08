@@ -1,4 +1,4 @@
-# Django settings for mysite project.
+# coding: utf-8
 import os
 from datetime import timedelta
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -226,30 +226,6 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [('id', 'id'),
                                           ('emailAddress', 'email_address'),
                                           ('headline', 'headline'),
                                           ('industry', 'industry')]
-
-SOCIAL_AUTH_TWITTER_KEY = ''
-SOCIAL_AUTH_TWITTER_SECRET = ''
-
-SOCIAL_AUTH_FACEBOOK_KEY = ''
-SOCIAL_AUTH_FACEBOOK_SECRET = ''
-
-SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = ''
-SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = ''
-
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
-
-SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY = ''
-SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET = ''
-
-# When we will use email auth we need to define SMTP settings
-EMAIL_USE_TLS = True
-EMAIL_HOST = ''
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 587
-EMAIL_FROM = ''
-
 
 ## LTI Parameters
 X_FRAME_OPTIONS = "GOFORIT"
