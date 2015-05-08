@@ -1,5 +1,6 @@
 # Django settings for mysite project.
 import os
+from datetime import timedelta
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Set template_path and template_dir
@@ -99,7 +100,8 @@ STATICFILES_FINDERS = (
 
 # URL of the login page.
 LOGIN_URL = '/login/'
-
+LOGIN_REDIRECT_URL = '/done/'
+URL_PATH = ''
 
 # this key is only used for dev localhost testing, not for production
 SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
@@ -141,11 +143,139 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
+    # LTI
+    'lti',
+    # Socials
+    'social.apps.django_app.default',
+    'psa',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+   'django.contrib.auth.context_processors.auth',
+   'django.core.context_processors.debug',
+   'django.core.context_processors.i18n',
+   'django.core.context_processors.media',
+   'django.core.context_processors.static',
+   'django.core.context_processors.tz',
+   'django.contrib.messages.context_processors.messages',
+   'social.apps.django_app.context_processors.backends',
+   'social.apps.django_app.context_processors.login_redirect',
+   'psa.context_processors.debug_settings',
+)
+
+AUTHENTICATION_BACKENDS = (
+   'social.backends.twitter.TwitterOAuth',
+   'social.backends.facebook.FacebookOAuth2',
+   'social.backends.google.GoogleOAuth2',
+   'social.backends.linkedin.LinkedinOAuth2',
+   'social.backends.khanacademy.KhanAcademyOAuth1',
+   'social.backends.email.EmailAuth',
+   'django.contrib.auth.backends.ModelBackend',
+)
+
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'psa.pipeline.social_user',
+    'social.pipeline.user.get_username',
+    'psa.pipeline.custom_mail_validation',
+    'psa.pipeline.associate_by_email',
+    'social.pipeline.user.create_user',
+    'psa.pipeline.validated_user_details',
+    # 'psa.pipeline.password_ask',
+    'psa.pipeline.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
+)
+
+SOCIAL_AUTH_DISCONNECT_PIPELINE = (
+    # 'psa.pipeline.password_check',
+    'social.pipeline.disconnect.allowed_to_disconnect',
+    'social.pipeline.disconnect.get_entries',
+    'social.pipeline.disconnect.revoke_tokens',
+    'social.pipeline.disconnect.disconnect'
+)
+
+PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'email']
+
+FORCE_EMAIL_VALIDATION = True
+PASSWORDLESS = True
+
+SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/email-sent/'
+
+SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
+SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile'
+]
+
+# Facebook email scope declaring
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+# Add email to requested authorizations.
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SCOPE = ['r_basicprofile', 'r_emailaddress']
+# Add the fields so they will be requested from linkedin.
+SOCIAL_AUTH_LINKEDIN_OAUTH2_FIELD_SELECTORS = ['email-address', 'headline', 'industry']
+# Arrange to add the fields to UserSocialAuth.extra_data
+SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [('id', 'id'),
+                                          ('firstName', 'first_name'),
+                                          ('lastName', 'last_name'),
+                                          ('emailAddress', 'email_address'),
+                                          ('headline', 'headline'),
+                                          ('industry', 'industry')]
+
+SOCIAL_AUTH_TWITTER_KEY = ''
+SOCIAL_AUTH_TWITTER_SECRET = ''
+
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = ''
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = ''
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+
+SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY = ''
+SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET = ''
+
+# When we will use email auth we need to define SMTP settings
+EMAIL_USE_TLS = True
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+EMAIL_FROM = ''
+
+
+## LTI Parameters
+X_FRAME_OPTIONS = "GOFORIT"
+LTI_DEBUG = True
+CONSUMER_KEY = "__consumer_key__"  # can be any random python string with enough length for OAuth
+LTI_SECRET = "__lti_secret__"  # can be any random python string with enough length for OAuth
+
+## Heroku SSL proxy fix
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'amqp://'
+CELERY_TIMEZONE = 'UTC'
+
+CELERYBEAT_SCHEDULE = {
+    'check_anonymous': {
+        'task': 'mysite.celery.check_anonymous',
+        'schedule': timedelta(days=1),
+    }
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -175,7 +305,6 @@ LOGGING = {
         },
     }
 }
-
 
 try:
     from settings_local import *
