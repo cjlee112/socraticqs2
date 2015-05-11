@@ -71,14 +71,16 @@ def video_html(filename):
     except ValueError:
         return 'ERROR: bad video source: %s' % filename
     d = {
-        'youtube': '''<iframe width="560" height="315"
-        src="http://www.youtube.com/embed/%s?rel=0"
-        frameborder="0" allowfullscreen></iframe>
+        'youtube': '''<div class="embed-responsive embed-responsive-4by3">
+        <iframe class="embed-responsive-item"
+        src="https://www.youtube.com/embed/%s"
+        allowfullscreen></iframe></div>
         ''',
-        'vimeo': '''<iframe width="500" height="281"
-        src="http://player.vimeo.com/video/%s"
-        frameborder="0" webkitallowfullscreen mozallowfullscreen
-        allowfullscreen></iframe>
+        'vimeo': '''<div class="embed-responsive embed-responsive-4by3">
+        <iframe class="embed-responsive-item"
+        src="https://player.vimeo.com/video/%s"
+        webkitallowfullscreen mozallowfullscreen
+        allowfullscreen></iframe></div>
         ''',
         }
     try:
