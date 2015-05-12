@@ -63,3 +63,5 @@ static/
 deploy.sh
 celerybeat-schedule
 .idea/
+local_conf.py
+
