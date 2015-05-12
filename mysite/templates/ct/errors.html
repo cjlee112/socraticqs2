@@ -80,7 +80,7 @@ CHECKED=""
 <tbody>
 {% for r in novelErrors %}
   <tr>
-  <td><a href="{{ actionTarget |get_object_url:r }}assess/">Assess</a>
+  <td><a href="{{ actionTarget |get_object_url:r }}errors/">Assess</a>
     </td>
   <td>{{ r.text|md2html }}</td>
   </tr>
