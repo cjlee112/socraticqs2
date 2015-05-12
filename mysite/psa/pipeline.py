@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout
 # from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
+from django.contrib.auth.models import User
 import time
 from datetime import datetime
 
@@ -55,6 +56,17 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
             if not backend.strategy.validate_email(details['email'],
                                                    data['verification_code']):
                 raise InvalidEmail(backend)
+            code = backend.strategy.storage.code.get_code(data['verification_code'])
+            # This is very straightforward method
+            # TODO Need to check current user to avoid unnecessary check
+            if code.user_id:
+                user_from_code = User.objects.filter(id=code.user_id)
+                if user_from_code:
+                    user = user_from_code[0]
+                    logout(backend.strategy.request)
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    login(backend.strategy.request, user)
+                    return {'user': user}
         else:
             if user and 'anonymous' in user.username:
                 AnonymEmail.objects.get_or_create(user=user, email=details.get('email'),
