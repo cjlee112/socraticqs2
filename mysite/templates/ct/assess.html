@@ -83,6 +83,7 @@ $( "#anstoggle" ).click(function() {
 {% for em in errorModels %}
   <tr>
     <td><input type="checkbox" name="emlist" value="{{ em.id }}"/>
+        <a href="{{ actionTarget |get_object_url:em }}">
         {{ em.lesson.title }}</a></td>
   </tr>
 {% endfor %}
