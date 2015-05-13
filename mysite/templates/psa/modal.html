@@ -1,0 +1,229 @@
+{% load social_tags %}
+
+<div id="email-required-modal_2" class="modal fade">
+    <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Re-send activation link</h4>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="control-label" for="email">Email address:</label>
+              <input class="form-control" id="email" type="email" name="email"
+              value="{{ user.anonymemail_set.all.0.email }}" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Continue</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+<div id="email-modal" class="modal fade">
+  <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Email Authentication</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="control-label" for="email">Email address:</label>
+            <input class="form-control" id="email" type="email" name="email" value="" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Login</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if tmp_email_ask %}
+  <div id="email-required-modal" class="modal fade">
+    <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">Email required</h4>
+          </div>
+
+          <div class="modal-body">
+            <p>An email address is required.</p>
+            <div class="form-group">
+              <label class="control-label" for="email">Email address:</label>
+              <input class="form-control" id="email" type="email" name="email"
+              value="{{ user.anonymemail_set.all.0.email }}" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Continue</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endif %}
+
+<div id="validation-sent-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Email Validation Sent</h4>
+      </div>
+
+      <div class="modal-body">
+        <p>An email validation was sent{% if email %} to <code>{{ email }}</code>{% endif %}.</p>
+        <p>Click the link sent to finish the authentication process.</p>
+        {% if social_propose %}
+            <p>You email is associated with the following list of social auth providers and you can login with one of them:</p>
+            {% for social in social_list %}
+              <li>{{ social|presentation_name }}</li>
+            {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="alert-popup" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Attention</h4>
+      </div>
+
+      <div class="modal-body">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="set-pass" class="modal fade">
+  <form action="/set-pass/" method="post" role="form">{% csrf_token %}
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Setting password</h4>
+        </div>
+
+        <div class="modal-body">
+          <p>Enter password to set/change</p>
+          <div class="form-group">
+            <label class="control-label" for="pass">Password:</label>
+            <input class="form-control" id="pass" type="password" name="pass" value="" />
+            <label class="control-label" for="confirm">Confim:</label>
+            <input class="form-control" id="confirm" type="password" name="confirm" value="" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Continue</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if changed %}
+<div id="password-changed" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Password was changed</h4>
+      </div>
+
+      <div class="modal-body">
+        <p>Your password was changed.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if exception %}
+<div id="exception" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Exception</h4>
+      </div>
+
+      <div class="modal-body">
+        <p>Something goes wrong.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div id="merge-confirm" class="modal fade">
+  <form action="{{ request.path }}" method="post" role="form">{% csrf_token %}
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Setting password</h4>
+        </div>
+
+        <div class="modal-body">
+          <p>Target username <b>{{ target_name }}</b>
+        is different from your username <b>{{ own_name }}</b>!
+        Do you want to proceed?</p>
+          <div class="form-group">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            <input type="radio" name="confirm" value="no" checked> No
+            <input type="radio" name="confirm" value="yes"> Yes
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary">Continue</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

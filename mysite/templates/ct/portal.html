@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% load ct_extras %}
+
 {% comment %}
   This is the main template for all portal pages.
 {% endcomment %}
 
 {% block head %}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
-</script>
-
 <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,Safe">
 </script>
 
@@ -43,6 +41,19 @@ function toggleInterest(o, targeturl, csrftoken)
 {% else %}
   <title>Courselets</title>
 {% endif %}
+
+<style>
+  .buttons { display: block; table-layout: fixed; border-radius: 7px; border: 1px solid #ccc;
+             margin: 20px; background: #eee; padding: 30px; }
+  .buttons > div a { margin: 5px 10px; }
+  .buttons > div:not(:first-child) { margin-top: 10px; border-top: 1px solid #ccc;
+                                     padding-top: 10px; text-align: center; }
+  .user-details { text-align: center; font-size: 16px; font-weight: bold; }
+  .disconnect-form { padding: 0; margin: 0px 10px; }
+  .disconnect-form > a { display: block; margin: 5px 0 !important; }
+  ul.messages > li { color: red; }
+</style>
+
 {% endblock %}
 
 {% block body %}
@@ -57,6 +68,9 @@ function toggleInterest(o, targeturl, csrftoken)
         <a class="navbar-brand" href="/ct/">Courselets.org</a>
       </div>
       <div class="navbar-collapse collapse">
+{#        <ul class="nav navbar-nav">#}
+{#          <li><a href="/ct/courses/">Courses</a></li>#}
+{#        </ul>#}
         <ul class="nav navbar-nav">
           {% if not fsmStack.state or not fsmStack.state.hideNav %}
             <li><a href="/ct/about/">About</a></li>
@@ -76,20 +90,27 @@ function toggleInterest(o, targeturl, csrftoken)
           {% endif %}
           {% if fsmStack.state %}
           <li><a href='/ct/nodes/'>{{ fsmStack.state.title }}</a></li>
+          {% elif user.is_authenticated %}
+          <li><a href='/ct/nodes/'>Activity Center</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-right">
-          {% if user %}
-          <li><a href="/ct/people/{{ user.pk }}/">{{ user.get_full_name }}</a></li>
+          {% if user and user.is_authenticated %}
+            <li><a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
+            {% if user.get_full_name %}
+                {{ user.get_full_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}</a></li>
           {% else %}
-          <li><a href="/login/?next=/ct/">Sign in</a></li>
+            <li><a href="/login/?next=/ct/">Stranger</a></li>
           {% endif %}
         </ul>
       </div>
     </div>
-  </nav>
 
+  </nav>
   {% if pageData.errorMessage %}
     <p><b>{{ pageData.errorMessage }}</b></p>
   {% elif pageData.statusMessage %}
@@ -118,5 +139,8 @@ function toggleInterest(o, targeturl, csrftoken)
   </header>
 
   {% block content %}{% endblock %}
+
+  {% include 'psa/modal.html' %}
+  {% include 'psa/auth.js.html' %}
 
 {% endblock %}

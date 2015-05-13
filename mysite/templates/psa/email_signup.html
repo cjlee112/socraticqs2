@@ -1,0 +1,11 @@
+{% extends "ct/portal.html" %}
+{% load url from future %}
+
+{% block content %}
+<form action="{% url 'social:complete' "email" %}" method="post">
+  {% csrf_token %}
+  <label for="email">Email address:</label>
+  <input id="email" type="email" name="email" value="" />
+  <button>Submit</button>
+</form>
+{% endblock %}

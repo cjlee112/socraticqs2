@@ -1,21 +1,28 @@
 {% extends "ct/portal.html" %}
+
 {% comment %}
-  View or edit a course
+  Public courses page
 {% endcomment %}
 
 {% block title %}
-  All Courses
+    {% if user.is_authenticated and not 'anonymous' in user.username %}
+        All Courses
+    {% else %}
+        Public courses
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-<ul>
-{% for course in courses %}
-  <li><a href="{% url 'ct:course' course.id %}">{{ course.title }}</a>:
-  {% if course.courselet_set.count > 0 %}
-    ({{ course.courselet_set.count }} courselets)
-  {% endif %}
-  </li>
-{% endfor %}
-</ul>
+<table class="table table-striped">
+<thead><tr><th>Course</th><th>Course id</th></tr></thead>
+<tbody>
+    {% for course in courses %}
+    <tr><td>
+    <a href="{% url 'ct:subscribe' course.id %}">{{ course.title }}</a>
+    </td>
+    <td>{{ course.id }}</td>
+    </tr>
+    {% endfor %}
+</tbody></table>
 
 {% endblock %}
