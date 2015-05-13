@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 
 
 def send_validation(strategy, backend, code):
+    """Send email validation link"""
     # TODO add email validating regex [^@]+@[^@]+\.[^@]+
     url = (reverse('social:complete', args=(backend.name,)) +
            '?verification_code=' + code.code +
