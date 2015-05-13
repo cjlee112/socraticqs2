@@ -24,6 +24,7 @@ class LTIUser(models.Model):
         unique_together = ('user_id', 'consumer', 'course_id')
 
     def create_links(self):
+        """Create all needed links to Django and/or UserSocialAuth"""
         extra_data = json.loads(self.extra_data)
         username = extra_data.get('lis_person_name_full', self.user_id)
         first_name = extra_data.get('lis_person_name_given', '')
@@ -66,6 +67,7 @@ class LTIUser(models.Model):
             login(request, self.django_user)
 
     def enroll(self, roles, course_id):
+        """Create Role according to user roles from LTI POST"""
         if not isinstance(roles, list):
             roles = roles.split(',')
         course = Course.objects.filter(id=course_id)
@@ -77,6 +79,7 @@ class LTIUser(models.Model):
                                            role=role)
 
     def is_enrolled(self, roles, course_id):
+        """Check enroll status"""
         if not isinstance(roles, list):
             roles = roles.split(',')
         course = Course.objects.filter(id=course_id)

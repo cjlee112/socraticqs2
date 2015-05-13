@@ -44,6 +44,10 @@ from psa.models import AnonymEmail, SecondaryEmail
 
 @partial
 def custom_mail_validation(backend, details, user=None, is_new=False, *args, **kwargs):
+    """Email validation pipeline
+
+    Verify email or send email with validation link.
+    """
     requires_validation = backend.REQUIRES_EMAIL_VALIDATION or \
                           backend.setting('FORCE_EMAIL_VALIDATION', False)
     send_validation = (details.get('email') and
@@ -80,9 +84,14 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
 
 
 def union_merge(tmp_user, user):
+    """Union merge
+
+    Merging Roles, UnitStatus, FSMState, Response, StudentError objects.
+    """
+
     """
        Reassigning Roles
-       Doing UNION megre to not repeat roles to the same course
+       Doing UNION merge to not repeat roles to the same course
        with the save role
     """
     roles_to_reset = (role for role in tmp_user.role_set.all()
@@ -94,21 +103,25 @@ def union_merge(tmp_user, user):
     """
        Reassigning UnitStatuses
        TODO think about filter() for UNION instead all()
-       maybe we need fresh unitstatuses instead of all to reassing
+       maybe we need fresh unitstatuses instead of all to reassign
     """
     unitstatus_to_reset = (us for us in tmp_user.unitstatus_set.all())
     for ut in unitstatus_to_reset:
         ut.user = user
         ut.save()
-    """ Reassigning FSMStates """
+    """Reassigning FSMStates"""
     tmp_user.fsmstate_set.all().update(user=user)
-    """ Reassigning Responses """
+    """Reassigning Responses"""
     tmp_user.response_set.all().update(author=user)
-    """ Reassigning StudentErrors """
+    """Reassigning StudentErrors"""
     tmp_user.studenterror_set.all().update(author=user)
 
 
 def social_merge(tmp_user, user):
+    """Merge UserSocialAuth
+
+    Re-assign UserSocialAuth objects to given user.
+    """
     tmp_user.social_auth.all().update(user=user)
     tmp_user.lti_auth.all().update(django_user=user)
 
@@ -193,6 +206,10 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
 
 
 def not_allowed_to_merge(user, social_user):
+    """Check if two users are allowed to merge
+
+    Check all social-auth from two users to predict providers intersection.
+    """
     user_auths = set([i.provider for i in user.social_auth.all()])
     social_user_auths = set([i.provider for i in social_user.social_auth.all()])
 
@@ -200,6 +217,7 @@ def not_allowed_to_merge(user, social_user):
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
+    """Search for UserSocialAuth"""
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
@@ -216,6 +234,7 @@ def social_user(backend, uid, user=None, *args, **kwargs):
 
 
 def associate_user(backend, details, uid, user=None, social=None, *args, **kwargs):
+    """Create UserSocialAuth"""
     email = details.get('email')
     if user and not social:
         try:

@@ -28,6 +28,12 @@ MOODLE_PARAMS = (
 
 @csrf_exempt
 def lti_init(request, course_id=None, unit_id=None):
+    """LTI init view
+
+    Analyze LTI POST request to start LTI session.
+    Create LTIUser with all needed link to Django user and/or UserSocialAuth.
+    Finally login Django user.
+    """
     if settings.LTI_DEBUG:
         print('META')
         print request.META
