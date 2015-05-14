@@ -26,9 +26,6 @@ In settings/local_conf.py we need to describe all needed KEY/SECRET for social-a
     SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY = 'key'
     SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET = 'secret'
 
-    # Will be changed to JSONSerializer, not finished yet
-    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
-
     # When we will use email auth we need to define SMTP settings
     EMAIL_USE_TLS = True
     EMAIL_HOST = ''

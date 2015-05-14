@@ -30,9 +30,12 @@ MOODLE_PARAMS = (
 def lti_init(request, course_id=None, unit_id=None):
     """LTI init view
 
-    Analyze LTI POST request to start LTI session.
-    Create LTIUser with all needed link to Django user and/or UserSocialAuth.
-    Finally login Django user.
+    |  Analyze LTI POST request to start LTI session.
+    |  Create LTIUser with all needed link to Django user and/or UserSocialAuth.
+    |  Finally login Django user.
+
+    :param course_id: course id from launch url
+    :param unit_id: unit id from lunch url
     """
     if settings.LTI_DEBUG:
         print('META')
