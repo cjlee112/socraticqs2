@@ -403,7 +403,8 @@ def courses_subscribe(request, course_id):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
         # Set expiry time to year in future
-        # request.session.set_expiry(timedelta(days=365))
+        one_year = 31536000
+        request.session.set_expiry(one_year)
     course = Course.objects.get(id=course_id)
     # role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
     role = 'self'
