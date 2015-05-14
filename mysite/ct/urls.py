@@ -128,7 +128,7 @@ urlpatterns = patterns('',
         assess, name='assess'),
     url(r'^courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/errors/$',
         assess_errors, name='assess_errors'),
-    # Public couses page for anonymous users
+    # Public courses page for anonymous users
     url(r'^courses/$', courses, name='courses'),
     # Subscribe to course with particular id
     url(r'^courses/(?P<course_id>\d+)/subscribe/$', courses_subscribe, name='subscribe'),

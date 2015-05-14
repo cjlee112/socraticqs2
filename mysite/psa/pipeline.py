@@ -64,9 +64,9 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
             # This is very straightforward method
             # TODO Need to check current user to avoid unnecessary check
             if code.user_id:
-                user_from_code = User.objects.filter(id=code.user_id)
+                user_from_code = User.objects.filter(id=code.user_id).first()
                 if user_from_code:
-                    user = user_from_code[0]
+                    user = user_from_code
                     logout(backend.strategy.request)
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
@@ -249,7 +249,7 @@ def associate_user(backend, details, uid, user=None, social=None, *args, **kwarg
             # https://github.com/omab/django-social-auth/issues/131
             return social_user(backend, uid, user, *args, **kwargs)
         else:
-            if email and not user.email == email:
+            if email and user.email and not user.email == email:
                 secondary = SecondaryEmail(user=user,
                                            email=email,
                                            provider=social)
@@ -279,10 +279,10 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
         # objects are returned.
         users = list(backend.strategy.storage.user.get_users_by_email(email))
         if len(users) == 0:
-            socials = UserSocialAuth.objects.filter(uid=email,
-                                                    provider=u'email')
-            if socials:
-                return {'user': socials[0].user}
+            social = UserSocialAuth.objects.filter(uid=email,
+                                                   provider=u'email').first()
+            if social:
+                return {'user': social.user}
             else:
                 return None
         elif len(users) > 1:
