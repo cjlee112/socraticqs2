@@ -4,7 +4,7 @@ from django.conf import settings
 # Allow debug information about LTI request
 LTI_DEBUG = getattr(settings, 'LTI_DEBUG', True)
 
-# Allow them to uniquely identify the source of requests being received
+# Allow to uniquely identify Tool Consumer
 CONSUMER_KEY = getattr(settings, 'CONSUMER_KEY', "__consumer_key__")
 
 # To secure communications between the tool provider and consumer using OAuth
