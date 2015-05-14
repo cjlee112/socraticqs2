@@ -1,28 +1,30 @@
-from django.shortcuts import render, get_object_or_404, render_to_response
-from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout, login
-from django.contrib.auth.models import  AnonymousUser
-from django.contrib.sites.models import Site
-from django.utils.safestring import mark_safe
-from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.db.models import Q
-import json
-from ct.models import *
-from ct.forms import *
-from ct.ct_util import reverse_path_args
-from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
-from ct.fsm import FSMStack
 import time
 import urllib
-from datetime import datetime, timedelta
+from datetime import datetime
 
+from django.db.models import Q
 from django.conf import settings
+from django.utils import timezone
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
+from django.contrib.auth import logout, login
+from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect, HttpResponse
 from social.backends.utils import load_backends
+
+from ct.forms import *
+from ct.models import *
+from ct.fsm import FSMStack
+from ct.ct_util import reverse_path_args
+from ct.templatetags.ct_extras import (md2html,
+                                       get_base_url,
+                                       get_object_url,
+                                       is_teacher_url,
+                                       display_datetime,
+                                       get_path_type)
+
 
 ###########################################################
 # WelcomeMat refactored utilities
@@ -380,6 +382,11 @@ def edit_course(request, course_id):
 
 
 def courses(request):
+    """Courses view
+
+    Render all courses for all users except anonymous.
+    For `anonymous` users render courses with public access.
+    """
     user = request.user
     courses = Course.objects.all()
     if isinstance(user, AnonymousUser) or 'anonymous' in user.username:
@@ -390,11 +397,18 @@ def courses(request):
 
 
 def courses_subscribe(request, course_id):
+    """Courses subscribe view
+
+    Subscribe user to given course by creating Role object.
+    For not logged in user (Stranger) we create `anonymous` user
+    and login him.
+    Also we ask `anonymous` user to enter email to be able to save progress.
+    """
     _id = int(time.mktime(datetime.now().timetuple()))
     user = request.user
-    tmp_user = False
+    is_tmp_user = False
     if isinstance(user, AnonymousUser):
-        tmp_user = True
+        is_tmp_user = True
         # TODO Implement User OneToOne profile with BoolField is_temporary
         # TODO or move username to settings.py
         user = User.objects.get_or_create(username='anonymous' + str(_id),
@@ -411,7 +425,7 @@ def courses_subscribe(request, course_id):
     Role.objects.get_or_create(course=course,
                                user=user,
                                role=role)
-    if tmp_user:
+    if is_tmp_user:
         return HttpResponseRedirect('/tmp-email-ask/')
     return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
 

@@ -30,11 +30,10 @@ def validation_sent(request):
         if by_secondary:
             social_propose = True
 
-        user_by_email = User.objects.filter(email=email)
-
-        if len(user_by_email) == 1:
+        users_by_email = User.objects.filter(email=email)
+        for u in users_by_email:
             by_primary = [i.provider for i in
-                          user_by_email[0].social_auth.all()
+                          u.social_auth.all()
                           if not i.provider == u'email']
             by_secondary.extend(by_primary)
             social_propose = True

@@ -72,9 +72,9 @@ def lti_init(request, course_id=None, unit_id=None):
         return render_to_response('lti/error.html', RequestContext(request))
     course_id = int(course_id)
 
-    user = LTIUser.objects.get_or_create(user_id=user_id,
-                                         consumer=consumer_name,
-                                         course_id=course_id)[0]
+    user, created = LTIUser.objects.get_or_create(user_id=user_id,
+                                                  consumer=consumer_name,
+                                                  course_id=course_id)
     extra_data = {k: v for (k, v) in request_dict.iteritems()
                   if k in MOODLE_PARAMS}
     user.extra_data = json.dumps(extra_data)

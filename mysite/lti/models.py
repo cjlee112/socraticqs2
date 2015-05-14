@@ -11,8 +11,21 @@ from ct.models import Role, Course
 class LTIUser(models.Model):
     """Model for LTI user
 
-    Created for Moodle LMS.
-    Intended to link to Django user in socraticqs2.
+    Fields:
+    user_id -> uniquely identifies the user within LTI Consumer
+    consumer -> uniquely  identifies the Tool Consumer
+    extra_data -> user params received from LTI Consumer
+
+    LTI user params saved to extra_data field:
+        'user_id'
+        'ext_lms'
+        'lis_person_name_full'
+        'lis_person_name_given'
+        'lis_person_name_family'
+        'lis_person_contact_email_primary'
+
+    django_user -> Django user to store study progress
+    course_id -> Course entry id given from Launch URL
     """
     user_id = models.CharField(max_length=255, blank=False)
     consumer = models.CharField(max_length=64, blank=True)
@@ -31,33 +44,31 @@ class LTIUser(models.Model):
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '').lower()
 
+        defaults = {
+            'first_name': first_name,
+            'last_name': last_name,
+        }
+
         if email:
+            defaults['email'] = email
             social = UserSocialAuth.objects.filter(provider='email',
-                                                   uid=email)
+                                                   uid=email).first()
             if social:
-                django_user = social[0].user
+                django_user = social.user
             else:
-                django_user = User.objects.filter(email=email)
-                if django_user:
-                    django_user = django_user[0]
-                else:
-                    django_user = User.objects.get_or_create(username=username,
-                                                             defaults={
-                                                                 'first_name': first_name,
-                                                                 'last_name': last_name,
-                                                                 'email': email
-                                                             })[0]
+                django_user = User.objects.filter(email=email).first()
+                if not django_user:
+                    django_user, created = User.objects.get_or_create(
+                        username=username, defaults=defaults
+                    )
                 social = UserSocialAuth(user=django_user,
                                         provider='email',
                                         uid=email,
                                         extra_data=extra_data)
                 social.save()
         else:
-            django_user = User.objects.get_or_create(username=username,
-                                                     defaults={
-                                                         'first_name': first_name,
-                                                         'last_name': last_name,
-                                                     })[0]
+            django_user, created = User.objects.get_or_create(username=username,
+                                                              defaults=defaults)
         self.django_user = django_user
         self.save()
 
@@ -67,27 +78,38 @@ class LTIUser(models.Model):
             login(request, self.django_user)
 
     def enroll(self, roles, course_id):
-        """Create Role according to user roles from LTI POST"""
+        """Create Role according to user roles from LTI POST
+
+        roles -> roles of LTI user given from LTI Consumer
+        course_id -> Course entry id given from Launch URL
+
+        :param roles: (str|list)
+        :param course_id: int
+        :return: None
+        """
         if not isinstance(roles, list):
             roles = roles.split(',')
-        course = Course.objects.filter(id=course_id)
+        course = Course.objects.filter(id=course_id).first()
         if course:
-            course = course[0]
             for role in roles:
                 Role.objects.get_or_create(course=course,
                                            user=self.django_user,
                                            role=role)
 
     def is_enrolled(self, roles, course_id):
-        """Check enroll status"""
+        """Check enroll status
+
+        :param roles: (str|list)
+        :param course_id: int
+        :return: ct.Role
+        """
         if not isinstance(roles, list):
             roles = roles.split(',')
-        course = Course.objects.filter(id=course_id)
+        course = Course.objects.filter(id=course_id).first()
         if course:
-            course = course[0]
-        return Role.objects.filter(course=course,
-                                   user=self.django_user,
-                                   role=roles[0]).exists()
+            return Role.objects.filter(course=course,
+                                       user=self.django_user,
+                                       role=roles[0]).exists()
 
     @property
     def is_linked(self):
