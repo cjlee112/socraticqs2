@@ -11,21 +11,31 @@ from ct.models import Role, Course
 class LTIUser(models.Model):
     """Model for LTI user
 
-    Fields:
-    user_id -> uniquely identifies the user within LTI Consumer
-    consumer -> uniquely  identifies the Tool Consumer
-    extra_data -> user params received from LTI Consumer
+    **Fields:**
 
-    LTI user params saved to extra_data field:
+      .. attribute:: user_id
+      uniquely identifies the user within LTI Consumer
+
+      .. attribute:: consumer
+      uniquely  identifies the Tool Consumer
+
+      .. attribute:: extra_data
+      user params received from LTI Consumer
+
+      .. attribute:: django_user
+      Django user to store study progress
+
+      .. attribute:: course_id
+      Course entry id given from Launch URL
+
+    LTI user params saved to extra_data field::
+
         'user_id'
         'ext_lms'
         'lis_person_name_full'
         'lis_person_name_given'
         'lis_person_name_family'
         'lis_person_contact_email_primary'
-
-    django_user -> Django user to store study progress
-    course_id -> Course entry id given from Launch URL
     """
     user_id = models.CharField(max_length=255, blank=False)
     consumer = models.CharField(max_length=64, blank=True)
@@ -73,6 +83,7 @@ class LTIUser(models.Model):
         self.save()
 
     def login(self, request):
+        """Login linked Django user"""
         if self.django_user:
             self.django_user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, self.django_user)
@@ -113,4 +124,8 @@ class LTIUser(models.Model):
 
     @property
     def is_linked(self):
+        """Check link to some Django user
+
+        :return: bool
+        """
         return bool(self.django_user)
