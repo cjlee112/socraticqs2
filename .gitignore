@@ -64,4 +64,5 @@ deploy.sh
 celerybeat-schedule
 .idea/
 local_conf.py
-
+socraticqs2.sublime-workspace
+sftp-config.json

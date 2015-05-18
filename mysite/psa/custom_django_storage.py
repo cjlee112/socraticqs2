@@ -11,4 +11,3 @@ class CustomCode(Code):
 class CustomDjangoStorage(DjangoStorage):
     """Redefine code field to CustomCode model that add user_id to track"""
     code = CustomCode
-
