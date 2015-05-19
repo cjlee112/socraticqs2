@@ -1,14 +1,14 @@
-from django.shortcuts import redirect
-from django.shortcuts import render_to_response
-from django.contrib.auth import logout, login, authenticate
-from django.contrib.auth.decorators import login_required
-from django.template import RequestContext
+from django.db.models import Q
 from django.conf import settings
+from django.template import RequestContext
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render_to_response
+from django.contrib.auth import logout, login, authenticate
+from social.backends.utils import load_backends
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
-from social.backends.utils import load_backends
 
 
 def context(**extra):
@@ -34,7 +34,10 @@ def validation_sent(request):
         for u in users_by_email:
             by_primary = [i.provider for i in
                           u.social_auth.all()
-                          if not i.provider == u'email']
+                          if not i.provider == u'email' and
+                          not SecondaryEmail.objects.filter(
+                            ~Q(email=email), provider=i, user=u
+                          ).exists()]
             by_secondary.extend(by_primary)
             social_propose = True
 
