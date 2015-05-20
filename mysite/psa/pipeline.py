@@ -9,7 +9,9 @@ import time
 from datetime import datetime
 
 from social.pipeline.partial import partial
-from social.exceptions import InvalidEmail, AuthException, AuthAlreadyAssociated
+from social.exceptions import (InvalidEmail,
+                               AuthException,
+                               AuthAlreadyAssociated)
 from social.backends.utils import load_backends
 from social.apps.django_app.default.models import UserSocialAuth
 
@@ -183,8 +185,8 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                 'You interrupted merge process.'
             )
         elif (not user.get_full_name() == social.user.get_full_name() and
-                  not strategy.request.POST.get('confirm') and
-                  not user.email == social.user.email):
+              not strategy.request.POST.get('confirm') and
+              not user.email == social.user.email):
             return render_to_response('ct/person.html', {
                 'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
                 'request': strategy.request,

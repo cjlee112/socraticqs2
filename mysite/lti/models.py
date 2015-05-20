@@ -43,7 +43,7 @@ class LTIUser(models.Model):
     django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
     course_id = models.IntegerField()
 
-    class Meta:
+    class Meta:  # pragma: no cover
         unique_together = ('user_id', 'consumer', 'course_id')
 
     def create_links(self):

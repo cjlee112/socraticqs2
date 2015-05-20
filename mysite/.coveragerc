@@ -2,3 +2,6 @@
 omit =
     ../*admin*
     ../*migrations*
+    psa/models.py
+    psa/custom_django_storage.py
+    psa/custom_django_strategy.py
