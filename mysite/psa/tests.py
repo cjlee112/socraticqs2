@@ -125,11 +125,20 @@ class ViewsUnitTest(TestCase):
 class TestSocialUser(TestCase):
     """Test for custom_mail_validation pipeline"""
     def setUp(self):
-        self.user = User(username='test')
-        self.main_user = User(username='main')
+        self.exists = mock.Mock()
+        self.exists.exists.return_value = False
+
+        self.user = mock.Mock()
+        self.user.groups.filter.return_value = self.exists
+        self.main_user = mock.Mock()
+        self.main_user.groups.filter.return_value = self.exists
         self.social = mock.Mock()
         self.social.user = self.user
-        self.anonymous = User(username='anonymous_test')
+
+        self.exists_anonym = mock.Mock()
+        self.exists_anonym.exists.return_value = True
+        self.anonymous = mock.Mock()
+        self.anonymous.groups.filter.return_value = self.exists_anonym
         self.attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
 
     def test_no_social(self):
@@ -393,10 +402,13 @@ class ValidatedUserDetailTest(TestCase):
         self.backend = mock.Mock()
         self.details = {'email': 'test@test.com', 'username': 'new_username'}
         self.user = mock.Mock()
+        self.user.username = 'anonymous'
+        self.exists = mock.Mock()
+        self.exists.exists.return_value = True
+        self.user.groups.filter.return_value = self.exists
         self.social = mock.Mock()
 
     def test_temporary_user_with_social(self):
-        self.user.username = 'anonymous'
         self.social.user = mock.Mock()
 
         with mock.patch('psa.pipeline.logout') as mocked_logout:
@@ -417,7 +429,6 @@ class ValidatedUserDetailTest(TestCase):
         user_by_email = mock.Mock()
         self.backend.strategy.storage.user.get_users_by_email.return_value = [user_by_email]
         self.details = {'email': 'test@test.com'}
-        self.user.username = 'anonymous'
 
         with mock.patch('psa.pipeline.logout') as mocked_logout:
             with mock.patch('psa.pipeline.login') as mocked_login:
@@ -434,7 +445,6 @@ class ValidatedUserDetailTest(TestCase):
 
     def test_temporary_user_without_social_no_user_by_email(self):
         self.backend.strategy.storage.user.get_users_by_email.return_value = []
-        self.user.username = 'anonymous'
 
         with mock.patch('psa.pipeline.logout') as mocked_logout:
             with mock.patch('psa.pipeline.login') as mocked_login:
@@ -454,8 +464,6 @@ class ValidatedUserDetailTest(TestCase):
     def test_temporary_user_without_social_two_user_by_email(self):
         self.backend.strategy.storage.user.get_users_by_email.return_value = [mock.Mock(),
                                                                               mock.Mock()]
-        self.user.username = 'anonymous'
-
         with mock.patch('psa.pipeline.logout') as mocked_logout:
             with mock.patch('psa.pipeline.login') as mocked_login:
                 with mock.patch('psa.pipeline.union_merge') as mocked_merge:
@@ -471,7 +479,6 @@ class ValidatedUserDetailTest(TestCase):
 
     def test_integrity_error(self):
         self.backend.strategy.storage.user.get_users_by_email.return_value = [mock.Mock()]
-        self.user.username = 'anonymous'
 
         with mock.patch('psa.pipeline.logout') as mocked_logout:
             mocked_logout.side_effect = IntegrityError()
@@ -485,6 +492,7 @@ class ValidatedUserDetailTest(TestCase):
     def test_valid_user_with_social_confirm_no(self):
         self.social.user = mock.Mock()
         self.user.username = 'test_username'
+        self.exists.exists.return_value = False
         self.strategy.request.POST = {'confirm': 'no'}
 
         with self.assertRaises(AuthException):
@@ -496,10 +504,14 @@ class ValidatedUserDetailTest(TestCase):
                                    social=self.social)
 
     def test_valid_user_with_social_confirm_yes(self):
+        self.exists.exists.return_value = False
+
         self.social.user = mock.Mock()
+        self.social.user.groups.filter.return_value = self.exists
         self.social.user.email = 'test@test.com'
         self.user.username = 'test_username'
         self.user.email = 'test@test.com'
+        self.user.groups.filter.return_value = self.exists
         self.user.get_full_name.return_value = 'test_username1'
         self.social.user.get_full_name.return_value = 'test_username2'
         self.strategy.request.POST = {'confirm': 'yes'}
@@ -518,8 +530,12 @@ class ValidatedUserDetailTest(TestCase):
                 self.assertEqual(res['social'], self.social)
 
     def test_valid_user_with_social_without_confirm(self):
+        self.exists.exists.return_value = False
+
         self.social.user = mock.Mock()
+        self.social.user.groups.filter.return_value = self.exists
         self.social.user.email = 'test@test.com'
+        self.user.groups.filter.return_value = self.exists
         self.user.username = 'test_username'
         self.user.email = 'test@test.com'
         self.user.get_full_name.return_value = 'test_username1'
@@ -599,6 +615,9 @@ class CustomMailValidation(TestCase):
         self.backend.strategy.request_data.return_value = {}
         self.backend.strategy.send_email_validation = mock.Mock()
         self.user.username = 'test_user'
+        exists = mock.Mock()
+        exists.exists.return_value = False
+        self.user.groups.filter.return_value = exists
         res = custom_mail_validation(strategy=self.strategy,
                                      pipeline_index=5,
                                      backend=self.backend,
@@ -611,6 +630,9 @@ class CustomMailValidation(TestCase):
         send_email_validation = mock.Mock()
         self.backend.strategy.send_email_validation = send_email_validation
         self.user.username = 'anonymous_username'
+        exists = mock.Mock()
+        exists.exists.return_value = True
+        self.user.groups.filter.return_value = exists
         with mock.patch('psa.pipeline.AnonymEmail') as mocked_anonym:
             get_or_create = mock.Mock()
             mocked_anonym.objects.get_or_create = get_or_create

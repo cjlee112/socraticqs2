@@ -23,7 +23,7 @@ from psa.models import AnonymEmail, SecondaryEmail
 # if is_new and kwargs.get('backend').name == 'email':
 #         email = user.email or details.get('email')
 #         if strategy.request.POST.get('password'):
-#             if 'anonymous' in user.username:
+#             if user.groups.filter(name='Temporary').exists():
 #                 user.username = details.get('username')
 #                 user.first_name = ''
 #             username = user.username
@@ -74,7 +74,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                     login(backend.strategy.request, user)
                     return {'user': user}
         else:
-            if user and 'anonymous' in user.username:
+            if user and user.groups.filter(name='Temporary').exists():
                 AnonymEmail.objects.get_or_create(user=user, email=details.get('email'),
                                                   defaults={'date': datetime.now()})
             backend.strategy.send_email_validation(backend, details['email'])
@@ -136,7 +136,7 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
     """
     social = kwargs.get('social')
     email = details.get('email')
-    if user and 'anonymous' in user.username:
+    if user and user.groups.filter(name='Temporary').exists():
         if social:
             tmp_user = user
             logout(strategy.request)
@@ -223,11 +223,11 @@ def social_user(backend, uid, user=None, *args, **kwargs):
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
-        if user and social.user != user and 'anonymous' not in user.username:
+        if user and social.user != user and not user.groups.filter(name='Temporary').exists():
             if not_allowed_to_merge(user, social.user):
                 msg = 'Merge aborted due to providers intersection.'
                 raise AuthAlreadyAssociated(backend, msg)
-        elif not user or 'anonymous' in user.username:
+        elif not user or user.groups.filter(name='Temporary').exists():
             user = social.user
     return {'social': social,
             'user': user,
