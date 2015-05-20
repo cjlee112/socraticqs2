@@ -1,21 +1,26 @@
 import mock
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.test import TestCase, Client
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User, AnonymousUser
-from social.exceptions import AuthAlreadyAssociated, AuthException
+from social.exceptions import (AuthAlreadyAssociated,
+                               AuthException,
+                               InvalidEmail)
 
 from psa.views import (context,
                        validation_sent,
                        custom_login,
-                       done,
-                       ask_stranger)
+                       done)
 from psa.pipeline import (social_user,
                           not_allowed_to_merge,
                           associate_user,
                           associate_by_email,
                           social_merge,
-                          union_merge)
+                          union_merge,
+                          validated_user_details,
+                          custom_mail_validation)
+from psa.mail import send_validation
 
 
 class ViewsUnitTest(TestCase):
@@ -49,7 +54,8 @@ class ViewsUnitTest(TestCase):
         credentials = {'username': 'test',
                        'password': 'test'}
         response = self.client.post('/login/', data=credentials)
-        self.assertTemplateUsed(response, template_name='psa/custom_login.html')
+        self.assertTemplateUsed(response,
+                                template_name='psa/custom_login.html')
 
     def test_custom_login_post_positive(self):
         user = User(username='test')
@@ -124,10 +130,11 @@ class TestSocialUser(TestCase):
         self.social = mock.Mock()
         self.social.user = self.user
         self.anonymous = User(username='anonymous_test')
+        self.attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
 
     def test_no_social(self):
-        attrs = {'strategy.storage.user.get_social_auth.return_value': []}
-        backend = mock.Mock(**attrs)
+        self.attrs = {'strategy.storage.user.get_social_auth.return_value': []}
+        backend = mock.Mock(**self.attrs)
         backend.name = 'google-oauth2'
         uid = 'test@test.com'
 
@@ -138,8 +145,7 @@ class TestSocialUser(TestCase):
         self.assertEqual(res['new_association'], False)
 
     def test_social_stranger(self):
-        attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
-        backend = mock.Mock(**attrs)
+        backend = mock.Mock(**self.attrs)
         backend.name = 'google-oauth2'
         uid = 'test@test.com'
 
@@ -150,8 +156,7 @@ class TestSocialUser(TestCase):
         self.assertEqual(res['new_association'], False)
 
     def test_social_validated(self):
-        attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
-        backend = mock.Mock(**attrs)
+        backend = mock.Mock(**self.attrs)
         backend.name = 'google-oauth2'
         uid = 'test@test.com'
 
@@ -164,8 +169,7 @@ class TestSocialUser(TestCase):
         self.assertEqual(res['new_association'], False)
 
     def test_social_validated_not_allowed(self):
-        attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
-        backend = mock.Mock(**attrs)
+        backend = mock.Mock(**self.attrs)
         backend.name = 'google-oauth2'
         uid = 'test@test.com'
 
@@ -175,8 +179,7 @@ class TestSocialUser(TestCase):
                 social_user(backend, uid, user=self.main_user)
 
     def test_social_anonymous(self):
-        attrs = {'strategy.storage.user.get_social_auth.return_value': self.social}
-        backend = mock.Mock(**attrs)
+        backend = mock.Mock(**self.attrs)
         backend.name = 'google-oauth2'
         uid = 'test@test.com'
 
@@ -205,15 +208,18 @@ class NotAllowedToMergeTest(TestCase):
         self.user2.social_auth = mock.Mock()
 
     def test_not_allowed_to_merge_false(self):
-        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1, self.provider2))
+        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1,
+                                                             self.provider2))
         self.user2.social_auth.all = mock.Mock(return_value=(self.provider3,))
 
         res = bool(not_allowed_to_merge(self.user1, self.user2))
         self.assertFalse(res)
 
     def test_not_allowed_to_merge_true(self):
-        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1, self.provider2))
-        self.user2.social_auth.all = mock.Mock(return_value=(self.provider2, self.provider3))
+        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1,
+                                                             self.provider2))
+        self.user2.social_auth.all = mock.Mock(return_value=(self.provider2,
+                                                             self.provider3))
 
         res = bool(not_allowed_to_merge(self.user1, self.user2))
         self.assertTrue(res)
@@ -235,7 +241,8 @@ class AssociateUserTest(TestCase):
             save = mock.Mock()
             save.return_value = None
             mocked.return_value = save
-            res = associate_user(self.backend, self.details, 'test@test.com', user=self.user)
+            res = associate_user(self.backend, self.details,
+                                 'test@test.com', user=self.user)
             self.assertEqual(res['social'], self.social)
             self.assertEqual(res['user'], self.social.user)
             self.assertEqual(res['new_association'], True)
@@ -344,7 +351,8 @@ class UnionMergeTest(TestCase):
         unitstatus1, unitstatus2 = (mock.Mock(), mock.Mock())
         for us in (unitstatus1, unitstatus2):
             us.save = save
-        tmp_user.unitstatus_set.all = mock.Mock(return_value=(unitstatus1, unitstatus2))
+        tmp_user.unitstatus_set.all = mock.Mock(return_value=(unitstatus1,
+                                                              unitstatus2))
 
         update = mock.Mock()
         update.update = mock.Mock()
@@ -358,5 +366,259 @@ class UnionMergeTest(TestCase):
         self.assertEqual(save.call_count, 5)
 
         self.assertEqual(update.update.call_count, 3)
-        calls = [mock.call(user=user), mock.call(author=user), mock.call(author=user)]
+        calls = [mock.call(user=user),
+                 mock.call(author=user),
+                 mock.call(author=user)]
         update.update.assert_has_calls(calls, any_order=True)
+
+
+class MailTest(TestCase):
+    """Testing send_validation function"""
+    def test_send_validation(self):
+        with mock.patch('psa.mail.send_mail') as mocked:
+            mocked.return_value = None
+            strategy, backend, code = (mock.Mock(),
+                                       mock.Mock(),
+                                       mock.Mock())
+            backend.name = 'google-oauth2'
+            code.code = 'test_code'
+            code.email = 'test@test.com'
+            self.assertIsNone(send_validation(strategy, backend, code))
+
+
+class ValidatedUserDetailTest(TestCase):
+    """Tests for ValidatedUserDetailTest"""
+    def setUp(self):
+        self.strategy = mock.Mock()
+        self.backend = mock.Mock()
+        self.details = {'email': 'test@test.com', 'username': 'new_username'}
+        self.user = mock.Mock()
+        self.social = mock.Mock()
+
+    def test_temporary_user_with_social(self):
+        self.user.username = 'anonymous'
+        self.social.user = mock.Mock()
+
+        with mock.patch('psa.pipeline.logout') as mocked_logout:
+            with mock.patch('psa.pipeline.login') as mocked_login:
+                with mock.patch('psa.pipeline.union_merge') as mocked_merge:
+                    mocked_logout.return_value = None
+                    mocked_login.return_value = None
+                    mocked_merge.return_value = None
+                    res = validated_user_details(strategy=self.strategy,
+                                                 pipeline_index=6,
+                                                 backend=self.backend,
+                                                 details=self.details,
+                                                 user=self.user,
+                                                 social=self.social)
+                    self.assertEqual(res['user'], self.social.user)
+
+    def test_temporary_user_without_social_user_by_email(self):
+        user_by_email = mock.Mock()
+        self.backend.strategy.storage.user.get_users_by_email.return_value = [user_by_email]
+        self.details = {'email': 'test@test.com'}
+        self.user.username = 'anonymous'
+
+        with mock.patch('psa.pipeline.logout') as mocked_logout:
+            with mock.patch('psa.pipeline.login') as mocked_login:
+                with mock.patch('psa.pipeline.union_merge') as mocked_merge:
+                    mocked_logout.return_value = None
+                    mocked_login.return_value = None
+                    mocked_merge.return_value = None
+                    res = validated_user_details(strategy=self.strategy,
+                                                 pipeline_index=6,
+                                                 backend=self.backend,
+                                                 details=self.details,
+                                                 user=self.user)
+                    self.assertEqual(res['user'], user_by_email)
+
+    def test_temporary_user_without_social_no_user_by_email(self):
+        self.backend.strategy.storage.user.get_users_by_email.return_value = []
+        self.user.username = 'anonymous'
+
+        with mock.patch('psa.pipeline.logout') as mocked_logout:
+            with mock.patch('psa.pipeline.login') as mocked_login:
+                with mock.patch('psa.pipeline.union_merge') as mocked_merge:
+                    mocked_logout.return_value = None
+                    mocked_login.return_value = None
+                    mocked_merge.return_value = None
+                    res = validated_user_details(strategy=self.strategy,
+                                                 pipeline_index=6,
+                                                 backend=self.backend,
+                                                 details=self.details,
+                                                 user=self.user)
+                    self.assertEqual(res, {})
+                    self.assertEqual(self.user.username, self.details.get('username'))
+                    self.assertEqual(self.user.first_name, '')
+
+    def test_temporary_user_without_social_two_user_by_email(self):
+        self.backend.strategy.storage.user.get_users_by_email.return_value = [mock.Mock(),
+                                                                              mock.Mock()]
+        self.user.username = 'anonymous'
+
+        with mock.patch('psa.pipeline.logout') as mocked_logout:
+            with mock.patch('psa.pipeline.login') as mocked_login:
+                with mock.patch('psa.pipeline.union_merge') as mocked_merge:
+                    mocked_logout.return_value = None
+                    mocked_login.return_value = None
+                    mocked_merge.return_value = None
+                    with self.assertRaises(AuthException):
+                        validated_user_details(strategy=self.strategy,
+                                               pipeline_index=6,
+                                               backend=self.backend,
+                                               details=self.details,
+                                               user=self.user)
+
+    def test_integrity_error(self):
+        self.backend.strategy.storage.user.get_users_by_email.return_value = [mock.Mock()]
+        self.user.username = 'anonymous'
+
+        with mock.patch('psa.pipeline.logout') as mocked_logout:
+            mocked_logout.side_effect = IntegrityError()
+            validated_user_details(strategy=self.strategy,
+                                   pipeline_index=6,
+                                   backend=self.backend,
+                                   details=self.details,
+                                   user=self.user)
+            self.assertIn(self.details.get('username'), self.user.username)
+
+    def test_valid_user_with_social_confirm_no(self):
+        self.social.user = mock.Mock()
+        self.user.username = 'test_username'
+        self.strategy.request.POST = {'confirm': 'no'}
+
+        with self.assertRaises(AuthException):
+            validated_user_details(strategy=self.strategy,
+                                   pipeline_index=6,
+                                   backend=self.backend,
+                                   details=self.details,
+                                   user=self.user,
+                                   social=self.social)
+
+    def test_valid_user_with_social_confirm_yes(self):
+        self.social.user = mock.Mock()
+        self.social.user.email = 'test@test.com'
+        self.user.username = 'test_username'
+        self.user.email = 'test@test.com'
+        self.user.get_full_name.return_value = 'test_username1'
+        self.social.user.get_full_name.return_value = 'test_username2'
+        self.strategy.request.POST = {'confirm': 'yes'}
+
+        with mock.patch('psa.pipeline.social_merge') as mocked_social:
+            with mock.patch('psa.pipeline.union_merge') as mocked_union:
+                mocked_social.return_value = None
+                mocked_union.return_value = None
+                res = validated_user_details(strategy=self.strategy,
+                                             pipeline_index=6,
+                                             backend=self.backend,
+                                             details=self.details,
+                                             user=self.user,
+                                             social=self.social)
+                self.assertEqual(res['user'], self.user)
+                self.assertEqual(res['social'], self.social)
+
+    def test_valid_user_with_social_without_confirm(self):
+        self.social.user = mock.Mock()
+        self.social.user.email = 'test@test.com'
+        self.user.username = 'test_username'
+        self.user.email = 'test@test.com'
+        self.user.get_full_name.return_value = 'test_username1'
+        self.social.user.get_full_name.return_value = 'test_username2'
+        self.strategy.request.POST = {}
+
+        with mock.patch('psa.pipeline.social_merge') as mocked_social:
+            with mock.patch('psa.pipeline.union_merge') as mocked_union:
+                mocked_social.return_value = None
+                mocked_union.return_value = None
+                validated_user_details(strategy=self.strategy,
+                                       pipeline_index=6,
+                                       backend=self.backend,
+                                       details=self.details,
+                                       user=self.user,
+                                       social=self.social)
+                self.assertTemplateUsed('ct/person.html')
+
+
+class CustomMailValidation(TestCase):
+    """Testing psa.pipeline.custom_mail_validation"""
+    def setUp(self):
+        self.strategy = mock.Mock()
+        self.backend = mock.Mock()
+        self.backend.name = 'email'
+        self.backend.setting.return_value = True
+        self.backend.strategy.session_set = mock.Mock()
+        self.backend.strategy.session_pop = mock.Mock()
+        self.backend.strategy.request_data.return_value = {'verification_code': 'test_code'}
+        self.details = {'email': 'test@test.com', 'username': 'new_username'}
+        self.user = mock.Mock()
+        self.social = mock.Mock()
+
+    def test_custom_mail_validation_backend_not_email(self):
+        self.backend.name = 'facebook'
+        res = custom_mail_validation(strategy=self.strategy,
+                                     pipeline_index=5,
+                                     backend=self.backend,
+                                     details=self.details,
+                                     user=self.user,
+                                     social=self.social)
+        self.assertEqual(res, {})
+
+    def test_custom_mail_validation_backend_email_verify_code(self):
+        self.backend.strategy.validate_email.return_value = True
+        code = mock.Mock()
+        code.user_id = 1
+        self.backend.strategy.storage.code.get_code.return_value = code
+
+        with mock.patch('psa.pipeline.User') as mocked_user:
+            with mock.patch('psa.pipeline.logout') as mocked_logout:
+                with mock.patch('psa.pipeline.login') as mocked_login:
+                    mocked_logout.return_value = None
+                    mocked_login.return_value = None
+                    qs = mock.Mock()
+                    qs.first.return_value = self.user
+                    mocked_user.objects.filter.return_value = qs
+                    res = custom_mail_validation(strategy=self.strategy,
+                                                 pipeline_index=5,
+                                                 backend=self.backend,
+                                                 details=self.details,
+                                                 user=self.user)
+                    self.assertEqual(res['user'], self.user)
+                    self.assertEqual(self.user.backend,
+                                     'django.contrib.auth.backends.ModelBackend')
+
+    def test_custom_mail_validation_raise(self):
+        self.backend.strategy.validate_email.return_value = False
+        with self.assertRaises(InvalidEmail):
+            custom_mail_validation(strategy=self.strategy,
+                                   pipeline_index=5,
+                                   backend=self.backend,
+                                   details=self.details,
+                                   user=self.user)
+
+    def test_custom_mail_validation_backend_email_send_email(self):
+        self.backend.strategy.request_data.return_value = {}
+        self.backend.strategy.send_email_validation = mock.Mock()
+        self.user.username = 'test_user'
+        res = custom_mail_validation(strategy=self.strategy,
+                                     pipeline_index=5,
+                                     backend=self.backend,
+                                     details=self.details,
+                                     user=self.user)
+        self.assertEqual(res, self.backend.strategy.redirect())
+
+    def test_custom_mail_validation_backend_email_send_email_anonym(self):
+        self.backend.strategy.request_data.return_value = {}
+        send_email_validation = mock.Mock()
+        self.backend.strategy.send_email_validation = send_email_validation
+        self.user.username = 'anonymous_username'
+        with mock.patch('psa.pipeline.AnonymEmail') as mocked_anonym:
+            get_or_create = mock.Mock()
+            mocked_anonym.objects.get_or_create = get_or_create
+            res = custom_mail_validation(strategy=self.strategy,
+                                         pipeline_index=5,
+                                         backend=self.backend,
+                                         details=self.details,
+                                         user=self.user)
+            self.assertEqual(res, self.backend.strategy.redirect())
+            self.assertEqual(get_or_create.call_count, 1)
+            self.assertEqual(send_email_validation.call_count, 1)
