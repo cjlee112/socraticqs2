@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import AnonymousUser
@@ -389,7 +390,7 @@ def courses(request):
     """
     user = request.user
     courses = Course.objects.all()
-    if isinstance(user, AnonymousUser) or 'anonymous' in user.username:
+    if isinstance(user, AnonymousUser) or user.groups.filter(name='Temporary').exists():
         courses = courses.filter(access='public')
     pageData = PageData(request)
     return pageData.render(request, 'ct/courses.html',
@@ -409,25 +410,25 @@ def courses_subscribe(request, course_id):
     is_tmp_user = False
     if isinstance(user, AnonymousUser):
         is_tmp_user = True
-        # TODO Implement User OneToOne profile with BoolField is_temporary
-        # TODO or move username to settings.py
         user = User.objects.get_or_create(username='anonymous' + str(_id),
                                           first_name='Temporary User')[0]
-
+        temporary_group, created = Group.objects.get_or_create(name='Temporary')
+        user.groups.add(temporary_group)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
         # Set expiry time to year in future
         one_year = 31536000
         request.session.set_expiry(one_year)
     course = Course.objects.get(id=course_id)
-    # role = 'self' if (tmp_user or 'anonymous' in user.username) else 'student'
     role = 'self'
     Role.objects.get_or_create(course=course,
                                user=user,
                                role=role)
     if is_tmp_user:
         return HttpResponseRedirect('/tmp-email-ask/')
-    return HttpResponseRedirect(reverse('ct:course_student', args=(course_id,)))
+    return HttpResponseRedirect(
+        reverse('ct:course_student', args=(course_id,))
+    )
 
 
 @login_required

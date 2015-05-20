@@ -39,11 +39,12 @@ def check_anonymous():
     """
     now = datetime.utcnow().replace(tzinfo=UTC)
     user_sessions = UserSession.objects.filter(
-        user__username__startswith='anonymous')
+        user__groups__name='Temporary'
+    )
 
     # zombie_users - temporary students without session
     zombie_users = (user for user in
-                    User.objects.filter(username__startswith='anonymous')
+                    User.objects.filter(groups__name='Temporary')
                     if user.id not in
                     (session.user.id for session in user_sessions))
 
