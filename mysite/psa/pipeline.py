@@ -94,7 +94,9 @@ def union_merge(tmp_user, user):
     """
        Reassigning Roles
        Doing UNION merge to not repeat roles to the same course
-       with the save role
+       with the save role.
+       Also we reassigning UnitStatuses, FSMStates, Responses and
+       StudentErrors here.
     """
     roles_to_reset = (role for role in tmp_user.role_set.all()
                       if not user.role_set.filter(course=role.course,
@@ -102,20 +104,13 @@ def union_merge(tmp_user, user):
     for role in roles_to_reset:
         role.user = user
         role.save()
-    """
-       Reassigning UnitStatuses
-       TODO think about filter() for UNION instead all()
-       maybe we need fresh unitstatuses instead of all to reassign
-    """
+
     unitstatus_to_reset = (us for us in tmp_user.unitstatus_set.all())
     for ut in unitstatus_to_reset:
         ut.user = user
         ut.save()
-    """Reassigning FSMStates"""
     tmp_user.fsmstate_set.all().update(user=user)
-    """Reassigning Responses"""
     tmp_user.response_set.all().update(author=user)
-    """Reassigning StudentErrors"""
     tmp_user.studenterror_set.all().update(author=user)
 
 
@@ -138,45 +133,41 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
     email = details.get('email')
     if user and user.groups.filter(name='Temporary').exists():
         if social:
-            tmp_user = user
             logout(strategy.request)
-            user = social.user
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(strategy.request, user)
-            union_merge(tmp_user, user)
-            tmp_user.delete()
-            return {'user': user}
+            social.user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(strategy.request, social.user)
+            union_merge(user, social.user)
+            user.delete()
+            return {'user': social.user}
         else:
-            try:
-                new = False
-                if email:
-                    users = list(backend.strategy.storage.user.get_users_by_email(email))
-                    if len(users) == 0:
-                        pass
-                    elif len(users) > 1:
-                        raise AuthException(
-                            backend,
-                            'The given email address is associated with another account'
-                        )
-                    else:
-                        new = users[0]
-                if not new:
+            new_user = None
+            if email:
+                users = list(backend.strategy.storage.user.get_users_by_email(email))
+                if len(users) == 0:
+                    pass
+                elif len(users) > 1:
+                    raise AuthException(
+                        backend,
+                        'The given email address is associated with another account'
+                    )
+                else:
+                    new_user = users[0]
+            if not new_user:
+                try:
                     user.username = details.get('username')
                     user.first_name = ''
                     user.save()
-                else:
-                    tmp_user = user
-                    logout(strategy.request)
-                    user = new
-                    user.backend = 'django.contrib.auth.backends.ModelBackend'
-                    login(strategy.request, user)
-                    union_merge(tmp_user, user)
-                    tmp_user.delete()
-                    return {'user': user}
-            except IntegrityError as e:
-                _id = int(time.mktime(datetime.now().timetuple()))
-                user.username = details.get('username') + str(_id)
-                user.save()
+                except IntegrityError as e:
+                    _id = int(time.mktime(datetime.now().timetuple()))
+                    user.username = details.get('username') + str(_id)
+                    user.save()
+            else:
+                logout(strategy.request)
+                new_user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(strategy.request, new_user)
+                union_merge(user, new_user)
+                user.delete()
+                return {'user': new_user}
     elif user and social and social.user != user:
         confirm = strategy.request.POST.get('confirm')
         if confirm and confirm == 'no':

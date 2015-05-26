@@ -22,12 +22,16 @@ app = Celery('mysite')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
+import logging
 from pytz import UTC
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 
 from psa.models import UserSession
+
+
+LOGGER = logging.getLogger('celery_warn')
 
 
 @app.task
@@ -55,7 +59,7 @@ def check_anonymous():
         try:
             user_session.session
         except Session.DoesNotExist as e:
-            print(e)
+            LOGGER.info(e)
             # Delete users in UserSession but without session
             user_session.user.delete()
         else:
