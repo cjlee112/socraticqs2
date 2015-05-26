@@ -230,7 +230,7 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [('id', 'id'),
 ## LTI Parameters
 X_FRAME_OPTIONS = "GOFORIT"
 
-## Heroku SSL proxy fix
+## SSL proxy fix
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 BROKER_URL = 'amqp://'
@@ -262,7 +262,11 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
         'django.request': {
@@ -270,6 +274,13 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'lti_debug': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'celery_warn': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
     }
 }
-

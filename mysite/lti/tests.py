@@ -5,6 +5,7 @@ import oauth2
 from mock import patch
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from ddt import ddt, data, unpack
 
 from lti.models import LTIUser
 from ct.models import Course, Role
@@ -55,111 +56,99 @@ class LTITestCase(TestCase):
         self.course.save()
 
 
+@patch('lti.views.DjangoToolProvider')
 class MethodsTest(LTITestCase):
     """Test for correct request method passed in view."""
 
-    def test_post(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            response = self.client.post('/lti/ct/courses/1/',
-                                        data=self.headers,
-                                        follow=True)
-            self.assertTemplateUsed(response, template_name='ct/course.html')
+    def test_post(self, mocked):
+        mocked.return_value.is_valid_request.return_value = True
+        response = self.client.post('/lti/ct/courses/1/',
+                                    data=self.headers,
+                                    follow=True)
+        self.assertTemplateUsed(response, template_name='ct/course.html')
 
-    def test_failure_post(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = False
-            response = self.client.post('/lti/ct/courses/1/',
-                                        data=self.headers,
-                                        follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
+    def test_failure_post(self, mocked):
+        mocked.return_value.is_valid_request.return_value = False
+        response = self.client.post('/lti/ct/courses/1/',
+                                    data=self.headers,
+                                    follow=True)
+        self.assertTemplateUsed(response, template_name='lti/error.html')
 
-    def test_get(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            response = self.client.get('/lti/ct/courses/1/',
-                                       follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
+    def test_get(self, mocked):
+        mocked.return_value.is_valid_request.return_value = True
+        response = self.client.get('/lti/ct/courses/1/',
+                                   follow=True)
+        self.assertTemplateUsed(response, template_name='lti/error.html')
 
 
+@ddt
+@patch('lti.views.DjangoToolProvider')
 class ParamsTest(LTITestCase):
     """Test different params handling."""
 
-    def test_ext_lms(self):
+    def test_ext_lms(self, mocked):
         del self.headers[u'ext_lms']
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(LTIUser.objects.filter(consumer='lti').exists())
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(LTIUser.objects.filter(consumer='lti').exists())
 
-    def test_roles_prof(self):
-        self.headers.update({u'roles': u'Instructor'})
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(Role.objects.filter(role='prof').exists())
+    @unpack
+    @data(('prof', {u'roles': u'Instructor'}),
+          ('student', {u'roles': u'Leaner'}))
+    def test_roles(self, role, header, mocked):
+        self.headers.update(header)
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(Role.objects.filter(role=role).exists())
 
-    def test_roles_student(self):
-        self.headers.update({u'roles': u'Leaner'})
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(Role.objects.filter(role='student').exists())
-
-    def test_user_id(self):
+    def test_user_id(self, mocked):
         del self.headers[u'user_id']
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            response = self.client.post('/lti/ct/courses/1/',
-                                        data=self.headers,
-                                        follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
+        mocked.return_value.is_valid_request.return_value = True
+        response = self.client.post('/lti/ct/courses/1/',
+                                    data=self.headers,
+                                    follow=True)
+        self.assertTemplateUsed(response, template_name='lti/error.html')
 
-    def test_roles_none(self):
+    def test_roles_none(self, mocked):
         del self.headers[u'roles']
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(Role.objects.filter(role='student').exists())
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(Role.objects.filter(role='student').exists())
 
-    def test_lti_user(self):
+    def test_lti_user(self, mocked):
         """Default LTI user creation process"""
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
-            self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                             UserSocialAuth.objects.get(
-                                 uid=self.headers[u'lis_person_contact_email_primary']
-                             ).user)
-            self.assertEqual(self.user, UserSocialAuth.objects.get(
-                uid=self.headers[u'lis_person_contact_email_primary']
-            ).user)
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
+        self.assertTrue(Role.objects.filter(role='student').exists())
+        self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                         UserSocialAuth.objects.get(
+                             uid=self.headers[u'lis_person_contact_email_primary']
+                         ).user)
+        self.assertEqual(self.user, UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user)
 
-    def test_lti_user_no_email(self):
+    def test_lti_user_no_email(self, mocked):
         del self.headers[u'lis_person_contact_email_primary']
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
-            self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                                User.objects.get(id=1))
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
+        self.assertTrue(Role.objects.filter(role='student').exists())
+        self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                            User.objects.get(id=1))
 
-    def test_lti_user_no_username_no_email(self):
+    def test_lti_user_no_username_no_email(self, mocked):
         """Test for non-existent username field
 
         If there is no username in POST
@@ -167,20 +156,19 @@ class ParamsTest(LTITestCase):
         """
         del self.headers[u'lis_person_name_full']
         del self.headers[u'lis_person_contact_email_primary']
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
-            self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                                User.objects.get(id=1))
-            self.assertEqual(LTIUser.objects.get(consumer='moodle-2').
-                             django_user.username,
-                             LTIUser.objects.get(consumer='moodle-2').user_id)
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
+        self.assertTrue(Role.objects.filter(role='student').exists())
+        self.assertNotEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                            User.objects.get(id=1))
+        self.assertEqual(LTIUser.objects.get(consumer='moodle-2').
+                         django_user.username,
+                         LTIUser.objects.get(consumer='moodle-2').user_id)
 
-    def test_lti_user_link_social(self):
+    def test_lti_user_link_social(self, mocked):
         """Default LTI user creation process"""
         social = UserSocialAuth(
             user=self.user,
@@ -188,49 +176,33 @@ class ParamsTest(LTITestCase):
             provider='email'
         )
         social.save()
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.return_value = True
-            self.client.post('/lti/ct/courses/1/',
-                             data=self.headers,
-                             follow=True)
-            self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
-            self.assertTrue(Role.objects.filter(role='student').exists())
-            self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
-                             social.user)
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/ct/courses/1/',
+                         data=self.headers,
+                         follow=True)
+        self.assertTrue(LTIUser.objects.filter(consumer='moodle-2').exists())
+        self.assertTrue(Role.objects.filter(role='student').exists())
+        self.assertEqual(LTIUser.objects.get(consumer='moodle-2').django_user,
+                         social.user)
 
 
+@ddt
+@patch('lti.views.DjangoToolProvider')
 class ExceptionTest(LTITestCase):
     """Test raising exception."""
 
-    def test_missing_signature(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.side_effect = oauth2.MissingSignature()
-            response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
-
-    def test_oauth_error(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.side_effect = oauth2.Error()
-            response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
-
-    def test_key_error(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.side_effect = KeyError()
-            response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
-
-    def test_attribute_error(self):
-        with patch('lti.views.DjangoToolProvider') as mocked:
-            mocked.return_value.is_valid_request.side_effect = AttributeError()
-            response = self.client.get('/lti/ct/courses/1/', follow=True)
-            self.assertTemplateUsed(response, template_name='lti/error.html')
+    @data(oauth2.MissingSignature, oauth2.Error, KeyError, AttributeError)
+    def test_exceptions(self, exception, mocked):
+        mocked.return_value.is_valid_request.side_effect = exception()
+        response = self.client.get('/lti/ct/courses/1/', follow=True)
+        self.assertTemplateUsed(response, template_name='lti/error.html')
 
 
 class ModelTest(LTITestCase):
     """Test model LTIUser."""
 
     def test_lti_user(self):
+        """Test enrollment process"""
         lti_user = LTIUser(user_id=1,
                            consumer='test_consimer',
                            extra_data=json.dumps(self.headers),
@@ -238,13 +210,16 @@ class ModelTest(LTITestCase):
                            course_id=1)
         lti_user.save()
 
-        self.assertTrue(lti_user.is_linked)
         self.assertFalse(lti_user.is_enrolled('student', 1))
 
         lti_user.enroll('student', 1)
         self.assertTrue(lti_user.is_enrolled('student', 1))
 
     def test_lti_user_create_links(self):
+        """Creating LTIUser without Django user
+
+        Testing Django user creation process.
+        """
         lti_user = LTIUser(user_id=1,
                            consumer='test_consimer',
                            extra_data=json.dumps(self.headers),

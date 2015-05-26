@@ -478,16 +478,23 @@ class ValidatedUserDetailTest(TestCase):
                                                user=self.user)
 
     def test_integrity_error(self):
-        self.backend.strategy.storage.user.get_users_by_email.return_value = [mock.Mock()]
+        self.backend.strategy.storage.user.get_users_by_email.return_value = []
+        save = mock.Mock()
+        save.side_effect = IntegrityError()
+        self.user.save = save
 
-        with mock.patch('psa.pipeline.logout') as mocked_logout:
-            mocked_logout.side_effect = IntegrityError()
+        # pipeline do not raise IntegrityError but we mock user.save()
+        # so in our test second call to save will raise IntegrityError
+        # exception
+        with self.assertRaises(IntegrityError):
             validated_user_details(strategy=self.strategy,
                                    pipeline_index=6,
                                    backend=self.backend,
                                    details=self.details,
                                    user=self.user)
             self.assertIn(self.details.get('username'), self.user.username)
+            self.assertLess(len(self.details.get('username')),
+                            len(self.user.username))
 
     def test_valid_user_with_social_confirm_no(self):
         self.social.user = mock.Mock()

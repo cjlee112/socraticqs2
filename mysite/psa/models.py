@@ -25,7 +25,7 @@ class AnonymEmail(models.Model):
 class SecondaryEmail(models.Model):
     """Model for storing secondary emails
 
-    We can store emails there from social_auth
+    We can store emails here from social_auth
     or LTI login.
     """
     user = models.ForeignKey(User, related_name='secondary')
