@@ -33,10 +33,7 @@ LOGGER = logging.getLogger('lti_debug')
 def lti_init(request, course_id=None, unit_id=None):
     """LTI init view
 
-    |  Analyze LTI POST request to start LTI session.
-    |  Create LTIUser with all needed link to Django user
-    |  and/or UserSocialAuth.
-    |  Finally login Django user.
+    Analyze LTI POST request to start LTI session.
 
     :param course_id: course id from launch url
     :param unit_id: unit id from lunch url
@@ -62,8 +59,7 @@ def lti_init(request, course_id=None, unit_id=None):
         session['message'] = "{}".format(e)
 
     session['is_valid'] = is_valid
-    request_dict = {k: v for (k, v) in request.POST.iteritems()}
-    session['LTI_POST'] = pickle.dumps(request_dict)
+    session['LTI_POST'] = pickle.dumps({k: v for (k, v) in request.POST.iteritems()})
 
     if settings.LTI_DEBUG:
         LOGGER.info('session: is_valid = {}'.format(session.get('is_valid')))
@@ -72,6 +68,20 @@ def lti_init(request, course_id=None, unit_id=None):
     if not is_valid:
         return render_to_response('lti/error.html', RequestContext(request))
 
+    return lti_redirect(request, course_id, unit_id)
+
+
+def lti_redirect(request, course_id=None, unit_id=None):
+    """Create user and redirect to Course
+
+    |  Create LTIUser with all needed link to Django user
+    |  and/or UserSocialAuth.
+    |  Finally login Django user and redirect to Course
+
+    :param course_id: course id from launch url
+    :param unit_id: unit id from lunch url
+    """
+    request_dict = pickle.loads(request.session['LTI_POST'])
     consumer_name = request_dict.get('ext_lms', 'lti')
     user_id = request_dict.get('user_id', None)
     roles = ROLES_MAP.get(request_dict.get('roles', None), 'student')
