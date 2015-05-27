@@ -15,7 +15,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CustomCode',
             fields=[
-                ('code_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='default.Code')),
+                ('code_ptr', models.OneToOneField(
+                    parent_link=True, auto_created=True, primary_key=True,
+                    serialize=False, to='default.Code')),
                 ('user_id', models.IntegerField(null=True)),
             ],
             options={

@@ -51,7 +51,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
     Verify email or send email with validation link.
     """
     requires_validation = backend.REQUIRES_EMAIL_VALIDATION or \
-                          backend.setting('FORCE_EMAIL_VALIDATION', False)
+        backend.setting('FORCE_EMAIL_VALIDATION', False)
     send_validation = (details.get('email') and
                        (is_new or backend.setting('PASSWORDLESS', False)))
 
@@ -157,7 +157,7 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                     user.username = details.get('username')
                     user.first_name = ''
                     user.save()
-                except IntegrityError as e:
+                except IntegrityError:
                     _id = int(time.mktime(datetime.now().timetuple()))
                     user.username = details.get('username') + str(_id)
                     user.save()
@@ -187,9 +187,8 @@ def validated_user_details(strategy, backend, details, user=None, is_new=False, 
                 'person': user,
                 'merge_confirm': True
             }, RequestContext(strategy.request))
-        elif (user.get_full_name() == social.user.get_full_name()
-              or confirm and confirm == 'yes'
-              or user.email == social.user.email):
+        elif (user.get_full_name() == social.user.get_full_name() or
+              confirm and confirm == 'yes' or user.email == social.user.email):
             union_merge(social.user, user)
             social_merge(social.user, user)
             social.user.delete()
