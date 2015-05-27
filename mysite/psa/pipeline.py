@@ -89,14 +89,11 @@ def union_merge(tmp_user, user):
     """Union merge
 
     Merging Roles, UnitStatus, FSMState, Response, StudentError objects.
-    """
 
-    """
-       Reassigning Roles
-       Doing UNION merge to not repeat roles to the same course
-       with the save role.
-       Also we reassigning UnitStatuses, FSMStates, Responses and
-       StudentErrors here.
+    In Roles merge doing UNION merge to not repeat roles to the same course
+    with the save role.
+    Also we reassigning UnitStatuses, FSMStates, Responses and
+    StudentErrors here.
     """
     roles_to_reset = (role for role in tmp_user.role_set.all()
                       if not user.role_set.filter(course=role.course,
