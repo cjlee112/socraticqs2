@@ -46,4 +46,8 @@ In settings/local_conf.py we need to describe all needed KEY/SECRET for social-a
     )
 
 
+Quality check
+-------------
 
+We can check code quality using `./check-quality.sh {pep8|pylint}` script.
+We encourage you to run this script before each commit.
