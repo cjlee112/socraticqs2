@@ -66,3 +66,4 @@ celerybeat-schedule
 local_conf.py
 socraticqs2.sublime-workspace
 sftp-config.json
+_ve_socraticqs2/
