@@ -13,6 +13,8 @@ Contents:
 
    devintro
    fsm
+   lti
+   psa
 
 Project Enhancement Proposals:
 

@@ -117,6 +117,29 @@ class ConceptMethodTests(OurTestCase):
         lessons = [ul.lesson for ul in children]
         self.assertIn(emUL1.lesson, lessons)
         self.assertIn(emUL2.lesson, lessons)
+        # test adding resolution
+        reso = Lesson(title='A resolution', text='now I get it',
+                      addedBy=self.user)
+        resoUL = ul.save_resolution(reso)
+        em, resols = ul.get_em_resolutions()
+        resols = list(resols)
+        self.assertEqual(resols, [resoUL])
+        # test linking a lesson as resolution
+        other = Lesson(title='A lesson', text='something else',
+                       addedBy=self.user)
+        other.save_root()
+        otherUL = UnitLesson.create_from_lesson(other, self.unit)
+        resoUL2 = ul.copy_resolution(otherUL, self.user)
+        em, resols = ul.get_em_resolutions()
+        resols = list(resols)
+        self.assertEqual(resols, [resoUL, resoUL2])
+        # check that it prevents adding duplicate resolutions
+        resoUL3 = ul.copy_resolution(otherUL, self.user)
+        self.assertEqual(resoUL2, resoUL3)
+        em, resols = ul.get_em_resolutions()
+        resols = list(resols)
+        self.assertEqual(resols, [resoUL, resoUL2])
+        
     def test_get_conceptlinks(self):
         'test ConceptLink creation and retrieval'
         concept = Concept.new_concept('bad', 'idea', self.unit, self.user)

@@ -1,31 +1,43 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.utils.safestring import mark_safe
-from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.db.models import Q
-import json
-from ct.models import *
-from ct.forms import *
-from ct.ct_util import reverse_path_args
-from ct.templatetags.ct_extras import md2html, get_base_url, get_object_url, is_teacher_url, display_datetime, get_path_type
-from ct.fsm import FSMStack
 import time
 import urllib
+from datetime import datetime
+
+from django.db.models import Q
+from django.conf import settings
+from django.utils import timezone
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
+from django.contrib.auth import logout, login
+from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect, HttpResponse
+from social.backends.utils import load_backends
+
+from ct.forms import *
+from ct.models import *
+from ct.fsm import FSMStack
+from ct.ct_util import reverse_path_args
+from ct.templatetags.ct_extras import (md2html,
+                                       get_base_url,
+                                       get_object_url,
+                                       is_teacher_url,
+                                       display_datetime,
+                                       get_path_type)
+
 
 ###########################################################
 # WelcomeMat refactored utilities
 
 def check_instructor_auth(course, request):
     'return 403 if not course instructor, else None'
-    role = course.get_user_role(request.user)
-    if role != Role.INSTRUCTOR:
+    role = course.get_user_role(request.user, justOne=False)
+    if not isinstance(role, list):
+        role = [role]
+    if not Role.INSTRUCTOR in role:
         return HttpResponse("Only the instructor can access this",
-                            status_code=403)
+                            status=403)
 
 def make_tabs(path, current, tabs, tail=4, **kwargs):
     path = get_base_url(path, tail=tail, **kwargs)
@@ -115,7 +127,7 @@ def unit_tabs_student(path, current,
 def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, baseToken='courses',
                      **kwargs)
-    
+
 
 class PageData(object):
     'generic holder for page UI elements such as tabs'
@@ -202,6 +214,7 @@ class PageData(object):
         templateArgs['actionTarget'] = request.path
         templateArgs['pageData'] = self
         templateArgs['fsmStack'] = self.fsmStack
+        templateArgs['target'] = request.session.get('target', '_self')
         if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
@@ -282,7 +295,10 @@ def person_profile(request, user_id):
     else:
         logoutForm = None
     return pageData.render(request, 'ct/person.html',
-                           dict(person=person, logoutForm=logoutForm))
+                           dict(person=person, logoutForm=logoutForm,
+                                next=request.path,
+                                available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
+
 
 def about(request):
     pageData = PageData(request)
@@ -362,7 +378,57 @@ def edit_course(request, course_id):
         courseform = CourseTitleForm(instance=course)
     set_crispy_action(request.path, courseform)
     return pageData.render(request, 'ct/edit_course.html',
-                  dict(course=course, courseform=courseform))
+                  dict(course=course, courseform=courseform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
+
+
+def courses(request):
+    """Courses view
+
+    Render all courses for all users except anonymous.
+    For `anonymous` users render courses with public access.
+    """
+    user = request.user
+    courses = Course.objects.all()
+    if isinstance(user, AnonymousUser) or user.groups.filter(name='Temporary').exists():
+        courses = courses.filter(access='public')
+    pageData = PageData(request)
+    return pageData.render(request, 'ct/courses.html',
+                           dict(courses=courses))
+
+
+def courses_subscribe(request, course_id):
+    """Courses subscribe view
+
+    Subscribe user to given course by creating Role object.
+    For not logged in user (Stranger) we create `anonymous` user
+    and login him.
+    Also we ask `anonymous` user to enter email to be able to save progress.
+    """
+    _id = int(time.mktime(datetime.now().timetuple()))
+    user = request.user
+    is_tmp_user = False
+    if isinstance(user, AnonymousUser):
+        is_tmp_user = True
+        user = User.objects.get_or_create(username='anonymous' + str(_id),
+                                          first_name='Temporary User')[0]
+        temporary_group, created = Group.objects.get_or_create(name='Temporary')
+        user.groups.add(temporary_group)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        # Set expiry time to year in future
+        one_year = 31536000
+        request.session.set_expiry(one_year)
+    course = Course.objects.get(id=course_id)
+    role = 'self'
+    Role.objects.get_or_create(course=course,
+                               user=user,
+                               role=role)
+    if is_tmp_user:
+        return HttpResponseRedirect('/tmp-email-ask/')
+    return HttpResponseRedirect(
+        reverse('ct:course_student', args=(course_id,))
+    )
 
 
 @login_required
@@ -396,7 +462,8 @@ def edit_unit(request, course_id, unit_id):
                                 defaultURL, reverseArgs=kwargs, unit=unit)
     set_crispy_action(request.path, unitform)
     return pageData.render(request, 'ct/edit_unit.html',
-                  dict(unit=unit, courseUnit=cu, unitform=unitform))
+                  dict(unit=unit, courseUnit=cu, unitform=unitform,
+                       domain='https://{0}'.format(Site.objects.get_current().domain)))
 
 
 def update_concept_link(request, conceptLinks, unit):
@@ -786,8 +853,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     if lessonTable is None:
         lessonTable = unit.get_exercises()
     r = _lessons(request, pageData, msg='''You can search for a lesson to add
-          to this courselet, or write a new lesson for a concept by
-          clicking on the Concepts tab.''', 
+          to this courselet by entering a search term below.
+          (To write a new lesson, click on the Concepts tab to identify
+          what concept your new lesson will be about).''', 
                   unit=unit, showReorderForm=showReorderForm,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
@@ -823,7 +891,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         concept, lesson = Concept.get_from_sourceDB(sourceID, request.user)
         ul = UnitLesson.create_from_lesson(lesson, unit)
         kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul.pk)
-        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+        defaultURL = reverse('ct:concept_teach', kwargs=kwargs)
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
@@ -1059,17 +1127,11 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
 
 def create_resolution_ul(lesson, em, unit, parentUL):
     'create UnitLesson as resolution linked to error model'
-    lesson.save_root(em, ConceptLink.RESOLVES) # link as resolution
-    return UnitLesson.create_from_lesson(lesson, unit, addAnswer=True,
-                                         kind=UnitLesson.RESOLVES)
+    return parentUL.save_resolution(lesson)
 
 def link_resolution_ul(ul, em, unit, addedBy, parentUL):
     'link ul as resolution for error model'
-    if ul.lesson.conceptlink_set.filter(concept=em,
-                    relationship=ConceptLink.RESOLVES).count() == 0:
-        ul.lesson.conceptlink_set.create(concept=em, addedBy=addedBy,
-                                  relationship=ConceptLink.RESOLVES)
-    return ul
+    return parentUL.copy_resolution(ul, addedBy)
 
 
 @login_required
@@ -1088,7 +1150,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                  unit=unit, actionLabel='Add to suggestion list',
                  creationInstructions=creationInstructions,
                  createULFunc=create_resolution_ul,
-                 selectULFunc=link_resolution_ul)
+                 selectULFunc=link_resolution_ul, parentUL=ul)
     if isinstance(r, UnitLesson):
         red = pageData.fsm_redirect(request, 'create_Resolution',
                                     defaultURL=None, unitLesson=r)
@@ -1100,7 +1162,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                   msg='Successfully added resolution. Thank you!',
                   ignorePOST=True, lessonTable=lessonTable, unit=unit,
                   actionLabel='Add to suggestion list',
-                  creationInstructions=creationInstructions)
+                  creationInstructions=creationInstructions, parentUL=ul)
     return r
 
 @login_required
