@@ -167,7 +167,7 @@ AUTHENTICATION_BACKENDS = (
    'social.backends.google.GoogleOAuth2',
    'social.backends.linkedin.LinkedinOAuth2',
    'social.backends.khanacademy.KhanAcademyOAuth1',
-   'social.backends.email.EmailAuth',
+   'psa.custom_backends.EmailAuth',
    'django.contrib.auth.backends.ModelBackend',
 )
 
