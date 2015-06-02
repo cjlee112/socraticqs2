@@ -59,8 +59,9 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
         data = backend.strategy.request_data()
         if 'verification_code' in data:
             backend.strategy.session_pop('email_validation_address')
-            if not backend.strategy.validate_email(details['email'],
-                                                   data['verification_code']):
+            if not backend.strategy.validate_email(
+                details.get('email'), data.get('verification_code')
+            ):
                 raise InvalidEmail(backend)
             code = backend.strategy.storage.code.get_code(data['verification_code'])
             # This is very straightforward method
@@ -77,9 +78,10 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
             if user and user.groups.filter(name='Temporary').exists():
                 AnonymEmail.objects.get_or_create(user=user, email=details.get('email'),
                                                   defaults={'date': datetime.now()})
-            backend.strategy.send_email_validation(backend, details['email'])
-            backend.strategy.session_set('email_validation_address',
-                                         details['email'])
+            backend.strategy.send_email_validation(backend, details.get('email'))
+            backend.strategy.session_set(
+                'email_validation_address', details.get('email')
+            )
             return backend.strategy.redirect(
                 backend.strategy.setting('EMAIL_VALIDATION_URL')
             )
