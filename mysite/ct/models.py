@@ -325,6 +325,13 @@ class Lesson(models.Model):
         if copyLinks:
             for cl in self.parent.conceptlink_set.all():
                 cl.copy(self)
+    def add_concept_link(self, concept, relationship, addedBy):
+        'add concept link if not already present'
+        if self.conceptlink_set.filter(concept=concept,
+                                       relationship=relationship).count() == 0:
+            return self.conceptlink_set.create(concept=concept, addedBy=addedBy,
+                                               relationship=relationship)
+        
     def __unicode__(self):
         return self.title
     ## def get_url(self):
@@ -545,12 +552,13 @@ class UnitLesson(models.Model):
         return Concept.objects.filter(conceptlink__lesson=self.lesson,
                                       isError=False)
     def get_em_resolutions(self):
-        'get deduped list of resolution UL for this error UL'
+        'get list of resolution UL for this error UL'
         em = self.lesson.concept
-        query = Q(kind=self.RESOLVES,
-                  lesson__conceptlink__relationship=ConceptLink.RESOLVES,
-                  lesson__conceptlink__concept=em)
-        return em, distinct_subset(UnitLesson.objects.filter(query))
+        return em, list(self.unitlesson_set.filter(kind=self.RESOLVES))
+        ## query = Q(kind=self.RESOLVES,
+        ##           lesson__conceptlink__relationship=ConceptLink.RESOLVES,
+        ##           lesson__conceptlink__concept=em)
+        ## return em, distinct_subset(UnitLesson.objects.filter(query))
     def get_new_inquiries(self):
         return self.response_set.filter(kind=Response.STUDENT_QUESTION,
                                         needsEval=True)
@@ -580,7 +588,7 @@ class UnitLesson(models.Model):
         if newLesson:
             self.lesson = lesson
             self.save()
-    def copy(self, unit, addedBy, parent=None, order=None, **kwargs):
+    def copy(self, unit, addedBy, parent=None, order=None, kind=None, **kwargs):
         'copy self and children to new unit'
         if not self.lesson.is_committed(): # to fork it, must commit it!
             name = addedBy.get_full_name()
@@ -590,13 +598,33 @@ class UnitLesson(models.Model):
             self.lesson.checkin(commit=True)
         if order == 'APPEND':
             order = unit.next_order()
+        if kind == UnitLesson.RESOLVES:
+            self.lesson.add_concept_link(parent.lesson.concept,
+                                         ConceptLink.RESOLVES, addedBy)
+        elif kind is None:
+            kind = self.kind
         ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
-                            kind=self.kind, treeID=self.treeID, parent=parent,
+                            kind=kind, treeID=self.treeID, parent=parent,
                             order=order, branch=self.branch, **kwargs)
         ul.save()
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
+    def save_resolution(self, lesson):
+        'save new lesson as resolution for this error model UL'
+        if not self.lesson.concept or self.kind != self.MISUNDERSTANDS:
+            raise ValueError('not an error model!')
+        lesson.save_root(self.lesson.concept,
+                         ConceptLink.RESOLVES) # link as resolution
+        return self.__class__.create_from_lesson(lesson, self.unit,
+                                kind=UnitLesson.RESOLVES, parent=self)
+    def copy_resolution(self, ul, addedBy):
+        'copy existing UL as resolution for this error model UL'
+        try: # already added?
+            return self.unitlesson_set.get(treeID=ul.treeID,
+                                           kind=UnitLesson.RESOLVES)
+        except UnitLesson.DoesNotExist:
+            return ul.copy(self.unit, addedBy, self, kind=UnitLesson.RESOLVES)
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'get URL path for this UL'

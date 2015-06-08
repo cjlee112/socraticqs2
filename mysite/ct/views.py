@@ -837,8 +837,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
     if lessonTable is None:
         lessonTable = unit.get_exercises()
     r = _lessons(request, pageData, msg='''You can search for a lesson to add
-          to this courselet, or write a new lesson for a concept by
-          clicking on the Concepts tab.''', 
+          to this courselet by entering a search term below.
+          (To write a new lesson, click on the Concepts tab to identify
+          what concept your new lesson will be about).''', 
                   unit=unit, showReorderForm=showReorderForm,
                   lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
     if isinstance(r, UnitLesson):
@@ -874,7 +875,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         concept, lesson = Concept.get_from_sourceDB(sourceID, request.user)
         ul = UnitLesson.create_from_lesson(lesson, unit)
         kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ul.pk)
-        defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+        defaultURL = reverse('ct:concept_teach', kwargs=kwargs)
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
@@ -1110,17 +1111,11 @@ def ul_errors(request, course_id, unit_id, ul_id, showNETable=True):
 
 def create_resolution_ul(lesson, em, unit, parentUL):
     'create UnitLesson as resolution linked to error model'
-    lesson.save_root(em, ConceptLink.RESOLVES) # link as resolution
-    return UnitLesson.create_from_lesson(lesson, unit, addAnswer=True,
-                                         kind=UnitLesson.RESOLVES)
+    return parentUL.save_resolution(lesson)
 
 def link_resolution_ul(ul, em, unit, addedBy, parentUL):
     'link ul as resolution for error model'
-    if ul.lesson.conceptlink_set.filter(concept=em,
-                    relationship=ConceptLink.RESOLVES).count() == 0:
-        ul.lesson.conceptlink_set.create(concept=em, addedBy=addedBy,
-                                  relationship=ConceptLink.RESOLVES)
-    return ul
+    return parentUL.copy_resolution(ul, addedBy)
 
 
 @login_required
@@ -1139,7 +1134,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                  unit=unit, actionLabel='Add to suggestion list',
                  creationInstructions=creationInstructions,
                  createULFunc=create_resolution_ul,
-                 selectULFunc=link_resolution_ul)
+                 selectULFunc=link_resolution_ul, parentUL=ul)
     if isinstance(r, UnitLesson):
         red = pageData.fsm_redirect(request, 'create_Resolution',
                                     defaultURL=None, unitLesson=r)
@@ -1151,7 +1146,7 @@ def resolutions(request, course_id, unit_id, ul_id):
                   msg='Successfully added resolution. Thank you!',
                   ignorePOST=True, lessonTable=lessonTable, unit=unit,
                   actionLabel='Add to suggestion list',
-                  creationInstructions=creationInstructions)
+                  creationInstructions=creationInstructions, parentUL=ul)
     return r
 
 @login_required

@@ -71,6 +71,8 @@ urlpatterns = patterns('',
     # responses
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/assess/$',
         assess, name='assess_teach'),
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/errors/$',
+        assess_errors, name='assess_errors_teach'),
 
     # student UI
     # course tabs
