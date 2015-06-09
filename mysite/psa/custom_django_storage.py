@@ -1,3 +1,8 @@
+"""Module define improved entries
+
+CustomCode -> add user_id attr to handle user generated validation link
+CustomDjangoStorage -> Storage to use this CustomCode
+"""
 from django.db import models
 
 from social.apps.django_app.default.models import DjangoStorage, Code
