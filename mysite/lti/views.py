@@ -54,17 +54,19 @@ def lti_init(request, course_id=None, unit_id=None):
     except (oauth2.MissingSignature,
             oauth2.Error,
             KeyError,
-            AttributeError) as e:
+            AttributeError) as err:
         is_valid = False
-        session['message'] = "{}".format(e)
+        session['message'] = "{}".format(err)
 
     session['is_valid'] = is_valid
     session['LTI_POST'] = pickle.dumps({k: v for (k, v) in request.POST.iteritems()})
 
     if settings.LTI_DEBUG:
-        LOGGER.info('session: is_valid = {}'.format(session.get('is_valid')))
+        msg = 'session: is_valid = {}'.format(session.get('is_valid'))
+        LOGGER.info(msg)
         if session.get('message'):
-            LOGGER.info('session: message = {}'.format(session.get('message')))
+            msg = 'session: message = {}'.format(session.get('message'))
+            LOGGER.info(msg)
     if not is_valid:
         return render_to_response('lti/error.html', RequestContext(request))
 

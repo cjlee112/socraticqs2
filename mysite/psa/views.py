@@ -12,6 +12,7 @@ from psa.models import SecondaryEmail
 
 
 def context(**extra):
+    """Adding default context to rendered page"""
     return dict({
         'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
     }, **extra)
@@ -19,6 +20,7 @@ def context(**extra):
 
 @render_to('psa/custom_login.html')
 def validation_sent(request):
+    """View to handle validation_send action"""
     user = request.user
     social_propose = False
     by_secondary = []
@@ -31,12 +33,12 @@ def validation_sent(request):
             social_propose = True
 
         users_by_email = User.objects.filter(email=email)
-        for u in users_by_email:
+        for user_by_email in users_by_email:
             by_primary = [i.provider for i in
-                          u.social_auth.all()
+                          user_by_email.social_auth.all()
                           if not i.provider == u'email' and
                           not SecondaryEmail.objects.filter(
-                            ~Q(email=email), provider=i, user=u
+                              ~Q(email=email), provider=i, user=user_by_email
                           ).exists()]
             by_secondary.extend(by_primary)
             social_propose = True
@@ -50,6 +52,7 @@ def validation_sent(request):
 
 
 def custom_login(request):
+    """Custom login to integrate social auth and default login"""
     username = password = ''
     logout(request)
     if request.POST:
@@ -79,12 +82,14 @@ def done(request):
 @login_required
 @render_to('ct/index.html')
 def ask_stranger(request):
+    """View to handle stranger whend asking email"""
     return context(tmp_email_ask=True)
 
 
 @login_required
 @render_to('ct/person.html')
 def set_pass(request):
+    """View to handle password set / change action"""
     changed = False
     user = request.user
     if user.is_authenticated():

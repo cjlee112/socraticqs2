@@ -1,3 +1,4 @@
+"""Module defined send_validation function to verify emails"""
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
