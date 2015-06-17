@@ -14,7 +14,7 @@ from lti import app_settings as settings
 
 ROLES_MAP = {
     'Instructor': 'prof',
-    'Leaner': 'student',
+    'Learner': 'student',
 }
 
 MOODLE_PARAMS = (
