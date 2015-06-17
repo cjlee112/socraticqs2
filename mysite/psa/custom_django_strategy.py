@@ -1,3 +1,4 @@
+"""Custom Strategy to implement handling user_id attr in Code object"""
 from social.strategies.django_strategy import DjangoStrategy
 
 

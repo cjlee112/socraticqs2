@@ -1,3 +1,4 @@
+"""Set needed settings for reinsurance"""
 from django.conf import settings
 
 

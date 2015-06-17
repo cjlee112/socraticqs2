@@ -6,7 +6,7 @@ Socraticqs2 is the web engine for courselets.org.
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 
 
-In settings/local_conf.py we need to describe all needed KEY/SECRET for social-auth:
+For a developer / test version to access social-auth, you will need to add the following social-auth keys to settings/local_conf.py in your development install:
 ::
 
     # coding: utf-8
@@ -41,7 +41,7 @@ In settings/local_conf.py we need to describe all needed KEY/SECRET for social-a
        # 'social.backends.google.GoogleOAuth2',
        # 'social.backends.linkedin.LinkedinOAuth2',
        # 'social.backends.khanacademy.KhanAcademyOAuth1',
-       # 'social.backends.email.EmailAuth',
+       # 'psa.custom_backends.EmailAuth',
        'django.contrib.auth.backends.ModelBackend',
     )
 
