@@ -1,4 +1,7 @@
-{% extends "registration/base.html" %}
+{% extends "ct/portal.html" %}
+
+{% block head %}
+{% endblock %}
 
 {% block content %}
 
@@ -20,7 +23,25 @@
 </table>
 
 <input type="submit" value="login" />
+
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
+<br>
+<div class="container-fluid">
+  {% include "psa/legacy_backends.html" %}
+</div>
+<br>
+
+{% if DEBUG %}
+    {% include "psa/social_backends.html" %}
+    {% include "psa/user_details.html" %}
+{% endif %}
+
+<script type="text/javascript">
+  $('.disconnect-form').on('click', 'a.btn', function (event) {
+    event.preventDefault();
+    $(event.target).closest('form').submit();
+  });
+</script>
 
 {% endblock %}

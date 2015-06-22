@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from django.apps import apps
 from mysite.views import *
 
 # Uncomment the next two lines to enable the admin:
@@ -14,8 +15,8 @@ urlpatterns = patterns('',
     (r'^ct/', include('ct.urls', namespace='ct')),
 
     # Login / logout.
-    (r'^login/$', 'django.contrib.auth.views.login'),
-    (r'^logout/$', logout_page),
+    (r'^login/$', 'psa.views.custom_login'),
+    (r'^logout/$', logout_page, {'next_page': '/login/'}),
 
 
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -23,4 +24,20 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+
+    url(r'^email-sent/$', 'psa.views.validation_sent'),
+    url('', include('social.apps.django_app.urls', namespace='social')),
+
+    url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),
+    url(r'^set-pass/$', 'psa.views.set_pass'),
+
+    url(r'^done/$', 'psa.views.done'),
+    
+
 )
+
+if apps.is_installed('lti'):
+    urlpatterns += patterns('',
+        url(r'^lti/', include('lti.urls')),
+    )

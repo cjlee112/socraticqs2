@@ -1,0 +1,39 @@
+{% load social_tags %}
+
+{% if user.is_authenticated and not 'anonymous' in user.username %}
+  <section>
+    <header><h1>User details</h1></header>
+    <div style="text-align: left">
+      <p>You username is <strong>{{ user.username }}</strong></p>
+      <p>Associated accounts:</p>
+      <ul>
+        {% for assoc in backends.associated %}
+          <li>
+            {{ assoc.provider|presentation_name }} ({{ assoc.uid }})
+            {% if show_disconnect %}
+              <form method="post" action="{% url 'social:disconnect_individual' assoc.provider assoc.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}" />
+                <button>Disconnect</button>
+              </form>
+            {% endif %}
+          </li>
+        {% empty %}
+          <li>No associations</li>
+        {% endfor %}
+      </ul>
+      {% if user.email %}
+        <h5>Primary email: {{ user.email }}</h5>
+      {% endif %}
+      {% if user.secondary.all %}
+      <h5>Secondary emails:</h5>
+      <ul>
+      {% for secondary in user.secondary.all %}
+        <li>From provider {{ secondary.provider.provider|presentation_name }}: {{ secondary.email }} </li>
+      {% endfor %}
+      </ul>
+      {% endif %}
+      {% include 'psa/similar_auth.html' %}
+    </div>
+  </section>
+{% endif %}

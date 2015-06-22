@@ -1,0 +1,38 @@
+{% load social_tags %}
+
+{% similar_backends %}
+<hr>
+{% if similar_users %}
+<h2>You appear to have multiple accounts.</h2>
+<h5>Your email <b>{{ person.email }}</b> is used in the following accounts:</h5>
+{% for similar, backends in similar_users.items %}
+{% if similar.get_full_name %}
+  <li>{{ similar.get_full_name }}</li>
+{% else %}
+  <li>{{ similar.username }}</li>
+{% endif %}
+{% endfor %}
+<h5>We recommend you to merge accounts to have all your study activities in one place.</h5>
+<p>In order to merge one of the following account(s) you should click one of the button(s) below</p>
+{% endif %}
+{% for similar, backends in similar_users.items %}
+<div class="row">
+  <p>
+  <b>
+      {% if similar.get_full_name %}
+        "{{ similar.get_full_name }}"
+      {% else %}
+        "{{ similar.username }}"
+      {% endif %}
+  </b>
+  </p>
+  {% for name, backend in backends %}
+  <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}"
+     href="{% url 'social:begin' backend=name %}">
+    <i class="fa fa-{{ name|icon_name }}"></i>
+    {{ backend|backend_name }}
+  </a>
+  {% endfor %}
+</div>
+
+{% endfor %}

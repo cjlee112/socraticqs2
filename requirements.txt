@@ -1,0 +1,50 @@
+Django==1.7.8
+PyJWT==1.1.0
+amqp==1.4.6
+anyjson==0.3.3
+beautifulsoup4==4.3.2
+billiard==3.3.0.20
+
+# Distributed Task Queue
+celery==3.1.18
+
+# test coverage measuring
+coverage==3.7.1
+
+django-crispy-forms==1.4.0
+
+# django integration with nose
+django-nose==1.4
+
+httplib2==0.9.1
+
+# LTI python implementation
+-e git+https://github.com/mitodl/ims_lti_py.git@d96a6201cf3b63b9e1b33780ef5e29bc65242ceb#egg=ims_lti_py-origin
+
+# ipython for django shell
+ipython==3.1.0
+
+kombu==3.0.26
+lxml==3.4.4
+
+# mock for testing
+mock==1.0.1
+
+nose==1.3.6
+oauth2==1.5.211
+oauthlib==0.7.2
+pypandoc==0.9.7
+python-openid==2.2.5
+
+# social authentication/registration mechanizm
+python-social-auth==0.2.9
+
+pytz==2015.2
+requests==2.7.0
+requests-oauthlib==0.5.0
+six==1.9.0
+wikipedia==1.4.0
+pep8==1.6.2
+pylint==1.4.3
+ddt==1.0.0
+Sphinx==1.3.1
