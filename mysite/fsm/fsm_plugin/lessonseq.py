@@ -1,7 +1,10 @@
-from ct.models import *
+from ct.models import UnitStatus
+
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    'edge method that moves us to right state for next lesson (or END)'
+    """
+    Edge method that moves us to right state for next lesson (or END).
+    """
     fsm = edge.fromNode.fsm
     unitStatus = fsmStack.state.get_data_attr('unitStatus')
     if useCurrent:
@@ -12,21 +15,29 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         return fsm.get_node('END')
     elif nextUL.is_question():
         return fsm.get_node(name='ASK')
-    else: # just a lesson to read
+    else:  # just a lesson to read
         return edge.toNode
 
+
 def get_lesson_url(self, node, state, request, **kwargs):
-    'get URL for any lesson'
+    """
+    Get URL for any lesson.
+    """
     course = state.get_data_attr('course')
     unitStatus = state.get_data_attr('unitStatus')
     ul = unitStatus.get_lesson()
     return ul.get_study_url(course.pk)
-    
+
+
 class START(object):
-    '''Initialize data for viewing a courselet, and go immediately
-    to first lesson. '''
+    """
+    Initialize data for viewing a courselet, and go immediately
+    to first lesson.
+    """
     def start_event(self, node, fsmStack, request, **kwargs):
-        'event handler for START node'
+        """
+        Event handler for START node.
+        """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
         unitStatus = UnitStatus(unit=unit, user=request.user)
@@ -41,8 +52,11 @@ class START(object):
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
+
 class LESSON(object):
-    '''View a lesson explanation. '''
+    """
+    View a lesson explanation.
+    """
     get_path = get_lesson_url
     next_edge = next_lesson
     # node specification data goes here
@@ -50,7 +64,8 @@ class LESSON(object):
     edges = (
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
-    
+
+
 class ASK(object):
     get_path = get_lesson_url
     # node specification data goes here
@@ -58,6 +73,7 @@ class ASK(object):
     edges = (
             dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
         )
+
 
 class ASSESS(object):
     next_edge = next_lesson
@@ -68,6 +84,7 @@ class ASSESS(object):
             dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
+
 class ERRORS(object):
     next_edge = next_lesson
     # node specification data goes here
@@ -76,9 +93,12 @@ class ERRORS(object):
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
+
 class END(object):
     def get_path(self, node, state, request, **kwargs):
-        'get URL for next steps in this unit'
+        """
+        Get URL for next steps in this unit.
+        """
         unitStatus = state.get_data_attr('unitStatus')
         return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
@@ -87,13 +107,16 @@ class END(object):
     courselet.  See below for suggested next steps for what to study now in
     this courselet.'''
 
-        
-def get_specs():
-    'get FSM specifications stored in this file'
-    from fsmspec import FSMSpecification
-    spec = FSMSpecification(name='lessonseq', hideTabs=True,
-            title='Take the courselet core lessons',
-            pluginNodes=[START, LESSON, ASK, ASSESS, ERRORS, END],
-        )
-    return (spec,)
 
+def get_specs():
+    """
+    Get FSM specifications stored in this file.
+    """
+    from fsmspec import FSMSpecification
+    spec = FSMSpecification(
+        name='lessonseq',
+        hideTabs=True,
+        title='Take the courselet core lessons',
+        pluginNodes=[START, LESSON, ASK, ASSESS, ERRORS, END],
+    )
+    return (spec,)

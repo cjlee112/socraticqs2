@@ -1,8 +1,8 @@
 from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from social import exceptions as social_exceptions  
-from django.contrib import messages   
+from social import exceptions as social_exceptions
+from django.contrib import messages
 
 
 class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):

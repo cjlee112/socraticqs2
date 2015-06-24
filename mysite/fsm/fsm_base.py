@@ -1,7 +1,10 @@
-from models import FSM, FSMState, FSMBadUserError, FSMStackResumeError
+from fsm.models import FSM, FSMState, FSMBadUserError, FSMStackResumeError
+
 
 class FSMStack(object):
-    'main interface to our current FSM if any'
+    """
+    Main interface to our current FSM if any.
+    """
     def __init__(self, request, **kwargs):
         try:
             fsmID = request.session['fsmID']
@@ -14,44 +17,60 @@ class FSMStack(object):
             del request.session['fsmID']
             self.state = None
             return
-        for e in self.state.fsmNode.outgoing.all(): # detect selection edges
+        for e in self.state.fsmNode.outgoing.all():  # detect selection edges
             if e.name.startswith('select_'):
-                setattr(self, e.name, e) # make available to HTML templates
+                setattr(self, e.name, e)  # make available to HTML templates
+
     def event(self, request, eventName='next', pageData=None, **kwargs):
-        '''top-level interface for passing event to a running FSM instance.
+        """Top-level interface for passing event to a running FSM instance
+
         If FSM handles this event, return a redirect that over-rides
         the generic UI behavior.  Otherwise return None,
-        indicating NO over-ride of generic UI behavior.'''
-        if self.state is None: # no ongoing activity
+        indicating NO over-ride of generic UI behavior.
+        """
+        if self.state is None:  # no ongoing activity
             return
-        state = self.state # remember current state
+        state = self.state  # remember current state
         path = self.state.event(self, request, eventName, pageData=pageData,
                                 **kwargs)
-        if self.state and self.state != state: # pushed or popped
-            path = self.state.path # use path of new FSM
-        if self.state.fsmNode.name == 'END': # reached terminal state
-            pageData.set_refresh_timer(request, False) # reset timer if on
-            if self.state.fsmNode.help: # save its help message
+        if self.state and self.state != state:  # pushed or popped
+            path = self.state.path  # use path of new FSM
+        if self.state.fsmNode.name == 'END':  # reached terminal state
+            pageData.set_refresh_timer(request, False)  # reset timer if on
+            if self.state.fsmNode.help:  # save its help message
                 request.session['statusMessage'] = self.state.fsmNode.help
             parentPath = self.pop(request, pageData=pageData)
-            if parentPath: # let parent FSM redirect us to its current state
+            if parentPath:  # let parent FSM redirect us to its current state
                 return parentPath
         return path
+
     def push(self, request, fsmName, stateData={}, startArgs={},
              activity=None, **kwargs):
-        'start running a new FSM instance (layer)'
+        """
+        Start running a new FSM instance (layer).
+        """
         fsm = FSM.objects.get(name=fsmName)
         if not activity and self.state:
             activity = self.state.activity
-        self.state = FSMState(user=request.user, fsmNode=fsm.startNode,
-                parentState=self.state, activity=activity,
-                title=fsm.title, hideTabs=fsm.hideTabs,
-                hideLinks=fsm.hideLinks, hideNav=fsm.hideNav, **kwargs)
+        self.state = FSMState(
+            user=request.user,
+            fsmNode=fsm.startNode,
+            parentState=self.state,
+            activity=activity,
+            title=fsm.title,
+            hideTabs=fsm.hideTabs,
+            hideLinks=fsm.hideLinks,
+            hideNav=fsm.hideNav,
+            **kwargs
+        )
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         request.session['fsmID'] = self.state.pk
         return path
+
     def pop(self, request, eventName='return', pageData=None, **kwargs):
-        'pop current FSM state and pass event to next stack state if any'
+        """
+        Pop current FSM state and pass event to next stack state if any.
+        """
         nextState = self.state.parentState
         self.state.delete()
         self.state = nextState
@@ -60,8 +79,11 @@ class FSMStack(object):
             return self.event(request, eventName, pageData, **kwargs)
         else:
             del request.session['fsmID']
+
     def resume(self, request, stateID):
-        'resume an orphaned activity'
+        """
+        Resume an orphaned activity.
+        """
         state = FSMState.objects.get(pk=int(stateID))
         if state.user != request.user:
             raise FSMBadUserError('user mismatch!!')
@@ -70,8 +92,10 @@ class FSMStack(object):
         self.state = state
         request.session['fsmID'] = self.state.pk
         return self.get_current_url()
+
     def get_current_url(self):
-        'get URL for resuming at current FSM state'
+        """
+        Get URL for resuming at current FSM state.
+        """
         if self.state:
             return self.state.path
-        

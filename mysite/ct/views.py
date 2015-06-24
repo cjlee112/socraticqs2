@@ -17,7 +17,6 @@ from social.backends.utils import load_backends
 
 from ct.forms import *
 from ct.models import *
-from ct.fsm import FSMStack
 from ct.ct_util import reverse_path_args
 from ct.templatetags.ct_extras import (md2html,
                                        get_base_url,
@@ -25,6 +24,8 @@ from ct.templatetags.ct_extras import (md2html,
                                        is_teacher_url,
                                        display_datetime,
                                        get_path_type)
+from fsm.fsm_base import FSMStack
+from fsm.models import FSM, FSMState
 
 
 ###########################################################
@@ -1522,63 +1523,3 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     return pageData.render(request, 'ct/assess.html',
                 dict(response=r, answer=answer, errorModels=allErrors,
                      showAnswer=False))
-
-###############################################################
-# FSM user interface
-
-
-@login_required
-def fsm_node(request, node_id):
-    'display standard FSM node explanation & next steps page' 
-    pageData = PageData(request)
-    if not pageData.fsmStack.state or \
-      pageData.fsmStack.state.fsmNode.pk != int(node_id):
-        return HttpResponseRedirect('/ct/')
-    if request.method == 'POST' and 'fsmedge' in request.POST:
-        return pageData.fsm_redirect(request, request.POST['fsmedge'])
-    addNextButton = (pageData.fsmStack.state.fsmNode.outgoing.count() == 1)
-    return pageData.render(request, 'ct/fsm_node.html',
-                           addNextButton=addNextButton)
-@login_required
-def fsm_status(request):
-    'display Activity Center UI'
-    pageData = PageData(request)
-    cancelForm = logoutForm = None
-    nextSteps = ()
-    if request.method == 'POST':
-        task = request.POST.get('task', '')
-        if 'fsmstate_id' in request.POST:
-            try:
-                url = pageData.fsmStack.resume(request,
-                                               request.POST['fsmstate_id'])
-            except FSMBadUserError:
-                pageData.errorMessage = 'Cannot access activity belonging to another user'
-            except FSMStackResumeError:
-                pageData.errorMessage = 'This activity is waiting for a sub-activity to complete, and hence cannot be resumed (you should complete or cancel the sub-activity first).'
-            except FSMState.DoesNotExist:
-                pageData.errorMessage = 'Activity not found!'
-            else: # redirect to this activity
-                return HttpResponseRedirect(url)
-        elif not pageData.fsmStack.state:
-            pageData.errorMessage = 'No activity ongoing currently!'
-        elif 'abort' == task:
-            pageData.fsmStack.pop(request, eventName='exceptCancel')
-            pageData.statusMessage = 'Activity canceled.'
-        elif pageData.fsmStack.state.fsmNode. \
-          outgoing.filter(name=task).count() > 0: # follow this optional edge
-            return pageData.fsm_redirect(request, task, vagueEvents=())
-    if not pageData.fsmStack.state: # search for unfinished activities
-        unfinished = FSMState.objects.filter(user=request.user,
-                                             children__isnull=True)
-    else: # provide options to cancel or quit this activity
-        unfinished = None
-        cancelForm = CancelForm()
-        set_crispy_action(request.path, cancelForm)
-        edges = pageData.fsmStack.state.fsmNode.outgoing
-        nextSteps = edges.filter(showOption=True)
-        logoutForm = LogoutForm()
-        set_crispy_action(reverse('ct:person_profile', args=(request.user.id,)),
-                          logoutForm)
-    return pageData.render(request, 'ct/fsm_status.html',
-                           dict(cancelForm=cancelForm, unfinished=unfinished,
-                                logoutForm=logoutForm, nextSteps=nextSteps))
