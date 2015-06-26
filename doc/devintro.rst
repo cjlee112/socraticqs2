@@ -40,12 +40,17 @@ type (again replace the path with what you used in the previous step)::
 Installing Django etc.
 ........................
 
+.. warning::
+
+   On Ubuntu-like distros, you must first install some dependencies
+   of the python lxml package, *before* running `pip install` below::
+
+     sudo apt-get install libxml2-dev libxslt1-dev python-dev zlib1g-dev
+
 Assuming you have Python and Pandoc installed::
 
-  pip install Django
-  pip install pypandoc
-  pip install django-crispy-forms
-  pip install wikipedia
+  pip install -r dev_requirements.txt
+
 
 Git version control software
 .....................................
