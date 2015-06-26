@@ -10,7 +10,7 @@ from django.db.models import Q, Count, Max
 # Concept ID and graph -- not version controlled
 
 class Concept(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     addedBy = models.ForeignKey(User)
     approvedBy = models.ForeignKey(User, null=True,
                                    related_name='approvedConcepts')
@@ -205,11 +205,11 @@ class Lesson(models.Model):
         (SOFTWARE, SOFTWARE),
     )
     _sourceDBdict = {}
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     text = models.TextField(null=True)
     data = models.TextField(null=True) # JSON DATA
     url = models.CharField(max_length=256, null=True)
-    kind = models.CharField(max_length=10, choices=KIND_CHOICES,
+    kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)
