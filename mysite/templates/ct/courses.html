@@ -1,4 +1,5 @@
 {% extends "ct/portal.html" %}
+{% load ct_extras %}
 
 {% comment %}
   Public courses page
@@ -13,14 +14,26 @@
 {% endblock %}
 
 {% block content %}
+<p>You can take individual courselets (short lessons each designed to master one
+concept), or a whole course.  Click any course to get started!</p>
 <table class="table table-striped">
-<thead><tr><th>Course</th><th>Course id</th></tr></thead>
+<thead><th>Course descriptions</th></thead>
 <tbody>
     {% for course in courses %}
     <tr><td>
-    <a href="{% url 'ct:subscribe' course.id %}">{{ course.title }}</a>
+    <a href="{% url 'ct:subscribe' course.id %}"><b>{{ course.title }}</b></a>
+    (Instructor: {{ course.addedBy.get_full_name }}).
+    <input type="checkbox" id="desctoggle{{ course.id }}"/>Show description
+    <div id="descdiv{{ course.id }}" style="display: none">
+      <p>{{ course.description |md2html}}</p>
+    </div>
+
+    <script>
+    $( "#desctoggle{{ course.id }}" ).click(function() {
+      $( "#descdiv{{ course.id }}" ).toggle();
+    });
+    </script>
     </td>
-    <td>{{ course.id }}</td>
     </tr>
     {% endfor %}
 </tbody></table>
