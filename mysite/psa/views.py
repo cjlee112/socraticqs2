@@ -55,7 +55,9 @@ def custom_login(request):
     """Custom login to integrate social auth and default login"""
     username = password = ''
     logout(request)
+    kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
+        params = request.POST
         username = request.POST['username']
         password = request.POST['password']
 
@@ -64,12 +66,12 @@ def custom_login(request):
             if user.is_active:
                 login(request, user)
                 return redirect(request.POST.get('next', '/ct/'))
+    else:
+        params = request.GET
+    if 'next' in params: # must pass through for both GET or POST
+        kwargs['next'] = params['next']
     return render_to_response('psa/custom_login.html',
-                              context_instance=RequestContext(request,
-                                                              {
-                                                                  'available_backends': load_backends(
-                                                                      settings.AUTHENTICATION_BACKENDS),
-                                                              }))
+                              context_instance=RequestContext(request, kwargs))
 
 
 @login_required
