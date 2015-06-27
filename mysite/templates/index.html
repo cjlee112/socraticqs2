@@ -1,20 +1,67 @@
-{% extends "base.html" %}
+{% extends "ct/portal.html" %}
 {% comment %}
-  Main page of django_consultant's website.
+  homepage
 {% endcomment %}
 
-{% block head %}
-  <title>Courselets.org Alpha</title>
-{% endblock %}
-
-{% block body %}
-  <header>
-      <h1>Courselets.org</h1>
-  </header>
-
-  <section>
-      <p>Welcome to the private alpha release of Courselets.org. 
-Please click <a href="/ct/">here</a> to login.</p>
-{#	  <p>To access Public courses click <a href={% url "ct:courses" %}>here</a>#}
-  </section>
+{% block content %}
+  <div class="row bg-primary">
+      <div class="col-md-1"></div>
+      <div class="col-md-7">
+        <h1>The fast, easy way to add Active Learning to your teaching</h1>
+        <ul>
+           <li>Both in the classroom, and online.</li>
+           <li>Students answer using their smartphones or laptops.</li>
+           <li>Find, remix or modify exercises from the Courselets database.</li>
+           <li>Write your own exercises using our fast, effective Open Response Concept Testing methodology.</li>
+           <li>Powerful and easy tools.</li>
+           <li>Free and Open Source.</li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <p>Changing how you teach, to incorporate active learning into
+        your class, can be a major undertaking.  Based on our own
+        experiences of what works, we've designed Courselets to
+        give you the power-tools, methods and materials to
+        add Active Learning exercises your students can start
+        using right away.</p>
+        <button type="button" class="btn btn-default btn-lg" onclick="location.href='/ct/courses/1/units/1/'">Try it out</button>
+      </div>
+  </div>
+  <div class="row bg-danger">
+      <div class="col-md-1"></div>
+      <div class="col-md-7">
+        <h1>Learn a new concept now</h1>
+        <ul>
+           <li>A courselet is a short lesson that helps you really 
+           understand an important concept, typically from multiple
+           angles that many students miss.</li>
+           <li>A courselet challenges your understanding with
+           real-world problems designed to expose common misunderstandings
+           or subtleties.</li>
+           <li>A courselet really takes off where most materials end:
+           your errors.  By helping you classify exactly what your
+           conceptual mistake was, a courselet helps you understand
+           a new, hidden aspect of the concept, and see how others
+           resolved that mistake.  <B>Your mistakes become your most
+           important learning tool</B>.</li>
+           <li>A courselet connects everyone trying to learn that concept,
+           and every concept to related concepts and other materials
+           online (such as Wikipedia).</li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <p>You can search Courselets.org for concepts you want to learn.
+        You can quickly take a courselet in a single sitting.</p>
+        <button type="button" class="btn btn-default btn-lg" onclick="location.href='/ct/courses/2/units/2/'">Try it out</button>
+      </div>
+  </div>
+  <div class="row bg-success">
+      <div class="col-md-1"></div>
+      <div class="col-md-7">
+        <h1>Challenge your understanding of bioinformatics / Big Data</h1>
+      </div>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-default btn-lg" onclick="location.href='/ct/courses/'">View the public courses</button>
+      </div>
+  </div>
 {% endblock %}
