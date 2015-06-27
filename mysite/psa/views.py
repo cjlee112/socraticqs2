@@ -63,7 +63,7 @@ def custom_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect('/ct/')
+                return redirect(request.POST.get('next', '/ct/'))
     return render_to_response('psa/custom_login.html',
                               context_instance=RequestContext(request,
                                                               {
