@@ -19,16 +19,19 @@ class FSMSpecification(object):
         for node in pluginNodes:  # expect list of node class objects
             modName = node.__module__
             name = node.__name__
-            d = dict(title=node.title, funcName=modName + '.' + name,
-                     description=getattr(node, '__doc__', None))
+            node_dict = dict(
+                title=node.title,
+                funcName=modName + '.' + name,
+                description=getattr(node, '__doc__', None)
+            )
             for attr in attrs:  # save node attributes
                 if hasattr(node, attr):
-                    d[attr] = getattr(node, attr)
-            nodeDict[name] = d
-            for e in getattr(node, 'edges', ()):
-                e = e.copy()  # prevent side effects
-                e['fromNode'] = name
-                edges.append(e)
+                    node_dict[attr] = getattr(node, attr)
+            nodeDict[name] = node_dict
+            for edge in getattr(node, 'edges', ()):
+                edge = edge.copy()  # prevent side effects
+                edge['fromNode'] = name
+                edges.append(edge)
         self.nodeData = nodeDict
         self.edgeData = edges
 
@@ -58,16 +61,16 @@ class CallerNode(object):
         return edge.toNode
 
 
-def deploy(modname, username):
+def deploy(mod_path, username):
     """
     Load FSM specifications found in the specified plugin module.
     """
     import importlib
-    mod = importlib.import_module(modname)
-    l = []
+    mod = importlib.import_module(mod_path)
+    fsm_list = []
     for fsmSpec in mod.get_specs():
-        l.append(fsmSpec.save_graph(username))
-    return l
+        fsm_list.append(fsmSpec.save_graph(username))
+    return fsm_list
 
 
 def deploy_all(username, ignore=('testme', '__init__'),
@@ -76,9 +79,9 @@ def deploy_all(username, ignore=('testme', '__init__'),
     Load all FSM specifications found via pattern but not ignore.
     """
     import glob
-    l = []
+    fsm_list = []
     for modpath in glob.glob(pattern):
-        mod = modpath[:-3].split('/')
-        if mod[-1] not in ignore:
-            l += deploy('.'.join(mod), username)
-    return l
+        splitted_path = modpath[:-3].split('/')
+        if splitted_path[-1] not in ignore:
+            fsm_list.extend(deploy('.'.join(splitted_path), username))
+    return fsm_list
