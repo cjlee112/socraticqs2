@@ -306,6 +306,50 @@ the ``lessonseq`` specification::
 FSM Reference Documentation
 -----------------------------
 
+.. _fsm-deploy:
+
+Loading FSM specifications into the database
+.................................................
+
+Since FSMs are loaded dynamically via a plug-in architecture,
+their specifications are stored in the database for real-time
+query by the application.  Whenever an FSM specification changes
+(e.g. adding a new FSM or modifying an existing FSM), that 
+specification must be loaded to the database.  Whenever the
+database table is flushed, the set of FSM specifications must be
+loaded.  The standard way to do this is simply::
+
+  $ python manage.py shell
+  >>> from ct.fsm_plugin.fsmspec import deploy_all
+  >>> deploy_all('foobaron')
+
+where ``foobaron`` is the username that will be recorded as the owner
+of the loaded FSMs.
+
+Two convenience functions exist to do this, in the ``fsmspec`` module.
+To load a single FSM specification, use:
+
+.. function:: deploy(modname, username, prefix='ct.fsm_plugin.')
+
+   *modname*: name of the module (in the ``fsm_plugin`` directory)
+   containing the new / modified FSM to load.
+
+   *username*: for administrative purposes, an existing user in
+   the database, who will be recorded as the owner of the FSM.
+   At present this isn't really used for anything, hence somewhat
+   arbitrary.
+
+To load all FSM specifications, use:
+
+.. function:: deploy_all(username, ignore=('testme', '__init__', 'fsmspec'), pattern='ct/fsm_plugin/*.py')
+
+   *username*: same as above
+
+   *ignore*: list of modules in the ``fsm_plugin`` directory that should *not*
+   be treated as FSM specifications.
+
+   *pattern*: ``glob`` search pattern for finding FSM plugin modules.
+
 FSMSpecification
 ......................
 

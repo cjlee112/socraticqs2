@@ -131,6 +131,9 @@ repository::
 
   python manage.py loaddata dumpdata/debug.json
 
+You will also need to load FSM plugin specifications;
+see :ref:`fsm-deploy`.
+
 Finally, start up the development web server::
 
   python manage.py runserver
@@ -322,5 +325,6 @@ You can then restore a particular snapshot like this::
 
   python manage.py loaddata dumpdata/mysnap.json
 
-
+You will also need to load FSM plugin specifications;
+see :ref:`fsm-deploy`.
 
