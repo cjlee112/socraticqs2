@@ -128,7 +128,7 @@ changes you want.
 See a Git tutorial to learn more about all its great capabilities.
 
 Some best practices to follow
-+++++++++++++++++++++++++++++++
+................................
 
 * don't push "junk" commits to your public (GitHub) repository.
   Instead clean up your branch to get rid of unwanted commits

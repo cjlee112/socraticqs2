@@ -24,6 +24,13 @@ Project Enhancement Proposals:
 
    pep/*
 
+Additional information:
+
+.. toctree::
+   :maxdepth: 2
+
+   gitguide
+
 Indices and tables
 ==================
 
