@@ -130,14 +130,15 @@ class LTIUser(models.Model):
 
         :param roles: (str|list)
         :param course_id: int
-        :return: ct.Role
+        :return: bool
         """
         if not isinstance(roles, list):
             roles = roles.split(',')
         course = Course.objects.filter(id=course_id).first()
+        role = Role.INSTRUCTOR if Role.INSTRUCTOR in roles else Role.ENROLLED
         if course:
             return Role.objects.filter(
-                role=roles[0],
+                role=role,
                 course=course,
                 user=self.django_user
             ).exists()

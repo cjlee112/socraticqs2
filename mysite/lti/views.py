@@ -91,7 +91,8 @@ def lti_redirect(request, unit_id=None):
     course_ref = CourseRef.objects.filter(context_id=context_id).first()
     consumer_name = request_dict.get('tool_consumer_info_product_family_code', 'lti')
     user_id = request_dict.get('user_id', None)
-    roles = ROLES_MAP.get(request_dict.get('roles', None), Role.ENROLLED)
+    roles_from_request = request_dict.get('roles', '').split(',')
+    roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
 
     if not user_id:
         return render_to_response('lti/error.html', RequestContext(request))
@@ -123,12 +124,12 @@ def lti_redirect(request, unit_id=None):
         # Redirect to course or unit page considering users role
         if not unit_id:
             dispatch = 'ct:course_student'
-            if roles == Role.INSTRUCTOR:
+            if Role.INSTRUCTOR in roles:
                 dispatch = 'ct:course'
             return redirect(reverse(dispatch, args=(course_id,)))
         else:
             dispatch = 'ct:study_unit'
-            if roles == Role.INSTRUCTOR:
+            if Role.INSTRUCTOR in roles:
                 dispatch = 'ct:unit_tasks'
             return redirect(reverse(dispatch, args=(course_id, unit_id)))
     else:
@@ -144,11 +145,12 @@ def create_courseref(request):
     if not request.session.get('is_valid'):
         return redirect(reverse('ct:home'))
     context_id = request_dict.get('context_id')
-    role = ROLES_MAP.get(request_dict.get('roles', None), Role.ENROLLED)
+    roles_from_request = request_dict.get('roles', '').split(',')
+    roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
     # Make sure this context_id is not used
     course_ref = CourseRef.objects.filter(context_id=context_id).first()
     if course_ref:
-        if role == Role.INSTRUCTOR:
+        if Role.INSTRUCTOR in roles:
             return redirect(reverse('ct:edit_course', args=(course_ref.course.id,)))
         else:
             return redirect(reverse('ct:home'))
