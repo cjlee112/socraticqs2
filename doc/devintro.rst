@@ -5,25 +5,8 @@ Getting Started with Socraticqs2 Development
 Installation and setup
 -----------------------
 
-Pre-requisites
-...............
-
-To run the Socraticqs2 development/test server on your computer,
-you need:
-
-* Python 2.7
-* Django 1.7 or higher
-* Pandoc (currently used for converting text to HTML): you can download
-  this for Mac OS X; most linux package managers can install it automatically.
-* several Python packages installable by pip: pypandoc, django-crispy-forms,
-  wikipedia
-
-We also use Git as our version control; if you don't already have it,
-you can download either Github for Windows or Github for Mac;
-most linux package managers can install Git for you automatically.
-
-Optional: use virtualenv to create an isolated test environment
-................................................................
+Recommended: use virtualenv to create an isolated test environment
+.....................................................................
 
 I find it convenient to isolate my development environment from
 any other Python installation, by using virtualenv.
@@ -37,8 +20,20 @@ type (again replace the path with what you used in the previous step)::
 
   source /path/to/put/your/new/ve/bin/activate
 
-Installing Django etc.
-........................
+Pre-requisites
+...............
+
+To run the Socraticqs2 development/test server on your computer,
+you need various things such as:
+
+* Python 2.7
+* Git: We also Git as our version control; if you don't already have it,
+you can download either Github for Windows or Github for Mac;
+most linux package managers can install Git for you automatically.  See further details below.
+* Pandoc (currently used for converting text to HTML): you can download
+  this for Mac OS X; most linux package managers can install it automatically.
+* Python packages automatically installable by pip using our `dev_requirements.txt` requirements file: e.g. Django, pypandoc, django-crispy-forms,
+  wikipedia etc.  This is described in detail below.
 
 .. warning::
 
@@ -47,13 +42,10 @@ Installing Django etc.
 
      sudo apt-get install libxml2-dev libxslt1-dev python-dev zlib1g-dev
 
-Assuming you have Python and Pandoc installed::
-
-  pip install -r dev_requirements.txt
 
 
-Git version control software
-.....................................
+Installing Git version control software
+...........................................
 
 We use `Git <http://www.git-scm.com>`_ and 
 `GitHub <https://github.com>`_ for working on Socraticqs2 development.
@@ -99,6 +91,15 @@ one of two ways:
 * **via Github for Windows or Mac**: you can just click the Clone to Desktop
   link on the webpage for your fork (repository).
 
+Installing Django etc. using pip
+..................................
+
+Assuming you have the above pre-requisites installed, within the
+`socraticqs2` directory run the following command::
+
+  pip install -r dev_requirements.txt
+
+
 Run the test suite
 ....................
 
@@ -106,7 +107,7 @@ To make sure your setup is working properly, try running the
 test suite::
 
   cd socraticqs2/mysite
-  python manage.py test ct
+  python manage.py test
 
 You should see a series of tests pass successfully.
 
