@@ -17,7 +17,7 @@ class FSMSpecification(object):
         if not edges:
             edges = []
         for node in pluginNodes:  # expect list of node class objects
-            modName = node.__module__.split('.')[-1]
+            modName = node.__module__
             name = node.__name__
             d = dict(title=node.title, funcName=modName + '.' + name,
                      description=getattr(node, '__doc__', None))

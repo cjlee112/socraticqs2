@@ -142,7 +142,7 @@ def get_data_attr(self, attr):
     return d[attr]
 
 
-def get_plugin(funcName, prefix='fsm.fsm_plugin.'):
+def get_plugin(funcName, prefix=''):
     """
     Import and call plugin func for this object.
     """
