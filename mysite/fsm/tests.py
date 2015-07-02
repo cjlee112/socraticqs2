@@ -28,7 +28,7 @@ from ct.tests import (
 
 fsmDict = dict(name='test', title='try this')
 nodeDict = dict(
-    START=dict(title='start here', path='ct:home', funcName='testme.START'),
+    START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.START'),
     MID=dict(title='in the middle', path='ct:about', doLogging=True),
     END=dict(title='end here', path='ct:home')
 )
@@ -243,7 +243,7 @@ class FSMTests(OurTestCase):
         Check that FSM.save_graph() catches bad plugin funcName.
         """
         nodeDictBad = dict(START=dict(title='start here', path='ct:home',
-                           funcName='testme.invalid'))
+                           funcName='fsm.fsm_plugin.testme.invalid'))
 
         try:
             FSM.save_graph(fsmDict, nodeDictBad, (), 'jacob')
@@ -266,9 +266,9 @@ class FSMTests(OurTestCase):
         Basic randomized trial.
         """
         self.assertEqual(self.ulQ.order, 0)
-        from fsm.fsm_plugin.lessonseq import get_specs
+        from ct.fsm_plugin.lessonseq import get_specs
         f = get_specs()[0].save_graph(self.user.username)  # load FSM spec
-        from fsm.fsm_plugin.randomtrial import get_specs
+        from ct.fsm_plugin.randomtrial import get_specs
         f = get_specs()[0].save_graph(self.user.username)  # load FSM spec
         self.assertEqual(ActivityLog.objects.count(), 0)
         fsmData = dict(testFSM='lessonseq', treatmentFSM='lessonseq',
@@ -317,7 +317,7 @@ class FSMTests(OurTestCase):
         """
         Basic slide show FSM.
         """
-        from fsm.fsm_plugin.slideshow import get_specs
+        from ct.fsm_plugin.slideshow import get_specs
         get_specs()[0].save_graph(self.user.username)  # load FSM spec
         fsmData = dict(unit=self.ulQ2.unit, course=self.course)
         request, fsmStack, result = self.get_fsm_request('slideshow', fsmData)

@@ -142,7 +142,7 @@ def get_data_attr(self, attr):
     return d[attr]
 
 
-def get_plugin(funcName, prefix='fsm.fsm_plugin.'):
+def get_plugin(funcName):
     """
     Import and call plugin func for this object.
     """
@@ -150,7 +150,7 @@ def get_plugin(funcName, prefix='fsm.fsm_plugin.'):
     if not funcName:
         raise ValueError('invalid call_plugin() with no funcName!')
     i = funcName.rindex('.')
-    modName = prefix + funcName[:i]
+    modName = funcName[:i]
     funcName = funcName[i + 1:]
     mod = importlib.import_module(modName)
     return getattr(mod, funcName)

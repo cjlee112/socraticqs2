@@ -138,7 +138,7 @@ def get_specs():
     """
     Get FSM specifications stored in this file.
     """
-    from fsmspec import FSMSpecification
+    from fsm.fsmspec import FSMSpecification
     spec = FSMSpecification(
         name='livestudent',
         hideTabs=True,

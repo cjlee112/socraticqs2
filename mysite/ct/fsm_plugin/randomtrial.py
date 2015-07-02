@@ -1,5 +1,5 @@
 from fsm.models import ActivityLog
-from fsmspec import FSMSpecification, CallerNode
+from fsm.fsmspec import FSMSpecification, CallerNode
 import random
 
 

@@ -99,7 +99,7 @@ class END(object):
 
 def get_specs():
     'get FSM specifications stored in this file'
-    from fsmspec import FSMSpecification
+    from fsm.fsmspec import FSMSpecification
     spec = FSMSpecification(
         name='add_lesson',
         hideTabs=True,

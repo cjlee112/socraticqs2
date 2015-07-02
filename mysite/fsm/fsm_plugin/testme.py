@@ -1,4 +1,4 @@
-from fsmspec import FSMSpecification
+from fsm.fsmspec import FSMSpecification
 
 
 class START(object):
