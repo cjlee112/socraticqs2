@@ -58,12 +58,12 @@ class CallerNode(object):
         return edge.toNode
 
 
-def deploy(modname, username, prefix='fsm.fsm_plugin.'):
+def deploy(modname, username):
     """
     Load FSM specifications found in the specified plugin module.
     """
     import importlib
-    mod = importlib.import_module(prefix + modname)
+    mod = importlib.import_module(modname)
     l = []
     for fsmSpec in mod.get_specs():
         l.append(fsmSpec.save_graph(username))
@@ -71,7 +71,7 @@ def deploy(modname, username, prefix='fsm.fsm_plugin.'):
 
 
 def deploy_all(username, ignore=('testme', '__init__', 'fsmspec'),
-               pattern='fsm/fsm_plugin/*.py'):
+               pattern='*/fsm_plugin/*.py'):
     """
     Load all FSM specifications found via pattern but not ignore.
     """
@@ -79,7 +79,7 @@ def deploy_all(username, ignore=('testme', '__init__', 'fsmspec'),
     import os.path
     l = []
     for modpath in glob.glob(pattern):
-        modname = os.path.basename(modpath)[:-3]
-        if modname not in ignore:
-            l += deploy(modname, username)
+        mod = modpath[:-3].split('/')
+        if mod[-1] not in ignore:
+            l += deploy('.'.join(mod), username)
     return l
