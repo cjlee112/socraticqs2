@@ -26,15 +26,13 @@ def validation_sent(request):
     View to handle validation_send action.
     """
     user = request.user
-    social_propose = False
-    by_secondary = []
+    social_list = []
     email = request.session.get('email_validation_address')
     if user and user.is_anonymous():
         by_secondary = [i.provider.provider for i in
                         SecondaryEmail.objects.filter(email=email)
                         if not i.provider.provider == u'email']
-        if by_secondary:
-            social_propose = True
+        social_list.extend(by_secondary)
 
         users_by_email = User.objects.filter(email=email)
         for user_by_email in users_by_email:
@@ -44,14 +42,13 @@ def validation_sent(request):
                           not SecondaryEmail.objects.filter(
                               ~Q(email=email), provider=i, user=user_by_email
                           ).exists()]
-            by_secondary.extend(by_primary)
-            social_propose = True
+            social_list.extend(by_primary)
 
     return context(
         validation_sent=True,
         email=email,
-        social_propose=social_propose,
-        social_list=by_secondary
+        social_propose=bool(social_list),
+        social_list=social_list
     )
 
 
