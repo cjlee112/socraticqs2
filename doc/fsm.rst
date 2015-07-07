@@ -320,7 +320,7 @@ database table is flushed, the set of FSM specifications must be
 loaded.  The standard way to do this is simply::
 
   $ python manage.py shell
-  >>> from ct.fsm_plugin.fsmspec import deploy_all
+  >>> from fsm.fsmspec import deploy_all
   >>> deploy_all('foobaron')
 
 where ``foobaron`` is the username that will be recorded as the owner
@@ -329,9 +329,11 @@ of the loaded FSMs.
 Two convenience functions exist to do this, in the ``fsmspec`` module.
 To load a single FSM specification, use:
 
-.. function:: deploy(modname, username, prefix='ct.fsm_plugin.')
+.. function:: deploy(modname, username)
 
-   *modname*: name of the module (in the ``fsm_plugin`` directory)
+   *modname*: full name of the module (typically of the form
+   ``APP.fsm_plugin.MODULENAME`` where ``APP`` is the name of the Django
+   app, and ``MODULENAME`` is the module name in that directory)
    containing the new / modified FSM to load.
 
    *username*: for administrative purposes, an existing user in
@@ -341,7 +343,7 @@ To load a single FSM specification, use:
 
 To load all FSM specifications, use:
 
-.. function:: deploy_all(username, ignore=('testme', '__init__', 'fsmspec'), pattern='ct/fsm_plugin/*.py')
+.. function:: deploy_all(username, ignore=('testme', '__init__',), pattern='*/fsm_plugin/*.py')
 
    *username*: same as above
 
