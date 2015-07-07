@@ -90,9 +90,9 @@ function toggleInterest(o, targeturl, csrftoken)
           </li>
           {% endif %}
           {% if fsmStack.state %}
-          <li><a href='/ct/nodes/'>{{ fsmStack.state.title }}</a></li>
+          <li><a href='/fsm/nodes/'>{{ fsmStack.state.title }}</a></li>
           {% elif user.is_authenticated %}
-          <li><a href='/ct/nodes/'>Activity Center</a></li>
+          <li><a href='/fsm/nodes/'>Activity Center</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>

@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # url(r'^mysite/', include('mysite.foo.urls')),
 
     (r'^ct/', include('ct.urls', namespace='ct')),
+    (r'^fsm/', include('fsm.urls', namespace='fsm')),
 
     # Login / logout.
     (r'^login/$', 'psa.views.custom_login'),

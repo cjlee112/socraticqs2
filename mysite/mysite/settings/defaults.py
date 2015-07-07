@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
+    'fsm',
     # LTI
     'lti',
     # Socials

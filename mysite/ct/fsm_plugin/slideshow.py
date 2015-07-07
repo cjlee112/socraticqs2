@@ -1,29 +1,34 @@
-from ct.models import *
+from ct.models import UnitLesson
+
 
 def next_lesson(self, edge, fsmStack, request, unit=None, **kwargs):
-    'edge method that moves us to right state for next lesson (or END)'
+    """
+    Edge method that moves us to right state for next lesson (or END).
+    """
     fsm = edge.fromNode.fsm
-    if unit: # get first lesson
+    if unit:  # get first lesson
         fsmStack.state.unitLesson = unit.get_exercises()[0]
     else:
         ul = fsmStack.state.unitLesson
         answers = ul.get_answers()
-        if ul.is_question() and len(answers) > 0: # get the answer
+        if ul.is_question() and len(answers) > 0:  # get the answer
             fsmStack.state.unitLesson = answers[0]
         else:
-            if ul.parent: # if ul is answer, use its linked question
+            if ul.parent:  # if ul is answer, use its linked question
                 ul = ul.parent
             try:
                 fsmStack.state.unitLesson = ul.get_next_lesson()
             except UnitLesson.DoesNotExist:
                 return fsm.get_node('END')
-    return edge.toNode # just show it as a LESSON slide
+    return edge.toNode  # just show it as a LESSON slide
+
 
 QuitEdgeData = dict(
     name='quit', toNode='END', title='End this slideshow', showOption=True,
     description="If you don't want to view any more slides, exit the slideshow",
     help='''Click here to end this slideshow. '''
 )
+
 
 ContentsEdgeData = dict(
     name='contents', toNode='CHOOSE', showOption=True,
@@ -32,9 +37,12 @@ ContentsEdgeData = dict(
     help='Click here to view the Table of Contents'
 )
 
+
 class START(object):
-    '''Initialize data for viewing a courselet, and go immediately
-    to first lesson. '''
+    """
+    Initialize data for viewing a courselet, and go immediately
+    to first lesson.
+    """
     def start_event(self, node, fsmStack, request, **kwargs):
         'event handler for START node'
         unit = fsmStack.state.get_data_attr('unit')
@@ -48,8 +56,11 @@ class START(object):
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
+
 class LESSON(object):
-    '''View a lesson explanation. '''
+    """
+    View a lesson explanation.
+    """
     next_edge = next_lesson
     # node specification data goes here
     path = 'ct:lesson'
@@ -67,9 +78,12 @@ class LESSON(object):
             ContentsEdgeData,
             QuitEdgeData,
         )
-    
+
+
 class FAQ(object):
-    '''Discussion of this slide.'''
+    """
+    Discussion of this slide.
+    """
     create_Comment_edge = next_lesson
     # node specification data goes here
     path = 'ct:ul_faq_student'
@@ -86,9 +100,12 @@ class FAQ(object):
             ContentsEdgeData,
             QuitEdgeData,
         )
-    
+
+
 class CHOOSE(object):
-    '''Overview list of slides, for you to jump to any slide in the slideshow'''
+    """
+    Overview list of slides, for you to jump to any slide in the slideshow.
+    """
     # node specification data goes here
     path = 'ct:unit_lessons_student'
     title = 'Slideshow Table of Contents'
@@ -107,7 +124,8 @@ class CHOOSE(object):
                  help='''Click here to resume the slideshow.'''),
             QuitEdgeData,
         )
-        
+
+
 class END(object):
     # node specification data goes here
     path = 'ct:unit_concepts_student'
@@ -116,13 +134,14 @@ class END(object):
     See below for suggested next steps on concepts you can study in
     this courselet.'''
 
-        
+
 def get_specs():
     'get FSM specifications stored in this file'
-    from fsmspec import FSMSpecification
-    spec = FSMSpecification(name='slideshow', hideTabs=True,
-            title='View courselet as a slide show',
-            pluginNodes=[START, LESSON, FAQ, CHOOSE, END],
-        )
+    from fsm.fsmspec import FSMSpecification
+    spec = FSMSpecification(
+        name='slideshow',
+        hideTabs=True,
+        title='View courselet as a slide show',
+        pluginNodes=[START, LESSON, FAQ, CHOOSE, END],
+    )
     return (spec,)
-
