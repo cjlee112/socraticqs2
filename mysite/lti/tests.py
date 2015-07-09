@@ -120,7 +120,7 @@ class ParamsTest(LTITestCase):
 
     @unpack
     @data((Role.INSTRUCTOR, {u'roles': u'Instructor'}),
-          (Role.ENROLLED, {u'roles': u'Leaner'}))
+          (Role.ENROLLED, {u'roles': u'Learner'}))
     def test_roles(self, role, header, mocked):
         self.headers.update(header)
         mocked.return_value.is_valid_request.return_value = True
@@ -277,7 +277,7 @@ class TestCourseRef(LTITestCase):
 
     def test_create_courseref_only_lti(self, mocked):
         """
-        Test that only LTI is assowed.
+        Test that only LTI is allowed.
         """
         request = Mock()
         request.session = {}
