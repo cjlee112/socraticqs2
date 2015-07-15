@@ -5,25 +5,8 @@ Getting Started with Socraticqs2 Development
 Installation and setup
 -----------------------
 
-Pre-requisites
-...............
-
-To run the Socraticqs2 development/test server on your computer,
-you need:
-
-* Python 2.7
-* Django 1.7 or higher
-* Pandoc (currently used for converting text to HTML): you can download
-  this for Mac OS X; most linux package managers can install it automatically.
-* several Python packages installable by pip: pypandoc, django-crispy-forms,
-  wikipedia
-
-We also use Git as our version control; if you don't already have it,
-you can download either Github for Windows or Github for Mac;
-most linux package managers can install Git for you automatically.
-
-Optional: use virtualenv to create an isolated test environment
-................................................................
+Recommended: use virtualenv to create an isolated test environment
+.....................................................................
 
 I find it convenient to isolate my development environment from
 any other Python installation, by using virtualenv.
@@ -37,18 +20,36 @@ type (again replace the path with what you used in the previous step)::
 
   source /path/to/put/your/new/ve/bin/activate
 
-Installing Django etc.
-........................
+Pre-requisites
+...............
 
-Assuming you have Python and Pandoc installed::
+To run the Socraticqs2 development/test server on your computer,
+you need various things such as:
 
-  pip install Django
-  pip install pypandoc
-  pip install django-crispy-forms
-  pip install wikipedia
+* **Python 2.7**
+* **Git**: we use Git as our version control; if you don't already have it,
+  you can download either Github for Windows or Github for Mac;
+  most linux package managers can install Git for you automatically.
+  See further details below.
+* **PostgreSQL**: back-end database for Socraticqs2.  See further details below.
+* **Pandoc** (currently used for converting text to HTML): you can download
+  this for Mac OS X; most linux package managers can install it automatically.
+* **Python packages** automatically installable by pip using our
+  `dev_requirements.txt` requirements file:
+  e.g. Django, pypandoc, django-crispy-forms,
+  wikipedia etc.  This is described in detail below.
 
-Git version control software
-.....................................
+.. warning::
+
+   On Ubuntu-like distros, you must first install some dependencies
+   of the python lxml package, *before* running `pip install` below::
+
+     sudo apt-get install libxml2-dev libxslt1-dev python-dev zlib1g-dev
+
+
+
+Installing Git version control software
+...........................................
 
 We use `Git <http://www.git-scm.com>`_ and 
 `GitHub <https://github.com>`_ for working on Socraticqs2 development.
@@ -65,6 +66,9 @@ You'll first need to get Git:
 * On Linux, your package manager can install (and update) Git
   for you automatically.  We recommend installing both the command
   line tools (``git``) and a graphical interface (``gitg``).
+
+If you are not accustomed to using Git / GitHub as your primary version
+control system, we suggest you review our :doc:`gitguide`.
 
 Getting the Socraticqs2 source code
 .....................................
@@ -94,6 +98,113 @@ one of two ways:
 * **via Github for Windows or Mac**: you can just click the Clone to Desktop
   link on the webpage for your fork (repository).
 
+
+Installing and configuring PostgreSQL
+.....................................
+
+Ubuntu 14.04 distribution instructions
+::::::::::::::::::::::::::::::::::::::
+
+
+To install PostgreSQL 9.4 on Ubuntu machine you should follow next steps:
+
+* Create the file ``/etc/apt/sources.list.d/pgdg.list``, and
+  add a line for the repository 
+    ::
+
+     deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main
+
+* Import the repository signing key, and update the package lists
+  ::
+
+   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+     sudo apt-key add -
+   sudo apt-get update
+
+* Install postgres-9.4::
+   
+   sudo apt-get install postgresql-9.4
+
+.. warning::
+
+   On Ubuntu-like distros, you must first install postgresql-server-dev-9.4
+   as a dependency to python psycopg2 package, *before* running `pip install` below::
+
+     sudo apt-get install postgresql-server-dev-9.4
+
+* Next we need to set default postgres user password to start development process::
+
+   sudo -u postgres psql postgres
+   postgres=# \password postgres
+
+* Finally we need to create database with desired name::
+
+    postgres=# CREATE DATABASE db_name ENCODING 'UTF8';
+
+* Now we can exit from PostgreSQL and start to configure our Django project to use created database::
+
+    postgres=# \q
+
+* But one more thing we need to do is to open pg_hba.conf file::
+
+    sudo vim /etc/postgresql/9.4/main/pg_hba.conf
+
+* And change::
+
+    local   all    postgres    peer
+
+  to::
+
+    local   all    postgres    md5
+
+* Finally we need to restart PostgreSQL server::
+
+    sudo service postgresql restart
+
+
+In case when you don't want to have the PostgreSQL server running all the time on your computer, just to play with the Socraticqs2 code (e.g. this consumes system resources), you can start and stop PostgreSQL manually::
+
+    sudo service postgresql stop
+    sudo service postgresql start
+
+To prevent PostgreSQL to start on system boot you need to change line ``auto`` to ``manual`` in ``/etc/postgresql/9.4/main/start.conf``.
+
+
+Mac OS X installation
+:::::::::::::::::::::
+
+For installing PostgreSQL on Mac OS X please follow the official `instructions`_.
+
+.. _instructions: http://www.postgresql.org/download/macosx/
+
+
+Configuring Django project for using PostgreSQL
+...............................................
+
+To configure project to need to copy ``mysite/settings/local_conf_example.py`` into ``mysite/settings/local_conf.py`` and change DATABASES dict::
+
+    DATABASES = {
+        'default': {
+          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+          'NAME': 'db_name',
+          'USER': 'postgres',
+          'PASSWORD': 'your_postgres_pass',
+          'HOST': '',  # leave blank for localhost
+          'PORT': '',  # leave blank for localhost
+        }
+    }
+
+
+
+Installing required Python Packages using pip
+...............................................
+
+Assuming you have the above pre-requisites installed, within the
+`socraticqs2` directory run the following command::
+
+  pip install -r dev_requirements.txt
+
+
 Run the test suite
 ....................
 
@@ -101,14 +212,15 @@ To make sure your setup is working properly, try running the
 test suite::
 
   cd socraticqs2/mysite
-  python manage.py test ct
+  python manage.py test
 
 You should see a series of tests pass successfully.
 
 Running a test web server
 ...........................
 
-You need to create a database, load it with some data, and
+You need to create a database, load it with some data,
+load plugin specifications, and
 run the development web server.  You first create the 
 database::
 
@@ -118,6 +230,16 @@ Next load it with some example data that we supply in the
 repository::
 
   python manage.py loaddata dumpdata/debug.json
+
+.. warning::
+   If you get an error message of the form
+   ``Could not load contenttypes.ContentType`` then load the example
+   data as follows::
+
+     python manage.py loaddata dumpdata/debug-e.json
+
+You will also need to load FSM plugin specifications;
+see :ref:`fsm-deploy`.
 
 Finally, start up the development web server::
 
@@ -140,150 +262,10 @@ Security notes:
 Basic Developer Operations
 ---------------------------
 
-Pulling the latest code updates
-.......................................................
+Getting source code updates, making changes etc.
+..................................................
 
-Using standard Git
-+++++++++++++++++++
-
-Assuming you used our Git setup instructions above
-(so that your local repository's ``upstream`` remote points to 
-our repo), you can pull our latest changes from a specific branch
-(e.g. ``master``) by simply typing::
-
-  git pull upstream master
-
-Or if you want simply to fetch our latest changes (without actually
-merging them into your current branch), so that you can look at them,
-just type::
-
-  git fetch upstream
-
-You can then use your graphical viewer (e.g. ``gitg`` or SourceTree)
-to view the latest ``upstream`` commits prior to merging them into
-your own branch(es).
-
-Using Github for Windows / Mac
-++++++++++++++++++++++++++++++++
-
-Github for Windows / Mac doesn't work with multiple remotes --
-it only synchronizes against your GitHub fork. Working around
-this limitation, there are two
-ways to get the latest updates from *our* GitHub fork:
-
-via the command line
-:::::::::::::::::::::::
-
-#. If this is the first time you are pulling from our repository,
-   you will need to add a "remote" telling Git the URL of our
-   repository, like so::
-
-     git remote add upstream https://github.com/cjlee112/socraticqs2.git
-
-   You can verify the new ``upstream`` repository has been added,
-   by listing all the existing remotes::
-
-     git remote -v
-
-   You should see the following lines (in addition to your other remotes)::
-
-     upstream  https://github.com/cjlee112/socraticqs2.git (fetch)
-     upstream  https://github.com/cjlee112/socraticqs2.git (push)
-
-#. Now you are able to pull or fetch the branches and their respective
-   commits from the upstream repository, using the standard Git commands
-   listed in the previous section, e.g.::
-
-     $ git fetch upstream
-
-   Once you've fetched ``upstream`` commits, you can merge them
-   (e.g. from ``upstream/master``) to your current local branch::
-
-     $ git merge upstream/master
-
-   This brings your current branch into sync with ``upstream/master``.
-
-Using GitHub desktop client
-:::::::::::::::::::::::::::::::
-
-Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:
-
-#. Go to the setting tab of your fork.
-
-#. Change the "Primary remote repository" to the upstream repo you want to use.(ie, https://github.com/cjlee112/socraticqs2.git)
-
-#. Press "Update Remote"
-#. Press "Sync Branch"
-#. Change the "Primary remote repository" back to the original forked repo you were using.
-#. Press "Update Remote"
-
-Making source-code changes
-............................
-
-We strongly recommend that you take advantage of Git's easy
-revision control "branches" to create a new "experimental" branch
-for any changes you want to try, e.g. via the command-line::
-
-  git checkout -b try
-
-This creates a new branch called ``try``, forked from your
-current branch (for the purpose of argument, let's assume it
-was called ``previous``).  Now make and commit whatever
-changes you want.  
-
-* As long as your latest changes have been committed, you can
-  instantly switch to another branch, like so::
-
-    git checkout previous
-
-* If you decide you want to merge your changes from ``try`` into
-  your current branch, just type::
-
-    git merge try
-
-  If you now have no further need for ``try``, because all its commits
-  have been merged into your current branch, type::
-
-    git branch -d try
-
-* If you decide you want to abandon (completely delete)
-  the changes you made on ``try``, just type::
-
-    git branch -D try
-
-* If you decide to abandon your latest commit (undo its changes, and
-  delete the commit), you can type::
-
-    git reset --hard HEAD^
-
-  In general, if you want to "reset" your branch to a previous commit
-  (abandoning subsequent changes), just type::
-
-    git reset --hard 7a529
-
-  where ``7a529`` is the commit ID you want to go back to.
-
-See a Git tutorial to learn more about all its great capabilities.
-
-Some best practices to follow
-+++++++++++++++++++++++++++++++
-
-* don't push "junk" commits to your public (GitHub) repository.
-  Instead clean up your branch to get rid of unwanted commits
-  (using methods like the above), before pushing it to GitHub.
-* once your branch is "clean", make sure the test suite passes
-  before you push your branch to GitHub.
-* When you branch is clean and all tests pass, you can push
-  it to GitHub so others can access it.  For example, to push
-  your ``try`` branch::
-
-    git push origin try
-
-* Git can do just about anything to help you clean up or reorganize
-  your branches, but its complexities may initially seem
-  mystifying.  When in doubt about how to get Git to do what you
-  want, search Google for a tutorial, or ask us for help.
-  
+See our :doc:`gitguide`.
 
 Database Operations
 .....................
@@ -450,5 +432,6 @@ You can then restore a particular snapshot like this::
 
   python manage.py loaddata dumpdata/mysnap.json
 
-
+You will also need to load FSM plugin specifications;
+see :ref:`fsm-deploy`.
 

@@ -8,7 +8,7 @@
     
     <title>Writing Guided Activities (Finite State Machines) &mdash; Socraticqs2 0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -24,30 +24,33 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
-    <link rel="next" title="Django Version Collaboration System for Courselets" href="pep/django_vcs.html" />
+    <link rel="next" title="Socraticqs2 as LTI provider" href="lti.html" />
     <link rel="prev" title="Getting Started with Socraticqs2 Development" href="devintro.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lti.html" title="Socraticqs2 as LTI provider"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="writing-guided-activities-finite-state-machines">
 <h1>Writing Guided Activities (Finite State Machines)<a class="headerlink" href="#writing-guided-activities-finite-state-machines" title="Permalink to this headline">¶</a></h1>
@@ -81,23 +84,23 @@ Machine (FSM) consisting of a <em>graph</em> of <em>nodes</em> connected by <em>
 <li>its <em>nodes</em> are pages or &#8220;views&#8221;, that is, each node shows one
 view from the generic Socraticqs2 interface.  Each node in a FSM
 has a distinct <em>name</em>.  An FSM always begins at its
-<tt class="docutils literal"><span class="pre">START</span></tt> node, and terminates when it reaches its <tt class="docutils literal"><span class="pre">END</span></tt> node.
-An <tt class="docutils literal"><span class="pre">FSMNode</span></tt> instance always has an <tt class="docutils literal"><span class="pre">fsm</span></tt> attribute that
-points to the <tt class="docutils literal"><span class="pre">FSM</span></tt> that it is part of.</li>
+<code class="docutils literal"><span class="pre">START</span></code> node, and terminates when it reaches its <code class="docutils literal"><span class="pre">END</span></code> node.
+An <code class="docutils literal"><span class="pre">FSMNode</span></code> instance always has an <code class="docutils literal"><span class="pre">fsm</span></code> attribute that
+points to the <code class="docutils literal"><span class="pre">FSM</span></code> that it is part of.</li>
 <li>its <em>edges</em> are transitions from one view (node) to another.
 Concretely, on a given page there may be one or more possible
 <em>events</em> such as the user submitting an answer to a question,
 clicking the Next button, etc.  Each event in the generic interface
-has a defined name such as <tt class="docutils literal"><span class="pre">next</span></tt>, <tt class="docutils literal"><span class="pre">add</span></tt>, etc.
+has a defined name such as <code class="docutils literal"><span class="pre">next</span></code>, <code class="docutils literal"><span class="pre">add</span></code>, etc.
 A node can define what events will trigger which edge.
 Each edge has a distinct <em>name</em>.
-An <tt class="docutils literal"><span class="pre">FSMEdge</span></tt> instance always has <tt class="docutils literal"><span class="pre">fromNode</span></tt> and <tt class="docutils literal"><span class="pre">toNode</span></tt>
+An <code class="docutils literal"><span class="pre">FSMEdge</span></code> instance always has <code class="docutils literal"><span class="pre">fromNode</span></code> and <code class="docutils literal"><span class="pre">toNode</span></code>
 attributes that point to the nodes that it connects.</li>
-<li>while an FSM is running, it is represented by an <tt class="docutils literal"><span class="pre">FSMState</span></tt>
+<li>while an FSM is running, it is represented by an <code class="docutils literal"><span class="pre">FSMState</span></code>
 record that points to the current node, and stores any data
-associated with this running FSM instance.  An <tt class="docutils literal"><span class="pre">FSMState</span></tt>
-instance always keeps an <tt class="docutils literal"><span class="pre">fsmNode</span></tt> attribute that points to
-the current <tt class="docutils literal"><span class="pre">FSMNode</span></tt>.</li>
+associated with this running FSM instance.  An <code class="docutils literal"><span class="pre">FSMState</span></code>
+instance always keeps an <code class="docutils literal"><span class="pre">fsmNode</span></code> attribute that points to
+the current <code class="docutils literal"><span class="pre">FSMNode</span></code>.</li>
 </ul>
 <p>An FSM works by intercepting events from the current view, and
 redirecting the user to a different next view (node) than the
@@ -148,40 +151,40 @@ to perform either of the treatments, because it could just call a &#8220;treatme
 FSM&#8221; that performs the specified treatment, and when finished returns
 control to randomized trial FSM.</p>
 <p>This hierarchical &#8220;subroutine calling&#8221; capability is handled
-by the <tt class="docutils literal"><span class="pre">FSMStack</span></tt> class, which acts as the main interface
-between Socraticqs2 code and FSM code.  An <tt class="docutils literal"><span class="pre">FSMStack</span></tt> instance always
-keeps a <tt class="docutils literal"><span class="pre">state</span></tt> attribute that points to the current
-<tt class="docutils literal"><span class="pre">FSMState</span></tt>.</p>
+by the <code class="docutils literal"><span class="pre">FSMStack</span></code> class, which acts as the main interface
+between Socraticqs2 code and FSM code.  An <code class="docutils literal"><span class="pre">FSMStack</span></code> instance always
+keeps a <code class="docutils literal"><span class="pre">state</span></code> attribute that points to the current
+<code class="docutils literal"><span class="pre">FSMState</span></code>.</p>
 </div>
 </div>
 <div class="section" id="an-example-lesson-sequence-fsm">
 <h2>An Example: Lesson Sequence FSM<a class="headerlink" href="#an-example-lesson-sequence-fsm" title="Permalink to this headline">¶</a></h2>
-<p>To make this tangible, let&#8217;s look at an example.  The <tt class="docutils literal"><span class="pre">lessonseq</span></tt> FSM
+<p>To make this tangible, let&#8217;s look at an example.  The <code class="docutils literal"><span class="pre">lessonseq</span></code> FSM
 shows the student the sequence of core lessons for a courselet,
 in the order set by the instructor.</p>
 <p>It consists of four nodes:
-<tt class="docutils literal"><span class="pre">LESSON</span></tt>, <tt class="docutils literal"><span class="pre">ASK</span></tt>, <tt class="docutils literal"><span class="pre">ASSESS</span></tt>, <tt class="docutils literal"><span class="pre">ERRORS</span></tt> (in addition to the
-mandatory <tt class="docutils literal"><span class="pre">START</span></tt> and <tt class="docutils literal"><span class="pre">END</span></tt>).</p>
+<code class="docutils literal"><span class="pre">LESSON</span></code>, <code class="docutils literal"><span class="pre">ASK</span></code>, <code class="docutils literal"><span class="pre">ASSESS</span></code>, <code class="docutils literal"><span class="pre">ERRORS</span></code> (in addition to the
+mandatory <code class="docutils literal"><span class="pre">START</span></code> and <code class="docutils literal"><span class="pre">END</span></code>).</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">LESSON</span></tt>: presents an explanation.</li>
-<li><tt class="docutils literal"><span class="pre">ASK</span></tt>: asks the student a question</li>
-<li><tt class="docutils literal"><span class="pre">ASSESS</span></tt>: shows the answer and prompts the student for a self-assessment
+<li><code class="docutils literal"><span class="pre">LESSON</span></code>: presents an explanation.</li>
+<li><code class="docutils literal"><span class="pre">ASK</span></code>: asks the student a question</li>
+<li><code class="docutils literal"><span class="pre">ASSESS</span></code>: shows the answer and prompts the student for a self-assessment
 of their own answer.</li>
-<li><tt class="docutils literal"><span class="pre">ERRORS</span></tt>: prompts the student to categorize what error(s) they made
+<li><code class="docutils literal"><span class="pre">ERRORS</span></code>: prompts the student to categorize what error(s) they made
 in their answer.</li>
 </ul>
 <p>Edges:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">next</span></tt>: Typically, the <tt class="docutils literal"><span class="pre">next</span></tt> edge must see whether the next lesson is an
-explanation (<tt class="docutils literal"><span class="pre">LESSON</span></tt>) or question (<tt class="docutils literal"><span class="pre">ASK</span></tt>), or whether we&#8217;ve reached
-the <tt class="docutils literal"><span class="pre">END</span></tt>.  This dynamic edge behavior is implemented by supplying
-a plug-in method <tt class="docutils literal"><span class="pre">next_edge()</span></tt>.  By convention, plug-in edge methods
-always consist of the <em>name of the edge</em> followed by <tt class="docutils literal"><span class="pre">_edge</span></tt>.</li>
-<li><tt class="docutils literal"><span class="pre">error</span></tt>: if the student self-assessment indicates they got the
-answer wrong, the <tt class="docutils literal"><span class="pre">error</span></tt> event is directed to take the student
-to the <tt class="docutils literal"><span class="pre">ERRORS</span></tt> page.</li>
+<li><code class="docutils literal"><span class="pre">next</span></code>: Typically, the <code class="docutils literal"><span class="pre">next</span></code> edge must see whether the next lesson is an
+explanation (<code class="docutils literal"><span class="pre">LESSON</span></code>) or question (<code class="docutils literal"><span class="pre">ASK</span></code>), or whether we&#8217;ve reached
+the <code class="docutils literal"><span class="pre">END</span></code>.  This dynamic edge behavior is implemented by supplying
+a plug-in method <code class="docutils literal"><span class="pre">next_edge()</span></code>.  By convention, plug-in edge methods
+always consist of the <em>name of the edge</em> followed by <code class="docutils literal"><span class="pre">_edge</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">error</span></code>: if the student self-assessment indicates they got the
+answer wrong, the <code class="docutils literal"><span class="pre">error</span></code> event is directed to take the student
+to the <code class="docutils literal"><span class="pre">ERRORS</span></code> page.</li>
 </ul>
-<p>Behind the scenes, there is a <tt class="docutils literal"><span class="pre">UnitStatus</span></tt> data structure that
+<p>Behind the scenes, there is a <code class="docutils literal"><span class="pre">UnitStatus</span></code> data structure that
 knows how to follow the sequence of lessons in that &#8220;unit&#8221; (courselet).</p>
 <p>An FSM is written as a simple set of class definitions for nodes,
 with outgoing edges defined for each node.  Here is minimalist code for
@@ -253,35 +256,35 @@ the Lesson Sequence FSM:</p>
 </div>
 <p>Notes:</p>
 <ul class="simple">
-<li><em>start event</em>: whenever an FSM first starts, its <tt class="docutils literal"><span class="pre">START</span></tt> node is sent
-a <tt class="docutils literal"><span class="pre">start</span></tt> event.  This FSM defines a <tt class="docutils literal"><span class="pre">start_event()</span></tt> method on
-its <tt class="docutils literal"><span class="pre">START</span></tt> node, to receive this event and perform initialization
-of the data which the FSM must store (on its <tt class="docutils literal"><span class="pre">FSMState</span></tt> data).
-Specifically the method uses the <tt class="docutils literal"><span class="pre">FSMState</span></tt> <tt class="docutils literal"><span class="pre">get_data_attr()</span></tt>
-and <tt class="docutils literal"><span class="pre">set_data_attr()</span></tt> methods for binding data to the <tt class="docutils literal"><span class="pre">FSMState</span></tt>.</li>
+<li><em>start event</em>: whenever an FSM first starts, its <code class="docutils literal"><span class="pre">START</span></code> node is sent
+a <code class="docutils literal"><span class="pre">start</span></code> event.  This FSM defines a <code class="docutils literal"><span class="pre">start_event()</span></code> method on
+its <code class="docutils literal"><span class="pre">START</span></code> node, to receive this event and perform initialization
+of the data which the FSM must store (on its <code class="docutils literal"><span class="pre">FSMState</span></code> data).
+Specifically the method uses the <code class="docutils literal"><span class="pre">FSMState</span></code> <code class="docutils literal"><span class="pre">get_data_attr()</span></code>
+and <code class="docutils literal"><span class="pre">set_data_attr()</span></code> methods for binding data to the <code class="docutils literal"><span class="pre">FSMState</span></code>.</li>
 <li>Note that this code represents a <em>specification</em> of the FSM,
 not the actual storage of the FSM in the database.  Specifically,
 the nodes need do nothing more than specify what data needs
 to be saved for each node, and provide its plug-in code.
 Hence these are just generic Python class objects, not
-<tt class="docutils literal"><span class="pre">FSMNode</span></tt> objects.  We will describe later how to <em>load</em>
+<code class="docutils literal"><span class="pre">FSMNode</span></code> objects.  We will describe later how to <em>load</em>
 such an FSM specification into the database.</li>
-<li>outgoing edges from a node <em>must</em> be specified in its <tt class="docutils literal"><span class="pre">edges</span></tt> attribute.
+<li>outgoing edges from a node <em>must</em> be specified in its <code class="docutils literal"><span class="pre">edges</span></code> attribute.
 Providing plug-in code for an edge is <em>optional</em>, and always follows
-the naming convention <tt class="docutils literal"><span class="pre">EDGENAME_edge()</span></tt>, where <tt class="docutils literal"><span class="pre">EDGENAME</span></tt> is the
+the naming convention <code class="docutils literal"><span class="pre">EDGENAME_edge()</span></code>, where <code class="docutils literal"><span class="pre">EDGENAME</span></code> is the
 name of the edge.</li>
 <li>a node typically specifies which generic view it will display
-via its <tt class="docutils literal"><span class="pre">path</span></tt> attribute.  Paths are given using the Django
-URL &#8220;name&#8221; convention <tt class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></tt>; in our case <tt class="docutils literal"><span class="pre">ct</span></tt>
+via its <code class="docutils literal"><span class="pre">path</span></code> attribute.  Paths are given using the Django
+URL &#8220;name&#8221; convention <code class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></code>; in our case <code class="docutils literal"><span class="pre">ct</span></code>
 is the name of our Django app, and the set of all VIEW names are listed in
-<tt class="docutils literal"><span class="pre">ct/urls.py</span></tt>.</li>
+<code class="docutils literal"><span class="pre">ct/urls.py</span></code>.</li>
 <li>note that a full-blown FSM specification would typically give
-a lot more useful node attributes such as a docstring description, <tt class="docutils literal"><span class="pre">help</span></tt>
-etc. that provide the user helpful guidance.  See the <tt class="docutils literal"><span class="pre">FSMNode</span></tt>
+a lot more useful node attributes such as a docstring description, <code class="docutils literal"><span class="pre">help</span></code>
+etc. that provide the user helpful guidance.  See the <code class="docutils literal"><span class="pre">FSMNode</span></code>
 reference docs below for details.</li>
 </ul>
-<p>Here is the code for the <tt class="docutils literal"><span class="pre">next_lesson()</span></tt> edge method used by many of
-these nodes.  It uses <tt class="docutils literal"><span class="pre">UnitStatus</span></tt> and <tt class="docutils literal"><span class="pre">UnitLesson</span></tt> methods to
+<p>Here is the code for the <code class="docutils literal"><span class="pre">next_lesson()</span></code> edge method used by many of
+these nodes.  It uses <code class="docutils literal"><span class="pre">UnitStatus</span></code> and <code class="docutils literal"><span class="pre">UnitLesson</span></code> methods to
 determine what the next view should be:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">next_lesson</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">useCurrent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="s">&#39;edge method that moves us to right state for next lesson (or END)&#39;</span>
@@ -300,9 +303,9 @@ determine what the next view should be:</p>
 </pre></div>
 </div>
 <p>Finally, an FSM specification typically ends with a brief
-<tt class="docutils literal"><span class="pre">FSMSpecification</span></tt> initialization that makes it easy to load
+<code class="docutils literal"><span class="pre">FSMSpecification</span></code> initialization that makes it easy to load
 the specification into the database.  Here is an example for
-the <tt class="docutils literal"><span class="pre">lessonseq</span></tt> specification:</p>
+the <code class="docutils literal"><span class="pre">lessonseq</span></code> specification:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_specs</span><span class="p">():</span>
     <span class="s">&#39;get FSM specifications stored in this file&#39;</span>
     <span class="n">spec</span> <span class="o">=</span> <span class="n">FSMSpecification</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;lessonseq&#39;</span><span class="p">,</span> <span class="n">hideTabs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
@@ -313,14 +316,14 @@ the <tt class="docutils literal"><span class="pre">lessonseq</span></tt> specifi
 </pre></div>
 </div>
 <ul>
-<li><p class="first">this first provides a number of <tt class="docutils literal"><span class="pre">FSM</span></tt> attributes such as its
+<li><p class="first">this first provides a number of <code class="docutils literal"><span class="pre">FSM</span></code> attributes such as its
 <em>name</em>, user interface properties (in this case it specifies that
 the tabbed interface should be hidden while this FSM is running), etc.</p>
 </li>
 <li><p class="first">it also lists the complete set of nodes in the FSM.</p>
 </li>
-<li><p class="first">to actually load an <tt class="docutils literal"><span class="pre">FSMSpecification</span></tt> into the database,
-simply call its <tt class="docutils literal"><span class="pre">save_graph()</span></tt> method with the username who should
+<li><p class="first">to actually load an <code class="docutils literal"><span class="pre">FSMSpecification</span></code> into the database,
+simply call its <code class="docutils literal"><span class="pre">save_graph()</span></code> method with the username who should
 &#8220;own&#8221; this FSM.  (Typically, this would be an admin user):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">fsmSpec</span><span class="o">.</span><span class="n">save_graph</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">)</span>
 </pre></div>
@@ -330,41 +333,83 @@ simply call its <tt class="docutils literal"><span class="pre">save_graph()</spa
 to the database this way, to take effect.</p>
 </li>
 <li><p class="first">note that FSM specifications and plug in code must be stored in
-Python source code files in the <tt class="docutils literal"><span class="pre">mysite/ct/fsm_plugin/</span></tt> directory.</p>
+Python source code files in the <code class="docutils literal"><span class="pre">mysite/ct/fsm_plugin/</span></code> directory.</p>
 </li>
 </ul>
 </div>
 <div class="section" id="fsm-reference-documentation">
 <h2>FSM Reference Documentation<a class="headerlink" href="#fsm-reference-documentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="loading-fsm-specifications-into-the-database">
+<span id="fsm-deploy"></span><h3>Loading FSM specifications into the database<a class="headerlink" href="#loading-fsm-specifications-into-the-database" title="Permalink to this headline">¶</a></h3>
+<p>Since FSMs are loaded dynamically via a plug-in architecture,
+their specifications are stored in the database for real-time
+query by the application.  Whenever an FSM specification changes
+(e.g. adding a new FSM or modifying an existing FSM), that
+specification must be loaded to the database.  Whenever the
+database table is flushed, the set of FSM specifications must be
+loaded.  The standard way to do this is simply:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python manage.py shell
+&gt;&gt;&gt; from fsm.fsmspec import deploy_all
+&gt;&gt;&gt; deploy_all(&#39;foobaron&#39;)
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">foobaron</span></code> is the username that will be recorded as the owner
+of the loaded FSMs.</p>
+<p>Two convenience functions exist to do this, in the <code class="docutils literal"><span class="pre">fsmspec</span></code> module.
+To load a single FSM specification, use:</p>
+<dl class="function">
+<dt id="deploy">
+<code class="descname">deploy</code><span class="sig-paren">(</span><em>modname</em>, <em>username</em><span class="sig-paren">)</span><a class="headerlink" href="#deploy" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>modname</em>: full name of the module (typically of the form
+<code class="docutils literal"><span class="pre">APP.fsm_plugin.MODULENAME</span></code> where <code class="docutils literal"><span class="pre">APP</span></code> is the name of the Django
+app, and <code class="docutils literal"><span class="pre">MODULENAME</span></code> is the module name in that directory)
+containing the new / modified FSM to load.</p>
+<p><em>username</em>: for administrative purposes, an existing user in
+the database, who will be recorded as the owner of the FSM.
+At present this isn&#8217;t really used for anything, hence somewhat
+arbitrary.</p>
+</dd></dl>
+
+<p>To load all FSM specifications, use:</p>
+<dl class="function">
+<dt id="deploy_all">
+<code class="descname">deploy_all</code><span class="sig-paren">(</span><em>username</em>, <em>ignore=('testme'</em>, <em>'__init__'</em>, <em>)</em>, <em>pattern='*/fsm_plugin/*.py'</em><span class="sig-paren">)</span><a class="headerlink" href="#deploy_all" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>username</em>: same as above</p>
+<p><em>ignore</em>: list of modules in the <code class="docutils literal"><span class="pre">fsm_plugin</span></code> directory that should <em>not</em>
+be treated as FSM specifications.</p>
+<p><em>pattern</em>: <code class="docutils literal"><span class="pre">glob</span></code> search pattern for finding FSM plugin modules.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="fsmspecification">
 <h3>FSMSpecification<a class="headerlink" href="#fsmspecification" title="Permalink to this headline">¶</a></h3>
 <p>Provides an interface for loading a Guided Activity specification
 into the database.  Displayed as an option in the
-<strong>Start Activity</strong> menu according to its <tt class="docutils literal"><span class="pre">fsmGroups</span></tt> attribute
+<strong>Start Activity</strong> menu according to its <code class="docutils literal"><span class="pre">fsmGroups</span></code> attribute
 (see below).</p>
 <p><strong>Important attributes to set in your FSM specification:</strong></p>
 <dl class="attribute">
 <dt id="name">
-<tt class="descname">name</tt><a class="headerlink" href="#name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><a class="headerlink" href="#name" title="Permalink to this definition">¶</a></dt>
 <dd><p>the ID by which the FSM will be called.  That is, FSMs are invoked
 by name.  For example, when the user indicates they want to study
 the sequence of lessons in a courselet, the generic Socraticqs2
-UI searches for an FSM named <tt class="docutils literal"><span class="pre">lessonseq</span></tt>.</p>
+UI searches for an FSM named <code class="docutils literal"><span class="pre">lessonseq</span></code>.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="title">
-<tt class="descname">title</tt><a class="headerlink" href="#title" title="Permalink to this definition">¶</a></dt>
+<code class="descname">title</code><a class="headerlink" href="#title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displayed in the Start Activity menu.</p>
 <p>Also sets the title which will be displayed by default for the FSM,
-unless its plug-in code <tt class="docutils literal"><span class="pre">start_event()</span></tt> explicitly overrides that
-by writing a new value to the <tt class="docutils literal"><span class="pre">FSMState.title</span></tt> for this running
+unless its plug-in code <code class="docutils literal"><span class="pre">start_event()</span></code> explicitly overrides that
+by writing a new value to the <code class="docutils literal"><span class="pre">FSMState.title</span></code> for this running
 FSM instance.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="description">
-<tt class="descname">description</tt><a class="headerlink" href="#description" title="Permalink to this definition">¶</a></dt>
+<code class="descname">description</code><a class="headerlink" href="#description" title="Permalink to this definition">¶</a></dt>
 <dd><p>An explanation of what this Guided Activity does for the user,
 to be displayed in the Activity Center UI, as a tooltip for this
 option in the Start Activity menu, etc.</p>
@@ -372,32 +417,32 @@ option in the Start Activity menu, etc.</p>
 
 <dl class="attribute">
 <dt id="fsmGroups">
-<tt class="descname">fsmGroups</tt><a class="headerlink" href="#fsmGroups" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fsmGroups</code><a class="headerlink" href="#fsmGroups" title="Permalink to this definition">¶</a></dt>
 <dd><p>Optional.  A list of one or more <em>user interface group</em> names
 (just a string) that this FSM should be listed in, on the
 <strong>Start Activity</strong> menu.</p>
 <p>Currently, there are two user interface groups:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">'teach/unit_tasks'</span></tt>: displayed on the instructor <tt class="docutils literal"><span class="pre">unit_tasks</span></tt> page.</li>
-<li><tt class="docutils literal"><span class="pre">'teach/unit/published'</span></tt>: same as above, but only if unit published.</li>
+<li><code class="docutils literal"><span class="pre">'teach/unit_tasks'</span></code>: displayed on the instructor <code class="docutils literal"><span class="pre">unit_tasks</span></code> page.</li>
+<li><code class="docutils literal"><span class="pre">'teach/unit/published'</span></code>: same as above, but only if unit published.</li>
 </ul>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="help">
-<tt class="descname">help</tt><a class="headerlink" href="#help" title="Permalink to this definition">¶</a></dt>
+<code class="descname">help</code><a class="headerlink" href="#help" title="Permalink to this definition">¶</a></dt>
 <dd><p>More detailed info to help the user understand what this FSM is for.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="hideTabs">
-<tt class="descname">hideTabs</tt><a class="headerlink" href="#hideTabs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hideTabs</code><a class="headerlink" href="#hideTabs" title="Permalink to this definition">¶</a></dt>
 <dd><p>If set True, hide the generic tabbed interface while this FSM is running.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="hideLinks">
-<tt class="descname">hideLinks</tt><a class="headerlink" href="#hideLinks" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hideLinks</code><a class="headerlink" href="#hideLinks" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Not yet implemented: turning this option doesn&#8217;t actually do anything
 yet</strong>.  If set True, block hyperlinks from being clickable while this
 FSM is running.</p>
@@ -405,35 +450,35 @@ FSM is running.</p>
 
 <dl class="attribute">
 <dt id="hideNav">
-<tt class="descname">hideNav</tt><a class="headerlink" href="#hideNav" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hideNav</code><a class="headerlink" href="#hideNav" title="Permalink to this definition">¶</a></dt>
 <dd><p>If set True, hide the generic navigation bar options while this FSM
 is running.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="save_graph">
-<tt class="descname">save_graph</tt><big>(</big><em>username</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#save_graph" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save_graph</code><span class="sig-paren">(</span><em>username</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#save_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load FSM specification into the database, owned by the specified
-<tt class="docutils literal"><span class="pre">username</span></tt>.  Arguments are passed to <tt class="docutils literal"><span class="pre">FSM.save_graph()</span></tt> (see below).</p>
+<code class="docutils literal"><span class="pre">username</span></code>.  Arguments are passed to <code class="docutils literal"><span class="pre">FSM.save_graph()</span></code> (see below).</p>
 </dd></dl>
 
 </div>
 <div class="section" id="fsm">
 <h3>FSM<a class="headerlink" href="#fsm" title="Permalink to this headline">¶</a></h3>
 <p>Database object representing a Guided Activity.  Displayed as an option in the
-<strong>Start Activity</strong> menu according to the <tt class="docutils literal"><span class="pre">fsmGroups</span></tt> attribute
+<strong>Start Activity</strong> menu according to the <code class="docutils literal"><span class="pre">fsmGroups</span></code> attribute
 (see above).  Actually stores the attributes listed above for an FSM
 specification.  In addition, you can use the following in your code:</p>
 <p><strong>Useful methods</strong>:</p>
 <dl class="method">
 <dt id="get_node">
-<tt class="descname">get_node</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#get_node" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_node</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#get_node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get node in this FSM with specified <em>name</em>.</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt>
-<em class="property">classmethod </em><tt class="descname">save_graph</tt><big>(</big><em>klass</em>, <em>fsmData</em>, <em>nodeData</em>, <em>edgeData</em>, <em>username</em>, <em>fsmGroups=()</em>, <em>oldLabel='OLD'</em><big>)</big></dt>
+<em class="property">classmethod </em><code class="descname">save_graph</code><span class="sig-paren">(</span><em>klass</em>, <em>fsmData</em>, <em>nodeData</em>, <em>edgeData</em>, <em>username</em>, <em>fsmGroups=()</em>, <em>oldLabel='OLD'</em><span class="sig-paren">)</span></dt>
 <dd><p><strong>this is a low-level call; in general you should use the higher
 level call FSMSpecification.save_graph() instead</strong>.
 Store FSM specification from node, edge graph
@@ -443,7 +488,7 @@ Note that ongoing activities
 using the old FSM will continue to work (following the old FSM spec),
 but any new activities will be created using the new FSM spec
 (since they request it by name).
-Returns the newly created <tt class="docutils literal"><span class="pre">FSM</span></tt> object.</p>
+Returns the newly created <code class="docutils literal"><span class="pre">FSM</span></code> object.</p>
 </dd></dl>
 
 </div>
@@ -452,21 +497,21 @@ Returns the newly created <tt class="docutils literal"><span class="pre">FSM</sp
 <p><strong>Important attributes to set in your FSM specification:</strong></p>
 <dl class="attribute">
 <dt>
-<tt class="descname">name</tt></dt>
+<code class="descname">name</code></dt>
 <dd><p>Note that you set this in an FSM specification by simply
 naming the class definition that you write for a node.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">title</tt></dt>
+<code class="descname">title</code></dt>
 <dd><p>Title for the current step to be displayed in the Activity Center
 UI etc.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">description</tt></dt>
+<code class="descname">description</code></dt>
 <dd><p>Provides an explanation of what this step in the Guided Activity
 does for the user, to display in the Activity Center UI, etc.
 Note that you set this by simply giving a <strong>docstring</strong> in
@@ -475,7 +520,7 @@ the class definition that you write for a node.</p>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">help</tt></dt>
+<code class="descname">help</code></dt>
 <dd><p>Instructions for this step that will be displayed to the user
 as an overlay at the top of the current page, <em>in addition</em> to
 the generic instructions that are always shown on that page.
@@ -485,28 +530,28 @@ user to look at and do when performing this step.</p>
 
 <dl class="attribute">
 <dt id="path">
-<tt class="descname">path</tt><a class="headerlink" href="#path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">path</code><a class="headerlink" href="#path" title="Permalink to this definition">¶</a></dt>
 <dd><p>specifies which generic view it will display
-via its <tt class="docutils literal"><span class="pre">path</span></tt> attribute.  Paths are given using the Django
-URL &#8220;name&#8221; convention <tt class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></tt>; in our case <tt class="docutils literal"><span class="pre">ct</span></tt>
+via its <code class="docutils literal"><span class="pre">path</span></code> attribute.  Paths are given using the Django
+URL &#8220;name&#8221; convention <code class="docutils literal"><span class="pre">APPNAME:VIEWNAME</span></code>; in our case <code class="docutils literal"><span class="pre">ct</span></code>
 is the name of our Django app, and the set of all VIEW names are listed in
-<tt class="docutils literal"><span class="pre">ct/urls.py</span></tt>.</p>
+<code class="docutils literal"><span class="pre">ct/urls.py</span></code>.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="doLogging">
-<tt class="descname">doLogging</tt><a class="headerlink" href="#doLogging" title="Permalink to this definition">¶</a></dt>
+<code class="descname">doLogging</code><a class="headerlink" href="#doLogging" title="Permalink to this definition">¶</a></dt>
 <dd><p>If set True, records entry and exit timestamps for the user&#8217;s
-visit to this view.  Log data are saved as <tt class="docutils literal"><span class="pre">ActivityEvent</span></tt>
+visit to this view.  Log data are saved as <code class="docutils literal"><span class="pre">ActivityEvent</span></code>
 records.  If the current FSMState instance already has
-an <tt class="docutils literal"><span class="pre">activity</span></tt> attribute pointing to the current <tt class="docutils literal"><span class="pre">ActivityLog</span></tt>,
-the event will be marked as part of that <tt class="docutils literal"><span class="pre">ActivityLog</span></tt>.
-Otherwise, an <tt class="docutils literal"><span class="pre">ActivityLog</span></tt> whose name matches the current
+an <code class="docutils literal"><span class="pre">activity</span></code> attribute pointing to the current <code class="docutils literal"><span class="pre">ActivityLog</span></code>,
+the event will be marked as part of that <code class="docutils literal"><span class="pre">ActivityLog</span></code>.
+Otherwise, an <code class="docutils literal"><span class="pre">ActivityLog</span></code> whose name matches the current
 FSM will be used (or created, if it does not already exist),
-and also set as the current <tt class="docutils literal"><span class="pre">FSMState.activity</span></tt>.</p>
-<p>Note that <tt class="docutils literal"><span class="pre">Response</span></tt> and <tt class="docutils literal"><span class="pre">StudentError</span></tt> data created
+and also set as the current <code class="docutils literal"><span class="pre">FSMState.activity</span></code>.</p>
+<p>Note that <code class="docutils literal"><span class="pre">Response</span></code> and <code class="docutils literal"><span class="pre">StudentError</span></code> data created
 while an FSM is running are also automatically time stamped
-and bound to the current <tt class="docutils literal"><span class="pre">FSMState.activity</span></tt>.</p>
+and bound to the current <code class="docutils literal"><span class="pre">FSMState.activity</span></code>.</p>
 </dd></dl>
 
 <p><strong>Plug-in code</strong>:</p>
@@ -515,17 +560,17 @@ class:</p>
 <ul>
 <li><p class="first"><strong>help method</strong>: if a node needs to control exactly what help message
 should be displayed on <em>any</em> given view (page), you can supply a
-<tt class="docutils literal"><span class="pre">get_help()</span></tt> method to do so.  It must return a help message as a
+<code class="docutils literal"><span class="pre">get_help()</span></code> method to do so.  It must return a help message as a
 string, based on the current page that is being requested, or
-<tt class="docutils literal"><span class="pre">None</span></tt> if the current page should be considered &#8220;off-path&#8221; (in
+<code class="docutils literal"><span class="pre">None</span></code> if the current page should be considered &#8220;off-path&#8221; (in
 which case a default message will be displayed).</p>
 <p>Note that even
-<em>without</em> such a method, the node&#8217;s <tt class="docutils literal"><span class="pre">help</span></tt> attribute will automatically
+<em>without</em> such a method, the node&#8217;s <code class="docutils literal"><span class="pre">help</span></code> attribute will automatically
 be shown as the help message for the view associated with this node,
 and the &#8220;off-path&#8221; message will be shown on all other views.  So
 the only case where you need to supply this method is when your
 node needs to supply help messages for multiple possible views.</p>
-<p>The <tt class="docutils literal"><span class="pre">get_help()</span></tt> method definition must be of the following form:</p>
+<p>The <code class="docutils literal"><span class="pre">get_help()</span></code> method definition must be of the following form:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
         <span class="s">&#39;provide help messages for all views relevant to this stage.&#39;</span>
@@ -552,9 +597,9 @@ node needs to supply help messages for multiple possible views.</p>
 </div>
 </li>
 <li><p class="first"><strong>path method</strong>: if a node must determine its URL dynamically, you
-can supply a <tt class="docutils literal"><span class="pre">get_path()</span></tt> method to do so.  It must return a
-URL string of the form <tt class="docutils literal"><span class="pre">'/ct/some/path/'</span></tt>.  Note the trailing
-<tt class="docutils literal"><span class="pre">/</span></tt>, required by convention in Django.  The method definition must be
+can supply a <code class="docutils literal"><span class="pre">get_path()</span></code> method to do so.  It must return a
+URL string of the form <code class="docutils literal"><span class="pre">'/ct/some/path/'</span></code>.  Note the trailing
+<code class="docutils literal"><span class="pre">/</span></code>, required by convention in Django.  The method definition must be
 of the following form:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -566,8 +611,8 @@ of the following form:</p>
 </li>
 <li><p class="first"><strong>event method</strong>: if a node needs to determine dynamically
 what edge to trigger in response to a given event, you can
-supply a method named <tt class="docutils literal"><span class="pre">EVENTNAME_event()</span></tt> to do so
-(where <tt class="docutils literal"><span class="pre">EVENTNAME</span></tt> is the name of the event you want it
+supply a method named <code class="docutils literal"><span class="pre">EVENTNAME_event()</span></code> to do so
+(where <code class="docutils literal"><span class="pre">EVENTNAME</span></code> is the name of the event you want it
 to intercept).  It should call the desired edge transition
 directly, and return the result.  The method definition must be
 of the following form:</p>
@@ -586,9 +631,9 @@ of the following form:</p>
 </li>
 <li><p class="first"><strong>edge method</strong>: if an edge needs to do something (such as save
 state data or decide dynamically what node to transition to),
-you can do so by supplying a method named <tt class="docutils literal"><span class="pre">EDGENAME_edge()</span></tt>,
-where <tt class="docutils literal"><span class="pre">EDGENAME</span></tt> is the name of the edge it should intercept.
-It must return an <tt class="docutils literal"><span class="pre">FSMNode</span></tt> to transition to.
+you can do so by supplying a method named <code class="docutils literal"><span class="pre">EDGENAME_edge()</span></code>,
+where <code class="docutils literal"><span class="pre">EDGENAME</span></code> is the name of the edge it should intercept.
+It must return an <code class="docutils literal"><span class="pre">FSMNode</span></code> to transition to.
 The method definition must be of the following form:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FOO</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">next_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">fsmStack</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -604,43 +649,43 @@ The method definition must be of the following form:</p>
 <p><strong>Important attributes to set in your FSM specification:</strong></p>
 <dl class="attribute">
 <dt>
-<tt class="descname">name</tt></dt>
+<code class="descname">name</code></dt>
 <dd><p>Name of this edge.  Must be unique among the set of outgoing edges
 from a given node.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="toNode">
-<tt class="descname">toNode</tt><a class="headerlink" href="#toNode" title="Permalink to this definition">¶</a></dt>
+<code class="descname">toNode</code><a class="headerlink" href="#toNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>The destination node of this edge.  Must be specified as a string
-node name in an edge dict input to <tt class="docutils literal"><span class="pre">FSMSpecification</span></tt>.</p>
+node name in an edge dict input to <code class="docutils literal"><span class="pre">FSMSpecification</span></code>.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">title</tt></dt>
+<code class="descname">title</code></dt>
 <dd><p>Title for this edge to be displayed in the Activity Center
 UI etc.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">description</tt></dt>
+<code class="descname">description</code></dt>
 <dd><p>Provides an explanation of what this transition
 does for the user, to display in the Activity Center UI, etc.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">help</tt></dt>
+<code class="descname">help</code></dt>
 <dd><p>If provided, displayed as a tool-tip for the Activity Center
 button that will trigger this edge.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="showOption">
-<tt class="descname">showOption</tt><a class="headerlink" href="#showOption" title="Permalink to this definition">¶</a></dt>
-<dd><p>If set <tt class="docutils literal"><span class="pre">True</span></tt>, this edge will be listed as an additional option
+<code class="descname">showOption</code><a class="headerlink" href="#showOption" title="Permalink to this definition">¶</a></dt>
+<dd><p>If set <code class="docutils literal"><span class="pre">True</span></code>, this edge will be listed as an additional option
 on the Activity Center view.  This is an easy way to give the
 user multiple choices for &#8220;next steps&#8221; from a given node.</p>
 </dd></dl>
@@ -652,79 +697,79 @@ user multiple choices for &#8220;next steps&#8221; from a given node.</p>
 <p><strong>useful attributes you can read / write from plug-in code</strong>:</p>
 <dl class="attribute">
 <dt id="user">
-<tt class="descname">user</tt><a class="headerlink" href="#user" title="Permalink to this definition">¶</a></dt>
+<code class="descname">user</code><a class="headerlink" href="#user" title="Permalink to this definition">¶</a></dt>
 <dd><p>The user running this FSM instance.  Do not change this directly.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="fsmNode">
-<tt class="descname">fsmNode</tt><a class="headerlink" href="#fsmNode" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fsmNode</code><a class="headerlink" href="#fsmNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>The current node.  Do not change this directly.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="activity">
-<tt class="descname">activity</tt><a class="headerlink" href="#activity" title="Permalink to this definition">¶</a></dt>
-<dd><p>The current <tt class="docutils literal"><span class="pre">ActivityLog</span></tt> for logging timestamp data to.
-You can set this directly, e.g. in <tt class="docutils literal"><span class="pre">start</span></tt> event plug-in code.</p>
+<code class="descname">activity</code><a class="headerlink" href="#activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>The current <code class="docutils literal"><span class="pre">ActivityLog</span></code> for logging timestamp data to.
+You can set this directly, e.g. in <code class="docutils literal"><span class="pre">start</span></code> event plug-in code.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">title</tt></dt>
+<code class="descname">title</code></dt>
 <dd><p>The title which will be displayed for the FSM.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">hideTabs</tt></dt>
+<code class="descname">hideTabs</code></dt>
 <dd><p>If set True, hide the generic tabbed interface while this FSM is running.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">hideLinks</tt></dt>
+<code class="descname">hideLinks</code></dt>
 <dd><p>If set True, block hyperlinks from being clickable while this FSM is running.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt>
-<tt class="descname">hideNav</tt></dt>
+<code class="descname">hideNav</code></dt>
 <dd><p>If set True, hide the generic navigation bar options while this FSM
 is running.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="unitLesson">
-<tt class="descname">unitLesson</tt><a class="headerlink" href="#unitLesson" title="Permalink to this definition">¶</a></dt>
+<code class="descname">unitLesson</code><a class="headerlink" href="#unitLesson" title="Permalink to this definition">¶</a></dt>
 <dd><p>records what lesson or question the FSM is currently working
 with.  This is so useful that it is part of the database definition
-of <tt class="docutils literal"><span class="pre">FSMState</span></tt>.</p>
+of <code class="docutils literal"><span class="pre">FSMState</span></code>.</p>
 <p>Other arbitrary data can be saved using
-the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt> JSON blob storage using the following methods.</p>
+the <code class="docutils literal"><span class="pre">FSMState.data</span></code> JSON blob storage using the following methods.</p>
 </dd></dl>
 
 <p><strong>useful methods you can call from plug-in code</strong>:</p>
 <dl class="method">
 <dt id="get_data_attr">
-<tt class="descname">get_data_attr</tt><big>(</big><em>attr</em><big>)</big><a class="headerlink" href="#get_data_attr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve the named attribute <em>attr</em> from the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt>
-JSON blob, or <tt class="docutils literal"><span class="pre">KeyError</span></tt> if it does not exist.</p>
+<code class="descname">get_data_attr</code><span class="sig-paren">(</span><em>attr</em><span class="sig-paren">)</span><a class="headerlink" href="#get_data_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the named attribute <em>attr</em> from the <code class="docutils literal"><span class="pre">FSMState.data</span></code>
+JSON blob, or <code class="docutils literal"><span class="pre">KeyError</span></code> if it does not exist.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="set_data_attr">
-<tt class="descname">set_data_attr</tt><big>(</big><em>attr</em>, <em>value</em><big>)</big><a class="headerlink" href="#set_data_attr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store <em>value</em> as the named attribute <em>attr</em> on the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt>
+<code class="descname">set_data_attr</code><span class="sig-paren">(</span><em>attr</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#set_data_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store <em>value</em> as the named attribute <em>attr</em> on the <code class="docutils literal"><span class="pre">FSMState.data</span></code>
 JSON blob.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="get_all_state_data">
-<tt class="descname">get_all_state_data</tt><big>(</big><big>)</big><a class="headerlink" href="#get_all_state_data" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_all_state_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#get_all_state_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a dictionary of named attributes from the current state,
-including both the <tt class="docutils literal"><span class="pre">unitLesson</span></tt> attribute, and attributes
-stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span></tt> JSON blob.</p>
+including both the <code class="docutils literal"><span class="pre">unitLesson</span></code> attribute, and attributes
+stored in the <code class="docutils literal"><span class="pre">FSMState.data</span></code> JSON blob.</p>
 </dd></dl>
 
 </div>
@@ -735,7 +780,7 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -753,6 +798,7 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
 </li>
 <li><a class="reference internal" href="#an-example-lesson-sequence-fsm">An Example: Lesson Sequence FSM</a></li>
 <li><a class="reference internal" href="#fsm-reference-documentation">FSM Reference Documentation</a><ul>
+<li><a class="reference internal" href="#loading-fsm-specifications-into-the-database">Loading FSM specifications into the database</a></li>
 <li><a class="reference internal" href="#fsmspecification">FSMSpecification</a></li>
 <li><a class="reference internal" href="#fsm">FSM</a></li>
 <li><a class="reference internal" href="#fsmnode">FSMNode</a></li>
@@ -768,14 +814,16 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
   <p class="topless"><a href="devintro.html"
                         title="previous chapter">Getting Started with Socraticqs2 Development</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pep/django_vcs.html"
-                        title="next chapter">Django Version Collaboration System for Courselets</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/fsm.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <p class="topless"><a href="lti.html"
+                        title="next chapter">Socraticqs2 as LTI provider</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fsm.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -792,24 +840,27 @@ stored in the <tt class="docutils literal"><span class="pre">FSMState.data</span
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lti.html" title="Socraticqs2 as LTI provider"
              >next</a> |</li>
         <li class="right" >
           <a href="devintro.html" title="Getting Started with Socraticqs2 Development"
              >previous</a> |</li>
-        <li><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2015, Christopher Lee.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

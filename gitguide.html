@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Git Usage Guide &mdash; Socraticqs2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Django Version Collaboration System for Courselets" href="pep/django_vcs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="git-usage-guide">
+<h1>Git Usage Guide<a class="headerlink" href="#git-usage-guide" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pulling-the-latest-code-updates">
+<h2>Pulling the latest code updates<a class="headerlink" href="#pulling-the-latest-code-updates" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-standard-git">
+<h3>Using standard Git<a class="headerlink" href="#using-standard-git" title="Permalink to this headline">¶</a></h3>
+<p>Assuming you used our Git setup instructions above
+(so that your local repository&#8217;s <code class="docutils literal"><span class="pre">upstream</span></code> remote points to
+our repo), you can pull our latest changes from a specific branch
+(e.g. <code class="docutils literal"><span class="pre">master</span></code>) by simply typing:</p>
+<div class="highlight-python"><div class="highlight"><pre>git pull upstream master
+</pre></div>
+</div>
+<p>Or if you want simply to fetch our latest changes (without actually
+merging them into your current branch), so that you can look at them,
+just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git fetch upstream
+</pre></div>
+</div>
+<p>You can then use your graphical viewer (e.g. <code class="docutils literal"><span class="pre">gitg</span></code> or SourceTree)
+to view the latest <code class="docutils literal"><span class="pre">upstream</span></code> commits prior to merging them into
+your own branch(es).</p>
+</div>
+<div class="section" id="using-github-for-windows-mac">
+<h3>Using Github for Windows / Mac<a class="headerlink" href="#using-github-for-windows-mac" title="Permalink to this headline">¶</a></h3>
+<p>Github for Windows / Mac doesn&#8217;t work with multiple remotes &#8211;
+it only synchronizes against your GitHub fork. Working around
+this limitation, there are two
+ways to get the latest updates from <em>our</em> GitHub fork:</p>
+<div class="section" id="via-the-command-line">
+<h4>via the command line<a class="headerlink" href="#via-the-command-line" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic">
+<li><p class="first">If this is the first time you are pulling from our repository,
+you will need to add a &#8220;remote&#8221; telling Git the URL of our
+repository, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>git remote add upstream https://github.com/cjlee112/socraticqs2.git
+</pre></div>
+</div>
+<p>You can verify the new <code class="docutils literal"><span class="pre">upstream</span></code> repository has been added,
+by listing all the existing remotes:</p>
+<div class="highlight-python"><div class="highlight"><pre>git remote -v
+</pre></div>
+</div>
+<p>You should see the following lines (in addition to your other remotes):</p>
+<div class="highlight-python"><div class="highlight"><pre>upstream  https://github.com/cjlee112/socraticqs2.git (fetch)
+upstream  https://github.com/cjlee112/socraticqs2.git (push)
+</pre></div>
+</div>
+</li>
+<li><p class="first">Now you are able to pull or fetch the branches and their respective
+commits from the upstream repository, using the standard Git commands
+listed in the previous section, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git fetch upstream
+</pre></div>
+</div>
+<p>Once you&#8217;ve fetched <code class="docutils literal"><span class="pre">upstream</span></code> commits, you can merge them
+(e.g. from <code class="docutils literal"><span class="pre">upstream/master</span></code>) to your current local branch:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ git merge upstream/master
+</pre></div>
+</div>
+<p>This brings your current branch into sync with <code class="docutils literal"><span class="pre">upstream/master</span></code>.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="using-github-desktop-client">
+<h4>Using GitHub desktop client<a class="headerlink" href="#using-github-desktop-client" title="Permalink to this headline">¶</a></h4>
+<p>Unfortunately, this is less user friendly. However, you can achieve the same goal by doing following:</p>
+<ol class="arabic simple">
+<li>Go to the setting tab of your fork.</li>
+<li>Change the &#8220;Primary remote repository&#8221; to the upstream repo you want to use.(ie, <a class="reference external" href="https://github.com/cjlee112/socraticqs2.git">https://github.com/cjlee112/socraticqs2.git</a>)</li>
+<li>Press &#8220;Update Remote&#8221;</li>
+<li>Press &#8220;Sync Branch&#8221;</li>
+<li>Change the &#8220;Primary remote repository&#8221; back to the original forked repo you were using.</li>
+<li>Press &#8220;Update Remote&#8221;</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="making-source-code-changes">
+<h2>Making source-code changes<a class="headerlink" href="#making-source-code-changes" title="Permalink to this headline">¶</a></h2>
+<p>We strongly recommend that you take advantage of Git&#8217;s easy
+revision control &#8220;branches&#8221; to create a new &#8220;experimental&#8221; branch
+for any changes you want to try, e.g. via the command-line:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout -b try
+</pre></div>
+</div>
+<p>This creates a new branch called <code class="docutils literal"><span class="pre">try</span></code>, forked from your
+current branch (for the purpose of argument, let&#8217;s assume it
+was called <code class="docutils literal"><span class="pre">previous</span></code>).  Now make and commit whatever
+changes you want.</p>
+<ul>
+<li><p class="first">As long as your latest changes have been committed, you can
+instantly switch to another branch, like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout previous
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide you want to merge your changes from <code class="docutils literal"><span class="pre">try</span></code> into
+your current branch, just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git merge try
+</pre></div>
+</div>
+<p>If you now have no further need for <code class="docutils literal"><span class="pre">try</span></code>, because all its commits
+have been merged into your current branch, type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git branch -d try
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide you want to abandon (completely delete)
+the changes you made on <code class="docutils literal"><span class="pre">try</span></code>, just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git branch -D try
+</pre></div>
+</div>
+</li>
+<li><p class="first">If you decide to abandon your latest commit (undo its changes, and
+delete the commit), you can type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git reset --hard HEAD^
+</pre></div>
+</div>
+<p>In general, if you want to &#8220;reset&#8221; your branch to a previous commit
+(abandoning subsequent changes), just type:</p>
+<div class="highlight-python"><div class="highlight"><pre>git reset --hard 7a529
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">7a529</span></code> is the commit ID you want to go back to.</p>
+</li>
+</ul>
+<p>See a Git tutorial to learn more about all its great capabilities.</p>
+</div>
+<div class="section" id="some-best-practices-to-follow">
+<h2>Some best practices to follow<a class="headerlink" href="#some-best-practices-to-follow" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">don&#8217;t push &#8220;junk&#8221; commits to your public (GitHub) repository.
+Instead clean up your branch to get rid of unwanted commits
+(using methods like the above), before pushing it to GitHub.</p>
+</li>
+<li><p class="first">once your branch is &#8220;clean&#8221;, make sure the test suite passes
+before you push your branch to GitHub.</p>
+</li>
+<li><p class="first">When you branch is clean and all tests pass, you can push
+it to GitHub so others can access it.  For example, to push
+your <code class="docutils literal"><span class="pre">try</span></code> branch:</p>
+<div class="highlight-python"><div class="highlight"><pre>git push origin try
+</pre></div>
+</div>
+</li>
+<li><p class="first">Git can do just about anything to help you clean up or reorganize
+your branches, but its complexities may initially seem
+mystifying.  When in doubt about how to get Git to do what you
+want, search Google for a tutorial, or ask us for help.</p>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Git Usage Guide</a><ul>
+<li><a class="reference internal" href="#pulling-the-latest-code-updates">Pulling the latest code updates</a><ul>
+<li><a class="reference internal" href="#using-standard-git">Using standard Git</a></li>
+<li><a class="reference internal" href="#using-github-for-windows-mac">Using Github for Windows / Mac</a><ul>
+<li><a class="reference internal" href="#via-the-command-line">via the command line</a></li>
+<li><a class="reference internal" href="#using-github-desktop-client">Using GitHub desktop client</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-source-code-changes">Making source-code changes</a></li>
+<li><a class="reference internal" href="#some-best-practices-to-follow">Some best practices to follow</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pep/django_vcs.html"
+                        title="previous chapter">Django Version Collaboration System for Courselets</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/gitguide.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

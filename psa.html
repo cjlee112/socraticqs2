@@ -1,0 +1,514 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Socraticqs2 Social Auth registration &mdash; Socraticqs2 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
+    <link rel="next" title="Django Version Collaboration System for Courselets" href="pep/django_vcs.html" />
+    <link rel="prev" title="Socraticqs2 as LTI provider" href="lti.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lti.html" title="Socraticqs2 as LTI provider"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="socraticqs2-social-auth-registration">
+<h1>Socraticqs2 Social Auth registration<a class="headerlink" href="#socraticqs2-social-auth-registration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Socraticqs2 users can authorize using SSO.</p>
+<p>We a using Python Social Auth library for that process.</p>
+<p>Source code available at <a class="reference external" href="https://github.com/omab/python-social-auth">github</a>.</p>
+<p>Available backend(s) now are:</p>
+<div class="highlight-python"><div class="highlight"><pre>Google OAuth2
+Facebook OAuth2
+Twitter OAuth
+LinkedIn OAuth2
+KhanAcademy OAuth1
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration-python-social-auth">
+<h2>Configuration Python Social Auth<a class="headerlink" href="#configuration-python-social-auth" title="Permalink to this headline">¶</a></h2>
+<p>To configure Python Social Auth (PSA) we need to set appropriate KEY/SECRET for available backends on local_conf.py file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SOCIAL_AUTH_TWITTER_KEY</span> <span class="o">=</span> <span class="s">&#39;key&#39;</span>
+<span class="n">SOCIAL_AUTH_TWITTER_SECRET</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+
+<span class="n">SOCIAL_AUTH_FACEBOOK_KEY</span> <span class="o">=</span> <span class="s">&#39;key&#39;</span>
+<span class="n">SOCIAL_AUTH_FACEBOOK_SECRET</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+
+<span class="n">SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY</span> <span class="o">=</span> <span class="s">&#39;key&#39;</span>
+<span class="n">SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+
+<span class="n">SOCIAL_AUTH_GOOGLE_OAUTH2_KEY</span> <span class="o">=</span> <span class="s">&#39;key&#39;</span>
+<span class="n">SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+
+<span class="n">SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY</span> <span class="o">=</span> <span class="s">&#39;key&#39;</span>
+<span class="n">SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+</pre></div>
+</div>
+<p>Manuals for backend(s) configuration:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/backends/google.html#google-oauth2">Google OAuth2</a></li>
+<li><a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/backends/facebook.html#oauth2">Facebook OAuth2</a></li>
+<li><a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/backends/twitter.html">Twitter OAuth</a></li>
+<li><a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/backends/linkedin.html#oauth2">LinkedIn OAuth2</a></li>
+<li><a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/backends/khanacademy.html">KhanAcademy OAuth1</a></li>
+</ul>
+<p>Also we can re-define auth backends on local_conf.py:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">AUTHENTICATION_BACKENDS</span> <span class="o">=</span> <span class="p">(</span>
+   <span class="c"># &#39;social.backends.twitter.TwitterOAuth&#39;,</span>
+   <span class="c"># &#39;social.backends.facebook.FacebookOAuth2&#39;,</span>
+   <span class="c"># &#39;social.backends.google.GoogleOAuth2&#39;,</span>
+   <span class="c"># &#39;social.backends.linkedin.LinkedinOAuth2&#39;,</span>
+   <span class="c"># &#39;social.backends.khanacademy.KhanAcademyOAuth1&#39;,</span>
+   <span class="c"># &#39;social.backends.email.EmailAuth&#39;,</span>
+   <span class="s">&#39;django.contrib.auth.backends.ModelBackend&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>There are main settings for PSA in settings/default.py:</p>
+<div class="highlight-python"><div class="highlight"><pre>MIDDLEWARE_CLASSES = (
+  .............
+  &#39;ct.middleware.MySocialAuthExceptionMiddleware&#39;,
+)
+
+INSTALLED_APPS = (
+  ........
+  # Socials
+  &#39;social.apps.django_app.default&#39;,
+  &#39;psa&#39;,
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+ ................
+ &#39;social.apps.django_app.context_processors.backends&#39;,
+ &#39;social.apps.django_app.context_processors.login_redirect&#39;,
+)
+
+AUTHENTICATION_BACKENDS = (
+ &#39;social.backends.twitter.TwitterOAuth&#39;,
+ &#39;social.backends.facebook.FacebookOAuth2&#39;,
+ &#39;social.backends.google.GoogleOAuth2&#39;,
+ &#39;social.backends.linkedin.LinkedinOAuth2&#39;,
+ &#39;social.backends.khanacademy.KhanAcademyOAuth1&#39;,
+ &#39;social.backends.email.EmailAuth&#39;,
+ &#39;django.contrib.auth.backends.ModelBackend&#39;,
+)
+
+
+SOCIAL_AUTH_PIPELINE = (
+  &#39;social.pipeline.social_auth.social_details&#39;,
+  &#39;social.pipeline.social_auth.social_uid&#39;,
+  &#39;social.pipeline.social_auth.auth_allowed&#39;,
+  &#39;psa.pipeline.social_user&#39;,
+  &#39;social.pipeline.user.get_username&#39;,
+  &#39;psa.pipeline.custom_mail_validation&#39;,
+  &#39;psa.pipeline.associate_by_email&#39;,
+  &#39;social.pipeline.user.create_user&#39;,
+  &#39;psa.pipeline.validated_user_details&#39;,
+  &#39;psa.pipeline.associate_user&#39;,
+  &#39;social.pipeline.social_auth.load_extra_data&#39;,
+  &#39;social.pipeline.user.user_details&#39;,
+)
+
+SOCIAL_AUTH_DISCONNECT_PIPELINE = (
+  &#39;social.pipeline.disconnect.allowed_to_disconnect&#39;,
+  &#39;social.pipeline.disconnect.get_entries&#39;,
+  &#39;social.pipeline.disconnect.revoke_tokens&#39;,
+  &#39;social.pipeline.disconnect.disconnect&#39;
+)
+
+PROTECTED_USER_FIELDS = [&#39;first_name&#39;, &#39;last_name&#39;, &#39;email&#39;]
+
+FORCE_EMAIL_VALIDATION = True
+PASSWORDLESS = True
+
+SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = &#39;psa.mail.send_validation&#39;
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = &#39;/email-sent/&#39;
+
+SOCIAL_AUTH_STRATEGY = &#39;psa.custom_django_strategy.CustomDjangoStrategy&#39;
+SOCIAL_AUTH_STORAGE = &#39;psa.custom_django_storage.CustomDjangoStorage&#39;
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    &#39;https://www.googleapis.com/auth/userinfo.email&#39;,
+    &#39;https://www.googleapis.com/auth/userinfo.profile&#39;
+]
+
+# Facebook email scope declaring
+SOCIAL_AUTH_FACEBOOK_SCOPE = [&#39;email&#39;]
+
+# Add email to requested authorizations.
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SCOPE = [&#39;r_basicprofile&#39;, &#39;r_emailaddress&#39;]
+# Add the fields so they will be requested from linkedin.
+SOCIAL_AUTH_LINKEDIN_OAUTH2_FIELD_SELECTORS = [&#39;email-address&#39;, &#39;headline&#39;, &#39;industry&#39;]
+# Arrange to add the fields to UserSocialAuth.extra_data
+SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [(&#39;id&#39;, &#39;id&#39;),
+                                          (&#39;firstName&#39;, &#39;first_name&#39;),
+                                          (&#39;lastName&#39;, &#39;last_name&#39;),
+                                          (&#39;emailAddress&#39;, &#39;email_address&#39;),
+                                          (&#39;headline&#39;, &#39;headline&#39;),
+                                          (&#39;industry&#39;, &#39;industry&#39;)]
+</pre></div>
+</div>
+<p>About these and many other parameters you can read at the PSA <a class="reference external" href="https://python-social-auth.readthedocs.org/en/latest/">docs</a>.</p>
+</div>
+<div class="section" id="user-auth-flow-procedure">
+<h2>User Auth flow procedure<a class="headerlink" href="#user-auth-flow-procedure" title="Permalink to this headline">¶</a></h2>
+<p>We have next <cite>providers</cite>:</p>
+<ul class="simple">
+<li>Django user, with primary email</li>
+<li>for STRANGER, when he adds email, and we show pop-up with validation link, do search email associated with social accounts, and if there are similar one, and propose to login on the social auth</li>
+<li>LTI user</li>
+<li>Python social-auth accounts: email and social accounts</li>
+</ul>
+<p><strong>Principles:</strong>
+do not merge two social account from same providers</p>
+<p><strong>Assumptions:</strong>
+We trust LTI and email providers on email validation they send to us</p>
+<div class="section" id="lti-user">
+<h3>LTI user<a class="headerlink" href="#lti-user" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://docs.google.com/drawings/d/1ggBJCrCqWFOY0ST3QqWVikBhj-lFAN7dhzOmhn-Coss/edit">https://docs.google.com/drawings/d/1ggBJCrCqWFOY0ST3QqWVikBhj-lFAN7dhzOmhn-Coss/edit</a></p>
+</div>
+<div class="section" id="social-auth">
+<h3>Social auth<a class="headerlink" href="#social-auth" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="stranger-clicks-on-social-auth-button-on-login-page">
+<h4>Stranger clicks on social-auth button on login page<a class="headerlink" href="#stranger-clicks-on-social-auth-button-on-login-page" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://docs.google.com/drawings/d/1v3fBfb3Y1V1EwJ6Kwt3sTiX0v-1HGb8Me5cWeMIB55k/edit">https://docs.google.com/drawings/d/1v3fBfb3Y1V1EwJ6Kwt3sTiX0v-1HGb8Me5cWeMIB55k/edit</a></p>
+</div>
+<div class="section" id="temporary-user-clicks-validation-link">
+<h4>TEMPORARY user clicks validation link<a class="headerlink" href="#temporary-user-clicks-validation-link" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://docs.google.com/drawings/d/1fnlXom0eFG7pfnkc80iJtfu_vI_28WDHgsD05js0m_c/edit">https://docs.google.com/drawings/d/1fnlXom0eFG7pfnkc80iJtfu_vI_28WDHgsD05js0m_c/edit</a></p>
+</div>
+<div class="section" id="validated-user-clicks-on-social-auth-button">
+<h4>VALIDATED user clicks on social-auth button<a class="headerlink" href="#validated-user-clicks-on-social-auth-button" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference external" href="https://docs.google.com/drawings/d/1BfVylifaSDsO97OVP2l7Nxfqj4YwYYYajrJTV8KF9ww/edit">https://docs.google.com/drawings/d/1BfVylifaSDsO97OVP2l7Nxfqj4YwYYYajrJTV8KF9ww/edit</a></p>
+</div>
+<div class="section" id="users-merge">
+<h4>Users merge<a class="headerlink" href="#users-merge" title="Permalink to this headline">¶</a></h4>
+<p>We are VALIDATED user.</p>
+<p>When we click to one of social/email buttons to associate with - system search such provider and if found  start to
+analyze possible social/email provider conflicts after possible merge.</p>
+<p>This mean that if after merge user would have more than one auth records with the same provider (google for example) we prevent this action with pop-up
+“warning about intersected providers”.</p>
+</div>
+<div class="section" id="temporary-user-validation">
+<h4>Temporary user validation<a class="headerlink" href="#temporary-user-validation" title="Permalink to this headline">¶</a></h4>
+<p>We are TEMPORARY user.</p>
+<p>We make some progress and click validation link.</p>
+<p>After that system will search email provider with email we validating or search django users by primary email.</p>
+<p>If found - TEMPORARY user is logged out, start history merging process and new user is logged in.</p>
+<p>If we can not find appropriate user via email - we start to modify user detail.</p>
+<p>We change username to part before &#64; in email, remove ‘Temporary user’ full user name. Because of user is currently
+logged in and has all history we do not doing logout/login and history merge action.</p>
+</div>
+<div class="section" id="user-login-process">
+<h4>User login process<a class="headerlink" href="#user-login-process" title="Permalink to this headline">¶</a></h4>
+<p>When STRANGER click on social/email auth button on login page system starts login/register process.</p>
+<p>It is possible to login at any time by validate social or email (via confirmation link) auth.</p>
+<p>If user will set password after login to the system it will be possible to login using username/password method.</p>
+<p>When we login using social/email auth system searching for such social auth records.</p>
+<p>If found - login user associated with that social auth.</p>
+</div>
+</div>
+</div>
+<div class="section" id="module-psa.pipeline">
+<span id="social-auth-pipelines"></span><h2>Social Auth pipelines<a class="headerlink" href="#module-psa.pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Module define custom pipeline to handle custom cases</p>
+<p>custom_mail_validation - &gt; implement code obj inspect</p>
+<dl class="function">
+<dt id="psa.pipeline.associate_by_email">
+<code class="descclassname">psa.pipeline.</code><code class="descname">associate_by_email</code><span class="sig-paren">(</span><em>backend</em>, <em>details</em>, <em>user=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.associate_by_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate current auth with a user with the same email address in the DB.</p>
+<p>This pipeline entry is not 100% secure unless you know that the providers
+enabled enforce email verification on their side, otherwise a user can
+attempt to take over another user account by using the same (not validated)
+email address on some provider.  This pipeline entry is disabled by
+default.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.associate_user">
+<code class="descclassname">psa.pipeline.</code><code class="descname">associate_user</code><span class="sig-paren">(</span><em>backend</em>, <em>details</em>, <em>uid</em>, <em>user=None</em>, <em>social=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.associate_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create UserSocialAuth</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.custom_mail_validation">
+<code class="descclassname">psa.pipeline.</code><code class="descname">custom_mail_validation</code><span class="sig-paren">(</span><em>strategy</em>, <em>pipeline_index</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.custom_mail_validation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Email validation pipeline</p>
+<p>Verify email or send email with validation link.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.not_allowed_to_merge">
+<code class="descclassname">psa.pipeline.</code><code class="descname">not_allowed_to_merge</code><span class="sig-paren">(</span><em>user</em>, <em>user_social</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.not_allowed_to_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if two users are allowed to merge</p>
+<p>Check all social-auth from two users to predict providers intersection.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.social_merge">
+<code class="descclassname">psa.pipeline.</code><code class="descname">social_merge</code><span class="sig-paren">(</span><em>tmp_user</em>, <em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.social_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge UserSocialAuth</p>
+<p>Re-assign UserSocialAuth objects to given user.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.social_user">
+<code class="descclassname">psa.pipeline.</code><code class="descname">social_user</code><span class="sig-paren">(</span><em>backend</em>, <em>uid</em>, <em>user=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.social_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for UserSocialAuth</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.union_merge">
+<code class="descclassname">psa.pipeline.</code><code class="descname">union_merge</code><span class="sig-paren">(</span><em>tmp_user</em>, <em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.union_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Union merge</p>
+<p>Merging Roles, UnitStatus, FSMState, Response, StudentError objects.</p>
+<p>In Roles merge doing UNION merge to not repeat roles to the same course
+with the save role.
+Also we reassigning UnitStatuses, FSMStates, Responses and
+StudentErrors here.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.pipeline.validated_user_details">
+<code class="descclassname">psa.pipeline.</code><code class="descname">validated_user_details</code><span class="sig-paren">(</span><em>strategy</em>, <em>pipeline_index</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.validated_user_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge actions</p>
+<p>Make different merge actions based on user type.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-psa.models">
+<span id="social-auth-models"></span><h2>Social Auth Models<a class="headerlink" href="#module-psa.models" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="psa.models.AnonymEmail">
+<em class="property">class </em><code class="descclassname">psa.models.</code><code class="descname">AnonymEmail</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.models.AnonymEmail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporary anonymous user emails</p>
+<p>Model for temporary storing anonymous user emails
+to allow to restore anonymous sessions.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="psa.models.SecondaryEmail">
+<em class="property">class </em><code class="descclassname">psa.models.</code><code class="descname">SecondaryEmail</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.models.SecondaryEmail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model for storing secondary emails</p>
+<p>We can store emails here from social_auth
+or LTI login.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="psa.models.UserSession">
+<em class="property">class </em><code class="descclassname">psa.models.</code><code class="descname">UserSession</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.models.UserSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>User&lt;-&gt;Session model</p>
+<p>Model for linking user to session.
+Solution from <a class="reference external" href="http://gavinballard.com/associating-django-users-sessions/">http://gavinballard.com/associating-django-users-sessions/</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.models.user_logged_in_handler">
+<code class="descclassname">psa.models.</code><code class="descname">user_logged_in_handler</code><span class="sig-paren">(</span><em>sender</em>, <em>request</em>, <em>user</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.models.user_logged_in_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create UserSession object to store User&lt;=&gt;Session relation</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-psa.views">
+<span id="social-auth-views"></span><h2>Social Auth Views<a class="headerlink" href="#module-psa.views" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="psa.views.ask_stranger">
+<code class="descclassname">psa.views.</code><code class="descname">ask_stranger</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.ask_stranger" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to handle stranger whend asking email</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.views.context">
+<code class="descclassname">psa.views.</code><code class="descname">context</code><span class="sig-paren">(</span><em>**extra</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adding default context to rendered page</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.views.custom_login">
+<code class="descclassname">psa.views.</code><code class="descname">custom_login</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.custom_login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom login to integrate social auth and default login</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.views.done">
+<code class="descclassname">psa.views.</code><code class="descname">done</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Login complete view, displays user data</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.views.set_pass">
+<code class="descclassname">psa.views.</code><code class="descname">set_pass</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.set_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to handle password set / change action</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="psa.views.validation_sent">
+<code class="descclassname">psa.views.</code><code class="descname">validation_sent</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.validation_sent" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to handle validation_send action</p>
+</dd></dl>
+
+</div>
+<div class="section" id="custom-django-strategy-and-storage">
+<h2>Custom Django Strategy and Storage<a class="headerlink" href="#custom-django-strategy-and-storage" title="Permalink to this headline">¶</a></h2>
+<p>We used in Socraticqs2 Social Auth implementation custom Strategy and Storage to move around issue <a class="reference external" href="https://github.com/omab/python-social-auth/issues/577">557</a>.</p>
+<span class="target" id="module-psa.custom_django_storage"></span><p>Module define improved entries</p>
+<p>CustomCode -&gt; add user_id attr to handle user generated validation link
+CustomDjangoStorage -&gt; Storage to use this CustomCode</p>
+<dl class="class">
+<dt id="psa.custom_django_storage.CustomCode">
+<em class="property">class </em><code class="descclassname">psa.custom_django_storage.</code><code class="descname">CustomCode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.custom_django_storage.CustomCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom Code object to track user_id through different sessions</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="psa.custom_django_storage.CustomDjangoStorage">
+<em class="property">class </em><code class="descclassname">psa.custom_django_storage.</code><code class="descname">CustomDjangoStorage</code><a class="headerlink" href="#psa.custom_django_storage.CustomDjangoStorage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redefine code field to CustomCode model that add user_id to track</p>
+<dl class="attribute">
+<dt id="psa.custom_django_storage.CustomDjangoStorage.code">
+<code class="descname">code</code><a class="headerlink" href="#psa.custom_django_storage.CustomDjangoStorage.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#psa.custom_django_storage.CustomCode" title="psa.custom_django_storage.CustomCode"><code class="xref py py-class docutils literal"><span class="pre">CustomCode</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-psa.custom_django_strategy"></span><p>Custom Strategy to implement handling user_id attr in Code object</p>
+<dl class="class">
+<dt id="psa.custom_django_strategy.CustomDjangoStrategy">
+<em class="property">class </em><code class="descclassname">psa.custom_django_strategy.</code><code class="descname">CustomDjangoStrategy</code><span class="sig-paren">(</span><em>storage</em>, <em>request=None</em>, <em>tpl=None</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.custom_django_strategy.CustomDjangoStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom DjangoStrategy</p>
+<p>Needed to add custom login and fix different session issue.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Socraticqs2 Social Auth registration</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#configuration-python-social-auth">Configuration Python Social Auth</a></li>
+<li><a class="reference internal" href="#user-auth-flow-procedure">User Auth flow procedure</a><ul>
+<li><a class="reference internal" href="#lti-user">LTI user</a></li>
+<li><a class="reference internal" href="#social-auth">Social auth</a><ul>
+<li><a class="reference internal" href="#stranger-clicks-on-social-auth-button-on-login-page">Stranger clicks on social-auth button on login page</a></li>
+<li><a class="reference internal" href="#temporary-user-clicks-validation-link">TEMPORARY user clicks validation link</a></li>
+<li><a class="reference internal" href="#validated-user-clicks-on-social-auth-button">VALIDATED user clicks on social-auth button</a></li>
+<li><a class="reference internal" href="#users-merge">Users merge</a></li>
+<li><a class="reference internal" href="#temporary-user-validation">Temporary user validation</a></li>
+<li><a class="reference internal" href="#user-login-process">User login process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-psa.pipeline">Social Auth pipelines</a></li>
+<li><a class="reference internal" href="#module-psa.models">Social Auth Models</a></li>
+<li><a class="reference internal" href="#module-psa.views">Social Auth Views</a></li>
+<li><a class="reference internal" href="#custom-django-strategy-and-storage">Custom Django Strategy and Storage</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lti.html"
+                        title="previous chapter">Socraticqs2 as LTI provider</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pep/django_vcs.html"
+                        title="next chapter">Django Version Collaboration System for Courselets</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/psa.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lti.html" title="Socraticqs2 as LTI provider"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Socraticqs2 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Christopher Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

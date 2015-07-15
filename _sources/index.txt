@@ -13,6 +13,8 @@ Contents:
 
    devintro
    fsm
+   lti
+   psa
 
 Project Enhancement Proposals:
 
@@ -21,6 +23,13 @@ Project Enhancement Proposals:
    :glob:
 
    pep/*
+
+Additional information:
+
+.. toctree::
+   :maxdepth: 2
+
+   gitguide
 
 Indices and tables
 ==================
