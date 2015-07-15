@@ -161,6 +161,14 @@ To install PostgreSQL 9.4 on Ubuntu machine you should follow next steps:
     sudo service postgresql restart
 
 
+In case when you don't want to have the PostgreSQL server running all the time on your computer, just to play with the Socraticqs2 code (e.g. this consumes system resources), you can start and stop PostgreSQL manually::
+
+    sudo service postgresql stop
+    sudo service postgresql start
+
+To prevent PostgreSQL to start on system boot you need to change line ``auto`` to ``manual`` in ``/etc/postgresql/9.4/main/start.conf``.
+
+
 Mac OS X installation
 :::::::::::::::::::::
 
