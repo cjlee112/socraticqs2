@@ -97,6 +97,96 @@ one of two ways:
 * **via Github for Windows or Mac**: you can just click the Clone to Desktop
   link on the webpage for your fork (repository).
 
+
+Installing and configuring PostgreSQL
+.....................................
+
+Ubuntu 14.04 distribution instructions
+::::::::::::::::::::::::::::::::::::::
+
+
+To install PostgreSQL 9.4 on Ubuntu machine you should follow next steps:
+
+* Create the file ``/etc/apt/sources.list.d/pgdg.list``, and
+  add a line for the repository 
+    ::
+
+     deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main
+
+* Import the repository signing key, and update the package lists
+  ::
+
+   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+     sudo apt-key add -
+   sudo apt-get update
+
+* Install postgres-9.4::
+   
+   sudo apt-get install postgresql-9.4
+
+.. warning::
+
+   On Ubuntu-like distros, you must first install postgresql-server-dev-9.4
+   as a dependency to python psycopg2 package, *before* running `pip install` below::
+
+     sudo apt-get install postgresql-server-dev-9.4
+
+* Next we need to set default postgres user password to start development process::
+
+   sudo -u postgres psql postgres
+   postgres=# \password postgres
+
+* Finally we need to create database with desired name::
+
+    postgres=# CREATE DATABASE db_name ENCODING 'UTF8';
+
+* Now we can exit from PostgreSQL and start to configure our Django project to use created database::
+
+    postgres=# \q
+
+* But one more thing we need to do is to open pg_hba.conf file::
+
+    sudo vim /etc/postgresql/9.4/main/pg_hba.conf
+
+* And change::
+
+    local   all    postgres    peer
+
+  to::
+
+    local   all    postgres    md5
+
+* Finally we need to restart PostgreSQL server::
+
+    sudo service postgresql restart
+
+
+Mac OS X installation
+:::::::::::::::::::::
+
+For installing PostgreSQL on Mac OS X please follow the official `instructions`_.
+
+.. _instructions: http://www.postgresql.org/download/macosx/
+
+
+Configuring Django project for using PostgreSQL
+...............................................
+
+To configure project to need to copy ``mysite/settings/local_conf_example.py`` into ``mysite/settings/local_conf.py`` and change DATABASES dict::
+
+    DATABASES = {
+        'default': {
+          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+          'NAME': 'db_name',
+          'USER': 'postgres',
+          'PASSWORD': 'your_postgres_pass',
+          'HOST': '',  # leave blank for localhost
+          'PORT': '',  # leave blank for localhost
+        }
+    }
+
+
+
 Installing required Python Packages using pip
 ...............................................
 
