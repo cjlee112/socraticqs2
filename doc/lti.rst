@@ -81,9 +81,14 @@ Adding new External tool on Moodle LTI consumer
 #. Click on ``Add an activity or resource`` button
 #. Select ``External tool`` Activity
 #. Click Add
-#. Click ‘Show more’ on Adding a new External tool page
+#. Click ``Show more`` on Adding a new External tool page
 #. Type Activity name
-#. Add ``/lti/`` at the end of Socraticqs2 site URL and specify the resulting URL in form of ``https://socraticqs2_domain_name.org/lti/`` into ``Launch URL`` input field on External tool page
+#. Go to Socraticqs2 site
+#. Login as Instructor
+#. Go to course edit page or unit edit page
+#. Copy course or unit URL from ``Copy course URL`` input field
+#. Paste this URL into ``Launch URL`` input field on External tool page
+#. Alternatively Instructor can create a new empty Course by adding ``/lti/`` at the end of Socraticqs2 site URL and specify the resulting URL in form of ``https://socraticqs2_domain_name.org/lti/`` into ``Launch URL`` input field on External tool page
 #. Type ``Consumer key`` and ``Shared secret`` on External tool page given from our settings_local.py
 #. Click ``Save and display`` or ``Save and return to course``
 

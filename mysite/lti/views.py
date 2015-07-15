@@ -34,7 +34,7 @@ LOGGER = logging.getLogger('lti_debug')
 
 
 @csrf_exempt
-def lti_init(request, unit_id=None):
+def lti_init(request, course_id=None, unit_id=None):
     """LTI init view
 
     Analyze LTI POST request to start LTI session.
@@ -71,12 +71,16 @@ def lti_init(request, unit_id=None):
             msg = 'session: message = {}'.format(session.get('message'))
             LOGGER.info(msg)
     if not is_valid:
-        return render_to_response('lti/error.html', RequestContext(request))
+        return render_to_response(
+            'lti/error.html',
+            {'message': 'LTI request is not valid'},
+            RequestContext(request)
+        )
 
-    return lti_redirect(request, unit_id)
+    return lti_redirect(request, course_id, unit_id)
 
 
-def lti_redirect(request, unit_id=None):
+def lti_redirect(request, course_id=None, unit_id=None):
     """Create user and redirect to Course
 
     |  Create LTIUser with all needed link to Django user
@@ -95,7 +99,11 @@ def lti_redirect(request, unit_id=None):
     roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
 
     if not user_id:
-        return render_to_response('lti/error.html', RequestContext(request))
+        return render_to_response(
+            'lti/error.html',
+            {'message': 'There is not user_id required LTI param'},
+            RequestContext(request)
+        )
 
     user, created = LTIUser.objects.get_or_create(
         user_id=user_id,
@@ -111,12 +119,18 @@ def lti_redirect(request, unit_id=None):
         user.create_links()
     user.login(request)
 
-    if course_ref:
-        course_id = course_ref.course.id
-    elif Role.INSTRUCTOR in roles:
-        return redirect(reverse('lti:create_courseref'))
-    else:
-        return redirect(reverse('ct:home'))
+    if not course_id or not Course.objects.filter(id=course_id).exists():
+        if course_ref:
+            course_id = course_ref.course.id
+        elif Role.INSTRUCTOR in roles:
+            return redirect(reverse('lti:create_courseref'))
+        else:
+            return render_to_response(
+                'lti/error.html',
+                {'message': """You are trying to access Course that does not exists but
+                            Students can not create new Courses automatically"""},
+                RequestContext(request)
+            )
 
     user.enroll(roles, course_id)
 

@@ -273,7 +273,7 @@ class TestCourseRef(LTITestCase):
         self.course_ref.delete()
         response = self.client.post('/lti/', data=self.headers, follow=True)
         self.assertFalse(CourseRef.objects.filter(course=self.course).exists())
-        self.assertTemplateUsed(response, 'ct/index.html')
+        self.assertTemplateUsed(response, 'lti/error.html')
 
     def test_create_courseref_only_lti(self, mocked):
         """
