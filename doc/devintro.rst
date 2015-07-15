@@ -31,6 +31,7 @@ you need various things such as:
   you can download either Github for Windows or Github for Mac;
   most linux package managers can install Git for you automatically.
   See further details below.
+* **PostgreSQL**: back-end database for Socraticqs2.  See further details below.
 * **Pandoc** (currently used for converting text to HTML): you can download
   this for Mac OS X; most linux package managers can install it automatically.
 * **Python packages** automatically installable by pip using our
@@ -210,7 +211,8 @@ You should see a series of tests pass successfully.
 Running a test web server
 ...........................
 
-You need to create a database, load it with some data, and
+You need to create a database, load it with some data,
+load plugin specifications, and
 run the development web server.  You first create the 
 database::
 
@@ -220,6 +222,13 @@ Next load it with some example data that we supply in the
 repository::
 
   python manage.py loaddata dumpdata/debug.json
+
+.. warning::
+   If you get an error message of the form
+   ``Could not load contenttypes.ContentType`` then load the example
+   data as follows::
+
+     python manage.py loaddata dumpdata/debug-e.json
 
 You will also need to load FSM plugin specifications;
 see :ref:`fsm-deploy`.
