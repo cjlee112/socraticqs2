@@ -285,11 +285,12 @@ class TestCourseRef(LTITestCase):
         self.assertEqual(res.content, 'Only LTI allowed')
 
     @unpack
-    @data(('1', 1), ('1111', 2))
-    def test_create_courseref_existence(self, context_id, _id, mocked):
+    @data(('1', 'ct:course'), ('1111', 'ct:edit_course'))
+    def test_create_courseref_existence(self, context_id, langing_page, mocked):
         """
         Test for existence/non-existence of CourseRef.
         """
+        _id = self.course.id if context_id == '1' else self.course.id + 1
         lti_post = {'context_id': context_id,
                     'context_title': 'test title',
                     'tool_consumer_instance_guid': 'test.dot.com',
@@ -299,7 +300,7 @@ class TestCourseRef(LTITestCase):
         request.session = {'LTI_POST': json.dumps(lti_post),
                            'is_valid': True}
         res = create_courseref(request)
-        self.assertEqual(res.url, reverse('ct:edit_course', args=(_id,)))
+        self.assertEqual(res.url, reverse(langing_page, args=(_id,)))
 
 
 @patch('lti.views.DjangoToolProvider')
@@ -310,6 +311,6 @@ class TestUnit(LTITestCase):
     def test_unit_render(self, mocked):
         mocked.return_value.is_valid_request.return_value = True
         response = self.client.post(
-            '/lti/unit/1/', data=self.headers, follow=True
+            '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
         )
         self.assertTemplateUsed(response, 'ct/study_unit.html')
