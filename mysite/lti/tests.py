@@ -297,7 +297,7 @@ class TestCourseRef(LTITestCase):
                     'roles': 'Instructor'}
         request = Mock()
         request.user = self.user
-        request.session = {'LTI_POST': json.dumps(lti_post),
+        request.session = {'LTI_POST': lti_post,
                            'is_valid': True}
         res = create_courseref(request)
         self.assertEqual(res.url, reverse(langing_page, args=(_id,)))

@@ -63,7 +63,7 @@ def lti_init(request, course_id=None, unit_id=None):
         session['message'] = "{}".format(err)
 
     session['is_valid'] = is_valid
-    session['LTI_POST'] = json.dumps({k: v for (k, v) in request.POST.iteritems()})
+    session['LTI_POST'] = {k: v for (k, v) in request.POST.iteritems()}
 
     if settings.LTI_DEBUG:
         msg = 'session: is_valid = {}'.format(session.get('is_valid'))
@@ -90,7 +90,7 @@ def lti_redirect(request, course_id=None, unit_id=None):
 
     :param unit_id: unit id from lunch url
     """
-    request_dict = json.loads(request.session['LTI_POST'])
+    request_dict = request.session['LTI_POST']
 
     context_id = request_dict.get('context_id')
     course_ref = CourseRef.objects.filter(context_id=context_id).first()
@@ -156,7 +156,7 @@ def create_courseref(request):
     """
     Create CourseRef and Course entry based on context_title.
     """
-    request_dict = json.loads(request.session['LTI_POST'])
+    request_dict = request.session['LTI_POST']
     if not request.session.get('is_valid'):
         return redirect(reverse('ct:home'))
     context_id = request_dict.get('context_id')
