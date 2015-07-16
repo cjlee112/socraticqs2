@@ -27,8 +27,8 @@ class LTIUser(models.Model):
       .. attribute:: django_user
       Django user to store study progress
 
-      .. attribute:: course_id
-      Course entry id given from Launch URL
+      .. attribute:: context_id
+      Context id given from LTI params
 
     LTI user params saved to extra_data field::
 
@@ -46,10 +46,10 @@ class LTIUser(models.Model):
     consumer = models.CharField(max_length=64, blank=True)
     extra_data = models.TextField(max_length=1024, blank=False)
     django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
-    course_id = models.CharField(max_length=255)
+    context_id = models.CharField(max_length=255)
 
     class Meta:  # pragma: no cover
-        unique_together = ('user_id', 'consumer', 'course_id')
+        unique_together = ('user_id', 'consumer', 'context_id')
 
     def create_links(self):
         """
@@ -135,7 +135,10 @@ class LTIUser(models.Model):
         if not isinstance(roles, list):
             roles = roles.split(',')
         course = Course.objects.filter(id=course_id).first()
-        role = Role.INSTRUCTOR if Role.INSTRUCTOR in roles else Role.ENROLLED
+        if Role.INSTRUCTOR in roles:
+            role = Role.INSTRUCTOR
+        else:
+            role = Role.ENROLLED
         if course:
             return Role.objects.filter(
                 role=role,

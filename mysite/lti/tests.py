@@ -237,7 +237,7 @@ class ModelTest(LTITestCase):
                            consumer='test_consumer',
                            extra_data=json.dumps(self.headers),
                            django_user=self.user,
-                           course_id=self.course.id)
+                           context_id=1)
         lti_user.save()
 
         self.assertFalse(lti_user.is_enrolled('student', self.course.id))
@@ -253,7 +253,7 @@ class ModelTest(LTITestCase):
         lti_user = LTIUser(user_id=self.user.id,
                            consumer='test_consumer',
                            extra_data=json.dumps(self.headers),
-                           course_id=self.course.id)
+                           context_id=1)
         lti_user.save()
 
         self.assertFalse(lti_user.is_linked)

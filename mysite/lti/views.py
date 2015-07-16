@@ -39,6 +39,7 @@ def lti_init(request, course_id=None, unit_id=None):
 
     Analyze LTI POST request to start LTI session.
 
+    :param course_id: course id from launch url
     :param unit_id: unit id from lunch url
     """
     if settings.LTI_DEBUG:
@@ -108,7 +109,7 @@ def lti_redirect(request, course_id=None, unit_id=None):
     user, created = LTIUser.objects.get_or_create(
         user_id=user_id,
         consumer=consumer_name,
-        course_id=request_dict.get('context_id')
+        context_id=request_dict.get('context_id')
     )
     extra_data = {k: v for (k, v) in request_dict.iteritems()
                   if k in MOODLE_PARAMS}
@@ -165,7 +166,7 @@ def create_courseref(request):
     course_ref = CourseRef.objects.filter(context_id=context_id).first()
     if course_ref:
         if Role.INSTRUCTOR in roles:
-            return redirect(reverse('ct:edit_course', args=(course_ref.course.id,)))
+            return redirect(reverse('ct:course', args=(course_ref.course.id,)))
         else:
             return redirect(reverse('ct:home'))
 

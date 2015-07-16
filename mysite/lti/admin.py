@@ -4,7 +4,7 @@ from lti.models import LTIUser, CourseRef
 
 
 class LTIUserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'consumer', 'django_user', 'course_id')
+    list_display = ('user_id', 'consumer', 'django_user', 'context_id')
 
 
 class CourseRefAdmin(admin.ModelAdmin):
