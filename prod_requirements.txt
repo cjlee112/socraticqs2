@@ -26,7 +26,7 @@ pypandoc==0.9.7
 python-openid==2.2.5
 
 # social authentication/registration mechanizm
-python-social-auth==0.2.9
+python-social-auth==0.2.12
 
 pytz==2015.2
 requests==2.7.0
