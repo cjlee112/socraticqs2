@@ -1,9 +1,12 @@
-<html>
-<head>
-    <title>IMS LTI Error</title>
-</head>
-<body>
-Error
-{{ message }}
-</body>
-</html>
+{% extends "ct/portal.html" %}
+
+
+{% block content %}
+
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      {{ message }}
+    </div>
+
+{% endblock %}

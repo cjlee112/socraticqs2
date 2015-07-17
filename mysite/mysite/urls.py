@@ -6,7 +6,8 @@ from mysite.views import *
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'^$', home_page),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
@@ -34,11 +35,10 @@ urlpatterns = patterns('',
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done'),
-    
-
 )
 
 if apps.is_installed('lti'):
-    urlpatterns += patterns('',
-        url(r'^lti/', include('lti.urls')),
+    urlpatterns += patterns(
+        '',
+        url(r'^lti/', include('lti.urls', namespace='lti')),
     )
