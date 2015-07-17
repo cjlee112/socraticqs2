@@ -20,7 +20,9 @@ class EmailAuth(LegacyAuth):
     EXTRA_DATA = ['email']
 
     def auth_complete(self, *args, **kwargs):
-        """Completes loging process, must return user instance"""
+        """
+        Completes loging process, must return user instance.
+        """
         if self.ID_KEY not in self.data:
             code = self.strategy.request.REQUEST.get('verification_code')
             code_object = CustomCode.objects.filter(code=code).first()

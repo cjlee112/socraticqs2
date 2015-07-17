@@ -3,3 +3,4 @@ max-line-length = 120
 count = True
 show-source = True
 statistics = True
+exclude=migrations

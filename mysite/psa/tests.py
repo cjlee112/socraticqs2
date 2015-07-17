@@ -25,7 +25,9 @@ from psa.custom_backends import EmailAuth
 
 
 class ViewsUnitTest(TestCase):
-    """Functional tests"""
+    """
+    Functional tests.
+    """
     def setUp(self):
         self.factory = RequestFactory()
         self.request = self.factory.get('/login/')
@@ -35,7 +37,9 @@ class ViewsUnitTest(TestCase):
         self.request.session['email_validation_address'] = 'test@test.com'
 
     def test_context(self):
-        """Need to return avaliable_backends variable"""
+        """
+        Need to return avaliable_backends variable.
+        """
         result = context()
         self.assertTrue('available_backends' in result)
 
@@ -56,8 +60,10 @@ class ViewsUnitTest(TestCase):
         credentials = {'username': 'test',
                        'password': 'test'}
         response = self.client.post('/login/', data=credentials)
-        self.assertTemplateUsed(response,
-                                template_name='psa/custom_login.html')
+        self.assertTemplateUsed(
+            response,
+            template_name='psa/custom_login.html'
+        )
 
     def test_custom_login_post_positive(self):
         user = User(username='test')
@@ -115,9 +121,11 @@ class ViewsUnitTest(TestCase):
         self.client.post('/login/',
                          data=credentials_for_login,
                          follow=True)
-        response = self.client.post('/set-pass/',
-                                    data=credentials_for_set_pass,
-                                    follow=True)
+        response = self.client.post(
+            '/set-pass/',
+            data=credentials_for_set_pass,
+            follow=True
+        )
         self.assertTemplateUsed(response, template_name='ct/person.html')
         self.assertTrue('Your password was changed' in response.content)
         user = User.objects.get(username='test')
@@ -125,7 +133,9 @@ class ViewsUnitTest(TestCase):
 
 
 class TestSocialUser(TestCase):
-    """Test for social_user pipeline"""
+    """
+    Test for social_user pipeline.
+    """
     def setUp(self):
         self.exists = mock.Mock()
         self.exists.exists.return_value = False
@@ -202,7 +212,9 @@ class TestSocialUser(TestCase):
 
 
 class NotAllowedToMergeTest(TestCase):
-    """Test not_allowed_to_merge function"""
+    """
+    Test not_allowed_to_merge function.
+    """
     def setUp(self):
         self.user1 = mock.Mock()
         self.user2 = mock.Mock()
@@ -219,25 +231,29 @@ class NotAllowedToMergeTest(TestCase):
         self.user2.social_auth = mock.Mock()
 
     def test_not_allowed_to_merge_false(self):
-        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1,
-                                                             self.provider2))
+        self.user1.social_auth.all = mock.Mock(
+            return_value=(self.provider1, self.provider2)
+        )
         self.user2.social_auth.all = mock.Mock(return_value=(self.provider3,))
 
         res = bool(not_allowed_to_merge(self.user1, self.user2))
         self.assertFalse(res)
 
     def test_not_allowed_to_merge_true(self):
-        self.user1.social_auth.all = mock.Mock(return_value=(self.provider1,
-                                                             self.provider2))
-        self.user2.social_auth.all = mock.Mock(return_value=(self.provider2,
-                                                             self.provider3))
-
+        self.user1.social_auth.all = mock.Mock(
+            return_value=(self.provider1, self.provider2)
+        )
+        self.user2.social_auth.all = mock.Mock(
+            return_value=(self.provider2, self.provider3)
+        )
         res = bool(not_allowed_to_merge(self.user1, self.user2))
         self.assertTrue(res)
 
 
 class AssociateUserTest(TestCase):
-    """Test for associate_user pipeline"""
+    """
+    Test for associate_user pipeline.
+    """
     def setUp(self):
         self.details = {'email': 'test@test.com'}
         self.user = mock.Mock()
@@ -264,10 +280,12 @@ class AssociateUserTest(TestCase):
         self.backend.strategy.storage.is_integrity_error = mock.Mock(return_value=False)
 
         with self.assertRaises(Exception):
-            associate_user(self.backend,
-                           self.details,
-                           'test@test.com',
-                           user=self.user)
+            associate_user(
+                self.backend,
+                self.details,
+                'test@test.com',
+                user=self.user
+            )
 
     def test_associate_user_handle_exception(self):
         create_sa = mock.Mock(side_effect=Exception())
@@ -276,15 +294,19 @@ class AssociateUserTest(TestCase):
 
         with mock.patch('psa.pipeline.social_user') as mocked:
             mocked.return_value = mock.Mock()
-            res = associate_user(self.backend,
-                                 self.details,
-                                 'test@test.com',
-                                 user=self.user)
+            res = associate_user(
+                self.backend,
+                self.details,
+                'test@test.com',
+                user=self.user
+            )
             self.assertEqual(res, mocked.return_value)
 
 
 class AssociateByEmailTest(TestCase):
-    """Test associate_by_email pipeline"""
+    """
+    Test associate_by_email pipeline.
+    """
     def setUp(self):
         self.user = mock.Mock()
         self.backend = mock.Mock()
@@ -332,7 +354,9 @@ class AssociateByEmailTest(TestCase):
 
 
 class SocialMergeTest(TestCase):
-    """Test social_merge function"""
+    """
+    Test social_merge function.
+    """
     def test_social_merge(self):
         update = mock.Mock()
         update.update = mock.Mock()
@@ -347,7 +371,9 @@ class SocialMergeTest(TestCase):
 
 
 class UnionMergeTest(TestCase):
-    """Test union_merge function"""
+    """
+    Test union_merge function.
+    """
     def test_union_merge(self):
         save = mock.Mock()
         role1, role2, role3 = (mock.Mock(), mock.Mock(), mock.Mock())
@@ -384,7 +410,9 @@ class UnionMergeTest(TestCase):
 
 
 class MailTest(TestCase):
-    """Testing send_validation function"""
+    """
+    Testing send_validation function.
+    """
     def test_send_validation(self):
         with mock.patch('psa.mail.send_mail') as mocked:
             mocked.return_value = None
@@ -398,7 +426,9 @@ class MailTest(TestCase):
 
 
 class ValidatedUserDetailTest(TestCase):
-    """Tests for ValidatedUserDetailTest"""
+    """
+    Tests for ValidatedUserDetailTest.
+    """
     def setUp(self):
         self.strategy = mock.Mock()
         self.backend = mock.Mock()
@@ -419,12 +449,14 @@ class ValidatedUserDetailTest(TestCase):
                     mocked_logout.return_value = None
                     mocked_login.return_value = None
                     mocked_merge.return_value = None
-                    res = validated_user_details(strategy=self.strategy,
-                                                 pipeline_index=6,
-                                                 backend=self.backend,
-                                                 details=self.details,
-                                                 user=self.user,
-                                                 social=self.social)
+                    res = validated_user_details(
+                        strategy=self.strategy,
+                        pipeline_index=6,
+                        backend=self.backend,
+                        details=self.details,
+                        user=self.user,
+                        social=self.social
+                    )
                     self.assertEqual(res['user'], self.social.user)
 
     def test_temporary_user_without_social_user_by_email(self):
@@ -438,11 +470,13 @@ class ValidatedUserDetailTest(TestCase):
                     mocked_logout.return_value = None
                     mocked_login.return_value = None
                     mocked_merge.return_value = None
-                    res = validated_user_details(strategy=self.strategy,
-                                                 pipeline_index=6,
-                                                 backend=self.backend,
-                                                 details=self.details,
-                                                 user=self.user)
+                    res = validated_user_details(
+                        strategy=self.strategy,
+                        pipeline_index=6,
+                        backend=self.backend,
+                        details=self.details,
+                        user=self.user
+                    )
                     self.assertEqual(res['user'], user_by_email)
 
     def test_temporary_user_without_social_no_user_by_email(self):
@@ -454,11 +488,13 @@ class ValidatedUserDetailTest(TestCase):
                     mocked_logout.return_value = None
                     mocked_login.return_value = None
                     mocked_merge.return_value = None
-                    res = validated_user_details(strategy=self.strategy,
-                                                 pipeline_index=6,
-                                                 backend=self.backend,
-                                                 details=self.details,
-                                                 user=self.user)
+                    res = validated_user_details(
+                        strategy=self.strategy,
+                        pipeline_index=6,
+                        backend=self.backend,
+                        details=self.details,
+                        user=self.user
+                    )
                     self.assertEqual(res, {})
                     self.assertEqual(self.user.username, self.details.get('username'))
                     self.assertEqual(self.user.first_name, '')
@@ -473,11 +509,13 @@ class ValidatedUserDetailTest(TestCase):
                     mocked_login.return_value = None
                     mocked_merge.return_value = None
                     with self.assertRaises(AuthException):
-                        validated_user_details(strategy=self.strategy,
-                                               pipeline_index=6,
-                                               backend=self.backend,
-                                               details=self.details,
-                                               user=self.user)
+                        validated_user_details(
+                            strategy=self.strategy,
+                            pipeline_index=6,
+                            backend=self.backend,
+                            details=self.details,
+                            user=self.user
+                        )
 
     def test_integrity_error(self):
         self.backend.strategy.storage.user.get_users_by_email.return_value = []
@@ -489,11 +527,13 @@ class ValidatedUserDetailTest(TestCase):
         # so in our test second call to save will raise IntegrityError
         # exception
         with self.assertRaises(IntegrityError):
-            validated_user_details(strategy=self.strategy,
-                                   pipeline_index=6,
-                                   backend=self.backend,
-                                   details=self.details,
-                                   user=self.user)
+            validated_user_details(
+                strategy=self.strategy,
+                pipeline_index=6,
+                backend=self.backend,
+                details=self.details,
+                user=self.user
+            )
             self.assertIn(self.details.get('username'), self.user.username)
             self.assertLess(len(self.details.get('username')),
                             len(self.user.username))
@@ -505,12 +545,14 @@ class ValidatedUserDetailTest(TestCase):
         self.strategy.request.POST = {'confirm': 'no'}
 
         with self.assertRaises(AuthException):
-            validated_user_details(strategy=self.strategy,
-                                   pipeline_index=6,
-                                   backend=self.backend,
-                                   details=self.details,
-                                   user=self.user,
-                                   social=self.social)
+            validated_user_details(
+                strategy=self.strategy,
+                pipeline_index=6,
+                backend=self.backend,
+                details=self.details,
+                user=self.user,
+                social=self.social
+            )
 
     def test_valid_user_with_social_confirm_yes(self):
         self.exists.exists.return_value = False
@@ -529,12 +571,14 @@ class ValidatedUserDetailTest(TestCase):
             with mock.patch('psa.pipeline.union_merge') as mocked_union:
                 mocked_social.return_value = None
                 mocked_union.return_value = None
-                res = validated_user_details(strategy=self.strategy,
-                                             pipeline_index=6,
-                                             backend=self.backend,
-                                             details=self.details,
-                                             user=self.user,
-                                             social=self.social)
+                res = validated_user_details(
+                    strategy=self.strategy,
+                    pipeline_index=6,
+                    backend=self.backend,
+                    details=self.details,
+                    user=self.user,
+                    social=self.social
+                )
                 self.assertEqual(res['user'], self.user)
                 self.assertEqual(res['social'], self.social)
 
@@ -555,17 +599,21 @@ class ValidatedUserDetailTest(TestCase):
             with mock.patch('psa.pipeline.union_merge') as mocked_union:
                 mocked_social.return_value = None
                 mocked_union.return_value = None
-                validated_user_details(strategy=self.strategy,
-                                       pipeline_index=6,
-                                       backend=self.backend,
-                                       details=self.details,
-                                       user=self.user,
-                                       social=self.social)
+                validated_user_details(
+                    strategy=self.strategy,
+                    pipeline_index=6,
+                    backend=self.backend,
+                    details=self.details,
+                    user=self.user,
+                    social=self.social
+                )
                 self.assertTemplateUsed('ct/person.html')
 
 
 class CustomMailValidation(TestCase):
-    """Testing psa.pipeline.custom_mail_validation"""
+    """
+    Testing psa.pipeline.custom_mail_validation.
+    """
     def setUp(self):
         self.strategy = mock.Mock()
         self.backend = mock.Mock()
@@ -580,12 +628,14 @@ class CustomMailValidation(TestCase):
 
     def test_custom_mail_validation_backend_not_email(self):
         self.backend.name = 'facebook'
-        res = custom_mail_validation(strategy=self.strategy,
-                                     pipeline_index=5,
-                                     backend=self.backend,
-                                     details=self.details,
-                                     user=self.user,
-                                     social=self.social)
+        res = custom_mail_validation(
+            strategy=self.strategy,
+            pipeline_index=5,
+            backend=self.backend,
+            details=self.details,
+            user=self.user,
+            social=self.social
+        )
         self.assertEqual(res, {})
 
     def test_custom_mail_validation_backend_email_verify_code(self):
@@ -602,23 +652,29 @@ class CustomMailValidation(TestCase):
                     queryset = mock.Mock()
                     queryset.first.return_value = self.user
                     mocked_user.objects.filter.return_value = queryset
-                    res = custom_mail_validation(strategy=self.strategy,
-                                                 pipeline_index=5,
-                                                 backend=self.backend,
-                                                 details=self.details,
-                                                 user=self.user)
+                    res = custom_mail_validation(
+                        strategy=self.strategy,
+                        pipeline_index=5,
+                        backend=self.backend,
+                        details=self.details,
+                        user=self.user
+                    )
                     self.assertEqual(res['user'], self.user)
-                    self.assertEqual(self.user.backend,
-                                     'django.contrib.auth.backends.ModelBackend')
+                    self.assertEqual(
+                        self.user.backend,
+                        'django.contrib.auth.backends.ModelBackend'
+                    )
 
     def test_custom_mail_validation_raise(self):
         self.backend.strategy.validate_email.return_value = False
         with self.assertRaises(InvalidEmail):
-            custom_mail_validation(strategy=self.strategy,
-                                   pipeline_index=5,
-                                   backend=self.backend,
-                                   details=self.details,
-                                   user=self.user)
+            custom_mail_validation(
+                strategy=self.strategy,
+                pipeline_index=5,
+                backend=self.backend,
+                details=self.details,
+                user=self.user
+            )
 
     def test_custom_mail_validation_backend_email_send_email(self):
         self.backend.strategy.request_data.return_value = {}
@@ -627,11 +683,13 @@ class CustomMailValidation(TestCase):
         exists = mock.Mock()
         exists.exists.return_value = False
         self.user.groups.filter.return_value = exists
-        res = custom_mail_validation(strategy=self.strategy,
-                                     pipeline_index=5,
-                                     backend=self.backend,
-                                     details=self.details,
-                                     user=self.user)
+        res = custom_mail_validation(
+            strategy=self.strategy,
+            pipeline_index=5,
+            backend=self.backend,
+            details=self.details,
+            user=self.user
+        )
         self.assertEqual(res, self.backend.strategy.redirect())
 
     def test_custom_mail_validation_backend_email_send_email_anonym(self):
@@ -645,11 +703,13 @@ class CustomMailValidation(TestCase):
         with mock.patch('psa.pipeline.AnonymEmail') as mocked_anonym:
             get_or_create = mock.Mock()
             mocked_anonym.objects.get_or_create = get_or_create
-            res = custom_mail_validation(strategy=self.strategy,
-                                         pipeline_index=5,
-                                         backend=self.backend,
-                                         details=self.details,
-                                         user=self.user)
+            res = custom_mail_validation(
+                strategy=self.strategy,
+                pipeline_index=5,
+                backend=self.backend,
+                details=self.details,
+                user=self.user
+            )
             self.assertEqual(res, self.backend.strategy.redirect())
             self.assertEqual(get_or_create.call_count, 1)
             self.assertEqual(send_email_validation.call_count, 1)
@@ -657,7 +717,9 @@ class CustomMailValidation(TestCase):
 
 @mock.patch('psa.custom_backends.CustomCode')
 class EmailAuthTest(TestCase):
-    """Testing EmailAuth.auth_complete method"""
+    """
+    Testing EmailAuth.auth_complete method.
+    """
     def setUp(self):
         self.test_email = 'test@test.com'
         self.email_auth = EmailAuth()

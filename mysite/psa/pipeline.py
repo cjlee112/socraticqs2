@@ -81,8 +81,11 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                     return {'user': user}
         else:
             if user and user.groups.filter(name='Temporary').exists():
-                AnonymEmail.objects.get_or_create(user=user, email=details.get('email'),
-                                                  defaults={'date': datetime.now()})
+                AnonymEmail.objects.get_or_create(
+                    user=user,
+                    email=details.get('email'),
+                    defaults={'date': datetime.now()}
+                )
             backend.strategy.send_email_validation(backend, details.get('email'))
             backend.strategy.session_set(
                 'email_validation_address', details.get('email')
@@ -103,8 +106,7 @@ def union_merge(tmp_user, user):
     StudentErrors here.
     """
     roles_to_reset = (role for role in tmp_user.role_set.all()
-                      if not user.role_set.filter(course=role.course,
-                                                  role=role.role))
+                      if not user.role_set.filter(course=role.course, role=role.role))
     for role in roles_to_reset:
         role.user = user
         role.save()
@@ -213,7 +215,9 @@ def not_allowed_to_merge(user, user_social):
 
 
 def social_user(backend, uid, user=None, *args, **kwargs):
-    """Search for UserSocialAuth"""
+    """
+    Search for UserSocialAuth.
+    """
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
     if social:
@@ -230,7 +234,9 @@ def social_user(backend, uid, user=None, *args, **kwargs):
 
 
 def associate_user(backend, details, uid, user=None, social=None, *args, **kwargs):
-    """Create UserSocialAuth"""
+    """
+    Create UserSocialAuth.
+    """
     email = details.get('email')
     if user and not social:
         try:
@@ -246,9 +252,11 @@ def associate_user(backend, details, uid, user=None, social=None, *args, **kwarg
             return social_user(backend, uid, user, *args, **kwargs)
         else:
             if email and user.email and not user.email == email:
-                secondary = SecondaryEmail(user=user,
-                                           email=email,
-                                           provider=social)
+                secondary = SecondaryEmail(
+                    user=user,
+                    email=email,
+                    provider=social
+                )
                 secondary.save()
             return {'social': social,
                     'user': social.user,
@@ -275,8 +283,9 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
         # objects are returned.
         users = list(backend.strategy.storage.user.get_users_by_email(email))
         if len(users) == 0:
-            social = UserSocialAuth.objects.filter(uid=email,
-                                                   provider=u'email').first()
+            social = UserSocialAuth.objects.filter(
+                uid=email, provider=u'email'
+            ).first()
             if social:
                 return {'user': social.user}
             else:

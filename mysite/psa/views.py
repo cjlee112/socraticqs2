@@ -12,7 +12,9 @@ from psa.models import SecondaryEmail
 
 
 def context(**extra):
-    """Adding default context to rendered page"""
+    """
+    Adding default context to rendered page.
+    """
     return dict({
         'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
     }, **extra)
@@ -20,17 +22,17 @@ def context(**extra):
 
 @render_to('psa/custom_login.html')
 def validation_sent(request):
-    """View to handle validation_send action"""
+    """
+    View to handle validation_send action.
+    """
     user = request.user
-    social_propose = False
-    by_secondary = []
+    social_list = []
     email = request.session.get('email_validation_address')
     if user and user.is_anonymous():
         by_secondary = [i.provider.provider for i in
                         SecondaryEmail.objects.filter(email=email)
                         if not i.provider.provider == u'email']
-        if by_secondary:
-            social_propose = True
+        social_list.extend(by_secondary)
 
         users_by_email = User.objects.filter(email=email)
         for user_by_email in users_by_email:
@@ -40,19 +42,20 @@ def validation_sent(request):
                           not SecondaryEmail.objects.filter(
                               ~Q(email=email), provider=i, user=user_by_email
                           ).exists()]
-            by_secondary.extend(by_primary)
-            social_propose = True
+            social_list.extend(by_primary)
 
     return context(
         validation_sent=True,
         email=email,
-        social_propose=social_propose,
-        social_list=by_secondary
+        social_propose=bool(social_list),
+        social_list=social_list
     )
 
 
 def custom_login(request):
-    """Custom login to integrate social auth and default login"""
+    """
+    Custom login to integrate social auth and default login.
+    """
     username = password = ''
     logout(request)
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
@@ -68,30 +71,37 @@ def custom_login(request):
                 return redirect(request.POST.get('next', '/ct/'))
     else:
         params = request.GET
-    if 'next' in params: # must pass through for both GET or POST
+    if 'next' in params:  # must pass through for both GET or POST
         kwargs['next'] = params['next']
-    return render_to_response('psa/custom_login.html',
-                              context_instance=RequestContext(request, kwargs))
+    return render_to_response(
+        'psa/custom_login.html', context_instance=RequestContext(request, kwargs)
+    )
 
 
 @login_required
 @render_to('ct/person.html')
 def done(request):
-    """Login complete view, displays user data"""
+    """
+    Login complete view, displays user data.
+    """
     return context(person=request.user)
 
 
 @login_required
 @render_to('ct/index.html')
 def ask_stranger(request):
-    """View to handle stranger whend asking email"""
+    """
+    View to handle stranger whend asking email.
+    """
     return context(tmp_email_ask=True)
 
 
 @login_required
 @render_to('ct/person.html')
 def set_pass(request):
-    """View to handle password set / change action"""
+    """
+    View to handle password set / change action.
+    """
     changed = False
     user = request.user
     if user.is_authenticated():

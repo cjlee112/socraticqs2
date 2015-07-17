@@ -47,7 +47,9 @@ class UserSession(models.Model):
 
 
 def user_logged_in_handler(sender, request, user, **kwargs):
-    """Create UserSession object to store User<=>Session relation"""
+    """
+    Create UserSession object to store User<=>Session relation.
+    """
     UserSession.objects.get_or_create(
         user=user,
         session_id=request.session.session_key
