@@ -21,7 +21,8 @@ class FSMStack(object):
             self.state = None
             return
         try:
-            self.state = FSMState.objects.get(pk=fsmID)
+            self.state = FSMState.objects.select_related('fsmNode')\
+                             .prefetch_related('fsmNode__outgoing').get(pk=fsmID)
         except FSMState.DoesNotExist:
             del request.session['fsmID']
             self.state = None
@@ -61,7 +62,7 @@ class FSMStack(object):
         """
         stateData = stateData or {}
         startArgs = startArgs or {}
-        fsm = FSM.objects.get(name=fsmName)
+        fsm = FSM.objects.select_related('startNode').get(name=fsmName)
         if not activity and self.state:
             activity = self.state.activity
         self.state = FSMState(
@@ -97,7 +98,7 @@ class FSMStack(object):
         Resume an orphaned activity.
         """
         state = FSMState.objects.get(pk=int(stateID))
-        if state.user != request.user:
+        if state.user_id != request.user.id:
             raise FSMBadUserError('user mismatch!!')
         elif state.children.count() > 0:
             raise FSMStackResumeError('can only resume innermost stack level')
