@@ -477,23 +477,11 @@ class ActivityLog(models.Model):
     course = models.ForeignKey(Course, null=True)
 
     @classmethod
-    def get_or_create(cls, name):
-        """
-        Get log with specified name if it exists, or create it.
-        """
-        try:
-            return cls.objects.get(fsmName=name)
-        except cls.DoesNotExist:
-            activity_log = cls(fsmName=name)
-            activity_log.save()
-            return activity_log
-
-    @classmethod
     def log_node_entry(cls, fsmNode, user, unitLesson=None):
         """
         Record entry to this node, creating ActivityLog if needed.
         """
-        activity_log = cls.get_or_create(fsmNode.fsm.name)
+        activity_log, created = cls.objects.get_or_create(fsmName=fsmNode.fsm.name)
         activity_event = ActivityEvent(
             activity=activity_log,
             user=user,

@@ -65,7 +65,7 @@ def fsm_status(request):
             pageData.fsmStack.pop(request, eventName='exceptCancel')
             pageData.statusMessage = 'Activity canceled.'
         # follow this optional edge
-        elif pageData.fsmStack.state.fsmNode. outgoing.filter(name=task).count() > 0:
+        elif pageData.fsmStack.state.fsmNode.outgoing.filter(name=task).count() > 0:
             return pageData.fsm_redirect(request, task, vagueEvents=())
     if not pageData.fsmStack.state:  # search for unfinished activities
         unfinished = FSMState.objects.filter(user=request.user, children__isnull=True)
