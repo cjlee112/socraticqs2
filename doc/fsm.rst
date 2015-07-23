@@ -317,21 +317,34 @@ query by the application.  Whenever an FSM specification changes
 (e.g. adding a new FSM or modifying an existing FSM), that 
 specification must be loaded to the database.  Whenever the
 database table is flushed, the set of FSM specifications must be
-loaded.  The standard way to do this is simply::
+loaded.
 
-  $ python manage.py shell
-  >>> from fsm.fsmspec import deploy_all
-  >>> deploy_all('foobaron')
+The standard way to do this is simply use ``fsm_deploy`` manage command.
 
-where ``foobaron`` is the username that will be recorded as the owner
-of the loaded FSMs.
+To load all FSM specifications, use::
 
-Two convenience functions exist to do this, in the ``fsmspec`` module.
-To load a single FSM specification, use:
+  $ python manage.py fsm_deploy
+  FSM `fsm_name1` is deployed.
+  FSM `fsm_name2` is deployed.
 
-.. function:: deploy(modname, username)
+FSM specifications will be deployed using `admin` user.
 
-   *modname*: full name of the module (typically of the form
+User `admin` is a conventional username for all FSMs developer to use.
+
+To load a single FSM specification, use::
+
+  $ python manage.py fsm_deploy APP.fsm_plugin.MODULENAME
+  FSM `MODULENAME` is deployed.
+Where ``APP.fsm_plugin.MODULENAME`` is the full path to the new / modified module. ``APP`` is the name of the Django app, and ``MODULENAME`` is the module name in the `fsm_plugin` directory.
+
+Low-level functions to deploy FSMs
+..............
+
+There are also two low-level functions exists in the ``fsmspec`` module for this purpose:
+
+.. function:: deploy(mod_path, username)
+
+   *mod_path*: full path of the module (typically of the form
    ``APP.fsm_plugin.MODULENAME`` where ``APP`` is the name of the Django
    app, and ``MODULENAME`` is the module name in that directory)
    containing the new / modified FSM to load.
@@ -341,8 +354,6 @@ To load a single FSM specification, use:
    At present this isn't really used for anything, hence somewhat
    arbitrary.
 
-To load all FSM specifications, use:
-
 .. function:: deploy_all(username, ignore=('testme', '__init__',), pattern='*/fsm_plugin/*.py')
 
    *username*: same as above
@@ -351,6 +362,20 @@ To load all FSM specifications, use:
    be treated as FSM specifications.
 
    *pattern*: ``glob`` search pattern for finding FSM plugin modules.
+
+To load all FSM specifications using low-level functions, use::
+
+  $ python manage.py shell
+  >>> from fsm.fsmspec import deploy_all
+  >>> deploy_all('admin')
+
+
+To load a single FSM specification using low-level functions, use::
+
+  $ python manage.py shell
+  >>> from fsm.fsmspec import deploy
+  >>> deploy('APP.fsm_plugin.MODULENAME', 'admin')
+
 
 FSMSpecification
 ......................
