@@ -24,11 +24,11 @@ class Command(BaseCommand):
         deployed = []
 
         if len(args) == 0:
-            deployed.extend(deploy_all('admin'))
+            deployed += deploy_all('admin')
         elif len(args) == 1:
             if re.match(r'^.+\.fsm_plugin\..+$', args[0]):
                 try:
-                    deployed.extend(deploy(args[0], 'admin'))
+                    deployed += deploy(args[0], 'admin')
                 except ImportError as err:
                     self.stdout.write('FSM on path `%s` can\'t be imported.' % args[0])
                     self.stderr.write('%s: %s' % (err.__class__.__name__, err))
