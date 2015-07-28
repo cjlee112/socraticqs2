@@ -106,7 +106,11 @@ Ubuntu 14.04 distribution instructions
 ::::::::::::::::::::::::::::::::::::::
 
 
-To install PostgreSQL 9.4 on Ubuntu machine you should follow next steps:
+You can check PostgreSQL installation manual for linux on official PostgreSQL `page`_.
+
+.. _page: http://www.postgresql.org/download/linux/ubuntu/
+
+Steps to install PostgreSQL on Ubuntu machine:
 
 * Create the file ``/etc/apt/sources.list.d/pgdg.list``, and
   add a line for the repository 
@@ -167,8 +171,46 @@ In case when you don't want to have the PostgreSQL server running all the time o
     sudo service postgresql stop
     sudo service postgresql start
 
-To prevent PostgreSQL to start on system boot you need to change line ``auto`` to ``manual`` in ``/etc/postgresql/9.4/main/start.conf``.
 
+There are couple of ways to prevent PostgreSQL to start on system boot:
+
+1. First one is to remove system start-up links for postgres::
+
+    ✗ sudo update-rc.d -f postgresql remove
+      Removing any system startup links for /etc/init.d/postgresql ...
+        /etc/rc0.d/K21postgresql
+        /etc/rc1.d/K21postgresql
+        /etc/rc2.d/S19postgresql
+        /etc/rc3.d/S19postgresql
+        /etc/rc4.d/S19postgresql
+        /etc/rc5.d/S19postgresql
+        /etc/rc6.d/K21postgresql
+
+  In this case we can use default way to start postgres manually::
+
+      sudo service postgresql start
+
+2. Second one is to change line ``auto`` to ``manual`` in ``/etc/postgresql/9.4/main/start.conf``::
+
+    # Automatic startup configuration
+    # auto: automatically start/stop the cluster in the init script
+    # manual: do not start/stop in init scripts, but allow manual startup with
+    #         pg_ctlcluster
+    # disabled: do not allow manual startup with pg_ctlcluster (this can be easily
+    #           circumvented and is only meant to be a small protection for
+    #           accidents).
+
+    auto
+
+  In this case we prevent to start ``main`` postgres cluster and need to use next commands to ``stop|start`` pg_cluster::
+
+      sudo pg_ctlcluster 9.4 main stop
+      sudo pg_ctlcluster 9.4 main start 
+
+
+More information you can find on PostgreSQL 9.4 `documentation`_ page.
+
+.. _documentation: http://www.postgresql.org/docs/9.4/static/
 
 Mac OS X installation
 :::::::::::::::::::::
@@ -181,7 +223,7 @@ For installing PostgreSQL on Mac OS X please follow the official `instructions`_
 Configuring Django project for using PostgreSQL
 ...............................................
 
-To configure project to need to copy ``mysite/settings/local_conf_example.py`` into ``mysite/settings/local_conf.py`` and change DATABASES dict::
+To configure project you need to copy ``mysite/settings/local_conf_example.py`` into ``mysite/settings/local_conf.py`` and change DATABASES dict according to previously configured PostgreSQL user and db_name::
 
     DATABASES = {
         'default': {
@@ -216,30 +258,35 @@ test suite::
 
 You should see a series of tests pass successfully.
 
+By default test suite is running on sqlite database to get a speed boost but you can change this by commenting out next lines in you local_conf.py::
+
+    if 'test' in sys.argv or 'test_coverage' in sys.argv:
+        DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
 Running a test web server
 ...........................
 
 You need to create a database, load it with some data,
-load plugin specifications, and
-run the development web server.  You first create the 
-database::
+load plugin specifications, and then
+run the development web server.
 
-  python manage.py migrate
+You can prepare database with :doc:`fab`.
 
-Next load it with some example data that we supply in the
-repository::
+To initialize DB to run test webserver use::
 
-  python manage.py loaddata dumpdata/debug.json
+    fab db.init
 
-.. warning::
-   If you get an error message of the form
-   ``Could not load contenttypes.ContentType`` then load the example
-   data as follows::
+This task creates a new DB and transforms it into working state by the next steps:
 
-     python manage.py loaddata dumpdata/debug-wo-fsm.json
+* Drop existing DB
+* Create new DB
+* Apply all current Django migrations
+* Load fixtures
+* Deploy all FSMs
 
-**Also necessarily need to load FSM plugin specifications;**
-see :ref:`fsm-deploy`.
+To list all available tasks use::
+
+    fab --list
 
 Finally, start up the development web server::
 
@@ -273,7 +320,7 @@ Database Operations
 .....................
 
 Updating your database schema 
-++++++++++++++++++++++++++++++
+:::::::::::::::::::::::::::::
 
 If upstream code changes (i.e. made by someone else, and pulled
 into your local repo) alter the database schema, you will have to
@@ -292,7 +339,7 @@ To migrate your database to the new schema, type::
   python manage.py migrate ct
 
 Altering the database schema (models) yourself
-++++++++++++++++++++++++++++++++++++++++++++++++
+::::::::::::::::::::::::::::::::::::::::::::::
 
 If you change the database fields for a data model in ``models.py``,
 you will of course also have to change your database to match.
@@ -305,7 +352,17 @@ Django 1.7 makes this easy via its ``makemigrations`` command.
 First make a backup copy of your current database (this is important,
 because it's not obvious whether there is any easy way to "undo" a migration)::
 
-  cp mysite.db mysite.db.previous
+    fab db.backup[:custom_branch_name]
+
+It will create db backup file with suffix from you current git branch name
+or from provided optional param ``custom_branch_name``::
+
+    fab db.backup:test1
+    .................
+    [localhost] local: pg_dump courselets -U postgres -w > /path/to/proj/backups/backup.engine.test1
+    [................
+
+    Done.
 
 Then simply type::
 
@@ -316,7 +373,7 @@ this migration to your database exactly as we did in the previous section::
 
   python manage.py migrate ct
 
-At this point you should be able to run the testsuite, ``runserver``, etc.
+At this point you should be able to run the ``runserver``, etc.
 
 
 .. warning::
@@ -339,7 +396,8 @@ At this point you should be able to run the testsuite, ``runserver``, etc.
 
    * once you change a model in ``models.py``, your code will no longer
      run until you successfully run ``makemigrations`` + ``migrate``.
-     So you cannot actually test your changes until you run both those steps.
+     So you cannot actually move to manual testing your changes until
+     you run both those steps.
 
    * every time you run ``makemigrations`` on another change to
      your data models, ANOTHER migration file
@@ -353,8 +411,13 @@ At this point you should be able to run the testsuite, ``runserver``, etc.
    * Because of this, in theory you shouldn't
      run ``makemigrations`` / ``migrate`` until
      *after* you are pretty sure your model changes are final.  
-     But you can't even test your changes until after both steps.
+     But you can't even start manual testing of your changes until after
+     both steps.
      This is an unpleasant catch-22.
+
+   * To run unittests you need to create migration according to your new
+     code with no need to apply them to DB because test suite applies all
+     migrations every time you run it to temporary DB.
 
    * Once you change your database schema (via ``migrate``), all *other*
      code versions (i.e. not matching the new schema stored in your
@@ -363,25 +426,38 @@ At this point you should be able to run the testsuite, ``runserver``, etc.
      have many different code branches and switch between them 
      effortlessly.
 
+   * Because of this, to make developer life easier, we provide Fabriс ``db.init|db.backup|db.restore``
+     tasks to init, backup and restore actions with DB. See :doc:`fab` section
+     for details.
+
+
 Recommended Migration Best Practices
-+++++++++++++++++++++++++++++++++++++
+::::::::::::::::::::::::::::::::::::
 
 For all these reasons, I suggest you follow a simple discipline
 whenever you are about to make model changes that will require
 migration:
 
-* BEFORE making those changes, save a copy of your current
-  database file and checkout a *new* Git branch, e.g.::
+* BEFORE making those changes, make your DB backup and
+  checkout a *new* Git branch, e.g.::
 
-    cp mysite.db mysite.db.previous
+  Make DB backup::
+
+    fab db.backup
+
+  By default without providing any custom params to task it  will use 
+  you current branch name as suffix for backup file.
+
+  Next you can checkput to new bigchange::
+
     git checkout -b bigchange
 
-  where ``previous`` is the name of your previous branch,
-  and ``bigchange`` is the name of your new branch.
+  where ``bigchange`` is the name of your new branch.
+
   You should also do this if you are starting to work with
   someone else's experimental model changes, e.g.::
 
-    cp mysite.db mysite.db.previous
+    fab db.backup
     git checkout -b bigchange
     git pull fred bigchange
 
@@ -390,13 +466,24 @@ migration:
   that worked with ``previous``::
 
     git checkout previous
-    cp mysite.db.previous mysite.db
 
-  Note that you should NOT add ``mysite.db`` to Git
+  Next you need to restore backuped DB::
+
+    fab db.restore
+
+  Note that you should NOT add any DB file to Git
   version control.
 
 * Now you can freely run ``makemigrations`` + ``migrate``
   whenever you like, so you can test your changes.
+
+* If you DB is in initial state without any new information stored in
+  you can use :doc:`fab` to get DB ready to test and development::
+
+      $ fab db.init
+
+  This will give you a new DB with all migrations applied,
+  initial data populated and all FSM deployed.
 
 * If it turns out that you need to make *more* model
   changes (i.e. your model changes turned out to be inadequate
@@ -406,18 +493,25 @@ migration:
   and REGENERATE a new migration to replace it, like this::
 
     rm ct/migrations/0005_unitstatus.py
-    cp mysite.db.previous mysite.db
+    fab db.restore 
     python manage.py makemigrations ct
     python manage.py migrate ct
 
   where ``ct/migrations/0005_unitstatus.py`` is your new
-  migration file, and ``mysite.db.previous`` is a copy of
-  your database file from before you applied this new migration.
+  migration file.
+
+  If you migration can be backwarded you can use next flow::
+
+    python manage.py migrate ct 0004
+    rm ct/migrations/0005_unitstatus.py
+    python manage.py makemigrations ct
+    python manage.py migrate ct
+
+  where 0004 is a number of your previous migration file.
 
    
-
 Backing up, flushing, and restoring your local database
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 You may wish to make and reload snapshots of your local database
 as part of your development and testing process.  This is easy.
@@ -433,7 +527,3 @@ You can flush (delete all data) from your database like this::
 You can then restore a particular snapshot like this::
 
   python manage.py loaddata dumpdata/mysnap.json
-
-You will also need to load FSM plugin specifications;
-see :ref:`fsm-deploy`.
-
