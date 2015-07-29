@@ -8,7 +8,7 @@ from fabric.api import local, settings, hide, lcd
 from fabric.tasks import Task
 
 
-sys.path.append(os.path.dirname(__file__) + '/mysite/')
+sys.path.append(os.path.dirname(__file__) + '/../../mysite/')
 
 django.settings_module('mysite.settings')
 from django.conf import settings as dj_settings
@@ -20,7 +20,7 @@ class BaseTask(Task):
     """
     db_cfg = dj_settings.DATABASES['default']
     engine = db_cfg.get('ENGINE').split('.')[-1]
-    base_path = os.path.dirname(__file__)
+    base_path = os.path.dirname(__file__) + '/../..'
 
     def run(self, action, suffix=None):
         handlers = {
@@ -139,7 +139,7 @@ class RestoreDBTask(BaseTask):
     """
     Restore DB task.
     """
-    name = 'restore_db'
+    name = 'restore'
     action = 'restore'
 
     def run(self, suffix=None):
@@ -150,7 +150,7 @@ class BackupDBTask(BaseTask):
     """
     Backup db task.
     """
-    name = 'backup_db'
+    name = 'backup'
     action = 'backup'
 
     def run(self, suffix=None):
@@ -161,13 +161,13 @@ class InitDBTask(BaseTask):
     """
     Backup db task.
     """
-    name = 'init_db'
+    name = 'init'
     action = 'init'
 
     def run(self):
         super(InitDBTask, self).run(self.action)
 
 
-restore_db = RestoreDBTask()
-backup_db = BackupDBTask()
-init_db = InitDBTask()
+restore = RestoreDBTask()
+backup = BackupDBTask()
+init = InitDBTask()
