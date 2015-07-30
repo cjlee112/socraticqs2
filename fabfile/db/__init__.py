@@ -28,6 +28,10 @@ class BaseTask(Task):
             'sqlite3': getattr(BaseTask, '%s_db_sqlite' % action)
         }
         suffix = suffix or local('git rev-parse --abbrev-ref HEAD', capture=True)
+        suffix = re.sub(r'/', r'\\\\', suffix)
+        suffix = re.sub(r'!', r'\\!', suffix)
+        suffix = re.sub(r'\$', r'U+0024', suffix)
+        suffix = re.sub(r'`', r'\\`', suffix)
         try:
             handlers[self.engine].__call__(self, suffix)
         except KeyError:
