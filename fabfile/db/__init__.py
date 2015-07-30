@@ -1,3 +1,68 @@
+"""Fabric tasks to automate typical database actions.
+
+There are three DB tasks:
+* db.init
+* db.backup
+* db.restore
+
+To list all available tasks::
+
+  fab --list
+
+All tasks makes decision about DB engine given from Django settings and
+performs appropriate actions.
+
+Init DB task
+------------
+Usage::
+
+    fab db.init
+
+This task performs following actions:
+
+  1. DROP database given from Django settings
+  2. CREATE new database with name given from Django settings
+  3. Apply all migrations
+  4. Load fixture data
+  5. Deploy FSMs
+
+Backup DB task
+--------------
+Usage::
+
+    fab db.backup[:custom_branch_name]
+
+This task performs following actions:
+
+  1. DROP database given from Django settings
+  2. CREATE new database with name given from Django settings
+  3. ``psql pg_dump > backup.postgres.custom_branch_name`` action
+     for PostgreSQL and ``cp mysite.db backup.sqlite.custom_branch_name``
+     action for SQLite DB.
+
+If ``custom_branch_name`` param is not presented task gets current
+git branch name and using it as a custom suffix for backup files.
+
+Restore DB task
+---------------
+Usage::
+
+    fab db.restore[:custom_branch_name]
+
+This task performs following actions:
+
+  1. DROP database given from Django settings
+  2. CREATE new database with name given from Django settings
+  3. ``psql < backup.postgres.custom_branch_name`` action for
+     PostgreSQL and ``cp backup.sqlite.custom_branch_name mysite.db``
+     action for SQLite DB.
+
+If ``custom_branch_name`` param is not presented task get current
+git branch name and using it as a suffix for backup files.
+
+If task can not find backup file it will list for you all backup files
+available with specific DB engine given from Django settings.
+"""
 import re
 import os
 import sys
