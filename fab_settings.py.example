@@ -1,22 +1,10 @@
-import os
-import sys
+"""Settings for Fabric.
 
+Params:
+
+- env.venv_name: name of the current virtualenv
+"""
 from fabric.api import env
-from fabric.contrib import django
 
-
-sys.path.append(os.path.dirname(__file__) + '/mysite/')
-
-
-django.settings_module('mysite.settings')
-from django.conf import settings
-
-
-env.db_cfg = {
-    'user': settings.DATABASES['default'].get('USER'),
-    'password': settings.DATABASES['default'].get('PASSWORD'),
-    'db_name': settings.DATABASES['default'].get('NAME'),
-    'engine': settings.DATABASES['default'].get('ENGINE')
-}
 
 env.venv_name = '_ve_socraticqs2'
