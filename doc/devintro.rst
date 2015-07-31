@@ -141,10 +141,6 @@ Steps to install PostgreSQL on Ubuntu machine:
    sudo -u postgres psql postgres
    postgres=# \password postgres
 
-* Finally we need to create database with desired name::
-
-    postgres=# CREATE DATABASE db_name ENCODING 'UTF8';
-
 * Now we can exit from PostgreSQL and start to configure our Django project to use created database::
 
     postgres=# \q
@@ -219,6 +215,25 @@ For installing PostgreSQL on Mac OS X please follow the official `instructions`_
 
 .. _instructions: http://www.postgresql.org/download/macosx/
 
+One of the prefered way to install PostreSQL is `Homebrew`_::
+
+    brew install postgres
+
+.. _Homebrew: http://brew.sh
+
+Postgres will be installed into ``/usr/local/var/postgres`` directory.
+
+Information about how to start Postgres you can find by following command::
+
+    brew info postgres
+
+By default Homebrew create postgres role with name as your mac username.
+
+So you need to set a password for this role::
+
+    psql postgres
+    \password your_username
+
 
 Configuring Django project for using PostgreSQL
 ...............................................
@@ -229,7 +244,7 @@ To configure project you need to copy ``mysite/settings/local_conf_example.py`` 
         'default': {
           'ENGINE': 'django.db.backends.postgresql_psycopg2',
           'NAME': 'db_name',
-          'USER': 'postgres',
+          'USER':  'your_username', (postgres for Ubuntu default configuration proccess)
           'PASSWORD': 'your_postgres_pass',
           'HOST': '',  # leave blank for localhost
           'PORT': '',  # leave blank for localhost
@@ -262,6 +277,17 @@ By default test suite is running on sqlite database to get a speed boost but you
 
     if 'test' in sys.argv or 'test_coverage' in sys.argv:
         DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+
+.. warning::
+   
+    For Mac developer if you see ``ValueError: unknown locale: UTF-8`` do the following::
+
+        export LC_ALL=en_US.UTF-8
+        export LANG=en_US.UTF-8
+
+    Or add this lines to your ``~/.bash_profile``
+
 
 Running a test web server
 ...........................
@@ -527,3 +553,25 @@ You can flush (delete all data) from your database like this::
 You can then restore a particular snapshot like this::
 
   python manage.py loaddata dumpdata/mysnap.json
+
+
+Test project on PostgreSQL before making any PR
+:::::::::::::::::::::::::::::::::::::::::::::::
+
+You can develop project using sqlite db but before creating
+any PR you need to init PostgreSQL DB to ensure
+your code not breaking anything.
+
+* You can create and populate db with :doc:`fab`::
+
+    fab db.init
+
+This will create and populate db with fixture. Then deploy all FSMs.
+
+* Run all tests::
+
+    python manage.py test
+
+* Run test server and start Course from home page.
+* Go to Activity Page and restore Activity.
+* Go to Activity Page and cancel Activity.
