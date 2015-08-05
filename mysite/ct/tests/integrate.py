@@ -1,8 +1,7 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+"""Integration tests for core application
 
-Replace this with more appropriate tests for your application.
+Tests Wikipedia api.
+Tests branching behaviour of core app.
 """
 
 from django.contrib.auth.models import User
@@ -33,11 +32,13 @@ class OurTestCase(TestCase):
 
 class ConceptMethodTests(OurTestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='jacob', email='jacob@_',
-                                             password='top_secret')
+        self.user = User.objects.create_user(
+            username='jacob', email='jacob@_', password='top_secret'
+        )
         self.client.login(username='jacob', password='top_secret')
-        self.wikiUser = User.objects.create_user(username='wikipedia', email='wiki@_',
-                                             password='top_secret')
+        self.wikiUser = User.objects.create_user(
+            username='wikipedia', email='wiki@_', password='top_secret'
+        )
         self.unit = Unit(title='My Courselet', addedBy=self.user)
         self.unit.save()
 
@@ -63,22 +64,22 @@ class ConceptMethodTests(OurTestCase):
         'check wikipedia temporary document retrieval'
         lesson = Lesson.get_from_sourceDB('New York City', self.user,
                                           doSave=False)
-        self.assertIn('City of New York', lesson.text) # got the text?
-        self.assertEqual(Lesson.objects.count(), 0) # nothing saved?
+        self.assertIn('City of New York', lesson.text)  # got the text?
+        self.assertEqual(Lesson.objects.count(), 0)  # nothing saved?
 
     def test_wikipedia_view(self):
         'check wikipedia view and concept addition method'
         url = '/ct/teach/courses/1/units/%d/concepts/wikipedia/%s/' \
-          % (self.unit.pk, urllib.quote('New York City'))
+            % (self.unit.pk, urllib.quote('New York City'))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'City of New York')
         self.check_post_get(url, dict(task='add'), '/', 'City of New York')
-        ul = UnitLesson.objects.get(lesson__concept__title='New York City',
-                                    unit=self.unit) # check UL & concept added
+        ul = UnitLesson.objects.get(
+            lesson__concept__title='New York City', unit=self.unit
+        )  # check UL & concept added
         self.assertTrue(ul in UnitLesson.search_sourceDB('New York City')[0])
-        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City',
-                                                         unit=self.unit)[0])
+        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City', unit=self.unit)[0])
 
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
@@ -171,7 +172,7 @@ class ConceptMethodTests(OurTestCase):
         unit3 = Unit(title='Another Courselet', addedBy=self.user)
         unit3.save()
         ul3 = UnitLesson.create_from_lesson(l3, unit3)
-        clList = concept.get_conceptlinks(self.unit) # should get l1, l2
+        clList = concept.get_conceptlinks(self.unit)  # should get l1, l2
         self.assertEqual(len(clList), 2)
         self.assertEqual([cl for cl in clList if cl.lesson == l1][0]
                          .relationship, ConceptLink.DEFINES)
@@ -262,20 +263,23 @@ def create_question_unit(user, utitle='Ask Me some questions',
 class ReversePathTests(TestCase):
     def test_home(self):
         'test trimming of args not needed for target'
-        url = ct_util.reverse_path_args('ct:home',
-                        '/ct/teach/courses/21/units/33/errors/2/')
+        url = ct_util.reverse_path_args(
+            'ct:home', '/ct/teach/courses/21/units/33/errors/2/'
+        )
         self.assertEqual(url, reverse('ct:home'))
 
     def test_ul_teach(self):
         'check proper extraction of args from path'
-        url = ct_util.reverse_path_args('ct:ul_teach',
-                        '/ct/teach/courses/21/units/33/errors/2/')
+        url = ct_util.reverse_path_args(
+            'ct:ul_teach', '/ct/teach/courses/21/units/33/errors/2/'
+        )
         self.assertEqual(url, reverse('ct:ul_teach', args=(21, 33, 2)))
 
     def test_ul_id(self):
         'test handling of ID kwargs'
-        url = ct_util.reverse_path_args('ct:ul_teach',
-                        '/ct/teach/courses/21/units/33/', ul_id=2)
+        url = ct_util.reverse_path_args(
+            'ct:ul_teach', '/ct/teach/courses/21/units/33/', ul_id=2
+        )
         self.assertEqual(url, reverse('ct:ul_teach', args=(21, 33, 2)))
 
 
