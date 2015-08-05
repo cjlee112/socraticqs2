@@ -49,5 +49,5 @@ For a developer / test version to access social-auth, you will need to add the f
 Quality check
 -------------
 
-We can check code quality using `./check-quality.sh {pep8|pylint}` script.
+We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.

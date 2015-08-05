@@ -30,7 +30,7 @@ class START(object):
         fsmStack.state.set_data_attr('unit', unit)
         fsmStack.state.title = 'Studying: %s' % unit.title
         logName = 'rt_%s_%d' % (trialName, r)  # log for this treatment
-        fsmStack.state.activity = ActivityLog.get_or_create(logName)
+        fsmStack.state.activity, created = ActivityLog.objects.get_or_create(fsmName=logName)
         return node.get_path(fsmStack.state, request, **kwargs)
     next_edge = push_unit_fsm
     _unitAttr = 'testUnit'

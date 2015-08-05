@@ -1,3 +1,12 @@
+"""Module contains FSMStack object - main interface to our current FSM if any
+
+FSMStack methods:
+  * ``event`` - top-level interface for passing event to a running FSM instance
+  * ``push`` - start running a new FSM instance (layer)
+  * ``pop`` - pop current FSM state and pass event to next stack state if any
+  * ``resume`` - resume an orphaned activity
+  * ``get_current_url`` - get URL for resuming at current FSM state
+"""
 from fsm.models import FSM, FSMState, FSMBadUserError, FSMStackResumeError
 
 
@@ -17,9 +26,9 @@ class FSMStack(object):
             del request.session['fsmID']
             self.state = None
             return
-        for e in self.state.fsmNode.outgoing.all():  # detect selection edges
-            if e.name.startswith('select_'):
-                setattr(self, e.name, e)  # make available to HTML templates
+        for edge in self.state.fsmNode.outgoing.all():  # detect selection edges
+            if edge.name.startswith('select_'):
+                setattr(self, edge.name, edge)  # make available to HTML templates
 
     def event(self, request, eventName='next', pageData=None, **kwargs):
         """Top-level interface for passing event to a running FSM instance
@@ -31,8 +40,9 @@ class FSMStack(object):
         if self.state is None:  # no ongoing activity
             return
         state = self.state  # remember current state
-        path = self.state.event(self, request, eventName, pageData=pageData,
-                                **kwargs)
+        path = self.state.event(
+            self, request, eventName, pageData=pageData, **kwargs
+        )
         if self.state and self.state != state:  # pushed or popped
             path = self.state.path  # use path of new FSM
         if self.state.fsmNode.name == 'END':  # reached terminal state
@@ -44,11 +54,13 @@ class FSMStack(object):
                 return parentPath
         return path
 
-    def push(self, request, fsmName, stateData={}, startArgs={},
+    def push(self, request, fsmName, stateData=None, startArgs=None,
              activity=None, **kwargs):
         """
         Start running a new FSM instance (layer).
         """
+        stateData = stateData or {}
+        startArgs = startArgs or {}
         fsm = FSM.objects.get(name=fsmName)
         if not activity and self.state:
             activity = self.state.activity

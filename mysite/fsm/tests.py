@@ -6,10 +6,7 @@ from fsm.models import (
     FSMNode,
     FSMState,
     ActivityLog,
-    dump_json_id,
-    load_json_id,
-    dump_json_id_dict,
-    load_json_id_dict
+    JSONBlobMixin
 )
 from ct.models import (
     Course,
@@ -23,18 +20,6 @@ from ct.tests import (
     FakeRequest,
     OurTestCase,
     create_question_unit
-)
-
-
-fsmDict = dict(name='test', title='try this')
-nodeDict = dict(
-    START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.START'),
-    MID=dict(title='in the middle', path='ct:about', doLogging=True),
-    END=dict(title='end here', path='ct:home')
-)
-edgeDict = (
-    dict(name='next', fromNode='START', toNode='END', title='go go go'),
-    dict(name='select_Lesson', fromNode='MID', toNode='MID', title='go go go'),
 )
 
 
@@ -63,6 +48,9 @@ def load_fsm2(username):
 
 
 class FSMTests(OurTestCase):
+    """
+    Tests for FSM stack.
+    """
     def setUp(self):
         self.user = User.objects.create_user(
             username='jacob', email='jacob@_', password='top_secret'
@@ -86,19 +74,30 @@ class FSMTests(OurTestCase):
         self.ulQ2 = create_question_unit(
             self.user, 'Pretest', 'Scary Question', 'Tell me something.'
         )
+        self.json_mixin = JSONBlobMixin()
+        self.fsmDict = dict(name='test', title='try this')
+        self.nodeDict = dict(
+            START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.START'),
+            MID=dict(title='in the middle', path='ct:about', doLogging=True),
+            END=dict(title='end here', path='ct:home')
+        )
+        self.edgeDict = (
+            dict(name='next', fromNode='START', toNode='END', title='go go go'),
+            dict(name='select_Lesson', fromNode='MID', toNode='MID', title='go go go'),
+        )
 
     def test_load(self):
         """
         Check loading an FSM graph, and replacing it.
         """
-        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')
         self.assertEqual(f.fsmnode_set.count(), 3)
         self.assertEqual(f.startNode.name, 'START')
         self.assertEqual(f.startNode.outgoing.count(), 1)
         e = f.startNode.outgoing.all()[0]
         self.assertEqual(e.name, 'next')
         self.assertEqual(e.toNode.name, 'END')
-        f2 = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')  # replace
+        f2 = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')  # replace
         self.assertEqual(FSM.objects.get(pk=f.pk).name, 'testOLD')  # renamed
         self.assertNotEqual(f.startNode, f2.startNode)
         self.assertEqual(f.startNode.name, f2.startNode.name)
@@ -107,8 +106,8 @@ class FSMTests(OurTestCase):
         """
         Check roundtrip dump/load via json blob data.
         """
-        name, pk = dump_json_id(self.unit)
-        label, obj = load_json_id(name, pk)
+        name, pk = self.json_mixin.dump_json_id(self.unit)
+        label, obj = self.json_mixin.load_json_id(name, pk)
         self.assertEqual(self.unit, obj)
         self.assertEqual(label, 'Unit')
 
@@ -116,9 +115,9 @@ class FSMTests(OurTestCase):
         """
         Check roundtrip dump/load via named json blob data.
         """
-        name, pk = dump_json_id(self.unit, 'fruity')
+        name, pk = self.json_mixin.dump_json_id(self.unit, 'fruity')
         self.assertEqual(name, 'fruity_Unit_id')
-        label, obj = load_json_id(name, pk)
+        label, obj = self.json_mixin.load_json_id(name, pk)
         self.assertEqual(self.unit, obj)
         self.assertEqual(label, 'fruity')
 
@@ -126,15 +125,15 @@ class FSMTests(OurTestCase):
         """
         Check roundtrip dump/load via json blob string.
         """
-        s = dump_json_id_dict(dict(fruity=self.unit))
-        d = load_json_id_dict(s)
+        s = self.json_mixin.dump_json_id_dict(dict(fruity=self.unit))
+        d = self.json_mixin.load_json_id_dict(s)
         self.assertEqual(d.items(), [('fruity', self.unit)])
 
     def test_json_blob4(self):
         """
         Check roundtrip dump/load via db storage.
         """
-        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')
         d = f.startNode.load_json_data()
         self.assertEqual(d, {})
         d['fruity'] = self.unit
@@ -150,7 +149,7 @@ class FSMTests(OurTestCase):
         """
         Check basic startup of new FSM instance.
         """
-        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')
         self.do_start(f)
 
     def test_start2(self):
@@ -178,7 +177,7 @@ class FSMTests(OurTestCase):
         """
         Check that FSMState saves unitLesson, select_ data, and logging.
         """
-        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')
         fsmStack = self.do_start(f, unitLesson=self.unitLesson)
         self.assertEqual(fsmStack.state.unitLesson, self.unitLesson)
         request = FakeRequest(self.user, method='GET')
@@ -229,7 +228,7 @@ class FSMTests(OurTestCase):
         """
         Check trivial plugin import and call.
         """
-        f = FSM.save_graph(fsmDict, nodeDict, edgeDict, 'jacob')
+        f = FSM.save_graph(self.fsmDict, self.nodeDict, self.edgeDict, 'jacob')
         request = FakeRequest(self.user)
         fsmStack = FSMStack(request)
         fsmStack.state = FSMState(user=self.user, fsmNode=f.startNode)
@@ -242,11 +241,11 @@ class FSMTests(OurTestCase):
         """
         Check that FSM.save_graph() catches bad plugin funcName.
         """
-        nodeDictBad = dict(START=dict(title='start here', path='ct:home',
-                           funcName='fsm.fsm_plugin.testme.invalid'))
-
+        nodeDictBad = dict(
+            START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.invalid')
+        )
         try:
-            FSM.save_graph(fsmDict, nodeDictBad, (), 'jacob')
+            FSM.save_graph(self.fsmDict, nodeDictBad, (), 'jacob')
         except AttributeError:
             pass
         else:
@@ -334,10 +333,11 @@ class FSMTests(OurTestCase):
         url2 = '/ct/courses/%d/units/%d/concepts/' % (self.course.pk, self.ulQ2.unit.pk)
         self.check_post_get(url, dict(fsmtask='next'), url2, 'Pretest')
 
-    def get_fsm_request(self, fsmName, stateData, startArgs={}, **kwargs):
+    def get_fsm_request(self, fsmName, stateData, startArgs=None, **kwargs):
         """
         Create request, fsmStack and start specified FSM.
         """
+        startArgs = startArgs or {}
         request = FakeRequest(self.user)
         request.session = self.client.session
         fsmStack = FSMStack(request)

@@ -38,19 +38,23 @@ class START(object):
     path = 'ct:home'
     doLogging = True
     edges = (
-            dict(name='next', toNode='END', title='go go go'),
-        )
+        dict(name='next', toNode='END', title='go go go'),
+    )
 
 
 class MID(object):
     def get_help(self, node, state, request):
-        d = {'/ct/about/': 'here here!', '/ct/courses/1/': 'there there'}
-        return d.get(request.path, None)
+        path_help = {
+            '/ct/about/': 'here here!',
+            '/ct/courses/1/': 'there there'
+        }
+        return path_help.get(request.path, None)
+
     title = 'in the middle'
     path = 'ct:about'
     edges = (
-            dict(name='next', toNode='END', title='go go go'),
-        )
+        dict(name='next', toNode='END', title='go go go'),
+    )
 
 
 def get_specs():
@@ -74,7 +78,7 @@ class CALLER(object):
         return node
     edges = (
         dict(name='call', toNode='WAITER', title='start a sub-fsm'),
-        )
+    )
 
 
 class WAITER(object):
@@ -85,6 +89,8 @@ class WAITER(object):
         return self._path
 
     edges = (
-        dict(name='subfsmdone', toNode='SOMENODE',
-             title='continue after sub-fsm done'),
-        )
+        dict(
+            name='subfsmdone',
+            toNode='SOMENODE',
+            title='continue after sub-fsm done'),
+    )
