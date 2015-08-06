@@ -4,12 +4,15 @@ Unit tests for core app views.py.
 
 from django.test import TestCase
 from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from mock import Mock, patch
 from ddt import ddt, data, unpack
 
 from ct.views import *
-from ct.models import UnitLesson
+from ct.models import UnitLesson, Lesson, Unit
+from fsm.fsm_base import FSMStack
 
 
 @ddt
@@ -217,3 +220,71 @@ class MiscTests(TestCase):
         path = current = Mock()
         course_tabs(path, current)
         make_tabs.assert_called_once_with(path, current, ('Home:', 'Edit'), tail=2, baseToken='courses')
+
+    def test_ul_page_data(self):
+        user = User(username='test_username')
+        user.save()
+        unit = Unit(title='test title', kind='Courselet', addedBy=user)
+        unit.save()
+        lesson = Lesson(title='test title', addedBy=user, treeID=1, text='test text')
+        lesson.save()
+        unit_lesson = UnitLesson.create_from_lesson(lesson, unit)
+        request = Mock()
+        request.user = user
+        request.path = '/ct/courses/1/units/1/lessons/1/'
+        request.session = {'fsmID': 1, 'statusMessage': 'test'}
+        result = ul_page_data(request, unit.id, unit_lesson.id, 'FAQ')
+        self.assertEqual(result[0], unit)
+        self.assertEqual(result[1], unit_lesson)
+        self.assertIsNone(result[2])
+        self.assertIsInstance(result[3], PageData)
+
+
+class PageDataTests(TestCase):
+    """
+    Tests for PageData object.
+    """
+    def test_PageData(self):
+        request = Mock()
+        request.session = {'fsmID': 1, 'statusMessage': 'test'}
+        pageData = PageData(request, test1=1, test2=2)
+        self.assertIsInstance(pageData, PageData)
+        self.assertIsInstance(pageData.fsmStack, FSMStack)
+        self.assertEqual(pageData.test1, 1)
+        self.assertEqual(pageData.test2, 2)
+        self.assertEqual(pageData.statusMessage, 'test')
+        self.assertEqual(request.session, {})
+        self.assertEqual(pageData.fsmStack.state, None)
+
+    def test_fsm_redirect_no_state(self):
+        request = Mock()
+        request.session = {'fsmID': 1, 'statusMessage': 'test'}
+        pageData = PageData(request, test1=1, test2=2)
+        result = pageData.fsm_redirect(request)
+        self.assertIsNone(result)
+
+    def test_fsm_redirect_launch(self):
+        request = Mock()
+        request.session = {'fsmID': 1, 'statusMessage': 'test'}
+        request.method = 'POST'
+        request.POST = {'fsmtask': 'launch', 'fsmName': 'testFSMName'}
+        pageData = PageData(request, test1=1, test2=2)
+        pageData.fsmData = Mock()
+        fsmArgs = Mock()
+        pageData.fsmData = {'testFSMName': fsmArgs}
+        pageData.fsm_push = Mock()
+        pageData.fsm_redirect(request)
+        pageData.fsm_push.assert_called_with(request, 'testFSMName', fsmArgs)
+
+
+class ViewsTests(TestCase):
+    """
+    Tests for views.
+    """
+    def test_main_page_get(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        response = self.client.get(reverse('ct:home'))
+        self.assertTemplateUsed(response, 'ct/index.html')
+        self.assertEqual(response.status_code, 200)
+
