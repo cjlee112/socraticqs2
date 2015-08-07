@@ -57,6 +57,14 @@ class FormsTest(TestCase):
         form = NextForm(data={'fsmtask_false': 'launch'})
         self.assertFalse(form.is_valid())
 
+    def test_launch_form_positive(self):
+        form = LaunchFSMForm('fsmname', 'fsmlabel', data={'fsmName': 'fsmname', 'fsmtask': 'fsmtask'})
+        self.assertTrue(form.is_valid())
+
+    def test_launch_form_negative(self):
+        form = LaunchFSMForm('fsmname', 'fsmlabel')
+        self.assertFalse(form.is_valid())
+
     def test_unit_title_form_positive(self):
         form = UnitTitleForm(data={'title': 'test_title'})
         self.assertTrue(form.is_valid())

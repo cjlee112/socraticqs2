@@ -3,14 +3,15 @@
 Tests Wikipedia api.
 Tests branching behaviour of core app.
 """
-
-from django.contrib.auth.models import User
-from django.test import TestCase
-from ct.models import *
-from fsm.models import *
-from ct import views, ct_util
 import time
 import urllib
+
+from django.test import TestCase
+from django.contrib.auth.models import User
+
+from ct.models import *
+from ct import views, ct_util
+from fsm.models import *
 
 
 class OurTestCase(TestCase):

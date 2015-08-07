@@ -288,3 +288,58 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'ct/index.html')
         self.assertEqual(response.status_code, 200)
 
+    def test_main_page_post_not_fsmstate(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        response = self.client.post(reverse('ct:home'), {'liveID': '1'})
+        self.assertEqual(response.status_code, 404)
+
+    @patch('ct.views.get_object_or_404')
+    @patch('ct.views.PageData.fsm_push', return_value=HttpResponse(status=200))
+    def test_main_page_post_fsmstate(self, fsm_push, get_obj_or_404):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        response = self.client.post(reverse('ct:home'), {'liveID': '1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(get_obj_or_404.call_count, 1)
+        self.assertEqual(fsm_push.call_count, 1)
+
+    @patch('ct.views.LogoutForm')
+    def test_person_profile_same_person(self, LogoutForm):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        response = self.client.get(reverse('ct:person_profile', kwargs={'user_id': self.user.id}))
+        self.assertAlmostEquals(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/person.html')
+        self.assertIn('You username is', response.content)
+        self.assertIn('User profile page', response.content)
+        self.assertEqual(LogoutForm.call_count, 1)
+
+    @patch('ct.views.LogoutForm')
+    def test_person_profile_post_diff_person(self, LogoutForm):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.user2 = User.objects.create_user(username='test2', password='test2')
+        self.client.login(username='test2', password='test2')
+        response = self.client.get(reverse('ct:person_profile', kwargs={'user_id': self.user.id}))
+        self.assertAlmostEquals(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/person.html')
+        self.assertNotIn('You username is', response.content)
+        self.assertIn('User profile page', response.content)
+        self.assertEqual(LogoutForm.call_count, 0)
+
+    @patch('ct.views.LogoutForm')
+    @patch('ct.views.logout')
+    def test_person_profile_post(self, logout, LogoutForm):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        response = self.client.post(
+            reverse('ct:person_profile', kwargs={'user_id': self.user.id}),
+            {'task': 'logout'}
+        )
+        self.assertEqual(logout.call_count, 1)
+        self.assertRedirects(response, reverse('ct:home'), status_code=302)
+
+    def test_about(self):
+        response = self.client.get(reverse('ct:about'))
+        self.assertTemplateUsed(response, 'ct/about.html')
+        self.assertIn('About Courselets.org', response.content)
