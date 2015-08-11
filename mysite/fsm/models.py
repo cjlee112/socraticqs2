@@ -224,7 +224,7 @@ class FSMGroup(models.Model):
     Groups multiple FSMs into one named UI group.
     """
     fsm = models.ForeignKey(FSM)
-    group = models.CharField(max_length=64)
+    group = models.CharField(db_index=True, max_length=64)
 
 
 class PluginDescriptor(object):
@@ -250,7 +250,7 @@ class FSMNode(JSONBlobMixin, models.Model):
     Stores one node of an FSM state-graph.
     """
     fsm = models.ForeignKey(FSM)
-    name = models.CharField(max_length=64)
+    name = models.CharField(db_index=True, max_length=64)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     help = models.TextField(null=True)
@@ -329,7 +329,7 @@ class FSMEdge(JSONBlobMixin, models.Model):
     """
     Stores one edge of an FSM state-graph.
     """
-    name = models.CharField(max_length=64)
+    name = models.CharField(db_index=True, max_length=64)
     fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
     toNode = models.ForeignKey(FSMNode, related_name='incoming')
     title = models.CharField(max_length=200)
