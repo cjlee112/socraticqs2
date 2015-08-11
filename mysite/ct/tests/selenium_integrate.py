@@ -10,7 +10,7 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 
 
 class MySeleniumTests(LiveServerTestCase):
-    fixtures = ['dumpdata/debug-wo-fsm.json']
+    fixtures = ['mysite/ct/tests/fixtures/initial_data.json']
 
     @classmethod
     def setUpClass(cls):
