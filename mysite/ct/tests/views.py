@@ -276,7 +276,7 @@ class PageDataTests(TestCase):
         pageData.fsm_push.assert_called_with(request, 'testFSMName', fsmArgs)
 
 
-class ViewsTests(TestCase):
+class BaseViewsTests(TestCase):
     """
     Tests for views.
     """
@@ -286,6 +286,7 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('ct:home'))
         self.assertTemplateUsed(response, 'ct/index.html')
         self.assertEqual(response.status_code, 200)
+        self.assertIn('liveSessions', response.context)
 
     def test_main_page_post_not_fsmstate(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -343,6 +344,8 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'ct/about.html')
         self.assertIn('About Courselets.org', response.content)
 
+
+class CourseViewTest(TestCase):
     def test_course_view_no_role(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.course = Course(title='test_title', addedBy=self.user)
@@ -413,49 +416,41 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'ct/course.html')
         self.assertEqual(reorder_course_unit.call_count, 1)
 
-    def test_edit_course_no_role(self):
+
+class EditCourseTest(TestCase):
+    def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
         self.client.login(username='test', password='test')
+
+    def test_edit_course_no_role(self):
+        self.role.delete()
         with self.assertRaises(KeyError):
             self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
 
     def test_edit_course_no_course(self):
-        self.user = User.objects.create_user(username='test', password='test')
-        self.client.login(username='test', password='test')
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': 99}))
         self.assertEqual(response.status_code, 404)
 
     def test_edit_course_student(self):
-        self.user = User.objects.create_user(username='test', password='test')
-        self.course = Course(title='test_title', addedBy=self.user)
-        self.course.save()
-        role = Role(course=self.course, user=self.user, role=Role.ENROLLED)
-        role.save()
-        self.client.login(username='test', password='test')
+        self.role.role = Role.ENROLLED
+        self.role.save()
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
     def test_edit_course_get(self):
-        self.user = User.objects.create_user(username='test', password='test')
-        self.course = Course(title='test_title', addedBy=self.user)
-        self.course.save()
-        role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
-        role.save()
-        self.client.login(username='test', password='test')
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/edit_course.html')
+        self.assertEqual(response.context['course'], self.course)
+        self.assertIsInstance(response.context['courseform'], CourseTitleForm)
+        self.assertIn('domain', response.context)
 
     def test_edit_course_post(self):
-        self.user = User.objects.create_user(username='test', password='test')
-        self.course = Course(title='test_title', addedBy=self.user)
-        self.course.save()
-        role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
-        role.save()
-        self.client.login(username='test', password='test')
         response = self.client.post(
             reverse('ct:edit_course', kwargs={'course_id': self.course.id}),
             {'title': 'test_title', 'access': 'enroll', 'description': 'test_description'},
@@ -468,6 +463,8 @@ class ViewsTests(TestCase):
         course = Course.objects.get(id=self.course.id)
         self.assertEqual(course.access, 'enroll')
 
+
+class SubscribeTest(TestCase):
     @patch('ct.views.time')
     def test_course_subscribe_tmp_user(self, time):
         time.mktime.return_value = '11011972'
@@ -491,9 +488,6 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
-    def test_update_concept_link(self):
-        pass
-
 
 class EditUnitTest(TestCase):
     def setUp(self):
@@ -514,6 +508,13 @@ class EditUnitTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/edit_unit.html')
+        self.assertIn('unit', response.context)
+        self.assertIn('courseUnit', response.context)
+        self.assertIn('unitform', response.context)
+        self.assertIn('domain', response.context)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertEqual(response.context['courseUnit'], self.course_unit)
+        self.assertIsInstance(response.context['unitform'], UnitTitleForm)
 
     def test_edit_unit_not_instructor(self):
         self.role.role = Role.ENROLLED
@@ -536,6 +537,10 @@ class EditUnitTest(TestCase):
             reverse('ct:unit_tasks', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id})
         )
         self.assertIn('new test title', response.content)
+        self.assertIn('unit', response.context)
+        self.assertIn('courseUnit', response.context)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertEqual(response.context['courseUnit'], self.course_unit)
 
     def test_edit_unit_task_release(self):
         response = self.client.post(
@@ -547,6 +552,18 @@ class EditUnitTest(TestCase):
         self.assertTemplateUsed(response, 'ct/edit_unit.html')
         course_unit = CourseUnit.objects.filter(unit=self.unit).first()
         self.assertIsNotNone(course_unit.releaseTime)
+        self.assertIn('unit', response.context)
+        self.assertIn('courseUnit', response.context)
+        self.assertIn('unitform', response.context)
+        self.assertIn('domain', response.context)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertEqual(response.context['courseUnit'], self.course_unit)
+        self.assertIsInstance(response.context['unitform'], UnitTitleForm)
+
+
+class UpdateConceptTest(TestCase):
+    def test_update_concept_link(self):
+        pass
 
 
 class ConceptsTests(TestCase):
@@ -573,6 +590,8 @@ class ConceptsTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/concepts.html')
+        self.assertIn('actionTarget', response.context)
 
     # def test_unit_concepts_post(self):
     #     response = self.client.post(
@@ -612,6 +631,16 @@ class ConceptsTests(TestCase):
     #     self.assertEqual(response.status_code, 200)
 
 
+class MakeClTable(TestCase):
+    def test_make_cl_table(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        result = make_cl_table(self.concept, self.unit)
+        self.assertIsInstance(result, ConceptLinkTable)
+
+
 class EditLessonTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -639,6 +668,12 @@ class EditLessonTest(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/edit_lesson.html')
+        self.assertIn('unitLesson', response.context)
+        self.assertIn('atime', response.context)
+        self.assertIn('titleform', response.context)
+        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
+        self.assertIsInstance(response.context['titleform'], LessonForm)
 
     def test_edit_lesson_update(self):
         response = self.client.post(
@@ -655,7 +690,15 @@ class EditLessonTest(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/lesson.html')
         self.assertIn('new lesson title', response.content)
+        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertIn('statusTable', response.context)
+        self.assertIn('evalTable', response.context)
+        self.assertIn('answer', response.context)
+        self.assertIn('addForm', response.context)
+        self.assertIn('roleForm', response.context)
 
     def test_edit_lesson_delete(self):
         response = self.client.post(
@@ -668,6 +711,14 @@ class EditLessonTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(UnitLesson.objects.filter(id=self.unit_lesson.id).exists())
+        self.assertTemplateUsed(response, 'ct/lessons.html')
+        for context_var in ('lessonSet', 'searchForm', 'msg',
+                            'lessonForm', 'conceptLinks',
+                            'actionLabel', 'lessonTable',
+                            'creationInstructions',
+                            'showReorderForm',
+                            'foundNothing'):
+            self.assertIn(context_var, response.context)
 
 
 class ResolutionsTests(TestCase):
@@ -699,6 +750,7 @@ class ResolutionsTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/lessons.html')
 
     def test_resolutions_create_lesson(self):
         response = self.client.post(
@@ -716,6 +768,14 @@ class ResolutionsTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(UnitLesson.objects.filter(lesson__title='new lesson title', kind=UnitLesson.RESOLVES).exists())
+        self.assertTemplateUsed(response, 'ct/lessons.html')
+        self.assertIn('new lesson title', response.content)
+
+    def test_link_resolution_ul(self):
+        parentUL = Mock()
+        ul = em = addedBy = unit = Mock()
+        link_resolution_ul(ul, em, unit, addedBy, parentUL)
+        parentUL.copy_resolution.assert_called_once_with(ul, addedBy)
 
 
 class ErrorResourcesTest(TestCase):
@@ -731,6 +791,8 @@ class ErrorResourcesTest(TestCase):
         self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
         self.role.save()
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.concept_graph_to_from = ConceptGraph(toConcept=self.concept, fromConcept=self.concept, addedBy=self.user)
+        self.concept_graph_to_from.save()
         self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user, concept=self.concept)
         self.lesson.save_root(self.concept)
         self.unit_lesson = UnitLesson(
@@ -748,6 +810,10 @@ class ErrorResourcesTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/error_resources.html')
+        for context_var in ('toConcepts', 'fromConcepts', 'testLessons', 'alternativeDefs'):
+            self.assertIn(context_var, response.context)
+        self.assertEqual(response.context['toConcepts'][0], self.concept_graph_to_from)
+        self.assertEqual(response.context['fromConcepts'][0], self.concept_graph_to_from)
 
 
 class SlideShowTest(TestCase):
@@ -773,18 +839,27 @@ class SlideShowTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/study_unit.html')
+        self.assertIn('unit', response.context)
+        self.assertIn('startForm', response.context)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertIsInstance(response.context['startForm'], TaskForm)
 
-    # def test_slideshow_post_start(self):
-    #     response = self.client.post(
-    #         reverse(
-    #             'ct:slideshow',
-    #             kwargs={'course_id': self.course.id, 'unit_id': self.unit.id}
-    #         ),
-    #         {'task': 'start'},
-    #         follow=True
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'ct/study_unit.html')
+    @patch('ct.views.PageData')
+    def test_slideshow_post_start(self, PageData):
+        pageData = Mock()
+        pageData.fsm_push.return_value = HttpResponse('It is ok', status=200)
+        PageData.return_value = pageData
+        response = self.client.post(
+            reverse(
+                'ct:slideshow',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id}
+            ),
+            {'task': 'start'},
+            follow=True
+        )
+        self.assertEqual(pageData.fsm_push.call_count, 1)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'It is ok')
 
 
 class UnitLessonTaskStudentTest(TestCase):
@@ -861,6 +936,39 @@ class UnitLessonsStudentTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/lessons_student.html')
         self.assertIn('test unit title', response.content)
+
+
+class ConceptLinkTableTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.concept_link_table = ConceptLinkTable(data=(self.concept,))
+
+    def test_concept_link_table_append(self):
+        self.assertEqual(self.concept_link_table.data[0][0], self.concept)
+        self.assertIsInstance(self.concept_link_table.data[0][1], ConceptLinkForm)
+
+    def test_concept_link_table_replace(self):
+        new_concept_form = ConceptLinkForm(instance=self.concept)
+        self.concept_link_table.replace(self.concept, new_concept_form)
+        self.assertEqual(self.concept_link_table.data[0][0], self.concept)
+        self.assertEqual(self.concept_link_table.data[0][1], new_concept_form)
+
+    def test_concept_link_table_remove(self):
+        result = self.concept_link_table.remove(self.concept)
+        self.assertTrue(result)
+        self.assertEqual(self.concept_link_table.data, [])
+
+    def test_concept_link_table_move_between_tables(self):
+        new_table = ConceptLinkTable()
+        self.concept_link_table.move_between_tables(self.concept, new_table)
+        self.assertEqual(new_table.data[0][0], self.concept)
+        self.assertIsInstance(new_table.data[0][1], ConceptLinkForm)
+        self.concept_link_table.move_between_tables(self.concept, new_table)
+        self.assertEqual(self.concept_link_table.data[0][0], self.concept)
+        self.assertIsInstance(self.concept_link_table.data[0][1], ConceptLinkForm)
 
 
 class UnitConceptsStudentTest(TestCase):
@@ -949,6 +1057,10 @@ class LessonTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/lesson_student.html')
+        self.assertIn('unitLesson', response.context)
+        self.assertIn('unit', response.context)
+        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
+        self.assertEqual(response.context['unit'], self.unit)
 
     def test_lesson_post(self):
         response = self.client.post(
@@ -1000,6 +1112,97 @@ class UlTasksStudentTest(TestCase):
         )
         self.assertEqual(response.context['unitLesson'], self.unit_lesson)
         self.assertEqual(response.context['unit'], self.unit)
+
+
+class UlTasksTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root(self.concept)
+        self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
+        self.unit_lesson.save()
+        self.response = Response(
+            unitLesson=self.unit_lesson,
+            lesson=self.lesson,
+            course=self.course,
+            text='test text',
+            author=self.user,
+            kind=Response.STUDENT_QUESTION
+        )
+        self.response.save()
+        self.student_error = StudentError(response=self.response, errorModel=self.unit_lesson, author=self.user)
+        self.student_error.save()
+
+    def test_ul_tasks(self):
+        unit_lesson_error = UnitLesson(
+            unit=self.unit,
+            lesson=self.lesson,
+            addedBy=self.user,
+            treeID=self.lesson.id,
+            kind=UnitLesson.MISUNDERSTANDS,
+            parent=self.unit_lesson
+        )
+        unit_lesson_error.save()
+        unit_lesson_answer = UnitLesson(
+            unit=self.unit,
+            lesson=self.lesson,
+            addedBy=self.user,
+            treeID=self.lesson.id,
+            kind=UnitLesson.ANSWERS,
+            parent=self.unit_lesson
+        )
+        unit_lesson_answer.save()
+        response = self.client.get(
+            reverse(
+                'ct:ul_tasks',
+                kwargs={
+                  'course_id': self.course.id,
+                  'unit_id': self.unit.id,
+                  'ul_id': self.unit_lesson.id,
+                }
+            ),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/ul_tasks.html')
+        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertEqual(response.context['errorTable'], [(unit_lesson_error, 0)])
+        self.assertIn('newInquiries', response.context)
+
+    def test_ul_tasks_kind_not_question(self):
+        self.lesson.kind = Lesson.PRACTICE_EXAM
+        self.lesson.save()
+        response = self.client.get(
+            reverse(
+                'ct:ul_tasks',
+                kwargs={
+                  'course_id': self.course.id,
+                  'unit_id': self.unit.id,
+                  'ul_id': self.unit_lesson.id,
+                }
+            ),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/ul_tasks.html')
+        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
+        self.assertEqual(response.context['unit'], self.unit)
+        self.assertEqual(response.context['errorTable'], ())
+        self.assertIn('errorTable', response.context)
+        self.assertIn('newInquiries', response.context)
 
 
 class StudyConceptTest(TestCase):
