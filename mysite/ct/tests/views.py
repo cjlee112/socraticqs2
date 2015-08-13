@@ -11,6 +11,7 @@ from ddt import ddt, data, unpack
 
 from ct.views import *
 from ct.models import UnitLesson, Lesson, Unit
+from ct.tests.integrate import FakeRequest, create_question_unit
 from fsm.fsm_base import FSMStack
 
 
@@ -417,6 +418,34 @@ class CourseViewTest(TestCase):
         self.assertEqual(reorder_course_unit.call_count, 1)
 
 
+class CoursesTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course_pub = Course(title='test_title', addedBy=self.user, access=PUBLIC_ACCESS)
+        self.course_pub.save()
+        self.course_privat = Course(title='test_title', addedBy=self.user, access=PRIVATE_ACCESS)
+        self.course_privat.save()
+        self.client.login(username='test', password='test')
+        self.temporary_group = Group(name='Temporary')
+        self.temporary_group.save()
+
+    def test_courses_anonymous(self):
+        self.client.logout()
+        response = self.client.get(reverse('ct:courses'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/courses.html')
+        self.assertIn('courses', response.context)
+        self.assertEqual(response.context['courses'][0], self.course_pub)
+
+    def test_courses_temporary(self):
+        self.user.groups.add(self.temporary_group)
+        response = self.client.get(reverse('ct:courses'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/courses.html')
+        self.assertIn('courses', response.context)
+        self.assertEqual(response.context['courses'][0], self.course_pub)
+
+
 class EditCourseTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -561,11 +590,46 @@ class EditUnitTest(TestCase):
         self.assertIsInstance(response.context['unitform'], UnitTitleForm)
 
 
+@patch('ct.views.get_object_or_404')
+@patch('ct.views.ConceptLinkForm')
 class UpdateConceptTest(TestCase):
-    def test_update_concept_link(self):
-        pass
+    """
+    By this tests we prove that update_concept_link make propper actions.
+    """
+    def setUp(self, *args, **kwargs):
+        self.cl = Mock()
+        self.clform = Mock()
+        self.request = self.unit = Mock()
+        self.request.POST.get.return_value = 1
+        self.conceptLinks = Mock()
+
+    def test_update_concept_link(self, ConceptLinkForm, get_obj_or_404):
+        get_obj_or_404.return_value = self.cl
+        ConceptLinkForm.return_value = self.clform
+
+        update_concept_link(self.request, self.conceptLinks, self.unit)
+        self.assertEqual(get_obj_or_404.call_count, 1)
+        ConceptLinkForm.assert_called_once_with(self.request.POST, instance=self.cl)
+        self.cl.annotate_ul.assert_called_once_with(self.unit)
+        self.clform.is_valid.assert_called_once_with()
+        self.clform.save.assert_called_once_with()
+        self.conceptLinks.replace.assert_called_once_with(self.cl, self.clform)
+
+    def test_update_concept_link_form_is_not_valid(self, ConceptLinkForm, get_obj_or_404):
+        get_obj_or_404.return_value = self.cl
+        ConceptLinkForm.return_value = self.clform
+        self.clform.is_valid.return_value = False
+
+        update_concept_link(self.request, self.conceptLinks, self.unit)
+        self.assertEqual(get_obj_or_404.call_count, 1)
+        ConceptLinkForm.assert_called_once_with(self.request.POST, instance=self.cl)
+        self.cl.annotate_ul.assert_called_once_with(self.unit)
+        self.clform.is_valid.assert_called_once_with()
+        self.assertEqual(self.clform.save.call_count, 0)
+        self.assertEqual(self.conceptLinks.replace.call_count, 0)
 
 
+# TODO need move to integrate tests - make request to wikipedia.org
 class ConceptsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -579,7 +643,7 @@ class ConceptsTests(TestCase):
         self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
         self.role.save()
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
-        self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        self.lesson = Lesson(title='New York Test Lesson', text='brr', addedBy=self.user)
         self.lesson.save_root(self.concept)
         self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
         self.unit_lesson.save()
@@ -593,13 +657,85 @@ class ConceptsTests(TestCase):
         self.assertTemplateUsed(response, 'ct/concepts.html')
         self.assertIn('actionTarget', response.context)
 
-    # def test_unit_concepts_post(self):
-    #     response = self.client.post(
-    #         reverse('ct:unit_concepts', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id}),
-    #         {'relationship': 'defines', 'clID': self.lesson.conceptlink_set.filter(concept=self.concept).first().id},
-    #         follow=True
-    #     )
-    #     self.assertEqual(response.status_code, 200)
+    def test_unit_concepts_search(self):
+        self.lesson.concept = self.concept
+        self.lesson.save()
+        response = self.client.get(
+            reverse('ct:unit_concepts', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id}),
+            {'search': 'New York'},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/concepts.html')
+        self.assertIn('actionTarget', response.context)
+        cset_dict = {i[0]: i[1] for i in response.context['cset']}
+        self.assertIn('New York Test Lesson', cset_dict)
+        self.assertIn('New York', cset_dict)
+        self.assertIn('The New York Times Company', cset_dict)
+
+
+class UlConcepts(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.lesson = Lesson(title='New York Test Lesson', text='brr', addedBy=self.user)
+        self.lesson.save_root(self.concept)
+        self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
+        self.unit_lesson.save()
+
+    def test_ul_concepts(self):
+        response = self.client.get(
+            reverse(
+                'ct:ul_concepts',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unit_lesson.id}
+            ),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/concepts.html')
+        self.assertIn('actionTarget', response.context)
+
+    @patch('ct.views.update_concept_link')
+    def test_ul_concepts_post(self, update_concept_link):
+        response = self.client.post(
+            reverse(
+                'ct:ul_concepts',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unit_lesson.id}
+            ),
+            {'relationship': 'defines', 'clID': self.lesson.conceptlink_set.filter(concept=self.concept).first().id},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/concepts.html')
+        self.assertEqual(update_concept_link.call_count, 1)
+
+
+class CopyTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.lesson = Lesson(title='New York Test Lesson', text='brr', addedBy=self.user)
+        self.lesson.save_root(self.concept)
+        self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
+        self.unit_lesson.save()
 
     def test_copy_unit_lesson_false(self):
         result = copy_unit_lesson(self.unit_lesson, self.concept, self.unit, self.user, None)
@@ -621,14 +757,87 @@ class ConceptsTests(TestCase):
         result = copy_error_ul(self.unit_lesson, self.concept, unit, self.user, None)
         self.assertNotEqual(result, self.unit_lesson)
 
-    # def test_live_questions(self):
-    #     response = self.client.get(
-    #         reverse(
-    #             'ct:live_question',
-    #             kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unit_lesson.id}),
-    #         follow=True
-    #     )
-    #     self.assertEqual(response.status_code, 200)
+
+class LiveQuestionUnitTest(TestCase):
+    """
+    Pure unittest for live_question view.
+    """
+    def test_live_questions(self):
+        # TODO finish unittests for live_questions view
+        pass
+
+
+class LiveQuestionTest(TestCase):
+    """
+    Some kind of integration tests due to using fsm app.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='jacob', email='jacob@_', password='top_secret'
+        )
+        self.client.login(username='jacob', password='top_secret')
+        self.course = Course(
+            title='Great Course', description='the bestest', addedBy=self.user
+        )
+        self.course.save()
+        self.unit = Unit(title='My Courselet', addedBy=self.user)
+        self.unit.save()
+        self.lesson = Lesson(
+            title='Big Deal', text='very interesting info', addedBy=self.user
+        )
+        self.lesson.save_root()
+        self.unitLesson = UnitLesson.create_from_lesson(
+            self.lesson, self.unit, order='APPEND'
+        )
+        self.ulQ = create_question_unit(self.user)
+        self.ulQ2 = create_question_unit(
+            self.user, 'Pretest', 'Scary Question', 'Tell me something.'
+        )
+        self.fsmDict = dict(name='test', title='try this')
+        self.nodeDict = dict(
+            START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.START'),
+            MID=dict(title='in the middle', path='ct:about', doLogging=True),
+            END=dict(title='end here', path='ct:home')
+        )
+        self.edgeDict = (
+            dict(name='next', fromNode='START', toNode='END', title='go go go'),
+            dict(name='select_Lesson', fromNode='MID', toNode='MID', title='go go go'),
+        )
+
+    def get_fsm_request(self, fsmName, stateData, startArgs=None, **kwargs):
+        """
+        Create request, fsmStack and start specified FSM.
+        """
+        startArgs = startArgs or {}
+        request = FakeRequest(self.user)
+        request.session = self.client.session
+        fsmStack = FSMStack(request)
+        result = fsmStack.push(request, fsmName, stateData, startArgs, **kwargs)
+        request.session.save()
+        return request, fsmStack, result
+
+    def test_live_questions(self):
+        from ct.fsm_plugin.lessonseq import get_specs
+        get_specs()[0].save_graph(self.user.username)
+        from ct.fsm_plugin.randomtrial import get_specs
+        get_specs()[0].save_graph(self.user.username)
+        fsmData = dict(testFSM='lessonseq', treatmentFSM='lessonseq',
+                       treatment1=self.ulQ.unit, treatment2=self.ulQ.unit,
+                       testUnit=self.ulQ2.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request(
+            'randomtrial', fsmData, dict(trialName='test')
+        )
+        response = self.client.get(
+            reverse(
+                'ct:live_question',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unitLesson.id}),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/lesson.html')
+        self.assertEqual(response.context['unitLesson'], self.unitLesson)
+        self.assertEqual(response.context['unit'], self.unit)
+        # TODO add mode checks
 
 
 class MakeClTable(TestCase):
@@ -1331,7 +1540,7 @@ class ResolutionsStudentTest(TestCase):
         self.assertIn('statusForm', response.context)
 
 
-class ul_faq_studentTest(TestCase):
+class UlFaqStudentTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
