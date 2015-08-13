@@ -236,9 +236,9 @@ repository::
    ``Could not load contenttypes.ContentType`` then load the example
    data as follows::
 
-     python manage.py loaddata dumpdata/debug-e.json
+     python manage.py loaddata dumpdata/debug-wo-fsm.json
 
-You will also need to load FSM plugin specifications;
+**Also necessarily need to load FSM plugin specifications;**
 see :ref:`fsm-deploy`.
 
 Finally, start up the development web server::
@@ -248,7 +248,9 @@ Finally, start up the development web server::
 Start a web browser and point it at http://localhost:8000/ct/
 
 It will prompt you to log in; the default development tester
-username is ``admin`` with password ``testonly``.  
+username is ``admin`` with password ``testonly``.
+
+User `admin` is a conventional user to use during the FSM development.
 
 You can stop the web server by simply typing Control-C.
 
