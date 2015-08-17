@@ -2,11 +2,13 @@
 Unit tests for core app models.py.
 """
 from django.test import TestCase
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from mock import Mock, patch
 
 from ct.models import *
+from ct.sourcedb_plugin.wikipedia_plugin import LessonDoc
 
 
 class ConceptTest(TestCase):
@@ -217,3 +219,202 @@ class ConceptGraphTest(TestCase):
         self.assertEqual(concept_graph.addedBy, user)
         self.assertEqual(concept_graph.approvedBy, user)
         self.assertIsNotNone(concept_graph.atime)
+
+
+class LessonTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+
+    def test_get_sourceDB_plugin(self):
+        result = Lesson.get_sourceDB_plugin('wikipedia')
+        self.assertEqual(result, LessonDoc)
+
+    # Need to move to integrate tests - get data from wiki
+    def test_get_from_sourceDB(self):
+        lesson = Lesson.get_from_sourceDB('New York', self.user)
+        self.assertIsInstance(lesson, Lesson)
+        self.assertEqual(lesson.addedBy, self.user)
+        self.assertEqual(lesson.title, 'New York')
+        self.assertEqual(lesson.sourceDB, 'wikipedia')
+        self.assertIsNotNone(lesson.commitTime)
+        self.assertTrue(Lesson.objects.filter(addedBy=self.user).exists())
+
+    # Need to move to integrate tests - get data from wiki
+    def test_get_from_sourceDB_noSave_wiki_user(self):
+        user = User.objects.create_user(username='wikipedia', password='wiki')
+        lesson = Lesson.get_from_sourceDB('New York', user, doSave=False)
+        self.assertIsInstance(lesson, Lesson)
+        self.assertEqual(lesson.addedBy, user)
+        self.assertEqual(lesson.title, 'New York')
+        self.assertEqual(lesson.sourceDB, 'wikipedia')
+        self.assertIsNotNone(lesson.commitTime)
+        self.assertFalse(Lesson.objects.filter(addedBy=self.user).exists())
+
+    @patch('ct.models.Lesson.get_sourceDB_plugin')
+    def test_get_from_sourceDB_unittest(self, get_sourceDB_plugin):
+        data = Mock()
+        data.title = 'New York'
+        data.url = '/test/url/'
+        data.description = 'test Description'
+        dataClass = Mock(return_value=data)
+        get_sourceDB_plugin.return_value = dataClass
+        lesson = Lesson.get_from_sourceDB('New York', self.user)
+        self.assertIsInstance(lesson, Lesson)
+        self.assertEqual(lesson.addedBy, self.user)
+        self.assertEqual(lesson._sourceDBdata, data)
+        self.assertEqual(lesson.title, data.title)
+        self.assertEqual(lesson.text, data.description)
+        self.assertEqual(lesson.url, data.url)
+        self.assertEqual(lesson.sourceDB, 'wikipedia')
+        self.assertIsNotNone(lesson.commitTime)
+        self.assertTrue(Lesson.objects.filter(addedBy=self.user).exists())
+        get_sourceDB_plugin.assert_called_once_with('wikipedia')
+        dataClass.assert_called_once_with(data.title)
+
+    @patch('ct.models.Lesson.get_sourceDB_plugin')
+    def test_get_from_sourceDB_noSave_wiki_user_unittest(self, get_sourceDB_plugin):
+        user = User.objects.create_user(username='wikipedia', password='wiki')
+        data = Mock()
+        data.title = 'New York'
+        data.description = '/test/url/'
+        data.url = 'test Description'
+        dataClass = Mock(return_value=data)
+        get_sourceDB_plugin.return_value = dataClass
+        lesson = Lesson.get_from_sourceDB('New York', user, doSave=False)
+        self.assertIsInstance(lesson, Lesson)
+        self.assertEqual(lesson.addedBy, user)
+        self.assertEqual(lesson._sourceDBdata, data)
+        self.assertEqual(lesson.title, data.title)
+        self.assertEqual(lesson.text, data.description)
+        self.assertEqual(lesson.url, data.url)
+        self.assertEqual(lesson.sourceDB, 'wikipedia')
+        self.assertIsNotNone(lesson.commitTime)
+        self.assertFalse(Lesson.objects.filter(addedBy=self.user).exists())
+        get_sourceDB_plugin.assert_called_once_with('wikipedia')
+        dataClass.assert_called_once_with(data.title)
+
+    @patch('ct.models.Lesson.get_sourceDB_plugin')
+    def test_search_sourceDB(self, get_sourceDB_plugin):
+        query = Mock()
+        dataClass = Mock()
+        get_sourceDB_plugin.return_value = dataClass
+        Lesson.search_sourceDB(query)
+        dataClass.search.assert_called_once_with(query)
+
+    def test_save_root(self):
+        lesson = self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        self.assertIsNone(lesson.treeID)
+        lesson.save_root()
+        self.assertIsNotNone(lesson.treeID)
+
+    def test_save_root_concept(self):
+        concept = Concept(title='test title', addedBy=self.user)
+        concept.save()
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, concept=concept)
+        lesson.save_root(concept=concept, relationship=ConceptLink.TESTS)
+        self.assertTrue(ConceptLink(concept=concept, addedBy=self.user, relationship=ConceptLink.TESTS))
+
+    def test_save_root_concept_default_relation(self):
+        concept = Concept(title='test title', addedBy=self.user)
+        concept.save()
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, concept=concept)
+        lesson.save_root(concept=concept)
+        self.assertTrue(ConceptLink(concept=concept, addedBy=self.user, relationship=ConceptLink.DEFINES))
+
+    def test_is_committed(self):
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now())
+        lesson2 = Lesson(title='ugh', text='brr', addedBy=self.user)
+        self.assertTrue(lesson.is_committed())
+        self.assertFalse(lesson2.is_committed())
+
+    def test_clone_dict(self):
+        concept = Concept(title='test title', addedBy=self.user)
+        concept.save()
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now(), concept=concept)
+        lesson.save_root(concept=concept, relationship=ConceptLink.TESTS)
+        clone_attr_dict = lesson._clone_dict()
+        for attr in Lesson._cloneAttrs:
+            self.assertIn(attr, clone_attr_dict)
+        self.assertEqual(clone_attr_dict['title'], 'ugh')
+        self.assertEqual(clone_attr_dict['text'], 'brr')
+        self.assertEqual(clone_attr_dict['concept'], concept)
+
+    def test_checkout(self):
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now())
+        result = lesson.checkout(self.user)
+        self.assertIsInstance(result, Lesson)
+        self.assertEqual(result.parent, lesson)
+        cloned_dict = lesson._clone_dict()
+        for attr in cloned_dict:
+            self.assertEqual(getattr(result, attr), cloned_dict[attr])
+
+    @patch('ct.models.Lesson.checkin')
+    def test_checkout_do_checkin(self, checkin):
+        new_user = User.objects.create_user(username='new user', password='new test')
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        lesson.checkout(new_user)
+        checkin.assert_called_once_with(commit=True)
+
+    @patch('ct.models.Lesson.conceptlink_set')
+    @patch('ct.models.Lesson.save')
+    def test_checkin_save(self, save, conceptlink_set):
+        parent = Lesson(title='parent', text='parent', addedBy=self.user)
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, parent=parent)
+        lesson.checkin(commit=False)
+        save.assert_called_once_with()
+        self.assertFalse(lesson.is_committed())
+
+        save.reset_mock()
+
+        lesson.checkin(commit=True)
+        save.assert_called_with()
+        self.assertTrue(lesson.is_committed())
+        self.assertTrue(parent.is_committed())
+
+        save.reset_mock()
+
+        concept_link = Mock()
+        conceptlink_set.all.return_value = [concept_link, concept_link]
+        lesson.checkin(commit=False, copyLinks=True)
+        concept_link.copy.assert_called_with(lesson)
+        self.assertEqual(concept_link.copy.call_count, 2)
+
+    def test_add_concept_link(self):
+        concept = Concept(title='test title', addedBy=self.user)
+        concept.save()
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        lesson.save()
+        self.assertTrue(lesson.add_concept_link(concept, ConceptLink.TESTS, self.user))
+        self.assertTrue(
+            ConceptLink.objects.filter(concept=concept, addedBy=self.user, relationship=ConceptLink.TESTS).exists()
+        )
+
+    def test_title(self):
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        self.assertEqual(lesson.__unicode__(), lesson.title)
+
+
+class ConceptLinkTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
+        self.lesson.save()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+
+    def test_copy(self):
+        lesson = Lesson(title='ugh test 2', text='brr test 2', addedBy=self.user)
+        lesson.save()
+        concept_link = self.lesson.conceptlink_set.get(lesson=self.lesson)
+        concept_link_copied = concept_link.copy(lesson)
+        self.assertTrue(ConceptLink.objects.filter(id=concept_link_copied.id).exists())
+        concept_link_copied = ConceptLink.objects.get(id=concept_link_copied.id)
+        self.assertIsInstance(concept_link_copied, ConceptLink)
+        self.assertEqual(concept_link_copied.concept, self.concept)
+        self.assertEqual(concept_link_copied.lesson, lesson)
+        self.assertEqual(concept_link_copied.relationship, concept_link.relationship)
+        self.assertEqual(concept_link_copied.addedBy, self.user)
+
+    def test_annotate_ul(self):
+        pass
