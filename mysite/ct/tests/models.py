@@ -400,8 +400,10 @@ class ConceptLinkTest(TestCase):
         self.concept = Concept(title='test title', addedBy=self.user)
         self.concept.save()
         self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
-        self.lesson.save()
+        self.lesson.save_root()
         self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
 
     def test_copy(self):
         lesson = Lesson(title='ugh test 2', text='brr test 2', addedBy=self.user)
@@ -417,4 +419,100 @@ class ConceptLinkTest(TestCase):
         self.assertEqual(concept_link_copied.addedBy, self.user)
 
     def test_annotate_ul(self):
-        pass
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        concept_link = self.lesson.conceptlink_set.get(lesson=self.lesson)
+        concept_link.annotate_ul(self.unit)
+        self.assertIsNotNone(concept_link.unitLesson)
+
+    def test_annotate_ul_raise_exception(self):
+        concept_link = self.lesson.conceptlink_set.get(lesson=self.lesson)
+        with self.assertRaises(UnitLesson.DoesNotExist):
+            concept_link.annotate_ul(self.unit)
+
+
+class StudyListTest(TestCase):
+    def test_title(self):
+        user = User.objects.create_user(username='test', password='test')
+        lesson = Lesson(title='ugh', text='brr', addedBy=user)
+        lesson.save()
+        study_list = StudyList(lesson=lesson, user=user)
+        self.assertEqual(study_list.__unicode__(), lesson.title)
+
+
+class UnitLessonTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION)
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+
+    def test_create_from_lesson(self):
+        result = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        self.assertIsInstance(result, UnitLesson)
+        self.assertEqual(result.unit, self.unit)
+        self.assertEqual(result.lesson, self.lesson)
+        self.assertTrue(UnitLesson.objects.filter(unit=self.unit, lesson=self.lesson).exists())
+
+    def test_create_from_lesson_answer(self):
+        result = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson, addAnswer=True)
+        self.assertIsInstance(result, UnitLesson)
+        self.assertEqual(result.unit, self.unit)
+        self.assertEqual(result.lesson, self.lesson)
+        self.assertIsInstance(result._answer, UnitLesson)
+        self.assertTrue(UnitLesson.objects.filter(unit=self.unit, lesson=self.lesson).exists())
+        answer = Lesson.objects.filter(
+            title='Answer', text='write an answer', addedBy=self.user, kind=Lesson.ANSWER
+        ).first()
+        self.assertTrue(UnitLesson.objects.filter(unit=self.unit, lesson=answer, parent=result).exists())
+
+    @patch('ct.models.Unit.next_order', return_value=42)
+    def test_create_from_lesson_order_append(self, next_order):
+        result = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson, order='APPEND')
+        next_order.assert_called_once_with()
+        self.assertEqual(result.order, 42)
+
+    def test_search_text(self):
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = UnitLesson.search_text('ugh')
+        self.assertIsInstance(result[0], UnitLesson)
+        result = UnitLesson.search_text('brr')
+        self.assertIsInstance(result[0], UnitLesson)
+
+    def test_search_text_lesson_is_lesson(self):
+        self.lesson.kind = Lesson.BASE_EXPLANATION
+        self.lesson.save()
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = UnitLesson.search_text('ugh', searchType='lesson')
+        self.assertIsInstance(result[0], UnitLesson)
+        self.assertEqual(result[0].lesson, self.lesson)
+        self.assertEqual(result[0].unit, self.unit)
+
+    def test_search_text_question(self):
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = UnitLesson.search_text('ugh', searchType='question')
+        self.assertIsInstance(result[0], UnitLesson)
+        self.assertEqual(result[0].lesson, self.lesson)
+        self.assertEqual(result[0].unit, self.unit)
+
+    def test_search_text_error(self):
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson, kind=UnitLesson.MISUNDERSTANDS)
+        self.lesson.concept = self.concept
+        self.lesson.save()
+        result = UnitLesson.search_text('ugh', searchType=0)
+        self.assertIsInstance(result[0], UnitLesson)
+        self.assertEqual(result[0].lesson, self.lesson)
+        self.assertEqual(result[0].unit, self.unit)
+
+    @patch('ct.models.distinct_subset')
+    def test_search_text_dedupe(self, distinct_subset):
+        UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        UnitLesson.search_text('ugh', searchType='question', dedupe=True)
+        self.assertEqual(distinct_subset.call_count, 1)
+
+    def test_search_sourceDB(self):
+        result = UnitLesson.search_sourceDB('test query')
+        self.assertIsInstance(result, tuple)
