@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models.query import QuerySet
 from mock import Mock, patch
 
 from ct.models import *
@@ -513,6 +514,290 @@ class UnitLessonTest(TestCase):
         UnitLesson.search_text('ugh', searchType='question', dedupe=True)
         self.assertEqual(distinct_subset.call_count, 1)
 
-    def test_search_sourceDB(self):
-        result = UnitLesson.search_sourceDB('test query')
+    @patch('ct.models.Lesson.search_sourceDB')
+    def test_search_sourceDB(self, search_sourceDB):
+        result_queries = (
+            ('test query 1', 'test query 1', 'http:/test/path1'),
+            ('test query 2', 'test query 2', 'http:/test/path2'),
+        )
+        search_sourceDB.return_value = result_queries
+        self.lesson.sourceDB = 'wikipedia'
+        self.lesson.sourceID = 'test query 1'
+        self.lesson.save()
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = UnitLesson.search_sourceDB('test query', unit=self.unit)
         self.assertIsInstance(result, tuple)
+        self.assertEqual(result, ([unit_lesson], [('test query 2', 'test query 2', 'http:/test/path2')]))
+        result = UnitLesson.search_sourceDB('test query')
+        self.assertEqual(result, ([unit_lesson], [('test query 2', 'test query 2', 'http:/test/path2')]))
+
+    def test_get_answers(self):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson_answer = UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.ANSWERS
+        )
+        result = unit_lesson.get_answers()
+        self.assertIsInstance(result, QuerySet)
+        self.assertEqual(result[0], unit_lesson_answer)
+        # Redundant check
+        with patch('ct.models.UnitLesson.unitlesson_set') as mocked:
+            unit_lesson.get_answers()
+            mocked.filter.assert_called_once_with(kind=UnitLesson.ANSWERS)
+
+    def test_get_errors(self):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson_answer = UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
+        )
+        result = unit_lesson.get_errors()
+        self.assertIsInstance(result, QuerySet)
+        self.assertEqual(result[0], unit_lesson_answer)
+        # Redundant check
+        with patch('ct.models.UnitLesson.unitlesson_set') as mocked:
+            unit_lesson.get_errors()
+            mocked.filter.assert_called_once_with(kind=UnitLesson.MISUNDERSTANDS)
+
+    def test_get_linked_concepts(self):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = unit_lesson.get_linked_concepts()
+        self.assertIsInstance(result, QuerySet)
+        self.assertEqual(result[0], ConceptLink.objects.filter(concept=self.concept).first())
+        # Redundant check
+        with patch('ct.models.Lesson.conceptlink_set') as mocked:
+            unit_lesson.get_linked_concepts()
+            mocked.all.assert_called_once_with()
+
+    def test_get_concepts(self):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = unit_lesson.get_concepts()
+        self.assertEqual(result[0], self.concept)
+        with patch('ct.models.Concept.objects.filter') as mocked:
+            unit_lesson.get_concepts()
+            mocked.assert_called_once_with(
+                conceptlink__lesson=self.lesson,
+                isError=False
+            )
+
+    def test_get_em_resolutions(self):
+        self.lesson.concept = self.concept
+        self.lesson.save()
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson_resolves = UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.RESOLVES
+        )
+        result = unit_lesson.get_em_resolutions()
+        self.assertEqual(result[0], self.concept)
+        self.assertEqual(result[1][0], unit_lesson_resolves)
+
+    @patch('ct.models.UnitLesson.response_set')
+    def test_get_new_inquiries(self, response_set):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson.get_new_inquiries()
+        response_set.filter.assert_called_once_with(
+            kind=Response.STUDENT_QUESTION,
+            needsEval=True
+        )
+
+    @patch('ct.models.UnitLesson.objects.filter')
+    @patch('ct.models.distinct_subset')
+    def test_get_alternative_defs(self, distinct_subset, mocked_filter):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson.get_alternative_defs()
+        self.assertEqual(distinct_subset.call_count, 1)
+        mocked_filter.assert_called_once_with(lesson__concept=unit_lesson.lesson.concept)
+        mocked_filter().exclude.assert_called_once_with(treeID=unit_lesson.treeID)
+
+    @patch('ct.models.Unit.unitlesson_set')
+    def test_get_next_lesson(self, mocked):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        with self.assertRaises(UnitLesson.DoesNotExist):
+            unit_lesson.get_next_lesson()
+        unit_lesson.order = 1
+        unit_lesson.get_next_lesson()
+        mocked.get.assert_called_once_with(order=unit_lesson.order + 1)
+
+    @patch('ct.models.Lesson.checkout')
+    def test_checkout(self, checkout):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        result = unit_lesson.checkout(self.user)
+        checkout.assert_called_once_with(self.user)
+        self.assertEqual(result, checkout())
+        checkout.return_value = False
+        result = unit_lesson.checkout(self.user)
+        self.assertEqual(result, unit_lesson.lesson)
+
+    @patch('ct.models.Lesson.checkin')
+    def test_checkin(self, mocked_checkin):
+        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION)
+        lesson.save_root()
+        lesson.changeLog = 'test change log'
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        with patch('ct.models.UnitLesson.save') as mocked_save:
+            unit_lesson.checkin(lesson)
+            mocked_checkin.assert_called_once_with(True, True, True)
+            mocked_save.assert_called_with()
+            self.assertEqual(unit_lesson.lesson, lesson)
+
+    @patch('ct.models.Lesson.checkin')
+    def test_checkin_same_lesson(self, mocked_checkin):
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        with patch('ct.models.UnitLesson.save') as mocked_save:
+            mocked_checkin.reset_mock()
+            mocked_save.reset_mock()
+            unit_lesson.checkin(self.lesson)
+            mocked_checkin.assert_called_once_with(None, True, False)
+            self.assertEqual(mocked_save.call_count, 0)
+
+            mocked_checkin.reset_mock()
+            mocked_save.reset_mock()
+            self.lesson.changeLog = 'new test change log'
+            unit_lesson.checkin(self.lesson)
+            mocked_checkin.assert_called_once_with(True, True, False)
+            self.assertEqual(mocked_save.call_count, 0)
+
+    def test_copy(self):
+        unit = Unit(title='new test unit title', addedBy=self.user)
+        unit.save()
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.RESOLVES
+        )
+        result = unit_lesson.copy(unit, self.user, order='APPEND')
+        self.assertIsInstance(result, UnitLesson)
+        self.assertEqual(result.order, 0)
+        self.assertEqual(unit_lesson.lesson.changeLog, 'snapshot for fork by %s' % self.user.username)
+        self.assertEqual(result.kind, unit_lesson.kind)
+        self.assertEqual(result.lesson, unit_lesson.lesson)
+        self.assertEqual(result.addedBy, unit_lesson.addedBy)
+        self.assertNotEqual(result.unit, unit_lesson.unit)
+        self.assertEqual(result.treeID, unit_lesson.treeID)
+        self.assertEqual(result.branch, unit_lesson.branch)
+
+    @patch('ct.models.Lesson.add_concept_link')
+    def test_copy_resolves(self, add_concept_link):
+        self.lesson.concept = self.concept
+        self.lesson.save()
+        unit = Unit(title='new test unit title', addedBy=self.user)
+        unit.save()
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        resolve = UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.RESOLVES
+        )
+        resolve.copy(unit, self.user, parent=unit_lesson, kind=UnitLesson.RESOLVES)
+        add_concept_link.assert_called_once_with(unit_lesson.lesson.concept, ConceptLink.RESOLVES, self.user)
+
+    def test_save_resolution(self):
+        self.lesson.concept = self.concept
+        self.lesson.save()
+        unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
+        unit_lesson = UnitLesson.create_from_lesson(
+            unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
+        )
+        lesson = Lesson(title='relosution', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION)
+        lesson.save_root()
+        result = unit_lesson.save_resolution(lesson)
+        self.assertIsInstance(result, UnitLesson)
+        self.assertEqual(result.lesson, lesson)
+        self.assertEqual(result.unit, self.unit)
+        self.assertEqual(result.kind, UnitLesson.RESOLVES)
+        self.assertEqual(result.parent, unit_lesson)
+
+    @patch('ct.models.UnitLesson.create_from_lesson')
+    def test_save_resolution_unittest(self, create_from_lesson):
+        """
+        Pure unittest for save_resolution method.
+        """
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42)
+        unit_lesson.lesson = self.lesson
+        self.lesson.concept = self.concept
+        lesson = Mock()
+        lesson.concept = Mock()
+        with self.assertRaises(ValueError):
+            unit_lesson.save_resolution(lesson)
+
+        unit_lesson.kind = UnitLesson.MISUNDERSTANDS
+        unit_lesson.save_resolution(lesson)
+        lesson.save_root.assert_called_once_with(self.lesson.concept, ConceptLink.RESOLVES)
+        create_from_lesson.assert_called_once_with(
+            lesson, self.unit, kind=UnitLesson.RESOLVES, parent=unit_lesson
+        )
+
+    @patch('ct.models.UnitLesson.unitlesson_set')
+    def test_copy_resolution(self, unitlesson_set):
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42)
+        new_unit_lesson = Mock()
+        new_unit_lesson.treeID = 43
+        result = unit_lesson.copy_resolution(new_unit_lesson, self.user)
+        unitlesson_set.get.assert_called_once_with(treeID=new_unit_lesson.treeID, kind=UnitLesson.RESOLVES)
+        self.assertEqual(result, unit_lesson.unitlesson_set.get())
+
+        unitlesson_set.get.side_effect = UnitLesson.DoesNotExist
+
+        result = unit_lesson.copy_resolution(new_unit_lesson, self.user)
+        new_unit_lesson.copy.assert_called_once_with(
+            unit_lesson.unit, self.user, unit_lesson, kind=UnitLesson.RESOLVES
+        )
+        self.assertEqual(result, new_unit_lesson.copy())
+
+    @patch('ct.models.UnitLesson.get_type', return_value=IS_LESSON)
+    def test_get_url(self, get_type):
+        course = Course(title='test_title', addedBy=self.user)
+        course.save()
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42)
+        unit_lesson.save()
+        base_path = reverse('ct:study_unit', args=(course.id, self.unit.id))
+        result = unit_lesson.get_url(base_path)
+        self.assertEqual(result, reverse('ct:lesson', args=(course.id, self.unit.id, unit_lesson.id)))
+
+        get_type.return_value = IS_CONCEPT
+        result = unit_lesson.get_url(base_path)
+        self.assertEqual(result, reverse('ct:concept_lessons_student', args=(course.id, self.unit.id, unit_lesson.id)))
+
+        get_type.return_value = IS_ERROR
+        result = unit_lesson.get_url(base_path)
+        self.assertEqual(result, reverse('ct:resolutions_student', args=(course.id, self.unit.id, unit_lesson.id)))
+
+        result = unit_lesson.get_url(base_path, forceDefault=True)
+        self.assertEqual(result, reverse('ct:lesson', args=(course.id, self.unit.id, unit_lesson.id)))
+
+        get_type.return_value = IS_LESSON
+        result = unit_lesson.get_url(base_path, subpath='faq')
+        self.assertEqual(result, reverse('ct:ul_faq_student', args=(course.id, self.unit.id, unit_lesson.id)))
+
+        result = unit_lesson.get_url(base_path, subpath='')
+        self.assertEqual(result, reverse('ct:lesson', args=(course.id, self.unit.id, unit_lesson.id)))
+
+    def test_get_type(self):
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42, lesson=self.lesson)
+        unit_lesson.lesson.concept = self.concept
+
+        unit_lesson.kind = UnitLesson.MISUNDERSTANDS
+        self.assertEqual(unit_lesson.get_type(), IS_ERROR)
+
+        unit_lesson.kind = UnitLesson.RESOLVES
+        self.assertEqual(unit_lesson.get_type(), IS_CONCEPT)
+
+        unit_lesson.lesson.concept = None
+        self.assertEqual(unit_lesson.get_type(), IS_LESSON)
+
+    @patch('ct.models.reverse')
+    def test_get_study_url(self, reverse):
+        course = Course(title='test_title', addedBy=self.user)
+        course.save()
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42, lesson=self.lesson)
+        unit_lesson.save()
+        unit_lesson.get_study_url(course.id)
+        reverse.assert_called_once_with('ct:ul_respond', args=(course.id, self.unit.pk, unit_lesson.pk))
+
+        reverse.reset_mock()
+
+        self.lesson.kind = Lesson.EXERCISE
+        unit_lesson.get_study_url(course.id)
+        reverse.assert_called_once_with('ct:lesson', args=(course.id, self.unit.pk, unit_lesson.pk))
+
+    def test_is_question(self):
+        unit_lesson = UnitLesson(unit=self.unit, addedBy=self.user, treeID=42, lesson=self.lesson)
+        self.assertTrue(unit_lesson.is_question())
+
+        self.lesson.kind = Lesson.EXERCISE
+        self.assertFalse(unit_lesson.is_question())
