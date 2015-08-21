@@ -1201,6 +1201,7 @@ def study_unit(request, course_id, unit_id):
                 dict(unitLesson=nextUL, unit=unit, startForm=startForm))
 
 
+@login_required
 def slideshow(request, course_id, unit_id):
     'launcher for viewing courselet as a slideshow'
     course = get_object_or_404(Course, pk=course_id)
