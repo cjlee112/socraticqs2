@@ -801,3 +801,558 @@ class UnitLessonTest(TestCase):
 
         self.lesson.kind = Lesson.EXERCISE
         self.assertFalse(unit_lesson.is_question())
+
+
+class UnitTest(TestCase):
+    """
+    Tests for Unit model.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit_lesson = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
+        )
+        self.unit_lesson.save()
+
+    @patch('ct.models.Unit.unitlesson_set')
+    def test_next_order(self, unitlesson_set):
+        aggregate_dict = {'n': None}
+        unitlesson_set.all().aggregate.return_value = aggregate_dict
+        self.assertEqual(self.unit.next_order(), 0)
+        aggregate_dict['n'] = 42
+        self.assertEqual(self.unit.next_order(), aggregate_dict['n']+1)
+
+    @patch('ct.models.Unit.unitlesson_set')
+    def test_no_lessons(self, unitlesson_set):
+        """
+        Source code need to be refactored.
+        """
+        unitlesson_set.filter().count.return_value = 0
+        self.assertTrue(self.unit.no_lessons())
+
+        unitlesson_set.filter().count.return_value = 42
+        self.assertFalse(self.unit.no_lessons())
+
+        unitlesson_set.filter.assert_called_with(order__isnull=False)
+
+    @patch('ct.models.Unit.unitlesson_set')
+    def test_no_orct(self, unitlesson_set):
+        """
+        Source code need to be refactored.
+        """
+        unitlesson_set.filter().count.return_value = 0
+        self.assertTrue(self.unit.no_orct())
+
+        unitlesson_set.filter().count.return_value = 42
+        self.assertFalse(self.unit.no_orct())
+
+        unitlesson_set.filter.assert_called_with(order__isnull=False, lesson__kind=Lesson.ORCT_QUESTION)
+
+    def test_create_lesson(self):
+        lesson_title = 'lesson title'
+        lesson_text = 'lesson test'
+        result = self.unit.create_lesson(lesson_title, lesson_text)
+        self.assertIsInstance(result, Lesson)
+        self.assertEqual(result.title, lesson_title)
+        self.assertEqual(result.text, lesson_text)
+        self.assertEqual(result.addedBy, self.user)
+        self.assertIsNotNone(result.treeID)
+        self.assertTrue(Lesson.objects.filter(title=lesson_title).exists())
+        # order = 1 because we have created self.unit_lesson earlier
+        self.assertTrue(UnitLesson.objects.filter(lesson=result, order=1, treeID=result.pk).exists())
+
+    def test_create_lesson_custom_author(self):
+        custom_user = User.objects.create_user(username='custom_user', password='test')
+        lesson_title = 'lesson title'
+        lesson_text = 'lesson test'
+        result = self.unit.create_lesson(lesson_title, lesson_text, author=custom_user)
+        self.assertIsInstance(result, Lesson)
+        self.assertEqual(result.addedBy, custom_user)
+        self.assertTrue(UnitLesson.objects.filter(addedBy=custom_user).exists())
+
+    def test_get_main_concepts(self):
+        result = self.unit.get_main_concepts()
+        self.assertIsInstance(result, dict)
+        self.assertIsInstance(result[self.concept], list)
+
+    def test_get_exercises(self):
+        lesson_title = 'lesson title'
+        lesson_text = 'lesson test'
+        new_lesson = self.unit.create_lesson(lesson_title, lesson_text)
+        new_unit_lesson = UnitLesson.objects.filter(lesson=new_lesson).first()
+        result = self.unit.get_exercises()
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+        self.assertEqual(result[1], new_unit_lesson)
+
+    def test_get_aborts(self):
+        self.unit_lesson.kind = UnitLesson.MISUNDERSTANDS
+        self.unit_lesson.save()
+        result = self.unit.get_aborts()
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+        self.unit_lesson.kind = UnitLesson.COMPONENT
+        self.unit_lesson.save()
+
+        concept = Concept(title='Always ask', addedBy=self.user, alwaysAsk=True)
+        concept.save()
+        lesson = Lesson(kind=Lesson.ERROR_MODEL, concept=concept, addedBy=self.user, treeID=42)
+        lesson.save()
+        result = self.unit.get_aborts()
+        self.assertIsInstance(result, list)
+        self.assertIsInstance(result[0], UnitLesson)
+        self.assertEqual(result[0].lesson, lesson)
+        self.assertEqual(result[0].kind, UnitLesson.MISUNDERSTANDS)
+        self.assertEqual(result[0].treeID, lesson.treeID)
+        self.assertEqual(result[0].addedBy, self.user)
+
+    @patch('ct.models.distinct_subset')
+    def test_get_new_inquiry_uls_unittest(self, distinct_subset):
+        self.unit.get_new_inquiry_uls()
+        self.assertEqual(distinct_subset.call_count, 1)
+
+    def test_get_new_inquiry(self):
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=course,
+            kind=Response.STUDENT_QUESTION,
+            text='test text',
+            confidence=Response.GUESS,
+            needsEval=True,
+            author=self.user
+        )
+        response.save()
+        result = self.unit.get_new_inquiry_uls()
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+    def test_get_errorless_uls(self):
+        unit_lesson2 = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, kind=UnitLesson.MISUNDERSTANDS
+        )
+        unit_lesson2.save()
+        result = self.unit.get_errorless_uls()
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.unit_lesson)
+
+    def test_get_resoless_uls(self):
+        unit_lesson2 = UnitLesson(
+            unit=self.unit,
+            addedBy=self.user,
+            treeID=self.lesson.id,
+            lesson=self.lesson,
+            kind=UnitLesson.MISUNDERSTANDS,
+            parent=self.unit_lesson
+        )
+        unit_lesson2.save()
+        result = self.unit.get_resoless_uls()
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.unit_lesson)
+
+    def test_get_unanswered_uls(self):
+        result = self.unit.get_unanswered_uls(user=self.user)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            needsEval=True,
+            author=self.user
+        )
+        response.save()
+        user2 = User.objects.create_user(username='test2', password='test2')
+        result = self.unit.get_unanswered_uls(user=self.user)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 0)
+
+        result = self.unit.get_unanswered_uls(user=user2)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.unit_lesson)
+
+    def test_get_selfeval_uls(self):
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            needsEval=True,
+            author=self.user
+        )
+        response.save()
+        result = self.unit.get_selfeval_uls()
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+        user2 = User.objects.create_user(username='test2', password='test2')
+        result = self.unit.get_selfeval_uls(user=user2)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 0)
+
+    def test_get_serrorless_uls(self):
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            selfeval=Response.DIFFERENT,
+            status=NEED_HELP_STATUS,
+            author=self.user
+        )
+        response.save()
+        result = self.unit.get_serrorless_uls(user=self.user)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+        student_error = StudentError(response=response, errorModel=self.unit_lesson, author=self.user)
+        student_error.save()
+
+        result = self.unit.get_serrorless_uls(user=self.user)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 0)
+
+    def test_get_unresolved_uls(self):
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            selfeval=Response.DIFFERENT,
+            status=NEED_HELP_STATUS,
+            author=self.user
+        )
+        response.save()
+
+        student_error = StudentError(
+            response=response,
+            errorModel=self.unit_lesson,
+            author=self.user,
+            status=NEED_HELP_STATUS)
+        student_error.save()
+
+        result = self.unit.get_unresolved_uls(user=self.user)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], self.unit_lesson)
+
+    def test_get_study_url(self):
+        course = Course(title='test course', description='test descr', addedBy=self.user)
+        course.save()
+        result = self.unit.get_study_url(reverse('ct:study_unit', args=(course.id, self.unit.id)))
+        self.assertEqual(result, reverse('ct:unit_tasks_student', args=(course.id, self.unit.id)))
+
+    @patch('ct.models.UnitLesson.copy')
+    @patch('ct.models.Unit.reorder_exercise')
+    def test_append(self, reorder_exercise, copy):
+        new_unit_lesson = UnitLesson(
+            unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id
+        )
+        new_unit_lesson.save()
+
+        self.unit.append(new_unit_lesson, self.user)
+        reorder_exercise.assert_called_once_with()
+
+        new_unit = Unit(title='Unit title', addedBy=self.user)
+        new_unit.save()
+
+        new_unit_lesson.unit = new_unit
+        new_unit_lesson.save()
+
+        self.unit.append(new_unit_lesson, self.user)
+        copy.assert_called_once_with(self.unit, self.user, order='APPEND')
+
+
+class FmtCountTest(TestCase):
+    """
+    Test for fmt_count function.
+    """
+    def test_fmt_count(self):
+        result = fmt_count(25, 4)
+        self.assertEqual(result, '625% (25)')
+
+
+class CountsTableTest(TestCase):
+    """
+    Test for CountsTable model.
+    Need to add clead docstring to CountsTable model to make a good tests.
+    """
+    def test_init(self):
+        pass
+
+
+class ResponseTest(TestCase):
+    """
+    Tests for Response model.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit_lesson = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
+        )
+        self.unit_lesson.save()
+        self.response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=self.course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            selfeval=Response.DIFFERENT,
+            status=NEED_HELP_STATUS,
+            author=self.user
+        )
+        self.response.save()
+
+    def test_get_counts(self):
+        """
+        Base checks, need to add more.
+        """
+        query = Q(unitLesson=self.unit_lesson, selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
+        result = Response.get_counts(query, n=5)
+        self.assertIsInstance(result, tuple)
+        self.assertIsInstance(result[0], CountsTable)
+        self.assertIsInstance(result[1], list)
+        self.assertIsInstance(result[2], int)
+
+    def test_get_novel_errors_exception(self):
+        with self.assertRaises(ValueError):
+            Response.get_novel_errors()
+
+    def test_get_novel_errors(self):
+        result = Response.get_novel_errors(unitLesson=self.unit_lesson)
+        self.assertIsInstance(result, QuerySet)
+        self.assertEqual(result[0], self.response)
+
+    def test_get_url(self):
+        base_path = reverse('ct:study_unit', args=(self.course.id, self.unit.id))
+        result = self.response.get_url(base_path, subpath='assess')
+        self.assertEqual(
+            result,
+            reverse(
+                'ct:assess',
+                args=(self.course.id, self.unit.id, self.unit_lesson.id, self.response.id)
+            )
+        )
+
+    def test_get_next_step(self):
+        result = self.response.get_next_step()
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(result, (Response.CLASSIFY_STEP, 'classify your error(s)'))
+
+        self.response.selfeval = False
+        result = self.response.get_next_step()
+        self.assertEqual(result, (Response.SELFEVAL_STEP, 'self-assess your answer'))
+
+
+class StudentErrorTest(TestCase):
+    """
+    Tests for StudentError model.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit_lesson = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
+        )
+        self.unit_lesson.save()
+        self.response = Response(
+            lesson=self.lesson,
+            unitLesson=self.unit_lesson,
+            course=self.course,
+            kind=Response.ORCT_RESPONSE,
+            text='test text',
+            confidence=Response.GUESS,
+            selfeval=Response.DIFFERENT,
+            status=NEED_HELP_STATUS,
+            author=self.user
+        )
+        self.response.save()
+        self.student_error = StudentError(
+            response=self.response, errorModel=self.unit_lesson, author=self.user
+        )
+        self.student_error.save()
+
+    def test_unicode(self):
+        self.assertEqual(self.student_error.__unicode__(), 'eval by ' + self.user.username)
+
+    def test_get_counts(self):
+        """
+        Need to add docstring to get_counts method to make a good test.
+        """
+        result = StudentError.get_counts(query=Q(response=self.response), n=5)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0][0], self.unit_lesson)
+        self.assertEqual(result[0][1], '20% (1)')
+
+    def test_get_ul_errors(self):
+        result = StudentError.get_ul_errors(self.unit_lesson)
+        self.assertEqual(result[0], self.student_error)
+
+
+class CourseTest(TestCase):
+    """
+    Tests for Course model.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
+
+    def test_title(self):
+        self.assertEqual(self.course.__unicode__(), self.course.title)
+
+    def test_create_unit(self):
+        result = self.course.create_unit(title='new unit title', author=self.user)
+        self.assertIsInstance(result, Unit)
+        self.assertEqual(result.title, 'new unit title')
+        self.assertEqual(result.addedBy, self.user)
+        self.assertTrue(
+            CourseUnit.objects.filter(unit=result, course=self.course, addedBy=self.user, order=0).exists()
+        )
+
+    def test_get_user_role(self):
+        with self.assertRaises(KeyError):
+            self.course.get_user_role(self.user, justOne=True, raiseError=True)
+
+        role = Role(course=self.course, user=self.user)
+        role.save()
+
+        result = self.course.get_user_role(self.user, justOne=True, raiseError=True)
+        self.assertEqual(result, Role.ENROLLED)
+
+        result = self.course.get_user_role(self.user, justOne=False)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], Role.ENROLLED)
+
+    def test_get_course_units(self):
+        unit = self.course.create_unit('test unit')
+        result = self.course.get_course_units(publishedOnly=False)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0], unit.courseunit_set.filter(course=self.course).first())
+
+    def test_get_users(self):
+        role = Role(course=self.course, user=self.user)
+        role.save()
+        result = self.course.get_users(role=Role.ENROLLED)
+        self.assertIsInstance(result, QuerySet)
+        self.assertEqual(result.first(), self.user)
+
+
+class CourseUnitTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+
+    def test_is_published(self):
+        course_unit = CourseUnit(
+            unit=self.unit, course=self.course, order=0, addedBy=self.user, releaseTime=timezone.now()
+        )
+        self.assertTrue(course_unit.is_published())
+
+
+class UnitStatusTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+        self.unit_status = UnitStatus(unit=self.unit, user=self.user)
+        self.unit_status.save()
+
+    def test_get_or_none(self):
+        result = UnitStatus.get_or_none(self.unit, self.user)
+        self.assertEqual(result, self.unit_status)
+
+        self.unit_status.delete()
+        self.assertIsNotNone(result)
+
+    def test_is_done(self):
+        result = UnitStatus.is_done(self.unit, self.user)
+        self.assertIsNone(result)
+
+        self.unit_status.done()
+        result = UnitStatus.is_done(self.unit, self.user)
+        self.assertEqual(result, self.unit_status)
+
+    def test_get_lesson(self):
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit_lesson = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
+        )
+        self.unit_lesson.save()
+
+        result = self.unit_status.get_lesson()
+        self.assertEqual(result, self.unit_lesson)
+
+    def test_set_lesson(self):
+        pass
+
+    def test_done(self):
+        self.assertIsNone(self.unit_status.endTime)
+        self.unit_status.done()
+        self.assertIsNotNone(self.unit_status.endTime)
+
+    def test_start_next_lesson(self):
+        pass
