@@ -1039,13 +1039,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
 
 
 def create_error_ul(lesson, concept, unit, parentUL):
-    'create UnitLesson, Concept etc. for new error model'
-    lesson.kind = lesson.ERROR_MODEL
-    em = concept.create_error_model(title=lesson.title,
-                                    addedBy=lesson.addedBy)
-    lesson.concept = em
-    lesson.save_root()
-    return UnitLesson.create_from_lesson(lesson, unit, parent=parentUL)
+    'save lesson as error model linked to concept and question UnitLesson'
+    return lesson.save_as_error_model(concept, parentUL)
 
 def copy_error_ul(ul, concept, unit, addedBy, parentUL):
     'copy error and append to this unit'
