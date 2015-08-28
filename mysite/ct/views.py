@@ -608,7 +608,7 @@ def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
-    unitConcepts = unit.get_main_concepts().items()
+    unitConcepts = unit.get_related_concepts().items()
     r = _concepts(request, pageData,
     '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', unitConcepts=unitConcepts,

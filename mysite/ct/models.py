@@ -732,17 +732,16 @@ class Unit(models.Model):
         lesson.treeID = lesson.pk
         lesson.save()
         return lesson
-    def get_main_concepts(self):
-        'get dict of concepts linked to main lesson sequence of this unit'
+    def get_related_concepts(self):
+        'get dict of concepts linked to lessons in this unit'
         d = {}
         for ul in self.unitlesson_set.filter(lesson__concept__isnull=False,
-                kind=UnitLesson.COMPONENT, order__isnull=False):
+                kind=UnitLesson.COMPONENT):
             cl = ConceptLink(lesson=ul.lesson, concept=ul.lesson.concept)
             cl.unitLesson = ul
             d[cl.concept] = [cl]
         for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
-            lesson__unitlesson__kind=UnitLesson.COMPONENT,
-            lesson__unitlesson__order__isnull=False) \
+            lesson__unitlesson__kind=UnitLesson.COMPONENT) \
             .values('concept', 'relationship', 'lesson__unitlesson'):
             concept = Concept.objects.get(pk=cld['concept'])
             ul = UnitLesson.objects.get(pk=cld['lesson__unitlesson'])
