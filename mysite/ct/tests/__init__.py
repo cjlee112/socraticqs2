@@ -3,3 +3,5 @@ from views import *
 from models import *
 from forms import *
 from selenium_integrate import *
+from plugins import *
+from templatetags import *
