@@ -62,7 +62,8 @@ def store_question(q, course, unit, genericErrors, genericIndex,
                    kind=Lesson.ORCT_QUESTION):
     'store question linked to concept, error models, answer, responses'
     conceptID = q['tests'][0] # link to first concept
-    concept = Concept.get_from_sourceDB(conceptID, unit.addedBy)[0]
+    concept, lesson = Concept.get_from_sourceDB(conceptID, unit.addedBy)
+    UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
     lesson = Lesson(title=q['title'], text=q['text'], addedBy=unit.addedBy,
                     kind=kind)
     if 'date_added' in q:
@@ -70,7 +71,12 @@ def store_question(q, course, unit, genericErrors, genericIndex,
         atime = datetime(d.year, d.month, d.day)
         lesson.atime = timezone.make_aware(atime, tzinfo)
     lesson.save_root(concept)
-    unitLesson = UnitLesson.create_from_lesson(lesson, unit, order='APPEND')
+    unitLesson = UnitLesson.create_from_lesson(lesson, unit, order='APPEND',
+                                               addAnswer=True)
+    answer = unitLesson._answer.lesson # get auto-created record
+    answer.title = q['title'] + ' Answer' # update answer text
+    answer.text = q['answer']
+    answer.save()
     errorModels = store_errors(q, concept, unitLesson)
     for r in q['responses']:
         store_response(r, course, unitLesson, errorModels, genericErrors,
