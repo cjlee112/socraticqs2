@@ -75,7 +75,14 @@ class Concept(models.Model):
         return l
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
-        objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
+        objID = unit_id = None
+        try:
+            unit_id = int(basePath.split('/')[-2])
+        except (IndexError,TypeError):
+            pass
+        for ul in UnitLesson.objects.filter(lesson__concept=self):
+            if objID is None or ul.unit_id == unit_id: # in this unit!
+                objID = ul.pk
         if self.isError: # default settings
             head = 'errors'
             tail = ''
