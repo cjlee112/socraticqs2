@@ -57,13 +57,27 @@ def store_response(r, course, parentUL, errorModels, genericErrors,
                           genericIndex)
     return response
 
+
+def add_concept_resource(conceptID, unit):
+    'get concept by courseletsConcept:ID or wikipedia ID, add to unit'
+    if conceptID.startswith('courseletsConcept:'):
+        ulID = int(conceptID[18:])
+        ul = UnitLesson.objects.get(pk=ulID)
+        lesson = ul.lesson
+        concept = lesson.concept
+        if not concept:
+            raise ValueError('%s does not link to a concept!' % conceptID)
+    else:
+        concept, lesson = Concept.get_from_sourceDB(conceptID, unit.addedBy)
+    UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
+    return concept
+
 def store_question(q, course, unit, genericErrors, genericIndex,
                    tzinfo=timezone.get_default_timezone(),
                    kind=Lesson.ORCT_QUESTION):
     'store question linked to concept, error models, answer, responses'
     conceptID = q['tests'][0] # link to first concept
-    concept, lesson = Concept.get_from_sourceDB(conceptID, unit.addedBy)
-    UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
+    concept = add_concept_resource(conceptID, unit)
     lesson = Lesson(title=q['title'], text=q['text'], addedBy=unit.addedBy,
                     kind=kind)
     if 'date_added' in q:
