@@ -1,6 +1,8 @@
 """
 Unit tests for ct/templatetags.
 """
+import inspect
+
 from datetime import timedelta
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -65,6 +67,32 @@ class TagsTest(TestCase):
             context=self.context
         )
         self.assertEqual(rendered, expected_result)
+
+    @patch('ct.templatetags.ct_extras.pypandoc')
+    def test_md2html_pandoc_exception(self, pypandoc):
+        pypandoc.convert.side_effect = StandardError
+        rendered = self.render_template(
+            '{% load ct_extras %}'
+            '{{ test_text | md2html }}',
+            context=self.context
+        )
+        self.assertEqual(rendered, self.context['test_text'])
+
+    @data('get_base_url', 'get_path_type')
+    def test_get_base_url_exception(self, helper):
+        with self.assertRaises(ValueError):
+            getattr(inspect.getmodule(self), helper).__call__(
+                '/ct/courses/1/units/1/lessons/1/', baseToken='non_existent_token'
+            )
+
+    def test_get_object_url_exception(self):
+        self.context['ul'] = self.unit  # Unit object does not have get_url method
+        rendered = self.render_template(
+            '{% load ct_extras %}'
+            '{{ actionTarget | get_object_url:ul }}',
+            context=self.context
+        )
+        self.assertEqual(rendered, '/ct/courses/1/units/1/unit/1/teach/')
 
     @patch('ct.templatetags.ct_extras.timezone')
     def test_display_datetime(self, timezone_patched):
