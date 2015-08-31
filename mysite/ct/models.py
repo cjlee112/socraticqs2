@@ -741,6 +741,7 @@ class Unit(models.Model):
             cl.unitLesson = ul
             d[cl.concept] = [cl]
         for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
+                                              concept__isError=False,
             lesson__unitlesson__kind=UnitLesson.COMPONENT) \
             .values('concept', 'relationship', 'lesson__unitlesson'):
             concept = Concept.objects.get(pk=cld['concept'])
