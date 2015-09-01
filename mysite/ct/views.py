@@ -26,7 +26,7 @@ from ct.templatetags.ct_extras import (md2html,
                                        display_datetime,
                                        get_path_type)
 from fsm.fsm_base import FSMStack
-from fsm.models import FSM, FSMState
+from fsm.models import FSM, FSMState, KLASS_NAME_DICT
 
 
 ###########################################################
@@ -169,7 +169,8 @@ class PageData(object):
                         className = task[7:]
                         attr = className[0].lower() + className[1:]
                         try:
-                            klass = klassNameDict[className]
+                            # TODO import KLASS_NAME_DICT from fsm should be refactored
+                            klass = KLASS_NAME_DICT[className]
                             selectID = int(request.POST['selectID'])
                         except (KeyError,ValueError):
                             return HttpResponse('bad select', status=400)
