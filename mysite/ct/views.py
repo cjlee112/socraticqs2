@@ -915,19 +915,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
-    if ul.unit != unit:
-        addForm = push_button(request, 'add', 'Add to this Courselet') 
-        if not addForm:
-            ulNew = unit.append(ul, request.user)
-            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
-            defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
-            if request.resolver_match.view_name == 'ct:concept_teach':
-                eventName = 'add_Concept'
-            else:
-                eventName = 'add_UnitLesson'
-            return pageData.fsm_redirect(request, eventName, defaultURL,
-                                         reverseArgs=kwargs, unitLesson=ulNew)
-    else: # ul is part of this unit
+    if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
             if roleForm.is_valid():
@@ -943,6 +931,19 @@ def ul_teach(request, course_id, unit_id, ul_id):
             else:
                 initial = UnitLesson.RESOURCE_ROLE
             roleForm = LessonRoleForm(initial)
+    elif ul.kind == UnitLesson.COMPONENT: # offer option to add to this unit
+        addForm = push_button(request, 'add', 'Add to this Courselet') 
+        if not addForm:
+            ulNew = unit.append(ul, request.user)
+            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
+            defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+            if request.resolver_match.view_name == 'ct:concept_teach':
+                eventName = 'add_Concept'
+            else:
+                eventName = 'add_UnitLesson'
+            return pageData.fsm_redirect(request, eventName, defaultURL,
+                                         reverseArgs=kwargs, unitLesson=ulNew)
+
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable, answer=answer, addForm=addForm,
