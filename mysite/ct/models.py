@@ -257,8 +257,9 @@ class Lesson(models.Model):
                           doSave=True):
         'get or create Lesson linked to sourceDB:sourceID external ref'
         try:
-            return klass.objects.get(sourceDB=sourceDB, sourceID=sourceID)
-        except klass.DoesNotExist:
+            return klass.objects.filter(sourceDB=sourceDB, sourceID=sourceID) \
+              .order_by('-atime')[0] # get most recent version
+        except IndexError:
             pass
         dataClass = klass.get_sourceDB_plugin(sourceDB)
         data = dataClass(sourceID)
