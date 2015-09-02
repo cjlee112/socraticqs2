@@ -11,7 +11,9 @@ from django.contrib.auth.models import User
 
 from ct.models import *
 from ct import views, ct_util
+from ct.fsm_plugin import live, livestudent
 from fsm.models import *
+from fsm.fsm_base import FSMStack
 
 
 class OurTestCase(TestCase):
@@ -296,3 +298,114 @@ class PageDataTests(TestCase):
         s = pageData.get_refresh_timer(request)
         self.assertNotEqual(s, '0:00')
         self.assertEqual(s[:3], '0:0')
+
+
+class LiveFSMTest(OurTestCase):
+    """Tests for liveteach and live student FSM's.
+
+    We testing two FSM's.
+    Firstly we start liveteach FSM - start to ask some question live.
+    Next we start livestudent FSM to answer the question.
+    Finally we continue liveteach FSM to end live session.
+    """
+    def setUp(self):
+        self.teacher = User.objects.create_user(username='jacob', password='top_secret')
+        self.student = User.objects.create_user(username='student', password='top_secret')
+
+        self.course = Course(
+            title='Great Course', description='the bestest', addedBy=self.teacher
+        )
+        self.course.save()
+        student_role = Role(course=self.course, role=Role.ENROLLED, user=self.student)
+        student_role.save()
+        self.unit = Unit(title='My Courselet', addedBy=self.teacher)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, addedBy=self.teacher, order=0)
+        self.course_unit.save()
+        self.lesson = Lesson(
+            title='Big Deal', text='very interesting info', addedBy=self.teacher
+        )
+        self.lesson.save_root()
+        self.unitLesson = UnitLesson.create_from_lesson(
+            self.lesson, self.unit, order='APPEND'
+        )
+        self.ulQ = create_question_unit(self.teacher)
+        self.ulQ2 = create_question_unit(
+            self.teacher, 'Pretest', 'Scary Question', 'Tell me something.'
+        )
+        live.get_specs()[0].save_graph(self.teacher.username)
+        livestudent.get_specs()[0].save_graph(self.teacher.username)
+
+    def get_fsm_request(self, fsmName, stateData, startArgs=None, user=None, **kwargs):
+        """
+        Create request, fsmStack and start specified FSM.
+        """
+        startArgs = startArgs or {}
+        request = FakeRequest(user)
+        request.session = self.client.session
+        fsmStack = FSMStack(request)
+        result = fsmStack.push(request, fsmName, stateData, startArgs, **kwargs)
+        request.session.save()
+        return request, fsmStack, result
+
+    def test_live_fsm(self):
+        self.client.login(username='jacob', password='top_secret')
+        fsmData = dict(unit=self.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
+        response = self.client.get(result)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Start asking a question', response.content)
+
+        url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
+        self.check_post_get(result, dict(fsmtask='next'), url, 'test')
+        live_teach_url = self.check_post_get(
+            url, dict(fsmtask='select_UnitLesson', selectID=self.ulQ2.id), 'live/', 'test'
+        )
+        response = self.client.post(live_teach_url, dict(task='start'))
+        self.assertContains(response, 'When you are ready to present the answer to the students, click Next')
+
+        # Next we run livestudent fsm for a student
+        self.client.login(username='student', password='top_secret')
+        response = self.client.get('/ct/')
+        self.assertContains(response, 'Join')
+
+        response = self.client.post('/ct/', dict(liveID=fsmStack.state.id))
+        result = self.client.get(response['Location'])
+        self.assertContains(result, 'In this activity you will answer questions')
+        url_ask = self.check_post_get(response['Location'], dict(fsmtask='next'), '/ask/', 'Scary Question')
+        wait_url = '/fsm/nodes/%s/' % FSMNode.objects.get(name='WAIT_ASSESS').id
+        self.check_post_get(
+            url_ask,
+            dict(text='answer', confidence='notsure'),
+            wait_url,
+            'Wait for the Instructor to End the Question',
+        )
+        self.check_post_get(wait_url, dict(fsmtask='next'), wait_url, 'Wait for the Instructor to End the Question')
+
+        # Return to teacher
+        self.client.login(username='jacob', password='top_secret')
+        self.check_post_get(
+            '/fsm/nodes/',
+            dict(fsmstate_id=fsmStack.state.id),
+            live_teach_url,
+            'test')
+        response = self.client.post(live_teach_url, dict(task='start'))
+        self.assertContains(response, 'When you are ready to present the answer to the students, click Next')
+        next_url = self.check_post_get(
+            live_teach_url,
+            dict(fsmtask='next'),
+            '/ct/teach/courses/%d/units/%d/lessons/%d/' % (self.course.id, self.unit.id, self.ulQ2.id),
+            'When you are done presenting this answer, click Next'
+        )
+        end = self.check_post_get(
+            next_url,
+            dict(fsmtask='next'),
+            '/fsm/nodes/%s/' % FSMNode.objects.filter(name='RECYCLE', funcName='ct.fsm_plugin.live.RECYCLE').first().id,
+            'End this live-session'
+        )
+        self.check_post_get(
+            end,
+            dict(fsmedge='quit'),
+            '/ct/teach/courses/%d/units/%d/' % (self.course.id, self.unit.id),
+            'You have successfully ended this live-session'
+        )
