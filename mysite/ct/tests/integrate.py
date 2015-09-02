@@ -397,15 +397,52 @@ class LiveFSMTest(OurTestCase):
             '/ct/teach/courses/%d/units/%d/lessons/%d/' % (self.course.id, self.unit.id, self.ulQ2.id),
             'When you are done presenting this answer, click Next'
         )
-        end = self.check_post_get(
+        recycle = self.check_post_get(
             next_url,
             dict(fsmtask='next'),
             '/fsm/nodes/%s/' % FSMNode.objects.filter(name='RECYCLE', funcName='ct.fsm_plugin.live.RECYCLE').first().id,
             'End this live-session'
         )
         self.check_post_get(
-            end,
+            recycle,
             dict(fsmedge='quit'),
             '/ct/teach/courses/%d/units/%d/' % (self.course.id, self.unit.id),
             'You have successfully ended this live-session'
+        )
+
+    def test_live_recycle_next_edge(self):
+        """
+        Check calling next edge method from answer FSM node.
+        """
+        self.client.login(username='jacob', password='top_secret')
+        fsmData = dict(unit=self.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
+        response = self.client.get(result)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Start asking a question', response.content)
+
+        url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
+        self.check_post_get(result, dict(fsmtask='next'), url, 'test')
+        live_teach_url = self.check_post_get(
+            url, dict(fsmtask='select_UnitLesson', selectID=self.ulQ2.id), 'live/', 'test'
+        )
+        response = self.client.post(live_teach_url, dict(task='start'))
+        self.assertContains(response, 'When you are ready to present the answer to the students, click Next')
+        answer_url = self.check_post_get(
+            live_teach_url,
+            dict(fsmtask='next'),
+            '/ct/teach/courses/%d/units/%d/lessons/%d/' % (self.course.id, self.unit.id, self.ulQ2.id),
+            'When you are done presenting this answer, click Next'
+        )
+        next_url = self.check_post_get(
+            answer_url,
+            dict(fsmtask='next'),
+            '/fsm/nodes/%s/' % FSMNode.objects.filter(name='RECYCLE', funcName='ct.fsm_plugin.live.RECYCLE').first().id,
+            'End this live-session'
+        )
+        self.check_post_get(
+            next_url,
+            dict(fsmtask='next'),
+            reverse('ct:unit_lessons', args=(self.course.id, self.unit.id)),
+            'Select a question below that you want to ask'
         )
