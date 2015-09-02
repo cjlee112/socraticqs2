@@ -301,13 +301,15 @@ class Lesson(models.Model):
                 relationship = DEFAULT_RELATION_MAP[self.kind]
             self.conceptlink_set.create(concept=concept,
                         addedBy=self.addedBy, relationship=relationship)
-    def save_as_error_model(self, concept, questionUL):
+    def save_as_error_model(self, concept, questionUL, errorModel=None):
         """Save this new lesson as an error model for the specified
         concept and question.  It does this by creating an error model
         concept and creating a child UnitLesson linking it to the
         questionUL."""
         self.kind = self.ERROR_MODEL
-        em = concept.create_error_model(title=self.title, addedBy=self.addedBy)
+        if errorModel is None:
+            em = concept.create_error_model(title=self.title,
+                                            addedBy=self.addedBy)
         self.concept = em
         self.save_root()
         return UnitLesson.create_from_lesson(self, questionUL.unit,

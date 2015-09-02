@@ -6,13 +6,46 @@ from datetime import datetime
 import codecs
 
 
-def store_errors(q, concept, parentUL):
+def store_errors(q, concept, parentUL, conceptIDdict=None):
     'store error models associated with question'
     errorModels = []
-    for e in q['error']:
-        emLesson = Lesson(title='(rename this)', addedBy=parentUL.addedBy,
-                          text=e)
-        emUL = emLesson.save_as_error_model(concept, parentUL)
+    courseletsMap = q.get('courseletsMapError', ())
+    if conceptIDdict is None:
+        conceptIDdict = {}
+    for i, e in enumerate(q.get('error', ())):
+        em = emUL = saveMapping = None
+        try:
+            mapID = courseletsMap[i]
+        except IndexError:
+            pass
+        else:
+            ulID = conceptIDdict.get(mapID, None)
+            if ulID is None:
+                saveMapping = True
+                print 'WARNING: %s not found in conceptIDdict; treating as new error model' % mapID
+            else:
+                if isinstance(ulID, int): # just add existing EM to this question
+                    ul = UnitLesson.objects.get(pk=ulID)
+                    emUL = UnitLesson.create_from_lesson(ul.lesson, unit,
+                                                        parent=parentUL)
+                else: # add new EMLesson to existing EM
+                    try:
+                        if not ulID.startswith('fork:'):
+                            raise ValueError
+                        ul = UnitLesson.objects.get(pk=int(ulID[5:]))
+                    except ValueError:
+                        raise ValueError('bad conceptIDdict ID value %s: should be int or "fork:INT"'
+                                        % ulID)
+                    em = ul.lesson.concept # link to existing error model
+                if not ul.lesson.concept or not ul.lesson.concept.isError:
+                    raise ValueError('%s: not a valid error model'
+                                    % ul.lesson.title)
+        if not emUL: # create new error model lesson
+            emLesson = Lesson(title='(rename this)', addedBy=parentUL.addedBy,
+                              text=e)
+            emUL = emLesson.save_as_error_model(concept, parentUL, em)
+            if saveMapping: # allow other questions to fork this EM
+                conceptIDdict[mapID] = 'fork:%d' % emUL.pk
         errorModels.append(emUL)
     return errorModels
 
@@ -58,10 +91,15 @@ def store_response(r, course, parentUL, errorModels, genericErrors,
     return response
 
 
-def add_concept_resource(conceptID, unit):
+def add_concept_resource(conceptID, unit, conceptIDdict=()):
     'get concept by courseletsConcept:ID or wikipedia ID, add to unit'
     if conceptID.startswith('courseletsConcept:'):
         ulID = int(conceptID[18:])
+    elif conceptID in conceptIDdict:
+        ulID = conceptIDdict[conceptID]
+    else:
+        ulID = None
+    if ulID is not None:
         ul = UnitLesson.objects.get(pk=ulID)
         lesson = ul.lesson
         concept = lesson.concept
@@ -69,15 +107,14 @@ def add_concept_resource(conceptID, unit):
             raise ValueError('%s does not link to a concept!' % conceptID)
     else:
         concept, lesson = Concept.get_from_sourceDB(conceptID, unit.addedBy)
-    UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
+    if unit.unitlesson_set.filter(lesson__concept=concept).count() <= 0:
+        UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
     return concept
 
-def store_question(q, course, unit, genericErrors, genericIndex,
-                   tzinfo=timezone.get_default_timezone(),
-                   kind=Lesson.ORCT_QUESTION):
-    'store question linked to concept, error models, answer, responses'
-    conceptID = q['tests'][0] # link to first concept
-    concept = add_concept_resource(conceptID, unit)
+def store_new_question(q, unit, concept,
+                       tzinfo=timezone.get_default_timezone(),
+                       kind=Lesson.ORCT_QUESTION):
+    'create new lessons for question, answer, and add to this unit'
     lesson = Lesson(title=q['title'], text=q['text'], addedBy=unit.addedBy,
                     kind=kind)
     if 'date_added' in q:
@@ -91,12 +128,22 @@ def store_question(q, course, unit, genericErrors, genericIndex,
     answer.title = q['title'] + ' Answer' # update answer text
     answer.text = q['answer']
     answer.save()
-    errorModels = store_errors(q, concept, unitLesson)
-    for r in q['responses']:
+    return unitLesson
+
+
+def store_question(q, course, unit, genericErrors, genericIndex,
+                   conceptIDdict=(), **kwargs):
+    'store question linked to concept, error models, answer, responses'
+    conceptID = q['tests'][0] # link to first concept
+    concept = add_concept_resource(conceptID, unit, conceptIDdict)
+    unitLesson = store_new_question(q, unit, concept, **kwargs)
+    errorModels = store_errors(q, concept, unitLesson, conceptIDdict)
+    for r in q.get('responses', ()):
         store_response(r, course, unitLesson, errorModels, genericErrors,
                        genericIndex)
     print 'saved %s: %d error models, %d responses' \
-      % (lesson.title, len(errorModels), len(q['responses']))
+      % (unitLesson.lesson.title, len(errorModels),
+         len(q.get('responses', ())))
     return unitLesson
 
 def index_generic_errors(unit):
@@ -110,7 +157,7 @@ def index_generic_errors(unit):
 
     
 def load_orct_data(infile='orctmerge.json', course=None, unit=None,
-                   courseID=None, unitID=None):
+                   courseID=None, unitID=None, conceptIDfile=None):
     'load ORCT questions, responses etc into this unit'
     if course is None:
         course = Course.objects.get(pk=courseID)
@@ -118,9 +165,14 @@ def load_orct_data(infile='orctmerge.json', course=None, unit=None,
         unit = Unit.objects.get(pk=unitID)
     genericErrors, genericIndex = index_generic_errors(unit)
     orctData = load_json(infile)
+    if conceptIDfile:
+        conceptIDdict = load_json(conceptIDfile)
+    else:
+        conceptIDdict = {}
     for q in orctData:
         if q.get('kind', 'SKIP') == 'question':
-            store_question(q, course, unit, genericErrors, genericIndex)
+            store_question(q, course, unit, genericErrors, genericIndex,
+                           conceptIDdict)
 
 def load_json(infile):
     with codecs.open(infile, 'r', encoding='utf-8') as ifile:
