@@ -105,3 +105,54 @@ class TagsTest(TestCase):
             context=context
         )
         self.assertEqual(rendered, '1 day ago')
+
+    def test_find_audio(self):
+        result = find_audio('test tag head .. audio:: test tag tail \n', 4)
+        self.assertEqual(result, (14, 39, 'test tag tail'))
+
+    def test_audio_html(self):
+        """
+        Function should return string for embeding audio into html.
+        """
+        result = audio_html('audio.mp3')
+        self.assertEqual(
+            result,
+            '''<audio controls><source src="audio.ogg" type="audio/ogg"><source src="audio.mp3" '''
+            '''type="audio/mpeg">no support for audio!</audio>'''
+        )
+
+    def test_video_html(self):
+        """
+        Function should return string for embeding youtube or vimeo link.
+        """
+        result = video_html('youtube:test_video_path')
+        self.assertIn('test_video_path', result)
+        self.assertIn('src="https://www.youtube.com/embed/', result)
+
+        result = video_html('vimeo:test_video_path')
+        self.assertIn('test_video_path', result)
+        self.assertIn('src="https://player.vimeo.com/video/', result)
+
+    def test_video_html_with_exception(self):
+        """
+        Test exception handling.
+        """
+        result = video_html('youtube')
+        self.assertEqual(result, 'ERROR: bad video source: youtube')
+
+        result = video_html('some_new_cdn:test_video_path')
+        self.assertEqual(result, 'ERROR: unknown video sourceDB: some_new_cdn')
+
+    def test_add_replace_temporary_markers(self):
+        """
+        Test add_temporary_markers and replace_temporary_markers in tandem.
+        """
+        result = add_temporary_markers('test tag head .. audio:: test tag tail \n', find_audio)
+        self.assertEqual(result, ('test tag head mArKeR:0:\n', [('mArKeR:0:', 'test tag tail')]))
+
+        result = replace_temporary_markers(result[0], audio_html, result[1])
+        self.assertEqual(
+            result,
+            '''test tag head <audio controls><source src="test tag tail.ogg" type="audio/ogg">'''
+            '''<source src="test tag tail.mp3" type="audio/mpeg">no support for audio!</audio>\n'''
+        )

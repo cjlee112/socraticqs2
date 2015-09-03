@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 
 from ct.models import *
 from ct import views, ct_util
-from ct.fsm_plugin import live, livestudent
+from ct.fsm_plugin import live, livestudent, add_lesson
 from fsm.models import *
 from fsm.fsm_base import FSMStack
 
@@ -300,13 +300,9 @@ class PageDataTests(TestCase):
         self.assertEqual(s[:3], '0:0')
 
 
-class LiveFSMTest(OurTestCase):
-    """Tests for liveteach and live student FSM's.
-
-    We testing two FSM's.
-    Firstly we start liveteach FSM - start to ask some question live.
-    Next we start livestudent FSM to answer the question.
-    Finally we continue liveteach FSM to end live session.
+class SetUpMixin(object):
+    """
+    SetUp mixin to add setUp method when needed.
     """
     def setUp(self):
         self.teacher = User.objects.create_user(username='jacob', password='top_secret')
@@ -335,6 +331,7 @@ class LiveFSMTest(OurTestCase):
         )
         live.get_specs()[0].save_graph(self.teacher.username)
         livestudent.get_specs()[0].save_graph(self.teacher.username)
+        add_lesson.get_specs()[0].save_graph(self.teacher.username)
 
     def get_fsm_request(self, fsmName, stateData, startArgs=None, user=None, **kwargs):
         """
@@ -348,6 +345,15 @@ class LiveFSMTest(OurTestCase):
         request.session.save()
         return request, fsmStack, result
 
+
+class LiveFSMTest(SetUpMixin, OurTestCase):
+    """Tests for liveteach and live student FSM's.
+
+    We testing two FSM's.
+    Firstly we start liveteach FSM - start to ask some question live.
+    Next we start livestudent FSM to answer the question.
+    Finally we continue liveteach FSM to end live session.
+    """
     def test_live_fsm(self):
         self.client.login(username='jacob', password='top_secret')
         fsmData = dict(unit=self.unit, course=self.course)
@@ -445,4 +451,29 @@ class LiveFSMTest(OurTestCase):
             dict(fsmtask='next'),
             reverse('ct:unit_lessons', args=(self.course.id, self.unit.id)),
             'Select a question below that you want to ask'
+        )
+
+
+class AddLessonTest(SetUpMixin, OurTestCase):
+    """
+    Test add_lesson FSM.
+    """
+    def test_add_lesson(self):
+        """
+        Check going to CONCEPTS node.
+        """
+        self.client.login(username='jacob', password='top_secret')
+        fsmData = dict(unit=self.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request('add_lesson', fsmData, user=self.teacher)
+        to_concept = self.check_post_get(
+            result,
+            dict(fsmtask='next'),
+            reverse('ct:unit_lessons', args=(self.course.id, self.unit.id)),
+            'Enter a search term below'
+        )
+        self.check_post_get(
+            to_concept,
+            dict(fsmtask='next'),
+            reverse('ct:unit_concepts', args=(self.course.id, self.unit.id)),
+            'The first step of writing a new Lesson'
         )
