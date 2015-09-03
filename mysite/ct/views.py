@@ -617,7 +617,7 @@ def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
-    unitConcepts = unit.get_main_concepts().items()
+    unitConcepts = unit.get_related_concepts().items()
     r = _concepts(request, pageData,
     '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', unitConcepts=unitConcepts,
@@ -924,19 +924,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
-    if ul.unit != unit:
-        addForm = push_button(request, 'add', 'Add to this Courselet') 
-        if not addForm:
-            ulNew = unit.append(ul, request.user)
-            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
-            defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
-            if request.resolver_match.view_name == 'ct:concept_teach':
-                eventName = 'add_Concept'
-            else:
-                eventName = 'add_UnitLesson'
-            return pageData.fsm_redirect(request, eventName, defaultURL,
-                                         reverseArgs=kwargs, unitLesson=ulNew)
-    else: # ul is part of this unit
+    if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
             if roleForm.is_valid():
@@ -952,6 +940,19 @@ def ul_teach(request, course_id, unit_id, ul_id):
             else:
                 initial = UnitLesson.RESOURCE_ROLE
             roleForm = LessonRoleForm(initial)
+    elif ul.kind == UnitLesson.COMPONENT: # offer option to add to this unit
+        addForm = push_button(request, 'add', 'Add to this Courselet') 
+        if not addForm:
+            ulNew = unit.append(ul, request.user)
+            kwargs = dict(course_id=course_id, unit_id=unit_id, ul_id=ulNew.pk)
+            defaultURL = reverse('ct:ul_teach', kwargs=kwargs)
+            if request.resolver_match.view_name == 'ct:concept_teach':
+                eventName = 'add_Concept'
+            else:
+                eventName = 'add_UnitLesson'
+            return pageData.fsm_redirect(request, eventName, defaultURL,
+                                         reverseArgs=kwargs, unitLesson=ulNew)
+
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable, answer=answer, addForm=addForm,
@@ -1048,13 +1049,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
 
 
 def create_error_ul(lesson, concept, unit, parentUL):
-    'create UnitLesson, Concept etc. for new error model'
-    lesson.kind = lesson.ERROR_MODEL
-    em = concept.create_error_model(title=lesson.title,
-                                    addedBy=lesson.addedBy)
-    lesson.concept = em
-    lesson.save_root()
-    return UnitLesson.create_from_lesson(lesson, unit, parent=parentUL)
+    'save lesson as error model linked to concept and question UnitLesson'
+    return lesson.save_as_error_model(concept, parentUL)
 
 def copy_error_ul(ul, concept, unit, addedBy, parentUL):
     'copy error and append to this unit'
@@ -1211,6 +1207,7 @@ def study_unit(request, course_id, unit_id):
                 dict(unitLesson=nextUL, unit=unit, startForm=startForm))
 
 
+@login_required
 def slideshow(request, course_id, unit_id):
     'launcher for viewing courselet as a slideshow'
     course = get_object_or_404(Course, pk=course_id)

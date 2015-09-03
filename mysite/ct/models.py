@@ -72,7 +72,14 @@ class Concept(models.Model):
         return l
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
-        objID = UnitLesson.objects.filter(lesson__concept=self)[0].pk
+        objID = unit_id = None
+        try:
+            unit_id = int(basePath.split('/')[-2])
+        except (IndexError,TypeError):
+            pass
+        for ul in UnitLesson.objects.filter(lesson__concept=self):
+            if objID is None or ul.unit_id == unit_id: # in this unit!
+                objID = ul.pk
         if self.isError: # default settings
             head = 'errors'
             tail = ''
@@ -247,8 +254,9 @@ class Lesson(models.Model):
                           doSave=True):
         'get or create Lesson linked to sourceDB:sourceID external ref'
         try:
-            return klass.objects.get(sourceDB=sourceDB, sourceID=sourceID)
-        except klass.DoesNotExist:
+            return klass.objects.filter(sourceDB=sourceDB, sourceID=sourceID) \
+              .order_by('-atime')[0] # get most recent version
+        except IndexError:
             pass
         dataClass = klass.get_sourceDB_plugin(sourceDB)
         data = dataClass(sourceID)
@@ -291,6 +299,19 @@ class Lesson(models.Model):
                 relationship = DEFAULT_RELATION_MAP[self.kind]
             self.conceptlink_set.create(concept=concept,
                         addedBy=self.addedBy, relationship=relationship)
+    def save_as_error_model(self, concept, questionUL, errorModel=None):
+        """Save this new lesson as an error model for the specified
+        concept and question.  It does this by creating an error model
+        concept and creating a child UnitLesson linking it to the
+        questionUL."""
+        self.kind = self.ERROR_MODEL
+        if errorModel is None:
+            em = concept.create_error_model(title=self.title,
+                                            addedBy=self.addedBy)
+        self.concept = em
+        self.save_root()
+        return UnitLesson.create_from_lesson(self, questionUL.unit,
+                                             parent=questionUL)
     def is_committed(self):
         'True if already committed'
         return self.commitTime is not None
@@ -711,17 +732,17 @@ class Unit(models.Model):
         lesson.treeID = lesson.pk
         lesson.save()
         return lesson
-    def get_main_concepts(self):
-        'get dict of concepts linked to main lesson sequence of this unit'
+    def get_related_concepts(self):
+        'get dict of concepts linked to lessons in this unit'
         d = {}
         for ul in self.unitlesson_set.filter(lesson__concept__isnull=False,
-                kind=UnitLesson.COMPONENT, order__isnull=False):
+                kind=UnitLesson.COMPONENT):
             cl = ConceptLink(lesson=ul.lesson, concept=ul.lesson.concept)
             cl.unitLesson = ul
             d[cl.concept] = [cl]
         for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
-            lesson__unitlesson__kind=UnitLesson.COMPONENT,
-            lesson__unitlesson__order__isnull=False) \
+                                              concept__isError=False,
+            lesson__unitlesson__kind=UnitLesson.COMPONENT) \
             .values('concept', 'relationship', 'lesson__unitlesson'):
             concept = Concept.objects.get(pk=cld['concept'])
             ul = UnitLesson.objects.get(pk=cld['lesson__unitlesson'])
