@@ -29,6 +29,7 @@ lxml==3.4.4
 
 # mock for testing
 mock==1.0.1
+selenium==2.47.1
 
 nose==1.3.6
 oauth2==1.5.211
