@@ -113,10 +113,18 @@ class ConceptMethodTests(OurTestCase):
         lesson = Lesson(title='a test', text='a word', addedBy=self.user)
         lesson.save_root(concept)
         ul = UnitLesson.create_from_lesson(lesson, self.unit)
-        emUL1 = views.create_error_ul(Lesson(title='oops', addedBy=self.user,
-                                    text='foo'), concept, self.unit, ul)
-        emUL2 = views.create_error_ul(Lesson(title='oops', addedBy=self.user,
-                                    text='foo'), concept, self.unit, ul)
+        emUL1 = views.create_error_ul(
+            Lesson(title='oops', addedBy=self.user, text='foo'),
+            concept,
+            self.unit,
+            ul
+        )
+        emUL2 = views.create_error_ul(
+            Lesson(title='oops', addedBy=self.user, text='foo'),
+            concept,
+            self.unit,
+            ul
+        )
         parent = UnitLesson.objects.get(lesson__concept=concept)
         ulList = concept.copy_error_models(parent)
         self.assertEqual(len(ulList), 2)

@@ -813,15 +813,26 @@ class UnitTest(TestCase):
         self.unit.save()
         self.concept = Concept(title='test title', addedBy=self.user)
         self.concept.save()
+        self.concept_new = Concept(title='test title new', addedBy=self.user)
+        self.concept_new.save()
         self.lesson = Lesson(
             title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
         )
         self.lesson.save_root()
         self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.new_lesson = Lesson(
+            title='new lesson', text='new', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept_new
+        )
+        self.new_lesson.save_root()
+        self.new_lesson.add_concept_link(self.concept_new, ConceptLink.TESTS, self.user)
         self.unit_lesson = UnitLesson(
             unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
         )
         self.unit_lesson.save()
+        self.unit_lesson_order_null = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson
+        )
+        self.unit_lesson_order_null.save()
 
     @patch('ct.models.Unit.unitlesson_set')
     def test_next_order(self, unitlesson_set):
@@ -879,10 +890,29 @@ class UnitTest(TestCase):
         self.assertEqual(result.addedBy, custom_user)
         self.assertTrue(UnitLesson.objects.filter(addedBy=custom_user).exists())
 
-    def test_get_main_concepts(self):
-        result = self.unit.get_main_concepts()
+    def test_get_related_concepts(self):
+        """Test to check return from get_related_concepts Unit method.
+
+        It need to return dict with concept as a keys and a list of ConceptLink's as
+        a  values
+        """
+        self.unit_lesson_order_null.lesson = self.new_lesson
+        self.unit_lesson_order_null.save()
+        result = self.unit.get_related_concepts()
         self.assertIsInstance(result, dict)
+        self.assertEqual(len(result), 2)
         self.assertIsInstance(result[self.concept], list)
+        self.assertEqual(result.keys()[0], self.concept)
+        self.assertEqual(result.keys()[1], self.concept_new)
+        self.assertEqual(len(result[self.concept]), 2)
+        self.assertEqual(result[self.concept][0].lesson, self.lesson)
+        self.assertEqual(result[self.concept_new][0].lesson, self.new_lesson)
+        self.assertEqual(result[self.concept][1].relationship, ConceptLink.TESTS)
+        self.assertEqual(result[self.concept_new][1].relationship, ConceptLink.TESTS)
+        self.assertEqual(result[self.concept][0].concept, self.concept)
+        self.assertEqual(result[self.concept][1].concept, self.concept)
+        self.assertEqual(result[self.concept_new][0].concept, self.concept_new)
+        self.assertEqual(result[self.concept_new][1].concept, self.concept_new)
 
     def test_get_exercises(self):
         lesson_title = 'lesson title'
@@ -918,10 +948,21 @@ class UnitTest(TestCase):
 
     @patch('ct.models.distinct_subset')
     def test_get_new_inquiry_uls_unittest(self, distinct_subset):
+        """
+        Unittest to ensure that distinct_subset method called once.
+        """
         self.unit.get_new_inquiry_uls()
         self.assertEqual(distinct_subset.call_count, 1)
 
-    def test_get_new_inquiry(self):
+    def test_get_new_inquiry_uls(self):
+        """Test to check get_new_inquiry_uls Unit method.
+
+        We suppose to see list of UnitLeson objects. That objects have responses
+        with kind STUDENT_QUESTION and with needEval flag
+        """
+        result = self.unit.get_new_inquiry_uls()
+        self.assertEqual(result, [])
+
         course = Course(title='test course', description='test descr', addedBy=self.user)
         course.save()
         response = Response(
@@ -965,8 +1006,14 @@ class UnitTest(TestCase):
         self.assertEqual(result[0], self.unit_lesson)
 
     def test_get_unanswered_uls(self):
+        """Test for get_unanswered_uls.
+
+        get_unanswered_uls should return distinct(by treeID) ul's
+        If we create a Responce from user - ul from thi Response excluded
+        """
         result = self.unit.get_unanswered_uls(user=self.user)
         self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
         self.assertEqual(result[0], self.unit_lesson)
 
         course = Course(title='test course', description='test descr', addedBy=self.user)
@@ -985,12 +1032,19 @@ class UnitTest(TestCase):
         user2 = User.objects.create_user(username='test2', password='test2')
         result = self.unit.get_unanswered_uls(user=self.user)
         self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], self.unit_lesson_order_null)
 
         result = self.unit.get_unanswered_uls(user=user2)
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], self.unit_lesson)
+
+        self.unit_lesson_order_null.treeID = 99
+        self.unit_lesson_order_null.save()
+        result = self.unit.get_unanswered_uls(user=user2)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
 
     def test_get_selfeval_uls(self):
         course = Course(title='test course', description='test descr', addedBy=self.user)
