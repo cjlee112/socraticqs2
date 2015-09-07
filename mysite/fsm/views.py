@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import never_cache
 
 from fsm.models import (
     FSMState,
@@ -16,7 +15,6 @@ from ct.forms import (
 )
 
 
-@never_cache
 @login_required
 def fsm_node(request, node_id):
     """
@@ -33,7 +31,6 @@ def fsm_node(request, node_id):
     )
 
 
-@never_cache
 @login_required
 def fsm_status(request):
     """

@@ -13,7 +13,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
-from django.views.decorators.cache import never_cache
 from social.backends.utils import load_backends
 
 from ct.forms import *
@@ -274,7 +273,6 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
 ###########################################################
 # WelcomeMat refactored instructor views
 
-@never_cache
 @login_required
 def main_page(request):
     'generic home page'
@@ -287,7 +285,6 @@ def main_page(request):
                            dict(liveSessions=liveSessions))
 
 
-@never_cache
 def person_profile(request, user_id):
     'stub for basic user info page'
     person = get_object_or_404(User, pk=user_id)
@@ -306,14 +303,12 @@ def person_profile(request, user_id):
                                 available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
 
 
-@never_cache
 def about(request):
     pageData = PageData(request)
     return pageData.render(request, 'ct/about.html')
 
 # course views
 
-@never_cache
 @login_required
 def course_view(request, course_id):
     'show courselets in a course'
@@ -390,7 +385,6 @@ def edit_course(request, course_id):
                        domain='https://{0}'.format(Site.objects.get_current().domain)))
 
 
-@never_cache
 def courses(request):
     """Courses view
 
@@ -1186,7 +1180,6 @@ def error_resources(request, course_id, unit_id, ul_id):
 ###########################################################
 # welcome mat refactored student UI for courses
 
-@never_cache
 @login_required
 def study_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
