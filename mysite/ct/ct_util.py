@@ -1,5 +1,13 @@
-from django.core.urlresolvers import reverse
+import hashlib
+from functools import wraps
 
+from django.core.urlresolvers import reverse
+from django.core.cache import cache
+from django.utils.encoding import force_bytes
+from django.utils.http import urlquote
+
+
+CACHE_KEY_TEMPLATE = 'views.cache.%s.%s'
 
 pathKwargs = dict(
     courses='course_id',
@@ -81,3 +89,23 @@ def reverse_path_args(target, path, **kwargs):
     for k in arglist: # use only the right kwargs for this target
         reverseArgs[k] = pathKwargs[k]
     return reverse(target, kwargs=reverseArgs)
+
+
+def cache_this(fn):
+    """
+    Decorator to implement caching on regular function.
+    """
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        sub_keys = list(args)
+        sub_keys.append(kwargs)
+        key = ':'.join(urlquote(arg) for arg in sub_keys)
+        cache_key = CACHE_KEY_TEMPLATE % (fn.__name__, hashlib.md5(force_bytes(key)).hexdigest())
+        result = cache.get(cache_key)
+
+        if not result:
+            result = fn(*args, **kwargs)
+            # Saving result to cache
+            cache.add(cache_key, result)
+        return result
+    return wrapped

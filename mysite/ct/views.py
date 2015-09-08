@@ -17,7 +17,7 @@ from social.backends.utils import load_backends
 
 from ct.forms import *
 from ct.models import *
-from ct.ct_util import reverse_path_args
+from ct.ct_util import reverse_path_args, cache_this
 from ct.templatetags.ct_extras import (md2html,
                                        get_base_url,
                                        get_object_url,
@@ -40,6 +40,8 @@ def check_instructor_auth(course, request):
         return HttpResponse("Only the instructor can access this",
                             status=403)
 
+
+@cache_this
 def make_tabs(path, current, tabs, tail=4, **kwargs):
     path = get_base_url(path, tail=tail, **kwargs)
     outTabs = []
