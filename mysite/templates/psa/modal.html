@@ -27,7 +27,7 @@
   </div>
 
 <div id="email-modal" class="modal fade">
-  <form action="{% url "social:complete" "email" %}" method="post" role="form">{% csrf_token %}
+  <form action="{% url "social:complete" "email" %}?next={{ next }}" method="post" role="form">{% csrf_token %}
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">

@@ -75,9 +75,11 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                 user_from_code = User.objects.filter(id=code.user_id).first()
                 if user_from_code:
                     user = user_from_code
+                    _next = backend.strategy.request.session.get('next')
                     logout(backend.strategy.request)
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
+                    backend.strategy.session_set('next', _next)
                     return {'user': user}
         else:
             if user and user.groups.filter(name='Temporary').exists():
@@ -87,9 +89,8 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                     defaults={'date': datetime.now()}
                 )
             backend.strategy.send_email_validation(backend, details.get('email'))
-            backend.strategy.session_set(
-                'email_validation_address', details.get('email')
-            )
+            backend.strategy.session_set('email_validation_address', details.get('email'))
+            backend.strategy.session_set('next', data.get('next'))
             return backend.strategy.redirect(
                 backend.strategy.setting('EMAIL_VALIDATION_URL')
             )

@@ -14,7 +14,7 @@
       </form>
     {% endif %}
     {% else %}
-      <a class="btn btn-default col-md-2" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}">
+      <a class="btn btn-default col-md-2" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}?next={{ next }}">
         <i class="fa fa-{{ name|icon_name }}"></i>
         {{ backend|backend_name }}
       </a>
