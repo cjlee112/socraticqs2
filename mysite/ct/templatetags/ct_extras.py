@@ -211,3 +211,12 @@ def display_datetime(dt):
     return '%s %d, %d' % (monthStrings[dt.month - 1], dt.day, dt.year)
 
 
+@register.filter
+def filter_input(edge, unit_lesson):
+    """Filter input UnitLesson to be acceptable for this edge.
+
+    :param edge: FSMEdge
+    :param unit_lesson: UnitLesson
+    :return:
+    """
+    return edge.fromNode._plugin.select_UnitLesson_filter(unit_lesson)
