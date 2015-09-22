@@ -112,34 +112,37 @@ function toggleInterest(o, targeturl, csrftoken)
     </div>
 
   </nav>
-  {% if pageData.errorMessage %}
-    <p><b>{{ pageData.errorMessage }}</b></p>
-  {% elif pageData.statusMessage %}
-    <p><b>{{ pageData.statusMessage }}</b></p>
-  {% endif %}
 
-  {% if fsmStack.state %}
-    {% if pageData.fsm_help_message %}
-      {{ pageData.fsm_help_message }}
-      <br>
-    {% elif pageData.fsm_off_path %}
-      <b>Note</b>: you are currently in the middle of an activity:
-      <b>{{ fsmStack.state.title }}</b>.
-      When you're done viewing other pages such as this one,
-      you can resume the next step of that activity by clicking on
-      the Resume Activity button.
-      <button type="button" onclick="location.href='{{ fsmStack.state.path }}'">
-      Resume Activity
-      </button>
-      <br>
+  <div class="container">
+    {% if pageData.errorMessage %}
+      <p><b>{{ pageData.errorMessage }}</b></p>
+    {% elif pageData.statusMessage %}
+      <p><b>{{ pageData.statusMessage }}</b></p>
     {% endif %}
-  {% endif %}
 
-  <header>
-    <h1>{% block title %}{% endblock %}</h1>
-  </header>
+    {% if fsmStack.state %}
+      {% if pageData.fsm_help_message %}
+        {{ pageData.fsm_help_message }}
+        <br>
+      {% elif pageData.fsm_off_path %}
+        <b>Note</b>: you are currently in the middle of an activity:
+        <b>{{ fsmStack.state.title }}</b>.
+        When you're done viewing other pages such as this one,
+        you can resume the next step of that activity by clicking on
+        the Resume Activity button.
+        <button type="button" onclick="location.href='{{ fsmStack.state.path }}'">
+        Resume Activity
+        </button>
+        <br>
+      {% endif %}
+    {% endif %}
 
-  {% block content %}{% endblock %}
+    <header>
+      <h1>{% block title %}{% endblock %}</h1>
+    </header>
+  
+    {% block content %}{% endblock %}
+  </div>
 
   {% include 'psa/modal.html' %}
   {% include 'psa/auth.js.html' %}
