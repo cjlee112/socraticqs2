@@ -34,6 +34,10 @@ you need various things such as:
 * **PostgreSQL**: back-end database for Socraticqs2.  See further details below.
 * **Pandoc** (currently used for converting text to HTML): you can download
   this for Mac OS X; most linux package managers can install it automatically.
+* **RabbitMQ**: an open source message broker software that implements the 
+  Advanced Message Queuing Protocol (AMQP) - used by Celery.
+* **Memcached**: free & open source, high-performance, distributed memory 
+  object caching system.
 * **Python packages** automatically installable by pip using our
   `dev_requirements.txt` requirements file:
   e.g. Django, pypandoc, django-crispy-forms,
@@ -575,3 +579,15 @@ This will create and populate db with fixture. Then deploy all FSMs.
 * Run test server and start Course from home page.
 * Go to Activity Page and restore Activity.
 * Go to Activity Page and cancel Activity.
+
+
+Running Celery periodic tasks
+:::::::::::::::::::::::::::::
+
+We are using Celery to delete obsolete Temorary users.
+
+To start the celery beat service use::
+
+    celery worker -A mysite --loglevel=INFO -B
+
+Previous command we need to call inside socraticqs2/mysite directory.
