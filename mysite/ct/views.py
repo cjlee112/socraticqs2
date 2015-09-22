@@ -230,7 +230,7 @@ class PageData(object):
     def fsm_off_path(self):
         'True if not on current node view or Activity Center view'
         return not self.fsmStack.state.fsm_on_path(self.path) and \
-          self.path != '/ct/nodes/'
+          self.path != reverse('fsm:fsm_status')
     def set_refresh_timer(self, request, timer=True):
         'start or end the refresh timer'
         if timer:
