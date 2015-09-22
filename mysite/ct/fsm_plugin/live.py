@@ -51,6 +51,13 @@ class CHOOSE(object):
     """
     At this step you choose a question to ask in this live session.
     """
+    def select_UnitLesson_filter(self, unit_lesson):
+        """
+        Return True if input is acceptable for this edge.
+        input: UnitLesson
+        """
+        return unit_lesson.is_question()
+
     # node specification data goes here
     path = 'ct:unit_lessons'
     title = 'Choose a Question to Ask'

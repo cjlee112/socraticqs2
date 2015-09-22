@@ -61,7 +61,7 @@ $( "#headtoggle" ).click(function() {
 {% for ul in lessonTable %}
   <tr>
     <td><a href="{{ actionTarget |get_home_url:ul }}">{{ ul.lesson.title }}</a>
-    {% if fsmStack.select_UnitLesson %}
+    {% if fsmStack.select_UnitLesson and fsmStack.select_UnitLesson|filter_input:ul %}
       <form action="{{ actionTarget }}" method="post"
             style=" display:inline!important;">
       {% csrf_token %}
