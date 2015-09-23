@@ -162,6 +162,10 @@ class FSMTests(OurTestCase):
         self.assertTrue(f.startNode.doLogging)
         self.assertFalse(f.get_node('MID').doLogging)
         fsmStack = self.do_start(f)
+        # test filter_input() plugin functionality
+        edge = fsmStack.state.fsmNode.outgoing.get(name='next')
+        self.assertTrue(edge.filter_input('the right stuff'))
+        self.assertFalse(edge.filter_input('the WRONG stuff'))
         # test get_help() plugin functionality
         request = FakeRequest(self.user, path='/ct/about/')
         msg = fsmStack.state.fsmNode.get_help(fsmStack.state, request)

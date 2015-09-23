@@ -212,11 +212,11 @@ def display_datetime(dt):
 
 
 @register.filter
-def filter_input(edge, unit_lesson):
+def filter_input(edge, obj):
     """Filter input UnitLesson to be acceptable for this edge.
 
     :param edge: FSMEdge
-    :param unit_lesson: UnitLesson
+    :param obj: data object to be checked whether it's acceptable input.
     :return:
     """
-    return edge.fromNode._plugin.select_UnitLesson_filter(unit_lesson)
+    return edge.filter_input(obj)

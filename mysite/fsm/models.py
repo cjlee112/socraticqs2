@@ -351,6 +351,16 @@ class FSMEdge(JSONBlobMixin, models.Model):
             return self.toNode
         else:
             return func(self, fsmStack, request, **kwargs)
+    def filter_input(self, obj):
+        """
+        Use plugin code to check whether obj is acceptable input to this edge.
+        """
+        try: # see if plugin code provides select_X_filter() call
+            func = getattr(self.fromNode._plugin, self.name + '_filter')
+        except AttributeError: # no plugin method, so accept by default
+            return True
+        else:
+            return func(self, obj)
 
 
 class FSMState(JSONBlobMixin, models.Model):

@@ -51,7 +51,7 @@ class CHOOSE(object):
     """
     At this step you choose a question to ask in this live session.
     """
-    def select_UnitLesson_filter(self, unit_lesson):
+    def select_UnitLesson_filter(self, edge, unit_lesson):
         """
         Return True if input is acceptable for this edge.
         input: UnitLesson

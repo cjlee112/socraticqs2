@@ -43,6 +43,11 @@ class START(object):
 
 
 class MID(object):
+    def next_filter(self, edge, obj):
+        """
+        Example edge filter_input method to check whether input is acceptable.
+        """
+        return obj == 'the right stuff'
     def get_help(self, node, state, request):
         path_help = {
             '/ct/about/': 'here here!',
