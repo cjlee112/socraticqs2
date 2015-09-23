@@ -18,7 +18,10 @@ class OurTestCase(TestCase):
     def check_post_get(self, url, postdata, urlTail, expected):
         '''do POST and associated redirect to GET.  Check the redirect
         target and GET response content '''
-        response = self.client.post(url, postdata, HTTP_REFERER=url)
+        origin = 'http://testserver'
+        if not url.startswith(origin):
+            url = origin + url
+        response = self.client.post(url, postdata, HTTP_REFERER=url, HTTP_ORIGIN=origin)
         self.assertEqual(response.status_code, 302)
         url = response['Location']
         self.assertTrue(url.endswith(urlTail))
