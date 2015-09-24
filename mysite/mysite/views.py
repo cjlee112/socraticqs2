@@ -1,7 +1,10 @@
+from django.views.decorators.cache import cache_page
 from django.contrib.auth import login, logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+
+cache_page(60*15)
 def home_page(request):
     return render(request, 'index.html')
 
