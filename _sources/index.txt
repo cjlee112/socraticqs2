@@ -15,6 +15,7 @@ Contents:
    fsm
    lti
    psa
+   fab
 
 Project Enhancement Proposals:
 

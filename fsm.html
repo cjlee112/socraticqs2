@@ -347,20 +347,30 @@ query by the application.  Whenever an FSM specification changes
 (e.g. adding a new FSM or modifying an existing FSM), that
 specification must be loaded to the database.  Whenever the
 database table is flushed, the set of FSM specifications must be
-loaded.  The standard way to do this is simply:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ python manage.py shell
-&gt;&gt;&gt; from fsm.fsmspec import deploy_all
-&gt;&gt;&gt; deploy_all(&#39;foobaron&#39;)
+loaded.</p>
+<p>The standard way to do this is simply use <code class="docutils literal"><span class="pre">fsm_deploy</span></code> manage command.</p>
+<p>To load all FSM specifications, use:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python manage.py fsm_deploy
+FSM `fsm_name1` is deployed.
+FSM `fsm_name2` is deployed.
 </pre></div>
 </div>
-<p>where <code class="docutils literal"><span class="pre">foobaron</span></code> is the username that will be recorded as the owner
-of the loaded FSMs.</p>
-<p>Two convenience functions exist to do this, in the <code class="docutils literal"><span class="pre">fsmspec</span></code> module.
-To load a single FSM specification, use:</p>
+<p>FSM specifications will be deployed using <cite>admin</cite> user.</p>
+<p>User <cite>admin</cite> is a conventional username for all FSMs developer to use.</p>
+<p>To load a single FSM specification, use:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python manage.py fsm_deploy APP.fsm_plugin.MODULENAME
+FSM `MODULENAME` is deployed.
+</pre></div>
+</div>
+<p>Where <code class="docutils literal"><span class="pre">APP.fsm_plugin.MODULENAME</span></code> is the full path to the new / modified module. <code class="docutils literal"><span class="pre">APP</span></code> is the name of the Django app, and <code class="docutils literal"><span class="pre">MODULENAME</span></code> is the module name in the <cite>fsm_plugin</cite> directory.</p>
+</div>
+<div class="section" id="low-level-functions-to-deploy-fsms">
+<h3>Low-level functions to deploy FSMs<a class="headerlink" href="#low-level-functions-to-deploy-fsms" title="Permalink to this headline">¶</a></h3>
+<p>There are also two low-level functions exists in the <code class="docutils literal"><span class="pre">fsmspec</span></code> module for this purpose:</p>
 <dl class="function">
 <dt id="deploy">
-<code class="descname">deploy</code><span class="sig-paren">(</span><em>modname</em>, <em>username</em><span class="sig-paren">)</span><a class="headerlink" href="#deploy" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>modname</em>: full name of the module (typically of the form
+<code class="descname">deploy</code><span class="sig-paren">(</span><em>mod_path</em>, <em>username</em><span class="sig-paren">)</span><a class="headerlink" href="#deploy" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mod_path</em>: full path of the module (typically of the form
 <code class="docutils literal"><span class="pre">APP.fsm_plugin.MODULENAME</span></code> where <code class="docutils literal"><span class="pre">APP</span></code> is the name of the Django
 app, and <code class="docutils literal"><span class="pre">MODULENAME</span></code> is the module name in that directory)
 containing the new / modified FSM to load.</p>
@@ -370,7 +380,6 @@ At present this isn&#8217;t really used for anything, hence somewhat
 arbitrary.</p>
 </dd></dl>
 
-<p>To load all FSM specifications, use:</p>
 <dl class="function">
 <dt id="deploy_all">
 <code class="descname">deploy_all</code><span class="sig-paren">(</span><em>username</em>, <em>ignore=('testme'</em>, <em>'__init__'</em>, <em>)</em>, <em>pattern='*/fsm_plugin/*.py'</em><span class="sig-paren">)</span><a class="headerlink" href="#deploy_all" title="Permalink to this definition">¶</a></dt>
@@ -380,6 +389,18 @@ be treated as FSM specifications.</p>
 <p><em>pattern</em>: <code class="docutils literal"><span class="pre">glob</span></code> search pattern for finding FSM plugin modules.</p>
 </dd></dl>
 
+<p>To load all FSM specifications using low-level functions, use:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python manage.py shell
+&gt;&gt;&gt; from fsm.fsmspec import deploy_all
+&gt;&gt;&gt; deploy_all(&#39;admin&#39;)
+</pre></div>
+</div>
+<p>To load a single FSM specification using low-level functions, use:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python manage.py shell
+&gt;&gt;&gt; from fsm.fsmspec import deploy
+&gt;&gt;&gt; deploy(&#39;APP.fsm_plugin.MODULENAME&#39;, &#39;admin&#39;)
+</pre></div>
+</div>
 </div>
 <div class="section" id="fsmspecification">
 <h3>FSMSpecification<a class="headerlink" href="#fsmspecification" title="Permalink to this headline">¶</a></h3>
@@ -799,6 +820,7 @@ stored in the <code class="docutils literal"><span class="pre">FSMState.data</sp
 <li><a class="reference internal" href="#an-example-lesson-sequence-fsm">An Example: Lesson Sequence FSM</a></li>
 <li><a class="reference internal" href="#fsm-reference-documentation">FSM Reference Documentation</a><ul>
 <li><a class="reference internal" href="#loading-fsm-specifications-into-the-database">Loading FSM specifications into the database</a></li>
+<li><a class="reference internal" href="#low-level-functions-to-deploy-fsms">Low-level functions to deploy FSMs</a></li>
 <li><a class="reference internal" href="#fsmspecification">FSMSpecification</a></li>
 <li><a class="reference internal" href="#fsm">FSM</a></li>
 <li><a class="reference internal" href="#fsmnode">FSMNode</a></li>

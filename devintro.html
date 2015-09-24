@@ -153,7 +153,8 @@ link on the webpage for your fork (repository).</p>
 <h3>Installing and configuring PostgreSQL<a class="headerlink" href="#installing-and-configuring-postgresql" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="ubuntu-14-04-distribution-instructions">
 <h4>Ubuntu 14.04 distribution instructions<a class="headerlink" href="#ubuntu-14-04-distribution-instructions" title="Permalink to this headline">¶</a></h4>
-<p>To install PostgreSQL 9.4 on Ubuntu machine you should follow next steps:</p>
+<p>You can check PostgreSQL installation manual for linux on official PostgreSQL <a class="reference external" href="http://www.postgresql.org/download/linux/ubuntu/">page</a>.</p>
+<p>Steps to install PostgreSQL on Ubuntu machine:</p>
 <ul>
 <li><p class="first">Create the file <code class="docutils literal"><span class="pre">/etc/apt/sources.list.d/pgdg.list</span></code>, and
 add a line for the repository</p>
@@ -191,11 +192,6 @@ postgres=# \password postgres
 </pre></div>
 </div>
 </li>
-<li><p class="first">Finally we need to create database with desired name:</p>
-<div class="highlight-python"><div class="highlight"><pre>postgres=# CREATE DATABASE db_name ENCODING &#39;UTF8&#39;;
-</pre></div>
-</div>
-</li>
 <li><p class="first">Now we can exit from PostgreSQL and start to configure our Django project to use created database:</p>
 <div class="highlight-python"><div class="highlight"><pre>postgres=# \q
 </pre></div>
@@ -226,26 +222,85 @@ postgres=# \password postgres
 sudo service postgresql start
 </pre></div>
 </div>
-<p>To prevent PostgreSQL to start on system boot you need to change line <code class="docutils literal"><span class="pre">auto</span></code> to <code class="docutils literal"><span class="pre">manual</span></code> in <code class="docutils literal"><span class="pre">/etc/postgresql/9.4/main/start.conf</span></code>.</p>
+<p>There are couple of ways to prevent PostgreSQL to start on system boot:</p>
+<ol class="arabic">
+<li><p class="first">First one is to remove system start-up links for postgres:</p>
+<div class="highlight-python"><div class="highlight"><pre>✗ sudo update-rc.d -f postgresql remove
+  Removing any system startup links for /etc/init.d/postgresql ...
+    /etc/rc0.d/K21postgresql
+    /etc/rc1.d/K21postgresql
+    /etc/rc2.d/S19postgresql
+    /etc/rc3.d/S19postgresql
+    /etc/rc4.d/S19postgresql
+    /etc/rc5.d/S19postgresql
+    /etc/rc6.d/K21postgresql
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>In this case we can use default way to start postgres manually:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo service postgresql start
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p class="first">Second one is to change line <code class="docutils literal"><span class="pre">auto</span></code> to <code class="docutils literal"><span class="pre">manual</span></code> in <code class="docutils literal"><span class="pre">/etc/postgresql/9.4/main/start.conf</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Automatic startup configuration</span>
+<span class="c"># auto: automatically start/stop the cluster in the init script</span>
+<span class="c"># manual: do not start/stop in init scripts, but allow manual startup with</span>
+<span class="c">#         pg_ctlcluster</span>
+<span class="c"># disabled: do not allow manual startup with pg_ctlcluster (this can be easily</span>
+<span class="c">#           circumvented and is only meant to be a small protection for</span>
+<span class="c">#           accidents).</span>
+
+<span class="n">auto</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<blockquote>
+<div><p>In this case we prevent to start <code class="docutils literal"><span class="pre">main</span></code> postgres cluster and need to use next commands to <code class="docutils literal"><span class="pre">stop|start</span></code> pg_cluster:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo pg_ctlcluster 9.4 main stop
+sudo pg_ctlcluster 9.4 main start
+</pre></div>
+</div>
+</div></blockquote>
+<p>More information you can find on PostgreSQL 9.4 <a class="reference external" href="http://www.postgresql.org/docs/9.4/static/">documentation</a> page.</p>
 </div>
 <div class="section" id="mac-os-x-installation">
 <h4>Mac OS X installation<a class="headerlink" href="#mac-os-x-installation" title="Permalink to this headline">¶</a></h4>
 <p>For installing PostgreSQL on Mac OS X please follow the official <a class="reference external" href="http://www.postgresql.org/download/macosx/">instructions</a>.</p>
+<p>One of the prefered way to install PostreSQL is <a class="reference external" href="http://brew.sh">Homebrew</a>:</p>
+<div class="highlight-python"><div class="highlight"><pre>brew install postgres
+</pre></div>
+</div>
+<p>Postgres will be installed into <code class="docutils literal"><span class="pre">/usr/local/var/postgres</span></code> directory.</p>
+<p>Information about how to start Postgres you can find by following command:</p>
+<div class="highlight-python"><div class="highlight"><pre>brew info postgres
+</pre></div>
+</div>
+<p>By default Homebrew create postgres role with name as your mac username.</p>
+<p>So you need to set a password for this role:</p>
+<div class="highlight-python"><div class="highlight"><pre>psql postgres
+\password your_username
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="configuring-django-project-for-using-postgresql">
 <h3>Configuring Django project for using PostgreSQL<a class="headerlink" href="#configuring-django-project-for-using-postgresql" title="Permalink to this headline">¶</a></h3>
-<p>To configure project to need to copy <code class="docutils literal"><span class="pre">mysite/settings/local_conf_example.py</span></code> into <code class="docutils literal"><span class="pre">mysite/settings/local_conf.py</span></code> and change DATABASES dict:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s">&#39;django.db.backends.postgresql_psycopg2&#39;</span><span class="p">,</span>
-      <span class="s">&#39;NAME&#39;</span><span class="p">:</span> <span class="s">&#39;db_name&#39;</span><span class="p">,</span>
-      <span class="s">&#39;USER&#39;</span><span class="p">:</span> <span class="s">&#39;postgres&#39;</span><span class="p">,</span>
-      <span class="s">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="s">&#39;your_postgres_pass&#39;</span><span class="p">,</span>
-      <span class="s">&#39;HOST&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># leave blank for localhost</span>
-      <span class="s">&#39;PORT&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>  <span class="c"># leave blank for localhost</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<p>To configure project you need to copy <code class="docutils literal"><span class="pre">mysite/settings/local_conf_example.py</span></code> into <code class="docutils literal"><span class="pre">mysite/settings/local_conf.py</span></code> and change DATABASES dict according to previously configured PostgreSQL user and db_name:</p>
+<div class="highlight-python"><div class="highlight"><pre>DATABASES = {
+    &#39;default&#39;: {
+      &#39;ENGINE&#39;: &#39;django.db.backends.postgresql_psycopg2&#39;,
+      &#39;NAME&#39;: &#39;db_name&#39;,
+      &#39;USER&#39;:  &#39;your_username&#39;, (postgres for Ubuntu default configuration proccess)
+      &#39;PASSWORD&#39;: &#39;your_postgres_pass&#39;,
+      &#39;HOST&#39;: &#39;&#39;,  # leave blank for localhost
+      &#39;PORT&#39;: &#39;&#39;,  # leave blank for localhost
+    }
+}
 </pre></div>
 </div>
 </div>
@@ -266,32 +321,43 @@ python manage.py test
 </pre></div>
 </div>
 <p>You should see a series of tests pass successfully.</p>
-</div>
-<div class="section" id="running-a-test-web-server">
-<h3>Running a test web server<a class="headerlink" href="#running-a-test-web-server" title="Permalink to this headline">¶</a></h3>
-<p>You need to create a database, load it with some data,
-load plugin specifications, and
-run the development web server.  You first create the
-database:</p>
-<div class="highlight-python"><div class="highlight"><pre>python manage.py migrate
-</pre></div>
-</div>
-<p>Next load it with some example data that we supply in the
-repository:</p>
-<div class="highlight-python"><div class="highlight"><pre>python manage.py loaddata dumpdata/debug.json
+<p>By default test suite is running on sqlite database to get a speed boost but you can change this by commenting out next lines in you local_conf.py:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="s">&#39;test&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="ow">or</span> <span class="s">&#39;test_coverage&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+    <span class="n">DATABASES</span><span class="p">[</span><span class="s">&#39;default&#39;</span><span class="p">][</span><span class="s">&#39;ENGINE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;django.db.backends.sqlite3&#39;</span>
 </pre></div>
 </div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p>If you get an error message of the form
-<code class="docutils literal"><span class="pre">Could</span> <span class="pre">not</span> <span class="pre">load</span> <span class="pre">contenttypes.ContentType</span></code> then load the example
-data as follows:</p>
-<div class="last highlight-python"><div class="highlight"><pre>python manage.py loaddata dumpdata/debug-e.json
+<p>For Mac developer if you see <code class="docutils literal"><span class="pre">ValueError:</span> <span class="pre">unknown</span> <span class="pre">locale:</span> <span class="pre">UTF-8</span></code> do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre>export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
 </pre></div>
 </div>
+<p class="last">Or add this lines to your <code class="docutils literal"><span class="pre">~/.bash_profile</span></code></p>
 </div>
-<p>You will also need to load FSM plugin specifications;
-see <a class="reference internal" href="fsm.html#fsm-deploy"><span>Loading FSM specifications into the database</span></a>.</p>
+</div>
+<div class="section" id="running-a-test-web-server">
+<h3>Running a test web server<a class="headerlink" href="#running-a-test-web-server" title="Permalink to this headline">¶</a></h3>
+<p>You need to create a database, load it with some data,
+load plugin specifications, and then
+run the development web server.</p>
+<p>You can prepare database with <a class="reference internal" href="fab.html"><em>Fabric deployment tool</em></a>.</p>
+<p>To initialize DB to run test webserver use:</p>
+<div class="highlight-python"><div class="highlight"><pre>fab db.init
+</pre></div>
+</div>
+<p>This task creates a new DB and transforms it into working state by the next steps:</p>
+<ul class="simple">
+<li>Drop existing DB</li>
+<li>Create new DB</li>
+<li>Apply all current Django migrations</li>
+<li>Load fixtures</li>
+<li>Deploy all FSMs</li>
+</ul>
+<p>To list all available tasks use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fab</span> <span class="o">--</span><span class="nb">list</span>
+</pre></div>
+</div>
 <p>Finally, start up the development web server:</p>
 <div class="highlight-python"><div class="highlight"><pre>python manage.py runserver
 </pre></div>
@@ -299,6 +365,7 @@ see <a class="reference internal" href="fsm.html#fsm-deploy"><span>Loading FSM s
 <p>Start a web browser and point it at <a class="reference external" href="http://localhost:8000/ct/">http://localhost:8000/ct/</a></p>
 <p>It will prompt you to log in; the default development tester
 username is <code class="docutils literal"><span class="pre">admin</span></code> with password <code class="docutils literal"><span class="pre">testonly</span></code>.</p>
+<p>User <cite>admin</cite> is a conventional user to use during the FSM development.</p>
 <p>You can stop the web server by simply typing Control-C.</p>
 <p>Security notes:</p>
 <ul class="simple">
@@ -316,6 +383,8 @@ credentials above and modify data in your development server).</li>
 </div>
 <div class="section" id="database-operations">
 <h3>Database Operations<a class="headerlink" href="#database-operations" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="updating-your-database-schema">
+<h4>Updating your database schema<a class="headerlink" href="#updating-your-database-schema" title="Permalink to this headline">¶</a></h4>
 <p>If upstream code changes (i.e. made by someone else, and pulled
 into your local repo) alter the database schema, you will have to
 update your developer database to match.  You will typically notice this
@@ -331,6 +400,9 @@ the current data models.</li>
 <div class="highlight-python"><div class="highlight"><pre>python manage.py migrate ct
 </pre></div>
 </div>
+</div>
+<div class="section" id="altering-the-database-schema-models-yourself">
+<h4>Altering the database schema (models) yourself<a class="headerlink" href="#altering-the-database-schema-models-yourself" title="Permalink to this headline">¶</a></h4>
 <p>If you change the database fields for a data model in <code class="docutils literal"><span class="pre">models.py</span></code>,
 you will of course also have to change your database to match.
 (Note that this means changes to the data fields that are
@@ -339,7 +411,17 @@ the data classes does not change the database schema).</p>
 <p>Django 1.7 makes this easy via its <code class="docutils literal"><span class="pre">makemigrations</span></code> command.</p>
 <p>First make a backup copy of your current database (this is important,
 because it&#8217;s not obvious whether there is any easy way to &#8220;undo&#8221; a migration):</p>
-<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
+<div class="highlight-python"><div class="highlight"><pre>fab db.backup[:custom_branch_name]
+</pre></div>
+</div>
+<p>It will create db backup file with suffix from you current git branch name
+or from provided optional param <code class="docutils literal"><span class="pre">custom_branch_name</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre>fab db.backup:test1
+.................
+[localhost] local: pg_dump courselets -U postgres -w &gt; /path/to/proj/backups/backup.engine.test1
+[................
+
+Done.
 </pre></div>
 </div>
 <p>Then simply type:</p>
@@ -351,7 +433,7 @@ this migration to your database exactly as we did in the previous section:</p>
 <div class="highlight-python"><div class="highlight"><pre>python manage.py migrate ct
 </pre></div>
 </div>
-<p>At this point you should be able to run the testsuite, <code class="docutils literal"><span class="pre">runserver</span></code>, etc.</p>
+<p>At this point you should be able to run the <code class="docutils literal"><span class="pre">runserver</span></code>, etc.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p>You must commit your new migration file at the same time
@@ -374,7 +456,8 @@ You need to be aware of the following &#8220;gotchas&#8221; lurking here:</p>
 <ul class="last simple">
 <li>once you change a model in <code class="docutils literal"><span class="pre">models.py</span></code>, your code will no longer
 run until you successfully run <code class="docutils literal"><span class="pre">makemigrations</span></code> + <code class="docutils literal"><span class="pre">migrate</span></code>.
-So you cannot actually test your changes until you run both those steps.</li>
+So you cannot actually move to manual testing your changes until
+you run both those steps.</li>
 <li>every time you run <code class="docutils literal"><span class="pre">makemigrations</span></code> on another change to
 your data models, ANOTHER migration file
 will be added, and EVERY migration file will be
@@ -386,31 +469,46 @@ you want that to be represented by a single new migration file.</li>
 <li>Because of this, in theory you shouldn&#8217;t
 run <code class="docutils literal"><span class="pre">makemigrations</span></code> / <code class="docutils literal"><span class="pre">migrate</span></code> until
 <em>after</em> you are pretty sure your model changes are final.
-But you can&#8217;t even test your changes until after both steps.
+But you can&#8217;t even start manual testing of your changes until after
+both steps.
 This is an unpleasant catch-22.</li>
+<li>To run unittests you need to create migration according to your new
+code with no need to apply them to DB because test suite applies all
+migrations every time you run it to temporary DB.</li>
 <li>Once you change your database schema (via <code class="docutils literal"><span class="pre">migrate</span></code>), all <em>other</em>
 code versions (i.e. not matching the new schema stored in your
 database) will NOT run.
 This would destroy the key virtue of Git &#8211; your ability to
 have many different code branches and switch between them
 effortlessly.</li>
+<li>Because of this, to make developer life easier, we provide Fabriс <code class="docutils literal"><span class="pre">db.init|db.backup|db.restore</span></code>
+tasks to init, backup and restore actions with DB. See <a class="reference internal" href="fab.html"><em>Fabric deployment tool</em></a> section
+for details.</li>
 </ul>
 </div>
+</div>
+<div class="section" id="recommended-migration-best-practices">
+<h4>Recommended Migration Best Practices<a class="headerlink" href="#recommended-migration-best-practices" title="Permalink to this headline">¶</a></h4>
 <p>For all these reasons, I suggest you follow a simple discipline
 whenever you are about to make model changes that will require
 migration:</p>
 <ul>
-<li><p class="first">BEFORE making those changes, save a copy of your current
-database file and checkout a <em>new</em> Git branch, e.g.:</p>
-<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
-git checkout -b bigchange
+<li><p class="first">BEFORE making those changes, make your DB backup and
+checkout a <em>new</em> Git branch, e.g.:</p>
+<p>Make DB backup:</p>
+<div class="highlight-python"><div class="highlight"><pre>fab db.backup
 </pre></div>
 </div>
-<p>where <code class="docutils literal"><span class="pre">previous</span></code> is the name of your previous branch,
-and <code class="docutils literal"><span class="pre">bigchange</span></code> is the name of your new branch.
-You should also do this if you are starting to work with
+<p>By default without providing any custom params to task it  will use
+you current branch name as suffix for backup file.</p>
+<p>Next you can checkput to new bigchange:</p>
+<div class="highlight-python"><div class="highlight"><pre>git checkout -b bigchange
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">bigchange</span></code> is the name of your new branch.</p>
+<p>You should also do this if you are starting to work with
 someone else&#8217;s experimental model changes, e.g.:</p>
-<div class="highlight-python"><div class="highlight"><pre>cp mysite.db mysite.db.previous
+<div class="highlight-python"><div class="highlight"><pre>fab db.backup
 git checkout -b bigchange
 git pull fred bigchange
 </pre></div>
@@ -419,14 +517,25 @@ git pull fred bigchange
 branch, you can simply switch back to the database file
 that worked with <code class="docutils literal"><span class="pre">previous</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre>git checkout previous
-cp mysite.db.previous mysite.db
 </pre></div>
 </div>
-<p>Note that you should NOT add <code class="docutils literal"><span class="pre">mysite.db</span></code> to Git
+<p>Next you need to restore backuped DB:</p>
+<div class="highlight-python"><div class="highlight"><pre>fab db.restore
+</pre></div>
+</div>
+<p>Note that you should NOT add any DB file to Git
 version control.</p>
 </li>
 <li><p class="first">Now you can freely run <code class="docutils literal"><span class="pre">makemigrations</span></code> + <code class="docutils literal"><span class="pre">migrate</span></code>
 whenever you like, so you can test your changes.</p>
+</li>
+<li><p class="first">If you DB is in initial state without any new information stored in
+you can use <a class="reference internal" href="fab.html"><em>Fabric deployment tool</em></a> to get DB ready to test and development:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ fab db.init
+</pre></div>
+</div>
+<p>This will give you a new DB with all migrations applied,
+initial data populated and all FSM deployed.</p>
 </li>
 <li><p class="first">If it turns out that you need to make <em>more</em> model
 changes (i.e. your model changes turned out to be inadequate
@@ -435,16 +544,26 @@ the inadequate models/migration),
 the best practice is to UNDO your migration
 and REGENERATE a new migration to replace it, like this:</p>
 <div class="highlight-python"><div class="highlight"><pre>rm ct/migrations/0005_unitstatus.py
-cp mysite.db.previous mysite.db
+fab db.restore
 python manage.py makemigrations ct
 python manage.py migrate ct
 </pre></div>
 </div>
 <p>where <code class="docutils literal"><span class="pre">ct/migrations/0005_unitstatus.py</span></code> is your new
-migration file, and <code class="docutils literal"><span class="pre">mysite.db.previous</span></code> is a copy of
-your database file from before you applied this new migration.</p>
+migration file.</p>
+<p>If you migration can be backwarded you can use next flow:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py migrate ct 0004
+rm ct/migrations/0005_unitstatus.py
+python manage.py makemigrations ct
+python manage.py migrate ct
+</pre></div>
+</div>
+<p>where 0004 is a number of your previous migration file.</p>
 </li>
 </ul>
+</div>
+<div class="section" id="backing-up-flushing-and-restoring-your-local-database">
+<h4>Backing up, flushing, and restoring your local database<a class="headerlink" href="#backing-up-flushing-and-restoring-your-local-database" title="Permalink to this headline">¶</a></h4>
 <p>You may wish to make and reload snapshots of your local database
 as part of your development and testing process.  This is easy.</p>
 <p>You can save a snapshot of your current database to a file, like this:</p>
@@ -459,8 +578,34 @@ as part of your development and testing process.  This is easy.</p>
 <div class="highlight-python"><div class="highlight"><pre>python manage.py loaddata dumpdata/mysnap.json
 </pre></div>
 </div>
-<p>You will also need to load FSM plugin specifications;
-see <a class="reference internal" href="fsm.html#fsm-deploy"><span>Loading FSM specifications into the database</span></a>.</p>
+</div>
+<div class="section" id="test-project-on-postgresql-before-making-any-pr">
+<h4>Test project on PostgreSQL before making any PR<a class="headerlink" href="#test-project-on-postgresql-before-making-any-pr" title="Permalink to this headline">¶</a></h4>
+<p>You can develop project using sqlite db but before creating
+any PR you need to init PostgreSQL DB to ensure
+your code not breaking anything.</p>
+<ul>
+<li><p class="first">You can create and populate db with <a class="reference internal" href="fab.html"><em>Fabric deployment tool</em></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre>fab db.init
+</pre></div>
+</div>
+</li>
+</ul>
+<p>This will create and populate db with fixture. Then deploy all FSMs.</p>
+<ul>
+<li><p class="first">Run all tests:</p>
+<div class="highlight-python"><div class="highlight"><pre>python manage.py test
+</pre></div>
+</div>
+</li>
+<li><p class="first">Run test server and start Course from home page.</p>
+</li>
+<li><p class="first">Go to Activity Page and restore Activity.</p>
+</li>
+<li><p class="first">Go to Activity Page and cancel Activity.</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
@@ -492,7 +637,14 @@ see <a class="reference internal" href="fsm.html#fsm-deploy"><span>Loading FSM s
 </li>
 <li><a class="reference internal" href="#basic-developer-operations">Basic Developer Operations</a><ul>
 <li><a class="reference internal" href="#getting-source-code-updates-making-changes-etc">Getting source code updates, making changes etc.</a></li>
-<li><a class="reference internal" href="#database-operations">Database Operations</a></li>
+<li><a class="reference internal" href="#database-operations">Database Operations</a><ul>
+<li><a class="reference internal" href="#updating-your-database-schema">Updating your database schema</a></li>
+<li><a class="reference internal" href="#altering-the-database-schema-models-yourself">Altering the database schema (models) yourself</a></li>
+<li><a class="reference internal" href="#recommended-migration-best-practices">Recommended Migration Best Practices</a></li>
+<li><a class="reference internal" href="#backing-up-flushing-and-restoring-your-local-database">Backing up, flushing, and restoring your local database</a></li>
+<li><a class="reference internal" href="#test-project-on-postgresql-before-making-any-pr">Test project on PostgreSQL before making any PR</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

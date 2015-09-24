@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Socraticqs2 0.1 documentation" href="index.html" />
-    <link rel="next" title="Django Version Collaboration System for Courselets" href="pep/django_vcs.html" />
+    <link rel="next" title="Fabric deployment tool" href="fab.html" />
     <link rel="prev" title="Socraticqs2 as LTI provider" href="lti.html" /> 
   </head>
   <body role="document">
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+          <a href="fab.html" title="Fabric deployment tool"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="lti.html" title="Socraticqs2 as LTI provider"
@@ -270,7 +270,7 @@ default.</p>
 <dl class="function">
 <dt id="psa.pipeline.associate_user">
 <code class="descclassname">psa.pipeline.</code><code class="descname">associate_user</code><span class="sig-paren">(</span><em>backend</em>, <em>details</em>, <em>uid</em>, <em>user=None</em>, <em>social=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.associate_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create UserSocialAuth</p>
+<dd><p>Create UserSocialAuth.</p>
 </dd></dl>
 
 <dl class="function">
@@ -297,7 +297,7 @@ default.</p>
 <dl class="function">
 <dt id="psa.pipeline.social_user">
 <code class="descclassname">psa.pipeline.</code><code class="descname">social_user</code><span class="sig-paren">(</span><em>backend</em>, <em>uid</em>, <em>user=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.pipeline.social_user" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search for UserSocialAuth</p>
+<dd><p>Search for UserSocialAuth.</p>
 </dd></dl>
 
 <dl class="function">
@@ -348,7 +348,7 @@ Solution from <a class="reference external" href="http://gavinballard.com/associ
 <dl class="function">
 <dt id="psa.models.user_logged_in_handler">
 <code class="descclassname">psa.models.</code><code class="descname">user_logged_in_handler</code><span class="sig-paren">(</span><em>sender</em>, <em>request</em>, <em>user</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.models.user_logged_in_handler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create UserSession object to store User&lt;=&gt;Session relation</p>
+<dd><p>Create UserSession object to store User&lt;=&gt;Session relation.</p>
 </dd></dl>
 
 </div>
@@ -357,37 +357,37 @@ Solution from <a class="reference external" href="http://gavinballard.com/associ
 <dl class="function">
 <dt id="psa.views.ask_stranger">
 <code class="descclassname">psa.views.</code><code class="descname">ask_stranger</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.ask_stranger" title="Permalink to this definition">¶</a></dt>
-<dd><p>View to handle stranger whend asking email</p>
+<dd><p>View to handle stranger whend asking email.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="psa.views.context">
 <code class="descclassname">psa.views.</code><code class="descname">context</code><span class="sig-paren">(</span><em>**extra</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.context" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adding default context to rendered page</p>
+<dd><p>Adding default context to rendered page.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="psa.views.custom_login">
 <code class="descclassname">psa.views.</code><code class="descname">custom_login</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.custom_login" title="Permalink to this definition">¶</a></dt>
-<dd><p>Custom login to integrate social auth and default login</p>
+<dd><p>Custom login to integrate social auth and default login.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="psa.views.done">
 <code class="descclassname">psa.views.</code><code class="descname">done</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.done" title="Permalink to this definition">¶</a></dt>
-<dd><p>Login complete view, displays user data</p>
+<dd><p>Login complete view, displays user data.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="psa.views.set_pass">
 <code class="descclassname">psa.views.</code><code class="descname">set_pass</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.set_pass" title="Permalink to this definition">¶</a></dt>
-<dd><p>View to handle password set / change action</p>
+<dd><p>View to handle password set / change action.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="psa.views.validation_sent">
 <code class="descclassname">psa.views.</code><code class="descname">validation_sent</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.views.validation_sent" title="Permalink to this definition">¶</a></dt>
-<dd><p>View to handle validation_send action</p>
+<dd><p>View to handle validation_send action.</p>
 </dd></dl>
 
 </div>
@@ -400,13 +400,13 @@ CustomDjangoStorage -&gt; Storage to use this CustomCode</p>
 <dl class="class">
 <dt id="psa.custom_django_storage.CustomCode">
 <em class="property">class </em><code class="descclassname">psa.custom_django_storage.</code><code class="descname">CustomCode</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#psa.custom_django_storage.CustomCode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Custom Code object to track user_id through different sessions</p>
+<dd><p>Custom Code object to track user_id through different sessions.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="psa.custom_django_storage.CustomDjangoStorage">
 <em class="property">class </em><code class="descclassname">psa.custom_django_storage.</code><code class="descname">CustomDjangoStorage</code><a class="headerlink" href="#psa.custom_django_storage.CustomDjangoStorage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Redefine code field to CustomCode model that add user_id to track</p>
+<dd><p>Redefine code field to CustomCode model that add user_id to track.</p>
 <dl class="attribute">
 <dt id="psa.custom_django_storage.CustomDjangoStorage.code">
 <code class="descname">code</code><a class="headerlink" href="#psa.custom_django_storage.CustomDjangoStorage.code" title="Permalink to this definition">¶</a></dt>
@@ -462,8 +462,8 @@ CustomDjangoStorage -&gt; Storage to use this CustomCode</p>
   <p class="topless"><a href="lti.html"
                         title="previous chapter">Socraticqs2 as LTI provider</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pep/django_vcs.html"
-                        title="next chapter">Django Version Collaboration System for Courselets</a></p>
+  <p class="topless"><a href="fab.html"
+                        title="next chapter">Fabric deployment tool</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -498,7 +498,7 @@ CustomDjangoStorage -&gt; Storage to use this CustomCode</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="pep/django_vcs.html" title="Django Version Collaboration System for Courselets"
+          <a href="fab.html" title="Fabric deployment tool"
              >next</a> |</li>
         <li class="right" >
           <a href="lti.html" title="Socraticqs2 as LTI provider"

@@ -82,7 +82,7 @@ secured using a signature generated using the OAuth 1.0 protocol [OAuth-A] with 
 secret (which should be known only to the tool provider and the tool consumer).</p>
 </div>
 <div class="section" id="settings-for-socraticqs2-lti-provider">
-<h2>Settings for Socraticqs2 LTI provider.<a class="headerlink" href="#settings-for-socraticqs2-lti-provider" title="Permalink to this headline">¶</a></h2>
+<h2>Settings for Socraticqs2 LTI provider<a class="headerlink" href="#settings-for-socraticqs2-lti-provider" title="Permalink to this headline">¶</a></h2>
 <p>Allow debug information about LTI request</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">LTI_DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
@@ -103,33 +103,41 @@ secret (which should be known only to the tool provider and the tool consumer).<
 <div class="highlight-python"><div class="highlight"><pre>SECURE_PROXY_SSL_HEADER = (&#39;HTTP_X_FORWARDED_PROTO&#39;, &#39;https&#39;))
 </pre></div>
 </div>
-<div class="section" id="to-add-new-external-tool-on-moodle-lti-consumer-we-should-do-the-following">
-<h3>To add new External tool on Moodle LTI consumer we should do the following:<a class="headerlink" href="#to-add-new-external-tool-on-moodle-lti-consumer-we-should-do-the-following" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="adding-new-external-tool-on-moodle-lti-consumer">
+<h2>Adding new External tool on Moodle LTI consumer<a class="headerlink" href="#adding-new-external-tool-on-moodle-lti-consumer" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Go to Control Panel of your course</li>
-<li>Click on ‘Add an activity or resource’ button</li>
-<li>Select ‘External tool’ Activity</li>
+<li>Click on <code class="docutils literal"><span class="pre">Add</span> <span class="pre">an</span> <span class="pre">activity</span> <span class="pre">or</span> <span class="pre">resource</span></code> button</li>
+<li>Select <code class="docutils literal"><span class="pre">External</span> <span class="pre">tool</span></code> Activity</li>
 <li>Click Add</li>
-<li>Click ‘Show more’ on Adding a new External tool page</li>
+<li>Click <code class="docutils literal"><span class="pre">Show</span> <span class="pre">more</span></code> on Adding a new External tool page</li>
 <li>Type Activity name</li>
 <li>Go to Socraticqs2 site</li>
 <li>Login as Instructor</li>
 <li>Go to course edit page or unit edit page</li>
-<li>Copy course or unit URL from ‘Copy course URL’ input field</li>
-<li>Paste this URL into ‘Launch URL’ input field on External tool page</li>
-<li>Type ‘Consumer key’ and ‘Shared secret’ on External tool page given from our settings_local.py</li>
-<li>Click ‘Save and display’ or ‘Save and return to course’</li>
+<li>Copy course or unit URL from <code class="docutils literal"><span class="pre">Copy</span> <span class="pre">course</span> <span class="pre">URL</span></code> input field</li>
+<li>Paste this URL into <code class="docutils literal"><span class="pre">Launch</span> <span class="pre">URL</span></code> input field on External tool page</li>
+<li>Alternatively Instructor can create a new empty Course by adding <code class="docutils literal"><span class="pre">/lti/</span></code> at the end of Socraticqs2 site URL and specify the resulting URL in form of <code class="docutils literal"><span class="pre">https://socraticqs2_domain_name.org/lti/</span></code> into <code class="docutils literal"><span class="pre">Launch</span> <span class="pre">URL</span></code> input field on External tool page</li>
+<li>Type <code class="docutils literal"><span class="pre">Consumer</span> <span class="pre">key</span></code> and <code class="docutils literal"><span class="pre">Shared</span> <span class="pre">secret</span></code> on External tool page given from our settings_local.py</li>
+<li>Click <code class="docutils literal"><span class="pre">Save</span> <span class="pre">and</span> <span class="pre">display</span></code> or <code class="docutils literal"><span class="pre">Save</span> <span class="pre">and</span> <span class="pre">return</span> <span class="pre">to</span> <span class="pre">course</span></code></li>
 </ol>
-</div>
 </div>
 <div class="section" id="lti-user-access-flow">
 <h2>LTI user access flow<a class="headerlink" href="#lti-user-access-flow" title="Permalink to this headline">¶</a></h2>
-<p>When LTI user is accessed External Tool we handle LTI request to get all user information from LTI Consumer.
-First of all we are verifying LTI request using python port of the useful ims-lti Ruby library.
-It can be reviewed there <a class="reference external" href="https://github.com/mitodl/ims_lti_py">https://github.com/mitodl/ims_lti_py</a></p>
+<p>When LTI user is accessed External Tool we handle LTI request to get all user information from LTI Consumer.</p>
+<p>First of all we are verifying LTI request using python port of the useful ims-lti Ruby library.</p>
+<p>It can be reviewed there <a class="reference external" href="https://github.com/mitodl/ims_lti_py">https://github.com/mitodl/ims_lti_py</a></p>
 <p>Next we store LTIUser entry with appropriate LTI params.</p>
-<p>Launch LTI request is handled by <cite>lti_init</cite> view.</p>
-<span class="target" id="module-lti.views"></span><dl class="function">
+<p>Launch LTI request is handled by followed views:</p>
+<blockquote>
+<div><span class="target" id="module-lti.views"></span><dl class="function">
+<dt id="lti.views.create_courseref">
+<code class="descclassname">lti.views.</code><code class="descname">create_courseref</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.views.create_courseref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create CourseRef and Course entry based on context_title.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="lti.views.lti_init">
 <code class="descclassname">lti.views.</code><code class="descname">lti_init</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.views.lti_init" title="Permalink to this definition">¶</a></dt>
 <dd><p>LTI init view</p>
@@ -161,19 +169,17 @@ It can be reviewed there <a class="reference external" href="https://github.com/
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>course_id</strong> &#8211; course id from launch url</li>
-<li><strong>unit_id</strong> &#8211; unit id from lunch url</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>unit_id</strong> &#8211; unit id from lunch url</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+</div></blockquote>
 <p>To work with Socraticqs2 courses we need to create/get django user to authorize him and need to have Role objects to have access to courses.</p>
 <p>For this requirements we have <code class="docutils literal"><span class="pre">create_links</span></code> and <code class="docutils literal"><span class="pre">enroll</span></code> methods in LTIUser class.</p>
-<dl class="class">
+<blockquote>
+<div><dl class="class">
 <dt id="lti.models.LTIUser">
 <em class="property">class </em><code class="descclassname">lti.models.</code><code class="descname">LTIUser</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.models.LTIUser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model for LTI user</p>
@@ -204,25 +210,28 @@ It can be reviewed there <a class="reference external" href="https://github.com/
 
 <p>Django user to store study progress</p>
 <dl class="attribute">
-<dt id="lti.views.LTIUser.course_id">
-<code class="descname">course_id</code><a class="headerlink" href="#lti.views.LTIUser.course_id" title="Permalink to this definition">¶</a></dt>
+<dt id="lti.views.LTIUser.context_id">
+<code class="descname">context_id</code><a class="headerlink" href="#lti.views.LTIUser.context_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Course entry id given from Launch URL</p>
+<p>Context id given from LTI params</p>
 </div></blockquote>
 <p>LTI user params saved to extra_data field:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;user_id&#39;</span>
-<span class="s">&#39;ext_lms&#39;</span>
+<span class="s">&#39;context_id&#39;</span>
 <span class="s">&#39;lis_person_name_full&#39;</span>
 <span class="s">&#39;lis_person_name_given&#39;</span>
 <span class="s">&#39;lis_person_name_family&#39;</span>
+<span class="s">&#39;lis_person_sourcedid&#39;</span>
+<span class="s">&#39;tool_consumer_instance_guid&#39;</span>
 <span class="s">&#39;lis_person_contact_email_primary&#39;</span>
+<span class="s">&#39;tool_consumer_info_product_family_code&#39;</span>
 </pre></div>
 </div>
 <dl class="method">
 <dt id="lti.models.LTIUser.create_links">
 <code class="descname">create_links</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lti.models.LTIUser.create_links" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create all needed links to Django and/or UserSocialAuth</p>
+<dd><p>Create all needed links to Django and/or UserSocialAuth.</p>
 </dd></dl>
 
 <dl class="method">
@@ -262,7 +271,7 @@ course_id -&gt; Course entry id given from Launch URL</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ct.Role</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">bool</p>
 </td>
 </tr>
 </tbody>
@@ -286,12 +295,70 @@ course_id -&gt; Course entry id given from Launch URL</p>
 <dl class="method">
 <dt id="lti.models.LTIUser.login">
 <code class="descname">login</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.models.LTIUser.login" title="Permalink to this definition">¶</a></dt>
-<dd><p>Login linked Django user</p>
+<dd><p>Login linked Django user.</p>
 </dd></dl>
 
 </dd></dl>
 
-<p>Finally, when Django user logged in and enrolled to course we redirect him to appropriate course given from Resource Link.</p>
+</div></blockquote>
+</div>
+<div class="section" id="course-creation-process">
+<h2>Course creation process<a class="headerlink" href="#course-creation-process" title="Permalink to this headline">¶</a></h2>
+<p>When Instructor set <code class="docutils literal"><span class="pre">/lti/</span></code> as the LaunchURL for External Tool he can create a blank Course on Socraticqs2 Tool Provider.</p>
+<p><strong>To implement this we follow the next logic:</strong></p>
+<ul>
+<li><p class="first">First of all, we look at the <code class="docutils literal"><span class="pre">roles</span></code> LTI param to decide whether the user can create courses or not.</p>
+</li>
+<li><p class="first">Next we look for <code class="docutils literal"><span class="pre">context_id</span></code> LTI param to search our <code class="docutils literal"><span class="pre">CourseRef</span></code> models.</p>
+</li>
+<li><p class="first">That models is a link between Course and particular University identified by <code class="docutils literal"><span class="pre">context_id</span></code>.</p>
+<dl class="class">
+<dt id="lti.models.CourseRef">
+<em class="property">class </em><code class="descclassname">lti.models.</code><code class="descname">CourseRef</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.models.CourseRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Course reference</p>
+<p>Represent Course reference with meta information
+such as:</p>
+<div class="highlight-python"><div class="highlight"><pre>course -&gt; Courslet Course entry
+instructors -&gt; list of User entry
+date - &gt; creation date
+context_id -&gt; LTI context_id
+tc_guid - &gt; LTI tool_consumer_instance_guid
+</pre></div>
+</div>
+</dd></dl>
+
+</li>
+<li><p class="first">If we find a <code class="docutils literal"><span class="pre">CourseRef</span></code> entry we just redirect user to a Course.</p>
+</li>
+<li><p class="first">If there is no <code class="docutils literal"><span class="pre">CourseRef</span></code> and user has role <code class="docutils literal"><span class="pre">Instructor</span></code> in <code class="docutils literal"><span class="pre">roles</span></code> LTI param we direct the user to the <code class="docutils literal"><span class="pre">create_courseref</span></code> view:</p>
+<dl class="function">
+<dt>
+<code class="descclassname">lti.views.</code><code class="descname">create_courseref</code><span class="sig-paren">(</span><em>request</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span></dt>
+<dd><p>Create CourseRef and Course entry based on context_title.</p>
+</dd></dl>
+
+<p><strong>That view do the following:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li>creates a new Course with <code class="docutils literal"><span class="pre">context_title</span></code> title</li>
+<li>creates Instructor <code class="docutils literal"><span class="pre">Role</span></code> for a django user with which the LTI user is associated</li>
+<li>creates <code class="docutils literal"><span class="pre">CourseRef</span></code> entry to link Tool Consumer with this Course</li>
+<li>adds LTI user to Instructor&#8217;s set of that Course</li>
+<li>redirects user to Course edit page</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Also we ensure that user is requests for Course creation only from LTI session using <code class="docutils literal"><span class="pre">only_lti</span></code> decorator:</p>
+<blockquote>
+<div><dl class="function">
+<dt id="lti.utils.only_lti">
+<code class="descclassname">lti.utils.</code><code class="descname">only_lti</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#lti.utils.only_lti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator ensures that user comes from LTI session.</p>
+</dd></dl>
+
+</div></blockquote>
+<p>Finally Instructor can change LaunchURL to a <code class="docutils literal"><span class="pre">/lti/unit/{unit_id}/</span></code> pattern to point directly to a particular unit of the Course if he has created one previously.</p>
 </div>
 </div>
 
@@ -305,11 +372,10 @@ course_id -&gt; Course entry id given from Launch URL</p>
   <ul>
 <li><a class="reference internal" href="#">Socraticqs2 as LTI provider</a><ul>
 <li><a class="reference internal" href="#terminology">Terminology</a></li>
-<li><a class="reference internal" href="#settings-for-socraticqs2-lti-provider">Settings for Socraticqs2 LTI provider.</a><ul>
-<li><a class="reference internal" href="#to-add-new-external-tool-on-moodle-lti-consumer-we-should-do-the-following">To add new External tool on Moodle LTI consumer we should do the following:</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#settings-for-socraticqs2-lti-provider">Settings for Socraticqs2 LTI provider</a></li>
+<li><a class="reference internal" href="#adding-new-external-tool-on-moodle-lti-consumer">Adding new External tool on Moodle LTI consumer</a></li>
 <li><a class="reference internal" href="#lti-user-access-flow">LTI user access flow</a></li>
+<li><a class="reference internal" href="#course-creation-process">Course creation process</a></li>
 </ul>
 </li>
 </ul>

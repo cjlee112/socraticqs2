@@ -41,8 +41,8 @@ secured using a signature generated using the OAuth 1.0 protocol [OAuth-A] with 
 secret (which should be known only to the tool provider and the tool consumer).
 
 
-Settings for Socraticqs2 LTI provider.
---------------------------------------
+Settings for Socraticqs2 LTI provider
+-------------------------------------
 
 Allow debug information about LTI request
 ::
@@ -74,44 +74,81 @@ Heroku SSL proxy fix
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https'))
 
 
-To add new External tool on Moodle LTI consumer we should do the following:
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+Adding new External tool on Moodle LTI consumer
+-----------------------------------------------
 
 #. Go to Control Panel of your course
-#. Click on ‘Add an activity or resource’ button
-#. Select ‘External tool’ Activity
+#. Click on ``Add an activity or resource`` button
+#. Select ``External tool`` Activity
 #. Click Add
-#. Click ‘Show more’ on Adding a new External tool page
+#. Click ``Show more`` on Adding a new External tool page
 #. Type Activity name
 #. Go to Socraticqs2 site
 #. Login as Instructor
 #. Go to course edit page or unit edit page
-#. Copy course or unit URL from ‘Copy course URL’ input field
-#. Paste this URL into ‘Launch URL’ input field on External tool page
-#. Type ‘Consumer key’ and ‘Shared secret’ on External tool page given from our settings_local.py
-#. Click ‘Save and display’ or ‘Save and return to course’
+#. Copy course or unit URL from ``Copy course URL`` input field
+#. Paste this URL into ``Launch URL`` input field on External tool page
+#. Alternatively Instructor can create a new empty Course by adding ``/lti/`` at the end of Socraticqs2 site URL and specify the resulting URL in form of ``https://socraticqs2_domain_name.org/lti/`` into ``Launch URL`` input field on External tool page
+#. Type ``Consumer key`` and ``Shared secret`` on External tool page given from our settings_local.py
+#. Click ``Save and display`` or ``Save and return to course``
 
 
 LTI user access flow
 --------------------
 
 When LTI user is accessed External Tool we handle LTI request to get all user information from LTI Consumer.
+
 First of all we are verifying LTI request using python port of the useful ims-lti Ruby library.
+
 It can be reviewed there https://github.com/mitodl/ims_lti_py
 
 Next we store LTIUser entry with appropriate LTI params.
 
-Launch LTI request is handled by `lti_init` view.
+Launch LTI request is handled by followed views:
 
-.. automodule:: lti.views
-    :members:
+  .. automodule:: lti.views   
+      :members:
 
 To work with Socraticqs2 courses we need to create/get django user to authorize him and need to have Role objects to have access to courses.
 
 For this requirements we have ``create_links`` and ``enroll`` methods in LTIUser class.
 
-.. autoclass:: lti.models.LTIUser
-    :members:
+  .. autoclass:: lti.models.LTIUser
+      :members:
 
 
-Finally, when Django user logged in and enrolled to course we redirect him to appropriate course given from Resource Link.
+Course creation process
+-----------------------
+
+When Instructor set ``/lti/`` as the LaunchURL for External Tool he can create a blank Course on Socraticqs2 Tool Provider.
+
+**To implement this we follow the next logic:**
+
+
+* First of all, we look at the ``roles`` LTI param to decide whether the user can create courses or not. 
+* Next we look for ``context_id`` LTI param to search our ``CourseRef`` models.
+* That models is a link between Course and particular University identified by ``context_id``.
+
+  .. autoclass:: lti.models.CourseRef
+      :members:
+
+* If we find a ``CourseRef`` entry we just redirect user to a Course.
+* If there is no ``CourseRef`` and user has role ``Instructor`` in ``roles`` LTI param we direct the user to the ``create_courseref`` view:
+
+  .. autofunction:: lti.views.create_courseref
+
+  **That view do the following:**
+
+    * creates a new Course with ``context_title`` title
+    * creates Instructor ``Role`` for a django user with which the LTI user is associated
+    * creates ``CourseRef`` entry to link Tool Consumer with this Course
+    * adds LTI user to Instructor's set of that Course
+    * redirects user to Course edit page
+
+Also we ensure that user is requests for Course creation only from LTI session using ``only_lti`` decorator:
+
+  .. autofunction:: lti.utils.only_lti 
+
+Finally Instructor can change LaunchURL to a ``/lti/unit/{unit_id}/`` pattern to point directly to a particular unit of the Course if he has created one previously.
+
+
