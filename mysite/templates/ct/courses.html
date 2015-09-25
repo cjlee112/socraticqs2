@@ -14,6 +14,11 @@
 {% endblock %}
 
 {% block content %}
+{% if user.is_authenticated and not 'anonymous' in user.username %}
+    <p>You can access your personal list of <a href="/ct/">enrolled courses</a>
+    by clicking the link.</p>
+{% endif %}
+
 <p>You can take individual courselets (short lessons each designed to master one
 concept), or a whole course.  Click any course to get started!</p>
 <table class="table table-striped">
