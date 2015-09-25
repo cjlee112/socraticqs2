@@ -112,7 +112,6 @@ class ASSESS(object):
     In this stage you assess your own answer vs. the correct answer.
     """
     next_edge = ask_edge
-    error_edge = ask_edge
     # node specification data goes here
     path = 'ct:assess'
     title = 'Assess your answer'
@@ -121,8 +120,22 @@ class ASSESS(object):
     understand this concept now. """
     edges = (
         dict(name='next', toNode='ASK', title='Go to the next question'),
-        dict(name='error', toNode='ASK', title='Go to the next question'),
+        dict(name='error', toNode='ERRORS', title='Classify your error'),
     )
+
+
+class ERRORS(object):
+    """
+    In this stage you assess whether you made any of the common errors for this concept.
+    """
+    next_edge = ask_edge
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    help = """If you have questions about the following common errors,
+    you can ask your instructor. """
+    edges = (
+            dict(name='next', toNode='ASK', title='Go to the next question'),
+        )
 
 
 class END(object):
@@ -143,6 +156,6 @@ def get_specs():
         name='livestudent',
         hideTabs=True,
         title='Join a Live Classroom Session',
-        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS, ASSESS, END],
+        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS, ASSESS, ERRORS, END],
     )
     return (spec,)
