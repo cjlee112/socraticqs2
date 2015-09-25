@@ -156,7 +156,7 @@ class PageData(object):
         # now we check here whether event is actually from path matching
         # this node
         referer = request.META.get('HTTP_REFERER', '')
-        origin = request.META.get('HTTP_ORIGIN', '')
+        origin = request.META.get('HTTP_ORIGIN', '/'.join(referer.split('/')[:3]))
         if request.method == 'POST' and referer != origin + self.fsmStack.state.path \
              and eventName in vagueEvents:
             r = None # don't even call FSM with POST events from other pages.
