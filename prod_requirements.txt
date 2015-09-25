@@ -37,3 +37,6 @@ sqlparse==0.1.15
 python-memcached==1.54
 psycopg2==2.6.1
 Fabric==1.10.2
+
+# deployment packages
+gunicorn==19.3.0
