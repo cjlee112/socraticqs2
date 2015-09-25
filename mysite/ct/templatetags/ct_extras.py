@@ -25,7 +25,7 @@ def md2html(txt, stripP=False):
         pass
     txt = replace_temporary_markers(txt, audio_html, markers)
     txt = replace_temporary_markers(txt, video_html, videoMarkers)
-    txt = StaticImagePat.sub(staticfiles.static('ct/') + r'\1', txt)
+    txt = StaticImagePat.sub(staticfiles.static('ct') + '/' + r'\1', txt)
     if stripP and txt.startswith('<p>') and txt.endswith('</p>'):
         txt = txt[3:-4]
     return mark_safe(txt)
