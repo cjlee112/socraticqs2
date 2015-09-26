@@ -50,10 +50,14 @@ def user_logged_in_handler(sender, request, user, **kwargs):
     """
     Create UserSession object to store User<=>Session relation.
     """
-    UserSession.objects.get_or_create(
-        user=user,
-        session_id=request.session.session_key
-    )
+    if user.groups.filter(name='Temporary').exists():
+        if not Session.objects.filter(session_key=request.session.session_key).exists():
+            request.session.save()
+
+        UserSession.objects.get_or_create(
+            user=user,
+            session_id=request.session.session_key
+        )
 
 
 user_logged_in.connect(user_logged_in_handler)
