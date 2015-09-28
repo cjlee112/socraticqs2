@@ -1186,12 +1186,14 @@ def error_resources(request, course_id, unit_id, ul_id):
 def study_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
-    unitStatus = None
+    unitStatus = UnitStatus.get_or_none(unit, request.user, latest=True)
     pageData = PageData(request, title=unit.title)
     startForm = push_button(request)
     if not startForm: # user clicked Start
-        return pageData.fsm_push(request, 'lessonseq',
-                                 dict(unit=unit, course=course))
+        stateData = dict(unit=unit, course=course)
+        if unitStatus:
+            stateData['unitStatus'] = unitStatus
+        return pageData.fsm_push(request, 'lessonseq', stateData)
     if unitStatus:
         nextUL = unitStatus.get_lesson()
         if unitStatus.endTime: # already completed unit
