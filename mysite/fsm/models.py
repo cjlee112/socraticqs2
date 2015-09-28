@@ -140,7 +140,10 @@ class JSONBlobMixin(object):
         Get a single data attribute from json data.
         """
         obj_dict = self.load_json_data()
-        return obj_dict[attr]
+        try:
+            return obj_dict[attr]
+        except KeyError:
+            raise AttributeError('JSON data has no attr %s' % attr)
 
 
 class FSM(models.Model):
