@@ -1124,9 +1124,12 @@ class UnitStatus(models.Model):
     endTime = models.DateTimeField('time ended', null=True)
     order = models.IntegerField(default=0) # index of current UL
     @classmethod
-    def get_or_none(klass, unit, user, **kwargs):
+    def get_or_none(klass, unit, user, latest=False, **kwargs):
         try:
-            return klass.objects.filter(unit=unit, user=user, **kwargs)[0]
+            query = klass.objects.filter(unit=unit, user=user, **kwargs)
+            if latest:
+                query = query.order_by('-startTime')
+            return query[0]
         except IndexError:
             return None
     @classmethod
