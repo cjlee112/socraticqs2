@@ -1186,6 +1186,7 @@ def error_resources(request, course_id, unit_id, ul_id):
 def study_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(request, title=unit.title)
     unitStatus = UnitStatus.get_or_none(unit, request.user, latest=True)
     if unitStatus:
         nextUL = unitStatus.get_lesson()
@@ -1194,7 +1195,6 @@ def study_unit(request, course_id, unit_id):
             unitStatus = None # force lessonseq to start with empty unitStatus
     else:
         nextUL = None
-    pageData = PageData(request, title=unit.title)
     startForm = push_button(request)
     if not startForm: # user clicked Start
         stateData = dict(unit=unit, course=course)
@@ -1272,7 +1272,7 @@ def lesson_next_url(request, ul, course_id):
     return nextUL.get_study_url(course_id)
     
         
-def lesson(request, course_id, unit_id, ul_id):
+def lesson(request, course_id, unit_id, ul_id, redirectQuestions=True):
     'show student a reading assignment'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
             checkUnitStatus=True, includeText=False)
@@ -1285,13 +1285,19 @@ def lesson(request, course_id, unit_id, ul_id):
             defaultURL = lesson_next_url(request, ul, course_id)
             # let fsm redirect this event if it wishes
             return pageData.fsm_redirect(request, 'next', defaultURL)
-    ## elif ul.lesson.kind == Lesson.ORCT_QUESTION:
-    ##     return HttpResponseRedirect(request.path + 'ask/')
+    elif redirectQuestions and ul.lesson.kind == Lesson.ORCT_QUESTION:
+        return HttpResponseRedirect(request.path + 'ask/')
     pageData.nextForm = NextLikeForm()
     set_crispy_action(request.path, pageData.nextForm)
     return pageData.render(request, 'ct/lesson_student.html',
                            dict(unitLesson=ul, unit=unit))
 
+def lesson_read(request, course_id, unit_id, ul_id):
+    """
+    present lesson as passive reading assignment
+    """
+    return lesson(request, course_id, unit_id, ul_id, redirectQuestions=False)
+    
 def ul_tasks_student(request, course_id, unit_id, ul_id):
     'suggest next steps on this question'
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Tasks')

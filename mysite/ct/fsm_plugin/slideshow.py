@@ -63,7 +63,7 @@ class LESSON(object):
     """
     next_edge = next_lesson
     # node specification data goes here
-    path = 'ct:lesson'
+    path = 'ct:lesson_read'
     title = 'View an explanation or question'
     help = '''After viewing this slide, click Next to move to the next slide,
     or click the Slideshow menu above for more options such as discussion
