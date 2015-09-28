@@ -32,7 +32,7 @@ def get_lesson_url(self, node, state, request, **kwargs):
 class START(object):
     """
     Initialize data for viewing a courselet, and go immediately
-    to first lesson.
+    to first lesson (not yet completed).
     """
     def start_event(self, node, fsmStack, request, **kwargs):
         """
@@ -40,9 +40,12 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
-        unitStatus = UnitStatus(unit=unit, user=request.user)
-        unitStatus.save()
-        fsmStack.state.set_data_attr('unitStatus', unitStatus)
+        try: # use unitStatus if provided
+            unitStatus = fsmStack.state.get_data_attr('unitStatus')
+        except AttributeError: # create new, empty unitStatus
+            unitStatus = UnitStatus(unit=unit, user=request.user)
+            unitStatus.save()
+            fsmStack.state.set_data_attr('unitStatus', unitStatus)
         return fsmStack.state.transition(fsmStack, request, 'next',
                                          useCurrent=True, **kwargs)
     next_edge = next_lesson
