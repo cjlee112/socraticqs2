@@ -324,13 +324,15 @@ class FSMTests(OurTestCase):
         get_specs()[0].save_graph(self.user.username)  # load FSM spec
         fsmData = dict(unit=self.ulQ2.unit, course=self.course)
         request, fsmStack, result = self.get_fsm_request('slideshow', fsmData)
+        self.assertEqual(result, '/ct/courses/%d/units/%d/lessons/%d/read/'
+              % (self.course.pk, self.ulQ2.unit.pk, self.ulQ2.pk))
         # start page = question
         response = self.client.get(result)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Scary Question')
         # answer page
         answer = self.ulQ2.get_answers()[0]
-        url = '/ct/courses/%d/units/%d/lessons/%d/' \
+        url = '/ct/courses/%d/units/%d/lessons/%d/read/' \
               % (self.course.pk, self.ulQ2.unit.pk, answer.pk)
         self.check_post_get(result, dict(fsmtask='next'), url, 'an answer')
         # end of slide show should dump us on concepts page
