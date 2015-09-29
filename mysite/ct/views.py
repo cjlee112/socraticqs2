@@ -1516,7 +1516,7 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study')
     r = get_object_or_404(Response, pk=resp_id)
     allErrors = list(r.unitLesson.get_errors()) + unit.get_aborts()
-    if request.method == 'POST' and 'emlist' in request.POST:
+    if request.method == 'POST':
         if request.user == r.author:
             status = r.status
         else:
