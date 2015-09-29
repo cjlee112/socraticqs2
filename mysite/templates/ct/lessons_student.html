@@ -63,6 +63,8 @@ $( "#headtoggle" ).click(function() {
 {% endfor %}
 </tbody>
 </table>
+{% else %}
+  <p><b>Your instructor has not added any materials to this section yet.</b></p>
 {% endif %}
 
 {% if conceptLinks.data %}

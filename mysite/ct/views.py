@@ -124,7 +124,7 @@ def unit_tabs(path, current,
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def unit_tabs_student(path, current,
-              tabs=('Study:', 'Tasks', 'Lessons', 'Concepts'), **kwargs):
+              tabs=('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
     
 def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
@@ -851,18 +851,19 @@ def copy_unit_lesson(ul, concept, unit, addedBy, parentUL):
 
 @login_required
 def unit_lessons(request, course_id, unit_id, lessonTable=None,
-                 currentTab='Lessons', showReorderForm=True):
+                 currentTab='Lessons', showReorderForm=True,
+                 msg='''You can search for a lesson to add
+          to this courselet by entering a search term below.
+          (To write a new lesson, click on the Concepts tab to identify
+          what concept your new lesson will be about).''', **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, currentTab))
     if lessonTable is None:
         lessonTable = unit.get_exercises()
-    r = _lessons(request, pageData, msg='''You can search for a lesson to add
-          to this courselet by entering a search term below.
-          (To write a new lesson, click on the Concepts tab to identify
-          what concept your new lesson will be about).''', 
+    r = _lessons(request, pageData, msg=msg, 
                   unit=unit, showReorderForm=showReorderForm,
-                  lessonTable=lessonTable, selectULFunc=copy_unit_lesson)
+                  lessonTable=lessonTable, selectULFunc=copy_unit_lesson, **kwargs)
     if isinstance(r, UnitLesson):
         red = pageData.fsm_redirect(request, 'create_UnitLesson',
                                     defaultURL=None, unitLesson=r)
@@ -871,7 +872,7 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
         lessonTable.append(r)
         return _lessons(request, pageData, msg='''Successfully added lesson.
             Thank you!''', ignorePOST=True, showReorderForm=showReorderForm,
-            unit=unit, lessonTable=lessonTable)
+            unit=unit, lessonTable=lessonTable, **kwargs)
     return r
 
 @login_required
@@ -881,7 +882,7 @@ def unit_resources(request, course_id, unit_id):
             .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
     lessonTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
     return unit_lessons(request, course_id, unit_id, lessonTable,
-                        'Resources', showReorderForm=False)
+                        'Resources', msg='', showReorderForm=False, allowSearch=False)
 
 
 @login_required
@@ -1235,15 +1236,29 @@ def unit_tasks_student(request, course_id, unit_id):
     return pageData.render(request, 'ct/unit_tasks_student.html',
                            dict(unit=unit, taskTable=taskTable))
 
-def unit_lessons_student(request, course_id, unit_id):
+def unit_lessons_student(request, course_id, unit_id, lessonTable=None,
+                         currentTab='Lessons'):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title,
-                        navTabs=unit_tabs_student(request.path, 'Lessons'))
-    lessonTable = unit.unitlesson_set \
+                        navTabs=unit_tabs_student(request.path, currentTab))
+    if lessonTable is None:
+        lessonTable = unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=False) \
             .order_by('order')
     return pageData.render(request, 'ct/lessons_student.html',
                            dict(lessonTable=lessonTable))
+
+def unit_resources_student(request, course_id, unit_id):
+    """
+    Show additional lesson resources not included in Concepts tab
+    """
+    unit = get_object_or_404(Unit, pk=unit_id)
+    lessonTable = list(unit.unitlesson_set \
+            .filter(kind=UnitLesson.COMPONENT, order__isnull=True,
+                    lesson__concept__isnull=True)) # exclude concepts
+    lessonTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
+    return unit_lessons_student(request, course_id, unit_id, lessonTable,
+                                'Resources')
 
 @login_required
 def unit_concepts_student(request, course_id, unit_id):
