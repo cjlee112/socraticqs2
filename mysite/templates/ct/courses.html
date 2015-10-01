@@ -26,7 +26,7 @@ concept), or a whole course.  Click any course to get started!</p>
 <tbody>
     {% for course in courses %}
     <tr><td>
-    <a href="{% url 'ct:subscribe' course.id %}"><b>{{ course.title }}</b></a>
+    <a href="{% url 'ct:course_student' course.id %}"><b>{{ course.title }}</b></a>
     (Instructor: {{ course.addedBy.get_full_name }}).
     <input type="checkbox" id="desctoggle{{ course.id }}"/>Show description
     <div id="descdiv{{ course.id }}" style="display: none">
