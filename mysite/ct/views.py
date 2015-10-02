@@ -1188,22 +1188,15 @@ def study_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title)
-    unitStatus = UnitStatus.get_or_none(unit, request.user, latest=True)
-    if unitStatus:
-        nextUL = unitStatus.get_lesson()
-        if unitStatus.endTime: # already completed unit
-            pageData.navTabs = unit_tabs_student(request.path, 'Study')
-            unitStatus = None # force lessonseq to start with empty unitStatus
-    else:
-        nextUL = None
+    if UnitStatus.objects.filter(user=request.user, unit=unit).exists() \
+      or Response.objects.filter(unitLesson__unit=unit, author=request.user).exists():
+        pageData.navTabs = unit_tabs_student(request.path, 'Study') # show tabs
     startForm = push_button(request)
     if not startForm: # user clicked Start
         stateData = dict(unit=unit, course=course)
-        if unitStatus:
-            stateData['unitStatus'] = unitStatus
         return pageData.fsm_push(request, 'lessonseq', stateData)
     return pageData.render(request, 'ct/study_unit.html',
-                dict(unitLesson=nextUL, unit=unit, startForm=startForm))
+                dict(unit=unit, startForm=startForm))
 
 
 @login_required

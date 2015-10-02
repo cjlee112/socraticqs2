@@ -26,17 +26,14 @@
   <div class="tab-pane active" id="StudyTabDiv">
 
 {% if pageData.navTabs %}
-<p>Congratulations!  You have answered the questions in this courselet.
-To see suggested next steps to study, click the <b>Tasks</b> tab.
-You can also repeat the lessons in this courselet at any time
-by clicking the <b>Start</b> button below, or study individual
-lessons by clicking the <b>Lessons</b> tab.</p>
-{% endif %}
-
-{% if unitLesson %}
-Your current lesson in this courselet is:
-<b>{{ unitLesson.lesson.title }}</b>.
-Click <b>Start</b> to resume this lesson.
+<p>It looks like you've already started working on this courselet.</p>
+<ul>
+  <li>To see suggested next steps to study, such as exercises you haven't
+  yet completed, click the <b>Tasks</b> tab.</li>
+  <li>You can also repeat the lessons in this courselet at any time
+  by clicking the <b>Start</b> button below.</li>
+  <li>You can study individual lessons by clicking the <b>Lessons</b> tab.</li>
+</ul>
 {% else %}
 Welcome!  To start this courselet, click <b>Start</b>.
 {% endif %}
