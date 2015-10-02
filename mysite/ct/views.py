@@ -248,16 +248,13 @@ class PageData(object):
 
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
-                 tabFunc=None, checkUnitStatus=False, includeNavTabs=True,
-                 **kwargs):
+                 tabFunc=None, includeNavTabs=True, **kwargs):
     'generate standard set of page data for a unitLesson'
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
     if not tabFunc:
         tabFunc = auto_tabs
     pageData = PageData(request, title=ul.lesson.title, **kwargs)
-    if checkUnitStatus and not UnitStatus.is_done(unit, request.user):
-        includeNavTabs = False
     if includeNavTabs:
         pageData.navTabs = tabFunc(request.path, currentTab, ul)
     if includeText:
@@ -1282,8 +1279,7 @@ def lesson_next_url(request, ul, course_id):
         
 def lesson(request, course_id, unit_id, ul_id, redirectQuestions=True):
     'show student a reading assignment'
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            checkUnitStatus=True, includeText=False)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study', includeText=False)
     if request.method == 'POST':
         nextForm = NextLikeForm(request.POST)
         if nextForm.is_valid():
@@ -1457,8 +1453,9 @@ def save_response(form, ul, user, course_id, **kwargs):
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
+    includeNavTabs = Response.objects.filter(unitLesson_id=ul_id, author=request.user).exists()
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            checkUnitStatus=True, includeText=False)
+            includeNavTabs=includeNavTabs, includeText=False)
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
