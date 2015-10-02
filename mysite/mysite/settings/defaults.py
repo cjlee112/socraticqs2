@@ -160,6 +160,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
    'social.apps.django_app.context_processors.backends',
    'social.apps.django_app.context_processors.login_redirect',
    'psa.context_processors.debug_settings',
+   'mysite.context_processors.google_analytics',
 )
 
 AUTHENTICATION_BACKENDS = (
