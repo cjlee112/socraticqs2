@@ -45,20 +45,27 @@ $( "#headtoggle" ).click(function() {
 
 {% for ul,task in taskTable %}
   <tr>
-  <td>
-  <a href="{{ actionTarget|get_tasks_url:ul }}">{{ ul.lesson.title }}</a>
-  </td>
-  <td>
-    {% if task == 'start' %}
+  {% if task == 'start' %}
+    <td>
+      <a href="{{ actionTarget|get_object_url:ul }}ask/">{{ ul.lesson.title }}</a>
+    </td>
+    <td>
       answer the question
-    {% elif task == 'selfeval' %}
+    </td>
+  {% else %}
+    <td>
+      <a href="{{ actionTarget|get_tasks_url:ul }}">{{ ul.lesson.title }}</a>
+    </td>
+    <td>
+    {% if task == 'selfeval' %}
       assess the correctness of your answer
     {% elif task == 'classify' %}
       classify what error(s) you made in your answer
     {% else %}
       work to resolve an error you made in your answer
     {% endif %}
-  </ul></td>
+    </td>
+  {% endif %}
   </tr>
 {% endfor %}
 
