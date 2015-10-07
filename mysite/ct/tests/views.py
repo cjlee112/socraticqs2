@@ -11,7 +11,6 @@ from ddt import ddt, data, unpack
 
 from ct.views import *
 from ct.models import UnitLesson, Lesson, Unit
-from ct.tests.integrate import FakeRequest, create_question_unit
 from fsm.fsm_base import FSMStack
 
 
@@ -211,9 +210,14 @@ class MiscTests(TestCase):
 
     @patch('ct.views.make_tabs')
     def test_unit_tabs_student(self, make_tabs):
+        """
+        Unittest to check that unit_tabs_student calls make_tabs with particular args.
+        """
         path = current = Mock()
         unit_tabs_student(path, current)
-        make_tabs.assert_called_once_with(path, current, ('Study:', 'Tasks', 'Lessons', 'Concepts'), tail=2)
+        make_tabs.assert_called_once_with(
+            path, current, ('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), tail=2
+        )
 
     @patch('ct.views.make_tabs')
     def test_course_tabs(self, make_tabs):
@@ -348,6 +352,11 @@ class BaseViewsTests(TestCase):
 
 class CourseViewTest(TestCase):
     def test_course_view_no_role(self):
+        """Test KeyError if user has not Instructor role to desired Course.
+
+        KeyError raises in Course.get_user_role method if user has no role
+        to access this Course. In this view we chech Instructor role.
+        """
         self.user = User.objects.create_user(username='test', password='test')
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
@@ -356,6 +365,10 @@ class CourseViewTest(TestCase):
             self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}))
 
     def test_course_view_teacher_get_redirect(self):
+        """
+        Check redirection from teacher course url to student course url if user has
+        only Student role to the Course.
+        """
         self.user = User.objects.create_user(username='test', password='test')
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
@@ -430,20 +443,44 @@ class CoursesTest(TestCase):
         self.temporary_group.save()
 
     def test_courses_anonymous(self):
+        """
+        Test rendering public course for anonymous user.
+        """
         self.client.logout()
         response = self.client.get(reverse('ct:courses'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/courses.html')
         self.assertIn('courses', response.context)
+        self.assertEqual(len(response.context['courses']), 1)
         self.assertEqual(response.context['courses'][0], self.course_pub)
+        self.assertNotIn('You can access your personal list of', response.content)
 
     def test_courses_temporary(self):
+        """
+        Test rendering public course for Temporary user.
+        """
         self.user.groups.add(self.temporary_group)
+        self.user.username = 'anonymous123'
+        self.user.save()
         response = self.client.get(reverse('ct:courses'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/courses.html')
         self.assertIn('courses', response.context)
         self.assertEqual(response.context['courses'][0], self.course_pub)
+        self.assertNotIn('You can access your personal list of', response.content)
+
+    def test_courses_all(self):
+        """
+        Test rendering all course for regular user.
+        """
+        response = self.client.get(reverse('ct:courses'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/courses.html')
+        self.assertIn('courses', response.context)
+        self.assertEqual(len(response.context['courses']), 2)
+        self.assertIn(self.course_pub, response.context['courses'])
+        self.assertIn(self.course_privat, response.context['courses'])
+        self.assertIn('You can access your personal list of', response.content)
 
 
 class EditCourseTest(TestCase):
@@ -675,6 +712,9 @@ class ConceptsTests(TestCase):
 
 
 class UlConcepts(TestCase):
+    """
+    Tests for `ul:concepts` url.
+    """
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -693,6 +733,9 @@ class UlConcepts(TestCase):
         self.unit_lesson.save()
 
     def test_ul_concepts(self):
+        """
+        Test getting concepts, rendering concepts.html.
+        """
         response = self.client.get(
             reverse(
                 'ct:ul_concepts',
@@ -706,6 +749,11 @@ class UlConcepts(TestCase):
 
     @patch('ct.views.update_concept_link')
     def test_ul_concepts_post(self, update_concept_link):
+        """
+        Test updating ConceptLink.
+
+        Checking that `update_concept_link` called
+        """
         response = self.client.post(
             reverse(
                 'ct:ul_concepts',
@@ -720,6 +768,9 @@ class UlConcepts(TestCase):
 
 
 class CopyTests(TestCase):
+    """
+    Tests for all copy functions.
+    """
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -767,81 +818,11 @@ class LiveQuestionUnitTest(TestCase):
         pass
 
 
-class LiveQuestionTest(TestCase):
-    """
-    Some kind of integration tests due to using fsm app.
-    """
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='jacob', email='jacob@_', password='top_secret'
-        )
-        self.client.login(username='jacob', password='top_secret')
-        self.course = Course(
-            title='Great Course', description='the bestest', addedBy=self.user
-        )
-        self.course.save()
-        self.unit = Unit(title='My Courselet', addedBy=self.user)
-        self.unit.save()
-        self.lesson = Lesson(
-            title='Big Deal', text='very interesting info', addedBy=self.user
-        )
-        self.lesson.save_root()
-        self.unitLesson = UnitLesson.create_from_lesson(
-            self.lesson, self.unit, order='APPEND'
-        )
-        self.ulQ = create_question_unit(self.user)
-        self.ulQ2 = create_question_unit(
-            self.user, 'Pretest', 'Scary Question', 'Tell me something.'
-        )
-        self.fsmDict = dict(name='test', title='try this')
-        self.nodeDict = dict(
-            START=dict(title='start here', path='ct:home', funcName='fsm.fsm_plugin.testme.START'),
-            MID=dict(title='in the middle', path='ct:about', doLogging=True),
-            END=dict(title='end here', path='ct:home')
-        )
-        self.edgeDict = (
-            dict(name='next', fromNode='START', toNode='END', title='go go go'),
-            dict(name='select_Lesson', fromNode='MID', toNode='MID', title='go go go'),
-        )
-
-    def get_fsm_request(self, fsmName, stateData, startArgs=None, **kwargs):
-        """
-        Create request, fsmStack and start specified FSM.
-        """
-        startArgs = startArgs or {}
-        request = FakeRequest(self.user)
-        request.session = self.client.session
-        fsmStack = FSMStack(request)
-        result = fsmStack.push(request, fsmName, stateData, startArgs, **kwargs)
-        request.session.save()
-        return request, fsmStack, result
-
-    def test_live_questions(self):
-        from ct.fsm_plugin.lessonseq import get_specs
-        get_specs()[0].save_graph(self.user.username)
-        from ct.fsm_plugin.randomtrial import get_specs
-        get_specs()[0].save_graph(self.user.username)
-        fsmData = dict(testFSM='lessonseq', treatmentFSM='lessonseq',
-                       treatment1=self.ulQ.unit, treatment2=self.ulQ.unit,
-                       testUnit=self.ulQ2.unit, course=self.course)
-        request, fsmStack, result = self.get_fsm_request(
-            'randomtrial', fsmData, dict(trialName='test')
-        )
-        response = self.client.get(
-            reverse(
-                'ct:live_question',
-                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unitLesson.id}),
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ct/lesson.html')
-        self.assertEqual(response.context['unitLesson'], self.unitLesson)
-        self.assertEqual(response.context['unit'], self.unit)
-        # TODO add mode checks
-
-
 class MakeClTable(TestCase):
     def test_make_cl_table(self):
+        """
+        Test for make_cl_table function.
+        """
         self.user = User.objects.create_user(username='test', password='test')
         self.unit = Unit(title='test unit title', addedBy=self.user)
         self.unit.save()
@@ -869,6 +850,9 @@ class EditLessonTest(TestCase):
         self.unit_lesson.save()
 
     def test_edit_lesson(self):
+        """
+        Test for edit lesson GET request.
+        """
         response = self.client.get(
             reverse(
                 'ct:edit_lesson',
@@ -951,6 +935,9 @@ class ResolutionsTests(TestCase):
         self.unit_lesson.save()
 
     def test_resolutions(self):
+        """
+        Test resolutions GET request.
+        """
         response = self.client.get(
             reverse(
                 'ct:resolutions',
@@ -981,6 +968,11 @@ class ResolutionsTests(TestCase):
         self.assertIn('new lesson title', response.content)
 
     def test_link_resolution_ul(self):
+        """
+        Unittest for link_resolution_ul func.
+
+        Checking that parentUL.copy_resolution called with propper args
+        """
         parentUL = Mock()
         ul = em = addedBy = unit = Mock()
         link_resolution_ul(ul, em, unit, addedBy, parentUL)
@@ -1010,6 +1002,9 @@ class ErrorResourcesTest(TestCase):
         self.unit_lesson.save()
 
     def test_error_resources(self):
+        """
+        Test GET request to error_resources.
+        """
         response = self.client.get(
             reverse(
                 'ct:error_resources',
@@ -1026,6 +1021,9 @@ class ErrorResourcesTest(TestCase):
 
 
 class SlideShowTest(TestCase):
+    """
+    Unittests for slideshow.
+    """
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -1039,6 +1037,9 @@ class SlideShowTest(TestCase):
         self.role.save()
 
     def test_slideshow(self):
+        """
+        Test GET request to ct:slideshow.
+        """
         response = self.client.get(
             reverse(
                 'ct:slideshow',
@@ -1355,6 +1356,9 @@ class UlTasksTest(TestCase):
         self.student_error.save()
 
     def test_ul_tasks(self):
+        """
+        Test GET request to ct:ul_tasks url.
+        """
         unit_lesson_error = UnitLesson(
             unit=self.unit,
             lesson=self.lesson,
@@ -1392,6 +1396,9 @@ class UlTasksTest(TestCase):
         self.assertIn('newInquiries', response.context)
 
     def test_ul_tasks_kind_not_question(self):
+        """
+        Test that if lesson is not question page will render without errorTable.
+        """
         self.lesson.kind = Lesson.PRACTICE_EXAM
         self.lesson.save()
         response = self.client.get(

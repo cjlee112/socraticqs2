@@ -60,10 +60,12 @@ class ConceptTest(TestCase):
 
     def test_search_text(self):
         dublicate_concept = Concept(title='test title', addedBy=self.user)
-        dublicate_concept.save
+        dublicate_concept.save()
         result = Concept.search_text('test title')
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
         self.assertEqual(result[0].title, self.concept.title)
+        self.assertIn(dublicate_concept, result)
+        self.assertIn(self.concept, result)
 
     @patch('ct.models.timezone')
     def test_new_concept(self, timezone_patched):
@@ -1009,7 +1011,7 @@ class UnitTest(TestCase):
         """Test for get_unanswered_uls.
 
         get_unanswered_uls should return distinct(by treeID) ul's
-        If we create a Responce from user - ul from thi Response excluded
+        If we create a Response from user - ul from this Response will excluded
         """
         result = self.unit.get_unanswered_uls(user=self.user)
         self.assertIsInstance(result, list)
@@ -1370,13 +1372,30 @@ class UnitStatusTest(TestCase):
         self.unit_status.save()
 
     def test_get_or_none(self):
-        result = UnitStatus.get_or_none(self.unit, self.user)
-        self.assertEqual(result, self.unit_status)
+        """
+        Test returning first UnitStatus related to self.unit or returning None.
+        """
+        self.assertEqual(UnitStatus.get_or_none(self.unit, self.user), self.unit_status)
 
         self.unit_status.delete()
-        self.assertIsNotNone(result)
+        self.assertIsNone(UnitStatus.get_or_none(self.unit, self.user))
+
+    def test_get_or_none_latest(self):
+        """
+        Test returning latest UnitStatus related to self.unit.
+        """
+        self.unit_status_latest = UnitStatus(unit=self.unit, user=self.user)
+        self.unit_status_latest.save()
+
+        self.assertEqual(
+            UnitStatus.get_or_none(self.unit, self.user, latest=True),
+            self.unit_status_latest
+        )
 
     def test_is_done(self):
+        """
+        Implisitly calling get_or_none with `endTime__isnull=False`.
+        """
         result = UnitStatus.is_done(self.unit, self.user)
         self.assertIsNone(result)
 
@@ -1400,13 +1419,61 @@ class UnitStatusTest(TestCase):
         result = self.unit_status.get_lesson()
         self.assertEqual(result, self.unit_lesson)
 
-    def test_set_lesson(self):
-        pass
+    def test_set_lesson_without_changes(self):
+        """
+        Test Unit.Status.set_lesson method. Test case when unit_status order > unit_lesson order.
+        """
+        self.unit_status.order = 2
+        ul = Mock()
+        ul.order = 1
+        self.assertEqual(self.unit_status.set_lesson(ul), ul)
+
+    @patch('ct.models.UnitStatus.start_next_lesson')
+    def test_set_lesson(self, start_next_lesson):
+        """
+        Test if UnitLesson is not ended and ul.order > self.order + 1.
+        """
+        self.unit_status.order = 0
+        ul = Mock()
+        ul.order = 2
+        self.unit_status.set_lesson(ul)
+        start_next_lesson.assert_called_once()
+
+    def test_set_lesson_change_order(self):
+        """
+        Test if UnitLesson is ended up or not ul.order > self.order + 1.
+        """
+        self.unit_status.order = 0
+        ul = Mock()
+        ul.order = 1
+        result = self.unit_status.set_lesson(ul)
+        self.assertEqual(result, ul)
+        self.assertEqual(result.order, self.unit_status.order)
+
+        self.unit_status.endTime = timezone.now()
+        self.unit_status.save()
+        result = self.unit_status.set_lesson(ul)
+        self.assertEqual(result, ul)
+        self.assertEqual(result.order, self.unit_status.order)
 
     def test_done(self):
         self.assertIsNone(self.unit_status.endTime)
         self.unit_status.done()
         self.assertIsNotNone(self.unit_status.endTime)
 
-    def test_start_next_lesson(self):
-        pass
+    def test_start_next_lesson_return_none(self):
+        """
+        Test start_next_lesson to return None.
+        """
+        self.unit_status.order = 0
+        result = self.unit_status.start_next_lesson()
+        self.assertIsNone(result)
+
+    @patch('ct.models.UnitStatus.get_lesson')
+    def test_start_next_lesson(self, get_lesson):
+        """
+        Test start_next_lesson to return UnitLesson.
+        """
+        self.unit_status.order = 0
+        result = self.unit_status.start_next_lesson()
+        self.assertEqual(result, get_lesson())
