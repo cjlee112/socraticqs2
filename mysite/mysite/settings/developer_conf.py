@@ -29,6 +29,7 @@ NOSE_ARGS = [
     '--cover-inclusive',
 ]
 
+GOOGLE_ANALYTICS_CODE = ""
 
 try:
     from local_conf import *
