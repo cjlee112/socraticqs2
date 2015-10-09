@@ -88,6 +88,7 @@ class BaseTask(Task):
     base_path = os.path.dirname(__file__) + '/../..'
 
     def run(self, action, suffix=None):
+        # VF: don't we support mysql?
         handlers = {
             'postgresql_psycopg2': getattr(BaseTask, '%s_db_postgres' % action),
             'sqlite3': getattr(BaseTask, '%s_db_sqlite' % action)
@@ -102,9 +103,27 @@ class BaseTask(Task):
         except KeyError:
             print('Error: Unknown engine `%s`' % self.engine)
 
+    # VF: @staticmethod
     def postgres(fn):
         """
         Decorator that adds PostgreSQL specific actions to task.
+
+        # VF: not good to use user's home dir for ~/.pgpass in such user-case
+        # VF: same file is used by pgAdmin and maybe other GUIs
+        # VF: and overwriting + removing of it can cause problems
+        # VF: for some users
+        # VF: Suggestion - generate random file and update environment
+        # VF: variable PGPASSFILE.
+
+        # VF: Also we should pass HOST and PORT, because they could be non-default
+
+        # >>> from tempfile import NamedTemporaryFile
+        # >>> with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
+        # ...     f.write('{HOST}:{PORT}:postgres:{USER}:{PASSWORD}%(**self.db_cfg)
+        # ... os.environ["PGPASSFILE"] = f.name
+        # ... local('chmod 600 %s' % f.name)
+        # ... fn(self, *args, **kwargs)
+        # ... local('rm %s ' % f.name)
         """
         def wrapped(self, *args, **kwargs):
             local(
@@ -124,6 +143,19 @@ class BaseTask(Task):
     def init_db_postgres(self, *args, **kwargs):
         """
         Init db to original state for postgres.
+
+        # VF: We should pass also --host and --port arguments
+        # VF: because user can have different values for them
+
+        # VF: Also - we need arguments to pass user/password for restoration
+        # VF: process, because database user from django config could have no
+        # VF: permissions for database-level operations.
+
+        # VF: Or there should be config to skip database drop/create
+        # VF: Maybe add alternative - drop public schema inside database
+        # VF: (fastest way to drop all tables) and create it again
+        # VF: SQL: drop schema public cascade;
+        # VF: SQL: create schema public;
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'], self.db_cfg['USER']))
@@ -135,6 +167,11 @@ class BaseTask(Task):
     def init_db_sqlite(self, *args, **kwargs):
         """
         Init db to original state for sqlite.
+
+        # VF: Here we should use NAME variable from config, because
+        # VF: database path and file could be different.
+        # VF: BTW - user can set absolute path to database file in config.
+
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local('rm %s/mysite.db' % dj_settings.BASE_DIR)
@@ -146,6 +183,9 @@ class BaseTask(Task):
     def backup_db_postgres(self, suffix, *args, **kwargs):
         """
         Backup Postgres DB.
+
+        # VF: path for saving backups should be overwritable by some
+        # VF: input argument
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
@@ -156,6 +196,11 @@ class BaseTask(Task):
     def backup_db_sqlite(self, suffix, *args, **kwargs):
         """
         Backup Sqlite DB.
+
+        # VF: path for saving backups should be overwritable by some
+        # VF: input argument
+        #
+        # VF: We should pass also --host and --port arguments
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
@@ -167,6 +212,18 @@ class BaseTask(Task):
     def restore_db_postgres(self, suffix, *args, **kwargs):
         """
         Restore Postgres DB.
+
+        # VF: We should pass also --host and --port arguments
+
+        # VF: dropping current database before we are ensured, that restore
+        # VF: was successful is dangerous. Better way - create new database
+        # VF: with different name, restore dump there, ensure that there is no
+        # VF: errors and only after that - drop current database and rename new
+        # VF: SQL: ALTER DATABASE name RENAME TO new_name
+        #
+        # VF: Also - we need arguments to pass user/password for restoration
+        # VF: process, because database user from django config could have no
+        # VF: permissions for database-level operations.
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             if not local('ls %s/backups/backup.postgres.%s' % (self.base_path, suffix)).succeeded:
