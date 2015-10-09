@@ -1,6 +1,7 @@
 # coding: utf-8
 import os
 from datetime import timedelta
+gettext = lambda s: s
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Set template_path and template_dir
@@ -8,6 +9,11 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 TEMPLATE_DIRS = (
     TEMPLATE_PATH,
 )
+
+CMS_TEMPLATES = (
+    ('marketing_template_1.html', 'Marketing Template One'),
+)
+
 # Set databases_name
 DATABASES_NAME = os.path.join(BASE_DIR, 'mysite.db')
 
@@ -42,6 +48,10 @@ TIME_ZONE = 'America/Los_Angeles'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
+
+LANGUAGES = [
+    ('en-us', 'English'),
+]
 
 # grr, Django testing framework stupidly uses this as signal that
 # code is pre-1.6, whereas it STILL seems to be required for app to run.
@@ -108,11 +118,16 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'cms.middleware.user.CurrentUserMiddleware',
+    'cms.middleware.page.CurrentPageMiddleware',
+    'cms.middleware.toolbar.ToolbarMiddleware',
+    'cms.middleware.language.LanguageCookieMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'ct.middleware.MySocialAuthExceptionMiddleware',
@@ -132,6 +147,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
+    'djangocms_admin_style',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -143,7 +159,18 @@ INSTALLED_APPS = (
     # Socials
     'social.apps.django_app.default',
     'psa',
+    # Django-CMS
+    'cms',
+    'treebeard',
+    'menus',
+    'sekizai',
+    # Filler
+    'filer',
+    'easy_thumbnails',
 )
+
+
+THUMBNAIL_HIGH_RESOLUTION = True
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
@@ -153,6 +180,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
    'django.contrib.auth.context_processors.auth',
    'django.core.context_processors.debug',
    'django.core.context_processors.i18n',
+   'django.core.context_processors.request',
    'django.core.context_processors.media',
    'django.core.context_processors.static',
    'django.core.context_processors.tz',
@@ -161,6 +189,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
    'social.apps.django_app.context_processors.login_redirect',
    'psa.context_processors.debug_settings',
    'mysite.context_processors.google_analytics',
+   'sekizai.context_processors.sekizai',
+   'cms.context_processors.cms_settings',
 )
 
 AUTHENTICATION_BACKENDS = (

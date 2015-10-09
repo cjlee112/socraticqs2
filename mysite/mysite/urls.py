@@ -35,10 +35,6 @@ urlpatterns = patterns(
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done'),
+    url(r'^lti/', include('lti.urls', namespace='lti')),
+    url(r'^', include('cms.urls')),
 )
-
-if apps.is_installed('lti'):
-    urlpatterns += patterns(
-        '',
-        url(r'^lti/', include('lti.urls', namespace='lti')),
-    )

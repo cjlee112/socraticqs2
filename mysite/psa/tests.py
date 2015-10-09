@@ -46,11 +46,13 @@ class ViewsUnitTest(TestCase):
     def test_validation_sent(self):
         anonymous = AnonymousUser()
         self.request.user = anonymous
+        self.request.current_page = None
         response = validation_sent(self.request)
         self.assertIsInstance(response, HttpResponse)
         self.assertTrue('test@test.com' in response.content)
 
     def test_custom_login_get(self):
+        self.request.current_page = None
         response = custom_login(self.request)
         self.assertIsInstance(response, HttpResponse)
         self.assertTrue('LoginForm' in response.content)
@@ -81,6 +83,7 @@ class ViewsUnitTest(TestCase):
         user.set_password('test')
         user.save()
         self.request.user = user
+        self.request.current_page = None
         response = done(self.request)
         self.assertIsInstance(response, HttpResponse)
         self.assertTrue('test_user' in response.content)
