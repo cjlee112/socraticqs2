@@ -12,7 +12,7 @@ from django.db.models import Q, Count, Max
 class Concept(models.Model):
     title = models.CharField(max_length=200)
     addedBy = models.ForeignKey(User)
-    approvedBy = models.ForeignKey(User, null=True,
+    approvedBy = models.ForeignKey(User, null=True, blank=True,
                                    related_name='approvedConcepts')
     isError = models.BooleanField(default=False)
     isAbort = models.BooleanField(default=False)
@@ -139,7 +139,7 @@ class ConceptGraph(models.Model):
     relationship = models.CharField(max_length=10, choices=REL_CHOICES,
                                     default=DEPENDS)
     addedBy = models.ForeignKey(User)
-    approvedBy = models.ForeignKey(User, null=True,
+    approvedBy = models.ForeignKey(User, null=True, blank=True,
                                    related_name='approvedConceptEdges')
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
@@ -213,27 +213,27 @@ class Lesson(models.Model):
     )
     _sourceDBdict = {}
     title = models.CharField(max_length=200)
-    text = models.TextField(null=True)
-    data = models.TextField(null=True) # JSON DATA
-    url = models.CharField(max_length=256, null=True)
+    text = models.TextField(null=True, blank=True)
+    data = models.TextField(null=True, blank=True)  # JSON DATA
+    url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
                               default=PUBLIC_ACCESS)
-    sourceDB = models.CharField(max_length=32, null=True)
-    sourceID = models.CharField(max_length=100, null=True)
+    sourceDB = models.CharField(max_length=32, null=True, blank=True)
+    sourceID = models.CharField(max_length=100, null=True, blank=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    concept = models.ForeignKey(Concept, null=True) # concept definition
-    treeID = models.IntegerField(null=True) # VCS METADATA
-    parent = models.ForeignKey('Lesson', null=True,
+    concept = models.ForeignKey(Concept, null=True, blank=True)  # concept definition
+    treeID = models.IntegerField(null=True, blank=True)  # VCS METADATA
+    parent = models.ForeignKey('Lesson', null=True, blank=True,
                                related_name='children')
-    mergeParent = models.ForeignKey('Lesson', null=True,
+    mergeParent = models.ForeignKey('Lesson', null=True, blank=True,
                                     related_name='mergeChildren')
-    changeLog = models.TextField(null=True)
-    commitTime = models.DateTimeField('time committed', null=True)
+    changeLog = models.TextField(null=True, blank=True)
+    commitTime = models.DateTimeField('time committed', null=True, blank=True)
 
     _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
                    'sourceDB', 'sourceID', 'concept', 'treeID')
@@ -478,9 +478,9 @@ class UnitLesson(models.Model):
     unit = models.ForeignKey('Unit')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=COMPONENT)
-    lesson = models.ForeignKey(Lesson, null=True)
-    parent = models.ForeignKey('UnitLesson', null=True)
-    order = models.IntegerField(null=True)
+    lesson = models.ForeignKey(Lesson, null=True, blank=True)
+    parent = models.ForeignKey('UnitLesson', null=True, blank=True)
+    order = models.IntegerField(null=True, blank=True)
     atime = models.DateTimeField('time added', default=timezone.now)
     addedBy = models.ForeignKey(User)
     treeID = models.IntegerField() # VCS METADATA
@@ -908,7 +908,7 @@ class Response(models.Model):
     course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
-    title = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES,
                                   blank=False, null=False)
@@ -919,8 +919,8 @@ class Response(models.Model):
                               blank=False, null=True)
     author = models.ForeignKey(User)
     needsEval = models.BooleanField(default=False)
-    parent = models.ForeignKey('Response', null=True) # reply-to
-    activity = models.ForeignKey('fsm.ActivityLog', null=True)
+    parent = models.ForeignKey('Response', null=True, blank=True)  # reply-to
+    activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
     def __unicode__(self):
         return 'answer by ' + self.author.username
     @classmethod
@@ -987,7 +987,7 @@ class StudentError(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,
                               blank=False, null=True)
     author = models.ForeignKey(User)
-    activity = models.ForeignKey('fsm.ActivityLog', null=True)
+    activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
     def __unicode__(self):
         return 'eval by ' + self.author.username
     @classmethod
@@ -1053,8 +1053,8 @@ class Course(models.Model):
     description = models.TextField()
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
                               default=PUBLIC_ACCESS)
-    enrollCode = models.CharField(max_length=64, null=True)
-    lockout = models.CharField(max_length=200, null=True)
+    enrollCode = models.CharField(max_length=64, null=True, blank=True)
+    lockout = models.CharField(max_length=200, null=True, blank=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
@@ -1106,7 +1106,7 @@ class CourseUnit(models.Model):
     order = models.IntegerField()
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    releaseTime = models.DateTimeField('time released', null=True)
+    releaseTime = models.DateTimeField('time released', null=True, blank=True)
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
 
