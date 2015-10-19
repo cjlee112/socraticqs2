@@ -14,4 +14,6 @@ before_script:
   - mv fab_settings.py.example fab_settings.py
 script:
   - python mysite/manage.py test
+after_success:
+  - coveralls
 sudo: false

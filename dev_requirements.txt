@@ -16,6 +16,9 @@ django-crispy-forms==1.4.0
 # django integration with nose
 django-nose==1.4
 
+# integration with coveralls.io
+coveralls==1.0
+
 httplib2==0.9.1
 
 # LTI python implementation
