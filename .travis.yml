@@ -1,0 +1,11 @@
+language: python
+python:
+  - 2.7
+cache:
+  directories:
+    - $HOME/.cache/pip
+install:
+  - pip install -r dev_requirements.txt
+script:
+  - python mysite/manage.py test
+sudo: false
