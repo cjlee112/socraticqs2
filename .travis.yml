@@ -1,7 +1,6 @@
 language: python
 python:
   - 2.7
-  - 3.4
 addons:
   apt_packages:
     - pandoc
@@ -10,6 +9,8 @@ cache:
     - $HOME/.cache/pip
 install:
   - pip install -r dev_requirements.txt
+before_script:
+  - mv mysite/mysite/settings/local_conf_example.py mysite/mysite/settings/local_conf.py
 script:
   - python mysite/manage.py test
 sudo: false
