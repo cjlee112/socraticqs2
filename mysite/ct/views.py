@@ -279,7 +279,11 @@ def main_page(request):
     if request.method == 'POST' and 'liveID' in request.POST:
         linkState = get_object_or_404(FSMState, pk=int(request.POST['liveID']))
         return pageData.fsm_push(request, 'livestudent', linkState=linkState)
-    liveSessions = FSMState.find_live_sessions(request.user)
+    if pageData.fsmStack.state and \
+      pageData.fsmStack.state.fsmNode.fsm.name == 'livestudent':
+        liveSessions = None # already in live session, so hide launch buttons!
+    else:
+        liveSessions = FSMState.find_live_sessions(request.user)
     return pageData.render(request, 'ct/index.html',
                            dict(liveSessions=liveSessions))
 
