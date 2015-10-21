@@ -94,16 +94,24 @@ def filter_tabs(tabs, filterLabels):
     return [t for t in tabs if t[0] in filterLabels]
     
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
-                 answerTabs=('Home', 'FAQ', 'Edit'), **kwargs):
+                tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                studentTabs=('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ'),
+                unansweredTabs=('Study:', 'Concepts', 'FAQ'),
+                answerTabs=('Home', 'FAQ', 'Edit'), showAnswer=True,
+                user=None, **kwargs):
     if not is_teacher_url(path):
-        tabs = ('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ')
+        if unitLesson.lesson.kind != Lesson.ORCT_QUESTION or \
+          Response.objects.filter(unitLesson=unitLesson, author=user).exists():
+            tabs = studentTabs
+        else:
+            tabs = unansweredTabs
+            showAnswer = False
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
         outTabs = filter_tabs(outTabs, answerTabs)
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
                     ['lessons', str(unitLesson.parent.pk)])))
-    else:
+    elif showAnswer:
         a = unitLesson.get_answers().all()
         if a:
             outTabs.append(make_tab(path, current, 'Answer',
@@ -248,7 +256,7 @@ class PageData(object):
 
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
-                 tabFunc=None, includeNavTabs=True, **kwargs):
+                 tabFunc=None, includeNavTabs=True, tabArgs={}, **kwargs):
     'generate standard set of page data for a unitLesson'
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
@@ -256,7 +264,8 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
         tabFunc = auto_tabs
     pageData = PageData(request, title=ul.lesson.title, **kwargs)
     if includeNavTabs:
-        pageData.navTabs = tabFunc(request.path, currentTab, ul)
+        pageData.navTabs = tabFunc(request.path, currentTab, ul,
+                                   user=request.user, **tabArgs)
     if includeText:
         pageData.headText = md2html(ul.lesson.text)
         ulType = ul.get_type()
@@ -1453,9 +1462,8 @@ def save_response(form, ul, user, course_id, **kwargs):
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
-    includeNavTabs = Response.objects.filter(unitLesson_id=ul_id, author=request.user).exists()
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            includeNavTabs=includeNavTabs, includeText=False)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study',
+                                         includeText=False)
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
