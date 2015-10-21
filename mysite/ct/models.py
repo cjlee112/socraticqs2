@@ -787,7 +787,8 @@ class Unit(models.Model):
         if user:
             kwargs['response__author'] = user
         return distinct_subset(self.unitlesson_set
-          .filter(lesson__kind=Lesson.ORCT_QUESTION)
+          .filter(kind=UnitLesson.COMPONENT, order__isnull=False,
+                  lesson__kind=Lesson.ORCT_QUESTION)
           .exclude(response__kind=Response.ORCT_RESPONSE, **kwargs))
     def get_selfeval_uls(self, user=None, **kwargs):
         if user:
