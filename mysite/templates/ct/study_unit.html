@@ -38,7 +38,13 @@
 Welcome!  To start this courselet, click <b>Start</b>.
 {% endif %}
 
-{% crispy startForm %}
+{% if startURL %}
+<p><button type="button" onclick="location.href='{{ startURL }}'">
+Start
+</button></p>
+{% else %}
+<p>Your instructor has not added any lessons yet.</p>
+{% endif %}
 
   </div><!-- @end #StudyTabDiv -->
 </div>

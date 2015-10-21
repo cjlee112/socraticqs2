@@ -1197,12 +1197,14 @@ def study_unit(request, course_id, unit_id):
     if UnitStatus.objects.filter(user=request.user, unit=unit).exists() \
       or Response.objects.filter(unitLesson__unit=unit, author=request.user).exists():
         pageData.navTabs = unit_tabs_student(request.path, 'Study') # show tabs
-    startForm = push_button(request)
-    if not startForm: # user clicked Start
-        stateData = dict(unit=unit, course=course)
-        return pageData.fsm_push(request, 'lessonseq', stateData)
+    try:
+        unitLesson = unit.unitlesson_set.get(order=0)
+    except UnitLesson.DoesNotExist:
+        startURL = None
+    else:
+        startURL = unitLesson.get_study_url(course_id)
     return pageData.render(request, 'ct/study_unit.html',
-                dict(unit=unit, startForm=startForm))
+                dict(unit=unit, startURL=startURL))
 
 
 @login_required
@@ -1540,7 +1542,7 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
                        pageData.fsmStack.state.activity
             se = r.studenterror_set.create(errorModel=em, author=request.user,
                                            status=status, activity=activity)
-        defaultURL = get_object_url(request.path, ul, subpath='tasks')
+        defaultURL = lesson_next_url(request, ul, course_id)
         return pageData.fsm_redirect(request, 'next', defaultURL)
     answer = get_answer_html(r.unitLesson)
     return pageData.render(request, 'ct/assess.html',
