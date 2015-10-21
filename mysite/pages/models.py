@@ -4,7 +4,7 @@ from cms.models.pluginmodel import CMSPlugin
 
 COLOR_CHOICES = (
     ("bg-primary", "blue"),
-    ("bg-danger","red"),
+    ("bg-danger", "red"),
     ("bg-success", "green"),
     ("bg-info", "light-blue"),
     ("bg-warning", "yellow"),

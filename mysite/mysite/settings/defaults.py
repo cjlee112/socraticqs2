@@ -12,7 +12,7 @@ TEMPLATE_DIRS = (
 )
 
 CMS_TEMPLATES = (
-    ('marketing_template_1.html', 'Marketing Template One'),
+    ('about_page.html', 'About Page'),
     ('landing_page.html', 'Landing Page')
 )
 
@@ -326,4 +326,21 @@ LOGGING = {
         },
     }
 }
-CMS_PLACEHOLDER_CONF = {}
+
+
+CMS_PLACEHOLDER_CONF = {
+    'about_page_content': {
+        'plugins': ['TextPlugin'],
+        'name': 'About Page content',
+        'limits': {
+            'global': 20,
+        },
+    },
+    'about_page_title': {
+        'plugins': ['TextPlugin'],
+        'name': 'About Page title',
+        'limits': {
+            'global': 1,
+        },
+    },
+}

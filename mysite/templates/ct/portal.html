@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags menu_tags %}
 {% load ct_extras %}
 
 {% comment %}
@@ -74,7 +74,6 @@ function toggleInterest(o, targeturl, csrftoken)
         </ul>
         <ul class="nav navbar-nav">
           {% if not fsmStack.state or not fsmStack.state.hideNav %}
-            <li><a href="/ct/about/">About</a></li>
             {{ actionTarget|get_dummy_navbar }}
           {% endif %}
           {% if pageData.fsmLauncher %}
@@ -95,6 +94,9 @@ function toggleInterest(o, targeturl, csrftoken)
           <li><a href='/fsm/nodes/'>Activity Center</a></li>
           {% endif %}
           {% block navbar %}{% endblock %}
+        </ul>
+        <ul class="nav navbar-nav">
+            {% show_menu 0 1 100 100 "menu.html" %}
         </ul>
         <ul class="nav navbar-right">
           {% if user and user.is_authenticated %}
