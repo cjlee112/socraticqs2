@@ -1,6 +1,7 @@
 # coding: utf-8
 import os
 from datetime import timedelta
+
 gettext = lambda s: s
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -12,11 +13,11 @@ TEMPLATE_DIRS = (
 
 CMS_TEMPLATES = (
     ('marketing_template_1.html', 'Marketing Template One'),
+    ('landing_page.html', 'Landing Page')
 )
 
 # Set databases_name
 DATABASES_NAME = os.path.join(BASE_DIR, 'mysite.db')
-
 
 ADMINS = (
     ('Christopher Lee', 'leec@chem.ucla.edu'),
@@ -25,7 +26,7 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': DATABASES_NAME,                      # Or path to database file if using sqlite3.
+        'NAME': DATABASES_NAME,  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -138,7 +139,6 @@ ROOT_URLCONF = 'mysite.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -164,11 +164,13 @@ INSTALLED_APPS = (
     'treebeard',
     'menus',
     'sekizai',
+    'djangocms_text_ckeditor',
     # Filler
     'filer',
     'easy_thumbnails',
+    # CMS pages
+    'pages',
 )
-
 
 THUMBNAIL_HIGH_RESOLUTION = True
 
@@ -194,15 +196,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-   'social.backends.twitter.TwitterOAuth',
-   'social.backends.facebook.FacebookOAuth2',
-   'social.backends.google.GoogleOAuth2',
-   'social.backends.linkedin.LinkedinOAuth2',
-   'social.backends.khanacademy.KhanAcademyOAuth1',
-   'psa.custom_backends.EmailAuth',
-   'django.contrib.auth.backends.ModelBackend',
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.linkedin.LinkedinOAuth2',
+    'social.backends.khanacademy.KhanAcademyOAuth1',
+    'psa.custom_backends.EmailAuth',
+    'django.contrib.auth.backends.ModelBackend',
 )
-
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
@@ -325,3 +326,4 @@ LOGGING = {
         },
     }
 }
+CMS_PLACEHOLDER_CONF = {}

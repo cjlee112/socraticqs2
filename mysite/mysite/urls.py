@@ -8,7 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    (r'^$', home_page),
+    #(r'^$', home_page),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
