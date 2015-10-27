@@ -1,0 +1,20 @@
+language: python
+python:
+  - 2.7
+addons:
+  apt_packages:
+    - pandoc
+cache:
+  directories:
+    - $HOME/.cache/pip
+install:
+  - pip install -r dev_requirements.txt
+before_script:
+  - mv mysite/mysite/settings/local_conf_example.py mysite/mysite/settings/local_conf.py
+  - mv fab_settings.py.example fab_settings.py
+script:
+  - cd mysite
+  - python manage.py test
+after_success:
+  - coveralls
+sudo: false

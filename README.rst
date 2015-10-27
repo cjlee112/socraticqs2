@@ -1,6 +1,13 @@
 Socraticqs2
 ===========
 
+.. image:: https://travis-ci.org/cjlee112/socraticqs2.svg?branch=master
+    :target: https://travis-ci.org/cjlee112/socraticqs2
+
+.. image:: https://coveralls.io/repos/cjlee112/socraticqs2/badge.svg?branch=master&service=github
+  :target: https://coveralls.io/github/cjlee112/socraticqs2?branch=master
+
+
 Socraticqs2 is the web engine for courselets.org.
 
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
