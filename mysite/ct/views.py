@@ -64,7 +64,7 @@ def make_tabs(path, current, tabs, tail=4, **kwargs):
 
 def concept_tabs(path, current, unitLesson,
                  tabs=('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
-                 **kwargs):
+                 user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
     if unitLesson.order is not None:
@@ -72,7 +72,7 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), **kwargs):
+               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
@@ -94,16 +94,24 @@ def filter_tabs(tabs, filterLabels):
     return [t for t in tabs if t[0] in filterLabels]
     
 def lesson_tabs(path, current, unitLesson,
-                 tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
-                 answerTabs=('Home', 'FAQ', 'Edit'), **kwargs):
+                tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
+                studentTabs=('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ'),
+                unansweredTabs=('Study:', 'Concepts', 'FAQ'),
+                answerTabs=('Home', 'FAQ', 'Edit'), showAnswer=True,
+                user=None, **kwargs):
     if not is_teacher_url(path):
-        tabs = ('Study:', 'Tasks', 'Concepts', 'Errors', 'FAQ')
+        if unitLesson.lesson.kind != Lesson.ORCT_QUESTION or \
+          Response.objects.filter(unitLesson=unitLesson, author=user).exists():
+            tabs = studentTabs
+        else:
+            tabs = unansweredTabs
+            showAnswer = False
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
         outTabs = filter_tabs(outTabs, answerTabs)
         outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
                     ['lessons', str(unitLesson.parent.pk)])))
-    else:
+    elif showAnswer:
         a = unitLesson.get_answers().all()
         if a:
             outTabs.append(make_tab(path, current, 'Answer',
@@ -248,7 +256,7 @@ class PageData(object):
 
 
 def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
-                 tabFunc=None, includeNavTabs=True, **kwargs):
+                 tabFunc=None, includeNavTabs=True, tabArgs={}, **kwargs):
     'generate standard set of page data for a unitLesson'
     unit = get_object_or_404(Unit, pk=unit_id)
     ul = get_object_or_404(UnitLesson, pk=ul_id)
@@ -256,7 +264,8 @@ def ul_page_data(request, unit_id, ul_id, currentTab, includeText=True,
         tabFunc = auto_tabs
     pageData = PageData(request, title=ul.lesson.title, **kwargs)
     if includeNavTabs:
-        pageData.navTabs = tabFunc(request.path, currentTab, ul)
+        pageData.navTabs = tabFunc(request.path, currentTab, ul,
+                                   user=request.user, **tabArgs)
     if includeText:
         pageData.headText = md2html(ul.lesson.text)
         ulType = ul.get_type()
@@ -1192,12 +1201,14 @@ def study_unit(request, course_id, unit_id):
     if UnitStatus.objects.filter(user=request.user, unit=unit).exists() \
       or Response.objects.filter(unitLesson__unit=unit, author=request.user).exists():
         pageData.navTabs = unit_tabs_student(request.path, 'Study') # show tabs
-    startForm = push_button(request)
-    if not startForm: # user clicked Start
-        stateData = dict(unit=unit, course=course)
-        return pageData.fsm_push(request, 'lessonseq', stateData)
+    try:
+        unitLesson = unit.unitlesson_set.get(order=0)
+    except UnitLesson.DoesNotExist:
+        startURL = None
+    else:
+        startURL = unitLesson.get_study_url(course_id)
     return pageData.render(request, 'ct/study_unit.html',
-                dict(unit=unit, startForm=startForm))
+                dict(unit=unit, startURL=startURL))
 
 
 @login_required
@@ -1457,9 +1468,8 @@ def save_response(form, ul, user, course_id, **kwargs):
 @login_required
 def ul_respond(request, course_id, unit_id, ul_id):
     'ask student a question'
-    includeNavTabs = Response.objects.filter(unitLesson_id=ul_id, author=request.user).exists()
-    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id,'Study',
-            includeNavTabs=includeNavTabs, includeText=False)
+    unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Study',
+                                         includeText=False)
     if request.method == 'POST':
         form = ResponseForm(request.POST)
         if form.is_valid():
@@ -1536,7 +1546,7 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
                        pageData.fsmStack.state.activity
             se = r.studenterror_set.create(errorModel=em, author=request.user,
                                            status=status, activity=activity)
-        defaultURL = get_object_url(request.path, ul, subpath='tasks')
+        defaultURL = lesson_next_url(request, ul, course_id)
         return pageData.fsm_redirect(request, 'next', defaultURL)
     answer = get_answer_html(r.unitLesson)
     return pageData.render(request, 'ct/assess.html',
