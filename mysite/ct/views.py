@@ -64,7 +64,7 @@ def make_tabs(path, current, tabs, tail=4, **kwargs):
 
 def concept_tabs(path, current, unitLesson,
                  tabs=('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
-                 **kwargs):
+                 user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Study:', 'Lessons', 'FAQ')
     if unitLesson.order is not None:
@@ -72,7 +72,7 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), **kwargs):
+               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
