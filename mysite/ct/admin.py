@@ -4,244 +4,156 @@ from django.forms.models import ModelForm
 import ct.models
 
 
-class ConceptForm(ModelForm):
+class BaseForm(ModelForm):
+    """
+    Base class for admin forms.
+    """
+    def __init__(self, *args, **kwargs):
+        super(BaseForm, self).__init__(*args, **kwargs)
+
+        for field_name in ('addedBy', 'author'):
+            if field_name in self.fields and not self.initial.get(field_name):
+                self.initial[field_name] = self.current_user
+
+
+class ConceptForm(BaseForm):
     """
     Form for AdminConcept.
     """
-    def __init__(self, *args, **kwargs):
-        super(ConceptForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.Concept
 
 
-class ConceptGraphForm(ModelForm):
+class ConceptGraphForm(BaseForm):
     """
     Form for AdminConceptGraph.
     """
-    def __init__(self, *args, **kwargs):
-        super(ConceptGraphForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.ConceptGraph
 
 
-class LessonForm(ModelForm):
+class LessonForm(BaseForm):
     """
     Form for AdminLesson.
     """
-    def __init__(self, *args, **kwargs):
-        super(LessonForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.Lesson
 
 
-class ConceptLinkForm(ModelForm):
+class ConceptLinkForm(BaseForm):
     """
     Form for AdminConceptLink.
     """
-    def __init__(self, *args, **kwargs):
-        super(ConceptLinkForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.ConceptLink
 
 
-class UnitLessonForm(ModelForm):
+class UnitLessonForm(BaseForm):
     """
     Form for AdminUnitLesson.
     """
-    def __init__(self, *args, **kwargs):
-        super(UnitLessonForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.UnitLesson
 
 
-class UnitForm(ModelForm):
+class UnitForm(BaseForm):
     """
     Form for AdminUnit.
     """
-    def __init__(self, *args, **kwargs):
-        super(UnitForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.Unit
 
 
-class ResponseForm(ModelForm):
+class ResponseForm(BaseForm):
     """
     Form for AdminResponse.
     """
-    def __init__(self, *args, **kwargs):
-        super(ResponseForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('author'):
-            self.initial['author'] = self.current_user
-
     class Meta:
         models = ct.models.Response
 
 
-class StudentErrorForm(ModelForm):
+class StudentErrorForm(BaseForm):
     """
     Form for AdminStudentError.
     """
-    def __init__(self, *args, **kwargs):
-        super(StudentErrorForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('author'):
-            self.initial['author'] = self.current_user
-
     class Meta:
         models = ct.models.StudentError
 
 
-class CourseForm(ModelForm):
+class CourseForm(BaseForm):
     """
     Form for AdminCourse.
     """
-    def __init__(self, *args, **kwargs):
-        super(CourseForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.Course
 
 
-class CourseUnitForm(ModelForm):
+class CourseUnitForm(BaseForm):
     """
     Form for AdminCourseUnit.
     """
-    def __init__(self, *args, **kwargs):
-        super(CourseUnitForm, self).__init__(*args, **kwargs)
-
-        if not self.initial.get('addedBy'):
-            self.initial['addedBy'] = self.current_user
-
     class Meta:
         models = ct.models.CourseUnit
 
 
-@admin.register(ct.models.Concept)
-class AdminConcept(admin.ModelAdmin):
-    form = ConceptForm
-
+class BaseAdmin(admin.ModelAdmin):
+    """
+    Base class for admin models.
+    """
     def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminConcept, self).get_form(request, obj, **kwargs)
+        form = super(BaseAdmin, self).get_form(request, obj, **kwargs)
         form.current_user = request.user
         return form
+
+
+@admin.register(ct.models.Concept)
+class AdminConcept(BaseAdmin):
+    form = ConceptForm
 
 
 @admin.register(ct.models.ConceptGraph)
-class AdminConceptGraph(admin.ModelAdmin):
+class AdminConceptGraph(BaseAdmin):
     form = ConceptGraphForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminConceptGraph, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.Lesson)
-class AdminLesson(admin.ModelAdmin):
+class AdminLesson(BaseAdmin):
     form = LessonForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminLesson, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.ConceptLink)
-class AdminConceptLink(admin.ModelAdmin):
+class AdminConceptLink(BaseAdmin):
     form = ConceptLinkForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminConceptLink, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.UnitLesson)
-class AdminUnitLesson(admin.ModelAdmin):
+class AdminUnitLesson(BaseAdmin):
     form = UnitLessonForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminUnitLesson, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.Unit)
-class AdminUnit(admin.ModelAdmin):
+class AdminUnit(BaseAdmin):
     form = UnitForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminUnit, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.Response)
-class AdminResponse(admin.ModelAdmin):
+class AdminResponse(BaseAdmin):
     form = ResponseForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminResponse, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.StudentError)
-class AdminStudentError(admin.ModelAdmin):
+class AdminStudentError(BaseAdmin):
     form = StudentErrorForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminStudentError, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.Course)
-class AdminCourse(admin.ModelAdmin):
+class AdminCourse(BaseAdmin):
     form = CourseForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminCourse, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.CourseUnit)
-class AdminCourseUnit(admin.ModelAdmin):
+class AdminCourseUnit(BaseAdmin):
     form = CourseUnitForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(AdminCourseUnit, self).get_form(request, obj, **kwargs)
-        form.current_user = request.user
-        return form
 
 
 @admin.register(ct.models.Role)
