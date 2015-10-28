@@ -28,20 +28,17 @@ class BaseAdmin(admin.ModelAdmin):
     form = BaseForm
 
 
-def register_model(model):
-    @admin.register(model)
-    class AdminModel(BaseAdmin):
-        pass
-
-
-models = [
+models = (
     ct.models.Concept, ct.models.ConceptGraph, ct.models.Lesson,
     ct.models.ConceptLink, ct.models.UnitLesson, ct.models.Unit,
     ct.models.Response, ct.models.StudentError, ct.models.Course,
     ct.models.CourseUnit
-]
+)
 
-map(register_model, models)
+
+@admin.register(*models)
+class AdminModel(BaseAdmin):
+    pass
 
 
 @admin.register(ct.models.Role)
