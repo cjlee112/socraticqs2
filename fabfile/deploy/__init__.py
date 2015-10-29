@@ -6,6 +6,7 @@ Fabric task for deploying project on servers(production, staging, development)
 """
 import os
 import sys
+from StringIO import StringIO
 
 from fabric.contrib import django
 from fabric.api import local, run, lcd, cd
@@ -56,8 +57,15 @@ class Deploying(Task):
         self.func('sudo supervisorctl restart celery')
         self.func('sudo service nginx restart')
 
+    @property
+    def __is_new_branch(self):
+        fh = StringIO()
+        self.func('git branch', stdout=fh)
+        return self.code_branch in fh.readlines()
+
     def __update(self):
-        if self.code_branch in self.func('git branch'):
+
+        if self.__is_new_branch:
             self.func('git checkout {0} --force'.format(self.code_branch))
             self.func('git pull origin {0} --force'.format(self.code_branch))
         else:
