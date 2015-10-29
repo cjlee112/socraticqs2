@@ -6,7 +6,6 @@ Fabric task for deploying project on servers(production, staging, development)
 """
 import os
 import sys
-from StringIO import StringIO
 
 from fabric.contrib import django
 from fabric.api import local, run, lcd, cd
@@ -59,9 +58,10 @@ class Deploying(Task):
 
     @property
     def __is_new_branch(self):
-        fh = StringIO()
-        self.func('git branch', stdout=fh)
-        return self.code_branch in fh.readlines()
+        if self.func == run:
+            return self.code_branch in self.func('git branch')
+        else:
+            return self.code_branch in self.func('git branch', capture=True)
 
     def __update(self):
 
