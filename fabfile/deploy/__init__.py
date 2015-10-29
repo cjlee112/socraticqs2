@@ -28,22 +28,28 @@ class Deploying(Task):
 
     func = local
     func_cd = lcd
-    __code_branch = STAGING_BRANCH
-    __project_path = os.path.join(BASE_PATH, '/../..')
-    __local_settings_path = os.path.join(__project_path, '/../settings')
+    code_branch = STAGING_BRANCH
+
+    @property
+    def project_path(self):
+        return os.path.join(BASE_PATH, '../..')
+
+    @property
+    def local_settings_path(self):
+        return os.path.join(self.project_path, '../settings')
 
     def __virtualenv(self):
-        with self.func_cd(os.path.join(self.__project_path, '/../')):
+        with self.func_cd(os.path.join(self.project_path, '../')):
             self.func('source {}/bin/activate'.format(env.venv_name))
 
     def update_requirements(self):
-        with self.func_cd(self.__project_path):
-            self.func("pip install -r requirements.txt")
+        with self.func_cd(self.project_path):
+            self.func("sudo pip install -r requirements.txt")
 
-    def __get_settings(self, branch='master'):
-        with self.func_cd(self.__local_settings_path):
+    def _get_settings(self, branch='master'):
+        with self.func_cd(self.local_settings_path):
             self.func('git pull origin {0}'.format(branch))
-            self.func('cp production_conf.py ../socraticqs2/mysite/mysite/production_conf.py')
+            self.func('cp production_conf.py ../socraticqs2/mysite/mysite/settings/production_conf.py')
 
     def __restart_service(self):
         self.func('sudo supervisorctl restart gunicorn')
@@ -51,8 +57,13 @@ class Deploying(Task):
         self.func('sudo service nginx restart')
 
     def __update(self):
-        self.func('git pull origin %s' % self.__code_branch)
-        self.__get_settings()
+        if self.code_branch in self.func('git branch'):
+            self.func('git checkout {0} --force'.format(self.code_branch))
+            self.func('git pull origin {0} --force'.format(self.code_branch))
+        else:
+            self.func('git fetch origin')
+            self.func('git checkout -b {0} origin/{0}'.format(self.code_branch))
+        self._get_settings()
         self.func('find . -name "*.pyc" -print -delete')
         self.__virtualenv()
         self.update_requirements()
@@ -62,22 +73,30 @@ class Deploying(Task):
         self.__restart_service()
 
     def run(self, running='local', branch='master', suffix=None):
+        print self.code_branch
+        self.code_branch = branch
         if running == 'local':
             self.func = local
             self.func_cd = lcd
+            self.__update()
         elif running == 'remote':
             self.func = run
             self.func_cd = cd
             env.hosts = [STAGING_HOST, ]
-
-        self.__code_branch = branch
-        self.__update()
+            global BASE_PATH
+            BASE_PATH = env.project_root
+            with self.func_cd(self.project_path):
+                print self.project_path
+                self.__update()
 
 
 class Staging(Deploying):
     """Deploy on Staging"""
-    def __get_settings(self, branch='master'):
+    def _get_settings(self, branch='master'):
         """On dev/staging we don't use production settings"""
+        with self.func_cd(self.local_settings_path):
+            self.func('git pull origin {0} --force'.format(branch))
+            self.func('cp developer_conf.py ../dev/socraticqs2/mysite/mysite/settings/developer_conf.py')
 
 
 class Development(Staging):
@@ -88,8 +107,21 @@ class Development(Staging):
     Example:
         fab deploy.dev:running='local', branch='dev'
     """
-    __project_path = os.path.join(BASE_PATH, '/../../dev')
-    __code_branch = 'dev'
+    @property
+    def project_path(self):
+        if self.func == local:
+            return os.path.join(BASE_PATH, '../../dev')
+        else:
+            return os.path.join(BASE_PATH, 'dev/socraticqs2')
+
+    @property
+    def local_settings_path(self):
+        if self.func == local:
+            return os.path.join(self.project_path, '../settings')
+        else:
+            return os.path.join(self.project_path, '../../settings')
+
+    code_branch = 'dev'
 
 
 prod = Deploying()
