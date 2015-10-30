@@ -78,6 +78,8 @@ class Deploying(Task):
         with self.func_cd("mysite"):
             self.func('python manage.py collectstatic --noinput')
             self.func('python manage.py syncdb --noinput')
+            self.func('python manage.py fsm_deploy --noinput')
+
         self.__restart_service()
 
     def run(self, running='local', branch='master', suffix=None):
