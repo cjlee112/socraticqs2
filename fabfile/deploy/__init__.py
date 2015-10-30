@@ -94,7 +94,6 @@ class Deploying(Task):
             global BASE_PATH
             BASE_PATH = env.project_root
             with self.func_cd(self.project_path):
-                print self.project_path
                 self.__update()
 
 
@@ -104,7 +103,7 @@ class Staging(Deploying):
         """On dev/staging we don't use production settings"""
         with self.func_cd(self.local_settings_path):
             self.func('git pull origin {0} --force'.format(branch))
-            self.func('cp developer_conf.py ../dev/socraticqs2/mysite/mysite/settings/developer_conf.py')
+            self.func('cp local_conf.py ../dev/socraticqs2/mysite/mysite/settings/local_conf.py')
 
 
 class Development(Staging):
@@ -118,7 +117,7 @@ class Development(Staging):
     @property
     def project_path(self):
         if self.func == local:
-            return os.path.join(BASE_PATH, '../../dev')
+            return os.path.join(BASE_PATH, '../../../../dev')
         else:
             return os.path.join(BASE_PATH, 'dev/socraticqs2')
 
