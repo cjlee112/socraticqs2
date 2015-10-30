@@ -319,7 +319,7 @@ class FSMNode(JSONBlobMixin, models.Model):
             return func(self, state, request)
 
     def __unicode__(self):
-        return '::'.join((self.name, self.funcName))
+        return u'::'.join((self.name, self.funcName))
 
 
 class FSMDone(ValueError):
@@ -493,7 +493,7 @@ class FSMState(JSONBlobMixin, models.Model):
         )
 
     def __unicode__(self):
-        return '::'.join((self.user.username, str(self.fsmNode)))
+        return u'::'.join((self.user.username, str(self.fsmNode)))
 
 
 class ActivityLog(models.Model):
@@ -521,7 +521,7 @@ class ActivityLog(models.Model):
         return activity_event
 
     def __unicode__(self):
-        return '::'.join((self.fsmName, str(self.startTime)))
+        return u'::'.join((self.fsmName, str(self.startTime)))
 
 
 class ActivityEvent(models.Model):
@@ -545,4 +545,4 @@ class ActivityEvent(models.Model):
         self.save()
 
     def __unicode__(self):
-        return '::'.join((self.user.username, self.nodeName, str(self.startTime)))
+        return u'::'.join((self.user.username, self.nodeName, str(self.startTime)))
