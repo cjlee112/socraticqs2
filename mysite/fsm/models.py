@@ -152,9 +152,9 @@ class FSM(models.Model):
     """
     name = models.CharField(max_length=64, unique=True)
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True)
-    help = models.TextField(null=True)
-    startNode = models.ForeignKey('FSMNode', related_name='+', null=True)
+    description = models.TextField(null=True, blank=True)
+    help = models.TextField(null=True, blank=True)
+    startNode = models.ForeignKey('FSMNode', related_name='+', null=True, blank=True)
     hideTabs = models.BooleanField(default=False)
     hideLinks = models.BooleanField(default=False)
     hideNav = models.BooleanField(default=False)
@@ -221,6 +221,9 @@ class FSM(models.Model):
         """
         return self.fsmnode_set.get(name=name)
 
+    def __unicode__(self):
+        return self.name
+
 
 class FSMGroup(models.Model):
     """
@@ -228,6 +231,9 @@ class FSMGroup(models.Model):
     """
     fsm = models.ForeignKey(FSM)
     group = models.CharField(db_index=True, max_length=64)
+
+    def __unicode__(self):
+        return self.group
 
 
 class PluginDescriptor(object):
@@ -255,13 +261,13 @@ class FSMNode(JSONBlobMixin, models.Model):
     fsm = models.ForeignKey(FSM)
     name = models.CharField(db_index=True, max_length=64)
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True)
-    help = models.TextField(null=True)
-    path = models.CharField(max_length=200, null=True)
-    data = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
+    help = models.TextField(null=True, blank=True)
+    path = models.CharField(max_length=200, null=True, blank=True)
+    data = models.TextField(null=True, blank=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
-    funcName = models.CharField(max_length=200, null=True)
+    funcName = models.CharField(max_length=200, null=True, blank=True)
     doLogging = models.BooleanField(default=False)
     _plugin = PluginDescriptor()  # provide access to plugin code if any
 
@@ -312,6 +318,9 @@ class FSMNode(JSONBlobMixin, models.Model):
         else:
             return func(self, state, request)
 
+    def __unicode__(self):
+        return '::'.join((self.name, self.funcName))
+
 
 class FSMDone(ValueError):
     pass
@@ -336,10 +345,10 @@ class FSMEdge(JSONBlobMixin, models.Model):
     fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
     toNode = models.ForeignKey(FSMNode, related_name='incoming')
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True)
-    help = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
+    help = models.TextField(null=True, blank=True)
     showOption = models.BooleanField(default=False)
-    data = models.TextField(null=True)
+    data = models.TextField(null=True, blank=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
     _funcDict = {}
@@ -354,16 +363,20 @@ class FSMEdge(JSONBlobMixin, models.Model):
             return self.toNode
         else:
             return func(self, fsmStack, request, **kwargs)
+
     def filter_input(self, obj):
         """
         Use plugin code to check whether obj is acceptable input to this edge.
         """
-        try: # see if plugin code provides select_X_filter() call
+        try:  # see if plugin code provides select_X_filter() call
             func = getattr(self.fromNode._plugin, self.name + '_filter')
-        except AttributeError: # no plugin method, so accept by default
+        except AttributeError:  # no plugin method, so accept by default
             return True
         else:
             return func(self, obj)
+
+    def __unicode__(self):
+        return self.name
 
 
 class FSMState(JSONBlobMixin, models.Model):
@@ -372,21 +385,21 @@ class FSMState(JSONBlobMixin, models.Model):
     """
     user = models.ForeignKey(User)
     fsmNode = models.ForeignKey(FSMNode)
-    parentState = models.ForeignKey('FSMState', null=True,
+    parentState = models.ForeignKey('FSMState', null=True, blank=True,
                                     related_name='children')
-    linkState = models.ForeignKey('FSMState', null=True,
+    linkState = models.ForeignKey('FSMState', null=True, blank=True,
                                   related_name='linkChildren')
-    unitLesson = models.ForeignKey('ct.UnitLesson', null=True)
+    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True)
     title = models.CharField(max_length=200)
     path = models.CharField(max_length=200)
-    data = models.TextField(null=True)
+    data = models.TextField(null=True, blank=True)
     hideTabs = models.BooleanField(default=False)
     hideLinks = models.BooleanField(default=False)
     hideNav = models.BooleanField(default=False)
     isLiveSession = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
-    activity = models.ForeignKey('ActivityLog', null=True)
-    activityEvent = models.ForeignKey('ActivityEvent', null=True)
+    activity = models.ForeignKey('ActivityLog', null=True, blank=True)
+    activityEvent = models.ForeignKey('ActivityEvent', null=True, blank=True)
 
     def get_all_state_data(self):
         """
@@ -479,6 +492,9 @@ class FSMState(JSONBlobMixin, models.Model):
             isLiveSession=True, activity__course__role__user=user
         )
 
+    def __unicode__(self):
+        return '::'.join((self.user.username, str(self.fsmNode)))
+
 
 class ActivityLog(models.Model):
     """
@@ -486,8 +502,8 @@ class ActivityLog(models.Model):
     """
     fsmName = models.CharField(max_length=64)
     startTime = models.DateTimeField('time created', default=timezone.now)
-    endTime = models.DateTimeField('time ended', null=True)
-    course = models.ForeignKey(Course, null=True)
+    endTime = models.DateTimeField('time ended', null=True, blank=True)
+    course = models.ForeignKey(Course, null=True, blank=True)
 
     @classmethod
     def log_node_entry(cls, fsmNode, user, unitLesson=None):
@@ -504,6 +520,9 @@ class ActivityLog(models.Model):
         activity_event.save()
         return activity_event
 
+    def __unicode__(self):
+        return '::'.join((self.fsmName, str(self.startTime)))
+
 
 class ActivityEvent(models.Model):
     """
@@ -512,9 +531,9 @@ class ActivityEvent(models.Model):
     activity = models.ForeignKey(ActivityLog)
     nodeName = models.CharField(max_length=64)
     user = models.ForeignKey(User)
-    unitLesson = models.ForeignKey('ct.UnitLesson', null=True)
+    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True)
     startTime = models.DateTimeField('time created', default=timezone.now)
-    endTime = models.DateTimeField('time ended', null=True)
+    endTime = models.DateTimeField('time ended', null=True, blank=True)
     exitEvent = models.CharField(max_length=64)
 
     def log_exit_event(self, eventName):
@@ -524,3 +543,6 @@ class ActivityEvent(models.Model):
         self.exitEvent = eventName
         self.endTime = timezone.now()
         self.save()
+
+    def __unicode__(self):
+        return '::'.join((self.user.username, self.nodeName, str(self.startTime)))
