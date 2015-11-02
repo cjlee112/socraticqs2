@@ -53,6 +53,8 @@ class ViewsUnitTest(TestCase):
 
     def test_custom_login_get(self):
         self.request.current_page = None
+        anonymous = AnonymousUser()
+        self.request.user = anonymous
         response = custom_login(self.request)
         self.assertIsInstance(response, HttpResponse)
         self.assertTrue('LoginForm' in response.content)
