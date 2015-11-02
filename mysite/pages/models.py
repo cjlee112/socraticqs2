@@ -20,3 +20,11 @@ class LandingPlugin(CMSPlugin):
     link_button = models.URLField(null=True, blank=True)
     text_button = models.CharField(max_length=70, null=True, blank=True)
     block_color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='bg-primary')
+
+
+class ShortAboutPlugin(CMSPlugin):
+    """
+    Plugin provide short about.
+    """
+    sponsors_text = models.CharField(max_length=120, blank=True)
+    to_learn_text = models.CharField(max_length=70, blank=True)
