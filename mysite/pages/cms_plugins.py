@@ -5,16 +5,17 @@ from pages.models import (
     LandingPlugin,
     ShortAboutPlugin,
     BannerPlugin,
-    ActiveLearningRatesPlugin
+    ActiveLearningRatesPlugin,
+    ListPlugin
 )
 
 
 class LandingPagePlugin(CMSPluginBase):
     model = LandingPlugin
-    render_template = "pages/landing_page_plugin.html"
+    render_template = "pages/landing_plugin.html"
 
 
-class BannerPlugin(CMSPluginBase):
+class BannerPagePlugin(CMSPluginBase):
     model = BannerPlugin
     render_template = "pages/banner_plugin.html"
 
@@ -29,7 +30,21 @@ class ActiveLearningRatesPagePlugin(CMSPluginBase):
     render_template = 'pages/active_learning_rates_plugin.html'
 
 
-plugin_pool.register_plugin(BannerPlugin)
+class ListPagePlugin(CMSPluginBase):
+    model = ListPlugin
+    render_template = 'pages/list_plugin.html'
+
+    def render(self, context, instance, placeholder):
+        context.update({
+            'instance': instance,
+            'placeholder': placeholder,
+            'list_text': instance.list_text.split(),
+        })
+        return context
+
+
+plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ShortAboutPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
+plugin_pool.register_plugin(ListPagePlugin)

@@ -1,0 +1,11 @@
+<h2>
+  <div class="container">
+    {{ instance.title }}
+  </div>
+</h2>
+
+<ul class="{{ instance.list_type }}">
+{% for i in list_text %}
+  <li>{{ i|safe }}</li>
+{% endfor %}
+</ul>

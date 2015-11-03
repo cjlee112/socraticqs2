@@ -14,6 +14,11 @@ COLOR_CHOICES = (
 )
 
 
+LIST_TYPES = (
+    ('list-questions', 'list-questions'),
+)
+
+
 class LandingPlugin(CMSPlugin):
     """
     Plugin provide widget landing page
@@ -52,3 +57,15 @@ class ActiveLearningRatesPlugin(CMSPlugin):
     image = FilerImageField(null=True, blank=True, related_name="Active learning image")
     title = models.CharField(max_length=70, blank=True)
     description = fields.HTMLField(blank=True)
+
+
+class ListPlugin(CMSPlugin):
+    """
+    General plugin for adding list
+    of tesises with the title and <li> element class.
+    """
+    title = models.CharField(max_length=70, blank=True)
+    description_header = fields.HTMLField(blank=True)
+    list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-questions')
+    list_text = fields.HTMLField()
+    description_footer = fields.HTMLField(blank=True)
