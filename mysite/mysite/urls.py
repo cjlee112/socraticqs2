@@ -1,5 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.apps import apps
+from django.conf import settings
+
 from mysite.views import *
 
 # Uncomment the next two lines to enable the admin:
@@ -38,3 +40,13 @@ urlpatterns = patterns(
     url(r'^lti/', include('lti.urls', namespace='lti')),
     url(r'^', include('cms.urls')),
 )
+
+
+if settings.DEBUG:
+   urlpatterns += [
+       url(
+           r'^media/(?P<path>.*)$',
+           'django.views.static.serve',
+           {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+       url(r'', include('django.contrib.staticfiles.urls')),
+   ]
