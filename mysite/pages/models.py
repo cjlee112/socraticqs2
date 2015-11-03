@@ -35,3 +35,11 @@ class BannerPlugin(CMSPlugin):
     link_button = models.URLField(blank=True)
     text_button = models.CharField(max_length=70, blank=True)
     background_image = FilerImageField(null=True, blank=True)
+
+
+class ShortAboutPlugin(CMSPlugin):
+    """
+    Plugin provide short about.
+    """
+    sponsors_text = models.CharField(max_length=120, blank=True)
+    to_learn_text = models.CharField(max_length=70, blank=True)
