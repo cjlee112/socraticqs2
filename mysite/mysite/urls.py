@@ -43,6 +43,7 @@ urlpatterns = patterns(
 
 if settings.DEBUG:
     urlpatterns += [
+        url(r'markup/(?P<path>.*)$', markup_view),
         url(
             r'^media/(?P<path>.*)$',
             'django.views.static.serve',
