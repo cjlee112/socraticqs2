@@ -1,6 +1,7 @@
 from django.db import models
 from djangocms_text_ckeditor import fields
 from cms.models.pluginmodel import CMSPlugin
+from filer.fields.image import FilerImageField
 
 COLOR_CHOICES = (
     ("bg-primary", "blue"),
@@ -20,3 +21,12 @@ class LandingPlugin(CMSPlugin):
     link_button = models.URLField(null=True, blank=True)
     text_button = models.CharField(max_length=70, null=True, blank=True)
     block_color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='bg-primary')
+
+
+class ActiveLearningRatesPlugin(CMSPlugin):
+    """
+    Plugin provide ability to edit Active learting block.
+    """
+    image = FilerImageField(null=True, blank=True, related_name="Active learning image")
+    title = models.CharField(max_length=70, blank=True)
+    description = fields.HTMLField(blank=True)
