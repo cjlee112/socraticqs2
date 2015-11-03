@@ -43,3 +43,12 @@ class ShortAboutPlugin(CMSPlugin):
     """
     sponsors_text = models.CharField(max_length=120, blank=True)
     to_learn_text = models.CharField(max_length=70, blank=True)
+
+
+class ActiveLearningRatesPlugin(CMSPlugin):
+    """
+    Plugin provide ability to edit Active learting block.
+    """
+    image = FilerImageField(null=True, blank=True, related_name="Active learning image")
+    title = models.CharField(max_length=70, blank=True)
+    description = fields.HTMLField(blank=True)

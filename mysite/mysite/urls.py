@@ -1,5 +1,4 @@
 from django.conf.urls import patterns, include, url
-from django.apps import apps
 from django.conf import settings
 
 from mysite.views import *
@@ -10,7 +9,7 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    #(r'^$', home_page),
+    # (r'^$', home_page),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
@@ -43,10 +42,10 @@ urlpatterns = patterns(
 
 
 if settings.DEBUG:
-   urlpatterns += [
-       url(
-           r'^media/(?P<path>.*)$',
-           'django.views.static.serve',
-           {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
-       url(r'', include('django.contrib.staticfiles.urls')),
-   ]
+    urlpatterns += [
+        url(
+            r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        url(r'', include('django.contrib.staticfiles.urls')),
+    ]
