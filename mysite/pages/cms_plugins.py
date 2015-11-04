@@ -9,7 +9,8 @@ from pages.models import (
     ActiveLearningRatesPlugin,
     ListPlugin,
     ChildPersonalGuidesPlugin,
-    ParentPersonalGuidesPlugin
+    ParentPersonalGuidesPlugin,
+    WorkshopDescriptionPlugin
 )
 
 
@@ -54,7 +55,17 @@ class ParentPersonalGuidesPagePlugin(CMSPluginBase):
     name = 'Personal_Guides_Parent'
     model = ParentPersonalGuidesPlugin
     allow_children = True
+    require_parent = True
     child_classes = ['ChildPersonalGuidesPagePlugin']
+    parent_classes = ['WorkshopDescriptionPagePlugin']
+
+
+class WorkshopDescriptionPagePlugin(CMSPluginBase):
+    render_template = 'pages/workshop_description_plugin.html'
+    name = 'Workshop Description Base Plugin'
+    model = WorkshopDescriptionPlugin
+    allow_children = True
+    child_classes = ['ParentPersonalGuidesPagePlugin']
 
 
 plugin_pool.register_plugin(BannerPagePlugin)
@@ -63,3 +74,4 @@ plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
 plugin_pool.register_plugin(ListPagePlugin)
 plugin_pool.register_plugin(ParentPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(ChildPersonalGuidesPagePlugin)
+plugin_pool.register_plugin(WorkshopDescriptionPagePlugin)

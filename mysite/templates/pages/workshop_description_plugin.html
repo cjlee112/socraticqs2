@@ -1,0 +1,15 @@
+{% load cms_tags %}
+
+<section class="section-agenda">
+  <h2>
+    <div class="container">
+      {{ instance.title }}
+    </div>
+  </h2>
+
+  <div class="container">
+    {% for plugin in instance.child_plugin_instances %}
+      {% render_plugin plugin %}
+    {% endfor %}
+  </div>
+</section>

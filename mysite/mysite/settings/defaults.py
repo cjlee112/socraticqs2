@@ -354,7 +354,7 @@ CMS_PLACEHOLDER_CONF = {
     'landing_page_list_placeholder': {
         'plugins': ['ListPagePlugin']
     },
-    'personal_guides_placeholder': {
-        'plugins': ['ParentPersonalGuidesPagePlugin']
+    'landing_workshop_description_placeholder': {
+        'plugins': ['WorkshopDescriptionPagePlugin']
     },
 }

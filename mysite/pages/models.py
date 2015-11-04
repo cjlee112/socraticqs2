@@ -76,3 +76,10 @@ class ParentPersonalGuidesPlugin(CMSPlugin):
     Parent plugin for Personal Guides.
     """
     title = models.CharField(max_length=70, blank=True)
+
+
+class WorkshopDescriptionPlugin(CMSPlugin):
+    """
+    Parent plugin Workshop description.
+    """
+    title = models.CharField(max_length=70, blank=True)
