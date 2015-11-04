@@ -1,0 +1,9 @@
+{% load cms_tags %}
+
+<h3>{{ instance.title }}</h3>
+
+<div class="row">
+{% for plugin in instance.child_plugin_instances %}
+    {% render_plugin plugin %}
+{% endfor %}
+</div>

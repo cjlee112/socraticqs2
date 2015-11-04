@@ -60,3 +60,19 @@ class ListPlugin(CMSPlugin):
     list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-questions')
     list_text = fields.HTMLField()
     description_footer = fields.HTMLField(blank=True)
+
+
+class ChildPersonalGuidesPlugin(CMSPlugin):
+    """
+    Plugin for personal guides block.
+    """
+    image = FilerImageField(related_name="personal_guides_image")
+    title = models.CharField(max_length=70, blank=True)
+    description = fields.HTMLField()
+
+
+class ParentPersonalGuidesPlugin(CMSPlugin):
+    """
+    Parent plugin for Personal Guides.
+    """
+    title = models.CharField(max_length=70, blank=True)
