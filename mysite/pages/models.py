@@ -83,3 +83,19 @@ class WorkshopDescriptionPlugin(CMSPlugin):
     Parent plugin Workshop description.
     """
     title = models.CharField(max_length=70, blank=True)
+
+
+class BenefitsItemPlugin(CMSPlugin):
+    """
+    Item of benefils
+    """
+    title = models.CharField(max_length=70, blank=True)
+    description = fields.HTMLField(blank=True)
+    image = FilerImageField(null=True, blank=True)
+
+
+class BenefitsPlugin(CMSPlugin):
+    """
+    Base plugin for benefits
+    """
+    title = models.CharField(max_length=70, blank=True)

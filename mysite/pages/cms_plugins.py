@@ -10,7 +10,9 @@ from pages.models import (
     ListPlugin,
     ChildPersonalGuidesPlugin,
     ParentPersonalGuidesPlugin,
-    WorkshopDescriptionPlugin
+    WorkshopDescriptionPlugin,
+    BenefitsPlugin,
+    BenefitsItemPlugin,
 )
 
 
@@ -68,6 +70,20 @@ class WorkshopDescriptionPagePlugin(CMSPluginBase):
     child_classes = ['ParentPersonalGuidesPagePlugin']
 
 
+class BenefitsItemPagePlugin(CMSPluginBase):
+    model = BenefitsItemPlugin
+    render_template = 'pages/benefits_item_plugin.html'
+    require_parent = True
+    parent_classes = ['BenefitPagePlugin']
+
+
+class BenefitPagePlugin(CMSPluginBase):
+    model = BenefitsPlugin
+    render_template = 'pages/benefits_plugin.html'
+    allow_children = True
+    child_classes = ['BenefitsItemPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -75,3 +91,5 @@ plugin_pool.register_plugin(ListPagePlugin)
 plugin_pool.register_plugin(ParentPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(ChildPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(WorkshopDescriptionPagePlugin)
+plugin_pool.register_plugin(BenefitPagePlugin)
+plugin_pool.register_plugin(BenefitsItemPagePlugin)

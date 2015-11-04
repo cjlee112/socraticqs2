@@ -357,4 +357,7 @@ CMS_PLACEHOLDER_CONF = {
     'landing_workshop_description_placeholder': {
         'plugins': ['WorkshopDescriptionPagePlugin']
     },
+    'landing_page_benefits_placeholder': {
+        'plugins': ['BenefitPagePlugin']
+    },
 }

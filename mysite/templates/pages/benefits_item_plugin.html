@@ -1,0 +1,8 @@
+{% load thumbnail %}
+<div class="col-md-4 card">
+  <img src="{% thumbnail instance.image 500x500 crop %}" alt="{{ instance.image.name }}">
+
+  <h3>{{ instance.title }}</h3>
+
+  <p>{{ instance.description|safe }}</p>
+</div>
