@@ -1,12 +1,21 @@
 {% load cms_tags sekizai_tags %}
 
-<div class="row" style="background-image: url('{{ instance.background_image.url }}')">
-  <div class="col-md-1"></div>
-  <div class="col-md-7">
-    <h1>{{ instance.title }}</h1>
+<header class="hero" role="banner">
+  <div class="inner">
+    <div class="container">
+      <h1>{{ instance.title }}</h1>
+
+      {{ instance.description|safe }}
+
+      <a href="#interested" class="btn">{{ instance.text_button }}</a>
+    </div>
+
+    <div class="cta-bar">
+      <div class="container">
+        <p class="info">{{ instance.sponsors_text }}</p>
+        <p class="scroll">Scroll to learn more</p>
+        <a href="#interested" class="btn">{{ instance.text_button }}</a>
+      </div>
+    </div>
   </div>
-  <div class="col-md-4">
-    {{ instance.description|safe }}
-    <button type="button" class="btn btn-default btn-lg" onclick="location.href='{{instance.link_button }}'">{{ instance.text_button }}</button>
-  </div>
-</div>
+</header>

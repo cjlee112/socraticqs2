@@ -12,7 +12,8 @@ TEMPLATE_DIRS = (
 )
 
 CMS_TEMPLATES = (
-    ('about_page.html', 'About Page'),
+    ('pages/main_page.html', 'Main Page'),
+    ('pages/about_page.html', 'About Page'),
     ('pages/landing_page.html', 'Landing Page')
 
 )
@@ -86,7 +87,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -343,5 +344,14 @@ CMS_PLACEHOLDER_CONF = {
         'limits': {
             'global': 1,
         },
+    },
+    'langing_page_placeholder': {
+        'plugins': ['LandingPagePlugin']
+    },
+    'landing_page_active_learning_placeholder': {
+        'plugins': ['ActiveLearningRatesPagePlugin']
+    },
+    'landing_page_list_placeholder': {
+        'plugins': ['ListPagePlugin']
     },
 }

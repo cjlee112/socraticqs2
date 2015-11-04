@@ -1,3 +1,4 @@
+<section class="section-questions">
 <h2>
   <div class="container">
     {{ instance.title }}
@@ -6,6 +7,7 @@
 
 <ul class="{{ instance.list_type }}">
 {% for i in list_text %}
-  <li>{{ i|safe }}</li>
+  {{ i|safe }}
 {% endfor %}
 </ul>
+</section>

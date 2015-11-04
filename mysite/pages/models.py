@@ -39,22 +39,13 @@ class BannerPlugin(CMSPlugin):
     description = fields.HTMLField(blank=True)
     link_button = models.URLField(blank=True)
     text_button = models.CharField(max_length=70, blank=True)
-    background_image = FilerImageField(null=True, blank=True)
-
-
-class ShortAboutPlugin(CMSPlugin):
-    """
-    Plugin provide short about.
-    """
-    sponsors_text = models.CharField(max_length=120, blank=True)
-    to_learn_text = models.CharField(max_length=70, blank=True)
+    sponsors_text = models.CharField(max_length=70, blank=True)
 
 
 class ActiveLearningRatesPlugin(CMSPlugin):
     """
     Plugin provide ability to edit Active learting block.
     """
-    image = FilerImageField(null=True, blank=True, related_name="Active learning image")
     title = models.CharField(max_length=70, blank=True)
     description = fields.HTMLField(blank=True)
 
