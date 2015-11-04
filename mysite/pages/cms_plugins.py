@@ -5,7 +5,9 @@ from pages.models import (
     LandingPlugin,
     ShortAboutPlugin,
     BannerPlugin,
-    ActiveLearningRatesPlugin
+    ActiveLearningRatesPlugin,
+    BenefitsPlugin,
+    BenefitsItemPlugin,
 )
 
 
@@ -29,7 +31,23 @@ class ActiveLearningRatesPagePlugin(CMSPluginBase):
     render_template = 'pages/active_learning_rates_plugin.html'
 
 
+class BenefitsItemPagePlugin(CMSPluginBase):
+    model = BenefitsItemPlugin
+    render_template = 'pages/benefits_item_plugin.html'
+    require_parent = True
+    parent_classes = ['BenefitPagePlugin']
+
+
+class BenefitPagePlugin(CMSPluginBase):
+    model = BenefitsPlugin
+    render_template = 'pages/benefits_plugin.html'
+    allow_children = True
+    child_classes = ['BenefitsItemPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ShortAboutPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
+plugin_pool.register_plugin(BenefitPagePlugin)
+plugin_pool.register_plugin(BenefitsItemPagePlugin)

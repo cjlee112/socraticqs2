@@ -3,7 +3,6 @@ from djangocms_text_ckeditor import fields
 from cms.models.pluginmodel import CMSPlugin
 from filer.fields.image import FilerImageField
 
-
 COLOR_CHOICES = (
     ("bg-primary", "blue"),
     ("bg-danger", "red"),
@@ -52,3 +51,19 @@ class ActiveLearningRatesPlugin(CMSPlugin):
     image = FilerImageField(null=True, blank=True, related_name="Active learning image")
     title = models.CharField(max_length=70, blank=True)
     description = fields.HTMLField(blank=True)
+
+
+class BenefitsItemPlugin(CMSPlugin):
+    """
+    Item of benefils
+    """
+    title = models.CharField(max_length=70, blank=True)
+    description = fields.HTMLField(blank=True)
+    image = FilerImageField(null=True, blank=True)
+
+
+class BenefitsPlugin(CMSPlugin):
+    """
+    Base plugin for benefits
+    """
+    title = models.CharField(max_length=70, blank=True)
