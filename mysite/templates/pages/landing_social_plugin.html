@@ -1,46 +1,46 @@
+{% load cms_tags sekizai_tags %}
+
 <div class="share_buttons">
+    <!-- Facebook button-->
+    <div class="fb-like" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
 
-<!-- Facebook button-->
-<div class="fb-like" data-layout="button_count" data-action="like" data-show-faces="true" data-share="true"></div>
+    <!-- Twitter button -->
+    <a href="https://twitter.com/share"
+       class="twitter-share-button"
+       data-text="{{ instance.twitter_text }}"
+       data-size="small"></a>
 
-<!-- Twitter button -->
-<a href="https://twitter.com/share"
-   class="twitter-share-button"
-   data-text="{{ instance.twitter_text }}"
-   data-size="small">
-    Tweet</a>
+    <!-- linkedIn button -->
+    <script type="IN/Share" data-counter="right"></script>
 
-<!-- linkedIn button -->
-<script type="IN/Share" data-counter="right"></script>
-
-<!-- G+ button -->
-<div class="g-plus" data-action="share" data-height="24"></div>
-
+    <!-- G+ button -->
+    <div class="g-plus" data-action="share" data-height="24"></div>
 </div>
 
+{% addtoblock "js" %}
+    <!-- Load Facebook SDK -->
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
 
-<!-- Load Facebook SDK -->
-<div id="fb-root"></div>
-<script>(function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));</script>
+    <!-- Twitter SDK -->
+    <script>
+        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+        if(!d.getElementById(id)){js=d.createElement(s);
+            js.id=id;
+            js.src=p+'://platform.twitter.com/widgets.js';
+            fjs.parentNode.insertBefore(js,fjs);}}
+        (document, 'script', 'twitter-wjs');
+    </script>
 
-<!-- Twitter SDK -->
-<script>
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
-    if(!d.getElementById(id)){js=d.createElement(s);
-        js.id=id;
-        js.src=p+'://platform.twitter.com/widgets.js';
-        fjs.parentNode.insertBefore(js,fjs);}}
-    (document, 'script', 'twitter-wjs');
-</script>
+    <!-- G+ SDK -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 
-<!-- G+ SDK -->
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-
-<!-- LinkedIn SDK -->
-<script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: en_US</script>
+    <!-- LinkedIn SDK -->
+    <script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: en_US</script>
+{% endaddtoblock %}
