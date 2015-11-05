@@ -3,7 +3,6 @@ from djangocms_text_ckeditor import fields
 from cms.models.pluginmodel import CMSPlugin
 from filer.fields.image import FilerImageField
 
-
 COLOR_CHOICES = (
     ("bg-primary", "blue"),
     ("bg-danger", "red"),
@@ -12,7 +11,6 @@ COLOR_CHOICES = (
     ("bg-warning", "yellow"),
 
 )
-
 
 LIST_TYPES = (
     ('list-questions', 'list-questions'),
@@ -138,3 +136,26 @@ class MiscItemPlugin(CMSPlugin):
     list_text = fields.HTMLField()
     description_footer = fields.HTMLField(blank=True)
     header_type_text = models.CharField(max_length=70, blank=True)
+
+
+class InterestedPlugin(CMSPlugin):
+    name_field = models.CharField(max_length=200, default="Name")
+    email_field = models.CharField(max_length=200, default="Email")
+    when_field = models.CharField(max_length=200, default="When can you join?")
+    description_field = fields.HTMLField(
+        default="We plan to host hackathons between ? and ?. "
+                "Please tell us more about your availability below."
+                "Our hackathons are split into 3 meetings that are about 2 hours long."
+    )
+    timezone_field = models.CharField(max_length=200, default=" What is your timezone?")
+
+
+class InterestedForm(models.Model):
+    """
+    Model for save interested form answer and do some later
+    """
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+    description = models.TextField(blank=True)
+    timezone = models.CharField(max_length=70, blank=True)

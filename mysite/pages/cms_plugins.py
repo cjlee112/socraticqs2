@@ -18,7 +18,8 @@ from pages.models import (
     FAQPlugin,
     FAQItemPlugin,
     DetailsPlugin,
-    MiscItemPlugin
+    MiscItemPlugin,
+    InterestedPlugin
 )
 
 
@@ -156,6 +157,11 @@ class MiscDetailContainer(CMSPluginBase):
     parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
+class InterestedPagePlugin(CMSPluginBase):
+    model = InterestedPlugin
+    render_template = 'pages/interested_plugin.html'
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -173,3 +179,4 @@ plugin_pool.register_plugin(DetailsPagePlugin)
 plugin_pool.register_plugin(MiscPagePlugin)
 plugin_pool.register_plugin(MiscItemPagePlugin)
 plugin_pool.register_plugin(MiscDetailContainer)
+plugin_pool.register_plugin(InterestedPagePlugin)

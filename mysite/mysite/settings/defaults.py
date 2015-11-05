@@ -369,4 +369,7 @@ CMS_PLACEHOLDER_CONF = {
     'faq_page_placeholder': {
         'plugins': ['FAQPagePlugin']
     },
+    'interested_page_placeholder': {
+        'plugins': ['InterestedPagePlugin']
+    },
 }
