@@ -17,6 +17,7 @@ from pages.models import (
     SocialPlugin,
     FAQPlugin,
     FAQItemPlugin,
+    DetailsPlugin
 )
 
 
@@ -62,7 +63,7 @@ class ParentPersonalGuidesPagePlugin(CMSPluginBase):
     model = ParentPersonalGuidesPlugin
     allow_children = True
     require_parent = True
-    child_classes = ['ChildPersonalGuidesPagePlugin']
+    child_classes = ['ChildPersonalGuidesPagePlugin', 'DetailsPagePlugin']
     parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
@@ -104,7 +105,7 @@ class FAQItemPagePlugin(CMSPluginBase):
     model = FAQItemPlugin
     render_template = 'pages/faq_item_plugin.html'
     require_parent = True
-    parent_classes = ['FAQPagePlugin']
+    parent_classes = ['FAQPagePlugin', 'DetailsPagePlugin']
 
 
 class FAQPagePlugin(CMSPluginBase):
@@ -112,6 +113,15 @@ class FAQPagePlugin(CMSPluginBase):
     render_template = 'pages/faq_plugin.html'
     allow_children = True
     child_classes = ['FAQItemPagePlugin']
+
+
+class DetailsPagePlugin(CMSPluginBase):
+    model = DetailsPlugin
+    render_template = 'pages/details_child_plugin.html'
+    allow_children = True
+    child_classes = ['FAQItemPagePlugin']
+    require_parent = True
+    parent_classes = ['ParentPersonalGuidesPagePlugin']
 
 
 plugin_pool.register_plugin(BannerPagePlugin)
@@ -127,3 +137,4 @@ plugin_pool.register_plugin(FooterPagePlugin)
 plugin_pool.register_plugin(LandingPageSocialPlugin)
 plugin_pool.register_plugin(FAQItemPagePlugin)
 plugin_pool.register_plugin(FAQPagePlugin)
+plugin_pool.register_plugin(DetailsPagePlugin)

@@ -1,6 +1,8 @@
 {% load cms_tags %}
 
+{% if instance.title %}
 <h3>{{ instance.title }}</h3>
+{% endif %}
 
 <div class="row">
   {% for plugin in instance.child_plugin_instances %}

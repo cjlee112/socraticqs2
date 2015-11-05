@@ -1,0 +1,21 @@
+{% load cms_tags %}
+
+<div class="col-md-4 col-md-offset-1">
+  <h3>{{ instance.title }}</h3>
+
+  <dl>
+{% for plugin in instance.child_plugin_instances %}
+    {% render_plugin plugin %}
+{% endfor %}
+  </dl>
+
+  <iframe src="{{ instance.video_url }}" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+  <p>{{ instance.details_text }}</p>
+
+
+  <blockquote>
+    <p>{{ instance.quote_text }}</p>
+    <small>{{ instance.quote_small }}</small>
+  </blockquote>
+</div>
