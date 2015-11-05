@@ -125,8 +125,8 @@ class DetailsPlugin(CMSPlugin):
     title = models.CharField(max_length=70, blank=True)
     video_url = models.URLField()
     details_text = models.CharField(max_length=70)
-    quote_text = models.CharField(max_length=70)
-    quote_small = models.CharField(max_length=70)
+    quote_text = models.CharField(max_length=70, blank=True)
+    quote_small = models.CharField(max_length=70, blank=True)
 
 
 class MiscItemPlugin(CMSPlugin):

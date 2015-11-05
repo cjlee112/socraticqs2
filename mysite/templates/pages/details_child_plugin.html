@@ -13,9 +13,10 @@
 
   <p>{{ instance.details_text }}</p>
 
-
+{% if instance.quote_small and instance.quote_text %}
   <blockquote>
     <p>{{ instance.quote_text }}</p>
     <small>{{ instance.quote_small }}</small>
   </blockquote>
+{% endif %}
 </div>
