@@ -360,6 +360,9 @@ CMS_PLACEHOLDER_CONF = {
     'landing_page_benefits_placeholder': {
         'plugins': ['BenefitPagePlugin']
     },
+    'share_page_placeholder': {
+        'plugins': ['LandingPageSocialPlugin']
+    },
     'landing_page_footer': {
         'plugins': ['FooterPagePlugin']
     }

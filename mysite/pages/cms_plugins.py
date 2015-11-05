@@ -13,7 +13,8 @@ from pages.models import (
     WorkshopDescriptionPlugin,
     BenefitsPlugin,
     BenefitsItemPlugin,
-    FooterPlugin
+    FooterPlugin,
+    SocialPlugin
 )
 
 
@@ -91,6 +92,12 @@ class FooterPagePlugin(CMSPluginBase):
     model = FooterPlugin
 
 
+class LandingPageSocialPlugin(CMSPluginBase):
+    render_template = 'pages/landing_social_plugin.html'
+    name = 'Landing Page Social Plugin'
+    model = SocialPlugin
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -101,3 +108,4 @@ plugin_pool.register_plugin(WorkshopDescriptionPagePlugin)
 plugin_pool.register_plugin(BenefitPagePlugin)
 plugin_pool.register_plugin(BenefitsItemPagePlugin)
 plugin_pool.register_plugin(FooterPagePlugin)
+plugin_pool.register_plugin(LandingPageSocialPlugin)
