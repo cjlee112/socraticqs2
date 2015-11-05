@@ -64,7 +64,7 @@ class ParentPersonalGuidesPagePlugin(CMSPluginBase):
     model = ParentPersonalGuidesPlugin
     allow_children = True
     require_parent = True
-    child_classes = ['ChildPersonalGuidesPagePlugin', 'DetailsPagePlugin', 'MiscPagePlugin']
+    child_classes = ['ChildPersonalGuidesPagePlugin']
     parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
@@ -73,7 +73,7 @@ class WorkshopDescriptionPagePlugin(CMSPluginBase):
     name = 'Workshop Description Base Plugin'
     model = WorkshopDescriptionPlugin
     allow_children = True
-    child_classes = ['ParentPersonalGuidesPagePlugin']
+    child_classes = ['ParentPersonalGuidesPagePlugin', 'MiscDetailContainer']
 
 
 class BenefitsItemPagePlugin(CMSPluginBase):
@@ -122,7 +122,7 @@ class DetailsPagePlugin(CMSPluginBase):
     allow_children = True
     child_classes = ['FAQItemPagePlugin']
     require_parent = True
-    parent_classes = ['ParentPersonalGuidesPagePlugin']
+    parent_classes = ['MiscDetailContainer']
 
 
 class MiscPagePlugin(CMSPluginBase):
@@ -130,7 +130,7 @@ class MiscPagePlugin(CMSPluginBase):
     allow_children = True
     child_classes = ['MiscItemPagePlugin']
     require_parent = True
-    parent_classes = ['ParentPersonalGuidesPagePlugin']
+    parent_classes = ['MiscDetailContainer']
 
 
 class MiscItemPagePlugin(ListPagePlugin):
@@ -138,6 +138,14 @@ class MiscItemPagePlugin(ListPagePlugin):
     render_template = 'pages/misc_item_plugin.html'
     require_parent = True
     parent_classes = ['MiscPagePlugin']
+
+
+class MiscDetailContainer(CMSPluginBase):
+    render_template = 'pages/misc_detail_container_plugin.html'
+    allow_children = True
+    child_classes = ['DetailsPagePlugin', 'MiscPagePlugin']
+    require_parent = True
+    parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
 plugin_pool.register_plugin(BannerPagePlugin)
@@ -156,3 +164,4 @@ plugin_pool.register_plugin(FAQPagePlugin)
 plugin_pool.register_plugin(DetailsPagePlugin)
 plugin_pool.register_plugin(MiscPagePlugin)
 plugin_pool.register_plugin(MiscItemPagePlugin)
+plugin_pool.register_plugin(MiscDetailContainer)
