@@ -11,7 +11,8 @@ from .models import (
     ChildPersonalGuidesPlugin,
     ParentPersonalGuidesPlugin,
     WorkshopDescriptionPlugin,
-    FooterPlugin
+    FooterPlugin,
+    SocialPlugin
 )
 
 
@@ -75,6 +76,11 @@ class LandingPageFooterPlugin(CMSPluginBase):
     model = FooterPlugin
 
 
+class LandingPageSocialPlugin(CMSPluginBase):
+    render_template = 'pages/landing_social_plugin.html'
+    name = 'Landing Page Social Plugin'
+    model = SocialPlugin
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -83,3 +89,4 @@ plugin_pool.register_plugin(ParentPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(ChildPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(WorkshopDescriptionPagePlugin)
 plugin_pool.register_plugin(LandingPageFooterPlugin)
+plugin_pool.register_plugin(LandingPageSocialPlugin)

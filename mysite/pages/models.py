@@ -91,3 +91,9 @@ class FooterPlugin(CMSPlugin):
     """
     footer_text = models.CharField(max_length=100, blank=True)
     footer_link = models.CharField(max_length=200, blank=True)
+
+
+class SocialPlugin(CMSPlugin):
+    twitter_text = models.CharField(max_length=140, blank=True)
+
+
