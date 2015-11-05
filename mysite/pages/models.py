@@ -16,6 +16,9 @@ COLOR_CHOICES = (
 
 LIST_TYPES = (
     ('list-questions', 'list-questions'),
+    ('list_numeric', 'list_numeric'),
+    ('list-checklist', 'list-checklist'),
+    ('list-header', 'list-header')
 )
 
 
@@ -56,10 +59,8 @@ class ListPlugin(CMSPlugin):
     of tesises with the title and <li> element class.
     """
     title = models.CharField(max_length=70, blank=True)
-    description_header = fields.HTMLField(blank=True)
     list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-questions')
     list_text = fields.HTMLField()
-    description_footer = fields.HTMLField(blank=True)
 
 
 class ChildPersonalGuidesPlugin(CMSPlugin):
@@ -128,3 +129,12 @@ class DetailsPlugin(CMSPlugin):
     details_text = models.CharField(max_length=70)
     quote_text = models.CharField(max_length=70)
     quote_small = models.CharField(max_length=70)
+
+
+class MiscItemPlugin(CMSPlugin):
+    title = models.CharField(max_length=70, blank=True)
+    description_header = fields.HTMLField(blank=True)
+    list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-checklist')
+    list_text = fields.HTMLField()
+    description_footer = fields.HTMLField(blank=True)
+    header_type_text = models.CharField(max_length=70, blank=True)

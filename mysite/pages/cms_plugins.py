@@ -17,7 +17,8 @@ from pages.models import (
     SocialPlugin,
     FAQPlugin,
     FAQItemPlugin,
-    DetailsPlugin
+    DetailsPlugin,
+    MiscItemPlugin
 )
 
 
@@ -63,7 +64,7 @@ class ParentPersonalGuidesPagePlugin(CMSPluginBase):
     model = ParentPersonalGuidesPlugin
     allow_children = True
     require_parent = True
-    child_classes = ['ChildPersonalGuidesPagePlugin', 'DetailsPagePlugin']
+    child_classes = ['ChildPersonalGuidesPagePlugin', 'DetailsPagePlugin', 'MiscPagePlugin']
     parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
@@ -124,6 +125,21 @@ class DetailsPagePlugin(CMSPluginBase):
     parent_classes = ['ParentPersonalGuidesPagePlugin']
 
 
+class MiscPagePlugin(CMSPluginBase):
+    render_template = 'pages/misc_plugin.html'
+    allow_children = True
+    child_classes = ['MiscItemPagePlugin']
+    require_parent = True
+    parent_classes = ['ParentPersonalGuidesPagePlugin']
+
+
+class MiscItemPagePlugin(ListPagePlugin):
+    model = MiscItemPlugin
+    render_template = 'pages/misc_item_plugin.html'
+    require_parent = True
+    parent_classes = ['MiscPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -138,3 +154,5 @@ plugin_pool.register_plugin(LandingPageSocialPlugin)
 plugin_pool.register_plugin(FAQItemPagePlugin)
 plugin_pool.register_plugin(FAQPagePlugin)
 plugin_pool.register_plugin(DetailsPagePlugin)
+plugin_pool.register_plugin(MiscPagePlugin)
+plugin_pool.register_plugin(MiscItemPagePlugin)

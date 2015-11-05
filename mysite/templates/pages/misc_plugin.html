@@ -1,10 +1,6 @@
 {% load cms_tags %}
 
-{% if instance.title %}
-<h3>{{ instance.title }}</h3>
-{% endif %}
-
-<div class="row">
+<div class="col-md-7">
 {% for plugin in instance.child_plugin_instances %}
   {% render_plugin plugin %}
 {% endfor %}
