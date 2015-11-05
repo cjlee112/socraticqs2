@@ -3,54 +3,65 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Courselets</title>
-        <meta name="description" content="">
+        <meta name="description" content="Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="css/main.css">
 
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+
+        <script src="https://use.typekit.net/aof4bxp.js"></script>
+        <script>try{Typekit.load({ async: true });}catch(e){}</script>
     </head>
     <body>
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <header class="header-main">
-          <div class="container">
-            <a href="/" class="brand"><img src="img/courselets-logo.png" alt="Courselets Logo"></a>
-          </div>
-        </header>
-
         <main role="main">
+
+          <!-- Hero -->
           <header class="hero" role="banner">
             <div class="inner">
               <div class="container">
+                <a href="http://courselets.org" class="brand"><img src="img/courselets-logo@2x.png" alt="Courselets Logo"></a>
+
                 <h1>A fun way to improve learning outcomes and solve challenges with other instructors!</h1>
 
                 <p>
                   Join us for a hands-on workshop...Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi.
                 </p>
 
-                <a href="#interested" class="btn">I'm Interested</a>
+                <a href="#" class="btn im-interested">I'm Interested</a>
               </div>
+            </div>
 
-              <div class="cta-bar">
-                <div class="container">
-                  <p class="info">A free hackathon sponsored by UCLA and NIH</p>
-                  <p class="scroll">Scroll to learn more</p>
-                  <a href="#interested" class="btn">I'm Interested</a>
+            <div class="cta-bar">
+              <div class="container clearfix">
+                <p class="info">A free hackathon sponsored by UCLA and NIH</p>
+
+                <div class="extra">
+                  <p class="scroll">
+                    Scroll to learn more
+                    <span class="mouse">
+                      <span class="mouse-wheel">
+                      </span>
+                    </span>
+                  </p>
+
+                  <a href="#" class="btn im-interested">I'm Interested</a>
                 </div>
               </div>
             </div>
           </header>
 
+          <!-- Attrition rates -->
           <section class="section-attrition">
             <div class="container">
               <div class="row">
                 <div class="col-md-5">
-                  <img src="" alt="">
+                  <img src="img/attrition-chart@2x.png" alt="Active learning attrition rates">
                 </div>
 
                 <div class="col-md-6">
@@ -65,62 +76,83 @@
           </section>
 
           <section class="section-cards">
-            <h2>
+            <header>
               <div class="container">
-                What you'll get from this hackathon
+                <h2>What you'll get from this hackathon</h2>
               </div>
-            </h2>
+            </header>
 
-            <div class="container">
-              <div class="row">
-                <div class="col-md-4 card">
-                  <img src="" alt="">
+            <div class="cards-container">
+              <div class="container">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="card">
+                      <img src="https://placeimg.com/360/220/nature" alt="Knowledge (use h3 text here)">
+                      <div class="inner">
+                        <h3>Knowledge</h3>
 
-                  <h3>Knowledge</h3>
+                        <p>Learn how to ipsum lorem ipsum dolor.</p>
+                      </div>
+                    </div>
+                  </div>
 
-                  <p>Learn how to ipsum lorem ipsum dolor.</p>
-                </div>
+                  <div class="col-md-4">
+                    <div class="card">
+                      <img src="https://placeimg.com/360/220/arch" alt="Metrics (use h3 text here)">
 
-                <div class="col-md-4 card">
-                  <img src="" alt="">
+                      <div class="inner">
+                        <h3>Metrics</h3>
 
-                  <h3>Metrics</h3>
+                        <p>Define learning outcomes and actionable metrics.</p>
+                      </div>
+                    </div>
+                  </div>
 
-                  <p>Define learning outcomes and actionable metrics.</p>
-                </div>
+                  <div class="col-md-4">
+                    <div class="card">
+                      <img src="https://placeimg.com/360/220/tech" alt="Boost (use h3 text here)">
 
-                <div class="col-md-4 card">
-                  <img src="" alt="">
+                      <div class="inner">
+                        <h3>Boost Student Learning</h3>
 
-                  <h3>Boost Student Learning</h3>
-
-                  <p>Work in a fun group setting and take small steps to boost student learning outcomes.</p>
+                        <p>Work in a fun group setting and take small steps to boost student learning outcomes.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
+          <!-- Questions -->
           <section class="section-questions">
-            <h2>
+            <header>
               <div class="container">
-                Is this workshop for me?
+                <h2>Is this workshop for me?</h2>
               </div>
-            </h2>
+            </header>
 
-            <ul class="list-questions">
-              <li>Do you have high student drop rates?</li>
-              <li>Are students struggling to understand key concepts?</li>
-              <li>Do your students lack the ability to apply what they've learned to real world problems?</li>
-              <li>Do you have metrics and clear learning outcomes for your course? Can you easily evaluate how well your students are learning?</li>
-            </ul>
+            <div class="container">
+              <div class="row">
+                <div class="col-lg-7">
+                  <ul class="list-questions">
+                    <li>Do you have high student drop rates?</li>
+                    <li>Are students struggling to understand key concepts?</li>
+                    <li>Do your students lack the ability to apply what they've learned to real world problems?</li>
+                    <li>Do you have metrics and clear learning outcomes for your course? Can you easily evaluate how well your students are learning?</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </section>
 
+          <!-- Agenda -->
           <section class="section-agenda">
-            <h2>
+            <header>
               <div class="container">
-                Workshop Description
+                <h2>Workshop Description</h2>
               </div>
-            </h2>
+            </header>
 
             <div class="container">
               <div class="row">
@@ -130,7 +162,7 @@
                   <ol>
                     <li>Review key concepts</li>
                     <li>Participate in fun guided group activities</li>
-                  </ul>
+                  </ol>
 
                   <h3>Key Concepts</h3>
 
@@ -180,10 +212,10 @@
                     <dd>A computer or mobile device, webcam, headset.</dd>
                   </dl>
 
-                  <div>
-                    VIDEO
-                    <p>This workshop can help you take small easy steps to improve your student learning outcomes.</p>
-                  </div>
+                  <iframe src="https://player.vimeo.com/video/136898815?title=0&byline=0&portrait=0" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+                  <p>This workshop can help you take small easy steps to improve your student learning outcomes.</p>
+
 
                   <blockquote>
                     <p>This hackathon was a great experience, and I was able to Lorem ipsum dolor sit amet.</p>
@@ -195,29 +227,44 @@
               <h3>Your Personal Guides</h3>
 
               <div class="row">
-                <div class="col-md-6 card card-chris">
-                  <h4>Christopher Lee, PhD</h4>
+                <div class="col-md-6">
+                  <div class="card">
+                    <img src="img/chris.jpg" alt="Christopher Lee, PhD">
 
-                  <p>
-                    Chris received a B.A. summa cum laude in Biochemistry and Molecular Biology in 1988 from Harvard College, and a Ph.D. in Structural Biology from Stanford University in 1993. He has been a faculty member in the UCLA  Department of Chemistry and Biochemistry since 1998. He personally struggled with high attrition rates in his bioinformatics classes, and has a personal passion for improving learning outcomes in STEM disciplines.
-                  </p>
+                    <div class="inner">
+                      <h4>Christopher Lee, PhD</h4>
+
+                      <p>
+                        Chris received a B.A. summa cum laude in Biochemistry and Molecular Biology in 1988 from Harvard College, and a Ph.D. in Structural Biology from Stanford University in 1993. He has been a faculty member in the UCLA  Department of Chemistry and Biochemistry since 1998. He personally struggled with high attrition rates in his bioinformatics classes, and has a personal passion for improving learning outcomes in STEM disciplines.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="col-md-6 card card-chris">
-                  <h4>Rachel Horak, PhD</h4>
+                <div class="col-md-6">
+                  <div class="card">
+                    <img src="img/rachel.jpg" alt="Rachel Horak, PhD">
 
-                  <p>
-                    Rachel Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi. Te ius augue melius, te delectus persecuti vel, porro debet appetere per ad. Unum integre no nam. Appareat legendos suscipiantur sea ei, te saperet adipiscing eum.
-                  </p>
+                    <div class="inner">
+                      <h4>Rachel Horak, PhD</h4>
+
+                      <p>
+                        Rachel Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi. Te ius augue melius, te delectus persecuti vel, porro debet appetere per ad. Unum integre no nam. Appareat legendos suscipiantur sea ei, te saperet adipiscing eum.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
+          <!-- FAQ -->
           <section class="section-faq">
-            <h2>
-              <div class="container">FAQ</div>
-            </h2>
+            <header>
+              <div class="container">
+                <h2>FAQ</h2>
+              </div>
+            </header>
 
             <div class="container">
               <dl class="faq">
@@ -230,6 +277,7 @@
             </div>
           </section>
 
+          <!-- Form -->
           <section id="interested" class="interested">
             <div class="interested-info">
               <div class="container">
@@ -243,65 +291,80 @@
               </div>
             </div>
 
-            <form action="">
+            <div class="message-container">
+
+            </div>
+
+            <form action="" id="interested-form">
               <div class="container">
                 <div class="row">
                   <div class="col-md-6 col-md-offset-3">
-                    <p>
+                    <div>
                       <label>Name</label>
 
                       <div class="row">
-                        <div class="col-md-6">
-                          <input type="text" name="first_name" placeholder="First">
+                        <div class="col-xs-6">
+                          <input type="text" name="first_name" placeholder="First" data-validation="alphanumeric" data-validation-error-msg="Please enter your first name">
                         </div>
 
-                        <div class="col-md-6">
-                          <input type="text" name="last_name" placeholder="Last">
+                        <div class="col-xs-6">
+                          <input type="text" name="last_name" placeholder="Last" data-validation="alphanumeric" data-validation-error-msg="Please enter your last name">
                         </div>
                       </div>
-                    </p>
+                    </div>
 
-                    <p>
+                    <div>
                       <label>Email</label>
-                      <input type="text" name="email" placeholder="Email">
-                    </p>
+                      <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="Please enter your email">
+                    </div>
 
-                    <p>
+                    <div>
                       <label>When can you join?</label>
                       <small>
                         We plan to host hackathons between ? and ?. Please tell us more about your availability below. Our hackathons are split into 3 meetings that are about 2 hours long.
                       </small>
 
-                      <textarea name="when_join"></textarea>
-                    </p>
+                      <textarea name="when_join" data-validation="alphanumeric" data-validation-error-msg="Please tell us when you can join"></textarea>
+                    </div>
 
-                    <p>
+                    <div>
                       <label>
                         What is your timezone?
                       </label>
 
-                      <input type="text" name="timezone">
-                    </p>
+                      <input type="text" name="timezone" data-validation="alphanumeric" data-validation-error-msg="Please enter your timezone">
+                    </div>
 
-                    <p>
-                      <input type="submit" value="Keep Me Informed">
-                    </p>
+                    <input type="submit" value="Keep Me Informed">
                   </div>
                 </div>
               </div>
             </form>
           </section>
 
+          <!-- Share -->
           <section class="section-share">
             <div class="container">
               <h2>Share This Event</h2>
 
               <div class="share-buttons">
-                Share buttons
+
+                <!-- Facebook -->
+                <div class="fb-like" data-layout="button" data-action="like" data-show-faces="false" data-share="true"></div>
+
+                <!-- Twitter -->
+                <a href="https://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a>
+
+                <!-- LinkedIn -->
+                <script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: en_US</script><script type="IN/Share"></script>
+
+                <!-- Google+ -->
+                <script src="https://apis.google.com/js/platform.js" async defer></script><div class="g-plus" data-action="share" data-annotation="none"></div>
               </div>
             </div>
           </section>
 
+          <!-- Footer -->
           <footer class="footer-main">
             <div class="container">
               &copy; 2015 Courselets.org
@@ -314,9 +377,24 @@
 
         <script src="js/vendor/bootstrap.min.js"></script>
 
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.8/jquery.form-validator.min.js"></script>
+
         <script src="js/main.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <!-- Load Facebook SDK -->
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+
+        <!-- Load Twitter SDK -->
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+        <!-- Google Analytics -->
         <script>
             (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
             function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;

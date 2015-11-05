@@ -3,7 +3,7 @@
 <h3>{{ instance.title }}</h3>
 
 <div class="row">
-{% for plugin in instance.child_plugin_instances %}
+  {% for plugin in instance.child_plugin_instances %}
     {% render_plugin plugin %}
-{% endfor %}
+  {% endfor %}
 </div>

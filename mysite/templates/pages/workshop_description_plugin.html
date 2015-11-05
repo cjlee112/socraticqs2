@@ -1,13 +1,83 @@
 {% load cms_tags %}
 
+<!-- Agenda -->
 <section class="section-agenda">
-  <h2>
+  <header>
     <div class="container">
-      {{ instance.title }}
+      <h2>{{ instance.title }}</h2>
     </div>
-  </h2>
+  </header>
 
   <div class="container">
+    <div class="row">
+      <div class="col-md-7">
+        <h3>Agenda</h3>
+
+        <ol>
+          <li>Review key concepts</li>
+          <li>Participate in fun guided group activities</li>
+        </ol>
+
+        <h3>Key Concepts</h3>
+
+        <p>The Problem: <strong>Student Blind Spots</strong>. We'll briefly review these problems and how to solve them.</p>
+
+        <ul class="list-checklist">
+          <li>High attrition rates from math-intensive STEM classes</li>
+          <li>Poor ability to solve real-world problems</li>
+          <li>Poor conceptual understanding (basic misconceptions on 50% of the concepts, and little improvement by the end of a course)</li>
+          <li>Missing ways to identify specific misconceptions, or to see how to fix them</li>
+          <li>Instructors lack a way to see what each student is actually thinking, and thus cannot diagnose their underlying conceptual errors, let alone fix them</li>
+        </ul>
+
+        <p>
+          Ut persecuti cotidieque pri, tamquam luptatum qualisque duo ad. Eu repudiandae instructior sit, ne deleniti intellegam cum. Qui sensibus assentior definitionem id, et cibo mazim philosophia vel. Debet officiis reformidans qui id. Ei mutat maluisset intellegat has, erat urbanitas nec ne.
+        </p>
+
+        <h3>Group Activities</h3>
+
+        <p>Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi. Te ius augue melius, te delectus persecuti vel, porro debet appetere per ad. Unum integre no nam. Appareat legendos suscipiantur sea ei, te saperet adipiscing eum.</p>
+
+        <p class="list-header">Identify four your courses:</p>
+
+        <ul>
+          <li>Key concepts and applications</li>
+          <li>Target problems that you can use right away as exam prep exercises</li>
+        </ul>
+      </div>
+
+      <div class="col-md-4 col-md-offset-1">
+        <h3>Details</h3>
+
+        <dl>
+          <dt>Duration:</dt>
+          <dd>3 meetings</dd>
+
+          <dt>Sessions:</dt>
+          <dd>2 hours each meeting</dd>
+
+          <dt>Location:</dt>
+          <dd>Online video conference</dd>
+
+          <dt>Number Participants:</dt>
+          <dd>4-8</dd>
+
+          <dt>What you need to participate:</dt>
+          <dd>A computer or mobile device, webcam, headset.</dd>
+        </dl>
+
+        <iframe src="https://player.vimeo.com/video/136898815?title=0&byline=0&portrait=0" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+        <p>This workshop can help you take small easy steps to improve your student learning outcomes.</p>
+
+
+        <blockquote>
+          <p>This hackathon was a great experience, and I was able to Lorem ipsum dolor sit amet.</p>
+          <small>&mdash; Pepe Ping, UCLA BD2K</small>
+        </blockquote>
+      </div>
+    </div>
+
     {% for plugin in instance.child_plugin_instances %}
       {% render_plugin plugin %}
     {% endfor %}

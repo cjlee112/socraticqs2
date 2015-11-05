@@ -5,15 +5,17 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Courselets</title>
-        <meta name="description" content="">
+        <meta name="description" content="Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="{% static "pages/css/bootstrap.min.css" %}">
-        <link rel="stylesheet" href="{% static "pages/css/bootstrap-theme.min.css" %}">
         <link rel="stylesheet" href="{% static "pages/css/main.css" %}">
         {% render_block "css" %}
 
         <script src="{% static "pages/js/vendor/modernizr-2.8.3-respond-1.4.2.min.js" %}"></script>
+
+        <script src="https://use.typekit.net/aof4bxp.js"></script>
+        <script>try{Typekit.load({ async: true });}catch(e){}</script>
     </head>
     <body>
         <!--[if lt IE 8]>
@@ -22,7 +24,7 @@
 
         <header class="header-main">
           <div class="container">
-            <a href="/" class="brand"><img src="pages/img/courselets-logo.png" alt="Courselets Logo"></a>
+            <a href="/" class="brand"><img src="{% static "pages/img/courselets-logo.png" %}" alt="Courselets Logo"></a>
           </div>
         </header>
 
@@ -40,12 +42,29 @@
         </main>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
-        <script src="{% static "pages/js/vendor/bootstrap.min.js" %}"></script>
-        <script src="{% static "pages/js/main.js" %}"></script>
-        {% render_block "js" %}
+        <script>window.jQuery || document.write('<script src="{% static "pages/js/vendor/jquery-1.11.2.min.js" %}"><\/script>')</script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script src="{% static "pages/js/vendor/bootstrap.min.js" %}"></script>
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.8/jquery.form-validator.min.js"></script>
+
+        <script src="{% static "pages/js/main.js" %}"></script>
+
+        <!-- Load Facebook SDK -->
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+
+        <!-- Load Twitter SDK -->
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+        <!-- Google Analytics -->
         {% include "google-analytics.html" %}
+        {% render_block "js" %}
     </body>
 </html>

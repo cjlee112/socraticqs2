@@ -59,7 +59,7 @@ target/
 .env/
 *.db
 settings_local.py
-static/
+mysite/static/
 deploy.sh
 celerybeat-schedule
 .idea/

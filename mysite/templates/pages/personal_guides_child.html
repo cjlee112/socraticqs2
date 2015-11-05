@@ -1,5 +1,13 @@
-<div class="col-md-6 card card-chris">
-<h4>{{ instance.title }}</h4>
+{% load cms_tags %}
 
-{{ instance.description|safe }}
+<div class="col-md-6">
+<div class="card">
+  <img src="{{ instance.image.url }}" alt="{{ instance.title }}">
+
+  <div class="inner">
+    <h4>{{ instance.title }}</h4>
+
+    {{ instance.description|safe }}
+  </div>
+</div>
 </div>

@@ -1,13 +1,20 @@
+<!-- Questions -->
 <section class="section-questions">
-<h2>
+<header>
   <div class="container">
-    {{ instance.title }}
+    <h2>{{ instance.title }}</h2>
   </div>
-</h2>
+</header>
 
-<ul class="{{ instance.list_type }}">
-{% for i in list_text %}
-  {{ i|safe }}
-{% endfor %}
-</ul>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-7">
+      <ul class="{{ instance.list_type }}">
+        {% for i in list_text %}
+          {{ i|safe }}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
 </section>
