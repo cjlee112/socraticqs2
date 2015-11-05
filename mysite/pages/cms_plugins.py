@@ -17,6 +17,7 @@ from pages.models import (
     SocialPlugin,
     FAQPlugin,
     FAQItemPlugin,
+    InterestedPlugin,
 )
 
 
@@ -114,6 +115,11 @@ class FAQPagePlugin(CMSPluginBase):
     child_classes = ['FAQItemPagePlugin']
 
 
+class InterestedPagePlugin(CMSPluginBase):
+    model = InterestedPlugin
+    render_template = 'pages/interested_plugin.html'
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -127,3 +133,4 @@ plugin_pool.register_plugin(FooterPagePlugin)
 plugin_pool.register_plugin(LandingPageSocialPlugin)
 plugin_pool.register_plugin(FAQItemPagePlugin)
 plugin_pool.register_plugin(FAQPagePlugin)
+plugin_pool.register_plugin(InterestedPagePlugin)

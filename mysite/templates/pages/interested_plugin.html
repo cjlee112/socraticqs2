@@ -1,0 +1,63 @@
+<section id="interested" class="interested">
+<div class="interested-info">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-md-offset-3">
+        <h2>I’m Interested in the Online Workshop</h2>
+
+        <p>There is no commitment to take the workshop at this point. We'll contact you when we get enough participants to schedule a workshop.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="message-container">
+
+</div>
+
+<form action="" id="interested-form">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-md-offset-3">
+        <div>
+          <label>{{ instance.name_field }}</label>
+
+          <div class="row">
+            <div class="col-xs-6">
+              <input type="text" name="first_name" placeholder="First" data-validation="alphanumeric" data-validation-error-msg="Please enter your first name">
+            </div>
+
+            <div class="col-xs-6">
+              <input type="text" name="last_name" placeholder="Last" data-validation="alphanumeric" data-validation-error-msg="Please enter your last name">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label>{{ instance.email_field }}</label>
+          <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="Please enter your email">
+        </div>
+
+        <div>
+          <label>{{ instance.when_field }}</label>
+          <small>
+              {{ instance.description_field|safe }}
+          </small>
+
+          <textarea name="when_join" data-validation="alphanumeric" data-validation-error-msg="Please tell us when you can join"></textarea>
+        </div>
+
+        <div>
+          <label>
+            {{ instance.timezone_field }}
+          </label>
+
+          <input type="text" name="timezone" data-validation="alphanumeric" data-validation-error-msg="Please enter your timezone">
+        </div>
+
+        <input type="submit" value="Keep Me Informed">
+      </div>
+    </div>
+  </div>
+</form>
+</section>
