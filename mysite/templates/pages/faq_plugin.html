@@ -1,0 +1,16 @@
+{% load cms_tags %}
+<section class="section-faq">
+<header>
+  <div class="container">
+    <h2>{{ instance.title }}</h2>
+  </div>
+</header>
+
+<div class="container">
+  <dl class="faq">
+{% for plugin in instance.child_plugin_instances %}
+    {% render_plugin plugin %}
+{% endfor %}
+  </dl>
+</div>
+</section>

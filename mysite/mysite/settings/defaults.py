@@ -365,5 +365,8 @@ CMS_PLACEHOLDER_CONF = {
     },
     'landing_page_footer': {
         'plugins': ['FooterPagePlugin']
-    }
+    },
+    'faq_page_placeholder': {
+        'plugins': ['FAQPagePlugin']
+    },
 }

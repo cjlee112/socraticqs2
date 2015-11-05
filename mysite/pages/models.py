@@ -111,3 +111,12 @@ class FooterPlugin(CMSPlugin):
 
 class SocialPlugin(CMSPlugin):
     title = models.CharField(max_length=70, blank=True)
+
+
+class FAQPlugin(CMSPlugin):
+    title = models.CharField(max_length=70, blank=True)
+
+
+class FAQItemPlugin(CMSPlugin):
+    question = models.TextField(blank=True)
+    answer = models.TextField(blank=True)

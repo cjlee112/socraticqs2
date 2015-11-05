@@ -14,7 +14,9 @@ from pages.models import (
     BenefitsPlugin,
     BenefitsItemPlugin,
     FooterPlugin,
-    SocialPlugin
+    SocialPlugin,
+    FAQPlugin,
+    FAQItemPlugin,
 )
 
 
@@ -98,6 +100,20 @@ class LandingPageSocialPlugin(CMSPluginBase):
     model = SocialPlugin
 
 
+class FAQItemPagePlugin(CMSPluginBase):
+    model = FAQItemPlugin
+    render_template = 'pages/faq_item_plugin.html'
+    require_parent = True
+    parent_classes = ['FAQPagePlugin']
+
+
+class FAQPagePlugin(CMSPluginBase):
+    model = FAQPlugin
+    render_template = 'pages/faq_plugin.html'
+    allow_children = True
+    child_classes = ['FAQItemPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -109,3 +125,5 @@ plugin_pool.register_plugin(BenefitPagePlugin)
 plugin_pool.register_plugin(BenefitsItemPagePlugin)
 plugin_pool.register_plugin(FooterPagePlugin)
 plugin_pool.register_plugin(LandingPageSocialPlugin)
+plugin_pool.register_plugin(FAQItemPagePlugin)
+plugin_pool.register_plugin(FAQPagePlugin)
