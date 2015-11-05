@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('cms', '0012_auto_20150607_2207'),
-        ('pages', '0015_faqitemplugin_faqplugin'),
+        ('pages', '0017_auto_20151105_0807'),
     ]
 
     operations = [
