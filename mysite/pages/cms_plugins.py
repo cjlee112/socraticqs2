@@ -133,11 +133,19 @@ class MiscPagePlugin(CMSPluginBase):
     parent_classes = ['MiscDetailContainer']
 
 
-class MiscItemPagePlugin(ListPagePlugin):
+class MiscItemPagePlugin(CMSPluginBase):
     model = MiscItemPlugin
     render_template = 'pages/misc_item_plugin.html'
     require_parent = True
     parent_classes = ['MiscPagePlugin']
+
+    def render(self, context, instance, placeholder):
+        context.update({
+            'instance': instance,
+            'placeholder': placeholder,
+            'list_text': re.findall(r'<li>.+</li>', instance.list_text),
+        })
+        return context
 
 
 class MiscDetailContainer(CMSPluginBase):
