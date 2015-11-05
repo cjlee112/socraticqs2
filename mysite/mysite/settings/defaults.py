@@ -360,4 +360,7 @@ CMS_PLACEHOLDER_CONF = {
     'landing_page_benefits_placeholder': {
         'plugins': ['BenefitPagePlugin']
     },
+    'landing_page_footer': {
+        'plugins': ['FooterPagePlugin']
+    }
 }
