@@ -3,14 +3,15 @@ import re
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
-from pages.models import (
+from .models import (
     LandingPlugin,
     BannerPlugin,
     ActiveLearningRatesPlugin,
     ListPlugin,
     ChildPersonalGuidesPlugin,
     ParentPersonalGuidesPlugin,
-    WorkshopDescriptionPlugin
+    WorkshopDescriptionPlugin,
+    FooterPlugin
 )
 
 
@@ -68,6 +69,12 @@ class WorkshopDescriptionPagePlugin(CMSPluginBase):
     child_classes = ['ParentPersonalGuidesPagePlugin']
 
 
+class LandingPageFooterPlugin(CMSPluginBase):
+    render_template = 'pages/landing_footer_plugin.html'
+    name = 'Landing Page Footer Plugin'
+    model = FooterPlugin
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -75,3 +82,4 @@ plugin_pool.register_plugin(ListPagePlugin)
 plugin_pool.register_plugin(ParentPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(ChildPersonalGuidesPagePlugin)
 plugin_pool.register_plugin(WorkshopDescriptionPagePlugin)
+plugin_pool.register_plugin(LandingPageFooterPlugin)

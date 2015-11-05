@@ -83,3 +83,11 @@ class WorkshopDescriptionPlugin(CMSPlugin):
     Parent plugin Workshop description.
     """
     title = models.CharField(max_length=70, blank=True)
+
+
+class FooterPlugin(CMSPlugin):
+    """
+    Plugin for the footer part of landing page.
+    """
+    footer_text = models.CharField(max_length=100, blank=True)
+    footer_link = models.CharField(max_length=200, blank=True)
