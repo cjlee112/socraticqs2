@@ -34,7 +34,7 @@ class LandingPlugin(AbstractPlugin):
     """
     Plugin provide widget main page
     """
-    title = models.CharField(max_length=70, null=True, blank=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
     description = fields.HTMLField(null=True, blank=True)
     list_description = fields.HTMLField(null=True, blank=True)
     link_button = models.URLField(null=True, blank=True)
@@ -46,21 +46,21 @@ class BannerPlugin(AbstractPlugin):
     """
     Plugin make banner with description and button to go
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField(blank=True)
     link_button = models.URLField(blank=True)
     text_button = models.CharField(max_length=70, blank=True)
-    sponsors_text = models.CharField(max_length=70, blank=True)
+    sponsors_text = models.CharField(max_length=200, blank=True)
 
 
 class ActiveLearningRatesPlugin(AbstractPlugin):
     """
     Plugin provide ability to edit Active learting block.
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField(blank=True)
-    fig_alt = models.CharField(max_length=70, blank=True)
-    fig_caption = models.CharField(max_length=70, blank=True)
+    fig_alt = models.CharField(max_length=200, blank=True)
+    fig_caption = models.CharField(max_length=200, blank=True)
     list_text = fields.HTMLField()
 
 
@@ -69,7 +69,7 @@ class ListPlugin(AbstractPlugin):
     General plugin for adding list
     of tesises with the title and <li> element class.
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-questions')
     list_text = fields.HTMLField()
 
@@ -79,7 +79,7 @@ class ChildPersonalGuidesPlugin(AbstractPlugin):
     Plugin for personal guides block.
     """
     image = FilerImageField(related_name="personal_guides_image")
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField()
 
 
@@ -87,21 +87,21 @@ class ParentPersonalGuidesPlugin(AbstractPlugin):
     """
     Parent plugin for Personal Guides.
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class WorkshopDescriptionPlugin(AbstractPlugin):
     """
     Parent plugin Workshop description.
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class BenefitsItemPlugin(AbstractPlugin):
     """
     Item of benefils
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField(blank=True)
     image = FilerImageField(null=True, blank=True)
 
@@ -110,7 +110,7 @@ class BenefitsPlugin(AbstractPlugin):
     """
     Base plugin for benefits
     """
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class FooterPlugin(AbstractPlugin):
@@ -122,11 +122,11 @@ class FooterPlugin(AbstractPlugin):
 
 
 class SocialPlugin(AbstractPlugin):
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class FAQPlugin(AbstractPlugin):
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class FAQItemPlugin(AbstractPlugin):
@@ -135,12 +135,12 @@ class FAQItemPlugin(AbstractPlugin):
 
 
 class MiscItemPlugin(AbstractPlugin):
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
     description_header = fields.HTMLField(blank=True)
     list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-checklist')
     list_text = fields.HTMLField()
     description_footer = fields.HTMLField(blank=True)
-    header_type_text = models.CharField(max_length=70, blank=True)
+    header_type_text = models.CharField(max_length=200, blank=True)
 
 
 class InterestedPlugin(AbstractPlugin):
@@ -167,14 +167,14 @@ class InterestedForm(models.Model):
 
 
 class DetailsChildPlugin(AbstractPlugin):
-    title = models.CharField(max_length=70, blank=True)
+    title = models.CharField(max_length=200, blank=True)
 
 
 class DetailsVideoPlugin(AbstractPlugin):
     video_url = models.URLField()
-    description = models.CharField(max_length=70)
+    description = models.CharField(max_length=200)
 
 
 class DetailsQuotePlugin(AbstractPlugin):
-    quote_text = models.CharField(max_length=70)
-    quote_small = models.CharField(max_length=70)
+    quote_text = models.CharField(max_length=200)
+    quote_small = models.CharField(max_length=200)
