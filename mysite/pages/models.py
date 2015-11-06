@@ -121,14 +121,6 @@ class FAQItemPlugin(CMSPlugin):
     answer = models.TextField(blank=True)
 
 
-class DetailsPlugin(CMSPlugin):
-    title = models.CharField(max_length=70, blank=True)
-    video_url = models.URLField()
-    details_text = models.CharField(max_length=70)
-    quote_text = models.CharField(max_length=70, blank=True)
-    quote_small = models.CharField(max_length=70, blank=True)
-
-
 class MiscItemPlugin(CMSPlugin):
     title = models.CharField(max_length=70, blank=True)
     description_header = fields.HTMLField(blank=True)
@@ -159,3 +151,17 @@ class InterestedForm(models.Model):
     email = models.EmailField(blank=True)
     description = models.TextField(blank=True)
     timezone = models.CharField(max_length=70, blank=True)
+
+
+class DetailsChildPlugin(CMSPlugin):
+    title = models.CharField(max_length=70, blank=True)
+
+
+class DetailsVideoPlugin(CMSPlugin):
+    video_url = models.URLField()
+    description = models.CharField(max_length=70)
+
+
+class DetailsQuotePlugin(CMSPlugin):
+    quote_text = models.CharField(max_length=70)
+    quote_small = models.CharField(max_length=70)

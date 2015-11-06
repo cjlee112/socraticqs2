@@ -17,9 +17,11 @@ from pages.models import (
     SocialPlugin,
     FAQPlugin,
     FAQItemPlugin,
-    DetailsPlugin,
     MiscItemPlugin,
-    InterestedPlugin
+    InterestedPlugin,
+    DetailsChildPlugin,
+    DetailsVideoPlugin,
+    DetailsQuotePlugin
 )
 
 
@@ -107,7 +109,7 @@ class FAQItemPagePlugin(CMSPluginBase):
     model = FAQItemPlugin
     render_template = 'pages/faq_item_plugin.html'
     require_parent = True
-    parent_classes = ['FAQPagePlugin', 'DetailsPagePlugin']
+    parent_classes = ['FAQPagePlugin', 'DetailsChildPagePlugin']
 
 
 class FAQPagePlugin(CMSPluginBase):
@@ -118,10 +120,9 @@ class FAQPagePlugin(CMSPluginBase):
 
 
 class DetailsPagePlugin(CMSPluginBase):
-    model = DetailsPlugin
-    render_template = 'pages/details_child_plugin.html'
+    render_template = 'pages/details_contaiter_plugin.html'
     allow_children = True
-    child_classes = ['FAQItemPagePlugin']
+    child_classes = ['DetailsChildPagePlugin', 'DetailsVideoPagePlugin', 'DetailsQuotePagePlugin']
     require_parent = True
     parent_classes = ['MiscDetailContainer']
 
@@ -162,6 +163,29 @@ class InterestedPagePlugin(CMSPluginBase):
     render_template = 'pages/interested_plugin.html'
 
 
+class DetailsChildPagePlugin(CMSPluginBase):
+    model = DetailsChildPlugin
+    render_template = 'pages/details_child_plugin.html'
+    allow_children = True
+    child_classes = ['FAQItemPagePlugin']
+    require_parent = True
+    parent_classes = ['DetailsPagePlugin']
+
+
+class DetailsVideoPagePlugin(CMSPluginBase):
+    model = DetailsVideoPlugin
+    render_template = 'pages/details_video_plugin.html'
+    require_parent = True
+    parent_classes = ['DetailsPagePlugin']
+
+
+class DetailsQuotePagePlugin(CMSPluginBase):
+    model = DetailsQuotePlugin
+    render_template = 'pages/details_quote_plugin.html'
+    require_parent = True
+    parent_classes = ['DetailsPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -180,3 +204,6 @@ plugin_pool.register_plugin(MiscPagePlugin)
 plugin_pool.register_plugin(MiscItemPagePlugin)
 plugin_pool.register_plugin(MiscDetailContainer)
 plugin_pool.register_plugin(InterestedPagePlugin)
+plugin_pool.register_plugin(DetailsChildPagePlugin)
+plugin_pool.register_plugin(DetailsVideoPagePlugin)
+plugin_pool.register_plugin(DetailsQuotePagePlugin)

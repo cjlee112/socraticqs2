@@ -1,9 +1,7 @@
 {% load cms_tags %}
 
-<h3>{{ instance.title }}</h3>
-
-<dl>
+<div class="col-md-4 col-md-offset-1">
 {% for plugin in instance.child_plugin_instances %}
   {% render_plugin plugin %}
 {% endfor %}
-</dl>
+</div>
