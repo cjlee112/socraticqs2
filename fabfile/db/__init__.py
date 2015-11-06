@@ -16,7 +16,7 @@ Init DB task
 ------------
 Usage::
 
-    fab db.init
+    fab db.init[:port][:host]
 
 This task performs following actions:
 
@@ -26,11 +26,16 @@ This task performs following actions:
   4. Load fixture data
   5. Deploy FSMs
 
+If ``port`` is not presented task gets it from settings or if it not presented in
+settings too give it standart value.
+If ``host`` is not presented task gets it from settings or if it not presented in
+settings too gives it standart value.
+
 Backup DB task
 --------------
 Usage::
 
-    fab db.backup[:custom_branch_name]
+    fab db.backup[:custom_branch_name][:port][:host][:bakup_path]
 
 This task performs following actions:
 
@@ -39,15 +44,23 @@ This task performs following actions:
   3. ``psql pg_dump > backup.postgres.custom_branch_name`` action
      for PostgreSQL and ``cp mysite.db backup.sqlite.custom_branch_name``
      action for SQLite DB.
+  4. In case of PostgreSQL tries to restore from that backup to check if
+     there is any errors in backup file
 
 If ``custom_branch_name`` param is not presented task gets current
 git branch name and using it as a custom suffix for backup files.
+If ``port`` is not presented task gets it from settings or if it not presented in
+settings too give it standart value.
+If ``host`` is not presented task gets it from settings or if it not presented in
+settings too gives it standart value.
+If ``bakup_path`` param is not presented task get backup file from 'backups'
+folder in root folder of project.
 
 Restore DB task
 ---------------
 Usage::
 
-    fab db.restore[:custom_branch_name]
+    fab db.restore[:custom_branch_name][:port][:host][:bakup_path]
 
 This task performs following actions:
 
@@ -59,6 +72,12 @@ This task performs following actions:
 
 If ``custom_branch_name`` param is not presented task get current
 git branch name and using it as a suffix for backup files.
+If ``port`` is not presented task gets it from settings or if it not presented in
+settings too give it standart value.
+If ``host`` is not presented task gets it from settings or if it not presented in
+settings too gives it standart value.
+If ``bakup_path`` param is not presented task get backup file from 'backups'
+folder in root folder of project.
 
 If task can not find backup file it will list for you all backup files
 available with specific DB engine given from Django settings.
@@ -71,6 +90,7 @@ from fab_settings import env
 from fabric.contrib import django
 from fabric.api import local, settings, hide, lcd
 from fabric.tasks import Task
+from tempfile import NamedTemporaryFile
 
 
 sys.path.append(os.path.dirname(__file__) + '/../../mysite/')
@@ -86,6 +106,9 @@ class BaseTask(Task):
     db_cfg = dj_settings.DATABASES['default']
     engine = db_cfg.get('ENGINE').split('.')[-1]
     base_path = os.path.dirname(__file__) + '/../..'
+    backup_path = None
+    port = None
+    host = None
 
     def run(self, action, suffix=None):
         handlers = {
@@ -107,18 +130,18 @@ class BaseTask(Task):
         Decorator that adds PostgreSQL specific actions to task.
         """
         def wrapped(self, *args, **kwargs):
-            local(
-                'echo localhost:5432:postgres:%s:%s > ~/.pgpass'
-                % (self.db_cfg['USER'], self.db_cfg['PASSWORD'])
-            )
-            local(
-                'echo localhost:5432:%s:%s:%s >> ~/.pgpass'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['PASSWORD'])
-            )
-            local('chmod 600 ~/.pgpass')
+            self.host = self.host or (self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost')
+            self.port = self.port or (self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432')
+            with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
+                f.write('%s:%s:*:%s:%s' % (self.host,
+                                                  self.port,
+                                                  self.db_cfg['USER'],
+                                                  self.db_cfg['PASSWORD']))
+            os.environ["PGPASSFILE"] = f.name
             fn(self, *args, **kwargs)
-            local('rm ~/.pgpass')
+            local('rm %s ' % f.name)
         return wrapped
+
 
     @postgres
     def init_db_postgres(self, *args, **kwargs):
@@ -126,8 +149,10 @@ class BaseTask(Task):
         Init db to original state for postgres.
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'], self.db_cfg['USER']))
-            local('createdb %s encoding="UTF8" --username=%s -w' % (self.db_cfg['NAME'], self.db_cfg['USER']))
+            local('dropdb %s --username=%s -w' % (self.db_cfg['NAME'],
+                                                  self.db_cfg['USER']))
+            local('createdb %s encoding="UTF8" --username=%s -w ' % (self.db_cfg['NAME'],
+                                                                     self.db_cfg['USER']))
             local('%s/bin/python mysite/manage.py migrate' % env.venv_name)
             local('%s/bin/python mysite/manage.py loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
             local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_name)
@@ -136,11 +161,11 @@ class BaseTask(Task):
         """
         Init db to original state for sqlite.
         """
-        with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            local('rm %s/mysite.db' % dj_settings.BASE_DIR)
-            local('%s/bin/python mysite/manage.py migrate' % env.venv_name)
-            local('%s/bin/python mysite/manage.py loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
-            local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_name)
+        with lcd(self.base_path+'/mysite/'), settings(hide('warnings'), warn_only=True):
+            local('rm %s' % (self.db_cfg['NAME']))
+            local('%s/bin/python manage.py migrate' % env.venv_name)
+            local('%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' % env.venv_name)
+            local('%s/bin/python manage.py fsm_deploy' % env.venv_name)
 
     @postgres
     def backup_db_postgres(self, suffix, *args, **kwargs):
@@ -149,9 +174,23 @@ class BaseTask(Task):
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
-                'pg_dump %s -U %s -w > %s/backups/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix)
+                'pg_dump %s -U %s -w > %s/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.backup_path, suffix)
             )
+            local(
+                'createdb %s_temp encoding="UTF8" --username=%s -w'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'])
+            )
+            x = local(
+                'psql %s_temp -U %s -w < %s/backups/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix),
+                capture=True)
+            if not x.stderr:
+                print 'Bakup is ok'
+            else:
+                print 'An error has occurred while backup'
+            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
+                                                        self.db_cfg['USER']))
 
     def backup_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -159,8 +198,8 @@ class BaseTask(Task):
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
-                'cp %s/mysite.db %s/backups/backup.sqlite.%s'
-                % (dj_settings.BASE_DIR, self.base_path, suffix)
+                'cp %s/%s %s/backup.sqlite.%s'
+                % (dj_settings.BASE_DIR, self.db_cfg['NAME'], self.backup_path, suffix)
             )
 
     @postgres
@@ -171,15 +210,25 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             if not local('ls %s/backups/backup.postgres.%s' % (self.base_path, suffix)).succeeded:
                 return self.list_backups('postgres')
-            local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'], self.db_cfg['USER']))
+            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
+                                                        self.db_cfg['USER']))
             local(
-                'createdb %s encoding="UTF8" --username=%s -w'
+                'createdb %s_temp encoding="UTF8" --username=%s -w'
                 % (self.db_cfg['NAME'], self.db_cfg['USER'])
             )
-            local(
-                'psql %s -U %s -w  < %s/backups/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix)
-            )
+            x = local(
+                'psql %s_temp -U %s -w < %s/backups/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix),
+                capture=True)
+            if not x.stderr:
+                local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
+                                                       self.db_cfg['USER']))
+                local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' % (self.db_cfg['USER'],
+                                                                               self.db_cfg['NAME'],
+                                                                               self.db_cfg['NAME']))
+                print 'Restore is ok'
+            else:
+                print 'An error has occurred'
 
     def restore_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -187,8 +236,8 @@ class BaseTask(Task):
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             result = local(
-                'cp %s/backups/backup.sqlite.%s %s/mysite.db'
-                % (self.base_path, suffix, dj_settings.BASE_DIR)
+                'cp %s/backup.sqlite.%s %s/%s'
+                % (self.backup_path, suffix, dj_settings.BASE_DIR, self.db_cfg['NAME'])
             )
             if not result.succeeded:
                 self.list_backups('sqlite')
@@ -211,7 +260,10 @@ class RestoreDBTask(BaseTask):
     name = 'restore'
     action = 'restore'
 
-    def run(self, suffix=None):
+    def run(self, suffix=None, backup_path=None, port=None, host=None):
+        self.backup_path = backup_path or (self.base_path + '/backups/')
+        self.port = port
+        self.host = host
         super(RestoreDBTask, self).run(self.action, suffix)
 
 
@@ -222,7 +274,10 @@ class BackupDBTask(BaseTask):
     name = 'backup'
     action = 'backup'
 
-    def run(self, suffix=None):
+    def run(self, suffix=None, backup_path=None, port=None, host=None):
+        self.backup_path = backup_path or (self.base_path + '/backups')
+        self.port = port
+        self.host = host
         super(BackupDBTask, self).run(self.action, suffix)
 
 
@@ -233,7 +288,9 @@ class InitDBTask(BaseTask):
     name = 'init'
     action = 'init'
 
-    def run(self):
+    def run(self, port=None, host=None):
+        self.port = port
+        self.host = host
         super(InitDBTask, self).run(self.action)
 
 
