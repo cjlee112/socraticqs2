@@ -1,4 +1,6 @@
 {% load cms_tags %}
+
+{% if not instance.hidden %}
 <section class="section-faq">
 <header>
   <div class="container">
@@ -14,3 +16,4 @@
   </dl>
 </div>
 </section>
+{% endif %}

@@ -1,5 +1,6 @@
 {% load sekizai_tags static %}
 
+{% if not instance.hidden %}
 <!-- Attrition rates -->
 <section class="section-attrition">
   <div class="container">
@@ -16,3 +17,4 @@
     </div>
   </div>
 </section>
+{% endif %}

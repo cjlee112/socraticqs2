@@ -1,5 +1,6 @@
 {% load thumbnail %}
 
+{% if not instance.hidden %}
 <div class="col-md-4">
   <div class="card">
     <img src="{% thumbnail instance.image 360x220 crop %}" alt="{{ instance.image.name }}">
@@ -10,3 +11,4 @@
     </div>
   </div>
 </div>
+{% endif %}

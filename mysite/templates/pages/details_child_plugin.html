@@ -1,5 +1,6 @@
 {% load cms_tags %}
 
+{% if not instance.hidden %}
 <h3>{{ instance.title }}</h3>
 
 <dl>
@@ -7,3 +8,4 @@
   {% render_plugin plugin %}
 {% endfor %}
 </dl>
+{% endif %}

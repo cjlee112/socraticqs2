@@ -1,5 +1,6 @@
 {% load cms_tags %}
 
+{% if not instance.hidden %}
 <section class="section-cards">
 <header>
   <div class="container">
@@ -17,3 +18,4 @@
   </div>
 </div>
 </section>
+{% endif %}

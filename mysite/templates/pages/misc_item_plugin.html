@@ -1,3 +1,4 @@
+{% if not instance.hidden %}
 <h3>{{ instance.title }}</h3>
 
 {{ instance.description_header|safe }}
@@ -21,3 +22,4 @@
 {% endif %}
 
 {{ instance.description_footer|safe }}
+{% endif %}

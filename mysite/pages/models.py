@@ -20,9 +20,19 @@ LIST_TYPES = (
 )
 
 
-class LandingPlugin(CMSPlugin):
+class AbstractPlugin(CMSPlugin):
     """
-    Plugin provide widget landing page
+    Abstract Base Class for all Plugins.
+    """
+    hidden = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+
+class LandingPlugin(AbstractPlugin):
+    """
+    Plugin provide widget main page
     """
     title = models.CharField(max_length=70, null=True, blank=True)
     description = fields.HTMLField(null=True, blank=True)
@@ -32,7 +42,7 @@ class LandingPlugin(CMSPlugin):
     block_color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='bg-primary')
 
 
-class BannerPlugin(CMSPlugin):
+class BannerPlugin(AbstractPlugin):
     """
     Plugin make banner with description and button to go
     """
@@ -43,7 +53,7 @@ class BannerPlugin(CMSPlugin):
     sponsors_text = models.CharField(max_length=70, blank=True)
 
 
-class ActiveLearningRatesPlugin(CMSPlugin):
+class ActiveLearningRatesPlugin(AbstractPlugin):
     """
     Plugin provide ability to edit Active learting block.
     """
@@ -51,7 +61,7 @@ class ActiveLearningRatesPlugin(CMSPlugin):
     description = fields.HTMLField(blank=True)
 
 
-class ListPlugin(CMSPlugin):
+class ListPlugin(AbstractPlugin):
     """
     General plugin for adding list
     of tesises with the title and <li> element class.
@@ -61,7 +71,7 @@ class ListPlugin(CMSPlugin):
     list_text = fields.HTMLField()
 
 
-class ChildPersonalGuidesPlugin(CMSPlugin):
+class ChildPersonalGuidesPlugin(AbstractPlugin):
     """
     Plugin for personal guides block.
     """
@@ -70,21 +80,21 @@ class ChildPersonalGuidesPlugin(CMSPlugin):
     description = fields.HTMLField()
 
 
-class ParentPersonalGuidesPlugin(CMSPlugin):
+class ParentPersonalGuidesPlugin(AbstractPlugin):
     """
     Parent plugin for Personal Guides.
     """
     title = models.CharField(max_length=70, blank=True)
 
 
-class WorkshopDescriptionPlugin(CMSPlugin):
+class WorkshopDescriptionPlugin(AbstractPlugin):
     """
     Parent plugin Workshop description.
     """
     title = models.CharField(max_length=70, blank=True)
 
 
-class BenefitsItemPlugin(CMSPlugin):
+class BenefitsItemPlugin(AbstractPlugin):
     """
     Item of benefils
     """
@@ -93,14 +103,14 @@ class BenefitsItemPlugin(CMSPlugin):
     image = FilerImageField(null=True, blank=True)
 
 
-class BenefitsPlugin(CMSPlugin):
+class BenefitsPlugin(AbstractPlugin):
     """
     Base plugin for benefits
     """
     title = models.CharField(max_length=70, blank=True)
 
 
-class FooterPlugin(CMSPlugin):
+class FooterPlugin(AbstractPlugin):
     """
     Plugin for the footer part of landing page.
     """
@@ -108,20 +118,20 @@ class FooterPlugin(CMSPlugin):
     footer_link = models.CharField(max_length=200, blank=True)
 
 
-class SocialPlugin(CMSPlugin):
+class SocialPlugin(AbstractPlugin):
     title = models.CharField(max_length=70, blank=True)
 
 
-class FAQPlugin(CMSPlugin):
+class FAQPlugin(AbstractPlugin):
     title = models.CharField(max_length=70, blank=True)
 
 
-class FAQItemPlugin(CMSPlugin):
+class FAQItemPlugin(AbstractPlugin):
     question = models.TextField(blank=True)
     answer = models.TextField(blank=True)
 
 
-class MiscItemPlugin(CMSPlugin):
+class MiscItemPlugin(AbstractPlugin):
     title = models.CharField(max_length=70, blank=True)
     description_header = fields.HTMLField(blank=True)
     list_type = models.CharField(max_length=20, choices=LIST_TYPES, default='list-checklist')
@@ -130,7 +140,7 @@ class MiscItemPlugin(CMSPlugin):
     header_type_text = models.CharField(max_length=70, blank=True)
 
 
-class InterestedPlugin(CMSPlugin):
+class InterestedPlugin(AbstractPlugin):
     name_field = models.CharField(max_length=200, default="Name")
     email_field = models.CharField(max_length=200, default="Email")
     when_field = models.CharField(max_length=200, default="When can you join?")
@@ -153,15 +163,15 @@ class InterestedForm(models.Model):
     timezone = models.CharField(max_length=70, blank=True)
 
 
-class DetailsChildPlugin(CMSPlugin):
+class DetailsChildPlugin(AbstractPlugin):
     title = models.CharField(max_length=70, blank=True)
 
 
-class DetailsVideoPlugin(CMSPlugin):
+class DetailsVideoPlugin(AbstractPlugin):
     video_url = models.URLField()
     description = models.CharField(max_length=70)
 
 
-class DetailsQuotePlugin(CMSPlugin):
+class DetailsQuotePlugin(AbstractPlugin):
     quote_text = models.CharField(max_length=70)
     quote_small = models.CharField(max_length=70)

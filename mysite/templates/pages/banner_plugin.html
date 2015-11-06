@@ -1,5 +1,6 @@
 {% load sekizai_tags static %}
 
+{% if not instance.hidden %}
 <!-- Hero -->
 <header class="hero" role="banner">
   <div class="inner">
@@ -32,3 +33,4 @@
     </div>
   </div>
 </header>
+{% endif %}
