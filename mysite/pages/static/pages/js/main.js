@@ -11,7 +11,7 @@
     initAffix: function(){
       $('.cta-bar').affix({
         offset: {
-            top: $('.cta-bar').offset().top
+              top: $('.cta-bar').offset().top
         }
       });
     },
@@ -47,11 +47,11 @@
           // Post form
           $.ajax({
             type: 'POST',
-            url: '/xxx',
+            url: '/interested-form/',
             data: formData,
             dataType: 'json'
           }).done(function(data){
-
+            window.d = data;
             // Display success message
             if(data.success) {
               base.showMessage('success', data.success);
@@ -61,8 +61,9 @@
               base.showMessage('error', data.error);
             }
 
-          }).fail(function(){
-            base.showMessage('error', 'Something went wrong. Please try again later.');
+          }).fail(function(err){
+              window.err = err;
+              base.showMessage('error', 'Something went wrong. Please try again later.');
           });
 
         // Show validation errors

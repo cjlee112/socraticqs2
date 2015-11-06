@@ -3,9 +3,9 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6 col-md-offset-3">
-        <h2>I’m Interested in the Online Workshop</h2>
+        <h2>{{ instance.title }}</h2>
 
-        <p>There is no commitment to take the workshop at this point. We'll contact you when we get enough participants to schedule a workshop.</p>
+        <p>{{ instance.description }}</p>
       </div>
     </div>
   </div>
@@ -16,6 +16,7 @@
 </div>
 
 <form action="" id="interested-form">
+    {% csrf_token %}
   <div class="container">
     <div class="row">
       <div class="col-md-6 col-md-offset-3">

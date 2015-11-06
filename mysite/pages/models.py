@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.db import models
 from djangocms_text_ckeditor import fields
 from cms.models.pluginmodel import CMSPlugin
@@ -131,15 +132,27 @@ class MiscItemPlugin(CMSPlugin):
 
 
 class InterestedPlugin(CMSPlugin):
+    title = models.CharField(max_length=200, default="I’m Interested in the Online Workshop")
+    description = models.TextField(
+        default="There is no commitment to take the workshop at this point. "
+                "We'll contact you when we get enough participants to schedule a workshop.")
     name_field = models.CharField(max_length=200, default="Name")
     email_field = models.CharField(max_length=200, default="Email")
     when_field = models.CharField(max_length=200, default="When can you join?")
     description_field = fields.HTMLField(
         default="We plan to host hackathons between ? and ?. "
-                "Please tell us more about your availability below."
+                "Please tell us more about your availability below. "
                 "Our hackathons are split into 3 meetings that are about 2 hours long."
     )
     timezone_field = models.CharField(max_length=200, default=" What is your timezone?")
+
+    first_name_error_msg = models.CharField(max_length=200, default="Please enter your first name")
+    last_name_error_msg = models.CharField(max_length=200, default="Please enter your last name")
+    email_error_msg = models.CharField(max_length=200, default="Please enter your email")
+    when_error_msg = models.CharField(max_length=200, default="Please tell us when you can join")
+    timezone_error_msg = models.CharField(max_length=200, default="Please enter your timezone")
+
+    email_to = models.EmailField(default='cmathews@elancecloud.com')
 
 
 class InterestedForm(models.Model):
@@ -149,7 +162,7 @@ class InterestedForm(models.Model):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
-    description = models.TextField(blank=True)
+    when_join = models.TextField(blank=True)
     timezone = models.CharField(max_length=70, blank=True)
 
 
