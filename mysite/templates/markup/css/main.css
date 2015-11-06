@@ -34,7 +34,7 @@ h1, h2, h3, h4, h5 {
   padding: 0; }
 
 h1 {
-  font-size: 32px;
+  font-size: 36px;
   line-height: 44px;
   color: #fff; }
 
@@ -239,7 +239,7 @@ form small {
       color: #fff;
       max-width: 652px; }
     .hero .inner p {
-      margin: 12px 0 36px 0; }
+      margin: 13px 0 35px 0; }
   .hero .cta-bar {
     position: absolute;
     bottom: 0;
@@ -307,11 +307,24 @@ form small {
     top: 7px; } }
 .section-attrition {
   padding: 80px 0 72px 0; }
-  .section-attrition img {
-    width: 324px;
+  .section-attrition .right {
+    float: right; }
+  .section-attrition figure {
+    width: 322px;
     max-width: 100%;
     display: block;
-    margin: 0 auto 80px auto; }
+    margin: 46px auto 74px auto; }
+  .section-attrition figcaption {
+    font-size: 12px;
+    line-height: 16px;
+    color: #999;
+    border-top: 1px solid #EBEBF0;
+    margin: 20px 0 0 0;
+    padding: 8px 0 0 0; }
+  .section-attrition img {
+    width: 100%;
+    height: auto;
+    display: block; }
   .section-attrition h2 {
     font-size: 28px;
     line-height: 32px;
@@ -454,6 +467,9 @@ section header {
   color: #999;
   text-align: center; }
 
+@media (max-width: 767px) {
+  .section-attrition .right {
+    width: 100%; } }
 @media (min-width: 768px) {
   html, body, main {
     height: 100%; }
@@ -493,6 +509,12 @@ section header {
       display: block;
       float: right; }
 
+  .section-attrition figure {
+    position: relative;
+    top: 8px;
+    left: 0;
+    margin: 0; }
+
   .section-share h2 {
     margin-bottom: 0; }
   .section-share .fb_iframe_widget, .section-share .twitter-share-button, .section-share .IN-widget, .section-share .container div:last-child {
@@ -503,15 +525,9 @@ section header {
     top: 20px; } }
 @media (min-width: 992px) {
   .section-attrition {
-    padding: 152px 0; }
-    .section-attrition img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin: 0; } }
+    padding: 152px 0; } }
 @media (min-width: 1200px) {
-  .section-attrition img {
-    top: -13px;
+  .section-attrition figure {
     left: 67px;
     margin: 0; } }
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {

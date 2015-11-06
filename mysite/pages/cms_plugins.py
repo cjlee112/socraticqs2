@@ -39,6 +39,14 @@ class ActiveLearningRatesPagePlugin(CMSPluginBase):
     model = ActiveLearningRatesPlugin
     render_template = 'pages/active_learning_rates_plugin.html'
 
+    def render(self, context, instance, placeholder):
+        context.update({
+            'instance': instance,
+            'placeholder': placeholder,
+            'list_text': re.findall(r'<li>.+</li>', instance.list_text),
+        })
+        return context
+
 
 class ListPagePlugin(CMSPluginBase):
     model = ListPlugin

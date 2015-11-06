@@ -20,7 +20,7 @@
       $('.im-interested').on('click', function(e){
         e.preventDefault();
         $('html, body').animate({
-            scrollTop: $("#interested").offset().top
+            scrollTop: $("#interested").offset().top-60
         }, 1200);
       })
     },

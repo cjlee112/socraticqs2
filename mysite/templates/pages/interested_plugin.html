@@ -25,11 +25,11 @@
 
           <div class="row">
             <div class="col-xs-6">
-              <input type="text" name="first_name" placeholder="First" data-validation="alphanumeric" data-validation-error-msg="Please enter your first name">
+              <input type="text" name="first_name" placeholder="First" data-validation="required" data-validation-error-msg="Please enter your first name">
             </div>
 
             <div class="col-xs-6">
-              <input type="text" name="last_name" placeholder="Last" data-validation="alphanumeric" data-validation-error-msg="Please enter your last name">
+              <input type="text" name="last_name" placeholder="Last" data-validation="required" data-validation-error-msg="Please enter your last name">
             </div>
           </div>
         </div>
@@ -45,7 +45,7 @@
               {{ instance.description_field|safe }}
           </small>
 
-          <textarea name="when_join" data-validation="alphanumeric" data-validation-error-msg="Please tell us when you can join"></textarea>
+          <textarea name="when_join" data-validation="required" data-validation-error-msg="Please tell us when you can join"></textarea>
         </div>
 
         <div>
@@ -53,7 +53,7 @@
             {{ instance.timezone_field }}
           </label>
 
-          <input type="text" name="timezone" data-validation="alphanumeric" data-validation-error-msg="Please enter your timezone">
+          <input type="text" name="timezone" data-validation="required" data-validation-error-msg="Please enter your timezone">
         </div>
 
         <input type="submit" value="Keep Me Informed">

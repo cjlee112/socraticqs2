@@ -59,6 +59,9 @@ class ActiveLearningRatesPlugin(AbstractPlugin):
     """
     title = models.CharField(max_length=70, blank=True)
     description = fields.HTMLField(blank=True)
+    fig_alt = models.CharField(max_length=70, blank=True)
+    fig_caption = models.CharField(max_length=70, blank=True)
+    list_text = fields.HTMLField()
 
 
 class ListPlugin(AbstractPlugin):
