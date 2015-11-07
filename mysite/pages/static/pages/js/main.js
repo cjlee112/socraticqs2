@@ -47,7 +47,7 @@
           // Post form
           $.ajax({
             type: 'POST',
-            url: '/xxx',
+            url: '/interested-form/',
             data: formData,
             dataType: 'json'
           }).done(function(data){

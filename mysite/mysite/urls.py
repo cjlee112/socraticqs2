@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.conf import settings
 
 from mysite.views import *
+from pages.views import interested_form
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -37,6 +38,7 @@ urlpatterns = patterns(
 
     url(r'^done/$', 'psa.views.done'),
     url(r'^lti/', include('lti.urls', namespace='lti')),
+    url(r'^interested-form/', interested_form, name='interested-form'),
     url(r'^', include('cms.urls')),
 )
 

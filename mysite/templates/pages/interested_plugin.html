@@ -4,9 +4,9 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6 col-md-offset-3">
-        <h2>I’m Interested in the Online Workshop</h2>
+        <h2>{{ instance.title }}</h2>
 
-        <p>There is no commitment to take the workshop at this point. We'll contact you when we get enough participants to schedule a workshop.</p>
+        <p>{{ instance.description }}</p>
       </div>
     </div>
   </div>
@@ -17,6 +17,7 @@
 </div>
 
 <form action="" id="interested-form">
+    {% csrf_token %}
   <div class="container">
     <div class="row">
       <div class="col-md-6 col-md-offset-3">
@@ -25,18 +26,18 @@
 
           <div class="row">
             <div class="col-xs-6">
-              <input type="text" name="first_name" placeholder="First" data-validation="required" data-validation-error-msg="Please enter your first name">
+              <input type="text" name="first_name" placeholder="First" data-validation="required" data-validation-error-msg="{{ instance.first_name_error_msg }}">
             </div>
 
             <div class="col-xs-6">
-              <input type="text" name="last_name" placeholder="Last" data-validation="required" data-validation-error-msg="Please enter your last name">
+              <input type="text" name="last_name" placeholder="Last" data-validation="required" data-validation-error-msg="{{ instance.last_name_error_msg }}">
             </div>
           </div>
         </div>
 
         <div>
           <label>{{ instance.email_field }}</label>
-          <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="Please enter your email">
+          <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
         </div>
 
         <div>
@@ -45,7 +46,7 @@
               {{ instance.description_field|safe }}
           </small>
 
-          <textarea name="when_join" data-validation="required" data-validation-error-msg="Please tell us when you can join"></textarea>
+          <textarea name="when_join" data-validation="required" data-validation-error-msg="{{ instance.when_error_msg }}"></textarea>
         </div>
 
         <div>
@@ -53,10 +54,10 @@
             {{ instance.timezone_field }}
           </label>
 
-          <input type="text" name="timezone" data-validation="required" data-validation-error-msg="Please enter your timezone">
+          <input type="text" name="timezone" data-validation="required" data-validation-error-msg="{{ instance.timezone_error_msg }}">
         </div>
 
-        <input type="submit" value="Keep Me Informed">
+        <input type="submit" value="{{ instance.btn_text }}">
       </div>
     </div>
   </div>
