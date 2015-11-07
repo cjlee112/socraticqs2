@@ -3,7 +3,7 @@ from models import InterestedForm
 
 
 class InterestedFormAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('first_name', 'last_name', 'email', 'timezone')
 
-admin.register(InterestedFormAdmin, InterestedForm)
-# Register your models here.
+
+admin.site.register(InterestedForm, InterestedFormAdmin)
