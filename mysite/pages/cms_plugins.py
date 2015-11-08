@@ -169,6 +169,7 @@ class MiscDetailContainer(CMSPluginBase):
 class InterestedPagePlugin(CMSPluginBase):
     model = InterestedPlugin
     render_template = 'pages/interested_plugin.html'
+    cache = False
 
 
 class DetailsChildPagePlugin(CMSPluginBase):
