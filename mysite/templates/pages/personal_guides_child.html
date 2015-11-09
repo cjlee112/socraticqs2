@@ -1,9 +1,9 @@
-{% load cms_tags %}
+{% load cms_tags thumbnail %}
 
 {% if not instance.hidden %}
 <div class="col-md-6">
 <div class="card">
-  <img src="{{ instance.image.url }}" alt="{{ instance.title }}">
+  <img src="{% thumbnail instance.image 572x356 crop %}" alt="{{ instance.title }}">
 
   <div class="inner">
     <h4>{{ instance.title }}</h4>
