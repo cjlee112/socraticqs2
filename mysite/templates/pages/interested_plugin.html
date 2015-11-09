@@ -26,11 +26,11 @@
 
           <div class="row">
             <div class="col-xs-6">
-              <input type="text" name="first_name" placeholder="First" data-validation="required" data-validation-error-msg="{{ instance.first_name_error_msg }}">
+              <input type="text" name="first_name" placeholder="First" data-validation="required length" data-validation-length="max100" data-validation-error-msg-required="{{ instance.first_name_error_msg }}">
             </div>
 
             <div class="col-xs-6">
-              <input type="text" name="last_name" placeholder="Last" data-validation="required" data-validation-error-msg="{{ instance.last_name_error_msg }}">
+              <input type="text" name="last_name" placeholder="Last" data-validation="required length" data-validation-length="max100" data-validation-error-msg-required="{{ instance.last_name_error_msg }}">
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@
             {{ instance.timezone_field }}
           </label>
 
-          <input type="text" name="timezone" data-validation="required" data-validation-error-msg="{{ instance.timezone_error_msg }}">
+          <input type="text" name="timezone" data-validation="required length" data-validation-length="max70" data-validation-error-msg-required="{{ instance.timezone_error_msg }}">
         </div>
 
         <input type="submit" value="{{ instance.btn_text }}">
