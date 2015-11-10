@@ -8,6 +8,7 @@ amqp==1.4.6
 anyjson==0.3.3
 beautifulsoup4==4.3.2
 billiard==3.3.0.20
+django-storages==1.1.8
 
 # Distributed Task Queue
 celery==3.1.18

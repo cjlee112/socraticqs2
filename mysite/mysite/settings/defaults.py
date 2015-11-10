@@ -372,4 +372,10 @@ CMS_PLACEHOLDER_CONF = {
     'interested_page_placeholder': {
         'plugins': ['InterestedPagePlugin']
     },
+    'landing_page_banner': {
+        'plugins': ['BannerPagePlugin'],
+        'limits': {
+            'global': 1,
+        },
+    },
 }
