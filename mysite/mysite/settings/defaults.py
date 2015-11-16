@@ -378,4 +378,7 @@ CMS_PLACEHOLDER_CONF = {
             'global': 1,
         },
     },
+    'landing_page_slideshare_placeholder': {
+        'plugins': ['SlideSharePagePlugin'],
+    }
 }

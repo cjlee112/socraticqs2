@@ -23,18 +23,13 @@
       <div class="col-md-6 col-md-offset-3">
         <div>
           <label>{{ instance.name_field }}</label>
-
-          <div class="row">
-            <div class="col-xs-6">
-              <input type="text" name="first_name" placeholder="First" data-validation="required length" data-validation-length="max100" data-validation-error-msg-required="{{ instance.first_name_error_msg }}">
-            </div>
-
-            <div class="col-xs-6">
-              <input type="text" name="last_name" placeholder="Last" data-validation="required length" data-validation-length="max100" data-validation-error-msg-required="{{ instance.last_name_error_msg }}">
-            </div>
-          </div>
+              <input type="text" name="name" placeholder="Name" data-validation="required length" data-validation-length="max200" data-validation-error-msg-required="{{ instance.name_error_msg }}">
         </div>
 
+        <div>
+          <label>{{ instance.organization }}</label>
+              <input type="text" name="organization" placeholder="Institute/Organization" data-validation="required length" data-validation-length="max200" data-validation-error-msg-required="{{ instance.last_name_error_msg }}">
+        </div>
         <div>
           <label>{{ instance.email_field }}</label>
           <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">

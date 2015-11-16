@@ -21,7 +21,9 @@ from pages.models import (
     InterestedPlugin,
     DetailsChildPlugin,
     DetailsVideoPlugin,
-    DetailsQuotePlugin
+    DetailsQuotePlugin,
+    SlideShareItemPlugin,
+    SlideSharePlugin
 )
 
 
@@ -195,6 +197,21 @@ class DetailsQuotePagePlugin(CMSPluginBase):
     parent_classes = ['DetailsPagePlugin']
 
 
+class SlideShareItemPagePlugin(CMSPluginBase):
+    model = SlideShareItemPlugin
+    render_template = 'pages/slideshareitem_plugin.html'
+    require_parent = True
+    parent_classes = ['SlideSharePagePlugin']
+
+
+class SlideSharePagePlugin(CMSPluginBase):
+    """docstring for SlideSharePagePlugin"""
+    model = SlideSharePlugin
+    render_template = 'pages/slideshare_plugin.html'
+    allow_children = True
+    child_classes = ['SlideShareItemPagePlugin']
+
+
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)
@@ -216,3 +233,5 @@ plugin_pool.register_plugin(InterestedPagePlugin)
 plugin_pool.register_plugin(DetailsChildPagePlugin)
 plugin_pool.register_plugin(DetailsVideoPagePlugin)
 plugin_pool.register_plugin(DetailsQuotePagePlugin)
+plugin_pool.register_plugin(SlideShareItemPagePlugin)
+plugin_pool.register_plugin(SlideSharePagePlugin)

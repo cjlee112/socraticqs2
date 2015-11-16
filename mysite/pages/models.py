@@ -20,6 +20,10 @@ LIST_TYPES = (
     ('list-header', 'list-header')
 )
 
+SLIDE_SHARE_BACK = (
+    ('gray', 'section-2-cols-bg'),
+    ('none', ''),
+)
 
 class AbstractPlugin(CMSPlugin):
     """
@@ -145,26 +149,19 @@ class MiscItemPlugin(AbstractPlugin):
 
 
 class InterestedPlugin(AbstractPlugin):
-    title = models.CharField(max_length=200, default="I’m Interested in the Online Workshop")
+    title = models.CharField(max_length=200, default="I’m Interested in the hackathon")
     description = models.TextField(
-        default="There is no commitment to take the workshop at this point. "
-                "We'll contact you when we get enough participants to schedule a workshop."
-    )
+        default="Get on our mailing list and we’ll contact you about the next hackathon.")
     name_field = models.CharField(max_length=200, default="Name")
     email_field = models.CharField(max_length=200, default="Email")
-    when_field = models.CharField(max_length=200, default="When can you join?")
-    description_field = fields.HTMLField(
-        default="We plan to host hackathons between ? and ?. "
-                "Please tell us more about your availability below. "
-                "Our hackathons are split into 3 meetings that are about 2 hours long."
-    )
-    timezone_field = models.CharField(max_length=200, default=" What is your timezone?")
+    organization_field = models.CharField(max_length=200, default="Institution/Organization")
 
-    first_name_error_msg = models.CharField(max_length=200, default="Please enter your first name")
-    last_name_error_msg = models.CharField(max_length=200, default="Please enter your last name")
+    role_field = models.CharField(max_length=200, default=" Title/Role")
+
+    name_error_msg = models.CharField(max_length=200, default="Please enter your name")
+    organization_error_msg = models.CharField(max_length=200, default="Please enter your Institute/Organization")
     email_error_msg = models.CharField(max_length=200, default="Please enter your email")
-    when_error_msg = models.CharField(max_length=200, default="Please tell us when you can join")
-    timezone_error_msg = models.CharField(max_length=200, default="Please enter your timezone")
+    role_error_msg = models.CharField(max_length=200, default="Please enter your Title/Role")
 
     email_to = models.EmailField(default='cmathews@elancecloud.com')
 
@@ -175,11 +172,10 @@ class InterestedForm(models.Model):
     """
     Model for save interested form answer and do some later
     """
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=200, blank=True)
+    organization = models.CharField(max_length=200, blank=True)
+    role = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
-    when_join = models.TextField(blank=True)
-    timezone = models.CharField(max_length=70, blank=True)
 
 
 class DetailsChildPlugin(AbstractPlugin):
@@ -194,3 +190,13 @@ class DetailsVideoPlugin(AbstractPlugin):
 class DetailsQuotePlugin(AbstractPlugin):
     quote_text = models.CharField(max_length=200)
     quote_small = models.CharField(max_length=200)
+
+
+class SlideSharePlugin(AbstractPlugin):
+    title = models.CharField(max_length=200)
+    description = fields.HTMLField()
+    background = models.CharField(default='grey', max_length=70, choices=SLIDE_SHARE_BACK)
+
+
+class SlideShareItemPlugin(AbstractPlugin):
+    slideshare_code = models.TextField()
