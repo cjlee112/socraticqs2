@@ -127,3 +127,40 @@ available with specific DB engine given from Django settings, e.g.::
     ...................................
 
     Done.
+
+
+Deploy task
+-----------
+
+These tasks used to deploy the project on the servers. There
+relatively flexible adjustment of behavior. Deployment can
+carried out both locally and on a remote server. Main tasks:
+
+Production deploy task
+----------------------
+
+This task should is used to deploy Productions (In this
+moment don't used because of security)
+
+Staging deploy task
+-------------------
+
+This task is used to update Staging environment
+
+Dev deploy task
+---------------
+
+This task is used to update developer server
+
+
+
+Usage::
+    fab deploy.[environment]:running='[server]',branch='[branch name]'
+
+All task have common interface and have next parameters:
+
+Running[local/remote] -  run deploying command locally or remote
+Branch - name of branch to deploying.
+
+Example::
+    fab deploy.dev:running='local',branch='dev'

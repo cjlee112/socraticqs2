@@ -4,8 +4,10 @@ Fabric task for deploying project on servers(production, staging, development)
 
 
 """
+
 import os
 import sys
+from contextlib import contextmanager
 
 from fabric.contrib import django
 from fabric.api import local, run, lcd, cd
@@ -21,6 +23,21 @@ STAGING_BRANCH = 'master'
 BASE_PATH = os.path.dirname(__file__)
 STAGING_HOST = 'staging.courselets.org'
 
+
+def debug(*args, **kwargs):
+    output = ""
+    for x in args:
+        print x
+        output += str(x)
+    return output
+
+
+@contextmanager
+def debug_cd(path):
+    print "run on path:{0}".format(path)
+    yield
+
+
 class Deploying(Task):
     """
     Deploy project on Production
@@ -32,7 +49,7 @@ class Deploying(Task):
 
     @property
     def project_path(self):
-        return os.path.join(BASE_PATH, '../..')
+        return os.path.join(BASE_PATH, 'socraticqs2')
 
     @property
     def local_settings_path(self):
@@ -83,7 +100,6 @@ class Deploying(Task):
         self.__restart_service()
 
     def run(self, running='local', branch='master', suffix=None):
-        print self.code_branch
         self.code_branch = branch
         if running == 'local':
             self.func = local
@@ -97,10 +113,16 @@ class Deploying(Task):
             BASE_PATH = env.project_root
             with self.func_cd(self.project_path):
                 self.__update()
+        elif running == 'debug':
+            print("DEBUG:\n")
+            self.func = debug
+            self.func_cd = debug_cd
+            self.__update()
 
 
 class Staging(Deploying):
     """Deploy on Staging"""
+
     def _get_settings(self, branch='master'):
         """On dev/staging we don't use production settings"""
         with self.func_cd(self.local_settings_path):
@@ -116,6 +138,7 @@ class Development(Staging):
     Example:
         fab deploy.dev:running='local', branch='dev'
     """
+
     @property
     def project_path(self):
         if self.func == local:
