@@ -1,0 +1,11 @@
+db:
+ image: postgres
+web:
+ image: courselets
+ command: sh /code/docker-commands.sh
+ volumes:
+   - .:/code
+ ports:
+   - "8000:8000"
+ links:
+   - db
