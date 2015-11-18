@@ -12,7 +12,7 @@ django-crispy-forms==1.4.0
 httplib2==0.9.1
 
 # LTI python implementation
--e git+https://github.com/mitodl/ims_lti_py.git@d96a6201cf3b63b9e1b33780ef5e29bc65242ceb#egg=ims_lti_py-origin
+git+https://github.com/mitodl/ims_lti_py.git@d96a6201cf3b63b9e1b33780ef5e29bc65242ceb
 
 kombu==3.0.26
 lxml==3.4.4
