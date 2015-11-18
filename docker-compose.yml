@@ -1,7 +1,7 @@
 db:
  image: postgres
 web:
- image: courselets
+ image: maxsocl/courselets:latest
  command: sh /code/docker-commands.sh
  volumes:
    - .:/code
