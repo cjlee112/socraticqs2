@@ -12,12 +12,14 @@ Contents:
    :maxdepth: 2
 
    devintro
+   docker
    fsm
    lti
    psa
    fab
 
-Project Enhancement Proposals:
+
+   Project Enhancement Proposals:
 
 .. toctree::
    :maxdepth: 2
