@@ -279,7 +279,19 @@ test suite::
 
 You should see a series of tests pass successfully.
 
-By default test suite is running on sqlite database to get a speed boost but you can change this by commenting out next lines in you local_conf.py::
+There are not all tests that you can run, also you can run
+``functional`` and ``bdd`` tests::
+
+  cd socraticqs2/mysite
+  python manage.py test ct.tests.functional
+  python manage.py test ct.tests.bdd
+
+These tests are not started by default because they are
+required Internet access.
+
+
+By default test suite is running on sqlite database to get a speed
+boost but you can change this by commenting out next lines in you local_conf.py::
 
     if 'test' in sys.argv or 'test_coverage' in sys.argv:
         DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'

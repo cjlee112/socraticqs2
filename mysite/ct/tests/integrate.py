@@ -4,7 +4,6 @@ Tests Wikipedia api.
 Tests branching behaviour of core app.
 """
 import time
-import urllib
 
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -44,45 +43,6 @@ class ConceptMethodTests(OurTestCase):
         )
         self.unit = Unit(title='My Courselet', addedBy=self.user)
         self.unit.save()
-
-    def test_sourceDB(self):
-        'check wikipedia concept retrieval'
-        c, lesson = Concept.get_from_sourceDB('New York City', self.user)
-        self.assertEqual(c.title, 'New York City')
-        self.assertEqual(c.addedBy, self.user)
-        self.assertEqual(lesson.addedBy, self.wikiUser)
-        self.assertEqual(lesson.concept, c)
-        self.assertTrue(lesson.is_committed())
-        self.assertEqual(lesson.changeLog, 'initial text from wikipedia')
-        self.assertEqual(lesson.sourceDB, 'wikipedia')
-        self.assertEqual(lesson.sourceID, 'New York City')
-        self.assertIn('City of New York', lesson.text)
-        # check that subsequent retrieval uses stored db record
-        c2, l2 = Concept.get_from_sourceDB('New York City', self.user)
-        self.assertEqual(c2.pk, c.pk)
-        self.assertEqual(l2.pk, lesson.pk)
-        self.assertIn(c, list(Concept.search_text('new york')))
-
-    def test_sourceDB_temp(self):
-        'check wikipedia temporary document retrieval'
-        lesson = Lesson.get_from_sourceDB('New York City', self.user,
-                                          doSave=False)
-        self.assertIn('City of New York', lesson.text)  # got the text?
-        self.assertEqual(Lesson.objects.count(), 0)  # nothing saved?
-
-    def test_wikipedia_view(self):
-        'check wikipedia view and concept addition method'
-        url = '/ct/teach/courses/1/units/%d/concepts/wikipedia/%s/' \
-            % (self.unit.pk, urllib.quote('New York City'))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'City of New York')
-        self.check_post_get(url, dict(task='add'), '/', 'City of New York')
-        ul = UnitLesson.objects.get(
-            lesson__concept__title='New York City', unit=self.unit
-        )  # check UL & concept added
-        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City')[0])
-        self.assertTrue(ul in UnitLesson.search_sourceDB('New York City', unit=self.unit)[0])
 
     def test_new_concept(self):
         'check standard creation of a concept bound to a UnitLesson'
@@ -209,13 +169,6 @@ class LessonMethodTests(TestCase):
         lesson.save_root()
         l2 = Lesson.objects.get(pk=lesson.pk)
         self.assertEqual(l2.treeID, l2.pk)
-
-    def test_search_sourceDB(self):
-        'check wikipedia search'
-        results = Lesson.search_sourceDB('new york city')
-        self.assertTrue(len(results) >= 10)
-        self.assertIn('New York City', [t[0] for t in results])
-        self.assertEqual(len(results[0]), 3)
 
     def test_checkout(self):
         'check Lesson commit and checkout'

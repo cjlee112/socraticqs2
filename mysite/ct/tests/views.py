@@ -666,7 +666,6 @@ class UpdateConceptTest(TestCase):
         self.assertEqual(self.conceptLinks.replace.call_count, 0)
 
 
-# TODO need move to integrate tests - make request to wikipedia.org
 class ConceptsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -693,22 +692,6 @@ class ConceptsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/concepts.html')
         self.assertIn('actionTarget', response.context)
-
-    def test_unit_concepts_search(self):
-        self.lesson.concept = self.concept
-        self.lesson.save()
-        response = self.client.get(
-            reverse('ct:unit_concepts', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id}),
-            {'search': 'New York'},
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ct/concepts.html')
-        self.assertIn('actionTarget', response.context)
-        cset_dict = {i[0]: i[1] for i in response.context['cset']}
-        self.assertIn('New York Test Lesson', cset_dict)
-        self.assertIn('New York', cset_dict)
-        self.assertIn('The New York Times Company', cset_dict)
 
 
 class UlConcepts(TestCase):
@@ -1903,6 +1886,9 @@ class AssessErrorsTest(TestCase):
         self.assertIn('showAnswer', response.context)
 
     def test_assess_errors_post(self):
+        """
+        Test assess_error view. View should create new StudentError and redirect to `next`.
+        """
         response = self.client.post(
             reverse(
                 'ct:assess_errors',
@@ -1917,37 +1903,6 @@ class AssessErrorsTest(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ct/lesson_tasks.html')
-        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
-        self.assertEqual(response.context['unit'], self.unit)
-        self.assertIn('unitLesson', response.context)
-        self.assertIn('unit', response.context)
-        self.assertIn('responseTable', response.context)
-        self.assertIn('errorTable', response.context)
-        self.assertFalse(StudentError.objects.filter(status='review').exists())
-
-    def test_assess_errors_post_new_user(self):
-        self.user_new = User.objects.create_user(username='test2', password='test2')
-        self.client.login(username='test2', password='test2')
-        response = self.client.post(
-            reverse(
-                'ct:assess_errors',
-                kwargs={
-                  'course_id': self.course.id,
-                  'unit_id': self.unit.id,
-                  'ul_id': self.unit_lesson.id,
-                  'resp_id': self.response.id
-                }
-            ),
-            {'emlist': self.unit_lesson.id},
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ct/lesson_tasks.html')
-        self.assertEqual(response.context['unitLesson'], self.unit_lesson)
-        self.assertEqual(response.context['unit'], self.unit)
-        self.assertIn('unitLesson', response.context)
-        self.assertIn('unit', response.context)
-        self.assertIn('responseTable', response.context)
-        self.assertIn('errorTable', response.context)
-        self.assertTrue(StudentError.objects.filter(status='review').exists())
+        self.assertTemplateUsed(response, 'ct/unit_tasks_student.html')
+        self.assertTrue(StudentError.objects.filter(author=self.user).exists())
+        self.assertEqual(StudentError.objects.filter(author=self.user).count(), 2)

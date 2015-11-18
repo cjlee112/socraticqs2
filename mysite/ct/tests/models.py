@@ -232,27 +232,6 @@ class LessonTest(TestCase):
         result = Lesson.get_sourceDB_plugin('wikipedia')
         self.assertEqual(result, LessonDoc)
 
-    # Need to move to integrate tests - get data from wiki
-    def test_get_from_sourceDB(self):
-        lesson = Lesson.get_from_sourceDB('New York', self.user)
-        self.assertIsInstance(lesson, Lesson)
-        self.assertEqual(lesson.addedBy, self.user)
-        self.assertEqual(lesson.title, 'New York')
-        self.assertEqual(lesson.sourceDB, 'wikipedia')
-        self.assertIsNotNone(lesson.commitTime)
-        self.assertTrue(Lesson.objects.filter(addedBy=self.user).exists())
-
-    # Need to move to integrate tests - get data from wiki
-    def test_get_from_sourceDB_noSave_wiki_user(self):
-        user = User.objects.create_user(username='wikipedia', password='wiki')
-        lesson = Lesson.get_from_sourceDB('New York', user, doSave=False)
-        self.assertIsInstance(lesson, Lesson)
-        self.assertEqual(lesson.addedBy, user)
-        self.assertEqual(lesson.title, 'New York')
-        self.assertEqual(lesson.sourceDB, 'wikipedia')
-        self.assertIsNotNone(lesson.commitTime)
-        self.assertFalse(Lesson.objects.filter(addedBy=self.user).exists())
-
     @patch('ct.models.Lesson.get_sourceDB_plugin')
     def test_get_from_sourceDB_unittest(self, get_sourceDB_plugin):
         data = Mock()
@@ -1031,22 +1010,23 @@ class UnitTest(TestCase):
             author=self.user
         )
         response.save()
-        user2 = User.objects.create_user(username='test2', password='test2')
+
         result = self.unit.get_unanswered_uls(user=self.user)
         self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], self.unit_lesson_order_null)
+        self.assertEqual(len(result), 0)
 
+        user2 = User.objects.create_user(username='test2', password='test2')
         result = self.unit.get_unanswered_uls(user=user2)
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], self.unit_lesson)
 
+        # get_unanswered_uls is not count ul's without order
         self.unit_lesson_order_null.treeID = 99
         self.unit_lesson_order_null.save()
         result = self.unit.get_unanswered_uls(user=user2)
         self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 1)  # not 2
 
     def test_get_selfeval_uls(self):
         course = Course(title='test course', description='test descr', addedBy=self.user)
