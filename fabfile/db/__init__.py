@@ -140,10 +140,8 @@ class BaseTask(Task):
             self.port = self.port or (
                 self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
                 )
-            self.user = self.name or self.db_cfg['NAME']
-            self.password = self.password or (
-                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
-                )
+            self.user = self.user or self.db_cfg['USER']
+            self.password = self.password or self.db_cfg['PASSWORD']
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
                 f.write('%s:%s:*:%s:%s' % (self.host,
                                                   self.port,
