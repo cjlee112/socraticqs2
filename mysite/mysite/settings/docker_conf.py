@@ -1,16 +1,18 @@
 # coding: utf-8
 
+import os
 import sys
 
 # Default DB settings for docker postgres container
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'postgres',
-       'USER': 'postgres',
-       'HOST': 'db',
-       'PORT': 5432,
-   }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['PGPASSWORD'],
+        'HOST': os.environ['DB_SERVICE'],
+        'PORT': os.environ['DB_PORT']
+    }
 }
 
 SOCIAL_AUTH_TWITTER_KEY = ''
