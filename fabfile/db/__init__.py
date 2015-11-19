@@ -16,7 +16,7 @@ Init DB task
 ------------
 Usage::
 
-    fab db.init[:port][:host]
+    fab db.init[:port][:host][:user][:password]
 
 This task performs following actions:
 
@@ -30,6 +30,8 @@ If ``port`` is not presented task gets it from settings or if it not presented i
 settings too give it standart value.
 If ``host`` is not presented task gets it from settings or if it not presented in
 settings too gives it standart value.
+If you want to use User and Password not the same as in settings you can type them
+in command line.
 
 Backup DB task
 --------------
