@@ -35,7 +35,7 @@ Backup DB task
 --------------
 Usage::
 
-    fab db.backup[:custom_branch_name][:port][:host][:bakup_path]
+    fab db.backup[:custom_branch_name][:port][:host][:backup_path]
 
 This task performs following actions:
 
@@ -53,14 +53,14 @@ If ``port`` is not presented task gets it from settings or if it not presented i
 settings too give it standart value.
 If ``host`` is not presented task gets it from settings or if it not presented in
 settings too gives it standart value.
-If ``bakup_path`` param is not presented task get backup file from 'backups'
+If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
 
 Restore DB task
 ---------------
 Usage::
 
-    fab db.restore[:custom_branch_name][:port][:host][:bakup_path]
+    fab db.restore[:custom_branch_name][:port][:host][:backup_path]
 
 This task performs following actions:
 
@@ -76,7 +76,7 @@ If ``port`` is not presented task gets it from settings or if it not presented i
 settings too give it standart value.
 If ``host`` is not presented task gets it from settings or if it not presented in
 settings too gives it standart value.
-If ``bakup_path`` param is not presented task get backup file from 'backups'
+If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
 
 If task can not find backup file it will list for you all backup files
@@ -109,6 +109,8 @@ class BaseTask(Task):
     backup_path = None
     port = None
     host = None
+    user = None
+    password = None
 
     def run(self, action, suffix=None):
         handlers = {
@@ -130,13 +132,21 @@ class BaseTask(Task):
         Decorator that adds PostgreSQL specific actions to task.
         """
         def wrapped(self, *args, **kwargs):
-            self.host = self.host or (self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost')
-            self.port = self.port or (self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432')
+            self.host = self.host or (
+                self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost'
+                )
+            self.port = self.port or (
+                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
+                )
+            self.user = self.name or self.db_cfg['NAME']
+            self.password = self.password or (
+                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
+                )
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
                 f.write('%s:%s:*:%s:%s' % (self.host,
                                                   self.port,
-                                                  self.db_cfg['USER'],
-                                                  self.db_cfg['PASSWORD']))
+                                                  self.user,
+                                                  self.password))
             os.environ["PGPASSFILE"] = f.name
             fn(self, *args, **kwargs)
             local('rm %s ' % f.name)
@@ -151,20 +161,28 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local('dropdb %s --username=%s -w' % (self.db_cfg['NAME'],
                                                   self.db_cfg['USER']))
-            local('createdb %s encoding="UTF8" --username=%s -w ' % (self.db_cfg['NAME'],
-                                                                     self.db_cfg['USER']))
+            local('createdb %s encoding="UTF8" --username=%s -w ' %
+                  (self.db_cfg['NAME'],
+                   self.db_cfg['USER']))
             local('%s/bin/python mysite/manage.py migrate' % env.venv_name)
-            local('%s/bin/python mysite/manage.py loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
+            local('%s/bin/python mysite/manage.py '
+                  'loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
             local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_name)
 
     def init_db_sqlite(self, *args, **kwargs):
         """
         Init db to original state for sqlite.
         """
-        with lcd(self.base_path+'/mysite/'), settings(hide('warnings'), warn_only=True):
+        path = os.path.dirname(os.path.dirname(
+               os.path.dirname(os.path.dirname(self.base_path))))
+        with lcd(os.path.join(path,'mysite/')), settings(hide('warnings'), warn_only=True):
+            local('pwd')
             local('rm %s' % (self.db_cfg['NAME']))
             local('%s/bin/python manage.py migrate' % env.venv_name)
-            local('%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' % env.venv_name)
+            local(
+                '%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' %
+                 env.venv_name
+                )
             local('%s/bin/python manage.py fsm_deploy' % env.venv_name)
 
     @postgres
@@ -175,15 +193,17 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
                 'pg_dump %s -U %s -w > %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.backup_path, suffix)
+                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                   self.backup_path, suffix)
             )
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
                 % (self.db_cfg['NAME'], self.db_cfg['USER'])
             )
             x = local(
-                'psql %s_temp -U %s -w < %s/backups/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix),
+                'psql %s_temp -U %s -w < %s/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                   self.backup_path, suffix),
                 capture=True)
             if not x.stderr:
                 print 'Bakup is ok'
@@ -199,7 +219,8 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
                 'cp %s/%s %s/backup.sqlite.%s'
-                % (dj_settings.BASE_DIR, self.db_cfg['NAME'], self.backup_path, suffix)
+                % (dj_settings.BASE_DIR, self.db_cfg['NAME'],
+                   self.backup_path, suffix)
             )
 
     @postgres
@@ -208,7 +229,8 @@ class BaseTask(Task):
         Restore Postgres DB.
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            if not local('ls %s/backups/backup.postgres.%s' % (self.base_path, suffix)).succeeded:
+            if not local('ls %s/backup.postgres.%s' %
+                        (self.backup_path, suffix)).succeeded:
                 return self.list_backups('postgres')
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
                                                         self.db_cfg['USER']))
@@ -217,15 +239,17 @@ class BaseTask(Task):
                 % (self.db_cfg['NAME'], self.db_cfg['USER'])
             )
             x = local(
-                'psql %s_temp -U %s -w < %s/backups/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.base_path, suffix),
+                'psql %s_temp -U %s -w < %s/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                   self.backup_path, suffix),
                 capture=True)
             if not x.stderr:
                 local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
                                                        self.db_cfg['USER']))
-                local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' % (self.db_cfg['USER'],
-                                                                               self.db_cfg['NAME'],
-                                                                               self.db_cfg['NAME']))
+                local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' %
+                      (self.db_cfg['USER'],
+                       self.db_cfg['NAME'],
+                       self.db_cfg['NAME']))
                 print 'Restore is ok'
             else:
                 print 'An error has occurred'
@@ -237,7 +261,8 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             result = local(
                 'cp %s/backup.sqlite.%s %s/%s'
-                % (self.backup_path, suffix, dj_settings.BASE_DIR, self.db_cfg['NAME'])
+                % (self.backup_path, suffix, dj_settings.BASE_DIR,
+                   self.db_cfg['NAME'])
             )
             if not result.succeeded:
                 self.list_backups('sqlite')
@@ -283,14 +308,16 @@ class BackupDBTask(BaseTask):
 
 class InitDBTask(BaseTask):
     """
-    Backup db task.
+    Init db task.
     """
     name = 'init'
     action = 'init'
 
-    def run(self, port=None, host=None):
+    def run(self, port=None, host=None, user=None, password=None):
         self.port = port
         self.host = host
+        self.user = user
+        self.password = password
         super(InitDBTask, self).run(self.action)
 
 
