@@ -5,6 +5,8 @@ Getting Started with Socraticqs2 Development
 Installation and setup
 -----------------------
 
+There are two ways to deploy project on you machine - local installation using virtualenv and :doc:`docker`.
+
 Recommended: use virtualenv to create an isolated test environment
 .....................................................................
 

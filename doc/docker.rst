@@ -47,24 +47,24 @@ Docker gives conviniet and simple way to install projest on the local machine.
 When you get your Docker installation done. You have to go to **socraticqs2**
 folder and run:
 ::
-    docker-compouse up
+    docker-compouse up web
 
 After that you'll get two Docker containers: one for the project and one for
 the Postgres database. While making containers, file
-/mysite/mysite/settings/docker_conf.py is copying into file local_conf.py if
-you already have local_conf.py file it will leave your file without changes.
-If you want to use your local_conf.py, but want to connect to Docker database
-container you have to add such database preferences to your local_conf.py:
+``/mysite/mysite/settings/docker_conf.py`` is copying into file ``local_conf.py`` if
+you already have ``local_conf.py`` file it will leave your file without changes.
+If you want to use your ``local_conf.py``, but want to connect to Docker database
+container you have to add such database preferences to your ``local_conf.py``:
 ::
     DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'postgres',
-       'USER': 'postgres',
-       'HOST': 'db',
-       'PORT': 5432,
-              }
-   }
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'HOST': 'db',
+            'PORT': 5432,
+        }
+    }
 
 To get connect to the runnig project on Linux machine you can just go to link
 ::
@@ -79,11 +79,17 @@ And connect usig this IP address:
 ::
     http://<ip-adress>:8000
 
-One more thing you have to do befor start to use Socraticqs2 is migrations.
-To do migrations you have to shut down containers and rum command
+One more thing you have to do before start to use Socraticqs2 is migrations.
+
+To do migrations you have to shut down containers and run command
 ::
     docker-compose run web python manage.py migrate
 
 In such a way you can run any command related to the project inside the Docker
-container. Also you can start Fabric deployment tool to get databases
-into initial state.
+container
+::
+
+    docker-compose run web python manage.py loaddata dumpdata/debug-wo-fsm.json
+    docker-compose run web python manage.py fsm_deploy
+
+Fabric deployment tool is not tuned yet for using with docker.
