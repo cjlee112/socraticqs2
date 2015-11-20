@@ -160,10 +160,10 @@ class BaseTask(Task):
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local('dropdb %s --username=%s -w' % (self.db_cfg['NAME'],
-                                                  self.db_cfg['USER']))
+                                                  self.user))
             local('createdb %s encoding="UTF8" --username=%s -w ' %
                   (self.db_cfg['NAME'],
-                   self.db_cfg['USER']))
+                   self.user))
             local('%s/bin/python mysite/manage.py migrate' % env.venv_name)
             local('%s/bin/python mysite/manage.py '
                   'loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
@@ -193,16 +193,16 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
                 'pg_dump %s -U %s -w > %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                % (self.db_cfg['NAME'], self.user,
                    self.backup_path, suffix)
             )
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'])
+                % (self.db_cfg['NAME'], self.user)
             )
             x = local(
                 'psql %s_temp -U %s -w < %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                % (self.db_cfg['NAME'], self.user,
                    self.backup_path, suffix),
                 capture=True)
             if not x.stderr:
@@ -210,16 +210,18 @@ class BaseTask(Task):
             else:
                 print 'An error has occurred while backup'
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
+                                                        self.user))
 
     def backup_db_sqlite(self, suffix, *args, **kwargs):
         """
         Backup Sqlite DB.
         """
-        with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
+        path = os.path.dirname(os.path.dirname(
+               os.path.dirname(os.path.dirname(self.base_path))))
+        with lcd(os.path.join(path,'mysite/')), settings(hide('warnings'), warn_only=True):
             local(
-                'cp %s/%s %s/backup.sqlite.%s'
-                % (dj_settings.BASE_DIR, self.db_cfg['NAME'],
+                'cp %s %s/backup.sqlite.%s'
+                % (self.db_cfg['NAME'],
                    self.backup_path, suffix)
             )
 
@@ -233,10 +235,10 @@ class BaseTask(Task):
                         (self.backup_path, suffix)).succeeded:
                 return self.list_backups('postgres')
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
+                                                        self.user))
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'])
+                % (self.db_cfg['NAME'], self.user)
             )
             x = local(
                 'psql %s_temp -U %s -w < %s/backup.postgres.%s'
@@ -245,9 +247,9 @@ class BaseTask(Task):
                 capture=True)
             if not x.stderr:
                 local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
-                                                       self.db_cfg['USER']))
+                                                       self.user))
                 local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' %
-                      (self.db_cfg['USER'],
+                      (self.user,
                        self.db_cfg['NAME'],
                        self.db_cfg['NAME']))
                 print 'Restore is ok'
@@ -258,11 +260,12 @@ class BaseTask(Task):
         """
         Restore Sqlite DB.
         """
-        with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
+        path = os.path.dirname(os.path.dirname(
+               os.path.dirname(os.path.dirname(self.base_path))))
+        with lcd(path), settings(hide('warnings'), warn_only=True):
             result = local(
-                'cp %s/backup.sqlite.%s %s/%s'
-                % (self.backup_path, suffix, dj_settings.BASE_DIR,
-                   self.db_cfg['NAME'])
+                'cp %s/backup.sqlite.%s %s'
+                % (self.backup_path, suffix, self.db_cfg['NAME'])
             )
             if not result.succeeded:
                 self.list_backups('sqlite')
