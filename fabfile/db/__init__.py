@@ -37,7 +37,7 @@ Backup DB task
 --------------
 Usage::
 
-    fab db.backup[:custom_branch_name][:port][:host][:backup_path]
+    fab db.backup[:custom_branch_name][:port][:host][:backup_path][:user][:password]
 
 This task performs following actions:
 
@@ -57,12 +57,14 @@ If ``host`` is not presented task gets it from settings or if it not presented i
 settings too gives it standart value.
 If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
+If you want to use User and Password not the same as in settings you can type them
+in command line.
 
 Restore DB task
 ---------------
 Usage::
 
-    fab db.restore[:custom_branch_name][:port][:host][:backup_path]
+    fab db.restore[:custom_branch_name][:port][:host][:backup_path][:user][:password]
 
 This task performs following actions:
 
@@ -80,6 +82,8 @@ If ``host`` is not presented task gets it from settings or if it not presented i
 settings too gives it standart value.
 If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
+If you want to use User and Password not the same as in settings you can type them
+in command line.
 
 If task can not find backup file it will list for you all backup files
 available with specific DB engine given from Django settings.
@@ -288,7 +292,7 @@ class RestoreDBTask(BaseTask):
     name = 'restore'
     action = 'restore'
 
-    def run(self, suffix=None, backup_path=None, port=None, host=None):
+    def run(self, suffix=None, backup_path=None, port=None, host=None, user=None, password=None):
         self.backup_path = backup_path or (self.base_path + '/backups/')
         self.port = port
         self.host = host
@@ -302,7 +306,7 @@ class BackupDBTask(BaseTask):
     name = 'backup'
     action = 'backup'
 
-    def run(self, suffix=None, backup_path=None, port=None, host=None):
+    def run(self, suffix=None, backup_path=None, port=None, host=None, user=None, password=None):
         self.backup_path = backup_path or (self.base_path + '/backups')
         self.port = port
         self.host = host
