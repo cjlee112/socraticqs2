@@ -2,9 +2,9 @@
 
 Params:
 
-- env.venv_name: name of the current virtualenv
+- env.venv_path: path to the current virtualenv
 """
 from fabric.api import env
 
 
-env.venv_name = '_ve_socraticqs2'
+env.venv_path = '~/_ve_socraticqs2'

@@ -16,7 +16,7 @@ Init DB task
 ------------
 Usage::
 
-    fab db.init[:port][:host][:user][:password]
+    fab db.init[:port=5432][,host=localhost][,user=username][,password=password]
 
 This task performs following actions:
 
@@ -37,7 +37,7 @@ Backup DB task
 --------------
 Usage::
 
-    fab db.backup[:custom_branch_name][:port][:host][:backup_path][:user][:password]
+    fab db.backup[:custom_branch_name][,port=5432][,host=localhost][,backup_path=backup_path][,user=username][,password=password]
 
 This task performs following actions:
 
@@ -64,7 +64,7 @@ Restore DB task
 ---------------
 Usage::
 
-    fab db.restore[:custom_branch_name][:port][:host][:backup_path][:user][:password]
+    fab db.restore[:custom_branch_name][,port=5432][,host=localhost][,backup_path=path][,user=username][,password=password]
 
 This task performs following actions:
 
@@ -148,14 +148,13 @@ class BaseTask(Task):
             self.password = self.password or self.db_cfg['PASSWORD']
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
                 f.write('%s:%s:*:%s:%s' % (self.host,
-                                                  self.port,
-                                                  self.user,
-                                                  self.password))
+                                           self.port,
+                                           self.user,
+                                           self.password))
             os.environ["PGPASSFILE"] = f.name
             fn(self, *args, **kwargs)
             local('rm %s ' % f.name)
         return wrapped
-
 
     @postgres
     def init_db_postgres(self, *args, **kwargs):
@@ -168,10 +167,11 @@ class BaseTask(Task):
             local('createdb %s encoding="UTF8" --username=%s -w ' %
                   (self.db_cfg['NAME'],
                    self.user))
-            local('%s/bin/python mysite/manage.py migrate' % env.venv_name)
+
+            local('%s/bin/python mysite/manage.py migrate' % env.venv_path)
             local('%s/bin/python mysite/manage.py '
-                  'loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_name)
-            local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_name)
+                  'loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_path)
+            local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_path)
 
     def init_db_sqlite(self, *args, **kwargs):
         """
@@ -179,15 +179,12 @@ class BaseTask(Task):
         """
         path = os.path.dirname(os.path.dirname(
                os.path.dirname(os.path.dirname(self.base_path))))
-        with lcd(os.path.join(path,'mysite/')), settings(hide('warnings'), warn_only=True):
+        with lcd(os.path.join(path, 'mysite/')), settings(hide('warnings'), warn_only=True):
             local('pwd')
             local('rm %s' % (self.db_cfg['NAME']))
-            local('%s/bin/python manage.py migrate' % env.venv_name)
-            local(
-                '%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' %
-                 env.venv_name
-                )
-            local('%s/bin/python manage.py fsm_deploy' % env.venv_name)
+            local('%s/bin/python manage.py migrate' % env.venv_path)
+            local('%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' % env.venv_path)
+            local('%s/bin/python manage.py fsm_deploy' % env.venv_path)
 
     @postgres
     def backup_db_postgres(self, suffix, *args, **kwargs):
