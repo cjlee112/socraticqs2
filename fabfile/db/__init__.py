@@ -16,7 +16,7 @@ Init DB task
 ------------
 Usage::
 
-    fab db.init[:port=5432][,host=localhost][,user=username][,password=password]
+    fab db.init[:dbport=5432][:dbhost=localhost][,user=username][,password=password][,name=DBname]
 
 This task performs following actions:
 
@@ -32,12 +32,14 @@ If ``host`` is not presented task gets it from settings or if it not presented i
 settings too gives it standart value.
 If you want to use User and Password not the same as in settings you can type them
 in command line.
+If you want to use Database Name not the same as in settings you can type it
+in command line.
 
 Backup DB task
 --------------
 Usage::
 
-    fab db.backup[:custom_branch_name][,port=5432][,host=localhost][,backup_path=backup_path][,user=username][,password=password]
+    fab db.backup[:custom_branch_name][,dbport=5432][,dbhost=localhost][,backup_path=backup_path][,user=username][,password=password][,name=DBname]
 
 This task performs following actions:
 
@@ -59,12 +61,14 @@ If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
 If you want to use User and Password not the same as in settings you can type them
 in command line.
+If you want to use Database Name not the same as in settings you can type it
+in command line.
 
 Restore DB task
 ---------------
 Usage::
 
-    fab db.restore[:custom_branch_name][,port=5432][,host=localhost][,backup_path=path][,user=username][,password=password]
+    fab db.restore[:custom_branch_name][,dbport=5432][,dbhost=localhost][,backup_path=path][,user=username][,password=password][,name=DBname]
 
 This task performs following actions:
 
@@ -84,6 +88,8 @@ If ``backup_path`` param is not presented task get backup file from 'backups'
 folder in root folder of project.
 If you want to use User and Password not the same as in settings you can type them
 in command line.
+If you want to use Database Name not the same as in settings you can type it
+in command line.
 
 If task can not find backup file it will list for you all backup files
 available with specific DB engine given from Django settings.
@@ -91,6 +97,9 @@ available with specific DB engine given from Django settings.
 import re
 import os
 import sys
+
+from django.core.management import call_command
+
 
 from fab_settings import env
 from fabric.contrib import django
@@ -103,7 +112,8 @@ sys.path.append(os.path.dirname(__file__) + '/../../mysite/')
 
 django.settings_module('mysite.settings')
 from django.conf import settings as dj_settings
-
+import django
+django.setup()
 
 class BaseTask(Task):
     """
@@ -116,6 +126,7 @@ class BaseTask(Task):
     port = None
     host = None
     user = None
+    name = None
     password = None
 
     def run(self, action, suffix=None):
@@ -128,6 +139,15 @@ class BaseTask(Task):
         suffix = re.sub(r'!', r'\\!', suffix)
         suffix = re.sub(r'\$', r'U+0024', suffix)
         suffix = re.sub(r'`', r'\\`', suffix)
+        self.db_cfg['NAME'] = self.name or self.db_cfg['NAME']
+        self.db_cfg['USER'] = self.user or self.db_cfg['USER']
+        self.db_cfg['PASSWORD'] = self.password or self.db_cfg['PASSWORD']
+        self.db_cfg['HOST'] = self.host or (
+                self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost'
+                                            )
+        self.db_cfg['PORT'] = self.port or (
+                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
+                                            )
         try:
             handlers[self.engine].__call__(self, suffix)
         except KeyError:
@@ -138,19 +158,11 @@ class BaseTask(Task):
         Decorator that adds PostgreSQL specific actions to task.
         """
         def wrapped(self, *args, **kwargs):
-            self.host = self.host or (
-                self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost'
-                )
-            self.port = self.port or (
-                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
-                )
-            self.user = self.user or self.db_cfg['USER']
-            self.password = self.password or self.db_cfg['PASSWORD']
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
-                f.write('%s:%s:*:%s:%s' % (self.host,
-                                           self.port,
-                                           self.user,
-                                           self.password))
+                f.write('%s:%s:*:%s:%s' % (self.db_cfg['HOST'],
+                                           self.db_cfg['PORT'],
+                                           self.db_cfg['USER'],
+                                           self.db_cfg['PASSWORD']))
             os.environ["PGPASSFILE"] = f.name
             fn(self, *args, **kwargs)
             local('rm %s ' % f.name)
@@ -161,17 +173,18 @@ class BaseTask(Task):
         """
         Init db to original state for postgres.
         """
+        path = os.path.dirname(os.path.dirname(
+               os.path.dirname(os.path.dirname(self.base_path))))
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local('dropdb %s --username=%s -w' % (self.db_cfg['NAME'],
-                                                  self.user))
+                                                  self.db_cfg['USER']))
             local('createdb %s encoding="UTF8" --username=%s -w ' %
                   (self.db_cfg['NAME'],
-                   self.user))
+                   self.db_cfg['USER']))
+            call_command('migrate')
+            call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
+            call_command('fsm_deploy')
 
-            local('%s/bin/python mysite/manage.py migrate' % env.venv_path)
-            local('%s/bin/python mysite/manage.py '
-                  'loaddata mysite/dumpdata/debug-wo-fsm.json' % env.venv_path)
-            local('%s/bin/python mysite/manage.py fsm_deploy' % env.venv_path)
 
     def init_db_sqlite(self, *args, **kwargs):
         """
@@ -182,9 +195,10 @@ class BaseTask(Task):
         with lcd(os.path.join(path, 'mysite/')), settings(hide('warnings'), warn_only=True):
             local('pwd')
             local('rm %s' % (self.db_cfg['NAME']))
-            local('%s/bin/python manage.py migrate' % env.venv_path)
-            local('%s/bin/python manage.py loaddata dumpdata/debug-wo-fsm.json' % env.venv_path)
-            local('%s/bin/python manage.py fsm_deploy' % env.venv_path)
+            call_command('migrate')
+            call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
+            call_command('fsm_deploy')
+
 
     @postgres
     def backup_db_postgres(self, suffix, *args, **kwargs):
@@ -289,10 +303,14 @@ class RestoreDBTask(BaseTask):
     name = 'restore'
     action = 'restore'
 
-    def run(self, suffix=None, backup_path=None, port=None, host=None, user=None, password=None):
+    def run(self, suffix=None, backup_path=None, dbport=None, dbhost=None,
+            user=None, password=None, name=None):
         self.backup_path = backup_path or (self.base_path + '/backups/')
-        self.port = port
-        self.host = host
+        self.port = dbport
+        self.host = dbhost
+        self.user = user
+        self.name = name
+        self.password = password
         super(RestoreDBTask, self).run(self.action, suffix)
 
 
@@ -303,10 +321,14 @@ class BackupDBTask(BaseTask):
     name = 'backup'
     action = 'backup'
 
-    def run(self, suffix=None, backup_path=None, port=None, host=None, user=None, password=None):
+    def run(self, suffix=None, backup_path=None, dbport=None, dbhost=None,
+            user=None, password=None, name=None):
         self.backup_path = backup_path or (self.base_path + '/backups')
-        self.port = port
-        self.host = host
+        self.port = dbport
+        self.host = dbhost
+        self.user = user
+        self.name = name
+        self.password = password
         super(BackupDBTask, self).run(self.action, suffix)
 
 
@@ -317,10 +339,11 @@ class InitDBTask(BaseTask):
     name = 'init'
     action = 'init'
 
-    def run(self, port=None, host=None, user=None, password=None):
-        self.port = port
-        self.host = host
+    def run(self, dbport=None, dbhost=None, user=None, password=None, name=None):
+        self.port = dbport
+        self.host = dbhost
         self.user = user
+        self.name = name
         self.password = password
         super(InitDBTask, self).run(self.action)
 
@@ -328,3 +351,5 @@ class InitDBTask(BaseTask):
 restore = RestoreDBTask()
 backup = BackupDBTask()
 init = InitDBTask()
+
+
