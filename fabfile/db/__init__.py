@@ -151,12 +151,17 @@ class BaseTask(Task):
             self.db_cfg['USER'] = self.user
         if self.password:
             self.db_cfg['PASSWORD'] = self.password
-        self.db_cfg['HOST'] = self.host or (
-                self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost'
-                                            )
-        self.db_cfg['PORT'] = self.port or (
-                self.db_cfg['PORT'] if 'PORT' in self.db_cfg else '5432'
-                                            )
+
+        if self.host:
+            self.db_cfg['HOST'] = self.host
+        elif not self.db_cfg['HOST']:
+            self.db_cfg['HOST'] = 'localhost'
+
+        if self.port:
+            self.db_cfg['PORT'] = self.port
+        elif not self.db_cfg['PORT']:
+            self.db_cfg['PORT'] = '5432'
+
         try:
             handlers[self.engine].__call__(self, suffix)
         except KeyError:
@@ -168,7 +173,7 @@ class BaseTask(Task):
         """
         def wrapped(self, *args, **kwargs):
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
-                f.write('%s:%s:*:%s:%s' % (self.db_cfg['HOST'],
+                f.write('%s:%s::%s:%s' % (self.db_cfg['HOST'],
                                            self.db_cfg['PORT'],
                                            self.db_cfg['USER'],
                                            self.db_cfg['PASSWORD']))
@@ -216,10 +221,12 @@ class BaseTask(Task):
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
-                'pg_dump %s -U %s -w > %s/backup.postgres.%s'
+                'pg_dump %s --no-owner --no-acl -U %s -w > %s/backup.postgres.%s'
                 % (self.db_cfg['NAME'], self.db_cfg['USER'],
                    self.backup_path, suffix)
             )
+            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
+                                                        self.db_cfg['USER']))
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
                 % (self.db_cfg['NAME'], self.db_cfg['USER'])
@@ -229,9 +236,10 @@ class BaseTask(Task):
                 % (self.db_cfg['NAME'], self.db_cfg['USER'],
                    self.backup_path, suffix),
                 capture=True)
-            if not x.stderr:
+            if not x.stderr or 'FATAL' not in x.stderr:
                 print 'Bakup is ok'
             else:
+                print(x.stderr)
                 print 'An error has occurred while backup'
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
                                                         self.db_cfg['USER']))
@@ -269,16 +277,19 @@ class BaseTask(Task):
                 % (self.db_cfg['NAME'], self.db_cfg['USER'],
                    self.backup_path, suffix),
                 capture=True)
-            if not x.stderr:
+            if not x.stderr or 'FATAL' not in x.stderr:
                 local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
                                                        self.db_cfg['USER']))
-                local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' %
+                local('psql --username %s -w -c "ALTER DATABASE %s_temp RENAME TO %s"' %
                       (self.db_cfg['USER'],
                        self.db_cfg['NAME'],
                        self.db_cfg['NAME']))
                 print 'Restore is ok'
             else:
+                print(x.stderr)
                 print 'An error has occurred'
+            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
+                                                        self.db_cfg['USER']))
 
     def restore_db_sqlite(self, suffix, *args, **kwargs):
         """
