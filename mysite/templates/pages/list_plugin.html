@@ -1,22 +1,17 @@
 {% if not instance.hidden %}
-<!-- Questions -->
-<section class="section-questions">
-<header>
-  <div class="container">
-    <h2>{{ instance.title }}</h2>
-  </div>
-</header>
+<h3>{{ instance.title }}</h3>
 
-<div class="container">
-  <div class="row">
-    <div class="col-lg-7">
-      <ul class="{{ instance.list_type }}">
-        {% for i in list_text %}
-          {{ i|safe }}
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-</div>
-</section>
+{% if instance.list_type == 'list_numeric' %}
+<ol>
+{% else %}
+<ul class="{{ instance.list_type }}">
+{% endif %}
+  {% for i in list_text %}
+    {{ i|safe }}
+  {% endfor %}
+{% if instance.list_type == 'list_numeric' %}
+</ol>
+{% else %}
+</ul>
+{% endif %}
 {% endif %}

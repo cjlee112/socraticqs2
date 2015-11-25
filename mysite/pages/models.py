@@ -100,6 +100,7 @@ class WorkshopDescriptionPlugin(AbstractPlugin):
     Parent plugin Workshop description.
     """
     title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField(blank=True)
 
 
 class BenefitsItemPlugin(AbstractPlugin):
@@ -116,6 +117,7 @@ class BenefitsPlugin(AbstractPlugin):
     Base plugin for benefits
     """
     title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField(blank=True)
 
 
 class FooterPlugin(AbstractPlugin):
@@ -184,7 +186,7 @@ class DetailsChildPlugin(AbstractPlugin):
 
 class DetailsVideoPlugin(AbstractPlugin):
     video_url = models.URLField()
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, blank=True)
 
 
 class DetailsQuotePlugin(AbstractPlugin):
@@ -199,4 +201,5 @@ class SlideSharePlugin(AbstractPlugin):
 
 
 class SlideShareItemPlugin(AbstractPlugin):
+    title = models.CharField(max_length=200, blank=True)
     slideshare_code = models.TextField()

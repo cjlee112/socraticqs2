@@ -9,10 +9,12 @@
   </header>
 
   <div class="container">
-        <div class="row">
-        {% for plugin in instance.child_plugin_instances %}
-            {% render_plugin plugin %}
-        {% endfor %}
-        </div>
+    <div class="row">
+{% for plugin in instance.child_plugin_instances %}
+    <div class="col-md-6">
+      {% render_plugin plugin %}
+    </div>
+{% endfor %}
+    </div>
   </div>
 </section>

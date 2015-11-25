@@ -76,9 +76,7 @@ class ParentPersonalGuidesPagePlugin(CMSPluginBase):
     name = 'Personal_Guides_Parent'
     model = ParentPersonalGuidesPlugin
     allow_children = True
-    require_parent = True
     child_classes = ['ChildPersonalGuidesPagePlugin']
-    parent_classes = ['WorkshopDescriptionPagePlugin']
 
 
 class WorkshopDescriptionPagePlugin(CMSPluginBase):
@@ -86,7 +84,7 @@ class WorkshopDescriptionPagePlugin(CMSPluginBase):
     name = 'Workshop Description Base Plugin'
     model = WorkshopDescriptionPlugin
     allow_children = True
-    child_classes = ['ParentPersonalGuidesPagePlugin', 'MiscDetailContainer']
+    child_classes = ['MiscDetailContainer']
 
 
 class BenefitsItemPagePlugin(CMSPluginBase):
@@ -140,7 +138,6 @@ class DetailsPagePlugin(CMSPluginBase):
 class MiscPagePlugin(CMSPluginBase):
     render_template = 'pages/misc_plugin.html'
     allow_children = True
-    child_classes = ['MiscItemPagePlugin']
     require_parent = True
     parent_classes = ['MiscDetailContainer']
 
@@ -163,7 +160,7 @@ class MiscItemPagePlugin(CMSPluginBase):
 class MiscDetailContainer(CMSPluginBase):
     render_template = 'pages/misc_detail_container_plugin.html'
     allow_children = True
-    child_classes = ['DetailsPagePlugin', 'MiscPagePlugin']
+    child_classes = ['ListPagePlugin', 'SlideShareItemPagePlugin']
     require_parent = True
     parent_classes = ['WorkshopDescriptionPagePlugin']
 
@@ -187,7 +184,7 @@ class DetailsVideoPagePlugin(CMSPluginBase):
     model = DetailsVideoPlugin
     render_template = 'pages/details_video_plugin.html'
     require_parent = True
-    parent_classes = ['DetailsPagePlugin']
+    parent_classes = ['DetailsPagePlugin', 'SlideSharePagePlugin']
 
 
 class DetailsQuotePagePlugin(CMSPluginBase):
@@ -201,7 +198,7 @@ class SlideShareItemPagePlugin(CMSPluginBase):
     model = SlideShareItemPlugin
     render_template = 'pages/slideshareitem_plugin.html'
     require_parent = True
-    parent_classes = ['SlideSharePagePlugin']
+    parent_classes = ['SlideSharePagePlugin', 'MiscDetailContainer']
 
 
 class SlideSharePagePlugin(CMSPluginBase):
@@ -209,7 +206,7 @@ class SlideSharePagePlugin(CMSPluginBase):
     model = SlideSharePlugin
     render_template = 'pages/slideshare_plugin.html'
     allow_children = True
-    child_classes = ['SlideShareItemPagePlugin']
+    child_classes = ['SlideShareItemPagePlugin', 'DetailsVideoPagePlugin']
 
 
 plugin_pool.register_plugin(BannerPagePlugin)

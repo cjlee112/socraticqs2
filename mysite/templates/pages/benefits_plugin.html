@@ -1,21 +1,23 @@
 {% load cms_tags %}
 
 {% if not instance.hidden %}
-<section class="section-cards">
-<header>
-  <div class="container">
-    <h2>{{ instance.title }}</h2>
-  </div>
-</header>
+<section class="section-3-cards">
+  <header>
+    <div class="container">
+      <h2>{{ instance.title }}</h2>
 
-<div class="cards-container">
-  <div class="container">
-    <div class="row">
+      {{ instance.description|safe }}
+    </div>
+  </header>
+
+  <div class="cards-container">
+    <div class="container">
+      <div class="row">
 {% for plugin in instance.child_plugin_instances %}
-    {% render_plugin plugin %}
+        {% render_plugin plugin %}
 {% endfor %}
+      </div>
     </div>
   </div>
-</div>
 </section>
 {% endif %}

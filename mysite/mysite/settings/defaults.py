@@ -380,5 +380,8 @@ CMS_PLACEHOLDER_CONF = {
     },
     'landing_page_slideshare_placeholder': {
         'plugins': ['SlideSharePagePlugin'],
+    },
+    'landing_personal_guides': {
+        'plugins': ['ParentPersonalGuidesPagePlugin']
     }
 }
