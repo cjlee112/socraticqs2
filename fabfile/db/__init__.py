@@ -34,6 +34,8 @@ If you want to use User and Password not the same as in settings you can type th
 in command line.
 If you want to use Database Name not the same as in settings you can type it
 in command line.
+These custom parameters (port, host, etc.) are not permanent and won't be saved in
+settings file.
 
 Backup DB task
 --------------
@@ -63,6 +65,8 @@ If you want to use User and Password not the same as in settings you can type th
 in command line.
 If you want to use Database Name not the same as in settings you can type it
 in command line.
+These custom parameters (port, host, etc.) are not permanent and won't be saved in
+settings file.
 
 Restore DB task
 ---------------
@@ -90,6 +94,8 @@ If you want to use User and Password not the same as in settings you can type th
 in command line.
 If you want to use Database Name not the same as in settings you can type it
 in command line.
+These custom parameters (port, host, etc.) are not permanent and won't be saved in
+settings file.
 
 If task can not find backup file it will list for you all backup files
 available with specific DB engine given from Django settings.
@@ -139,9 +145,12 @@ class BaseTask(Task):
         suffix = re.sub(r'!', r'\\!', suffix)
         suffix = re.sub(r'\$', r'U+0024', suffix)
         suffix = re.sub(r'`', r'\\`', suffix)
-        self.db_cfg['NAME'] = self.name or self.db_cfg['NAME']
-        self.db_cfg['USER'] = self.user or self.db_cfg['USER']
-        self.db_cfg['PASSWORD'] = self.password or self.db_cfg['PASSWORD']
+        if self.name:
+            self.db_cfg['NAME'] = self.name
+        if self.user:
+            self.db_cfg['USER'] = self.user
+        if self.password:
+            self.db_cfg['PASSWORD'] = self.password
         self.db_cfg['HOST'] = self.host or (
                 self.db_cfg['HOST'] if 'HOST' in self.db_cfg else 'localhost'
                                             )
@@ -208,16 +217,16 @@ class BaseTask(Task):
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
             local(
                 'pg_dump %s -U %s -w > %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.user,
+                % (self.db_cfg['NAME'], self.db_cfg['USER'],
                    self.backup_path, suffix)
             )
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.user)
+                % (self.db_cfg['NAME'], self.db_cfg['USER'])
             )
             x = local(
                 'psql %s_temp -U %s -w < %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.user,
+                % (self.db_cfg['NAME'], self.db_cfg['USER'],
                    self.backup_path, suffix),
                 capture=True)
             if not x.stderr:
@@ -225,7 +234,7 @@ class BaseTask(Task):
             else:
                 print 'An error has occurred while backup'
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.user))
+                                                        self.db_cfg['USER']))
 
     def backup_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -250,10 +259,10 @@ class BaseTask(Task):
                         (self.backup_path, suffix)).succeeded:
                 return self.list_backups('postgres')
             local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.user))
+                                                        self.db_cfg['USER']))
             local(
                 'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.user)
+                % (self.db_cfg['NAME'], self.db_cfg['USER'])
             )
             x = local(
                 'psql %s_temp -U %s -w < %s/backup.postgres.%s'
@@ -262,9 +271,9 @@ class BaseTask(Task):
                 capture=True)
             if not x.stderr:
                 local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
-                                                       self.user))
+                                                       self.db_cfg['USER']))
                 local('psql -U %s -c "ALTER DATABASE %s_temp RENAME TO %s"' %
-                      (self.user,
+                      (self.db_cfg['USER'],
                        self.db_cfg['NAME'],
                        self.db_cfg['NAME']))
                 print 'Restore is ok'
@@ -351,5 +360,3 @@ class InitDBTask(BaseTask):
 restore = RestoreDBTask()
 backup = BackupDBTask()
 init = InitDBTask()
-
-
