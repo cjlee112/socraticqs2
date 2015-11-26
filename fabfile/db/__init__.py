@@ -173,7 +173,7 @@ class BaseTask(Task):
         """
         def wrapped(self, *args, **kwargs):
             with NamedTemporaryFile(suffix=".pgpass", delete=False) as f:
-                f.write('%s:%s::%s:%s' % (self.db_cfg['HOST'],
+                f.write('%s:%s:*:%s:%s' % (self.db_cfg['HOST'],
                                            self.db_cfg['PORT'],
                                            self.db_cfg['USER'],
                                            self.db_cfg['PASSWORD']))
@@ -190,11 +190,15 @@ class BaseTask(Task):
         path = os.path.dirname(os.path.dirname(
                os.path.dirname(os.path.dirname(self.base_path))))
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            local('dropdb %s --username=%s -w' % (self.db_cfg['NAME'],
-                                                  self.db_cfg['USER']))
-            local('createdb %s encoding="UTF8" --username=%s -w ' %
-                  (self.db_cfg['NAME'],
-                   self.db_cfg['USER']))
+            local('dropdb %s --username=%s --host=%s --port=%s -w' % (self.db_cfg['NAME'],
+                                                                      self.db_cfg['USER'],
+                                                                      self.db_cfg['HOST'],
+                                                                      self.db_cfg['PORT']))
+            local('createdb %s encoding="UTF8" --username=%s --host=%s --port=%s -w ' %
+                                                                      (self.db_cfg['NAME'],
+                                                                       self.db_cfg['USER'],
+                                                                       self.db_cfg['HOST'],
+                                                                       self.db_cfg['PORT']))
             call_command('migrate')
             call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
             call_command('fsm_deploy')
@@ -208,6 +212,8 @@ class BaseTask(Task):
                os.path.dirname(os.path.dirname(self.base_path))))
         with lcd(os.path.join(path, 'mysite/')), settings(hide('warnings'), warn_only=True):
             local('pwd')
+            if not self.db_cfg['NAME'].startswith('/'):
+                self.db_cfg['NAME'] = os.path.join(path, 'mysite/', self.db_cfg['NAME'])
             local('rm %s' % (self.db_cfg['NAME']))
             call_command('migrate')
             call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
@@ -220,29 +226,37 @@ class BaseTask(Task):
         Backup Postgres DB.
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            local(
-                'pg_dump %s --no-owner --no-acl -U %s -w > %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'],
-                   self.backup_path, suffix)
+            log = local(
+                'pg_dump %s --no-owner --no-acl -U %s --host=%s --port=%s -w > %s/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['HOST'], self.db_cfg['PORT'],
+                   self.backup_path, suffix), capture=True
             )
-            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
-            local(
-                'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'])
-            )
-            x = local(
-                'psql %s_temp -U %s -w < %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'],
-                   self.backup_path, suffix),
-                capture=True)
-            if not x.stderr or 'FATAL' not in x.stderr:
-                print 'Bakup is ok'
+            if not log.stderr or 'FATAL' not in log.stderr:
+                local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
+                                                                                self.db_cfg['USER'],
+                                                                                self.db_cfg['HOST'],
+                                                                                self.db_cfg['PORT']))
+                local(
+                    'createdb %s_temp encoding="UTF8" --username=%s --host=%s --port=%s -w'
+                    % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['HOST'], self.db_cfg['PORT'])
+                )
+                x = local(
+                    'psql %s_temp -U %s --host=%s --port=%s -w < %s/backup.postgres.%s'
+                    % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['HOST'], self.db_cfg['PORT'],
+                       self.backup_path, suffix),
+                    capture=True)
+                if not x.stderr or 'FATAL' not in x.stderr:
+                    print 'Bakup is ok'
+                else:
+                    print(x.stderr)
+                    print 'An error has occurred while backup'
+                local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
+                                                                                self.db_cfg['USER'],
+                                                                                self.db_cfg['HOST'],
+                                                                                self.db_cfg['PORT']))
             else:
-                print(x.stderr)
-                print 'An error has occurred while backup'
-            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
+                print(log.stderr)
+                print('An error has occurred while backup')
 
     def backup_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -251,6 +265,8 @@ class BaseTask(Task):
         path = os.path.dirname(os.path.dirname(
                os.path.dirname(os.path.dirname(self.base_path))))
         with lcd(os.path.join(path,'mysite/')), settings(hide('warnings'), warn_only=True):
+            if not self.db_cfg['NAME'].startswith('/'):
+                self.db_cfg['NAME'] = os.path.join(path, 'mysite/', self.db_cfg['NAME'])
             local(
                 'cp %s %s/backup.sqlite.%s'
                 % (self.db_cfg['NAME'],
@@ -266,30 +282,51 @@ class BaseTask(Task):
             if not local('ls %s/backup.postgres.%s' %
                         (self.backup_path, suffix)).succeeded:
                 return self.list_backups('postgres')
-            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
+            local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
+                                                                            self.db_cfg['USER'],
+                                                                            self.db_cfg['HOST'],
+                                                                            self.db_cfg['PORT']))
             local(
-                'createdb %s_temp encoding="UTF8" --username=%s -w'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'])
+                'createdb %s_temp encoding="UTF8" --username=%s --host=%s --port=%s -w'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['HOST'], self.db_cfg['PORT'])
             )
             x = local(
-                'psql %s_temp -U %s -w < %s/backup.postgres.%s'
-                % (self.db_cfg['NAME'], self.db_cfg['USER'],
+                'psql %s_temp -U %s --host=%s --port=%s -w < %s/backup.postgres.%s'
+                % (self.db_cfg['NAME'], self.db_cfg['USER'], self.db_cfg['HOST'], self.db_cfg['PORT'],
                    self.backup_path, suffix),
                 capture=True)
-            if not x.stderr or 'FATAL' not in x.stderr:
-                local('dropdb %s --username=%s -w ' % (self.db_cfg['NAME'],
-                                                       self.db_cfg['USER']))
-                local('psql --username %s -w -c "ALTER DATABASE %s_temp RENAME TO %s"' %
-                      (self.db_cfg['USER'],
-                       self.db_cfg['NAME'],
-                       self.db_cfg['NAME']))
-                print 'Restore is ok'
+            if not x.stderr or ('FATAL' not in x.stderr and 'no password supplied' not in x.stderr):
+                log = local('psql --username %s --host=%s --port=%s -w -c "ALTER DATABASE %s RENAME TO %s_old"' %
+                            (self.db_cfg['USER'],
+                             self.db_cfg['HOST'],
+                             self.db_cfg['PORT'],
+                             self.db_cfg['NAME'],
+                             self.db_cfg['NAME']), capture=True)
+                if not log.stderr or (
+                    'FATAL' not in log.stderr and
+                    'no password supplied' not in log.stderr and
+                    'ERROR:  database "%s" is being accessed by other' % self.db_cfg['NAME'] not in log.stderr):
+                    local('psql --username %s --host=%s --port=%s -w -c "ALTER DATABASE %s_temp RENAME TO %s"' %
+                          (self.db_cfg['USER'],
+                           self.db_cfg['HOST'],
+                           self.db_cfg['PORT'],
+                           self.db_cfg['NAME'],
+                           self.db_cfg['NAME']))
+                    local('dropdb %s_old --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
+                                                                                   self.db_cfg['USER'],
+                                                                                   self.db_cfg['HOST'],
+                                                                                   self.db_cfg['PORT']))
+                    print 'Restore is ok'
+                else:
+                    print(log.stderr)
+                    print('An error has occured.')
+                    local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
+                                                                                    self.db_cfg['USER'],
+                                                                                    self.db_cfg['HOST'],
+                                                                                    self.db_cfg['PORT']))
             else:
                 print(x.stderr)
                 print 'An error has occurred'
-            local('dropdb %s_temp --username=%s -w ' % (self.db_cfg['NAME'],
-                                                        self.db_cfg['USER']))
 
     def restore_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -298,6 +335,8 @@ class BaseTask(Task):
         path = os.path.dirname(os.path.dirname(
                os.path.dirname(os.path.dirname(self.base_path))))
         with lcd(path), settings(hide('warnings'), warn_only=True):
+            if not self.db_cfg['NAME'].startswith('/'):
+                self.db_cfg['NAME'] = os.path.join(path, 'mysite/', self.db_cfg['NAME'])
             result = local(
                 'cp %s/backup.sqlite.%s %s'
                 % (self.backup_path, suffix, self.db_cfg['NAME'])
