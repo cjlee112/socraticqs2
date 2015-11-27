@@ -1,17 +1,14 @@
 """
 Logging methods
 """
-import os
+import logging
+
 from datetime import datetime
 
-from django.conf import settings
-
-filename = settings.LOG_FILE
-full_path = os.path.dirname(__file__) + '/../../logs/'+filename
+LOGGER = logging.getLogger('ct_debug')
 
 
 def write_exception_to_log(exception):
     message =  exception.message if exception.message else str(exception)
-    with open(full_path, "a") as log_file:
-        log_file.write("Time [%s] - Exception class [%s] - Exception message [%s] \n" %
-                       (datetime.now(), exception.__class__, message))
+    LOGGER.error("Time [%s] - Exception class [%s] - Exception message [%s]" %
+                    (datetime.now(), exception.__class__, message))
