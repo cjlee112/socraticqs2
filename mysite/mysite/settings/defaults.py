@@ -295,3 +295,7 @@ LOGGING = {
         },
     }
 }
+
+
+# Name of the file for loogging that will be created in /logs folder
+LOG_FILE = 'errs.log'

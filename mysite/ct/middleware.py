@@ -7,7 +7,9 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from social import exceptions as social_exceptions
 from django.contrib import messages
-from django.template import loader, RequestContext
+from django.template import RequestContext
+
+from mysite.log import write_exception_to_log
 
 
 class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
@@ -22,7 +24,7 @@ class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             else:
                 return HttpResponseRedirect(reverse('ct:home'))
         elif hasattr(smtplib, exception.__class__.__name__):
-            template = loader.get_template('ct/error.html')
+            write_exception_to_log(exception)
             return render_to_response(
                     'ct/error.html',
                     {'message': 'Something goes wrong with email sending. Please try again later.'},
