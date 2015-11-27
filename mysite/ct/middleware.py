@@ -1,4 +1,3 @@
-from urlparse import urlparse
 import smtplib
 
 from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
