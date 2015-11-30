@@ -282,7 +282,7 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'filters': ['require_debug_true'],
         },
-        'file':{
+        'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': '../logs/errs.log',
@@ -299,7 +299,7 @@ LOGGING = {
             'level': 'INFO',
         },
         'ct_debug': {
-            'handlers': ['console','file'],
+            'handlers': ['console', 'file'],
             'level': 'ERROR',
         },
         'celery_warn': {
