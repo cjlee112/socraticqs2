@@ -1,4 +1,5 @@
 import smtplib
+import logging
 
 from social.apps.django_app.middleware import SocialAuthExceptionMiddleware
 from django.http import HttpResponseRedirect
@@ -8,7 +9,8 @@ from social import exceptions as social_exceptions
 from django.contrib import messages
 from django.template import RequestContext
 
-from mysite.log import write_exception_to_log
+
+LOGGER = logging.getLogger('ct')
 
 
 class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
@@ -23,12 +25,12 @@ class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             else:
                 return HttpResponseRedirect(reverse('ct:home'))
         elif hasattr(smtplib, exception.__class__.__name__):
-            write_exception_to_log(exception)
+            message = exception.message if exception.message else str(exception)
+            LOGGER.error(message)
             return render_to_response(
                     'ct/error.html',
                     {'message': 'Something goes wrong with email sending. Please try again later.'},
                     RequestContext(request)
-                                    )
+            )
         else:
             raise exception
-

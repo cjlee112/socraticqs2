@@ -271,6 +271,11 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -281,11 +286,13 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'filters': ['require_debug_true'],
+            'formatter': 'verbose'
         },
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': 'logs/errs.log',
+            'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
+            'formatter': 'verbose'
         }
     },
     'loggers': {
@@ -298,7 +305,7 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
-        'ct_debug': {
+        'ct': {
             'handlers': ['console', 'file'],
             'level': 'ERROR',
         },
