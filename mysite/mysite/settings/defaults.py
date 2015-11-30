@@ -285,7 +285,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '../logs/errs.log',
+            'filename': 'logs/errs.log',
         }
     },
     'loggers': {
