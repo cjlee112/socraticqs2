@@ -438,3 +438,59 @@ class AddLessonTest(SetUpMixin, OurTestCase):
             reverse('ct:unit_concepts', args=(self.course.id, self.unit.id)),
             'The first step of writing a new Lesson'
         )
+
+
+class LiveTeachingTest(SetUpMixin, OurTestCase):
+    """
+    """
+
+    def test_index_out_range(self):
+        concept = Concept(title='test concept title', addedBy=self.teacher)
+        concept.save()
+        lesson = Lesson(
+            title='lessot title',
+            text='lorem ipsum',
+            addedBy=self.teacher,
+            kind=Lesson.ORCT_QUESTION,
+        )
+        lesson.save_root()
+        lesson_wo_question = Lesson(
+            title='Test no question Lesson',
+            text='No question',
+            addedBy=self.teacher,
+        )
+        lesson_wo_question.save_root()
+        unit_lesson = UnitLesson(
+            unit=self.unit, lesson=lesson, addedBy=self.teacher, treeID=lesson.id
+        )
+        unit_lesson.save()
+        unit_lesson_wo_question = UnitLesson(
+            unit=self.unit, lesson=lesson_wo_question, addedBy=self.teacher, treeID=lesson_wo_question.id
+        )
+        unit_lesson_wo_question.save()
+        ulQ = create_question_unit(self.teacher)
+        ulQ2 = create_question_unit(
+            self.teacher, 'TEst', 'Some Question', 'Tell me.'
+        )
+        live.get_specs()[0].save_graph(self.teacher.username)
+        livestudent.get_specs()[0].save_graph(self.teacher.username)
+        add_lesson.get_specs()[0].save_graph(self.teacher.username)
+
+        self.client.login(username='jacob', password='top_secret')
+        fsmData = dict(unit=self.unit, course=self.course)
+        request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
+        response = self.client.get(result)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Start asking a question', response.content)
+
+        url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
+        origin = 'http://testserver'
+        if not url.startswith(origin):
+            url = origin + url
+        response = self.client.post(url, dict(fsmtask='next'), HTTP_REFERER=url, HTTP_ORIGIN=origin)
+        self.assertEqual(response.status_code, 302)
+        url = response['Location']
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ask this Question")
+        self.assertEqual(response.content.count("Ask this Question"), 1)

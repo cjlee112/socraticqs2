@@ -1,7 +1,7 @@
 """
 Unit tests for core app views.py.
 """
-from django.test import TestCase
+from django.test import TestCase, RequestFactory, Client
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -10,7 +10,7 @@ from mock import Mock, patch
 from ddt import ddt, data, unpack
 
 from ct.views import *
-from ct.models import UnitLesson, Lesson, Unit
+from ct.models import UnitLesson, Lesson, Unit, Course, Concept
 from fsm.fsm_base import FSMStack
 
 
@@ -1908,30 +1908,5 @@ class AssessErrorsTest(TestCase):
         self.assertEqual(StudentError.objects.filter(author=self.user).count(), 2)
 
 
-class LiveTeachingTestCase(TestCase):
 
-    def setUp(self):
-        self.user = User(username='teacher')
-        self.user.set_password('teacher')
-        self.user.save()
-        self.concept = Concept(title='test title', addedBy=self.user)
-        self.concept.save()
-        self.course = Course(title='test_title', addedBy=self.user)
-        self.course.save()
-        self.unit = Unit(title='test unit title', addedBy=self.user)
-        self.unit.save()
-        self.lesson = Lesson(
-            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
-        )
-        self.lesson.save_root(self.concept)
-        self.unit_lesson = UnitLesson(
-            unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id
-        )
-        self.unit_lesson.save()
-        factory = RequestFactory()
-        test_url = '/reset-pass/{0}'.format(self.token.token)
-        request = factory.post(test_url, post_data)
-        client = Client()
-        client.post(test_url, post_data)
-        request.session = client.session
-        response = reset_pass(request, self.token.token)
+
