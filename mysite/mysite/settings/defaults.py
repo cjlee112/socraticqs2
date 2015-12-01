@@ -266,7 +266,15 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -276,8 +284,16 @@ LOGGING = {
         },
         'console': {
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
+            'filters': ['require_debug_true'],
+            'formatter': 'verbose'
         },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'django.request': {
@@ -288,6 +304,10 @@ LOGGING = {
         'lti_debug': {
             'handlers': ['console'],
             'level': 'INFO',
+        },
+        'ct': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
         },
         'celery_warn': {
             'handlers': ['console'],

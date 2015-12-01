@@ -5,6 +5,9 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+import requests
+
+from mock import patch
 from django.contrib.auth.models import User
 from django.test import TestCase
 from ct.models import *
@@ -12,6 +15,7 @@ from fsm.models import *
 from ct import views, ct_util
 import time
 import urllib
+import smtplib
 
 
 class OurTestCase(TestCase):
@@ -291,3 +295,16 @@ class PageDataTests(TestCase):
         s = pageData.get_refresh_timer(request)
         self.assertNotEqual(s, '0:00')
         self.assertEqual(s[:3], '0:0')
+
+
+class SMTPerrorTest(TestCase):
+    """
+    Test that SMTP errors are handling.
+    """
+    @patch('psa.mail.send_mail')
+    def smtp_error(self, mocked):
+        mocked.side_effect = smtplib.SMTPServerDisconnected
+        post_data = {'email': 'some@mail.com'}
+        response = requests.post('/complete/email/?next=/ct/', data=post_data)
+        content = response.content
+        self.assertEqual(content.message, 'Something goes wrong with email sending. Please try again later.')
