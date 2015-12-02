@@ -25,6 +25,7 @@ SLIDE_SHARE_BACK = (
     ('none', ''),
 )
 
+
 class AbstractPlugin(CMSPlugin):
     """
     Abstract Base Class for all Plugins.
@@ -168,6 +169,7 @@ class InterestedPlugin(AbstractPlugin):
     email_to = models.EmailField(default='cmathews@elancecloud.com')
 
     btn_text = models.CharField(max_length=70, default='Keep Me Informed')
+    bg_image = FilerImageField(null=True, blank=True)
 
 
 class InterestedForm(models.Model):
