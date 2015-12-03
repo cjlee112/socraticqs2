@@ -1,7 +1,7 @@
 """
 Unit tests for core app views.py.
 """
-from django.test import TestCase, RequestFactory, Client
+from django.test import TestCase
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -10,7 +10,7 @@ from mock import Mock, patch
 from ddt import ddt, data, unpack
 
 from ct.views import *
-from ct.models import UnitLesson, Lesson, Unit, Course, Concept
+from ct.models import UnitLesson, Lesson, Unit
 from fsm.fsm_base import FSMStack
 
 
@@ -1906,7 +1906,3 @@ class AssessErrorsTest(TestCase):
         self.assertTemplateUsed(response, 'ct/unit_tasks_student.html')
         self.assertTrue(StudentError.objects.filter(author=self.user).exists())
         self.assertEqual(StudentError.objects.filter(author=self.user).count(), 2)
-
-
-
-

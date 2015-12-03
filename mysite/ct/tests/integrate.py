@@ -442,9 +442,11 @@ class AddLessonTest(SetUpMixin, OurTestCase):
 
 class LiveTeachingTest(SetUpMixin, OurTestCase):
     """
+    Test bug live session start.
+    Issue #74
     """
-
-    def test_index_out_range(self):
+    def setUp(self):
+        super(LiveTeachingTest, self).setUp()
         concept = Concept(title='test concept title', addedBy=self.teacher)
         concept.save()
         lesson = Lesson(
@@ -468,14 +470,8 @@ class LiveTeachingTest(SetUpMixin, OurTestCase):
             unit=self.unit, lesson=lesson_wo_question, addedBy=self.teacher, treeID=lesson_wo_question.id
         )
         unit_lesson_wo_question.save()
-        ulQ = create_question_unit(self.teacher)
-        ulQ2 = create_question_unit(
-            self.teacher, 'TEst', 'Some Question', 'Tell me.'
-        )
-        live.get_specs()[0].save_graph(self.teacher.username)
-        livestudent.get_specs()[0].save_graph(self.teacher.username)
-        add_lesson.get_specs()[0].save_graph(self.teacher.username)
 
+    def test_index_out_range(self):
         self.client.login(username='jacob', password='top_secret')
         fsmData = dict(unit=self.unit, course=self.course)
         request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
