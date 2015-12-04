@@ -136,28 +136,107 @@ $( "#lessonstoggle" ).click(function() {
 </div>
 {% endif %}
 
-{% if lessonSet %}
+{#{% if lessonSet %}#}
+{#<h2>Search Results</h2>#}
+{#If one of these is relevant to this concept,#}
+{#please click <b>{{ actionLabel }}</b>.#}
+{#<table class="table table-striped">#}
+{#<thead><tr>#}
+{#  <th>Lesson</th><th>Type</th><th>Author</th>#}
+{#</tr></thead>#}
+{#<tbody>#}
+{#{% for ul in lessonSet %}#}
+{#  <tr><td>#}
+{#  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }} {{ ul.treeID }} {{ ul.branch }}</a>#}
+{#  <form action="{{ actionTarget }}" method="post"#}
+{#   style=" display:inline!important;">#}
+{#  {% csrf_token %}#}
+{#  <input type="hidden" name="ulID" value="{{ ul.pk }}" />#}
+{#  <input type="submit" value="{{ actionLabel }}" />#}
+{#  </form>#}
+{#  </td>#}
+{#    <td>{{ ul.lesson.get_kind_display }}</td>#}
+{#    <td>{{ ul.lesson.addedBy.get_full_name }}</td>#}
+{#  </tr>#}
+{#{% endfor %}#}
+{#</tbody>#}
+{#</table>#}
+{#{% elif foundNothing %}#}
+{#  <b>No matches found</b>.  Try another search, or write a new lesson.#}
+{#{% endif %}#}
+
+{% if full_list %}
 <h2>Search Results</h2>
 If one of these is relevant to this concept,
 please click <b>{{ actionLabel }}</b>.
 <table class="table table-striped">
 <thead><tr>
-  <th>Lesson</th><th>Type</th><th>Author</th>
+  <th>Lesson</th><th></th><th>Type</th><th>Author</th>
 </tr></thead>
 <tbody>
-{% for ul in lessonSet %}
-  <tr><td>
-  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a>
-  <form action="{{ actionTarget }}" method="post"
-   style=" display:inline!important;">
-  {% csrf_token %}
-  <input type="hidden" name="ulID" value="{{ ul.pk }}" />
-  <input type="submit" value="{{ actionLabel }}" />
-  </form>
-  </td>
-    <td>{{ ul.lesson.get_kind_display }}</td>
-    <td>{{ ul.lesson.addedBy.get_full_name }}</td>
-  </tr>
+{% for tree, branch in full_list.items %}
+    {% if branch %}
+        <tr><td colspan="4">
+    <a role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        {{ tree.lesson.title }} </a>
+        <hr>
+
+        <div class="collapse" id="collapseExample">
+            <table class="table table-striped">
+                <thead>
+                    <th></th><th>Lesson</th><th>Branch</th><th>Added by</th><th></th><th></th><th></th>
+                </thead>
+                <tr><td></td>
+                  <td>
+                  <a href="{{ actionTarget |get_object_url:tree }}">{{ tree.lesson.title }}</a>
+                      </td>
+                    <td>{{ tree.branch }}</td> <td>{{ tree.addedBy }}</td>
+                    <td>
+                  <form action="{{ actionTarget }}" method="post"
+                   style=" display:inline!important;" class="pull-right">
+                  {% csrf_token %}
+                  <input type="hidden" name="ulID" value="{{ tree.pk }}" />
+                  <input type="submit" value="{{ actionLabel }}" />
+                  </form>
+                  </td>
+                <td>{{ tree.lesson.get_kind_display }}</td>
+                <td>{{ tree.lesson.addedBy.get_full_name }}</td>
+               </tr>
+               {% for ul in branch %}
+                  <tr><td></td>
+                  <td>
+                  <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a></td>
+                       <td>{{ ul.branch }}</td> <td>{{ ul.addedBy }}</td>
+                    <td>
+                  <form action="{{ actionTarget }}" method="post"
+                   style=" display:inline!important;" class="pull-right">
+                  {% csrf_token %}
+                  <input type="hidden" name="ulID" value="{{ ul.pk }}" />
+                  <input type="submit" value="{{ actionLabel }}" />
+                  </form>
+                  </td>
+                <td>{{ ul.lesson.get_kind_display }}</td>
+                <td>{{ ul.lesson.addedBy.get_full_name }}</td>
+               </tr>
+               {% endfor %}
+            </table>
+        </div>
+        </tr>
+    {% else %}
+         <tr><td>
+          <a href="{{ actionTarget |get_object_url:tree }}">{{ tree.lesson.title }}</a>
+             </td><td>
+          <form action="{{ actionTarget }}" method="post"
+           style=" display:inline!important;" class="pull-right">
+          {% csrf_token %}
+          <input type="hidden" name="ulID" value="{{ tree.pk }}" />
+          <input type="submit" value="{{ actionLabel }}" />
+          </form>
+          </td>
+            <td>{{ tree.lesson.get_kind_display }}</td>
+            <td>{{ tree.lesson.addedBy.get_full_name }}</td>
+          </tr>
+    {% endif %}
 {% endfor %}
 </tbody>
 </table>
