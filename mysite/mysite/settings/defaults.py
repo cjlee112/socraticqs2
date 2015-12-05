@@ -125,6 +125,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
 INSTALLED_APPS = (
+    'raven.contrib.django.raven_compat',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
