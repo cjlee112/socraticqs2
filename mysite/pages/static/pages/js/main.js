@@ -55,6 +55,7 @@
             // Display success message
             if(data.success) {
               base.showMessage('success', data.success);
+              $('.section-form').fadeOut('slow');
 
             // Display error message
             }else if(data.error){

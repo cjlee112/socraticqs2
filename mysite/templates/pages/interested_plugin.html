@@ -12,9 +12,16 @@
 </section>
 
 
-<div class="message-container">
+<div class="container">
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+        <div id="gforms_confirmation_message_1" class="gform_confirmation_message_1 gforms_confirmation_message message-container">
+            <meta charset="UTF-8">
 
+        </div>
+  </div>
 </div>
+
 
 <section class="section-form">
 <form action="" id="interested-form">
@@ -39,23 +46,6 @@
           <label>{{ instance.email_field }}</label>
           <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
         </div>
-
-{#        <div>#}
-{#          <label>{{ instance.when_field }}</label>#}
-{#          <small>#}
-{#              {{ instance.description_field|safe }}#}
-{#          </small>#}
-{##}
-{#          <textarea name="when_join" data-validation="required" data-validation-error-msg="{{ instance.when_error_msg }}"></textarea>#}
-{#        </div>#}
-
-{#        <div>#}
-{#          <label>#}
-{#            {{ instance.timezone_field }}#}
-{#          </label>#}
-{##}
-{#          <input type="text" name="timezone" data-validation="required length" data-validation-length="max70" data-validation-error-msg-required="{{ instance.timezone_error_msg }}">#}
-{#        </div>#}
 
         <input type="submit" value="{{ instance.btn_text }}">
       </div>
