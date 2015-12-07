@@ -177,21 +177,23 @@ please click <b>{{ actionLabel }}</b>.
 {% for tree, branch in full_list.items %}
     {% if branch %}
         <tr><td colspan="4">
-    <a role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        {{ tree.lesson.title }} </a>
+        {{ tree.lesson.title }} &nbsp;
+    <a role="button" data-toggle="collapse" class="btn btn-default" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        Versions
+         </a>
         <hr>
 
         <div class="collapse" id="collapseExample">
             <table class="table table-striped">
                 <thead>
-                    <th></th><th>Lesson</th><th>Branch</th><th>Added by</th><th></th><th></th><th></th>
+                    <th>Lesson</th><th>Branch</th><th>Added by</th><th>Commit message</th><th></th><th>Type</th><th>Author</th>
                 </thead>
-                <tr><td></td>
+                <tr>
                   <td>
                   <a href="{{ actionTarget |get_object_url:tree }}">{{ tree.lesson.title }}</a>
                       </td>
-                    <td>{{ tree.branch }}</td> <td>{{ tree.addedBy }}</td>
-                    <td>
+                  <td>{{ tree.branch }}</td> <td>{{ tree.addedBy }}</td><td>{{ tree.lesson.changeLog }}</td>
+                  <td>
                   <form action="{{ actionTarget }}" method="post"
                    style=" display:inline!important;" class="pull-right">
                   {% csrf_token %}
@@ -203,11 +205,13 @@ please click <b>{{ actionLabel }}</b>.
                 <td>{{ tree.lesson.addedBy.get_full_name }}</td>
                </tr>
                {% for ul in branch %}
-                  <tr><td></td>
+                  <tr>
                   <td>
                   <a href="{{ actionTarget |get_object_url:ul }}">{{ ul.lesson.title }}</a></td>
                        <td>{{ ul.branch }}</td> <td>{{ ul.addedBy }}</td>
-                    <td>
+
+                  <td>{{ tree.lesson.changeLog }}</td>
+                  <td>
                   <form action="{{ actionTarget }}" method="post"
                    style=" display:inline!important;" class="pull-right">
                   {% csrf_token %}
