@@ -11,14 +11,10 @@
   </div>
 </section>
 
-
-<div class="container">
 <div class="row">
   <div class="col-md-6 col-md-offset-3">
-        <div id="gforms_confirmation_message_1" class="gform_confirmation_message_1 gforms_confirmation_message message-container">
-            <meta charset="UTF-8">
-
-        </div>
+    <div class="message-container">
+    </div>
   </div>
 </div>
 
@@ -45,6 +41,10 @@
         <div>
           <label>{{ instance.email_field }}</label>
           <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
+        </div>
+        <div>
+          <label>{{ instance.description_field|safe }}</label>
+          <textarea name="when_join"></textarea>
         </div>
 
         <input type="submit" value="{{ instance.btn_text }}">

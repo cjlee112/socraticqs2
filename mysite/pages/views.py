@@ -9,6 +9,6 @@ def interested_form(request):
     if obj.is_valid():
         obj.save()
         form_send(obj.clean())
-        return JsonResponse({'success': 'Thanks for your interest in the Hackaton.'})
+        return JsonResponse({'success': 'Thanks for contacting us! We will get in touch with you shortly.'})
     else:
         return JsonResponse({'error': 'Something went wrong. Please try again later.'})
