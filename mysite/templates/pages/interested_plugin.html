@@ -28,30 +28,34 @@
         </div>
 
         <div>
-          <label>{{ instance.organization }}</label>
+          <label>{{ instance.organization_field }}</label>
               <input type="text" name="organization" placeholder="Institute/Organization" data-validation="required length" data-validation-length="max200" data-validation-error-msg-required="{{ instance.last_name_error_msg }}">
+        </div>
+        <div>
+          <label>{{ instance.role_field }}</label>
+          <input type="text" name="role" placeholder="Title/Role" data-validation="required" data-validation-error-msg="{{ instance.role_error_msg }}">
         </div>
         <div>
           <label>{{ instance.email_field }}</label>
           <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
         </div>
 
-        <div>
-          <label>{{ instance.when_field }}</label>
-          <small>
-              {{ instance.description_field|safe }}
-          </small>
+{#        <div>#}
+{#          <label>{{ instance.when_field }}</label>#}
+{#          <small>#}
+{#              {{ instance.description_field|safe }}#}
+{#          </small>#}
+{##}
+{#          <textarea name="when_join" data-validation="required" data-validation-error-msg="{{ instance.when_error_msg }}"></textarea>#}
+{#        </div>#}
 
-          <textarea name="when_join" data-validation="required" data-validation-error-msg="{{ instance.when_error_msg }}"></textarea>
-        </div>
-
-        <div>
-          <label>
-            {{ instance.timezone_field }}
-          </label>
-
-          <input type="text" name="timezone" data-validation="required length" data-validation-length="max70" data-validation-error-msg-required="{{ instance.timezone_error_msg }}">
-        </div>
+{#        <div>#}
+{#          <label>#}
+{#            {{ instance.timezone_field }}#}
+{#          </label>#}
+{##}
+{#          <input type="text" name="timezone" data-validation="required length" data-validation-length="max70" data-validation-error-msg-required="{{ instance.timezone_error_msg }}">#}
+{#        </div>#}
 
         <input type="submit" value="{{ instance.btn_text }}">
       </div>
