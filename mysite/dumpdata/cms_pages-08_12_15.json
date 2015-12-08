@@ -1,0 +1,1068 @@
+[
+{
+  "fields": {
+    "clipboard": 1,
+    "user": [
+      "admin"
+    ],
+    "language": "en-us"
+  },
+  "model": "cms.usersettings",
+  "pk": 1
+},
+{
+  "fields": {
+    "slot": "clipboard",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 1
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 2
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 3
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 16
+},
+{
+  "fields": {
+    "slot": "about_page_title",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 17
+},
+{
+  "fields": {
+    "slot": "about_page_content",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 18
+},
+{
+  "fields": {
+    "slot": "about_page_title",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 19
+},
+{
+  "fields": {
+    "slot": "about_page_content",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 20
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 21
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:55:37.535Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:54:34.700Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0001",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 1
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:57:21.209Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:55:51.923Z",
+    "depth": 1,
+    "position": 1,
+    "path": "0002",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 2
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:58:11.976Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:57:23.888Z",
+    "depth": 1,
+    "position": 2,
+    "path": "0003",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 3
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:58:50.401Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:54:34.700Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0004",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 4
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:58:50.409Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:55:51.923Z",
+    "depth": 1,
+    "position": 1,
+    "path": "0005",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 5
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:58:50.418Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:57:23.888Z",
+    "depth": 1,
+    "position": 2,
+    "path": "0006",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 6
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:59:23.982Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:59:00.444Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0007",
+    "placeholder": 18,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 7
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:59:31.957Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:59:27.185Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0008",
+    "placeholder": 17,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 8
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:59:40.268Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:59:27.185Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0009",
+    "placeholder": 19,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 9
+},
+{
+  "fields": {
+    "changed_date": "2015-12-08T08:59:40.286Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-12-08T08:59:00.444Z",
+    "depth": 1,
+    "position": 0,
+    "path": "000A",
+    "placeholder": 20,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 10
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0001",
+    "in_navigation": false,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/main_page.html",
+    "placeholders": [
+      2
+    ],
+    "changed_date": "2015-12-08T09:10:31.708Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": true,
+    "publication_date": "2015-12-08T08:53:13.828Z",
+    "creation_date": "2015-12-08T08:53:13.741Z",
+    "publisher_public": 2,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": true,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 1
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0002",
+    "in_navigation": false,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/main_page.html",
+    "placeholders": [
+      3
+    ],
+    "changed_date": "2015-12-08T08:59:40.309Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": true,
+    "publication_date": "2015-12-08T08:53:13.828Z",
+    "creation_date": "2015-12-08T08:53:13.834Z",
+    "publisher_public": 1,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": false,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 2
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0004",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/about_page.html",
+    "placeholders": [
+      16,
+      17,
+      18
+    ],
+    "changed_date": "2015-12-08T08:59:40.324Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-12-08T08:59:40.149Z",
+    "creation_date": "2015-12-08T08:54:20.057Z",
+    "publisher_public": 5,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": true,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 4
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0005",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/about_page.html",
+    "placeholders": [
+      19,
+      20,
+      21
+    ],
+    "changed_date": "2015-12-08T08:59:40.291Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-12-08T08:59:40.149Z",
+    "creation_date": "2015-12-08T08:59:40.159Z",
+    "publisher_public": 4,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": false,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 5
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Home",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": true,
+    "page": 1,
+    "published": true,
+    "path": "",
+    "publisher_state": 0,
+    "creation_date": "2015-12-08T08:53:13.787Z",
+    "slug": "home",
+    "publisher_public": 2
+  },
+  "model": "cms.title",
+  "pk": 1
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Home",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": false,
+    "page": 2,
+    "published": true,
+    "path": "",
+    "publisher_state": 0,
+    "creation_date": "2015-12-08T08:53:13.787Z",
+    "slug": "home",
+    "publisher_public": 1
+  },
+  "model": "cms.title",
+  "pk": 2
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "About",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": true,
+    "page": 4,
+    "published": true,
+    "path": "about",
+    "publisher_state": 0,
+    "creation_date": "2015-12-08T08:54:20.095Z",
+    "slug": "about",
+    "publisher_public": 5
+  },
+  "model": "cms.title",
+  "pk": 4
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "About",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": false,
+    "page": 5,
+    "published": true,
+    "path": "about",
+    "publisher_state": 0,
+    "creation_date": "2015-12-08T08:54:20.095Z",
+    "slug": "about",
+    "publisher_public": 4
+  },
+  "model": "cms.title",
+  "pk": 5
+},
+{
+  "fields": {
+    "block_color": "bg-primary",
+    "description": "<p>Changing how you teach, to incorporate active learning into your class, can be a major undertaking. Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.</p>\n",
+    "title": "The fast, easy way to add Active Learning to your teaching",
+    "link_button": "https://vimeo.com/136898815",
+    "text_button": "Learn more",
+    "list_description": "<ul>\n\t<li>Both in the classroom, and online.</li>\n\t<li>Students answer using their smartphones or laptops.</li>\n\t<li>Find, remix or modify exercises from the Courselets database.</li>\n\t<li>Write your own exercises using our fast, effective Open Response Concept Testing methodology.</li>\n\t<li>Powerful and easy tools.</li>\n\t<li>Free and Open Source.</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 1
+},
+{
+  "fields": {
+    "block_color": "bg-danger",
+    "description": "<p>You can search Courselets.org for concepts you want to learn. You can quickly take a courselet in a single sitting.</p>\n",
+    "title": " Learn a new concept now",
+    "link_button": "https://www.courselets.org/ct/courses/2/units/2/slideshow/",
+    "text_button": "Take a look",
+    "list_description": "<ul>\n\t<li>A courselet is a short lesson that helps you really understand an important concept, typically from multiple angles that many students miss.</li>\n\t<li>A courselet challenges your understanding with real-world problems designed to expose common misunderstandings or subtleties.</li>\n\t<li>A courselet really takes off where most materials end: your errors. By helping you classify exactly what your conceptual mistake was, a courselet helps you understand a new, hidden aspect of the concept, and see how others resolved that mistake.\u00a0<b>Your mistakes become your most important learning tool</b>.</li>\n\t<li>A courselet connects everyone trying to learn that concept, and every concept to related concepts and other materials online (such as Wikipedia).</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 2
+},
+{
+  "fields": {
+    "block_color": "bg-success",
+    "description": "",
+    "title": " Challenge your understanding of bioinformatics / Big Data",
+    "link_button": "https://www.courselets.org/ct/courses/",
+    "text_button": "View the public courses",
+    "list_description": "",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 3
+},
+{
+  "fields": {
+    "block_color": "bg-primary",
+    "description": "<p>Changing how you teach, to incorporate active learning into your class, can be a major undertaking. Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.</p>\n",
+    "title": "The fast, easy way to add Active Learning to your teaching",
+    "link_button": "https://vimeo.com/136898815",
+    "text_button": "Learn more",
+    "list_description": "<ul>\n\t<li>Both in the classroom, and online.</li>\n\t<li>Students answer using their smartphones or laptops.</li>\n\t<li>Find, remix or modify exercises from the Courselets database.</li>\n\t<li>Write your own exercises using our fast, effective Open Response Concept Testing methodology.</li>\n\t<li>Powerful and easy tools.</li>\n\t<li>Free and Open Source.</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 4
+},
+{
+  "fields": {
+    "block_color": "bg-danger",
+    "description": "<p>You can search Courselets.org for concepts you want to learn. You can quickly take a courselet in a single sitting.</p>\n",
+    "title": " Learn a new concept now",
+    "link_button": "https://www.courselets.org/ct/courses/2/units/2/slideshow/",
+    "text_button": "Take a look",
+    "list_description": "<ul>\n\t<li>A courselet is a short lesson that helps you really understand an important concept, typically from multiple angles that many students miss.</li>\n\t<li>A courselet challenges your understanding with real-world problems designed to expose common misunderstandings or subtleties.</li>\n\t<li>A courselet really takes off where most materials end: your errors. By helping you classify exactly what your conceptual mistake was, a courselet helps you understand a new, hidden aspect of the concept, and see how others resolved that mistake.\u00a0<b>Your mistakes become your most important learning tool</b>.</li>\n\t<li>A courselet connects everyone trying to learn that concept, and every concept to related concepts and other materials online (such as Wikipedia).</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 5
+},
+{
+  "fields": {
+    "block_color": "bg-success",
+    "description": "",
+    "title": " Challenge your understanding of bioinformatics / Big Data",
+    "link_button": "https://www.courselets.org/ct/courses/",
+    "text_button": "View the public courses",
+    "list_description": "",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 6
+},
+{
+  "fields": {
+    "rght": 2,
+    "uploaded_at": "2015-12-08T09:05:27.488Z",
+    "name": "Uploads",
+    "parent": null,
+    "level": 0,
+    "created_at": "2015-12-08T09:05:27.488Z",
+    "modified_at": "2015-12-08T09:05:27.488Z",
+    "lft": 1,
+    "tree_id": 1,
+    "owner": [
+      "admin"
+    ]
+  },
+  "model": "filer.folder",
+  "pk": 1
+},
+{
+  "fields": {
+    "sha1": "5535e7e7898e05bf986d61d83409c2feeaca43de",
+    "original_filename": "nature.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-12-08T09:05:39.905Z",
+    "_file_size": 104064,
+    "uploaded_at": "2015-12-08T09:05:38.726Z",
+    "file": "filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 1
+},
+{
+  "fields": {
+    "sha1": "40580a282c1ff1c45b9653c4e43e32e5fc626f05",
+    "original_filename": "tech.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-12-08T09:06:30.024Z",
+    "_file_size": 48760,
+    "uploaded_at": "2015-12-08T09:06:24.163Z",
+    "file": "filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 2
+},
+{
+  "fields": {
+    "sha1": "ecdfce8aa4aab2b2fc2b29a06d62673bc4cc4882",
+    "original_filename": "arch.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-12-08T09:07:22.140Z",
+    "_file_size": 95400,
+    "uploaded_at": "2015-12-08T09:07:20.787Z",
+    "file": "filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 3
+},
+{
+  "fields": {
+    "user": [
+      "admin"
+    ]
+  },
+  "model": "filer.clipboard",
+  "pk": 1
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-12-08T09:05:38.690Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 1
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-12-08T09:06:24.156Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 2
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-12-08T09:07:20.782Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 3
+},
+{
+  "fields": {
+    "name": "filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:44.585Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 1
+},
+{
+  "fields": {
+    "name": "filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:34.295Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 2
+},
+{
+  "fields": {
+    "name": "filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:26.155Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 3
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.795Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 1
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.814Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 2
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.829Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 3
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.846Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 4
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.860Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 5
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.875Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 6
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.889Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 7
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:38.906Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 8
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:44.588Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 9
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/f0/c4/f0c46914-406e-4e65-a264-5ea845a65250/nature.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:05:44.616Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 10
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.196Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 11
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.217Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 12
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.235Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 13
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.260Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 14
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.289Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 15
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.308Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 16
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.323Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 17
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:24.339Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 18
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:34.298Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 19
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/c1/6e/c16e322f-5bd2-4355-b780-f8d4cfa9e394/tech.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:06:34.318Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 20
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.806Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 21
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.822Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 22
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.835Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 23
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.851Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 24
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.865Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 25
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.886Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 26
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.902Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 27
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:20.917Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 28
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:26.160Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 29
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/35/4d/354d2e8a-4c0d-4827-bc7b-4ea151c4e921/arch.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-12-08T09:07:26.206Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 30
+},
+{
+  "fields": {
+    "body": "<header>\n<p>Courselets.org is currently in public alpha release. Details will be made available in the public beta release.</p>\n</header>\n\n<ul>\n\t<li>We want to hear your feedback! If you have questions or comments on a specific lesson in a courselet, click on its\u00a0<b>FAQ</b>\u00a0tab to post your question or comment.</li>\n\t<li>During the initial alpha period, if you have general comments or questions, please raise them on the\u00a0<a href=\"https://plus.google.com/communities/103357779147103714603\">Courselets community page</a>.</li>\n\t<li>If you encounter software bugs or want to propose software enhancements, please enter them on our\u00a0<a href=\"https://github.com/cjlee112/socraticqs2/issues\">Github issue tracker</a>.</li>\n</ul>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 7
+},
+{
+  "fields": {
+    "body": "<p>About Courselets.org</p>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 8
+},
+{
+  "fields": {
+    "body": "<p>About Courselets.org</p>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 9
+},
+{
+  "fields": {
+    "body": "<header>\n<p>Courselets.org is currently in public alpha release. Details will be made available in the public beta release.</p>\n</header>\n\n<ul>\n\t<li>We want to hear your feedback! If you have questions or comments on a specific lesson in a courselet, click on its\u00a0<b>FAQ</b>\u00a0tab to post your question or comment.</li>\n\t<li>During the initial alpha period, if you have general comments or questions, please raise them on the\u00a0<a href=\"https://plus.google.com/communities/103357779147103714603\">Courselets community page</a>.</li>\n\t<li>If you encounter software bugs or want to propose software enhancements, please enter them on our\u00a0<a href=\"https://github.com/cjlee112/socraticqs2/issues\">Github issue tracker</a>.</li>\n</ul>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 10
+},
+{
+  "fields": {
+    "key": "menu_cache_menu_nodes_en-us_1_257_user",
+    "site": 1,
+    "language": "en-us"
+  },
+  "model": "menus.cachekey",
+  "pk": 7
+},
+{
+  "fields": {
+    "key": "menu_cache_menu_nodes_en-us_1",
+    "site": 1,
+    "language": "en-us"
+  },
+  "model": "menus.cachekey",
+  "pk": 8
+}
+]
