@@ -789,10 +789,7 @@ def _lessons(request, pageData, concept=None, msg='',
             s = searchForm.cleaned_data['search']
             if searchType is None:
                 searchType = searchForm.cleaned_data['searchType']
-            lessons_in_this_unit = unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=False).\
-                values_list('id', flat=True)
-            lessonSet = UnitLesson.search_text(s, searchType, dedupe=False)
-            lessonSet = lessonSet.exclude(pk__in=lessons_in_this_unit)
+            lessonSet = UnitLesson.search_text(s, searchType, dedupe=False).exclude(unit=unit)
             treeIDs_head = distinct_subset(lessonSet)
             branches = lessonSet.exclude(id__in=[each.id for each in treeIDs_head])
             tree_dict = {head_lesson: list(branches.filter(treeID=head_lesson.treeID)) for head_lesson in treeIDs_head}

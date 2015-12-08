@@ -186,13 +186,14 @@ please click <b>{{ actionLabel }}</b>.
         <div class="collapse" id="collapseExample">
             <table class="table table-striped">
                 <thead>
-                    <th>Lesson</th><th>Branch</th><th>Added by</th><th>Commit message</th><th></th><th>Type</th><th>Author</th>
+                    <th>Lesson</th><th>Branch</th><th>Added by</th><th>Commit message</th><th>Commit time</th><th></th><th>Type</th><th>Author</th>
                 </thead>
                 <tr>
                   <td>
                   <a href="{{ actionTarget |get_object_url:tree }}">{{ tree.lesson.title }}</a>
                       </td>
                   <td>{{ tree.branch }}</td> <td>{{ tree.addedBy }}</td><td>{{ tree.lesson.changeLog }}</td>
+                  <td>{{ tree.lesson.commitTime }}</td>
                   <td>
                   <form action="{{ actionTarget }}" method="post"
                    style=" display:inline!important;" class="pull-right">
@@ -211,6 +212,7 @@ please click <b>{{ actionLabel }}</b>.
                        <td>{{ ul.branch }}</td> <td>{{ ul.addedBy }}</td>
 
                   <td>{{ tree.lesson.changeLog }}</td>
+                  <td>{{ tree.lesson.commitTime }}</td>
                   <td>
                   <form action="{{ actionTarget }}" method="post"
                    style=" display:inline!important;" class="pull-right">
