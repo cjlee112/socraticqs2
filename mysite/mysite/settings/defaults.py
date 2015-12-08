@@ -1,6 +1,8 @@
 # coding: utf-8
 import os
 from datetime import timedelta
+
+gettext = lambda s: s
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # Set template_path and template_dir
@@ -8,9 +10,16 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 TEMPLATE_DIRS = (
     TEMPLATE_PATH,
 )
+
+CMS_TEMPLATES = (
+    ('pages/main_page.html', 'Main Page'),
+    ('pages/about_page.html', 'About Page'),
+    ('pages/landing_page.html', 'Landing Page')
+
+)
+
 # Set databases_name
 DATABASES_NAME = os.path.join(BASE_DIR, 'mysite.db')
-
 
 ADMINS = (
     ('Christopher Lee', 'leec@chem.ucla.edu'),
@@ -19,7 +28,7 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': DATABASES_NAME,                      # Or path to database file if using sqlite3.
+        'NAME': DATABASES_NAME,  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -43,6 +52,10 @@ TIME_ZONE = 'America/Los_Angeles'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = [
+    ('en-us', 'English'),
+]
+
 # grr, Django testing framework stupidly uses this as signal that
 # code is pre-1.6, whereas it STILL seems to be required for app to run.
 SITE_ID = 1
@@ -63,18 +76,18 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = ''
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -108,11 +121,16 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'cms.middleware.user.CurrentUserMiddleware',
+    'cms.middleware.page.CurrentPageMiddleware',
+    'cms.middleware.toolbar.ToolbarMiddleware',
+    'cms.middleware.language.LanguageCookieMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'ct.middleware.MySocialAuthExceptionMiddleware',
@@ -123,7 +141,6 @@ ROOT_URLCONF = 'mysite.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -132,6 +149,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
+    'djangocms_admin_style',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -143,7 +161,20 @@ INSTALLED_APPS = (
     # Socials
     'social.apps.django_app.default',
     'psa',
+    # Django-CMS
+    'cms',
+    'treebeard',
+    'menus',
+    'sekizai',
+    'djangocms_text_ckeditor',
+    # Filler
+    'filer',
+    'easy_thumbnails',
+    # CMS pages
+    'pages',
 )
+
+THUMBNAIL_HIGH_RESOLUTION = True
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
@@ -153,6 +184,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
    'django.contrib.auth.context_processors.auth',
    'django.core.context_processors.debug',
    'django.core.context_processors.i18n',
+   'django.core.context_processors.request',
    'django.core.context_processors.media',
    'django.core.context_processors.static',
    'django.core.context_processors.tz',
@@ -161,18 +193,19 @@ TEMPLATE_CONTEXT_PROCESSORS = (
    'social.apps.django_app.context_processors.login_redirect',
    'psa.context_processors.debug_settings',
    'mysite.context_processors.google_analytics',
+   'sekizai.context_processors.sekizai',
+   'cms.context_processors.cms_settings',
 )
 
 AUTHENTICATION_BACKENDS = (
-   'social.backends.twitter.TwitterOAuth',
-   'social.backends.facebook.FacebookOAuth2',
-   'social.backends.google.GoogleOAuth2',
-   'social.backends.linkedin.LinkedinOAuth2',
-   'social.backends.khanacademy.KhanAcademyOAuth1',
-   'psa.custom_backends.EmailAuth',
-   'django.contrib.auth.backends.ModelBackend',
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.linkedin.LinkedinOAuth2',
+    'social.backends.khanacademy.KhanAcademyOAuth1',
+    'psa.custom_backends.EmailAuth',
+    'django.contrib.auth.backends.ModelBackend',
 )
-
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
@@ -293,5 +326,62 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+    }
+}
+
+
+CMS_PLACEHOLDER_CONF = {
+    'about_page_content': {
+        'plugins': ['TextPlugin'],
+        'name': 'About Page content',
+        'limits': {
+            'global': 20,
+        },
+    },
+    'about_page_title': {
+        'plugins': ['TextPlugin'],
+        'name': 'About Page title',
+        'limits': {
+            'global': 1,
+        },
+    },
+    'langing_page_placeholder': {
+        'plugins': ['LandingPagePlugin']
+    },
+    'landing_page_active_learning_placeholder': {
+        'plugins': ['ActiveLearningRatesPagePlugin']
+    },
+    'landing_page_list_placeholder': {
+        'plugins': ['ListPagePlugin']
+    },
+    'landing_workshop_description_placeholder': {
+        'plugins': ['WorkshopDescriptionPagePlugin']
+    },
+    'landing_page_benefits_placeholder': {
+        'plugins': ['BenefitPagePlugin']
+    },
+    'share_page_placeholder': {
+        'plugins': ['LandingPageSocialPlugin']
+    },
+    'landing_page_footer': {
+        'plugins': ['FooterPagePlugin']
+    },
+    'faq_page_placeholder': {
+        'plugins': ['FAQPagePlugin']
+    },
+    'interested_page_placeholder': {
+        'plugins': ['InterestedPagePlugin']
+    },
+    'landing_page_banner': {
+        'plugins': ['BannerPagePlugin'],
+        'limits': {
+            'global': 1,
+        },
+    },
+    'landing_page_slideshare_placeholder': {
+        'plugins': ['SlideSharePagePlugin'],
+    },
+    'landing_personal_guides': {
+        'plugins': ['ParentPersonalGuidesPagePlugin']
     }
 }

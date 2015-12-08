@@ -1,0 +1,9 @@
+{% load cms_tags %}
+
+{% if not instance.hidden %}
+<div class="col-md-7">
+{% for plugin in instance.child_plugin_instances %}
+  {% render_plugin plugin %}
+{% endfor %}
+</div>
+{% endif %}

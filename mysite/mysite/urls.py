@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
-from django.apps import apps
+from django.conf import settings
+
 from mysite.views import *
+from pages.views import interested_form
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,7 +10,7 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    (r'^$', home_page),
+    # (r'^$', home_page),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
@@ -35,10 +37,18 @@ urlpatterns = patterns(
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done'),
+    url(r'^lti/', include('lti.urls', namespace='lti')),
+    url(r'^interested-form/', interested_form, name='interested-form'),
+    url(r'^', include('cms.urls')),
 )
 
-if apps.is_installed('lti'):
-    urlpatterns += patterns(
-        '',
-        url(r'^lti/', include('lti.urls', namespace='lti')),
-    )
+
+if settings.DEBUG:
+    urlpatterns += [
+        url(r'markup/(?P<path>.*)$', markup_view),
+        url(
+            r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        url(r'', include('django.contrib.staticfiles.urls')),
+    ]

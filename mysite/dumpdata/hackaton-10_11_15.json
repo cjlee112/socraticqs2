@@ -1,0 +1,3380 @@
+[
+{
+  "fields": {
+    "clipboard": 1,
+    "user": [
+      "admin"
+    ],
+    "language": "en-us"
+  },
+  "model": "cms.usersettings",
+  "pk": 1
+},
+{
+  "fields": {
+    "slot": "clipboard",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 1
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 2
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 3
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 4
+},
+{
+  "fields": {
+    "slot": "landing_page_banner",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 5
+},
+{
+  "fields": {
+    "slot": "landing_page_active_learning_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 6
+},
+{
+  "fields": {
+    "slot": "landing_page_benefits_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 7
+},
+{
+  "fields": {
+    "slot": "landing_page_list_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 8
+},
+{
+  "fields": {
+    "slot": "landing_workshop_description_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 9
+},
+{
+  "fields": {
+    "slot": "share_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 10
+},
+{
+  "fields": {
+    "slot": "landing_page_footer",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 11
+},
+{
+  "fields": {
+    "slot": "landing_page_banner",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 12
+},
+{
+  "fields": {
+    "slot": "landing_page_active_learning_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 13
+},
+{
+  "fields": {
+    "slot": "landing_page_benefits_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 14
+},
+{
+  "fields": {
+    "slot": "landing_page_list_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 15
+},
+{
+  "fields": {
+    "slot": "landing_workshop_description_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 16
+},
+{
+  "fields": {
+    "slot": "share_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 17
+},
+{
+  "fields": {
+    "slot": "landing_page_footer",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 18
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 19
+},
+{
+  "fields": {
+    "slot": "faq_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 20
+},
+{
+  "fields": {
+    "slot": "faq_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 21
+},
+{
+  "fields": {
+    "slot": "interested_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 22
+},
+{
+  "fields": {
+    "slot": "interested_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 23
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 24
+},
+{
+  "fields": {
+    "slot": "about_page_title",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 25
+},
+{
+  "fields": {
+    "slot": "about_page_content",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 26
+},
+{
+  "fields": {
+    "slot": "about_page_title",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 27
+},
+{
+  "fields": {
+    "slot": "about_page_content",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 28
+},
+{
+  "fields": {
+    "slot": "langing_page_placeholder",
+    "default_width": null
+  },
+  "model": "cms.placeholder",
+  "pk": 29
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T11:57:55.501Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:56:57.272Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0001",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 1
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:48:36.751Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:58:06.651Z",
+    "depth": 1,
+    "position": 1,
+    "path": "0002",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 2
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:48:26.650Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:59:24.256Z",
+    "depth": 1,
+    "position": 2,
+    "path": "0003",
+    "placeholder": 2,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 3
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:38:47.889Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:08:48.019Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0008",
+    "placeholder": 10,
+    "plugin_type": "LandingPageSocialPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 8
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:37:04.628Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 2,
+    "creation_date": "2015-11-05T12:09:09.268Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0009",
+    "placeholder": 9,
+    "plugin_type": "WorkshopDescriptionPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 9
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:44:49.203Z",
+    "language": "en-us",
+    "parent": 9,
+    "numchild": 2,
+    "creation_date": "2015-11-05T12:09:26.966Z",
+    "depth": 2,
+    "position": 1,
+    "path": "00090001",
+    "placeholder": 9,
+    "plugin_type": "ParentPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 10
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T08:33:45.155Z",
+    "language": "en-us",
+    "parent": 10,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:09:53.610Z",
+    "depth": 3,
+    "position": 0,
+    "path": "000900010001",
+    "placeholder": 9,
+    "plugin_type": "ChildPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 11
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T12:11:33.434Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:11:19.012Z",
+    "depth": 1,
+    "position": 0,
+    "path": "000A",
+    "placeholder": 11,
+    "plugin_type": "FooterPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 12
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:35:03.138Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 3,
+    "creation_date": "2015-11-05T12:11:46.118Z",
+    "depth": 1,
+    "position": 0,
+    "path": "000B",
+    "placeholder": 7,
+    "plugin_type": "BenefitPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 13
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T16:37:43.296Z",
+    "language": "en-us",
+    "parent": 13,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:12:07.839Z",
+    "depth": 2,
+    "position": 0,
+    "path": "000B0001",
+    "placeholder": 7,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 14
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:34:52.336Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:13:52.198Z",
+    "depth": 1,
+    "position": 0,
+    "path": "000C",
+    "placeholder": 8,
+    "plugin_type": "ListPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 15
+},
+{
+  "fields": {
+    "changed_date": "2015-11-07T20:32:45.486Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:28:50.434Z",
+    "depth": 1,
+    "position": 0,
+    "path": "000J",
+    "placeholder": 5,
+    "plugin_type": "BannerPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 25
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:06.055Z",
+    "language": "en-us",
+    "parent": 10,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:19:24.682Z",
+    "depth": 3,
+    "position": 1,
+    "path": "000900010002",
+    "placeholder": 9,
+    "plugin_type": "ChildPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 55
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:35:53.211Z",
+    "language": "en-us",
+    "parent": 13,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:22:01.286Z",
+    "depth": 2,
+    "position": 1,
+    "path": "000B0002",
+    "placeholder": 7,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 56
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T12:09:02.015Z",
+    "language": "en-us",
+    "parent": 13,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:22:33.003Z",
+    "depth": 2,
+    "position": 2,
+    "path": "000B0003",
+    "placeholder": 7,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 57
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:44:49.239Z",
+    "language": "en-us",
+    "parent": 9,
+    "numchild": 2,
+    "creation_date": "2015-11-05T16:44:31.287Z",
+    "depth": 2,
+    "position": 0,
+    "path": "00090002",
+    "placeholder": 9,
+    "plugin_type": "MiscDetailContainer"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 78
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:45:57.488Z",
+    "language": "en-us",
+    "parent": 78,
+    "numchild": 3,
+    "creation_date": "2015-11-05T16:44:55.081Z",
+    "depth": 3,
+    "position": 0,
+    "path": "000900020001",
+    "placeholder": 9,
+    "plugin_type": "MiscPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 79
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:49:29.378Z",
+    "language": "en-us",
+    "parent": 79,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:49:11.258Z",
+    "depth": 4,
+    "position": 0,
+    "path": "0009000200010001",
+    "placeholder": 9,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 81
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:50:13.740Z",
+    "language": "en-us",
+    "parent": 79,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:49:42.685Z",
+    "depth": 4,
+    "position": 1,
+    "path": "0009000200010002",
+    "placeholder": 9,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 82
+},
+{
+  "fields": {
+    "changed_date": "2015-11-05T16:50:53.605Z",
+    "language": "en-us",
+    "parent": 79,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:50:21.919Z",
+    "depth": 4,
+    "position": 2,
+    "path": "0009000200010003",
+    "placeholder": 9,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 83
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:09.774Z",
+    "language": "en-us",
+    "parent": 78,
+    "numchild": 3,
+    "creation_date": "2015-11-05T16:51:10.904Z",
+    "depth": 3,
+    "position": 1,
+    "path": "000900020002",
+    "placeholder": 9,
+    "plugin_type": "DetailsPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 84
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:56.003Z",
+    "language": "en-us",
+    "parent": 140,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:13.389Z",
+    "depth": 5,
+    "position": 0,
+    "path": "00090002000200060001",
+    "placeholder": 9,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 85
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:56.048Z",
+    "language": "en-us",
+    "parent": 140,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:30.016Z",
+    "depth": 5,
+    "position": 1,
+    "path": "00090002000200060002",
+    "placeholder": 9,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 86
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:56.094Z",
+    "language": "en-us",
+    "parent": 140,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:58.118Z",
+    "depth": 5,
+    "position": 2,
+    "path": "00090002000200060003",
+    "placeholder": 9,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 87
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:56.135Z",
+    "language": "en-us",
+    "parent": 140,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:53:13.957Z",
+    "depth": 5,
+    "position": 3,
+    "path": "00090002000200060004",
+    "placeholder": 9,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 88
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T10:59:56.178Z",
+    "language": "en-us",
+    "parent": 140,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:53:38.332Z",
+    "depth": 5,
+    "position": 4,
+    "path": "00090002000200060005",
+    "placeholder": 9,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 89
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T17:46:12.024Z",
+    "language": "en-us",
+    "parent": 84,
+    "numchild": 5,
+    "creation_date": "2015-11-06T10:59:18.704Z",
+    "depth": 4,
+    "position": 0,
+    "path": "0009000200020006",
+    "placeholder": 9,
+    "plugin_type": "DetailsChildPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 140
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T18:51:47.045Z",
+    "language": "en-us",
+    "parent": 84,
+    "numchild": 0,
+    "creation_date": "2015-11-06T11:00:33.293Z",
+    "depth": 4,
+    "position": 1,
+    "path": "0009000200020007",
+    "placeholder": 9,
+    "plugin_type": "DetailsVideoPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 167
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T17:46:44.376Z",
+    "language": "en-us",
+    "parent": 84,
+    "numchild": 0,
+    "creation_date": "2015-11-06T11:01:11.552Z",
+    "depth": 4,
+    "position": 2,
+    "path": "0009000200020008",
+    "placeholder": 9,
+    "plugin_type": "DetailsQuotePagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 168
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T13:01:54.519Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 2,
+    "creation_date": "2015-11-06T13:01:43.306Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0010",
+    "placeholder": 20,
+    "plugin_type": "FAQPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 197
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T13:02:21.149Z",
+    "language": "en-us",
+    "parent": 197,
+    "numchild": 0,
+    "creation_date": "2015-11-06T13:02:06.012Z",
+    "depth": 2,
+    "position": 0,
+    "path": "00100001",
+    "placeholder": 20,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 198
+},
+{
+  "fields": {
+    "changed_date": "2015-11-06T13:02:42.564Z",
+    "language": "en-us",
+    "parent": 197,
+    "numchild": 0,
+    "creation_date": "2015-11-06T13:02:37.172Z",
+    "depth": 2,
+    "position": 1,
+    "path": "00100002",
+    "placeholder": 20,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 199
+},
+{
+  "fields": {
+    "changed_date": "2015-11-09T09:25:25.957Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-06T18:22:23.938Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001A",
+    "placeholder": 6,
+    "plugin_type": "ActiveLearningRatesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 231
+},
+{
+  "fields": {
+    "changed_date": "2015-11-07T09:22:48.516Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-07T00:21:03.875Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001K",
+    "placeholder": 22,
+    "plugin_type": "InterestedPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 542
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.383Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:28:50.434Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001L",
+    "placeholder": 12,
+    "plugin_type": "BannerPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 763
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.391Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-06T18:22:23.938Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001M",
+    "placeholder": 13,
+    "plugin_type": "ActiveLearningRatesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 764
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.399Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 3,
+    "creation_date": "2015-11-05T12:11:46.118Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001N",
+    "placeholder": 14,
+    "plugin_type": "BenefitPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 765
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.406Z",
+    "language": "en-us",
+    "parent": 765,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:12:07.839Z",
+    "depth": 2,
+    "position": 0,
+    "path": "001N0001",
+    "placeholder": 14,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 766
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.413Z",
+    "language": "en-us",
+    "parent": 765,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:22:01.286Z",
+    "depth": 2,
+    "position": 1,
+    "path": "001N0002",
+    "placeholder": 14,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 767
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.420Z",
+    "language": "en-us",
+    "parent": 765,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:22:33.003Z",
+    "depth": 2,
+    "position": 2,
+    "path": "001N0003",
+    "placeholder": 14,
+    "plugin_type": "BenefitsItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 768
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.430Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:13:52.198Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001O",
+    "placeholder": 15,
+    "plugin_type": "ListPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 769
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.440Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 2,
+    "creation_date": "2015-11-05T12:09:09.268Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001P",
+    "placeholder": 16,
+    "plugin_type": "WorkshopDescriptionPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 770
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.446Z",
+    "language": "en-us",
+    "parent": 770,
+    "numchild": 2,
+    "creation_date": "2015-11-05T12:09:26.966Z",
+    "depth": 2,
+    "position": 1,
+    "path": "001P0001",
+    "placeholder": 16,
+    "plugin_type": "ParentPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 771
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.452Z",
+    "language": "en-us",
+    "parent": 771,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:09:53.610Z",
+    "depth": 3,
+    "position": 0,
+    "path": "001P00010001",
+    "placeholder": 16,
+    "plugin_type": "ChildPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 772
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.460Z",
+    "language": "en-us",
+    "parent": 771,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:19:24.682Z",
+    "depth": 3,
+    "position": 1,
+    "path": "001P00010002",
+    "placeholder": 16,
+    "plugin_type": "ChildPersonalGuidesPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 773
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.467Z",
+    "language": "en-us",
+    "parent": 770,
+    "numchild": 2,
+    "creation_date": "2015-11-05T16:44:31.287Z",
+    "depth": 2,
+    "position": 0,
+    "path": "001P0002",
+    "placeholder": 16,
+    "plugin_type": "MiscDetailContainer"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 774
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.471Z",
+    "language": "en-us",
+    "parent": 774,
+    "numchild": 3,
+    "creation_date": "2015-11-05T16:44:55.081Z",
+    "depth": 3,
+    "position": 0,
+    "path": "001P00020001",
+    "placeholder": 16,
+    "plugin_type": "MiscPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 775
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.477Z",
+    "language": "en-us",
+    "parent": 775,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:49:11.258Z",
+    "depth": 4,
+    "position": 0,
+    "path": "001P000200010001",
+    "placeholder": 16,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 776
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.484Z",
+    "language": "en-us",
+    "parent": 775,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:49:42.685Z",
+    "depth": 4,
+    "position": 1,
+    "path": "001P000200010002",
+    "placeholder": 16,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 777
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.492Z",
+    "language": "en-us",
+    "parent": 775,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:50:21.919Z",
+    "depth": 4,
+    "position": 2,
+    "path": "001P000200010003",
+    "placeholder": 16,
+    "plugin_type": "MiscItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 778
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.498Z",
+    "language": "en-us",
+    "parent": 774,
+    "numchild": 3,
+    "creation_date": "2015-11-05T16:51:10.904Z",
+    "depth": 3,
+    "position": 1,
+    "path": "001P00020002",
+    "placeholder": 16,
+    "plugin_type": "DetailsPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 779
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.503Z",
+    "language": "en-us",
+    "parent": 779,
+    "numchild": 5,
+    "creation_date": "2015-11-06T10:59:18.704Z",
+    "depth": 4,
+    "position": 0,
+    "path": "001P000200020001",
+    "placeholder": 16,
+    "plugin_type": "DetailsChildPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 780
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.510Z",
+    "language": "en-us",
+    "parent": 780,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:13.389Z",
+    "depth": 5,
+    "position": 0,
+    "path": "001P0002000200010001",
+    "placeholder": 16,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 781
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.517Z",
+    "language": "en-us",
+    "parent": 780,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:30.016Z",
+    "depth": 5,
+    "position": 1,
+    "path": "001P0002000200010002",
+    "placeholder": 16,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 782
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.524Z",
+    "language": "en-us",
+    "parent": 780,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:52:58.118Z",
+    "depth": 5,
+    "position": 2,
+    "path": "001P0002000200010003",
+    "placeholder": 16,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 783
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.531Z",
+    "language": "en-us",
+    "parent": 780,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:53:13.957Z",
+    "depth": 5,
+    "position": 3,
+    "path": "001P0002000200010004",
+    "placeholder": 16,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 784
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.538Z",
+    "language": "en-us",
+    "parent": 780,
+    "numchild": 0,
+    "creation_date": "2015-11-05T16:53:38.332Z",
+    "depth": 5,
+    "position": 4,
+    "path": "001P0002000200010005",
+    "placeholder": 16,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 785
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.546Z",
+    "language": "en-us",
+    "parent": 779,
+    "numchild": 0,
+    "creation_date": "2015-11-06T11:00:33.293Z",
+    "depth": 4,
+    "position": 1,
+    "path": "001P000200020002",
+    "placeholder": 16,
+    "plugin_type": "DetailsVideoPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 786
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.553Z",
+    "language": "en-us",
+    "parent": 779,
+    "numchild": 0,
+    "creation_date": "2015-11-06T11:01:11.552Z",
+    "depth": 4,
+    "position": 2,
+    "path": "001P000200020003",
+    "placeholder": 16,
+    "plugin_type": "DetailsQuotePagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 787
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.573Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:08:48.019Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001Q",
+    "placeholder": 17,
+    "plugin_type": "LandingPageSocialPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 788
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.581Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T12:11:19.012Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001R",
+    "placeholder": 18,
+    "plugin_type": "FooterPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 789
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.589Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 2,
+    "creation_date": "2015-11-06T13:01:43.306Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001S",
+    "placeholder": 21,
+    "plugin_type": "FAQPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 790
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.595Z",
+    "language": "en-us",
+    "parent": 790,
+    "numchild": 0,
+    "creation_date": "2015-11-06T13:02:06.012Z",
+    "depth": 2,
+    "position": 0,
+    "path": "001S0001",
+    "placeholder": 21,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 791
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.603Z",
+    "language": "en-us",
+    "parent": 790,
+    "numchild": 0,
+    "creation_date": "2015-11-06T13:02:37.172Z",
+    "depth": 2,
+    "position": 1,
+    "path": "001S0002",
+    "placeholder": 21,
+    "plugin_type": "FAQItemPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 792
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:19:12.612Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-07T00:21:03.875Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001T",
+    "placeholder": 23,
+    "plugin_type": "InterestedPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 793
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:48:51.974Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:56:57.272Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001U",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 794
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:48:51.980Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:58:06.651Z",
+    "depth": 1,
+    "position": 1,
+    "path": "001V",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 795
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T10:48:51.987Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-05T11:59:24.256Z",
+    "depth": 1,
+    "position": 2,
+    "path": "001W",
+    "placeholder": 3,
+    "plugin_type": "LandingPagePlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 796
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T13:00:40.045Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-10T13:00:29.193Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001X",
+    "placeholder": 26,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 797
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T13:00:56.926Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-10T13:00:50.659Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001Y",
+    "placeholder": 25,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 798
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T13:01:10.749Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-10T13:00:50.659Z",
+    "depth": 1,
+    "position": 0,
+    "path": "001Z",
+    "placeholder": 27,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 799
+},
+{
+  "fields": {
+    "changed_date": "2015-11-10T13:01:10.765Z",
+    "language": "en-us",
+    "parent": null,
+    "numchild": 0,
+    "creation_date": "2015-11-10T13:00:29.193Z",
+    "depth": 1,
+    "position": 0,
+    "path": "0020",
+    "placeholder": 28,
+    "plugin_type": "TextPlugin"
+  },
+  "model": "cms.cmsplugin",
+  "pk": 800
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0001",
+    "in_navigation": false,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/main_page.html",
+    "placeholders": [
+      2
+    ],
+    "changed_date": "2015-11-10T13:01:10.822Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": true,
+    "publication_date": "2015-11-05T11:56:01.010Z",
+    "creation_date": "2015-11-05T11:56:00.927Z",
+    "publisher_public": 2,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": true,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 1
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0002",
+    "in_navigation": false,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/main_page.html",
+    "placeholders": [
+      3
+    ],
+    "changed_date": "2015-11-10T13:01:10.788Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": true,
+    "publication_date": "2015-11-05T11:56:01.010Z",
+    "creation_date": "2015-11-05T11:56:01.015Z",
+    "publisher_public": 1,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": false,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 2
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0003",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/landing_page.html",
+    "placeholders": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      20,
+      22
+    ],
+    "changed_date": "2015-11-10T10:19:12.643Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-11-05T12:14:38.404Z",
+    "creation_date": "2015-11-05T11:56:24.674Z",
+    "publisher_public": 4,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": true,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 3
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0004",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/landing_page.html",
+    "placeholders": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      21,
+      23
+    ],
+    "changed_date": "2015-11-10T10:19:12.618Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-11-05T12:14:38.404Z",
+    "creation_date": "2015-11-05T12:14:38.411Z",
+    "publisher_public": 3,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": false,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 4
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0005",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/about_page.html",
+    "placeholders": [
+      24,
+      25,
+      26
+    ],
+    "changed_date": "2015-11-10T13:01:10.803Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-11-10T13:01:10.647Z",
+    "creation_date": "2015-11-10T13:00:04.518Z",
+    "publisher_public": 6,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": true,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 5
+},
+{
+  "fields": {
+    "navigation_extenders": "",
+    "site": 1,
+    "application_namespace": null,
+    "path": "0006",
+    "in_navigation": true,
+    "reverse_id": null,
+    "login_required": false,
+    "created_by": "admin",
+    "languages": "en-us",
+    "publication_end_date": null,
+    "template": "pages/about_page.html",
+    "placeholders": [
+      27,
+      28,
+      29
+    ],
+    "changed_date": "2015-11-10T13:01:10.769Z",
+    "limit_visibility_in_menu": null,
+    "parent": null,
+    "numchild": 0,
+    "soft_root": false,
+    "is_home": false,
+    "publication_date": "2015-11-10T13:01:10.647Z",
+    "creation_date": "2015-11-10T13:01:10.654Z",
+    "publisher_public": 5,
+    "application_urls": "",
+    "changed_by": "admin",
+    "publisher_is_draft": false,
+    "xframe_options": 0,
+    "depth": 1,
+    "revision_id": 0
+  },
+  "model": "cms.page",
+  "pk": 6
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Home",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": true,
+    "page": 1,
+    "published": true,
+    "path": "",
+    "publisher_state": 0,
+    "creation_date": "2015-11-05T11:56:00.972Z",
+    "slug": "home",
+    "publisher_public": 2
+  },
+  "model": "cms.title",
+  "pk": 1
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Home",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": false,
+    "page": 2,
+    "published": true,
+    "path": "",
+    "publisher_state": 0,
+    "creation_date": "2015-11-05T11:56:00.972Z",
+    "slug": "home",
+    "publisher_public": 1
+  },
+  "model": "cms.title",
+  "pk": 2
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Hackaton",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": true,
+    "page": 3,
+    "published": true,
+    "path": "hackaton",
+    "publisher_state": 0,
+    "creation_date": "2015-11-05T11:56:24.711Z",
+    "slug": "hackaton",
+    "publisher_public": 4
+  },
+  "model": "cms.title",
+  "pk": 3
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "Hackaton",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": false,
+    "page": 4,
+    "published": true,
+    "path": "hackaton",
+    "publisher_state": 0,
+    "creation_date": "2015-11-05T11:56:24.711Z",
+    "slug": "hackaton",
+    "publisher_public": 3
+  },
+  "model": "cms.title",
+  "pk": 4
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "About",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": true,
+    "page": 5,
+    "published": true,
+    "path": "about",
+    "publisher_state": 0,
+    "creation_date": "2015-11-10T13:00:04.556Z",
+    "slug": "about",
+    "publisher_public": 6
+  },
+  "model": "cms.title",
+  "pk": 5
+},
+{
+  "fields": {
+    "menu_title": "",
+    "meta_description": "",
+    "page_title": "",
+    "language": "en-us",
+    "title": "About",
+    "has_url_overwrite": false,
+    "redirect": "",
+    "publisher_is_draft": false,
+    "page": 6,
+    "published": true,
+    "path": "about",
+    "publisher_state": 0,
+    "creation_date": "2015-11-10T13:00:04.556Z",
+    "slug": "about",
+    "publisher_public": 5
+  },
+  "model": "cms.title",
+  "pk": 6
+},
+{
+  "fields": {
+    "block_color": "bg-primary",
+    "description": "<p>Changing how you teach, to incorporate active learning into your class, can be a major undertaking. Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.</p>\n",
+    "title": "The fast, easy way to add Active Learning to your teaching",
+    "link_button": "https://vimeo.com/136898815",
+    "text_button": "Learn more",
+    "list_description": "<ul>\n\t<li>Both in the classroom, and online.</li>\n\t<li>Students answer using their smartphones or laptops.</li>\n\t<li>Find, remix or modify exercises from the Courselets database.</li>\n\t<li>Write your own exercises using our fast, effective Open Response Concept Testing methodology.</li>\n\t<li>Powerful and easy tools.</li>\n\t<li>Free and Open Source.</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 1
+},
+{
+  "fields": {
+    "block_color": "bg-danger",
+    "description": "<p>You can search Courselets.org for concepts you want to learn. You can quickly take a courselet in a single sitting.</p>\n",
+    "title": "Learn a new concept now",
+    "link_button": "https://courselets.org/ct/courses/2/units/2/slideshow/",
+    "text_button": "Take a look",
+    "list_description": "<ul>\n\t<li>A courselet is a short lesson that helps you really understand an important concept, typically from multiple angles that many students miss.</li>\n\t<li>A courselet challenges your understanding with real-world problems designed to expose common misunderstandings or subtleties.</li>\n\t<li>A courselet really takes off where most materials end: your errors. By helping you classify exactly what your conceptual mistake was, a courselet helps you understand a new, hidden aspect of the concept, and see how others resolved that mistake.\u00a0<b>Your mistakes become your most important learning tool</b>.</li>\n\t<li>A courselet connects everyone trying to learn that concept, and every concept to related concepts and other materials online (such as Wikipedia).</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 2
+},
+{
+  "fields": {
+    "block_color": "bg-success",
+    "description": "",
+    "title": " Challenge your understanding of bioinformatics / Big Data",
+    "link_button": "https://courselets.org/ct/courses/",
+    "text_button": "View the public courses",
+    "list_description": "",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 3
+},
+{
+  "fields": {
+    "block_color": "bg-primary",
+    "description": "<p>Changing how you teach, to incorporate active learning into your class, can be a major undertaking. Based on our own experiences of what works, we've designed Courselets to give you the power-tools, methods and materials to add Active Learning exercises your students can start using right away.</p>\n",
+    "title": "The fast, easy way to add Active Learning to your teaching",
+    "link_button": "https://vimeo.com/136898815",
+    "text_button": "Learn more",
+    "list_description": "<ul>\n\t<li>Both in the classroom, and online.</li>\n\t<li>Students answer using their smartphones or laptops.</li>\n\t<li>Find, remix or modify exercises from the Courselets database.</li>\n\t<li>Write your own exercises using our fast, effective Open Response Concept Testing methodology.</li>\n\t<li>Powerful and easy tools.</li>\n\t<li>Free and Open Source.</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 794
+},
+{
+  "fields": {
+    "block_color": "bg-danger",
+    "description": "<p>You can search Courselets.org for concepts you want to learn. You can quickly take a courselet in a single sitting.</p>\n",
+    "title": "Learn a new concept now",
+    "link_button": "https://courselets.org/ct/courses/2/units/2/slideshow/",
+    "text_button": "Take a look",
+    "list_description": "<ul>\n\t<li>A courselet is a short lesson that helps you really understand an important concept, typically from multiple angles that many students miss.</li>\n\t<li>A courselet challenges your understanding with real-world problems designed to expose common misunderstandings or subtleties.</li>\n\t<li>A courselet really takes off where most materials end: your errors. By helping you classify exactly what your conceptual mistake was, a courselet helps you understand a new, hidden aspect of the concept, and see how others resolved that mistake.\u00a0<b>Your mistakes become your most important learning tool</b>.</li>\n\t<li>A courselet connects everyone trying to learn that concept, and every concept to related concepts and other materials online (such as Wikipedia).</li>\n</ul>\n",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 795
+},
+{
+  "fields": {
+    "block_color": "bg-success",
+    "description": "",
+    "title": " Challenge your understanding of bioinformatics / Big Data",
+    "link_button": "https://courselets.org/ct/courses/",
+    "text_button": "View the public courses",
+    "list_description": "",
+    "hidden": false
+  },
+  "model": "pages.landingplugin",
+  "pk": 796
+},
+{
+  "fields": {
+    "description": "<p>Join the hands-on workshop that utilizes the Courselets platform. Participants have the opportunity to refine their teaching strategies and create a learning environment that addresses student needs in real-time.\u00a0</p>\n",
+    "title": "Transform student outcomes ",
+    "link_button": "",
+    "text_button": "Sign Up Now ",
+    "sponsors_text": "A free hackathon sponsored by UCLA and NIH",
+    "hidden": false
+  },
+  "model": "pages.bannerplugin",
+  "pk": 25
+},
+{
+  "fields": {
+    "description": "<p>Join the hands-on workshop that utilizes the Courselets platform. Participants have the opportunity to refine their teaching strategies and create a learning environment that addresses student needs in real-time.\u00a0</p>\n",
+    "title": "Transform student outcomes ",
+    "link_button": "",
+    "text_button": "Sign Up Now ",
+    "sponsors_text": "A free hackathon sponsored by UCLA and NIH",
+    "hidden": false
+  },
+  "model": "pages.bannerplugin",
+  "pk": 763
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>Subject matter contains STEM content</li>\n\t<li>Course reflects high student drop rates</li>\n\t<li>Students struggle to understand key course concepts and apply them to real-world scenarios</li>\n\t<li>Available in-class technology doesn\u2019t provide real-time data or metrics for understanding gaps in learning</li>\n\t<li>Teaching goals include increasing collaborative learning in the classroom</li>\n</ul>\n",
+    "description": "<p>This small-group workshop will give you the opportunity to work with other instructors to implement the Courselets framework, taking small steps to improve overall student learning outcomes and decrease attrition rates.</p>\n\n<p>This workshop might be for you if your:</p>\n",
+    "title": "Collaborative, online hackathon",
+    "fig_caption": "Student attrition rates using Courselets framework",
+    "fig_alt": "Active learning attrition rates",
+    "hidden": false
+  },
+  "model": "pages.activelearningratesplugin",
+  "pk": 231
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>Subject matter contains STEM content</li>\n\t<li>Course reflects high student drop rates</li>\n\t<li>Students struggle to understand key course concepts and apply them to real-world scenarios</li>\n\t<li>Available in-class technology doesn\u2019t provide real-time data or metrics for understanding gaps in learning</li>\n\t<li>Teaching goals include increasing collaborative learning in the classroom</li>\n</ul>\n",
+    "description": "<p>This small-group workshop will give you the opportunity to work with other instructors to implement the Courselets framework, taking small steps to improve overall student learning outcomes and decrease attrition rates.</p>\n\n<p>This workshop might be for you if your:</p>\n",
+    "title": "Collaborative, online hackathon",
+    "fig_caption": "Student attrition rates using Courselets framework",
+    "fig_alt": "Active learning attrition rates",
+    "hidden": false
+  },
+  "model": "pages.activelearningratesplugin",
+  "pk": 764
+},
+{
+  "fields": {
+    "hidden": true,
+    "list_text": "<ul>\n\t<li>Do you have high student drop rates?</li>\n\t<li>Are students struggling to understand key concepts?</li>\n\t<li>Do your students lack the ability to apply what they've learned to real world problems?</li>\n\t<li>Do you have metrics and clear learning outcomes for your course? Can you easily evaluate how well your students are learning?</li>\n</ul>\n",
+    "list_type": "list-questions",
+    "title": "Is this workshop for me?"
+  },
+  "model": "pages.listplugin",
+  "pk": 15
+},
+{
+  "fields": {
+    "hidden": true,
+    "list_text": "<ul>\n\t<li>Do you have high student drop rates?</li>\n\t<li>Are students struggling to understand key concepts?</li>\n\t<li>Do your students lack the ability to apply what they've learned to real world problems?</li>\n\t<li>Do you have metrics and clear learning outcomes for your course? Can you easily evaluate how well your students are learning?</li>\n</ul>\n",
+    "list_type": "list-questions",
+    "title": "Is this workshop for me?"
+  },
+  "model": "pages.listplugin",
+  "pk": 769
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Chris received a B.A. summa cum laude in Biochemistry and Molecular Biology in 1988 from Harvard College, and a Ph.D. in Structural Biology from Stanford University in 1993. He has been a faculty member in the UCLA Department of Chemistry and Biochemistry since 1998. He personally struggled with high attrition rates in his bioinformatics classes, and has a personal passion for improving learning outcomes in STEM disciplines.</p>\n",
+    "image": 1,
+    "title": "Christopher Lee, PhD"
+  },
+  "model": "pages.childpersonalguidesplugin",
+  "pk": 11
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Dr. Rachel Horak received her Ph.D. in Biology at Georgia Tech. While studying for the degree, she won numerous awards for teaching biology courses and earned a Certificate for Instruction in Higher Education through the Center for the Enhancement of Teaching and Learning at Georgia Tech. Rachel then completed a 3 year postdoctoral fellowship at the University of Washington in the School of Oceanography, where she spent several months doing research in the Pacific Ocean and taught several undergraduate courses. She then completed a Fellowship in Education at the American Society for Microbiology Headquarters in Washington, DC. There, Rachel led professional development workshops and webinars and developed resources for undergraduate biology faculty that helped faculty implement active learning and effective course design. Her education scholarship has been published in the Journal of Microbiology and Biology Education and Microbe magazine. In her courses, Rachel emphasizes broad cross-disciplinary concepts, classroom methods backed by educational research, such as active learning, and the inclusion of real research in the STEM classroom.</p>\n",
+    "image": 3,
+    "title": "Rachel Horak, PhD"
+  },
+  "model": "pages.childpersonalguidesplugin",
+  "pk": 55
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Chris received a B.A. summa cum laude in Biochemistry and Molecular Biology in 1988 from Harvard College, and a Ph.D. in Structural Biology from Stanford University in 1993. He has been a faculty member in the UCLA Department of Chemistry and Biochemistry since 1998. He personally struggled with high attrition rates in his bioinformatics classes, and has a personal passion for improving learning outcomes in STEM disciplines.</p>\n",
+    "image": 1,
+    "title": "Christopher Lee, PhD"
+  },
+  "model": "pages.childpersonalguidesplugin",
+  "pk": 772
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Dr. Rachel Horak received her Ph.D. in Biology at Georgia Tech. While studying for the degree, she won numerous awards for teaching biology courses and earned a Certificate for Instruction in Higher Education through the Center for the Enhancement of Teaching and Learning at Georgia Tech. Rachel then completed a 3 year postdoctoral fellowship at the University of Washington in the School of Oceanography, where she spent several months doing research in the Pacific Ocean and taught several undergraduate courses. She then completed a Fellowship in Education at the American Society for Microbiology Headquarters in Washington, DC. There, Rachel led professional development workshops and webinars and developed resources for undergraduate biology faculty that helped faculty implement active learning and effective course design. Her education scholarship has been published in the Journal of Microbiology and Biology Education and Microbe magazine. In her courses, Rachel emphasizes broad cross-disciplinary concepts, classroom methods backed by educational research, such as active learning, and the inclusion of real research in the STEM classroom.</p>\n",
+    "image": 3,
+    "title": "Rachel Horak, PhD"
+  },
+  "model": "pages.childpersonalguidesplugin",
+  "pk": 773
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Personal Guides"
+  },
+  "model": "pages.parentpersonalguidesplugin",
+  "pk": 10
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Personal Guides"
+  },
+  "model": "pages.parentpersonalguidesplugin",
+  "pk": 771
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Workshop Description"
+  },
+  "model": "pages.workshopdescriptionplugin",
+  "pk": 9
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Workshop Description"
+  },
+  "model": "pages.workshopdescriptionplugin",
+  "pk": 770
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Working in collaborative groups, take small, actionable steps to assess and improve student learning outcomes through customized solutions.</p>\n",
+    "image": 2,
+    "title": "Action Plans"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 14
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Access real-time analytics that will help you understand where and why students are struggling. Explore data and work with colleagues to fill in gaps in learning.</p>\n",
+    "image": 5,
+    "title": "Analytics Reports"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 56
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Gain the metrics and tools you need to pursue grant funding, publish your research and establish yourself as an innovator among your peers.</p>\n",
+    "image": 4,
+    "title": "Increased Prestige"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 57
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Working in collaborative groups, take small, actionable steps to assess and improve student learning outcomes through customized solutions.</p>\n",
+    "image": 2,
+    "title": "Action Plans"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 766
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Access real-time analytics that will help you understand where and why students are struggling. Explore data and work with colleagues to fill in gaps in learning.</p>\n",
+    "image": 5,
+    "title": "Analytics Reports"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 767
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "<p>Gain the metrics and tools you need to pursue grant funding, publish your research and establish yourself as an innovator among your peers.</p>\n",
+    "image": 4,
+    "title": "Increased Prestige"
+  },
+  "model": "pages.benefitsitemplugin",
+  "pk": 768
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "What you'll get from this hackathon"
+  },
+  "model": "pages.benefitsplugin",
+  "pk": 13
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "What you'll get from this hackathon"
+  },
+  "model": "pages.benefitsplugin",
+  "pk": 765
+},
+{
+  "fields": {
+    "hidden": false,
+    "footer_text": "2015 Courselets.org",
+    "footer_link": ""
+  },
+  "model": "pages.footerplugin",
+  "pk": 12
+},
+{
+  "fields": {
+    "hidden": false,
+    "footer_text": "2015 Courselets.org",
+    "footer_link": ""
+  },
+  "model": "pages.footerplugin",
+  "pk": 789
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Share This Event"
+  },
+  "model": "pages.socialplugin",
+  "pk": 8
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "Share This Event"
+  },
+  "model": "pages.socialplugin",
+  "pk": 788
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "FAQ"
+  },
+  "model": "pages.faqplugin",
+  "pk": 197
+},
+{
+  "fields": {
+    "hidden": false,
+    "title": "FAQ"
+  },
+  "model": "pages.faqplugin",
+  "pk": 790
+},
+{
+  "fields": {
+    "answer": " 3 meetings",
+    "hidden": false,
+    "question": "Duration:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 85
+},
+{
+  "fields": {
+    "answer": " 2 hours each meeting",
+    "hidden": false,
+    "question": "Sessions:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 86
+},
+{
+  "fields": {
+    "answer": " Online video conference",
+    "hidden": false,
+    "question": "Location:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 87
+},
+{
+  "fields": {
+    "answer": " 4-8",
+    "hidden": false,
+    "question": "Number Participants:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 88
+},
+{
+  "fields": {
+    "answer": " A computer or mobile device, webcam, headset.",
+    "hidden": false,
+    "question": "What you need to participate:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 89
+},
+{
+  "fields": {
+    "answer": "Answer",
+    "hidden": false,
+    "question": "Who should attend?"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 198
+},
+{
+  "fields": {
+    "answer": "Answer",
+    "hidden": false,
+    "question": "What do I need to participate in the workshop?"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 199
+},
+{
+  "fields": {
+    "answer": " 3 meetings",
+    "hidden": false,
+    "question": "Duration:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 781
+},
+{
+  "fields": {
+    "answer": " 2 hours each meeting",
+    "hidden": false,
+    "question": "Sessions:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 782
+},
+{
+  "fields": {
+    "answer": " Online video conference",
+    "hidden": false,
+    "question": "Location:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 783
+},
+{
+  "fields": {
+    "answer": " 4-8",
+    "hidden": false,
+    "question": "Number Participants:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 784
+},
+{
+  "fields": {
+    "answer": " A computer or mobile device, webcam, headset.",
+    "hidden": false,
+    "question": "What you need to participate:"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 785
+},
+{
+  "fields": {
+    "answer": "Answer",
+    "hidden": false,
+    "question": "Who should attend?"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 791
+},
+{
+  "fields": {
+    "answer": "Answer",
+    "hidden": false,
+    "question": "What do I need to participate in the workshop?"
+  },
+  "model": "pages.faqitemplugin",
+  "pk": 792
+},
+{
+  "fields": {
+    "list_text": "<ol>\n\t<li>Review key concepts</li>\n\t<li>Participate in fun guided group activities</li>\n</ol>\n",
+    "list_type": "list_numeric",
+    "title": "Agenda",
+    "description_header": "",
+    "description_footer": "",
+    "hidden": false,
+    "header_type_text": ""
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 81
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>High attrition rates from math-intensive STEM classes</li>\n\t<li>Poor ability to solve real-world problems</li>\n\t<li>Poor conceptual understanding (basic misconceptions on 50% of the concepts, and little improvement by the end of a course)</li>\n\t<li>Missing ways to identify specific misconceptions, or to see how to fix them</li>\n\t<li>Instructors lack a way to see what each student is actually thinking, and thus cannot diagnose their underlying conceptual errors, let alone fix them</li>\n</ul>\n",
+    "list_type": "list-checklist",
+    "title": "Key Concepts",
+    "description_header": "<p>The Problem:\u00a0<strong>Student Blind Spots</strong>. We'll briefly review these problems and how to solve them.</p>\n",
+    "description_footer": "<p>Ut persecuti cotidieque pri, tamquam luptatum qualisque duo ad. Eu repudiandae instructior sit, ne deleniti intellegam cum. Qui sensibus assentior definitionem id, et cibo mazim philosophia vel. Debet officiis reformidans qui id. Ei mutat maluisset intellegat has, erat urbanitas nec ne.</p>\n",
+    "hidden": false,
+    "header_type_text": ""
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 82
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>Key concepts and applications</li>\n\t<li>Target problems that you can use right away as exam prep exercises</li>\n</ul>\n",
+    "list_type": "list-header",
+    "title": "Group Activities",
+    "description_header": "<p>Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi. Te ius augue melius, te delectus persecuti vel, porro debet appetere per ad. Unum integre no nam. Appareat legendos suscipiantur sea ei, te saperet adipiscing eum.</p>\n",
+    "description_footer": "",
+    "hidden": false,
+    "header_type_text": "Identify four your courses:"
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 83
+},
+{
+  "fields": {
+    "list_text": "<ol>\n\t<li>Review key concepts</li>\n\t<li>Participate in fun guided group activities</li>\n</ol>\n",
+    "list_type": "list_numeric",
+    "title": "Agenda",
+    "description_header": "",
+    "description_footer": "",
+    "hidden": false,
+    "header_type_text": ""
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 776
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>High attrition rates from math-intensive STEM classes</li>\n\t<li>Poor ability to solve real-world problems</li>\n\t<li>Poor conceptual understanding (basic misconceptions on 50% of the concepts, and little improvement by the end of a course)</li>\n\t<li>Missing ways to identify specific misconceptions, or to see how to fix them</li>\n\t<li>Instructors lack a way to see what each student is actually thinking, and thus cannot diagnose their underlying conceptual errors, let alone fix them</li>\n</ul>\n",
+    "list_type": "list-checklist",
+    "title": "Key Concepts",
+    "description_header": "<p>The Problem:\u00a0<strong>Student Blind Spots</strong>. We'll briefly review these problems and how to solve them.</p>\n",
+    "description_footer": "<p>Ut persecuti cotidieque pri, tamquam luptatum qualisque duo ad. Eu repudiandae instructior sit, ne deleniti intellegam cum. Qui sensibus assentior definitionem id, et cibo mazim philosophia vel. Debet officiis reformidans qui id. Ei mutat maluisset intellegat has, erat urbanitas nec ne.</p>\n",
+    "hidden": false,
+    "header_type_text": ""
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 777
+},
+{
+  "fields": {
+    "list_text": "<ul>\n\t<li>Key concepts and applications</li>\n\t<li>Target problems that you can use right away as exam prep exercises</li>\n</ul>\n",
+    "list_type": "list-header",
+    "title": "Group Activities",
+    "description_header": "<p>Lorem ipsum dolor sit amet, in regione saperet deleniti vel. Vel no postea scripta omnesque, ne vis inani dicam eligendi. Te ius augue melius, te delectus persecuti vel, porro debet appetere per ad. Unum integre no nam. Appareat legendos suscipiantur sea ei, te saperet adipiscing eum.</p>\n",
+    "description_footer": "",
+    "hidden": false,
+    "header_type_text": "Identify four your courses:"
+  },
+  "model": "pages.miscitemplugin",
+  "pk": 778
+},
+{
+  "fields": {
+    "name_field": "Name",
+    "description": "There is no commitment to take the workshop at this point. We'll contact you when we get enough participants to schedule a workshop.",
+    "email_field": "Email",
+    "title": "I\u2019m Interested in the Online Workshop",
+    "when_error_msg": "Please tell us when you can join",
+    "timezone_error_msg": "Please enter your timezone",
+    "first_name_error_msg": "Please enter your first name",
+    "btn_text": "Keep Me Informed",
+    "last_name_error_msg": "Please enter your last name",
+    "timezone_field": " What is your timezone?",
+    "when_field": "When can you join?",
+    "email_to": "redilonka@gmail.com",
+    "hidden": false,
+    "description_field": "<p>We plan to host hackathons between ? and ?. Please tell us more about your availability below. Our hackathons are split into 3 meetings that are about 2 hours long.</p>\n",
+    "email_error_msg": "Please enter your email"
+  },
+  "model": "pages.interestedplugin",
+  "pk": 542
+},
+{
+  "fields": {
+    "name_field": "Name",
+    "description": "There is no commitment to take the workshop at this point. We'll contact you when we get enough participants to schedule a workshop.",
+    "email_field": "Email",
+    "title": "I\u2019m Interested in the Online Workshop",
+    "when_error_msg": "Please tell us when you can join",
+    "timezone_error_msg": "Please enter your timezone",
+    "first_name_error_msg": "Please enter your first name",
+    "btn_text": "Keep Me Informed",
+    "last_name_error_msg": "Please enter your last name",
+    "timezone_field": " What is your timezone?",
+    "when_field": "When can you join?",
+    "email_to": "redilonka@gmail.com",
+    "hidden": false,
+    "description_field": "<p>We plan to host hackathons between ? and ?. Please tell us more about your availability below. Our hackathons are split into 3 meetings that are about 2 hours long.</p>\n",
+    "email_error_msg": "Please enter your email"
+  },
+  "model": "pages.interestedplugin",
+  "pk": 793
+},
+{
+  "fields": {
+    "hidden": true,
+    "title": "Details"
+  },
+  "model": "pages.detailschildplugin",
+  "pk": 140
+},
+{
+  "fields": {
+    "hidden": true,
+    "title": "Details"
+  },
+  "model": "pages.detailschildplugin",
+  "pk": 780
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "This workshop can help you take small easy steps to improve your student learning outcomes.",
+    "video_url": "https://player.vimeo.com/video/136898815?title=0&byline=0&portrait=0"
+  },
+  "model": "pages.detailsvideoplugin",
+  "pk": 167
+},
+{
+  "fields": {
+    "hidden": false,
+    "description": "This workshop can help you take small easy steps to improve your student learning outcomes.",
+    "video_url": "https://player.vimeo.com/video/136898815?title=0&byline=0&portrait=0"
+  },
+  "model": "pages.detailsvideoplugin",
+  "pk": 786
+},
+{
+  "fields": {
+    "hidden": true,
+    "quote_small": "\u2014 Pepe Ping, UCLA BD2K",
+    "quote_text": "This hackathon was a great experience, and I was able to Lorem ipsum dolor sit amet."
+  },
+  "model": "pages.detailsquoteplugin",
+  "pk": 168
+},
+{
+  "fields": {
+    "hidden": true,
+    "quote_small": "\u2014 Pepe Ping, UCLA BD2K",
+    "quote_text": "This hackathon was a great experience, and I was able to Lorem ipsum dolor sit amet."
+  },
+  "model": "pages.detailsquoteplugin",
+  "pk": 787
+},
+{
+  "fields": {
+    "rght": 2,
+    "uploaded_at": "2015-11-05T12:10:23.892Z",
+    "name": "Uploads",
+    "parent": null,
+    "level": 0,
+    "created_at": "2015-11-05T12:10:23.892Z",
+    "modified_at": "2015-11-05T12:10:23.892Z",
+    "lft": 1,
+    "tree_id": 1,
+    "owner": [
+      "admin"
+    ]
+  },
+  "model": "filer.folder",
+  "pk": 1
+},
+{
+  "fields": {
+    "sha1": "19ff7c5b8917f74f7d12bb287e09df140287f4e3",
+    "original_filename": "chris.jpg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-11-05T12:10:37.134Z",
+    "_file_size": 20512,
+    "uploaded_at": "2015-11-05T12:10:18.897Z",
+    "file": "filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 1
+},
+{
+  "fields": {
+    "sha1": "5535e7e7898e05bf986d61d83409c2feeaca43de",
+    "original_filename": "nature.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-11-05T12:12:57.388Z",
+    "_file_size": 104064,
+    "uploaded_at": "2015-11-05T12:12:55.556Z",
+    "file": "filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 2
+},
+{
+  "fields": {
+    "sha1": "c3f9c40dd98df89e6c5d4eaca1e2669cbd0bda5b",
+    "original_filename": "rachel.jpg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-11-05T16:19:50.515Z",
+    "_file_size": 21166,
+    "uploaded_at": "2015-11-05T16:19:47.352Z",
+    "file": "filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 3
+},
+{
+  "fields": {
+    "sha1": "40580a282c1ff1c45b9653c4e43e32e5fc626f05",
+    "original_filename": "tech.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-11-05T16:23:23.416Z",
+    "_file_size": 48760,
+    "uploaded_at": "2015-11-05T16:23:21.914Z",
+    "file": "filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 4
+},
+{
+  "fields": {
+    "sha1": "ecdfce8aa4aab2b2fc2b29a06d62673bc4cc4882",
+    "original_filename": "arch.jpeg",
+    "name": "",
+    "description": null,
+    "modified_at": "2015-11-05T16:23:38.662Z",
+    "_file_size": 95400,
+    "uploaded_at": "2015-11-05T16:23:31.367Z",
+    "file": "filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 5
+},
+{
+  "fields": {
+    "sha1": "e1b3f7e6bc8ab9fa46075aa23fca6c5eb45d573a",
+    "original_filename": "stAWwiN88Io.jpg",
+    "name": "",
+    "description": "",
+    "modified_at": "2015-11-09T09:29:02.678Z",
+    "_file_size": 38437,
+    "uploaded_at": "2015-11-09T08:35:42.890Z",
+    "file": "filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg",
+    "owner": [
+      "admin"
+    ],
+    "is_public": true,
+    "folder": 1,
+    "has_all_mandatory_data": false,
+    "polymorphic_ctype": [
+      "filer",
+      "image"
+    ]
+  },
+  "model": "filer.file",
+  "pk": 6
+},
+{
+  "fields": {
+    "user": [
+      "admin"
+    ]
+  },
+  "model": "filer.clipboard",
+  "pk": 1
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-05T12:10:18.885Z",
+    "author": null,
+    "_height": 356,
+    "_width": 572,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 1
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-05T12:12:55.553Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 2
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-05T16:19:47.342Z",
+    "author": null,
+    "_height": 356,
+    "_width": 572,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 3
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-05T16:23:21.912Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 4
+},
+{
+  "fields": {
+    "subject_location": null,
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-05T16:23:31.364Z",
+    "author": null,
+    "_height": 220,
+    "_width": 360,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": null,
+    "default_caption": null
+  },
+  "model": "filer.image",
+  "pk": 5
+},
+{
+  "fields": {
+    "subject_location": "",
+    "must_always_publish_copyright": false,
+    "date_taken": "2015-11-09T08:35:42.881Z",
+    "author": "",
+    "_height": 604,
+    "_width": 431,
+    "must_always_publish_author_credit": false,
+    "default_alt_text": "",
+    "default_caption": ""
+  },
+  "model": "filer.image",
+  "pk": 6
+},
+{
+  "fields": {
+    "name": "filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.369Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 1
+},
+{
+  "fields": {
+    "name": "filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:13:23.986Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 2
+},
+{
+  "fields": {
+    "name": "filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T12:07:59.813Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 3
+},
+{
+  "fields": {
+    "name": "filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:46.779Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 4
+},
+{
+  "fields": {
+    "name": "filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:24:06.335Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 5
+},
+{
+  "fields": {
+    "name": "filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.429Z"
+  },
+  "model": "easy_thumbnails.source",
+  "pk": 6
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:18.953Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 1
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:18.972Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 2
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:18.990Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 3
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:19.010Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 4
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:19.028Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 5
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:19.046Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 6
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:19.063Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 7
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:10:19.079Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 8
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.589Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 9
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.603Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 10
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.617Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 11
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.634Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 12
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.648Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 13
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.664Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 14
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.678Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 15
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:12:55.692Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 16
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:13:23.995Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 17
+},
+{
+  "fields": {
+    "source": 2,
+    "name": "filer_public_thumbnails/filer_public/e6/35/e635eff9-37b5-4628-8830-835e4bd79fb5/nature.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T12:13:24.012Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 18
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.397Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 19
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.416Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 20
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.435Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 21
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.455Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 22
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.473Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 23
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.492Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 24
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.509Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 25
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:19:47.528Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 26
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:21.946Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 27
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:21.960Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 28
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:21.974Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 29
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:21.989Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 30
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:22.003Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 31
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:22.016Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 32
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:22.030Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 33
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:22.044Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 34
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.399Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 35
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.412Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 36
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.427Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 37
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.442Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 38
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.456Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 39
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.472Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 40
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.487Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 41
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:31.501Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 42
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:46.787Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 43
+},
+{
+  "fields": {
+    "source": 4,
+    "name": "filer_public_thumbnails/filer_public/c8/c0/c8c0c768-235e-40bf-9fc1-ff1899e2ccca/tech.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:23:46.800Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 44
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:24:06.342Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 45
+},
+{
+  "fields": {
+    "source": 5,
+    "name": "filer_public_thumbnails/filer_public/56/7c/567c0ef8-529f-48ee-bbf6-08a12cebb391/arch.jpeg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-05T16:24:06.361Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 46
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__32x32_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:42.939Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 47
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__32x32_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:42.960Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 48
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__64x64_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:42.978Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 49
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__64x64_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:43.001Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 50
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__48x48_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:43.020Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 51
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__48x48_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:43.040Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 52
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__16x16_q85_crop_subsampling-2_upscale.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:43.057Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 53
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__16x16_q85_crop_subsampling-2_upscale@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T08:35:43.074Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 54
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__210x10000_q85_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T09:28:57.238Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 55
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__210x10000_q85_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T09:28:57.278Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 56
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__360x220_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T09:29:11.992Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 57
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__360x220_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T09:29:12.015Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 58
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__572x356_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.381Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 59
+},
+{
+  "fields": {
+    "source": 1,
+    "name": "filer_public_thumbnails/filer_public/20/59/20596690-f115-4c7d-95c3-4bc2da5f0a19/chris.jpg__572x356_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.404Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 60
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__572x356_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.439Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 61
+},
+{
+  "fields": {
+    "source": 6,
+    "name": "filer_public_thumbnails/filer_public/04/61/0461997b-961f-426d-9ec1-de6f43847094/stawwin88io.jpg__572x356_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T10:21:08.466Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 62
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__572x356_q85_crop_subsampling-2.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T12:07:59.824Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 63
+},
+{
+  "fields": {
+    "source": 3,
+    "name": "filer_public_thumbnails/filer_public/55/08/55086c38-dba4-4f00-bf0c-5661427f4384/rachel.jpg__572x356_q85_crop_subsampling-2@2x.jpg",
+    "storage_hash": "f9bde26a1556cd667f742bd34ec7c55e",
+    "modified": "2015-11-09T12:07:59.847Z"
+  },
+  "model": "easy_thumbnails.thumbnail",
+  "pk": 64
+},
+{
+  "fields": {
+    "body": "<p>Courselets.org is currently in public alpha release. Details will be made available in the public beta release.</p>\n\n<ul>\n\t<li>We want to hear your feedback! If you have questions or comments on a specific lesson in a courselet, click on its\u00a0<b>FAQ</b>\u00a0tab to post your question or comment.</li>\n\t<li>During the initial alpha period, if you have general comments or questions, please raise them on the\u00a0<a href=\"https://plus.google.com/communities/103357779147103714603\">Courselets community page</a>.</li>\n\t<li>If you encounter software bugs or want to propose software enhancements, please enter them on our\u00a0<a href=\"https://github.com/cjlee112/socraticqs2/issues\">Github issue tracker</a>.</li>\n</ul>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 797
+},
+{
+  "fields": {
+    "body": "<h1>About Courselets.org</h1>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 798
+},
+{
+  "fields": {
+    "body": "<h1>About Courselets.org</h1>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 799
+},
+{
+  "fields": {
+    "body": "<p>Courselets.org is currently in public alpha release. Details will be made available in the public beta release.</p>\n\n<ul>\n\t<li>We want to hear your feedback! If you have questions or comments on a specific lesson in a courselet, click on its\u00a0<b>FAQ</b>\u00a0tab to post your question or comment.</li>\n\t<li>During the initial alpha period, if you have general comments or questions, please raise them on the\u00a0<a href=\"https://plus.google.com/communities/103357779147103714603\">Courselets community page</a>.</li>\n\t<li>If you encounter software bugs or want to propose software enhancements, please enter them on our\u00a0<a href=\"https://github.com/cjlee112/socraticqs2/issues\">Github issue tracker</a>.</li>\n</ul>\n"
+  },
+  "model": "djangocms_text_ckeditor.text",
+  "pk": 800
+}
+]

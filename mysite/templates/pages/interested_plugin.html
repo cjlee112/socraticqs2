@@ -1,0 +1,56 @@
+{% if not instance.hidden %}
+<section id="interested" class="section-centered-background" style="background-image:url({{ instance.bg_image.url }})">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-md-offset-3">
+        <h2>{{ instance.title }}</h2>
+
+        <p>{{ instance.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <div class="message-container">
+    </div>
+  </div>
+</div>
+
+
+<section class="section-form">
+<form action="" id="interested-form">
+    {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-md-offset-3">
+        <div>
+          <label>{{ instance.name_field }}</label>
+              <input type="text" name="name" placeholder="Name" data-validation="required length" data-validation-length="max200" data-validation-error-msg-required="{{ instance.name_error_msg }}">
+        </div>
+
+        <div>
+          <label>{{ instance.organization_field }}</label>
+              <input type="text" name="organization" placeholder="Institute/Organization" data-validation="required length" data-validation-length="max200" data-validation-error-msg-required="{{ instance.last_name_error_msg }}">
+        </div>
+        <div>
+          <label>{{ instance.role_field }}</label>
+          <input type="text" name="role" placeholder="Title/Role" data-validation="required" data-validation-error-msg="{{ instance.role_error_msg }}">
+        </div>
+        <div>
+          <label>{{ instance.email_field }}</label>
+          <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
+        </div>
+        <div>
+          <label>{{ instance.description_field|safe }}</label>
+          <textarea name="when_join"></textarea>
+        </div>
+
+        <input type="submit" value="{{ instance.btn_text }}">
+      </div>
+    </div>
+  </div>
+</form>
+</section>
+{% endif %}

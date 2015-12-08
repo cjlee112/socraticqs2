@@ -1,0 +1,11 @@
+{% load cms_tags %}
+
+{% if not instance.hidden %}
+<h3>{{ instance.title }}</h3>
+
+<dl>
+{% for plugin in instance.child_plugin_instances %}
+  {% render_plugin plugin %}
+{% endfor %}
+</dl>
+{% endif %}
