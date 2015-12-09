@@ -927,7 +927,6 @@ def ul_teach(request, course_id, unit_id, ul_id):
         n = pageData.fsmStack.state.linkChildren.count() # livesession students
         statusTable, evalTable, n = Response.get_counts(query, n=n)
         answer = ul.get_answers().all()[0]
-        import pwd;pwd.set_trace()
     else: # default: all responses w/ selfeval
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
@@ -981,7 +980,6 @@ def live_question(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
     startForm = None
-    import pdb;pdb.set_trace()
     if not pageData.has_refresh_timer(request):
         startForm = push_button(request)
         if not startForm:

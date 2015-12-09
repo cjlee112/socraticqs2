@@ -15,7 +15,6 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'), 
     concat = require('gulp-concat'),
     minifyCSS = require('gulp-minify-css'),
-    debug = require('gulp-debug'),
     autoprefixer = require('gulp-autoprefixer');
 var through = require('through2');
 
@@ -27,10 +26,10 @@ gulp.task('js', function() {
        .pipe(concat('main.min.js'))
        .pipe(uglify())
        .on('error', console.log)
-       //.pipe(debug())
        .pipe(gulp.dest('./mysite/mysite/static/js/'));
 
 });
+
 // CSS
 gulp.task('css', function() {
     return gulp.src(['./mysite/assets/css/src/*.css', ])

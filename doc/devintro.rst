@@ -599,7 +599,9 @@ Installation
 .............
 
 You need have installed nodeJS latest version and npm(version >= 3.3.XX).
-Alos need install next packages:
+`<https://nodejs.org/en/>`_
+
+Also need install next packages:
 * gulp
 * gulp-stylus
 * gulp-csso
