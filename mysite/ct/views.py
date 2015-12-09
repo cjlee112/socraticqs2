@@ -1080,6 +1080,9 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     else: # let instructor edit this lesson
         titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
         if request.method == 'POST':
+            if 'unit_to_move' in request.POST:
+                ul.unit = Unit.objects.get(id=request.POST['unit_to_move'])
+                ul.save()
             if 'title' in request.POST:
                 lesson = ul.checkout(request.user)
                 titleform = formClass(request.POST, instance=lesson)
@@ -1099,7 +1102,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         set_crispy_action(request.path, titleform)
     return pageData.render(request, 'ct/edit_lesson.html',
                   dict(unitLesson=ul, atime=display_datetime(ul.atime),
-                       titleform=titleform))
+                       titleform=titleform, unints=Unit.objects.all()))
 
 
 def create_error_ul(lesson, concept, unit, parentUL):

@@ -21,6 +21,8 @@
   {% endfor %}
 </ul>
 
+
+
 <div class="tab-content">
   <div class="tab-pane active" id="EditTabDiv">
 
@@ -32,7 +34,21 @@
 <p>
 Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 </p>
-
+<p>
+<form action="." method="post">
+  {% csrf_token %}
+  <select id="js-slct-unit" name="unit_to_move" class="form-control">
+    {% for unit in unints %}
+      {% if not unit == ul.unit %}
+      <option selected="selected" value="{{ unit.id }}">{{ unit.title }}</option>
+      {% else %}
+      <option value="{{ unit.id }}">{{ unit.title }}</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+  <input type="submit" class="btn btn-primary" value="Move to select unit" />
+</form>
+</p>
 <form action="{{ actionTarget }}" method="post">
   {% csrf_token %}
   <input type="hidden" name="task" value="delete" />
@@ -41,5 +57,11 @@ Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 
   </div><!-- @end #EditTabDiv -->
 </div>
+<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" rel="stylesheet" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+
+<script type="application/javascript">
+$("#js-slct-unit").select2({placeholder: "Select a unit"});
+</script>
 {% endblock %}
 
