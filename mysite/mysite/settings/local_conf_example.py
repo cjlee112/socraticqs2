@@ -41,3 +41,9 @@ GOOGLE_ANALYTICS_CODE = ""
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+# GetSentry config
+
+RAVEN_CONFIG = {
+    'dsn': '',
+}
