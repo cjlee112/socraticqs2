@@ -592,16 +592,18 @@ To start the celery beat service use::
 
 Previous command we need to call inside socraticqs2/mysite directory.
 
-GULP 
------
+
+Front-end build system gulp
+---------------------------
 
 Installation
 .............
 
-You need have installed nodeJS latest version and npm(version >= 3.3.XX).
-`<https://nodejs.org/en/>`_
+We need to have installed nodeJS latest version and npm (version >= 3.3.XX) from
+`nodejs site. <https://nodejs.org/en/>`_
 
-Also need install next packages:
+Also we need to install next packages:
+
 * gulp
 * gulp-stylus
 * gulp-csso
@@ -610,19 +612,22 @@ Also need install next packages:
 * gulp-minify-css
 * gulp-autoprefixer
 
-To install packages run command:
-`npm install --global gulp`
+To install packages run command::
 
-`npm install gulp gulp-stylus gulp-csso gulp-uglify gulp-concat  gulp-minify-css gulp-autoprefixer connect --save-dev`
+    npm install --global gulp
+    npm install gulp gulp-stylus gulp-csso gulp-uglify gulp-concat  gulp-minify-css gulp-autoprefixer connect --save-dev
 
 
 Running gulp
 .............
 
-To run gulp all tasks:
-`$ gulp`
-Also you might run one task:
-`$gulp [task_name]`
+To run gulp all tasks::
+
+    $ gulp
+
+Also we might run one task::
+
+    $ gulp [task_name]
 
 
 
