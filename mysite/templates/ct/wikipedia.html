@@ -11,16 +11,24 @@
 {% endblock %}
 
 {% block content %}
+{% if sourceID %}
+    <h2>Choose one option</h2>
+    {% for title,url in sourceID %}
+       <p><b><a href="{{ url }}">{{ title }}</a></b></p>
+    {% endfor %}
+{% else %}
+    <p>{{ lesson.text }}</p>
 
-<p>{{ lesson.text }}</p>
+    {% if lesson.url %}
+      <p><b>Read <a href="{{ lesson.url }}">more information here</a></b>.</p>
+    {% endif %}
 
-{% if lesson.url %}
-  <p><b>Read <a href="{{ lesson.url }}">more information here</a></b>.</p>
+    {% if addForm %}
+      {% crispy addForm %}
+    {% endif %}
 {% endif %}
-
-{% if addForm %}
-  {% crispy addForm %}
-{% endif %}
-
 {% endblock %}
 
+http://127.0.0.1:8000/ct/teach/courses/1/units/5/concepts/wikipedia/%22Hey%20Mama%22%20%28David%20Guetta%20song%29/
+http://127.0.0.1:8000/ct/teach/courses/1/units/5/concepts/wikipedia/Hey%2520Mama%2520%2528David%2520Guetta%2520song%2529/
+http://127.0.0.1:8000/ct/teach/courses/1/units/5/concepts/wikipedia/Hey%2520Mama%2522%2520David%2520Guetta%2520song%2529/

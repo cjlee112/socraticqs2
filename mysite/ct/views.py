@@ -899,9 +899,10 @@ def unit_resources(request, course_id, unit_id):
 def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
     unit = get_object_or_404(Unit, pk=unit_id)
-    sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
+
+    sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     addForm = push_button(request, 'add', 'Add to this courselet')
     if not addForm: # user clicked Add
         concept, lesson = Concept.get_from_sourceDB(sourceID, request.user)
@@ -911,6 +912,10 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
     lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
+    if hasattr(lesson, 'list_of_search'):
+        sourceIDs = [(s, reverse_path_args('ct:wikipedia_concept', request.path,
+                      source_id=urllib.unquote(s.replace('"', '').encode('utf-8')))) for s in lesson.list_of_search]
+        return pageData.render(request, 'ct/wikipedia.html', {'sourceID': sourceIDs})
     if lesson.pk is not None:
         addForm = None
     return pageData.render(request, 'ct/wikipedia.html',

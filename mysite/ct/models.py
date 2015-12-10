@@ -260,6 +260,8 @@ class Lesson(models.Model):
             pass
         dataClass = klass.get_sourceDB_plugin(sourceDB)
         data = dataClass(sourceID)
+        if hasattr(data, 'list_of_search'):
+            return data
         try: # attribute authorship to the sourceDB
             user = User.objects.get(username=sourceDB)
         except User.DoesNotExist:
