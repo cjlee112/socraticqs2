@@ -13,9 +13,7 @@ class LessonDoc(object):
         except wikipedia.exceptions.PageError as e:
             raise KeyError(str(e))
         except wikipedia.exceptions.DisambiguationError as e:
-            print e
             self.list_of_search = [item for item in getattr(e, 'options')]
-
 
     @classmethod
     def search(klass, query, max_results=10):
