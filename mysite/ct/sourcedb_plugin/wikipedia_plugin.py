@@ -1,4 +1,5 @@
 import wikipedia
+from ct.exceptions import SearchDbDisambiguationError
 
 class LessonDoc(object):
     sourceDB = 'wikipedia'
@@ -13,7 +14,8 @@ class LessonDoc(object):
         except wikipedia.exceptions.PageError as e:
             raise KeyError(str(e))
         except wikipedia.exceptions.DisambiguationError as e:
-            self.list_of_search = [item for item in getattr(e, 'options')]
+            raise SearchDbDisambiguationError(getattr(e, 'options'))
+
 
     @classmethod
     def search(klass, query, max_results=10):
