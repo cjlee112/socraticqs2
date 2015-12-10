@@ -38,7 +38,7 @@ Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 <form action="." method="post">
   {% csrf_token %}
   <select id="js-slct-unit" name="unit_to_move" class="form-control">
-    {% for unit in unints %}
+    {% for unit in units %}
       {% if not unit == ul.unit %}
       <option selected="selected" value="{{ unit.id }}">{{ unit.title }}</option>
       {% else %}

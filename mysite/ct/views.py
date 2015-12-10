@@ -1102,7 +1102,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         set_crispy_action(request.path, titleform)
     return pageData.render(request, 'ct/edit_lesson.html',
                   dict(unitLesson=ul, atime=display_datetime(ul.atime),
-                       titleform=titleform, unints=Unit.objects.all()))
+                       titleform=titleform, units=Unit.objects.all()))
 
 
 def create_error_ul(lesson, concept, unit, parentUL):
