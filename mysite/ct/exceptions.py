@@ -1,9 +1,9 @@
 # coding=utf-8
 
 
-class SearchDbDisambiguationError(Exception):
+class CommonDisambiguationError(Exception):
     def __init__(self, options):
         self.options = options
 
     def __unicode__(self):
-        return "There are more than ome articles for that query"
+        return "There are more than one articles for that query"

@@ -27,7 +27,7 @@ from ct.templatetags.ct_extras import (md2html,
 from fsm.fsm_base import FSMStack
 from fsm.models import FSM, FSMState, KLASS_NAME_DICT
 
-from ct.exceptions import SearchDbDisambiguationError
+from ct.exceptions import CommonDisambiguationError
 
 
 ###########################################################
@@ -917,7 +917,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
         if lesson.pk is not None:
             addForm = None
-    except SearchDbDisambiguationError as e:
+    except CommonDisambiguationError as e:
         lesson = None
         opt = [(s, reverse_path_args('ct:wikipedia_concept', request.path,
                       source_id=urllib.unquote(s.replace('"', '').encode('utf-8')))) for s in e.options]

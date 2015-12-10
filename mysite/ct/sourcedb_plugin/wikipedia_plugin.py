@@ -1,5 +1,5 @@
 import wikipedia
-from ct.exceptions import SearchDbDisambiguationError
+from ct.exceptions import CommonDisambiguationError
 
 class LessonDoc(object):
     sourceDB = 'wikipedia'
@@ -14,7 +14,7 @@ class LessonDoc(object):
         except wikipedia.exceptions.PageError as e:
             raise KeyError(str(e))
         except wikipedia.exceptions.DisambiguationError as e:
-            raise SearchDbDisambiguationError(getattr(e, 'options'))
+            raise CommonDisambiguationError(getattr(e, 'options'))
 
 
     @classmethod
