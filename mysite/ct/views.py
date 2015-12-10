@@ -1594,5 +1594,12 @@ class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     Django RestFramework clas to implement Course report.
     """
-    queryset = Response.objects.filter(kind='orct', unitLesson__order__isnull=False).all()
+    queryset = Response.objects.filter(kind='orct', unitLesson__order__isnull=False)
     serializer_class = ResponseSerializer
+
+    def get_queryset(self):
+        queryset = super(ResponseViewSet, self).get_queryset()
+        course_id = self.kwargs.get('course_id')
+        if course_id:
+            queryset = queryset.filter(course__id=course_id)
+        return queryset
