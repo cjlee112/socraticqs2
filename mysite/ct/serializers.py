@@ -5,6 +5,7 @@ from ct.models import Response
 
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     author_id = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
     lti_identity = serializers.SerializerMethodField()
     unitLesson_id = serializers.SerializerMethodField()
     unit_id = serializers.SerializerMethodField()
@@ -14,6 +15,7 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'id',
             'author_id',
+            'author_name',
             'lti_identity',
             'text',
             'confidence',
@@ -28,6 +30,15 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
         Returning author id.
         """
         return obj.author.id
+
+    def get_author_name(self, obj):
+        """
+        Returning author name.
+        """
+        name = obj.author.get_full_name()
+        if not name:
+            name = obj.author.username
+        return name
 
     def get_lti_identity(self, obj):
         """
