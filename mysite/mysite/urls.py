@@ -3,7 +3,7 @@ from django.apps import apps
 from rest_framework import routers
 
 from mysite.views import *
-from ct.api import ResponseViewSet
+from ct.api import ResponseViewSet, ErrorViewSet
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -11,6 +11,7 @@ admin.autodiscover()
 
 router = routers.DefaultRouter()
 router.register(r'api/courses/responses', ResponseViewSet)
+router.register(r'api/courses/errors', ErrorViewSet)
 
 urlpatterns = patterns(
     '',
@@ -44,6 +45,7 @@ urlpatterns = patterns(
     url(r'^done/$', 'psa.views.done'),
 
     url(r'^api/courses/(?P<course_id>\d+)/responses/$', ResponseViewSet.as_view({'get': 'list'}), name='responses'),
+    url(r'^api/courses/(?P<course_id>\d+)/errors/$', ErrorViewSet.as_view({'get': 'list'}), name='errors'),
     url(r'^', include(router.urls)),
 )
 
