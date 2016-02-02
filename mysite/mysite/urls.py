@@ -1,10 +1,16 @@
 from django.conf.urls import patterns, include, url
 from django.apps import apps
+from rest_framework import routers
+
 from mysite.views import *
+from ct.api import ResponseViewSet
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
+
+router = routers.DefaultRouter()
+router.register(r'api/courses/responses', ResponseViewSet)
 
 urlpatterns = patterns(
     '',
@@ -35,6 +41,9 @@ urlpatterns = patterns(
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done'),
+
+    url(r'^api/courses/(?P<course_id>\d+)/responses/$', ResponseViewSet.as_view({'get': 'list'}), name='responses'),
+    url(r'^', include(router.urls)),
 )
 
 if apps.is_installed('lti'):

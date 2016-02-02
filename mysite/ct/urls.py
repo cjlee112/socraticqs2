@@ -1,11 +1,7 @@
 from django.conf.urls import patterns, include, url
-from rest_framework import routers
 
 from ct.views import *
 
-
-router = routers.DefaultRouter()
-router.register(r'courses/report', ResponseViewSet)
 
 urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
@@ -142,6 +138,4 @@ urlpatterns = patterns('',
     url(r'^courses/$', courses, name='courses'),
     # Subscribe to course with particular id
     url(r'^courses/(?P<course_id>\d+)/subscribe/$', courses_subscribe, name='subscribe'),
-    url(r'^courses/(?P<course_id>\d+)/report/$', ResponseViewSet.as_view({'get': 'list'}), name='report'),
-    url(r'^', include(router.urls)),
 )
