@@ -14,7 +14,6 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from social.backends.utils import load_backends
-from rest_framework import viewsets
 
 from ct.forms import *
 from ct.models import *
@@ -1588,18 +1587,3 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     return pageData.render(request, 'ct/assess.html',
                 dict(response=r, answer=answer, errorModels=allErrors,
                      showAnswer=False))
-
-
-class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
-    """
-    Django RestFramework clas to implement Course report.
-    """
-    queryset = Response.objects.filter(kind='orct', unitLesson__order__isnull=False)
-    serializer_class = ResponseSerializer
-
-    def get_queryset(self):
-        queryset = super(ResponseViewSet, self).get_queryset()
-        course_id = self.kwargs.get('course_id')
-        if course_id:
-            queryset = queryset.filter(course__id=course_id)
-        return queryset
