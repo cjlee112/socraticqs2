@@ -1,5 +1,7 @@
 from django.conf.urls import patterns, include, url
+
 from ct.views import *
+
 
 urlpatterns = patterns('',
     url(r'^$', main_page, name='home'),
