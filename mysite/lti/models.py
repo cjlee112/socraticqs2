@@ -8,6 +8,7 @@ from provider.utils import short_token
 from social.apps.django_app.default.models import UserSocialAuth
 
 from ct.models import Role, Course
+from .utils import create_courselets_user
 
 
 class LtiConsumer(models.Model):
@@ -18,6 +19,32 @@ class LtiConsumer(models.Model):
     consumer_key = models.CharField(max_length=32, unique=True, db_index=True, default=short_token)
     consumer_secret = models.CharField(max_length=32, unique=True, default=short_token)
     instance_guid = models.CharField(max_length=255, blank=True, null=True, unique=True)
+
+    @staticmethod
+    def get_or_combine(instance_guid, consumer_key):
+        """Search for LtiConsumer instance by `instance_guid`.
+
+        If there are no LtiConsumer found by `instance_guid`
+        it will be searched by `consumer_key`.
+        Also `instance_guid` will be added to found by `consumer_key`
+        instance.
+        """
+        consumer = None
+        if instance_guid:
+            consumer = LtiConsumer.objects.filter(instance_guid=instance_guid).first()
+
+        if not consumer:
+            consumer = LtiConsumer.objects.filter(
+                consumer_key=consumer_key,
+            ).first()
+
+        if not consumer:
+            return None
+
+        if instance_guid and not consumer.instance_guid:
+            consumer.instance_guid = instance_guid
+            consumer.save()
+        return consumer
 
 
 class LTIUser(models.Model):
@@ -53,13 +80,12 @@ class LTIUser(models.Model):
         'tool_consumer_info_product_family_code'
     """
     user_id = models.CharField(max_length=255, blank=False)
-    consumer = models.CharField(max_length=64, blank=True)
+    lti_consumer = models.ForeignKey(LtiConsumer, null=True)
     extra_data = models.TextField(max_length=1024, blank=False)
     django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
-    context_id = models.CharField(max_length=255)
 
     class Meta:  # pragma: no cover
-        unique_together = ('user_id', 'consumer', 'context_id')
+        unique_together = ('user_id', 'lti_consumer')
 
     def create_links(self):
         """
@@ -90,7 +116,7 @@ class LTIUser(models.Model):
                 django_user = User.objects.filter(email=email).first()
                 if not django_user:
                     django_user, created = User.objects.get_or_create(
-                        username=username, defaults=defaults
+                        username=email, defaults=defaults
                     )
                 social = UserSocialAuth(
                     user=django_user,
@@ -100,9 +126,7 @@ class LTIUser(models.Model):
                 )
                 social.save()
         else:
-            django_user, created = User.objects.get_or_create(
-                username=username, defaults=defaults
-            )
+            django_user = create_courselets_user()
         self.django_user = django_user
         self.save()
 

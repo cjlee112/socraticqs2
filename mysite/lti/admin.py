@@ -22,7 +22,7 @@ class LtiConsumerForm(ModelForm):
 
 
 class LTIUserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'consumer', 'django_user', 'context_id')
+    list_display = ('user_id', 'lti_consumer', 'django_user')
 
 
 class CourseRefAdmin(admin.ModelAdmin):
