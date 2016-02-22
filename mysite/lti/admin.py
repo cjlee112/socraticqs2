@@ -34,8 +34,8 @@ class LtiConsumerAdmin(admin.ModelAdmin):
     """Admin for LTI Consumer"""
     form = LtiConsumerForm
 
-    search_fields = ('consumer_name', 'consumer_key', 'instance_guid')
-    list_display = ('consumer_name', 'consumer_key', 'instance_guid')
+    search_fields = ('consumer_name', 'consumer_key', 'instance_guid', 'expiration_date')
+    list_display = ('consumer_name', 'consumer_key', 'instance_guid', 'expiration_date')
 
 
 admin.site.register(LTIUser, LTIUserAdmin)

@@ -2,6 +2,7 @@
 
 import json
 import oauth2
+from datetime import date, timedelta
 
 from mock import patch, Mock
 from ddt import ddt, data, unpack
@@ -321,3 +322,48 @@ class TestUnit(LTITestCase):
             '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
         )
         self.assertTemplateUsed(response, 'chat/main_view.html')
+
+
+class AcceptanceTests(LTITestCase):
+    """
+    Acceptance test for check different flows of handling LTI requests.
+    """
+    def test_expired_consumer(self):
+        """
+        Checking that expired consumer will not be used.
+        """
+        self.lti_consumer.expiration_date = date.today() - timedelta(days=1)
+        response = self.client.post('/lti/', data=self.headers, follow=True)
+        self.assertTemplateUsed(response, 'lti/error.html')
+
+    @patch('lti.views.LtiConsumer.objects.filter')
+    def test_short_term_consumer(self, mocked_consumer):
+        """
+        Test that user w/ short_term flag will be treated correctly w/.
+        """
+        self.lti_consumer.expiration_date = date.today() + timedelta(days=1)
+        self.headers['custom_short_term'] = 'true'
+        response = self.client.post('/lti/', data=self.headers, follow=True)
+        mocked_consumer.assert_called_once_with(
+            consumer_key=self.headers['oauth_consumer_key']
+        )
+
+    @patch('lti.views.LtiConsumer.get_or_combine')
+    def test_typical_consumer(self, mocked_consumer):
+        """
+        Typical LTi request (w/o short_term flag) will be treated w/ get_or_combine.
+        """
+        self.lti_consumer.expiration_date = date.today() + timedelta(days=1)
+        response = self.client.post('/lti/', data=self.headers, follow=True)
+        mocked_consumer.assert_called_once_with(
+            self.headers['tool_consumer_instance_guid'],
+            self.headers['oauth_consumer_key'],
+        )
+
+    def test_no_consumer_found(self):
+        """
+        If there is no LtiConsumer found throw error.
+        """
+        self.lti_consumer.delete()
+        response = self.client.post('/lti/', data=self.headers, follow=True)
+        self.assertTemplateUsed(response, 'lti/error.html')

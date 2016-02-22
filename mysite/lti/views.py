@@ -1,5 +1,7 @@
 import oauth2
 import json
+from datetime import date
+
 import logging
 
 from django.utils import timezone
@@ -38,7 +40,7 @@ MOODLE_PARAMS = (
     'tool_consumer_info_product_family_code',
 )
 
-LOGGER = logging.getLogger('lti_debug')
+LOGGER = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -51,8 +53,8 @@ def lti_init(request, course_id=None, unit_id=None):
     :param unit_id: unit id from lunch url
     """
     if settings.LTI_DEBUG:
-        LOGGER.info(request.META)
-        LOGGER.info(request.POST)
+        LOGGER.debug(request.META)
+        LOGGER.debug(request.POST)
     session = request.session
     # Code from ims_lti_py_django example
     session.clear()
@@ -75,6 +77,8 @@ def lti_init(request, course_id=None, unit_id=None):
         )
 
     try:
+        if lti_consumer.expiration_date and lti_consumer.expiration_date < date.today():
+            raise oauth2.Error('Consumer Key has expired.')
         consumer_key = lti_consumer.consumer_key
         secret = lti_consumer.consumer_secret
 
@@ -87,16 +91,17 @@ def lti_init(request, course_id=None, unit_id=None):
             AttributeError) as err:
         is_valid = False
         session['message'] = "{}".format(err)
+        LOGGER.error(err.__str__())
 
     session['is_valid'] = is_valid
     session['LTI_POST'] = {k: v for (k, v) in request.POST.iteritems()}
 
     if settings.LTI_DEBUG:
         msg = 'session: is_valid = {}'.format(session.get('is_valid'))
-        LOGGER.info(msg)
+        LOGGER.debug(msg)
         if session.get('message'):
             msg = 'session: message = {}'.format(session.get('message'))
-            LOGGER.info(msg)
+            LOGGER.debug(msg)
     if not is_valid:
         return render(
             request,

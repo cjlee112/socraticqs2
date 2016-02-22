@@ -19,6 +19,7 @@ class LtiConsumer(models.Model):
     consumer_key = models.CharField(max_length=32, unique=True, db_index=True, default=short_token)
     consumer_secret = models.CharField(max_length=32, unique=True, default=short_token)
     instance_guid = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    expiration_date = models.DateField(verbose_name='Consumer Key expiration date', null=True, blank=True)
 
     @staticmethod
     def get_or_combine(instance_guid, consumer_key):
