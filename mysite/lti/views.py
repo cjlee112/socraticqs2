@@ -70,6 +70,7 @@ def lti_init(request, course_id=None, unit_id=None):
     )
 
     if not lti_consumer:
+        LOGGER.error('Consumer with key {} was not found.'.format(consumer_key))
         return render_to_response(
             'lti/error.html',
             {'message': 'LTI request is not valid'},
@@ -79,6 +80,8 @@ def lti_init(request, course_id=None, unit_id=None):
     try:
         if lti_consumer.expiration_date and lti_consumer.expiration_date < date.today():
             raise oauth2.Error('Consumer Key has expired.')
+        if lti_consumer.consumer_key != consumer_key:
+            raise oauth2.Error('Wrong Consumer Key: {}'.format(consumer_key))
         consumer_key = lti_consumer.consumer_key
         secret = lti_consumer.consumer_secret
 
