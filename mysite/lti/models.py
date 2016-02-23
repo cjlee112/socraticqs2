@@ -4,11 +4,10 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from provider.utils import short_token
 from social.apps.django_app.default.models import UserSocialAuth
 
 from ct.models import Role, Course
-from .utils import create_courselets_user
+from .utils import create_courselets_user, key_secret_generator
 
 
 class LtiConsumer(models.Model):
@@ -16,8 +15,8 @@ class LtiConsumer(models.Model):
     Model to manage LTI consumers.
     """
     consumer_name = models.CharField(max_length=255, unique=True)
-    consumer_key = models.CharField(max_length=32, unique=True, db_index=True, default=short_token)
-    consumer_secret = models.CharField(max_length=32, unique=True, default=short_token)
+    consumer_key = models.CharField(max_length=32, unique=True, db_index=True, default=key_secret_generator)
+    consumer_secret = models.CharField(max_length=32, unique=True, default=key_secret_generator)
     instance_guid = models.CharField(max_length=255, blank=True, null=True, unique=True)
     expiration_date = models.DateField(verbose_name='Consumer Key expiration date', null=True, blank=True)
 

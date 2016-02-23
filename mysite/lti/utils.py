@@ -2,10 +2,13 @@ from functools import wraps
 import string
 import random
 import uuid
+import hashlib
+import shortuuid
 
 from django.http import HttpResponse
 from django.db import IntegrityError, transaction
 from django.contrib.auth.models import User
+from django.conf import settings
 
 
 def only_lti(fn):
@@ -55,3 +58,12 @@ def generate_random_courselets_username():
     for _index in range(30):
         username = username + random.SystemRandom().choice(allowable_chars)
     return username
+
+
+def key_secret_generator():
+    """
+    Generate a key/secret for LtiConsumer.
+    """
+    hash = hashlib.sha1(shortuuid.uuid())
+    hash.update(settings.SECRET_KEY)
+    return hash.hexdigest()[::2]
