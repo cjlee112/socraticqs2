@@ -1,9 +1,8 @@
-from functools import wraps
 import string
 import random
-import uuid
 import hashlib
-import shortuuid
+from uuid import uuid4
+from functools import wraps
 
 from django.http import HttpResponse
 from django.db import IntegrityError, transaction
@@ -31,12 +30,12 @@ def create_courselets_user():
 
     We can't trust LTI request w/o email in details.
     """
-    password = str(uuid.uuid4())
+    password = str(uuid4())
 
     created = False
     while not created:
         try:
-            username = generate_random_courselets_username()
+            username = uuid4().hex[:30]
             with transaction.atomic():
                 courselets_user = User.objects.create_user(
                     username=username,
@@ -49,21 +48,10 @@ def create_courselets_user():
     return courselets_user
 
 
-def generate_random_courselets_username():
-    """
-    Create a valid random Courselets username.
-    """
-    allowable_chars = string.ascii_letters + string.digits
-    username = ''
-    for _index in range(30):
-        username = username + random.SystemRandom().choice(allowable_chars)
-    return username
-
-
 def key_secret_generator():
     """
     Generate a key/secret for LtiConsumer.
     """
-    hash = hashlib.sha1(shortuuid.uuid())
+    hash = hashlib.sha1(uuid4().hex)
     hash.update(settings.SECRET_KEY)
     return hash.hexdigest()[::2]

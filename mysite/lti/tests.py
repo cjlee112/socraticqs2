@@ -177,16 +177,19 @@ class ParamsTest(LTITestCase):
         self.assertNotEqual(LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user,
                             User.objects.get(id=self.user.id))
 
-    @patch('lti.utils.generate_random_courselets_username', return_value='random_random')
+    @patch('lti.utils.uuid4')
     def test_lti_user_no_username_no_email(self, random, mocked):
         """Test for non-existent username field
 
         If there is no username in POST
         we create user with random username.
         """
+        test_random_username = 'c'*32
+
         del self.headers[u'lis_person_name_full']
         del self.headers[u'lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
+        random().hex = test_random_username[:30]
 
         self.client.post('/lti/', data=self.headers, follow=True)
 
@@ -196,7 +199,11 @@ class ParamsTest(LTITestCase):
                             User.objects.get(id=self.user.id))
         self.assertEqual(
             LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user.username,
-            random.return_value
+            test_random_username[:30]
+        )
+        self.assertEqual(
+            len(LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user.username),
+            30
         )
 
     def test_lti_user_link_social(self, mocked):
