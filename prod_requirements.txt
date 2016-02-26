@@ -40,3 +40,4 @@ Fabric==1.10.2
 
 # deployment packages
 gunicorn==19.3.0
+injections==0.2.2
