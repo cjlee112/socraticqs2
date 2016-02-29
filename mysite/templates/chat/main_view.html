@@ -1,1 +1,15 @@
-Main template for Chat UI
+<html>
+<body>
+    <div>lessons:
+        {% for ul in lessons %}
+            {{ ul.id }}
+            {{ ul.lesson.title }}
+            <br>
+        {% endfor %}
+    </div>
+    <br>
+    <div>chat_id: {{ chat_id }}</div>
+    <br>
+    <div>Next : {{ next_point.id }}</div>
+</body>
+</html>

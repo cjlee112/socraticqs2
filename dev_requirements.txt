@@ -56,3 +56,4 @@ python-memcached==1.54
 psycopg2==2.6.1
 Fabric==1.10.2
 injections==0.2.2
+djangorestframework==3.3.1

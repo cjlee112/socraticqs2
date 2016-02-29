@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
@@ -21,8 +20,12 @@ class Chat(models.Model):
     Chat model that handles particular student chat.
     """
     next_step = models.OneToOneField('Message', null=True, related_name='base_chat')
-    user = models.OneToOneField(User)
+    user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-timestamp']
 
 
 class Message(models.Model):
@@ -30,7 +33,7 @@ class Message(models.Model):
     Message model represent chat message.
     """
     chat = models.OneToOneField(Chat, null=True)
-    timestamp = models.DateTimeField(null=True, default=datetime.now)
+    timestamp = models.DateTimeField(null=True)
     contenttype = models.CharField(
         max_length=16, choices=MODEL_CHOISES, null=True, default='NoneType'
     )

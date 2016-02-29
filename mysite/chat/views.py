@@ -1,10 +1,34 @@
+import injections
 from django.views.generic import View
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+from .models import Chat
+from .services import ProgressHandler
+from ct.models import Unit
 
 
+@injections.has
 class ChatInitialView(View):
     """
     Entry point for Chat UI.
     """
-    def get(self, request, enroll_key):
-        return render(request, 'chat/main_view.html', locals())
+    next_handler = injections.depends(ProgressHandler)
+
+    def get(self, request, enroll_key=None):
+        unit = Unit.objects.all().first()
+        chat = Chat.objects.all().first()
+        if not chat:
+            chat = Chat.objects.create(user=request.user)
+            next_point = self.next_handler.start_point(unit=unit)
+        else:
+            next_point = self.next_handler.next_point()
+        return render(
+            request,
+            'chat/main_view.html',
+            {
+                'chat_id': chat.id,
+                'lessons': unit.get_exercises(),
+                'next_point': next_point
+            }
+        )

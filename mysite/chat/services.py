@@ -10,10 +10,10 @@ class ProgressHandler(object):
     """
     Base class for handling Student progress.
     """
-    def start(self):
+    def start_point(self):
         raise NotImplementedError
 
-    def get_next(self):
+    def next_point(self):
         raise NotImplementedError
 
 
@@ -21,11 +21,11 @@ class FsmHandler(ProgressHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
-    def start(self, request):
+    def start_point(self, request):
         fsm = FSMStack(request)
         fsm.push(request, 'lessonseq')
 
-    def get_next(self, request):
+    def next_point(self, request):
         return fsm.pop(request)
 
 
@@ -33,8 +33,11 @@ class SequenceHandler(ProgressHandler):
     """
     Simple handler for non FSM logic.
     """
-    def start(self):
-        pass
+    def start_point(self, unit):
+        try:
+            return unit.get_exercises()[0]
+        except IndexError:
+            return None
 
-    def get_next(self):
+    def next_point(self):
         return 'Non FSM'
