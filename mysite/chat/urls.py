@@ -5,7 +5,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import ChatInitialView
 from .api import MessagesView
-from .services import SequenceHandler
+from .services import SequenceHandler, FsmHandler
 
 
 inj = injections.Container()

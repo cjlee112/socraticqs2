@@ -11,7 +11,7 @@ MODEL_CHOISES = (
     ('NoneType', 'NoneType'),
     ('divider', 'divider'),
     ('response', 'response'),
-    ('lesson', 'lesson')
+    ('unitlesson', 'unitlesson')
 )
 
 
@@ -19,7 +19,7 @@ class Chat(models.Model):
     """
     Chat model that handles particular student chat.
     """
-    next_step = models.OneToOneField('Message', null=True, related_name='base_chat')
+    next_point = models.OneToOneField('Message', null=True, related_name='base_chat')
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
@@ -32,7 +32,7 @@ class Message(models.Model):
     """
     Message model represent chat message.
     """
-    chat = models.OneToOneField(Chat, null=True)
+    chat = models.ForeignKey(Chat, null=True)
     timestamp = models.DateTimeField(null=True)
     contenttype = models.CharField(
         max_length=16, choices=MODEL_CHOISES, null=True, default='NoneType'
@@ -46,6 +46,9 @@ class Message(models.Model):
             return model.objects.filter(id=self.content_id).first()
         else:
             return self.contenttype
+
+    def get_next_point(self):
+        return self.chat.next_point.id if self.chat else None
 
 
 class EnrollUnitCode(models.Model):

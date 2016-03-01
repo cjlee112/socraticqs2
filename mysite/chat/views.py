@@ -16,13 +16,14 @@ class ChatInitialView(View):
     next_handler = injections.depends(ProgressHandler)
 
     def get(self, request, enroll_key=None):
-        unit = Unit.objects.all().first()
-        chat = Chat.objects.all().first()
+        unit = Unit.objects.all().first()  # TODO add real Unit query
+        chat = Chat.objects.all().first()  # TODO add real Chat query
         if not chat:
             chat = Chat.objects.create(user=request.user)
-            next_point = self.next_handler.start_point(unit=unit)
+        if chat.message_set.count() == 0:
+            next_point = self.next_handler.start_point(unit=unit, chat=chat)
         else:
-            next_point = self.next_handler.next_point()
+            next_point = chat.next_point
         return render(
             request,
             'chat/main_view.html',
