@@ -26,6 +26,7 @@ from ct.templatetags.ct_extras import (md2html,
                                        get_path_type)
 from fsm.fsm_base import FSMStack
 from fsm.models import FSM, FSMState, KLASS_NAME_DICT
+from chat.models import EnrollUnitCode
 
 
 ###########################################################
@@ -450,6 +451,10 @@ def courses_subscribe(request, course_id):
 def edit_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
+    course_unit = CourseUnit.objects.get(unit=unit, course=course)
+    enroll_code, cr = EnrollUnitCode.objects.get_or_create(courseUnit=course_unit)
+    if cr:
+        enroll_code.create_code()
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
@@ -478,7 +483,8 @@ def edit_unit(request, course_id, unit_id):
     set_crispy_action(request.path, unitform)
     return pageData.render(request, 'ct/edit_unit.html',
                   dict(unit=unit, courseUnit=cu, unitform=unitform,
-                       domain='https://{0}'.format(Site.objects.get_current().domain)))
+                       domain='https://{0}'.format(Site.objects.get_current().domain),
+                       enroll_code=enroll_code.enrollCode))
 
 
 def update_concept_link(request, conceptLinks, unit):

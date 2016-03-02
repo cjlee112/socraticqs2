@@ -5,12 +5,13 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from ims_lti_py.tool_provider import DjangoToolProvider
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render_to_response, redirect, get_object_or_404
 
 from lti.utils import only_lti
 from lti import app_settings as settings
 from lti.models import LTIUser, CourseRef
-from ct.models import Course, Role
+from ct.models import Course, Role, CourseUnit, Unit
+from chat.models import EnrollUnitCode
 
 
 ROLES_MAP = {
@@ -133,22 +134,33 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 RequestContext(request)
             )
 
-    user.enroll(roles, course_id)
-
-    if user.is_enrolled(roles, course_id):
-        # Redirect to course or unit page considering users role
-        if not unit_id:
-            dispatch = 'ct:course_student'
-            if Role.INSTRUCTOR in roles:
-                dispatch = 'ct:course'
-            return redirect(reverse(dispatch, args=(course_id,)))
-        else:
-            dispatch = 'ct:study_unit'
-            if Role.INSTRUCTOR in roles:
-                dispatch = 'ct:unit_tasks'
-            return redirect(reverse(dispatch, args=(course_id, unit_id)))
+    if Role.INSTRUCTOR in roles:
+        return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
-        return redirect(reverse('ct:home'))
+        course = get_object_or_404(Course, id=course_id)
+        unit = get_object_or_404(Unit, id=unit_id)
+        course_unit = CourseUnit.objects.get(unit=unit, course=course)
+        enroll_code, cr = EnrollUnitCode.objects.get_or_create(courseUnit=course_unit)
+        if cr:
+            enroll_code.create_code()
+        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code.enrollCode}))
+
+    # user.enroll(roles, course_id)
+    #
+    # if user.is_enrolled(roles, course_id):
+    #     # Redirect to course or unit page considering users role
+    #     if not unit_id:
+    #         dispatch = 'ct:course_student'
+    #         if Role.INSTRUCTOR in roles:
+    #             dispatch = 'ct:course'
+    #         return redirect(reverse(dispatch, args=(course_id,)))
+    #     else:
+    #         dispatch = 'ct:study_unit'
+    #         if Role.INSTRUCTOR in roles:
+    #             dispatch = 'ct:unit_tasks'
+    #         return redirect(reverse(dispatch, args=(course_id, unit_id)))
+    # else:
+    #     return redirect(reverse('ct:home'))
 
 
 @only_lti

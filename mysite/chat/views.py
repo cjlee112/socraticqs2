@@ -19,8 +19,8 @@ class ChatInitialView(View):
         if enroll_key:
             courseUnit = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key).courseUnit
             unit = courseUnit.unit
-            if not Role.objects.filter(user=request.user, course=courseUnit.course, role=Role.ENROLLED):
-                enrolling = Role.objects.get_or_create(user=request.user,
+            if not Role.objects.filter(user=request.user.id, course=courseUnit.course, role=Role.ENROLLED):
+                enrolling = Role.objects.get_or_create(user=request.user.id,
                                                        course=courseUnit.course,
                                                        role=Role.SELFSTUDY)[0]
                 enrolling.role = Role.ENROLLED
