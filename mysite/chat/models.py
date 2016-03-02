@@ -1,9 +1,11 @@
+from uuid import uuid4
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
-from ct.models import Unit
+from ct.models import CourseUnit
 from .utils import enroll_generator
 
 
@@ -56,7 +58,11 @@ class EnrollUnitCode(models.Model):
     Model contains links between enrollCode and Units.
     """
     enrollCode = models.CharField(max_length=32, default=enroll_generator)
-    unit = models.ForeignKey(Unit)
+    courseUnit = models.ForeignKey(CourseUnit)
 
     class Meta:
-        unique_together = ('enrollCode', 'unit')
+        unique_together = ('enrollCode', 'courseUnit')
+
+    def create_code(self):
+        self.enrollCode = uuid4().hex
+        self.save()
