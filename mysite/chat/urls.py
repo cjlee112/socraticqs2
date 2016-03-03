@@ -19,7 +19,6 @@ router.register(r'messages', MessagesView, base_name='messages')
 
 urlpatterns = patterns(
     '',
-    url(r'^$', ChatInitialView.as_view(), name='chat_init'),
-    url(r'^', include(router.urls)),
     url(r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$', ChatInitialView.as_view(), name='chat_enroll'),
+    url(r'^', include(router.urls)),
 )

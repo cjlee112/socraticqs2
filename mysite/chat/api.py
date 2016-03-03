@@ -1,5 +1,5 @@
 import injections
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins, views, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -7,10 +7,11 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Message, Chat
 from .serializers import MessageSerializer
 from .services import ProgressHandler
+from ct.models import Response as StudentResponse
 
 
 @injections.has
-class MessagesView(viewsets.ModelViewSet):
+class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     next_handler = injections.depends(ProgressHandler)
 
     serializer_class = MessageSerializer
@@ -18,17 +19,38 @@ class MessagesView(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        queryset = super(MessagesView, self).get_queryset()
-        return queryset
+    def retrieve(self, request, *args, **kwargs):
+        # TODO it will be better to move custom logic to sirializer
+        message = self.get_object()
 
-    def get_object(self):
-        queryset = super(MessagesView, self).get_queryset()
-        message = queryset.filter(pk=self.kwargs[self.lookup_field]).first()
+        if message.input_type == 'text':
+            serializer = self.get_serializer(message)
+            return Response(serializer.data)
+
         if message and not message.chat:
             chat = Chat.objects.filter(user=self.request.user).first()
-            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat)
+            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
             chat.save()
             message.chat = chat
             message.save()
-        return message
+        serializer = self.get_serializer(message)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        # TODO it will be better to move custom logic to sirializer
+        message = self.get_object()
+        chat = Chat.objects.filter(user=self.request.user).first()
+        message.chat = chat
+        if message.input_type == 'text':
+            text = self.request.data.get('input').get('text')
+            resp = StudentResponse(text=text)
+            resp.lesson = message.lesson_to_answer.lesson
+            resp.unitLesson = message.lesson_to_answer
+            resp.course = message.chat.enroll_code.courseUnit.course
+            resp.author = self.request.user
+            resp.save()
+            message.content_id = resp.id
+            message.chat = chat
+            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+            chat.save()
+        serializer.save(chat=chat, content_id=resp.id)

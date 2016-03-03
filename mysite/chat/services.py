@@ -45,27 +45,58 @@ class SequenceHandler(ProgressHandler):
         except IndexError:
             return None
 
-    def next_point(self, current, chat):
+    def next_point(self, current, chat, message):
         """
         current: UnitLesson, Response or list of ErrorModels.
         """
+        print('next_point')
         if isinstance(current, UnitLesson) and current.lesson.kind == Lesson.BASE_EXPLANATION:
             m = Message(contenttype='unitlesson', content_id=current.get_next_lesson().id)
             m.save()
             next_point = m
         elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ORCT_QUESTION:
-            m = Message(contenttype='response')
+            m = Message(contenttype='response', input_type='text', lesson_to_answer=current)
             m.save()
             next_point = m
         elif isinstance(current, Response) and not current.selfeval:
-            next_point = current.unitLesson.get_answers().first()
-        elif isinstance(current, UnitLesson) and current.kind == Lesson.ANSWER:
-            next_point = 'assess'
+            m = Message(
+                contenttype='unitlesson',
+                content_id=current.unitLesson.get_answers().first().id,
+                response_to_check=current
+            )
+            m.save()
+            next_point = m
+        elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ANSWER:
+            m = Message(
+                contenttype='response',
+                content_id=message.response_to_check.id,
+                options=Response.EVAL_CHOICES,
+                input_type='options'
+            )
+            m.save()
+            next_point = m
         elif isinstance(current, Response) and current.selfeval:
             if current.selfeval == Response.CORRECT:
-                next_point = current.unitLesson.get_next_lesson()
+                m = Message(
+                    contenttype='unitlesson',
+                    content_id=current.unitLesson.get_next_lesson().id,
+                )
+                m.save()
+                next_point = m
             else:
-                next_point = list(r.unitLesson.get_errors()) + unit.get_aborts()
+                m = Message(
+                    contenttype='response',
+                    content_id=current.id,
+                    input_type='errors'
+                )
+                m.save()
+                next_point = m
         elif isinstance(current, list):
-            next_point = current[0].parent.get_next_lesson()
+            # TODO add saving selected error models and get next lesson
+            m = Message(
+                contenttype='unitlesson',
+                content_id=chat.enroll_code.courseUnit.unit.get_next_lesson().id,
+            )
+            m.save()
+            next_point = m
         return next_point
