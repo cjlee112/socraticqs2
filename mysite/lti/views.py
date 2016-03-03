@@ -140,10 +140,8 @@ def lti_redirect(request, course_id=None, unit_id=None):
         course = get_object_or_404(Course, id=course_id)
         unit = get_object_or_404(Unit, id=unit_id)
         course_unit = CourseUnit.objects.get(unit=unit, course=course)
-        enroll_code, cr = EnrollUnitCode.objects.get_or_create(courseUnit=course_unit)
-        if cr:
-            enroll_code.create_code()
-        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code.enrollCode}))
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
 
     # user.enroll(roles, course_id)
     #

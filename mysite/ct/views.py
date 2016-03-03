@@ -452,9 +452,7 @@ def edit_unit(request, course_id, unit_id):
     course = get_object_or_404(Course, pk=course_id)
     unit = get_object_or_404(Unit, pk=unit_id)
     course_unit = CourseUnit.objects.get(unit=unit, course=course)
-    enroll_code, cr = EnrollUnitCode.objects.get_or_create(courseUnit=course_unit)
-    if cr:
-        enroll_code.create_code()
+    enroll_code = EnrollUnitCode.get_code(course_unit)
     notInstructor = check_instructor_auth(course, request)
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
@@ -484,7 +482,7 @@ def edit_unit(request, course_id, unit_id):
     return pageData.render(request, 'ct/edit_unit.html',
                   dict(unit=unit, courseUnit=cu, unitform=unitform,
                        domain='https://{0}'.format(Site.objects.get_current().domain),
-                       enroll_code=enroll_code.enrollCode))
+                       enroll_code=enroll_code))
 
 
 def update_concept_link(request, conceptLinks, unit):

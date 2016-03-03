@@ -63,6 +63,10 @@ class EnrollUnitCode(models.Model):
     class Meta:
         unique_together = ('enrollCode', 'courseUnit')
 
-    def create_code(self):
-        self.enrollCode = uuid4().hex
-        self.save()
+    @classmethod
+    def get_code(cls, course_unit):
+        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit)
+        if cr:
+            enroll_code.enrollCode = uuid4().hex
+            enroll_code.save()
+        return enroll_code.enrollCode
