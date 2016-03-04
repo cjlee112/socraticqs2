@@ -6,13 +6,17 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
-from ct.models import CourseUnit, UnitLesson, Response
+from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS
+from fsm.models import FSMState, FSM
+from fsm.fsm_base import FSMStack
+
 from .utils import enroll_generator
 
 
 TYPE_CHOICES = (
     ('text', 'text'),
     ('options', 'options'),
+    ('errors', 'errors'),
     ('custom', 'custom'),
 )
 
@@ -33,9 +37,17 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
+    fsm_state = models.ForeignKey(FSMState, null=True)
 
     class Meta:
         ordering = ['-timestamp']
+
+    def save(self, request, *args, **kwargs):
+        if not self.pk:
+            fsm_stack = FSMStack(request)
+            fsm_stack.push(request, 'chat')
+            self.fsm_state = fsm_stack.state
+        super(Chat, self).save(*args, **kwargs)
 
 
 class Message(models.Model):
@@ -51,7 +63,6 @@ class Message(models.Model):
     input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True)
     lesson_to_answer = models.ForeignKey(UnitLesson, null=True)
     response_to_check = models.ForeignKey(Response, null=True)
-    options = models.CharField(max_length=24, choices=Response.EVAL_CHOICES, null=True)
 
     @property
     def content(self):
@@ -61,6 +72,11 @@ class Message(models.Model):
             return model.objects.filter(id=self.content_id).first()
         else:
             return self.contenttype
+
+    @property
+    def options(self):
+        print ('get_EVAL_OPTIONS')
+        return Response.EVAL_CHOICES
 
     def get_next_point(self):
         print('get_next_point')
@@ -100,3 +116,24 @@ class EnrollUnitCode(models.Model):
             enroll_code.enrollCode = uuid4().hex
             enroll_code.save()
         return enroll_code.enrollCode
+
+
+class UnitError(models.Model):
+    unit = models.ForeignKey(Unit)
+    response = models.ForeignKey(Response)
+
+    def get_errors(self):
+        r = Response.objects.get(pk=self.response.id)
+        return list(r.unitLesson.get_errors()) + self.unit.get_aborts()
+
+    def save_response(self, user, response_list):
+        r = Response.objects.get(pk=self.response.id)
+        if user == r.author:
+            status = r.status
+        else:
+            status = NEED_REVIEW_STATUS
+        for emID in response_list:
+            em = UnitLesson.objects.get(pk=int(emID))
+            r.studenterror_set.create(errorModel=em,
+                                      author=user,
+                                      status=status)
