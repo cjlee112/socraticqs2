@@ -24,7 +24,8 @@ MODEL_CHOISES = (
     ('NoneType', 'NoneType'),
     ('divider', 'divider'),
     ('response', 'response'),
-    ('unitlesson', 'unitlesson')
+    ('unitlesson', 'unitlesson'),
+    ('uniterror', 'uniterror'),
 )
 
 
@@ -67,7 +68,8 @@ class Message(models.Model):
     @property
     def content(self):
         print('content')
-        model = ContentType.objects.get(app_label="ct", model=self.contenttype).model_class()
+        app_label = 'chat' if self.contenttype == 'uniterror' else 'ct'
+        model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
         if model:
             return model.objects.filter(id=self.content_id).first()
         else:
@@ -93,9 +95,8 @@ class Message(models.Model):
     def get_errors(self):
         print('get_errors')
         errors = None
-        if self.input_type == 'errors':
-            error = list(self.content.unitLesson.get_errors()) + \
-                    self.chat.enroll_code.courseUnit.unit.get_aborts()
+        if isinstance(self.content, Response) and self.chat.next_point.input_type == 'errors':
+            errors = UnitError.get_by_message(self).get_errors()
         return errors
 
 
@@ -123,17 +124,24 @@ class UnitError(models.Model):
     response = models.ForeignKey(Response)
 
     def get_errors(self):
-        r = Response.objects.get(pk=self.response.id)
-        return list(r.unitLesson.get_errors()) + self.unit.get_aborts()
+        return list(self.response.unitLesson.get_errors()) + self.unit.get_aborts()
 
     def save_response(self, user, response_list):
-        r = Response.objects.get(pk=self.response.id)
-        if user == r.author:
-            status = r.status
+        if user == self.response.author:
+            status = self.response.status
         else:
             status = NEED_REVIEW_STATUS
         for emID in response_list:
             em = UnitLesson.objects.get(pk=int(emID))
-            r.studenterror_set.create(errorModel=em,
-                                      author=user,
-                                      status=status)
+            self.response.studenterror_set.create(
+                errorModel=em,
+                author=user,
+                status=status
+            )
+
+    @classmethod
+    def get_by_message(cls, message):
+        if message.chat and isinstance(message.content, Response):
+            return cls.objects.get_or_create(unit=message.chat)
+        else:
+            raise AttributeError

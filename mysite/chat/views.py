@@ -34,10 +34,11 @@ class ChatInitialView(View):
             unit = Unit.objects.all().first()  # TODO add real Unit query
         chat = Chat.objects.all().first()  # TODO add real Chat query
         if not chat and enroll_key:
-            chat = Chat.objects.create(
+            chat = Chat(
                 user=request.user,
                 enroll_code=EnrollUnitCode.objects.filter(enrollCode=enroll_key).first()
             )
+            chat.save(request)
         if chat.message_set.count() == 0:
             next_point = self.next_handler.start_point(unit=unit, chat=chat)
         else:

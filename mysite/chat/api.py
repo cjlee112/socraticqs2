@@ -30,7 +30,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         if message and not message.chat:
             chat = Chat.objects.filter(user=self.request.user).first()
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save()
+            chat.save(self.request)
             message.chat = chat
             message.save()
         serializer = self.get_serializer(message)
@@ -40,8 +40,8 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         # TODO it will be better to move custom logic to sirializer
         message = self.get_object()
         chat = Chat.objects.filter(user=self.request.user).first()
-        message.chat = chat
         if message.input_type == 'text':
+            message.chat = chat
             text = self.request.data.get('input').get('text')
             resp = StudentResponse(text=text)
             resp.lesson = message.lesson_to_answer.lesson
@@ -50,7 +50,12 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.author = self.request.user
             resp.save()
             message.content_id = resp.id
+            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+            chat.save()
+        if message.input_type == 'errors':
             message.chat = chat
+            uniterror = UnitError.get_by_message(message)
+            uniterror.save_response(user=request.user, response_list=self.request.data.get('err_list'))
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
             chat.save()
         serializer.save(chat=chat, content_id=resp.id)

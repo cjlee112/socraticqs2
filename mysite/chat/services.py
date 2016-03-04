@@ -84,9 +84,10 @@ class SequenceHandler(ProgressHandler):
                 m.save()
                 next_point = m
             else:
+                uniterror = UnitError.get_by_message(current)
                 m = Message(
-                    contenttype='response',
-                    content_id=current.id,
+                    contenttype='uniterror',
+                    content_id=uniterror.id,
                     input_type='errors'
                 )
                 m.save()
