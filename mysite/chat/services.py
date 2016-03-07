@@ -34,13 +34,13 @@ class SequenceHandler(ProgressHandler):
     """
     Simple handler for non FSM logic.
     """
-    def start_point(self, unit, chat):
+    def start_point(self, unit, chat, request):
         try:
             unit_lesson = unit.unitlesson_set.get(order=0)
             m = Message(contenttype='unitlesson', content_id=unit_lesson.id)
             m.save()
             chat.next_point = m
-            chat.save()
+            chat.save(request)
             return m
         except IndexError:
             return None

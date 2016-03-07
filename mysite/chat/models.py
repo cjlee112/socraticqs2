@@ -38,7 +38,7 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
-    fsm_state = models.ForeignKey(FSMState, null=True)
+    fsm_state = models.OneToOneField(FSMState, null=True)
 
     class Meta:
         ordering = ['-timestamp']
@@ -46,7 +46,11 @@ class Chat(models.Model):
     def save(self, request, *args, **kwargs):
         if not self.pk:
             fsm_stack = FSMStack(request)
-            fsm_stack.push(request, 'chat')
+            course_unit = self.enroll_code.courseUnit
+            print course_unit.__dict__
+            fsm_stack.push(request, 'chat',
+                           stateData={'unit': course_unit.unit,
+                                      'course': course_unit.course})
             self.fsm_state = fsm_stack.state
         super(Chat, self).save(*args, **kwargs)
 

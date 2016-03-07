@@ -40,7 +40,7 @@ class ChatInitialView(View):
             )
             chat.save(request)
         if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(unit=unit, chat=chat)
+            next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
         else:
             next_point = chat.next_point
         return render(
@@ -49,6 +49,7 @@ class ChatInitialView(View):
             {
                 'chat_id': chat.id,
                 'lessons': unit.get_exercises(),
-                'next_point': next_point
+                'next_point': next_point,
+                'fsmstate':chat.fsm_state
             }
         )
