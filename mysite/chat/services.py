@@ -4,7 +4,7 @@ Handler container module.
 
 from fsm.fsm_base import FSMStack
 from ct.models import Unit, Lesson, UnitLesson, Response
-from .models import Message, MODEL_CHOISES
+from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
 
 
 class ProgressHandler(object):
@@ -49,9 +49,14 @@ class SequenceHandler(ProgressHandler):
         """
         current: UnitLesson, Response or list of ErrorModels.
         """
-        print('next_point')
         if isinstance(current, UnitLesson) and current.lesson.kind == Lesson.BASE_EXPLANATION:
-            m = Message(contenttype='unitlesson', content_id=current.get_next_lesson().id)
+            try:
+                next_lesson = current.get_next_lesson()
+                m = Message(contenttype='unitlesson', content_id=next_lesson.id)
+            except UnitLesson.DoesNotExist:
+                divider = ChatDivider(text="You have finished lesson sequence. Well done.")
+                divider.save()
+                m = Message(contenttype='chatdivider', content_id=divider.id, input_type='finish')
             m.save()
             next_point = m
         elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ORCT_QUESTION:
@@ -70,7 +75,6 @@ class SequenceHandler(ProgressHandler):
             m = Message(
                 contenttype='response',
                 content_id=message.response_to_check.id,
-                options=Response.EVAL_CHOICES,
                 input_type='options'
             )
             m.save()
@@ -84,7 +88,7 @@ class SequenceHandler(ProgressHandler):
                 m.save()
                 next_point = m
             else:
-                uniterror = UnitError.get_by_message(current)
+                uniterror = UnitError.get_by_message(message)
                 m = Message(
                     contenttype='uniterror',
                     content_id=uniterror.id,
@@ -92,11 +96,10 @@ class SequenceHandler(ProgressHandler):
                 )
                 m.save()
                 next_point = m
-        elif isinstance(current, list):
-            # TODO add saving selected error models and get next lesson
+        elif isinstance(current, UnitError):
             m = Message(
                 contenttype='unitlesson',
-                content_id=chat.enroll_code.courseUnit.unit.get_next_lesson().id,
+                content_id=current.response.unitLesson.get_next_lesson().id,
             )
             m.save()
             next_point = m

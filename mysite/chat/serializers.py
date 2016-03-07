@@ -12,6 +12,7 @@ class MessageSerializer(serializers.ModelSerializer):
     userInputType = serializers.CharField(source='get_next_input_type', read_only=True)
     userInputUrl = serializers.CharField(source='get_next_url', read_only=True)
     errors = serializers.CharField(source='get_errors', read_only=True)
+    options = serializers.CharField(source='get_options', read_only=True)
     messages = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,7 +24,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'userInputType',
             'userInputUrl',
             'messages',
-            'errors'
+            'errors',
+            'options'
         )
 
     def get_messages(self, obj):

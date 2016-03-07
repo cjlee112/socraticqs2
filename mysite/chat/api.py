@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Message, Chat
+from .models import Message, Chat, UnitError
 from .serializers import MessageSerializer
 from .services import ProgressHandler
 from ct.models import Response as StudentResponse
@@ -23,7 +23,12 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         # TODO it will be better to move custom logic to sirializer
         message = self.get_object()
 
-        if message.input_type == 'text':
+        if (
+            message.input_type == 'text' or
+            message.input_type == 'options' or
+            message.input_type == 'errors' or
+            message.input_type == 'finish'
+        ):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
@@ -42,7 +47,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         chat = Chat.objects.filter(user=self.request.user).first()
         if message.input_type == 'text':
             message.chat = chat
-            text = self.request.data.get('input').get('text')
+            text = self.request.data.get('text')
             resp = StudentResponse(text=text)
             resp.lesson = message.lesson_to_answer.lesson
             resp.unitLesson = message.lesson_to_answer
@@ -51,11 +56,21 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.save()
             message.content_id = resp.id
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save()
+            chat.save(self.request)
+            serializer.save(chat=chat, content_id=resp.id)
+        if message.input_type == 'options':
+            message.chat = chat
+            selfeval = self.request.data.get('selfeval')
+            resp = message.content
+            resp.selfeval = selfeval
+            resp.save()
+            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+            chat.save(self.request)
+            serializer.save(chat=chat, content_id=resp.id)
         if message.input_type == 'errors':
             message.chat = chat
-            uniterror = UnitError.get_by_message(message)
-            uniterror.save_response(user=request.user, response_list=self.request.data.get('err_list'))
+            uniterror = message.content
+            uniterror.save_response(user=self.request.user, response_list=self.request.data.get('err_list'))
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save()
-        serializer.save(chat=chat, content_id=resp.id)
+            chat.save(self.request)
+            serializer.save(chat=chat)

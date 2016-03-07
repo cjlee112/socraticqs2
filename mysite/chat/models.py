@@ -22,7 +22,7 @@ TYPE_CHOICES = (
 
 MODEL_CHOISES = (
     ('NoneType', 'NoneType'),
-    ('divider', 'divider'),
+    ('chatdivider', 'chatdivider'),
     ('response', 'response'),
     ('unitlesson', 'unitlesson'),
     ('uniterror', 'uniterror'),
@@ -72,17 +72,12 @@ class Message(models.Model):
     @property
     def content(self):
         print('content')
-        app_label = 'chat' if self.contenttype == 'uniterror' else 'ct'
+        app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
         model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
         if model:
             return model.objects.filter(id=self.content_id).first()
         else:
             return self.contenttype
-
-    @property
-    def options(self):
-        print ('get_EVAL_OPTIONS')
-        return Response.EVAL_CHOICES
 
     def get_next_point(self):
         print('get_next_point')
@@ -99,9 +94,25 @@ class Message(models.Model):
     def get_errors(self):
         print('get_errors')
         errors = None
-        if isinstance(self.content, Response) and self.chat.next_point.input_type == 'errors':
-            errors = UnitError.get_by_message(self).get_errors()
+        if (
+            isinstance(self.content, Response) and
+            self.chat and
+            self.chat.next_point.input_type == 'errors'
+        ):
+            error_list = UnitError.get_by_message(self).get_errors()
+            errors = {error.id: error.lesson.title for error in error_list}
         return errors
+
+    def get_options(self):
+        print('get_options')
+        options = None
+        if (
+            isinstance(self.content, UnitLesson) and
+            self.chat and
+            self.chat.next_point.input_type == 'options'
+        ):
+            options = Response.EVAL_CHOICES
+        return options
 
 
 class EnrollUnitCode(models.Model):
@@ -146,6 +157,12 @@ class UnitError(models.Model):
     @classmethod
     def get_by_message(cls, message):
         if message.chat and isinstance(message.content, Response):
-            return cls.objects.get_or_create(unit=message.chat)
+            return cls.objects.get_or_create(
+                unit=message.chat.enroll_code.courseUnit.unit, response=message.content
+            )[0]
         else:
             raise AttributeError
+
+
+class ChatDivider(models.Model):
+    text = models.CharField(max_length=64)
