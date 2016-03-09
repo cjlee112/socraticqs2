@@ -135,7 +135,10 @@ def lti_redirect(request, course_id=None, unit_id=None):
             )
 
     if Role.INSTRUCTOR in roles:
-        return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
+        if not unit_id:
+            return redirect(reverse('ct:course', args=(course_id,)))
+        else:
+            return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
         course = get_object_or_404(Course, id=course_id)
         unit = get_object_or_404(Unit, id=unit_id)
