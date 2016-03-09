@@ -1,19 +1,33 @@
 from django.contrib import admin
-from django.forms.models import ModelForm
 
-import ct.models
+from .forms import BaseForm
+from .models import (
+    Concept,
+    ConceptGraph,
+    Lesson,
+    ConceptLink,
+    UnitLesson,
+    Unit,
+    Response,
+    StudentError,
+    Course,
+    CourseUnit,
+    Role
+)
 
 
-class BaseForm(ModelForm):
-    """
-    Base class for admin forms.
-    """
-    def __init__(self, *args, **kwargs):
-        super(BaseForm, self).__init__(*args, **kwargs)
-
-        for field_name in ('addedBy', 'author'):
-            if field_name in self.fields and not self.initial.get(field_name):
-                self.initial[field_name] = self.current_user
+MODELS = (
+    Concept,
+    ConceptGraph,
+    Lesson,
+    ConceptLink,
+    UnitLesson,
+    Unit,
+    Response,
+    StudentError,
+    Course,
+    CourseUnit
+)
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -28,19 +42,11 @@ class BaseAdmin(admin.ModelAdmin):
     form = BaseForm
 
 
-models = (
-    ct.models.Concept, ct.models.ConceptGraph, ct.models.Lesson,
-    ct.models.ConceptLink, ct.models.UnitLesson, ct.models.Unit,
-    ct.models.Response, ct.models.StudentError, ct.models.Course,
-    ct.models.CourseUnit
-)
-
-
-@admin.register(*models)
+@admin.register(*MODELS)
 class AdminModel(BaseAdmin):
     pass
 
 
-@admin.register(ct.models.Role)
+@admin.register(Role)
 class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
