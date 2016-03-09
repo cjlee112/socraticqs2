@@ -1,5 +1,37 @@
 import json
 
+from ct.models import (
+    Role,
+    Unit,
+    Course,
+    Lesson,
+    Concept,
+    Response,
+    CourseUnit,
+    UnitStatus,
+    UnitLesson,
+    ConceptLink,
+    StudentError,
+    ConceptGraph
+)
+
+
+# index of types that can be saved in json blobs
+KLASS_NAME_DICT = dict(
+    Unit=Unit,
+    Role=Role,
+    Course=Course,
+    Lesson=Lesson,
+    Concept=Concept,
+    Response=Response,
+    UnitLesson=UnitLesson,
+    ConceptLink=ConceptLink,
+    ConceptGraph=ConceptGraph,
+    StudentError=StudentError,
+    CourseUnit=CourseUnit,
+    UnitStatus=UnitStatus,
+)
+
 
 class JSONBlobMixin(object):
     """

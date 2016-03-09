@@ -24,23 +24,6 @@ from ct.models import (
 from mixins import JSONBlobMixin, ChatMixin
 
 
-# index of types that can be saved in json blobs
-KLASS_NAME_DICT = dict(
-    Unit=Unit,
-    Role=Role,
-    Course=Course,
-    Lesson=Lesson,
-    Concept=Concept,
-    Response=Response,
-    UnitLesson=UnitLesson,
-    ConceptLink=ConceptLink,
-    ConceptGraph=ConceptGraph,
-    StudentError=StudentError,
-    CourseUnit=CourseUnit,
-    UnitStatus=UnitStatus,
-)
-
-
 class FSM(models.Model):
     """
     Finite State Machine top-level state-graph container.

@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from django.core.urlresolvers import reverse
 
-from .models import Message
+from .models import Message, Chat
 from ct.models import UnitLesson, Response
 
 
@@ -36,3 +37,26 @@ class MessageSerializer(serializers.ModelSerializer):
         elif isinstance(obj.content, Response):
             text = [obj.content.text]
         return [text]
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    """
+    Serializer to implement /history API.
+    """
+    userInputType = serializers.CharField(source='next_point.input_type')
+    userInputUrl = serializers.SerializerMethodField()
+    messages = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Chat
+        fields = (
+            'userInputType',
+            'userInputUrl',
+            'messages',
+        )
+
+    def get_userInputUrl(self, obj):
+        return reverse('chat:messages-detail', args=(obj.next_point.id,))
+
+    def get_messages(self, obj):
+        return MessageSerializer(many=True).to_representation(obj.message_set.all())
