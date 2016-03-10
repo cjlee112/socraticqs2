@@ -56,7 +56,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.save()
             message.content_id = resp.id
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save(self.request)
+            chat.save()
             serializer.save(chat=chat, content_id=resp.id)
         if message.input_type == 'options':
             message.chat = chat
@@ -65,14 +65,14 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.selfeval = selfeval
             resp.save()
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save(self.request)
+            chat.save()
             serializer.save(chat=chat, content_id=resp.id)
         if message.input_type == 'errors':
             message.chat = chat
             uniterror = message.content
             uniterror.save_response(user=self.request.user, response_list=self.request.data.get('err_list'))
             chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save(self.request)
+            chat.save()
             serializer.save(chat=chat)
 
 

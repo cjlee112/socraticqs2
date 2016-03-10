@@ -9,7 +9,8 @@ from .services import SequenceHandler, FsmHandler
 
 
 inj = injections.Container()
-inj['next_handler'] = SequenceHandler()
+# inj['next_handler'] = SequenceHandler()
+inj['next_handler'] = FsmHandler()
 # Injects appropriate ProgressHandler
 MessagesView = inj.inject(MessagesView)
 ChatInitialView = inj.inject(ChatInitialView)

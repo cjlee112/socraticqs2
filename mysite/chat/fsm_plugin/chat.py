@@ -6,7 +6,11 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     Edge method that moves us to right state for next lesson (or END).
     """
     fsm = edge.fromNode.fsm
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    try:
+        unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    except:
+        unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+
     if useCurrent:
         nextUL = unitStatus.get_lesson()
     else:
@@ -40,12 +44,14 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
+
         try:  # use unitStatus if provided
             unitStatus = fsmStack.state.get_data_attr('unitStatus')
         except AttributeError:  # create new, empty unitStatus
             unitStatus = UnitStatus(unit=unit, user=request.user)
             unitStatus.save()
             fsmStack.state.set_data_attr('unitStatus', unitStatus)
+        fsmStack.state.unitLesson = unitStatus.get_lesson()
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )

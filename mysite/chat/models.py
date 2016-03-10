@@ -7,9 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS
-from fsm.models import FSMState, FSM
-from fsm.fsm_base import FSMStack
-
+import fsm
 from .utils import enroll_generator
 
 
@@ -44,21 +42,20 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
-    fsm_state = models.OneToOneField(FSMState, null=True)
+    fsm_state = models.OneToOneField('fsm.FSMState', null=True)
 
     class Meta:
         ordering = ['-timestamp']
 
-    def save(self, request, *args, **kwargs):
-        if not self.pk:
-            fsm_stack = FSMStack(request)
-            course_unit = self.enroll_code.courseUnit
-            print course_unit.__dict__
-            fsm_stack.push(request, 'chat',
-                           stateData={'unit': course_unit.unit,
-                                      'course': course_unit.course})
-            self.fsm_state = fsm_stack.state
-        super(Chat, self).save(*args, **kwargs)
+    # def save(self, request, *args, **kwargs):
+    #     if not self.pk:
+    #         fsm_stack = fsm.fsm_base.FSMStack(request)
+    #         course_unit = self.enroll_code.courseUnit
+    #         fsm_stack.push(request, 'chat',
+    #                        stateData={'unit': course_unit.unit,
+    #                                   'course': course_unit.course})
+    #         self.fsm_state = fsm_stack.state
+    #     super(Chat, self).save(*args, **kwargs)
 
     def get_options(self):
         options = None

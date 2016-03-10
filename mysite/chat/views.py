@@ -50,6 +50,6 @@ class ChatInitialView(View):
                 'chat_id': chat.id,
                 'lessons': unit.get_exercises(),
                 'next_point': next_point,
-                'fsmstate':chat.fsm_state
+                'fsmstate': chat.fsm_state
             }
         )

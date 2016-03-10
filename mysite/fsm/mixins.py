@@ -14,6 +14,7 @@ from ct.models import (
     StudentError,
     ConceptGraph
 )
+from chat.models import Message, ChatDivider, UnitError
 
 
 # index of types that can be saved in json blobs
@@ -140,10 +141,35 @@ class JSONBlobMixin(object):
 
 class ChatMixin(object):
 
-    def get_message(self, chat):
-        message = Message(chat=chat)
-        #
-        #TODO add logic from Max sequence to create message
-        #depending on fsmNod type
-
-        return message.save()
+    def get_message(self, chat, current=None, message=None):
+        print self.name
+        next_lesson = chat.fsm_state.unitLesson
+        if self.name == 'LESSON':
+            message = Message(contenttype='unitlesson',
+                              content_id=next_lesson.id)
+        if self.name == 'ASK':
+            if next_lesson:
+                message = Message(contenttype='unitlesson',
+                                  content_id=next_lesson.id)
+            else:
+                divider = ChatDivider(text=self.title)
+                divider.save()
+                message = Message(contenttype='chatdivider',
+                                  content_id=divider.id)
+        if self.name == 'ASSESS':
+            message = Message(contenttype='unitlesson',
+                              response_to_check=current,
+                              content_id=current.unitLesson.get_answers().first().id)
+        if self.name == 'ERRORS':
+            uniterror = UnitError.get_by_message(message)
+            message = Message(contenttype='uniterror',
+                              content_id=uniterror.id,
+                              input_type='errors')
+        if self.name == 'END':
+            divider = chat.models.ChatDivider(text=self.title)
+            divider.save()
+            message = Message(contenttype='chatdivider',
+                              content_id=divider.id,
+                              input_type='finish')
+        message.save()
+        return message

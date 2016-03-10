@@ -113,7 +113,7 @@ class PluginDescriptor(object):
         raise AttributeError('read only attribute!')
 
 
-class FSMNode(JSONBlobMixin, models.Model, ChatMixin):
+class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
     """
     Stores one node of an FSM state-graph.
     """
