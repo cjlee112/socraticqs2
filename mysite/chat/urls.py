@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 
 from .views import ChatInitialView
-from .api import MessagesView, HistoryView
+from .api import MessagesView, HistoryView, ProgressView
 from .services import SequenceHandler, FsmHandler
 
 
@@ -22,5 +22,6 @@ urlpatterns = patterns(
     '',
     url(r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$', ChatInitialView.as_view(), name='chat_enroll'),
     url(r'^history/$', HistoryView.as_view(), name='history'),
+    url(r'^progress/$', ProgressView.as_view(), name='progress'),
     url(r'^', include(router.urls)),
 )

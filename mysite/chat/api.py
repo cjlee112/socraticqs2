@@ -5,7 +5,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat, UnitError
-from .serializers import MessageSerializer, ChatHistorySerializer
+from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
 from .services import ProgressHandler
 from ct.models import Response as StudentResponse
 
@@ -78,9 +78,19 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
 
 class HistoryView(generics.RetrieveAPIView):
     """
-    List all snippets, or create a new snippet.
+    List all messages in chat w/ additional info.
     """
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.all().first()
         serializer = ChatHistorySerializer(chat)
+        return Response(serializer.data)
+
+
+class ProgressView(generics.RetrieveAPIView):
+    """
+    Return progress for chat.
+    """
+    def get(self, request, *args, **kwargs):
+        chat = Chat.objects.all().first()
+        serializer = ChatProgressSerializer(chat)
         return Response(serializer.data)

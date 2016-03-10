@@ -43,8 +43,8 @@ class HistoryMessage(serializers.ModelSerializer):
     """
     Serializer to represent Message in histrory.
     """
-    html = serializers.CharField(max_length=512, source='get_html')
-    name = serializers.CharField(max_length=32, source='get_name')
+    html = serializers.CharField(source='get_html', read_only=True)
+    name = serializers.CharField(source='get_name', read_only=True)
 
     class Meta:
         model = Message
@@ -60,9 +60,9 @@ class ChatHistorySerializer(serializers.ModelSerializer):
     """
     Serializer to implement /history API.
     """
-    userInputType = serializers.CharField(source='next_point.input_type')
+    userInputType = serializers.CharField(source='next_point.input_type', read_only=True)
     userInputUrl = serializers.SerializerMethodField()
-    userInputOptions = serializers.CharField(source='get_options')
+    userInputOptions = serializers.CharField(source='get_options', read_only=True)
     messages = serializers.SerializerMethodField()
 
     class Meta:
@@ -79,3 +79,38 @@ class ChatHistorySerializer(serializers.ModelSerializer):
 
     def get_messages(self, obj):
         return HistoryMessage(many=True).to_representation(obj.message_set.all())
+
+
+class LessonSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Lesson.
+    """
+    name = serializers.CharField(source='lesson.title', read_only=True)
+    # started = serializers.BooleanField(source='', read_only=True)
+
+    class Meta:
+        model = UnitLesson
+        fields = (
+            'id',
+            'name',
+            # 'started',
+            # 'done'
+        )
+
+
+class ChatProgressSerializer(serializers.ModelSerializer):
+    """
+    Serializer to implement /progress API.
+    """
+    lessons = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Chat
+        fields = (
+            # 'progress',
+            'lessons',
+        )
+
+    def get_lessons(self, obj):
+        lessons = obj.enroll_code.courseUnit.unit.get_exercises()
+        return LessonSerializer(many=True).to_representation(lessons)
