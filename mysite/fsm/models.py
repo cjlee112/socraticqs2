@@ -7,20 +7,7 @@ from django.core.urlresolvers import reverse
 from fsm.utils import get_plugin
 
 from ct.ct_util import reverse_path_args
-from ct.models import (
-    Role,
-    Unit,
-    Course,
-    Lesson,
-    Concept,
-    Response,
-    CourseUnit,
-    UnitStatus,
-    UnitLesson,
-    ConceptLink,
-    StudentError,
-    ConceptGraph
-)
+from ct.models import Course
 from mixins import JSONBlobMixin, ChatMixin
 
 

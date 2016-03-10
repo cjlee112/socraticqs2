@@ -5,7 +5,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat, UnitError
-from .serializers import MessageSerializer, ChatSerializer
+from .serializers import MessageSerializer, ChatHistorySerializer
 from .services import ProgressHandler
 from ct.models import Response as StudentResponse
 
@@ -26,16 +26,16 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         if (
             message.input_type == 'text' or
             message.input_type == 'options' or
-            message.input_type == 'errors' or
-            message.input_type == 'finish'
+            message.input_type == 'errors'
         ):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
         if message and not message.chat:
             chat = Chat.objects.filter(user=self.request.user).first()
-            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save(self.request)
+            if message.input_type != 'finish':
+                chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+                chat.save(self.request)
             message.chat = chat
             message.save()
         serializer = self.get_serializer(message)
@@ -82,5 +82,5 @@ class HistoryView(generics.RetrieveAPIView):
     """
     def get(self, request, *args, **kwargs):
         chat = Chat.objects.all().first()
-        serializer = ChatSerializer(chat)
+        serializer = ChatHistorySerializer(chat)
         return Response(serializer.data)

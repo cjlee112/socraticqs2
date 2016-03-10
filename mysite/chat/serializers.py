@@ -39,12 +39,30 @@ class MessageSerializer(serializers.ModelSerializer):
         return [text]
 
 
-class ChatSerializer(serializers.ModelSerializer):
+class HistoryMessage(serializers.ModelSerializer):
+    """
+    Serializer to represent Message in histrory.
+    """
+    html = serializers.CharField(max_length=512, source='get_html')
+    name = serializers.CharField(max_length=32, source='get_name')
+
+    class Meta:
+        model = Message
+        fields = (
+            'id',
+            'type',
+            'name',
+            'html'
+        )
+
+
+class ChatHistorySerializer(serializers.ModelSerializer):
     """
     Serializer to implement /history API.
     """
     userInputType = serializers.CharField(source='next_point.input_type')
     userInputUrl = serializers.SerializerMethodField()
+    userInputOptions = serializers.CharField(source='get_options')
     messages = serializers.SerializerMethodField()
 
     class Meta:
@@ -52,6 +70,7 @@ class ChatSerializer(serializers.ModelSerializer):
         fields = (
             'userInputType',
             'userInputUrl',
+            'userInputOptions',
             'messages',
         )
 
@@ -59,4 +78,4 @@ class ChatSerializer(serializers.ModelSerializer):
         return reverse('chat:messages-detail', args=(obj.next_point.id,))
 
     def get_messages(self, obj):
-        return MessageSerializer(many=True).to_representation(obj.message_set.all())
+        return HistoryMessage(many=True).to_representation(obj.message_set.all())

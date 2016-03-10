@@ -28,6 +28,12 @@ MODEL_CHOISES = (
     ('uniterror', 'uniterror'),
 )
 
+MESSAGE_TYPES = (
+    ('default', 'default'),
+    ('user', 'user'),
+    ('breakpoint', 'breakpoint'),
+)
+
 
 class Chat(models.Model):
     """
@@ -54,6 +60,12 @@ class Chat(models.Model):
             self.fsm_state = fsm_stack.state
         super(Chat, self).save(*args, **kwargs)
 
+    def get_options(self):
+        options = None
+        if self.next_point.input_type == 'options':
+            options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+        return options
+
 
 class Message(models.Model):
     """
@@ -68,6 +80,7 @@ class Message(models.Model):
     input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True)
     lesson_to_answer = models.ForeignKey(UnitLesson, null=True)
     response_to_check = models.ForeignKey(Response, null=True)
+    type = models.CharField(max_length=16, default='default', choices=MESSAGE_TYPES)
 
     @property
     def content(self):
@@ -111,8 +124,24 @@ class Message(models.Model):
             self.chat and
             self.chat.next_point.input_type == 'options'
         ):
-            options = Response.EVAL_CHOICES
+            options = self.chat.get_options()
         return options
+
+    def get_html(self):
+        html = None
+        if self.contenttype in ('chatdivider', 'response'):
+            html = self.content.text
+        elif self.contenttype == 'unitlesson':
+            html = self.content.lesson.text
+        return html
+
+    def get_name(self):
+        name = None
+        if self.contenttype == 'response':
+            name = self.content.author.get_full_name()
+        elif self.contenttype == 'unitlesson':
+            name = self.content.addedBy.get_full_name()
+        return name
 
 
 class EnrollUnitCode(models.Model):

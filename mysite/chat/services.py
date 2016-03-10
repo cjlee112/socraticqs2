@@ -56,11 +56,19 @@ class SequenceHandler(ProgressHandler):
             except UnitLesson.DoesNotExist:
                 divider = ChatDivider(text="You have finished lesson sequence. Well done.")
                 divider.save()
-                m = Message(contenttype='chatdivider', content_id=divider.id, input_type='finish')
+                m = Message(
+                    contenttype='chatdivider',
+                    content_id=divider.id,
+                    input_type='finish',
+                    type='breakpoint')
             m.save()
             next_point = m
         elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ORCT_QUESTION:
-            m = Message(contenttype='response', input_type='text', lesson_to_answer=current)
+            m = Message(
+                contenttype='response',
+                input_type='text',
+                lesson_to_answer=current,
+                type='user')
             m.save()
             next_point = m
         elif isinstance(current, Response) and not current.selfeval:
@@ -75,7 +83,8 @@ class SequenceHandler(ProgressHandler):
             m = Message(
                 contenttype='response',
                 content_id=message.response_to_check.id,
-                input_type='options'
+                input_type='options',
+                type='user'
             )
             m.save()
             next_point = m
