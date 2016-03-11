@@ -103,14 +103,23 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     Serializer to implement /progress API.
     """
     lessons = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
         fields = (
-            # 'progress',
+            'progress',
             'lessons',
         )
 
     def get_lessons(self, obj):
-        lessons = obj.enroll_code.courseUnit.unit.get_exercises()
+        lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
         return LessonSerializer(many=True).to_representation(lessons)
+
+    def get_progress(self, obj):
+        lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)
+        messages = Message.objects.filter(
+            contenttype='unitlesson',
+            content_id__in=[i[0] for i in lessons.values_list('id')]
+        ).count()
+        return messages / float(len(lessons))
