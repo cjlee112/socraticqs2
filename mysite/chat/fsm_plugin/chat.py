@@ -94,6 +94,15 @@ class ASSESS(object):
             dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
+    def next_edge(self, edge, fsmStack, request, **kwargs):
+        try:
+            unitStatus = fsmStack.state.get_data_attr('unitStatus')
+            fsmStack.state.unitLesson = unitStatus.start_next_lesson()
+        except:
+            unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+            fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
+        return edge.toNode
+
 
 class ERRORS(object):
     next_edge = next_lesson
@@ -102,6 +111,15 @@ class ERRORS(object):
     edges = (
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
+
+    def next_edge(self, edge, fsmStack, request, **kwargs):
+        try:
+            unitStatus = fsmStack.state.get_data_attr('unitStatus')
+            fsmStack.state.unitLesson = unitStatus.start_next_lesson()
+        except:
+            unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+            fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
+        return edge.toNode
 
 
 class END(object):

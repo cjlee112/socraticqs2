@@ -35,7 +35,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             chat = Chat.objects.filter(user=self.request.user).first()
             if message.input_type != 'finish':
                 chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-                chat.save(self.request)
+                chat.save()
             message.chat = chat
             message.save()
         serializer = self.get_serializer(message)

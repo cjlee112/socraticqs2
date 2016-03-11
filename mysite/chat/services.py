@@ -48,13 +48,13 @@ class FsmHandler(ProgressHandler):
     def next_point(self, current, chat, message):
         next_point = None
 
-        if isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ORCT_QUESTION:
+        if isinstance(current, UnitLesson) and chat.fsm_state.fsmNode.name == 'ASK':
             m = Message(contenttype='response',
                         input_type='text',
                         lesson_to_answer=current)
             m.save()
             next_point = m
-        elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ANSWER:
+        elif isinstance(current, UnitLesson) and chat.fsm_state.fsmNode.name == 'ASSESS':
             m = Message(
                 contenttype='response',
                 content_id=message.response_to_check.id,

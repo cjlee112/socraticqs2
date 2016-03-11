@@ -142,20 +142,14 @@ class JSONBlobMixin(object):
 class ChatMixin(object):
 
     def get_message(self, chat, current=None, message=None):
-        print self.name
+        print "Current node is " + self.name
         next_lesson = chat.fsm_state.unitLesson
         if self.name == 'LESSON':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id)
         if self.name == 'ASK':
-            if next_lesson:
-                message = Message(contenttype='unitlesson',
-                                  content_id=next_lesson.id)
-            else:
-                divider = ChatDivider(text=self.title)
-                divider.save()
-                message = Message(contenttype='chatdivider',
-                                  content_id=divider.id)
+            message = Message(contenttype='unitlesson',
+                              content_id=next_lesson.id)
         if self.name == 'ASSESS':
             message = Message(contenttype='unitlesson',
                               response_to_check=current,
