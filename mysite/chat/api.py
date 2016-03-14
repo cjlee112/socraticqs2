@@ -32,7 +32,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-        if message and not message.chat:
+        if message:
             chat = Chat.objects.filter(user=self.request.user).first()
             if message.input_type != 'finish':
                 chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)

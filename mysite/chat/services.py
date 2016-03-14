@@ -42,7 +42,7 @@ class FsmHandler(ProgressHandler):
                         input_type='text',
                         lesson_to_answer=current,
                         type='user',
-                        shadow_chat=chat,
+                        chat=chat,
                         owner=chat.user)
             m.save()
             next_point = m
@@ -52,7 +52,7 @@ class FsmHandler(ProgressHandler):
                 content_id=message.response_to_check.id,
                 input_type='options',
                 type='user',
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()
@@ -81,7 +81,7 @@ class SequenceHandler(ProgressHandler):
             m = Message(
                 contenttype='unitlesson',
                 content_id=unit_lesson.id,
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()
@@ -101,7 +101,7 @@ class SequenceHandler(ProgressHandler):
                 m = Message(
                     contenttype='unitlesson',
                     content_id=next_lesson.id,
-                    shadow_chat=chat,
+                    chat=chat,
                     owner=chat.user
                 )
             except UnitLesson.DoesNotExist:
@@ -112,7 +112,7 @@ class SequenceHandler(ProgressHandler):
                     content_id=divider.id,
                     input_type='finish',
                     type='breakpoint',
-                    shadow_chat=chat,
+                    chat=chat,
                     owner=chat.user
                 )
             m.save()
@@ -124,7 +124,7 @@ class SequenceHandler(ProgressHandler):
                 input_type='text',
                 lesson_to_answer=current,
                 type='user',
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()
@@ -134,7 +134,7 @@ class SequenceHandler(ProgressHandler):
                 contenttype='unitlesson',
                 content_id=current.unitLesson.get_answers().first().id,
                 response_to_check=current,
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()
@@ -145,7 +145,7 @@ class SequenceHandler(ProgressHandler):
                 content_id=message.response_to_check.id,
                 input_type='options',
                 type='user',
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()
@@ -155,7 +155,7 @@ class SequenceHandler(ProgressHandler):
                 m = Message(
                     contenttype='unitlesson',
                     content_id=current.unitLesson.get_next_lesson().id,
-                    shadow_chat=chat,
+                    chat=chat,
                     owner=chat.user
                 )
                 m.save()
@@ -166,7 +166,7 @@ class SequenceHandler(ProgressHandler):
                     contenttype='uniterror',
                     content_id=uniterror.id,
                     input_type='errors',
-                    shadow_chat=chat,
+                    chat=chat,
                     owner=chat.user
                 )
                 m.save()
@@ -175,7 +175,7 @@ class SequenceHandler(ProgressHandler):
             m = Message(
                 contenttype='unitlesson',
                 content_id=current.response.unitLesson.get_next_lesson().id,
-                shadow_chat=chat,
+                chat=chat,
                 owner=chat.user
             )
             m.save()

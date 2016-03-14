@@ -69,7 +69,6 @@ class Message(models.Model):
     response_to_check = models.ForeignKey(Response, null=True)
     type = models.CharField(max_length=16, default='default', choices=MESSAGE_TYPES)
     owner = models.ForeignKey(User, null=True)
-    shadow_chat = models.ForeignKey(Chat, null=True, related_name='ghosts')
 
     @property
     def content(self):
