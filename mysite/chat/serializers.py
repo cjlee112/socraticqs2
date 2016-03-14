@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
@@ -32,6 +34,9 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_messages(self, obj):
         print('get_messages')
         text = None
+        if not obj.timestamp:
+            obj.timestamp = datetime.now()
+            obj.save()
         if isinstance(obj.content, UnitLesson):
             text = [obj.content.lesson.text]
         elif isinstance(obj.content, Response):
@@ -78,7 +83,9 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         return reverse('chat:messages-detail', args=(obj.next_point.id,))
 
     def get_messages(self, obj):
-        return HistoryMessage(many=True).to_representation(obj.message_set.all())
+        return HistoryMessage(many=True).to_representation(obj.message_set.all()
+                                                              .exclude(timestamp__isnull=True)
+                                                              .order_by('timestamp'))
 
 
 class LessonSerializer(serializers.ModelSerializer):
