@@ -29,20 +29,9 @@ class FsmHandler(ProgressHandler):
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course})
         chat.fsm_state = fsm_stack.state
-        # edge = chat.fsm_state.fsmNode.outgoing.get(name='next')
-        # chat.fsm_state.fsmNode = edge.transition(chat, {})
-        # chat.fsm_state.save()
         m = fsm_stack.state.fsmNode.get_message(chat)
         chat.next_point = m
-        # try:
-        #     unit_lesson = unit.unitlesson_set.get(order=0)
-        #     m = Message(contenttype='unitlesson', content_id=unit_lesson.id)
-        #     m.save()
-        #     chat.next_point = m
         chat.save()
-        #     return m
-        # except IndexError:
-        #     return None
         return m
 
     def next_point(self, current, chat, message):
@@ -73,11 +62,7 @@ class FsmHandler(ProgressHandler):
             chat.fsm_state.fsmNode = edge.transition(chat, {})
             chat.fsm_state.save()
             next_point = chat.fsm_state.fsmNode.get_message(chat, current=current, message=message)
-            print '*'*50
-            print next_point.__dict__
-            return next_point
-        else:
-            return message
+        return next_point
 
 
 class SequenceHandler(ProgressHandler):

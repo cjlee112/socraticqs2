@@ -47,16 +47,6 @@ class Chat(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
-    # def save(self, request, *args, **kwargs):
-    #     if not self.pk:
-    #         fsm_stack = fsm.fsm_base.FSMStack(request)
-    #         course_unit = self.enroll_code.courseUnit
-    #         fsm_stack.push(request, 'chat',
-    #                        stateData={'unit': course_unit.unit,
-    #                                   'course': course_unit.course})
-    #         self.fsm_state = fsm_stack.state
-    #     super(Chat, self).save(*args, **kwargs)
-
     def get_options(self):
         options = None
         if self.next_point.input_type == 'options':
