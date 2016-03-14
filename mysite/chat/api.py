@@ -1,4 +1,5 @@
 import injections
+from django.utils import timezone
 from rest_framework import viewsets, mixins, views, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
@@ -21,8 +22,13 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, IsOwner)
 
     def retrieve(self, request, *args, **kwargs):
-        # TODO it will be better to move custom logic to sirializer
         message = self.get_object()
+        chat = Chat.objects.filter(user=self.request.user).first()
+
+        if not message.chat or message.chat != chat or message.timestamp:
+            print('FAULT')
+            serializer = self.get_serializer(message)
+            return Response(serializer.data)
 
         if (
             message.input_type == 'text' or
@@ -33,48 +39,70 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             return Response(serializer.data)
 
         if message:
-            chat = Chat.objects.filter(user=self.request.user).first()
             if message.input_type != 'finish':
-                chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+                # Set next message for user
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content, chat=chat, message=message
+                )
                 chat.save()
-            message.chat = chat
+            message.timestamp = timezone.now()
             message.save()
+
         serializer = self.get_serializer(message)
         return Response(serializer.data)
 
     def perform_update(self, serializer):
-        # TODO it will be better to move custom logic to sirializer
         message = self.get_object()
         chat = Chat.objects.filter(user=self.request.user).first()
+
+        # Check if message is not in current chat
+        if not message.chat or message.chat != chat:
+            return
+
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
-            resp = StudentResponse(text=text)
-            resp.lesson = message.lesson_to_answer.lesson
-            resp.unitLesson = message.lesson_to_answer
-            resp.course = message.chat.enroll_code.courseUnit.course
-            resp.author = self.request.user
+            if not message.content_id:
+                resp = StudentResponse(text=text)
+                resp.lesson = message.lesson_to_answer.lesson
+                resp.unitLesson = message.lesson_to_answer
+                resp.course = message.chat.enroll_code.courseUnit.course
+                resp.author = self.request.user
+            else:
+                resp = message.content
+                rest.text = text
             resp.save()
-            message.content_id = resp.id
-            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
-            chat.save()
-            serializer.save(chat=chat, content_id=resp.id)
+            if not message.timestamp:
+                message.content_id = resp.id
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content, chat=chat, message=message
+                    )
+                chat.save()
+                serializer.save(content_id=resp.id, timestamp=timezone.now())
+            else:
+                serializer.save()
         if message.input_type == 'options':
             message.chat = chat
             selfeval = self.request.data.get('selfeval')
             resp = message.content
             resp.selfeval = selfeval
             resp.save()
-            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+            chat.next_point = self.next_handler.next_point(
+                current=message.content, chat=chat, message=message
+            )
             chat.save()
-            serializer.save(chat=chat, content_id=resp.id)
+            serializer.save(content_id=resp.id, timestamp=timezone.now())
         if message.input_type == 'errors':
             message.chat = chat
             uniterror = message.content
-            uniterror.save_response(user=self.request.user, response_list=self.request.data.get('err_list'))
-            chat.next_point = self.next_handler.next_point(current=message.content, chat=chat, message=message)
+            uniterror.save_response(
+                user=self.request.user, response_list=self.request.data.get('err_list')
+            )
+            chat.next_point = self.next_handler.next_point(
+                current=message.content, chat=chat, message=message
+            )
             chat.save()
-            serializer.save(chat=chat)
+            serializer.save(timestamp=timezone.now())
 
 
 class HistoryView(generics.RetrieveAPIView):

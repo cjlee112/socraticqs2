@@ -147,25 +147,25 @@ class ChatMixin(object):
         if self.name == 'LESSON':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
-                              shadow_chat=chat,
+                              chat=chat,
                               owner=chat.user)
         if self.name == 'ASK':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
-                              shadow_chat=chat,
+                              chat=chat,
                               owner=chat.user)
         if self.name == 'ASSESS':
             message = Message(contenttype='unitlesson',
                               response_to_check=current,
                               content_id=current.unitLesson.get_answers().first().id,
-                              shadow_chat=chat,
+                              chat=chat,
                               owner=chat.user)
         if self.name == 'ERRORS':
             uniterror = UnitError.get_by_message(message)
             message = Message(contenttype='uniterror',
                               content_id=uniterror.id,
                               input_type='errors',
-                              shadow_chat=chat,
+                              chat=chat,
                               owner=chat.user)
         if self.name == 'END':
             divider = ChatDivider(text=self.title)
@@ -174,7 +174,7 @@ class ChatMixin(object):
                               content_id=divider.id,
                               input_type='finish',
                               type='breakpoint',
-                              shadow_chat=chat,
+                              chat=chat,
                               owner=chat.user)
         message.save()
         return message

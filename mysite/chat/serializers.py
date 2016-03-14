@@ -34,9 +34,6 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_messages(self, obj):
         print('get_messages')
         text = None
-        if not obj.timestamp:
-            obj.timestamp = datetime.now()
-            obj.save()
         if isinstance(obj.content, UnitLesson):
             text = [obj.content.lesson.text]
         elif isinstance(obj.content, Response):
