@@ -67,15 +67,17 @@ class FsmHandler(ProgressHandler):
                 edge = chat.fsm_state.fsmNode.outgoing.get(name='next')
             else:
                 edge = chat.fsm_state.fsmNode.outgoing.get(name='error')
-        else:
+        elif not chat.fsm_state.fsmNode.name == 'END':
             edge = chat.fsm_state.fsmNode.outgoing.get(name='next')
-        if not next_point:
+        if not next_point and not chat.fsm_state.fsmNode.name == 'END':
             chat.fsm_state.fsmNode = edge.transition(chat, {})
             chat.fsm_state.save()
             next_point = chat.fsm_state.fsmNode.get_message(chat, current=current, message=message)
-        print '*'*50
-        print next_point.__dict__
-        return next_point
+            print '*'*50
+            print next_point.__dict__
+            return next_point
+        else:
+            return message
 
 
 class SequenceHandler(ProgressHandler):

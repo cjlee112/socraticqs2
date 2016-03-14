@@ -18,8 +18,16 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     if not nextUL:
         return fsm.get_node('END')
     elif nextUL.is_question():
+        try:
+            fsmStack.state.unitLesson = nextUL
+        except:
+            fsmStack.fsm_state.unitLesson = nextUL
         return fsm.get_node(name='ASK')
     else:  # just a lesson to read
+        try:
+            fsmStack.state.unitLesson = nextUL
+        except:
+            fsmStack.fsm_state.unitLesson = nextUL
         return edge.toNode
 
 
@@ -94,14 +102,14 @@ class ASSESS(object):
             dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
-    def next_edge(self, edge, fsmStack, request, **kwargs):
-        try:
-            unitStatus = fsmStack.state.get_data_attr('unitStatus')
-            fsmStack.state.unitLesson = unitStatus.start_next_lesson()
-        except:
-            unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
-            fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
-        return edge.toNode
+    # def next_edge(self, edge, fsmStack, request, **kwargs):
+    #     try:
+    #         unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    #         fsmStack.state.unitLesson = unitStatus.start_next_lesson()
+    #     except:
+    #         unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+    #         fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
+    #     return edge.toNode
 
 
 class ERRORS(object):
@@ -112,14 +120,14 @@ class ERRORS(object):
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
-    def next_edge(self, edge, fsmStack, request, **kwargs):
-        try:
-            unitStatus = fsmStack.state.get_data_attr('unitStatus')
-            fsmStack.state.unitLesson = unitStatus.start_next_lesson()
-        except:
-            unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
-            fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
-        return edge.toNode
+    # def next_edge(self, edge, fsmStack, request, **kwargs):
+    #     try:
+    #         unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    #         fsmStack.state.unitLesson = unitStatus.start_next_lesson()
+    #     except:
+    #         unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+    #         fsmStack.fsm_state.unitLesson = unitStatus.start_next_lesson()
+    #     return edge.toNode
 
 
 class END(object):

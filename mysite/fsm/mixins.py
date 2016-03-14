@@ -160,7 +160,7 @@ class ChatMixin(object):
                               content_id=uniterror.id,
                               input_type='errors')
         if self.name == 'END':
-            divider = chat.models.ChatDivider(text=self.title)
+            divider = ChatDivider(text=self.title)
             divider.save()
             message = Message(contenttype='chatdivider',
                               content_id=divider.id,
