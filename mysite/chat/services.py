@@ -40,14 +40,20 @@ class FsmHandler(ProgressHandler):
         if isinstance(current, UnitLesson) and chat.fsm_state.fsmNode.name == 'ASK':
             m = Message(contenttype='response',
                         input_type='text',
-                        lesson_to_answer=current)
+                        lesson_to_answer=current,
+                        type='user',
+                        shadow_chat=chat,
+                        owner=chat.user)
             m.save()
             next_point = m
         elif isinstance(current, UnitLesson) and chat.fsm_state.fsmNode.name == 'ASSESS':
             m = Message(
                 contenttype='response',
                 content_id=message.response_to_check.id,
-                input_type='options'
+                input_type='options',
+                type='user',
+                shadow_chat=chat,
+                owner=chat.user
             )
             m.save()
             next_point = m
