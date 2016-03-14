@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Message, Chat, UnitError
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
 from .services import ProgressHandler
+from .permissions import IsOwner
 from ct.models import Response as StudentResponse
 
 
@@ -17,7 +18,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     serializer_class = MessageSerializer
     queryset = Message.objects.all()
     authentication_classes = (SessionAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwner)
 
     def retrieve(self, request, *args, **kwargs):
         # TODO it will be better to move custom logic to sirializer

@@ -72,7 +72,12 @@ class SequenceHandler(ProgressHandler):
     def start_point(self, unit, chat, request):
         try:
             unit_lesson = unit.unitlesson_set.get(order=0)
-            m = Message(contenttype='unitlesson', content_id=unit_lesson.id)
+            m = Message(
+                contenttype='unitlesson',
+                content_id=unit_lesson.id,
+                shadow_chat=chat,
+                owner=chat.user
+            )
             m.save()
             chat.next_point = m
             chat.save(request)
@@ -87,7 +92,12 @@ class SequenceHandler(ProgressHandler):
         if isinstance(current, UnitLesson) and current.lesson.kind == Lesson.BASE_EXPLANATION:
             try:
                 next_lesson = current.get_next_lesson()
-                m = Message(contenttype='unitlesson', content_id=next_lesson.id)
+                m = Message(
+                    contenttype='unitlesson',
+                    content_id=next_lesson.id,
+                    shadow_chat=chat,
+                    owner=chat.user
+                )
             except UnitLesson.DoesNotExist:
                 divider = ChatDivider(text="You have finished lesson sequence. Well done.")
                 divider.save()
@@ -95,7 +105,10 @@ class SequenceHandler(ProgressHandler):
                     contenttype='chatdivider',
                     content_id=divider.id,
                     input_type='finish',
-                    type='breakpoint')
+                    type='breakpoint',
+                    shadow_chat=chat,
+                    owner=chat.user
+                )
             m.save()
             next_point = m
 
@@ -104,14 +117,19 @@ class SequenceHandler(ProgressHandler):
                 contenttype='response',
                 input_type='text',
                 lesson_to_answer=current,
-                type='user')
+                type='user',
+                shadow_chat=chat,
+                owner=chat.user
+            )
             m.save()
             next_point = m
         elif isinstance(current, Response) and not current.selfeval:
             m = Message(
                 contenttype='unitlesson',
                 content_id=current.unitLesson.get_answers().first().id,
-                response_to_check=current
+                response_to_check=current,
+                shadow_chat=chat,
+                owner=chat.user
             )
             m.save()
             next_point = m
@@ -120,7 +138,9 @@ class SequenceHandler(ProgressHandler):
                 contenttype='response',
                 content_id=message.response_to_check.id,
                 input_type='options',
-                type='user'
+                type='user',
+                shadow_chat=chat,
+                owner=chat.user
             )
             m.save()
             next_point = m
@@ -129,6 +149,8 @@ class SequenceHandler(ProgressHandler):
                 m = Message(
                     contenttype='unitlesson',
                     content_id=current.unitLesson.get_next_lesson().id,
+                    shadow_chat=chat,
+                    owner=chat.user
                 )
                 m.save()
                 next_point = m
@@ -137,7 +159,9 @@ class SequenceHandler(ProgressHandler):
                 m = Message(
                     contenttype='uniterror',
                     content_id=uniterror.id,
-                    input_type='errors'
+                    input_type='errors',
+                    shadow_chat=chat,
+                    owner=chat.user
                 )
                 m.save()
                 next_point = m
@@ -145,6 +169,8 @@ class SequenceHandler(ProgressHandler):
             m = Message(
                 contenttype='unitlesson',
                 content_id=current.response.unitLesson.get_next_lesson().id,
+                shadow_chat=chat,
+                owner=chat.user
             )
             m.save()
             next_point = m
