@@ -82,11 +82,12 @@ class SequenceHandler(ProgressHandler):
                 contenttype='unitlesson',
                 content_id=unit_lesson.id,
                 chat=chat,
-                owner=chat.user
+                owner=chat.user,
+                input_type='custom',
             )
             m.save()
             chat.next_point = m
-            chat.save(request)
+            chat.save()
             return m
         except IndexError:
             return None
@@ -102,7 +103,8 @@ class SequenceHandler(ProgressHandler):
                     contenttype='unitlesson',
                     content_id=next_lesson.id,
                     chat=chat,
-                    owner=chat.user
+                    owner=chat.user,
+                    input_type='custom',
                 )
             except UnitLesson.DoesNotExist:
                 divider = ChatDivider(text="You have finished lesson sequence. Well done.")
@@ -135,7 +137,8 @@ class SequenceHandler(ProgressHandler):
                 content_id=current.unitLesson.get_answers().first().id,
                 response_to_check=current,
                 chat=chat,
-                owner=chat.user
+                owner=chat.user,
+                input_type='custom',
             )
             m.save()
             next_point = m
@@ -156,16 +159,18 @@ class SequenceHandler(ProgressHandler):
                     contenttype='unitlesson',
                     content_id=current.unitLesson.get_next_lesson().id,
                     chat=chat,
-                    owner=chat.user
+                    owner=chat.user,
+                    input_type='custom',
                 )
                 m.save()
                 next_point = m
             else:
                 uniterror = UnitError.get_by_message(message)
+                # Creating next Message that wait for selected errorModels
                 m = Message(
                     contenttype='uniterror',
                     content_id=uniterror.id,
-                    input_type='errors',
+                    input_type='custom',
                     chat=chat,
                     owner=chat.user
                 )
@@ -176,7 +181,8 @@ class SequenceHandler(ProgressHandler):
                 contenttype='unitlesson',
                 content_id=current.response.unitLesson.get_next_lesson().id,
                 chat=chat,
-                owner=chat.user
+                owner=chat.user,
+                input_type='custom',
             )
             m.save()
             next_point = m

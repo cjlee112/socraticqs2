@@ -98,7 +98,7 @@ class Message(models.Model):
         if (
             isinstance(self.content, Response) and
             self.chat and
-            self.chat.next_point.input_type == 'errors'
+            self.chat.next_point.contenttype == 'uniterror'
         ):
             error_list = UnitError.get_by_message(self).get_errors()
             errors = {error.id: error.lesson.title for error in error_list}
