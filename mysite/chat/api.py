@@ -45,6 +45,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                     current=message.content, chat=chat, message=message
                 )
                 chat.save()
+                message.chat = chat
             message.timestamp = timezone.now()
             message.save()
 
@@ -78,7 +79,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                     current=message.content, chat=chat, message=message
                     )
                 chat.save()
-                serializer.save(content_id=resp.id, timestamp=timezone.now())
+                serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
         if message.input_type == 'options':
@@ -91,7 +92,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 current=message.content, chat=chat, message=message
             )
             chat.save()
-            serializer.save(content_id=resp.id, timestamp=timezone.now())
+            serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
         if message.input_type == 'errors':
             message.chat = chat
             uniterror = message.content
@@ -102,7 +103,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 current=message.content, chat=chat, message=message
             )
             chat.save()
-            serializer.save(timestamp=timezone.now())
+            serializer.save(timestamp=timezone.now(), chat=chat)
 
 
 class HistoryView(generics.RetrieveAPIView):
