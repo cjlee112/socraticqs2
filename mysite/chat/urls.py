@@ -9,18 +9,32 @@ from .services import SequenceHandler, FsmHandler
 
 
 inj = injections.Container()
-# inj['next_handler'] = SequenceHandler()
 inj['next_handler'] = FsmHandler()
-# Injects appropriate ProgressHandler
-MessagesView = inj.inject(MessagesView)
-ChatInitialView = inj.inject(ChatInitialView)
+MessagesViewFSM = inj.inject(MessagesView)
+ChatInitialViewFSM = inj.inject(ChatInitialView)
+
+inj_alternative = injections.Container()
+inj_alternative['next_handler'] = SequenceHandler()
+MessagesViewAlternative = inj_alternative.inject(MessagesView)
+ChatInitialViewAlternative = inj_alternative.inject(ChatInitialView)
+
 
 router = SimpleRouter()
-router.register(r'messages', MessagesView, base_name='messages')
+router.register(r'messages', MessagesViewFSM, base_name='messages')
+router.register(r'alternative/messages', MessagesViewAlternative, base_name='messages')
 
 urlpatterns = patterns(
     '',
-    url(r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$', ChatInitialView.as_view(), name='chat_enroll'),
+    url(
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        ChatInitialViewFSM.as_view(),
+        name='chat_enroll'
+    ),
+    url(
+        r'^alternative/enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        ChatInitialViewAlternative.as_view(),
+        name='chat_enroll'
+    ),
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),
     url(r'^', include(router.urls)),
