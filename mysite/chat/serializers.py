@@ -90,16 +90,28 @@ class LessonSerializer(serializers.ModelSerializer):
     Serializer for Lesson.
     """
     name = serializers.CharField(source='lesson.title', read_only=True)
-    # started = serializers.BooleanField(source='', read_only=True)
+    done = serializers.SerializerMethodField()
+    started = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
         fields = (
             'id',
             'name',
-            # 'started',
-            # 'done'
+            'started',
+            'done'
         )
+
+    def get_started(self, obj):
+        message = Message.objects.get(id=obj.message)
+        return message.timestamp is not None
+
+    def get_done(self, obj):
+        message = Message.objects.get(id=obj.message)
+        last_message = Message.objects.filter(chat=message.chat,
+                                              timestamp__isnull=False)\
+                                      .order_by('timestamp').last()
+        return message.timestamp is not None and not message.timestamp == last_message.timestamp
 
 
 class ChatProgressSerializer(serializers.ModelSerializer):
@@ -117,13 +129,26 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         )
 
     def get_lessons(self, obj):
-        lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+        messages = obj.message_set.filter(contenttype='unitlesson')
+        print messages.count()
+        lessons = []
+        for each in messages:
+            lesson = each.content
+            lesson.message = each.id
+            lessons.append(lesson)
         return LessonSerializer(many=True).to_representation(lessons)
 
     def get_progress(self, obj):
+        additional_lessons = Message.objects.filter(
+            chat=obj,
+            is_additional=True
+        ).distinct('content_id').count()
         lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)
         messages = Message.objects.filter(
+            chat=obj,
             contenttype='unitlesson',
-            content_id__in=[i[0] for i in lessons.values_list('id')]
-        ).count()
-        return messages / float(len(lessons))
+            content_id__in=[i[0] for i in lessons.values_list('id')],
+            timestamp__isnull=False,
+            is_additional=False
+        ).distinct('content_id').count()
+        return (messages-1) / float(len(lessons)+additional_lessons)
