@@ -103,15 +103,21 @@ class LessonSerializer(serializers.ModelSerializer):
         )
 
     def get_started(self, obj):
-        message = Message.objects.get(id=obj.message)
-        return message.timestamp is not None
+        if obj.message:
+            message = Message.objects.get(id=obj.message)
+            return message.timestamp is not None
+        else:
+            return False
 
     def get_done(self, obj):
-        message = Message.objects.get(id=obj.message)
-        last_message = Message.objects.filter(chat=message.chat,
-                                              timestamp__isnull=False)\
-                                      .order_by('timestamp').last()
-        return message.timestamp is not None and not message.timestamp == last_message.timestamp
+        if obj.message:
+            message = Message.objects.get(id=obj.message)
+            last_message = Message.objects.filter(chat=message.chat,
+                                                  timestamp__isnull=False)\
+                                          .order_by('timestamp').last()
+            return message.timestamp is not None and not message.timestamp == last_message.timestamp
+        else:
+            return False
 
 
 class ChatProgressSerializer(serializers.ModelSerializer):
@@ -130,12 +136,14 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
     def get_lessons(self, obj):
         messages = obj.message_set.filter(contenttype='unitlesson')
-        print messages.count()
-        lessons = []
+        lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
         for each in messages:
-            lesson = each.content
-            lesson.message = each.id
-            lessons.append(lesson)
+            if each.content in lessons:
+                lessons[lessons.index(each.content)].message = each.id
+            else:
+                lesson = each.content
+                lesson.message = each.id
+                lessons.append(lesson)
         return LessonSerializer(many=True).to_representation(lessons)
 
     def get_progress(self, obj):
