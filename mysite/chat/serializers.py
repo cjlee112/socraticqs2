@@ -103,14 +103,14 @@ class LessonSerializer(serializers.ModelSerializer):
         )
 
     def get_started(self, obj):
-        if obj.message:
+        if hasattr(obj, 'message'):
             message = Message.objects.get(id=obj.message)
             return message.timestamp is not None
         else:
             return False
 
     def get_done(self, obj):
-        if obj.message:
+        if hasattr(obj, 'message'):
             message = Message.objects.get(id=obj.message)
             last_message = Message.objects.filter(chat=message.chat,
                                                   timestamp__isnull=False)\
@@ -159,4 +159,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             timestamp__isnull=False,
             is_additional=False
         ).distinct('content_id').count()
+        print messages-1
+        print float(len(lessons))
+        print additional_lessons
         return (messages-1) / float(len(lessons)+additional_lessons)
