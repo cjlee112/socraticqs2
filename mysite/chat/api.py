@@ -12,6 +12,24 @@ from .permissions import IsOwner
 from ct.models import Response as StudentResponse
 
 
+def get_additional_messages(chat):
+    print 'additional lessons'
+    course_unit = chat.enroll_code.courseUnit
+    unit = course_unit.unit
+    addition_tasks = [(ul, 'selfeval')
+                      for ul in unit.get_selfeval_uls(chat.user)]
+    addition_tasks += [(ul, 'classify')
+                       for ul in unit.get_serrorless_uls(chat.user)]
+    addition_tasks += [(ul, 'resolve')
+                       for ul in unit.get_unresolved_uls(chat.user)]
+    map(lambda (ul, task): Message.objects.get_or_create(contenttype='unitlesson',
+                                                         content_id=ul.id,
+                                                         chat=chat,
+                                                         owner=chat.user,
+                                                         is_additional=True),
+        addition_tasks)
+
+
 @injections.has
 class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     next_handler = injections.depends(ProgressHandler)
@@ -60,6 +78,9 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         if not message.chat or message.chat != chat:
             return
 
+        if message.contenttype == 'uniterror':
+            get_additional_messages(chat)
+
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
@@ -104,6 +125,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             )
             chat.save()
             serializer.save(timestamp=timezone.now(), chat=chat)
+            # TODO add creating additional lessons to current chat
 
 
 class HistoryView(generics.RetrieveAPIView):

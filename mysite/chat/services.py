@@ -68,6 +68,10 @@ class FsmHandler(ProgressHandler):
             chat.fsm_state.fsmNode = edge.transition(chat, {})
             chat.fsm_state.save()
             next_point = chat.fsm_state.fsmNode.get_message(chat, current=current, message=message)
+        # if current message is additional then the next one also will be additional
+        if message.is_additional:
+            next_point.is_additional = True
+            next_point.save()
         return next_point
 
 
@@ -186,4 +190,8 @@ class SequenceHandler(ProgressHandler):
             )
             m.save()
             next_point = m
+        # if current message is additional then the next one also will be additional
+        if message.is_additional:
+            next_point.is_additional = True
+            next_point.save()
         return next_point
