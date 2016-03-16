@@ -143,7 +143,7 @@ class ChatMixin(object):
 
     def get_message(self, chat, current=None, message=None):
         print "Current node is " + self.name
-        next_lesson = chat.fsm_state.unitLesson
+        next_lesson = chat.state.unitLesson
         if self.name == 'LESSON':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,

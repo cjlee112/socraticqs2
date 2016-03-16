@@ -42,7 +42,7 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
-    fsm_state = models.OneToOneField('fsm.FSMState', null=True)
+    state = models.OneToOneField('fsm.FSMState', null=True)
 
     class Meta:
         ordering = ['-timestamp']

@@ -6,10 +6,7 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     Edge method that moves us to right state for next lesson (or END).
     """
     fsm = edge.fromNode.fsm
-    try:
-        unitStatus = fsmStack.state.get_data_attr('unitStatus')
-    except:
-        unitStatus = fsmStack.fsm_state.get_data_attr('unitStatus')
+    unitStatus = fsmStack.state.get_data_attr('unitStatus')
 
     if useCurrent:
         nextUL = unitStatus.get_lesson()
@@ -18,16 +15,11 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     if not nextUL:
         return fsm.get_node('END')
     elif nextUL.is_question():
-        try:
-            fsmStack.state.unitLesson = nextUL
-        except:
-            fsmStack.fsm_state.unitLesson = nextUL
+        fsmStack.state.unitLesson = nextUL
         return fsm.get_node(name='ASK')
     else:  # just a lesson to read
-        try:
-            fsmStack.state.unitLesson = nextUL
-        except:
-            fsmStack.fsm_state.unitLesson = nextUL
+        fsmStack.state.unitLesson = nextUL
+
         return edge.toNode
 
 

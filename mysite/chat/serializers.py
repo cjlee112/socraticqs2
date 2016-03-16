@@ -137,6 +137,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     def get_lessons(self, obj):
         messages = obj.message_set.filter(contenttype='unitlesson')
         lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
+
         for each in messages:
             if each.content in lessons:
                 lessons[lessons.index(each.content)].message = each.id
@@ -155,11 +156,10 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         messages = Message.objects.filter(
             chat=obj,
             contenttype='unitlesson',
-            content_id__in=[i[0] for i in lessons.values_list('id')],
+            # content_id__in=[i[0] for i in lessons.values_list('id')],
             timestamp__isnull=False,
             is_additional=False
         ).distinct('content_id').count()
-        print messages-1
-        print float(len(lessons))
-        print additional_lessons
+        # to prevent from negative answer when messages count is 0
+        messages = messages or 1
         return (messages-1) / float(len(lessons)+additional_lessons)
