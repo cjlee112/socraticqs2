@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
-from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS
+from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson
 import fsm
 from .utils import enroll_generator
 
@@ -30,6 +30,16 @@ MESSAGE_TYPES = (
     ('default', 'default'),
     ('user', 'user'),
     ('breakpoint', 'breakpoint'),
+)
+
+KIND_CHOICES = (
+    (Lesson.BASE_EXPLANATION, Lesson.BASE_EXPLANATION),
+    (Lesson.ORCT_QUESTION, Lesson.ORCT_QUESTION),
+    (Lesson.ANSWER, Lesson.ANSWER),
+    (Lesson.ERROR_MODEL, Lesson.ERROR_MODEL),
+    ('chatdivider', 'chatdivider'),
+    ('uniterror', 'uniterror'),
+    ('response', 'response'),
 )
 
 
@@ -70,6 +80,7 @@ class Message(models.Model):
     type = models.CharField(max_length=16, default='default', choices=MESSAGE_TYPES)
     owner = models.ForeignKey(User, null=True)
     is_additional = models.BooleanField(default=False)
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
 
     @property
     def content(self):
@@ -90,7 +101,7 @@ class Message(models.Model):
         return self.chat.next_point.input_type if self.chat else None
 
     def get_next_url(self):
-        print('get_next_input_type')
+        print('get_next_url')
         return reverse('chat:messages-detail', args=(self.chat.next_point.id,)) if self.chat else None
 
     def get_errors(self):

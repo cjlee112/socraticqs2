@@ -1,22 +1,33 @@
-from datetime import datetime
-
+import injections
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
 from .models import Message, Chat
+from .services import ProgressHandler
 from ct.models import UnitLesson, Response
 
 
+class InternalMessageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for addMessage list representation.
+    """
+    class Meta:
+        model = Message
+
+
+@injections.has
 class MessageSerializer(serializers.ModelSerializer):
     """
     Message serializer.
     """
+    next_handler = injections.depends(ProgressHandler)
+
     next_point = serializers.CharField(source='get_next_point', read_only=True)
     userInputType = serializers.CharField(source='get_next_input_type', read_only=True)
     userInputUrl = serializers.CharField(source='get_next_url', read_only=True)
     errors = serializers.CharField(source='get_errors', read_only=True)
     options = serializers.CharField(source='get_options', read_only=True)
-    messages = serializers.SerializerMethodField()
+    addMessages = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -26,19 +37,19 @@ class MessageSerializer(serializers.ModelSerializer):
             'next_point',
             'userInputType',
             'userInputUrl',
-            'messages',
+            'addMessages',
             'errors',
             'options'
         )
 
-    def get_messages(self, obj):
+    def get_addMessages(self, obj):
         print('get_messages')
-        text = None
-        if isinstance(obj.content, UnitLesson):
-            text = [obj.content.lesson.text]
-        elif isinstance(obj.content, Response):
-            text = [obj.content.text]
-        return [text]
+        qs = [obj]
+        if obj.timestamp:
+            for message in obj.chat.message_set.filter(timestamp__gt=obj.timestamp):
+                if self.next_handler.group_filter(obj, message):
+                    qs.append(message)
+        return InternalMessageSerializer(many=True).to_representation(qs)
 
 
 class HistoryMessage(serializers.ModelSerializer):

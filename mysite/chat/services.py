@@ -1,11 +1,14 @@
 """
 Handler container module.
 """
+from datetime import timedelta
+
+from django.utils import timezone
 
 from fsm.fsm_base import FSMStack
 from fsm.models import FSMNode
 from ct.models import Unit, Lesson, UnitLesson, Response
-from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
+from .models import Message, UnitError, ChatDivider, MODEL_CHOISES, Message
 
 
 class ProgressHandler(object):
@@ -19,7 +22,28 @@ class ProgressHandler(object):
         raise NotImplementedError
 
 
-class FsmHandler(ProgressHandler):
+class GroupMessageMixin(object):
+    """
+    Should be used by MessageSerializer.
+
+    Mixin should create additional messages via `self.next_point`.
+    """
+    available_steps = {
+        'chatdivider': (Lesson.BASE_EXPLANATION,),
+        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,)
+    }
+
+    def group_filter(self, message, next_message=None):
+        """
+        Return True if next message is allowed to group with current message.
+        """
+        if not next_message:
+            return False
+        elif next_message.kind in self.available_steps.get(message.kind, []):
+            return True
+
+
+class FsmHandler(GroupMessageMixin, ProgressHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
@@ -91,7 +115,7 @@ class FsmHandler(ProgressHandler):
         return next_point
 
 
-class SequenceHandler(ProgressHandler):
+class SequenceHandler(GroupMessageMixin, ProgressHandler):
     """
     Simple handler for non FSM logic.
     """
@@ -104,6 +128,7 @@ class SequenceHandler(ProgressHandler):
                 chat=chat,
                 owner=chat.user,
                 input_type='custom',
+                kind=unit_lesson.lesson.kind
             )
             m.save()
             chat.next_point = m
@@ -125,6 +150,7 @@ class SequenceHandler(ProgressHandler):
                     chat=chat,
                     owner=chat.user,
                     input_type='custom',
+                    kind=next_lesson.lesson.kind
                 )
             except UnitLesson.DoesNotExist:
                 divider = ChatDivider(text="You have finished lesson sequence. Well done.")
@@ -135,7 +161,8 @@ class SequenceHandler(ProgressHandler):
                     input_type='finish',
                     type='breakpoint',
                     chat=chat,
-                    owner=chat.user
+                    owner=chat.user,
+                    kind='chatdivider'
                 )
             m.save()
             next_point = m
@@ -147,18 +174,21 @@ class SequenceHandler(ProgressHandler):
                 lesson_to_answer=current,
                 type='user',
                 chat=chat,
-                owner=chat.user
+                owner=chat.user,
+                kind='response'
             )
             m.save()
             next_point = m
         elif isinstance(current, Response) and not current.selfeval:
+            answer = current.unitLesson.get_answers().first()
             m = Message(
                 contenttype='unitlesson',
-                content_id=current.unitLesson.get_answers().first().id,
+                content_id=answer.id,
                 response_to_check=current,
                 chat=chat,
                 owner=chat.user,
                 input_type='custom',
+                kind=answer.kind
             )
             m.save()
             next_point = m
@@ -169,19 +199,35 @@ class SequenceHandler(ProgressHandler):
                 input_type='options',
                 type='user',
                 chat=chat,
-                owner=chat.user
+                owner=chat.user,
+                kind='response'
             )
             m.save()
             next_point = m
         elif isinstance(current, Response) and current.selfeval:
             if current.selfeval == Response.CORRECT:
-                m = Message(
-                    contenttype='unitlesson',
-                    content_id=current.unitLesson.get_next_lesson().id,
-                    chat=chat,
-                    owner=chat.user,
-                    input_type='custom',
-                )
+                try:
+                    ul = current.unitLesson.get_next_lesson()
+                    m = Message(
+                        contenttype='unitlesson',
+                        content_id=ul.id,
+                        chat=chat,
+                        owner=chat.user,
+                        input_type='custom',
+                        kind=ul.lesson.kind
+                    )
+                except UnitLesson.DoesNotExist:
+                    divider = ChatDivider(text="You have finished lesson sequence. Well done.")
+                    divider.save()
+                    m = Message(
+                        contenttype='chatdivider',
+                        content_id=divider.id,
+                        input_type='finish',
+                        type='breakpoint',
+                        chat=chat,
+                        owner=chat.user,
+                        kind='chatdivider'
+                    )
                 m.save()
                 next_point = m
             else:
@@ -192,22 +238,40 @@ class SequenceHandler(ProgressHandler):
                     content_id=uniterror.id,
                     input_type='custom',
                     chat=chat,
-                    owner=chat.user
+                    owner=chat.user,
+                    kind='uniterror'
                 )
                 m.save()
                 next_point = m
         elif isinstance(current, UnitError):
+            ul = current.response.unitLesson.get_next_lesson()
             m = Message(
                 contenttype='unitlesson',
-                content_id=current.response.unitLesson.get_next_lesson().id,
+                content_id=ul.id,
                 chat=chat,
                 owner=chat.user,
                 input_type='custom',
+                kind=ul.lesson.kind
             )
             m.save()
             next_point = m
+
         # if current message is additional then the next one also will be additional
         if message.is_additional:
             next_point.is_additional = True
             next_point.save()
+
+        group = True
+        while group:
+            if self.group_filter(message, next_point):
+                message.timestamp = timezone.now()
+                message.save()
+                next_point.timestamp = message.timestamp + timedelta(seconds=1)
+                next_point.save()
+                next_point = self.next_point(
+                    current=next_point.content, chat=chat, message=next_point
+                )
+            else:
+                group = False
+
         return next_point

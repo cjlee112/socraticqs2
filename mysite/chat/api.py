@@ -7,9 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat, UnitError
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
-from .services import ProgressHandler
+from .services import ProgressHandler, SequenceHandler
 from .permissions import IsOwner
 from ct.models import Response as StudentResponse
+
+
+inj_alternative = injections.Container()
+inj_alternative['next_handler'] = SequenceHandler()
+MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 
 def get_additional_messages(chat):
