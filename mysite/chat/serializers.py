@@ -137,14 +137,15 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     def get_lessons(self, obj):
         messages = obj.message_set.filter(contenttype='unitlesson')
         lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
-
         for each in messages:
             if each.content in lessons:
                 lessons[lessons.index(each.content)].message = each.id
             else:
-                lesson = each.content
-                lesson.message = each.id
-                lessons.append(lesson)
+                if each.content.kind != 'answers':
+                    lesson = each.content
+                    lesson.message = each.id
+                    lessons.append(lesson)
+
         return LessonSerializer(many=True).to_representation(lessons)
 
     def get_progress(self, obj):
@@ -153,13 +154,16 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             is_additional=True
         ).distinct('content_id').count()
         lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)
+        finish_lessont = Message.objects.filter(chat=obj,
+                                                contenttype='unitlesson',
+                                                content_id__in=[i[0] for i in lessons.values_list('id')],
+                                                timestamp__isnull=False)
         messages = Message.objects.filter(
             chat=obj,
             contenttype='unitlesson',
-            # content_id__in=[i[0] for i in lessons.values_list('id')],
-            timestamp__isnull=False,
-            is_additional=False
+            content_id__in=[i[0] for i in lessons.values_list('id')],
+            timestamp__isnull=False
+            # is_additional=False
         ).distinct('content_id').count()
-        # to prevent from negative answer when messages count is 0
-        messages = messages or 1
-        return (messages-1) / float(len(lessons)+additional_lessons)
+        # TODO implement counting of finished messages
+        return messages / float(len(lessons)+additional_lessons)
