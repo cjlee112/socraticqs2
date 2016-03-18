@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0016_remove_message_shadow_chat'),
+        ('chat', '0017_message_is_additional'),
     ]
 
     operations = [

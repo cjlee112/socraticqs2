@@ -29,8 +29,9 @@ class GroupMessageMixin(object):
     Mixin should create additional messages via `self.next_point`.
     """
     available_steps = {
-        'chatdivider': (Lesson.BASE_EXPLANATION,),
-        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,)
+        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
+        Lesson.ERROR_MODEL: ('message'),
+        'response': ('message'),
     }
 
     def group_filter(self, message, next_message=None):
@@ -156,13 +157,11 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                 divider = ChatDivider(text="You have finished lesson sequence. Well done.")
                 divider.save()
                 m = Message(
-                    contenttype='chatdivider',
-                    content_id=divider.id,
+                    contenttype='NoneType',
                     input_type='finish',
-                    type='breakpoint',
+                    type='custom',
                     chat=chat,
-                    owner=chat.user,
-                    kind='chatdivider'
+                    owner=chat.user
                 )
             m.save()
             next_point = m
@@ -217,16 +216,13 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                         kind=ul.lesson.kind
                     )
                 except UnitLesson.DoesNotExist:
-                    divider = ChatDivider(text="You have finished lesson sequence. Well done.")
-                    divider.save()
                     m = Message(
-                        contenttype='chatdivider',
-                        content_id=divider.id,
                         input_type='finish',
-                        type='breakpoint',
+                        type='custom',
                         chat=chat,
                         owner=chat.user,
-                        kind='chatdivider'
+                        kind='message',
+                        text='You have finished lesson sequence. Well done.'
                     )
                 m.save()
                 next_point = m

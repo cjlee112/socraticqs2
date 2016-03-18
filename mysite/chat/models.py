@@ -40,6 +40,7 @@ KIND_CHOICES = (
     ('chatdivider', 'chatdivider'),
     ('uniterror', 'uniterror'),
     ('response', 'response'),
+    ('message', 'message'),
 )
 
 
@@ -69,6 +70,7 @@ class Message(models.Model):
     Message model represent chat message.
     """
     chat = models.ForeignKey(Chat, null=True, on_delete=models.SET_NULL)
+    text = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(null=True)
     contenttype = models.CharField(
         max_length=16, choices=MODEL_CHOISES, null=True, default='NoneType'
