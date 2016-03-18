@@ -32,6 +32,7 @@ class GroupMessageMixin(object):
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
         Lesson.ERROR_MODEL: ('message'),
         'response': ('message'),
+        'message': ('message'),
     }
 
     def group_filter(self, message, next_message=None):
@@ -154,14 +155,13 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                     kind=next_lesson.lesson.kind
                 )
             except UnitLesson.DoesNotExist:
-                divider = ChatDivider(text="You have finished lesson sequence. Well done.")
-                divider.save()
                 m = Message(
-                    contenttype='NoneType',
                     input_type='finish',
                     type='custom',
                     chat=chat,
-                    owner=chat.user
+                    owner=chat.user,
+                    kind='message',
+                    text='You have finished lesson sequence. Well done.'
                 )
             m.save()
             next_point = m
@@ -216,13 +216,23 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                         kind=ul.lesson.kind
                     )
                 except UnitLesson.DoesNotExist:
-                    m = Message(
+                    m1 = Message(
                         input_type='finish',
                         type='custom',
                         chat=chat,
                         owner=chat.user,
                         kind='message',
                         text='You have finished lesson sequence. Well done.'
+                    )
+                    m1.timestamp = message.timestamp + timedelta(seconds=1)
+                    m1.save()
+                    m = Message(
+                        input_type='finish',
+                        type='custom',
+                        chat=chat,
+                        owner=chat.user,
+                        kind='message',
+                        text='Now you can try to learn something else.'
                     )
                 m.save()
                 next_point = m
@@ -240,15 +250,35 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                 m.save()
                 next_point = m
         elif isinstance(current, UnitError):
-            ul = current.response.unitLesson.get_next_lesson()
-            m = Message(
-                contenttype='unitlesson',
-                content_id=ul.id,
-                chat=chat,
-                owner=chat.user,
-                input_type='custom',
-                kind=ul.lesson.kind
-            )
+            try:
+                ul = current.response.unitLesson.get_next_lesson()
+                m = Message(
+                    contenttype='unitlesson',
+                    content_id=ul.id,
+                    chat=chat,
+                    owner=chat.user,
+                    input_type='custom',
+                    kind=ul.lesson.kind
+                )
+            except UnitLesson.DoesNotExist:
+                m1 = Message(
+                    input_type='finish',
+                    type='custom',
+                    chat=chat,
+                    owner=chat.user,
+                    kind='message',
+                    text='You have finished lesson sequence. Well done.'
+                )
+                m1.timestamp = message.timestamp + timedelta(seconds=1)
+                m1.save()
+                m = Message(
+                    input_type='finish',
+                    type='custom',
+                    chat=chat,
+                    owner=chat.user,
+                    kind='message',
+                    text='Now you can try to learn something else.'
+                )
             m.save()
             next_point = m
 

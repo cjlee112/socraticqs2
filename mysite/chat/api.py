@@ -82,6 +82,8 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             )
             chat.save()
             message.chat = chat
+            if not message.timestamp:
+                message.timestamp = timezone.now()
             message.save()
 
         serializer = self.get_serializer(message)
@@ -122,6 +124,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 serializer.save()
         if message.input_type == 'options':
             message.chat = chat
+            message.timestamp = timezone.now()
             selfeval = self.request.data.get('selfeval')
             resp = message.content
             resp.selfeval = selfeval
@@ -133,6 +136,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
         if message.input_type == 'errors':
             message.chat = chat
+            message.timestamp = timezone.now()
             uniterror = message.content
             uniterror.save_response(
                 user=self.request.user, response_list=self.request.data.get('err_list')
@@ -141,8 +145,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 current=message.content, chat=chat, message=message, request=self.request
             )
             chat.save()
-            serializer.save(timestamp=timezone.now(), chat=chat)
-            # TODO add creating additional lessons to current chat
+            serializer.save(chat=chat)
 
 
 class HistoryView(generics.RetrieveAPIView):
