@@ -156,25 +156,9 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                     lesson = each.content
                     lesson.message = each.id
                     lessons.append(lesson)
-
         return LessonSerializer(many=True).to_representation(lessons)
 
     def get_progress(self, obj):
-        additional_lessons = Message.objects.filter(
-            chat=obj,
-            is_additional=True
-        ).distinct('content_id').count()
-        lessons = obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)
-        finish_lessont = Message.objects.filter(chat=obj,
-                                                contenttype='unitlesson',
-                                                content_id__in=[i[0] for i in lessons.values_list('id')],
-                                                timestamp__isnull=False)
-        messages = Message.objects.filter(
-            chat=obj,
-            contenttype='unitlesson',
-            content_id__in=[i[0] for i in lessons.values_list('id')],
-            timestamp__isnull=False
-            # is_additional=False
-        ).distinct('content_id').count()
-        # TODO implement counting of finished messages
-        return messages / float(len(lessons)+additional_lessons)
+        message_dict = self.get_lessons(obj)
+        done = sum(1 for x in message_dict if x['done'])
+        return float(done)/len(message_dict)
