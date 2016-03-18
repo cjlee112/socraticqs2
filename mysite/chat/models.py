@@ -87,6 +87,8 @@ class Message(models.Model):
     @property
     def content(self):
         print('content')
+        if self.contenttype == 'NoneType':
+            return self.text
         app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
         model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
         if model:

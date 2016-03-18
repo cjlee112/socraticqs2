@@ -138,7 +138,7 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
         except IndexError:
             return None
 
-    def next_point(self, current, chat, message):
+    def next_point(self, current, chat, message, request):
         """
         current: UnitLesson, Response or list of ErrorModels.
         """
@@ -265,7 +265,7 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                 next_point.timestamp = message.timestamp + timedelta(seconds=1)
                 next_point.save()
                 next_point = self.next_point(
-                    current=next_point.content, chat=chat, message=next_point
+                    current=next_point.content, chat=chat, message=next_point, request=request
                 )
             else:
                 group = False

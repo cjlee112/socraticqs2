@@ -82,7 +82,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             )
             chat.save()
             message.chat = chat
-            message.timestamp = timezone.now()
             message.save()
 
         serializer = self.get_serializer(message)
