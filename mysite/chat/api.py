@@ -134,7 +134,11 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             )
             chat.save()
             serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
-        if message.input_type == 'errors':
+        if (
+            message.input_type == 'custom' and
+            message.contenttype == 'uniterrorand' and
+            'err_list' in self.request.data
+        ):
             message.chat = chat
             message.timestamp = timezone.now()
             uniterror = message.content
