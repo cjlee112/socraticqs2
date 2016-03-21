@@ -21,12 +21,12 @@ def get_additional_messages(chat):
     print 'additional lessons'
     course_unit = chat.enroll_code.courseUnit
     unit = course_unit.unit
-    # addition_tasks = [(ul, 'selfeval')
-    #                   for ul in unit.get_selfeval_uls(chat.user)]
-    addition_tasks = [(ul, 'classify')
+    addition_tasks = [(ul, 'selfeval')
+                      for ul in unit.get_selfeval_uls(chat.user)]
+    addition_tasks += [(ul, 'classify')
                        for ul in unit.get_serrorless_uls(chat.user)]
-    # addition_tasks += [(ul, 'resolve')
-    #                    for ul in unit.get_unresolved_uls(chat.user)]
+    addition_tasks += [(ul, 'resolve')
+                       for ul in unit.get_unresolved_uls(chat.user)]
     # map(lambda (ul, task): Message.objects.get_or_create(contenttype='unitlesson',
     #                                                      content_id=ul.id,
     #                                                      chat=chat,
@@ -36,16 +36,12 @@ def get_additional_messages(chat):
     lesson_ids = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).values_list('id', flat=True)
     print lesson_ids
     for (ul, task) in addition_tasks:
-        print ul.id
         if ul not in lesson_ids:
             m, cr = Message.objects.get_or_create(contenttype='unitlesson',
                                                   content_id=ul.id,
                                                   chat=chat,
-                                                  owner=chat.user)
-            print m.__dict__
-            if cr:
-                m.is_additional = True
-                m.save()
+                                                  owner=chat.user,
+                                                  is_additional = True)
 
 
 @injections.has
@@ -69,7 +65,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         if (
             message.input_type == 'text' or
             message.input_type == 'options' or
-            message.input_type == 'errors'
+            message.contenttype == 'uniterror'
         ):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
@@ -96,9 +92,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
-
-        if message.contenttype == 'uniterror':
-            get_additional_messages(chat)
 
         if message.input_type == 'text':
             message.chat = chat
@@ -136,9 +129,10 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
         if (
             message.input_type == 'custom' and
-            message.contenttype == 'uniterrorand' and
+            message.contenttype == 'uniterror' and
             'err_list' in self.request.data
         ):
+            get_additional_messages(chat)
             message.chat = chat
             message.timestamp = timezone.now()
             uniterror = message.content

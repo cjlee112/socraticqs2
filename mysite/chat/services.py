@@ -101,6 +101,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         elif chat.state.fsmNode.name == 'END':
             unitlesson = Message.objects.filter(is_additional=True,
+                                                chat=chat,
                                                 timestamp__isnull=True).first().content
             if unitlesson:
                 self.start_fsm(chat, request, 'additional', {'unitlesson': unitlesson})
@@ -115,6 +116,19 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         if message.is_additional:
             next_point.is_additional = True
             next_point.save()
+
+        group = True
+        while group:
+            if self.group_filter(message, next_point):
+                message.timestamp = timezone.now()
+                message.save()
+                next_point.timestamp = message.timestamp + timedelta(seconds=1)
+                next_point.save()
+                next_point = self.next_point(
+                    current=next_point.content, chat=chat, message=next_point, request=request
+                )
+            else:
+                group = False
 
         return next_point
 
@@ -141,6 +155,53 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
         except IndexError:
             return None
 
+    def finish_part(self, current, chat, message, request):
+        unit_lesson = Message.objects.filter(chat=chat,
+                                             owner=chat.user,
+                                             is_additional=True,
+                                             timestamp__isnull=True).first().content
+        print unit_lesson
+        if unit_lesson:
+            m1 = Message(
+                    input_type='finish',
+                    type='custom',
+                    chat=chat,
+                    owner=chat.user,
+                    kind='message',
+                    text='Now you can go through additional lessons to improve learning results.'
+                )
+            m1.timestamp = message.timestamp + timedelta(seconds=1)
+            m1.save()
+            m = Message(
+                contenttype='unitlesson',
+                content_id=unit_lesson.id,
+                chat=chat,
+                owner=chat.user,
+                input_type='custom',
+                kind=unit_lesson.lesson.kind,
+            )
+        else:
+            m1 = Message(
+                    input_type='finish',
+                    type='custom',
+                    chat=chat,
+                    owner=chat.user,
+                    kind='message',
+                    text='You have finished lesson sequence. Well done.'
+                )
+            m1.timestamp = message.timestamp + timedelta(seconds=1)
+            m1.save()
+            m = Message(
+                input_type='finish',
+                type='custom',
+                chat=chat,
+                owner=chat.user,
+                kind='message',
+                text='Now you can try to learn something else.'
+            )
+        m.save()
+        return m
+
     def next_point(self, current, chat, message, request):
         """
         current: UnitLesson, Response or list of ErrorModels.
@@ -157,17 +218,8 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                     kind=next_lesson.lesson.kind
                 )
             except UnitLesson.DoesNotExist:
-                m = Message(
-                    input_type='finish',
-                    type='custom',
-                    chat=chat,
-                    owner=chat.user,
-                    kind='message',
-                    text='You have finished lesson sequence. Well done.'
-                )
-            m.save()
+                m = self.finish_part(current, chat, message, request)
             next_point = m
-
         elif isinstance(current, UnitLesson) and current.lesson.kind == Lesson.ORCT_QUESTION:
             m = Message(
                 contenttype='response',
@@ -208,6 +260,9 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
         elif isinstance(current, Response) and current.selfeval:
             if current.selfeval == Response.CORRECT:
                 try:
+                    # if current message is additional rise exception and go to finish
+                    if message.is_additional:
+                        raise UnitLesson.DoesNotExist
                     ul = current.unitLesson.get_next_lesson()
                     m = Message(
                         contenttype='unitlesson',
@@ -218,25 +273,7 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                         kind=ul.lesson.kind
                     )
                 except UnitLesson.DoesNotExist:
-                    m1 = Message(
-                        input_type='finish',
-                        type='custom',
-                        chat=chat,
-                        owner=chat.user,
-                        kind='message',
-                        text='You have finished lesson sequence. Well done.'
-                    )
-                    m1.timestamp = message.timestamp + timedelta(seconds=1)
-                    m1.save()
-                    m = Message(
-                        input_type='finish',
-                        type='custom',
-                        chat=chat,
-                        owner=chat.user,
-                        kind='message',
-                        text='Now you can try to learn something else.'
-                    )
-                m.save()
+                    m = self.finish_part(current, chat, message, request)
                 next_point = m
             else:
                 uniterror = UnitError.get_by_message(message)
@@ -253,6 +290,9 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                 next_point = m
         elif isinstance(current, UnitError):
             try:
+                # if current message is additional rise exception and go to finish
+                if message.is_additional:
+                        raise UnitLesson.DoesNotExist
                 ul = current.response.unitLesson.get_next_lesson()
                 m = Message(
                     contenttype='unitlesson',
@@ -262,26 +302,10 @@ class SequenceHandler(GroupMessageMixin, ProgressHandler):
                     input_type='custom',
                     kind=ul.lesson.kind
                 )
+                m.save()
             except UnitLesson.DoesNotExist:
-                m1 = Message(
-                    input_type='finish',
-                    type='custom',
-                    chat=chat,
-                    owner=chat.user,
-                    kind='message',
-                    text='You have finished lesson sequence. Well done.'
-                )
-                m1.timestamp = message.timestamp + timedelta(seconds=1)
-                m1.save()
-                m = Message(
-                    input_type='finish',
-                    type='custom',
-                    chat=chat,
-                    owner=chat.user,
-                    kind='message',
-                    text='Now you can try to learn something else.'
-                )
-            m.save()
+                # check if there is any additional lessons
+                m = self.finish_part(current, chat, message, request)
             next_point = m
 
         # if current message is additional then the next one also will be additional

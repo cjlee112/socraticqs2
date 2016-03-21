@@ -46,8 +46,10 @@ class MessageSerializer(serializers.ModelSerializer):
         print('get_messages')
         qs = [obj]
         if obj.timestamp:
+            current = obj
             for message in obj.chat.message_set.filter(timestamp__gt=obj.timestamp):
-                if self.next_handler.group_filter(obj, message):
+                if self.next_handler.group_filter(current, message):
+                    current = message
                     qs.append(message)
         return InternalMessageSerializer(many=True).to_representation(qs)
 
@@ -160,5 +162,5 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
     def get_progress(self, obj):
         message_dict = self.get_lessons(obj)
-        done = sum(1 for x in message_dict if x['done'])
+        done = reduce(lambda x, y: x+y, map(lambda x: x['done'], message_dict))
         return round(float(done)/len(message_dict), 2)

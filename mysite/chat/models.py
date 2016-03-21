@@ -84,6 +84,9 @@ class Message(models.Model):
     is_additional = models.BooleanField(default=False)
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
 
+    class Meta:
+        ordering = ['timestamp']
+
     @property
     def content(self):
         print('content')
