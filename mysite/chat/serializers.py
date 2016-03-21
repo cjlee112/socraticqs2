@@ -161,4 +161,4 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     def get_progress(self, obj):
         message_dict = self.get_lessons(obj)
         done = sum(1 for x in message_dict if x['done'])
-        return float(done)/len(message_dict)
+        return round(float(done)/len(message_dict), 2)
