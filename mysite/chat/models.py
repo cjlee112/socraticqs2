@@ -136,18 +136,20 @@ class Message(models.Model):
 
     def get_html(self):
         html = None
-        if self.contenttype in ('chatdivider', 'response'):
-            html = self.content.text
-        elif self.contenttype == 'unitlesson':
-            html = self.content.lesson.text
+        if self.content_id:
+            if self.contenttype in ('chatdivider', 'response'):
+                html = self.content.text
+            elif self.contenttype == 'unitlesson':
+                html = self.content.lesson.text
         return html
 
     def get_name(self):
         name = None
-        if self.contenttype == 'response':
-            name = self.content.author.get_full_name()
-        elif self.contenttype == 'unitlesson':
-            name = self.content.addedBy.get_full_name()
+        if self.content_id:
+            if self.contenttype == 'response':
+                name = self.content.author.get_full_name()
+            elif self.contenttype == 'unitlesson':
+                name = self.content.addedBy.get_full_name()
         return name
 
 

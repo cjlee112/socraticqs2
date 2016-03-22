@@ -104,7 +104,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 resp.author = self.request.user
             else:
                 resp = message.content
-                rest.text = text
+                resp.text = text
             resp.save()
             if not message.timestamp:
                 message.content_id = resp.id
