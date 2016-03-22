@@ -11,8 +11,34 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     """
     Serializer for addMessage list representation.
     """
+    html = serializers.CharField(source='get_html', read_only=True)
+    name = serializers.CharField(source='get_name', read_only=True)
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
+        fields = (
+            'id',
+            'type',
+            'name',
+            'avatar',
+            'html'
+        )
+
+    def get_avatar(self, obj):
+        return '/avatar.jpg'
+
+
+class InputSerializer(serializers.Serializer):
+    """
+    Serializer for input description for next message.
+    """
+    type = serializers.CharField(max_length=16, read_only=True)
+    url = serializers.CharField(max_length=64, read_only=True)
+    options = serializers.ListField()
+    messagesWithSelectables = serializers.ListField(
+        child=serializers.IntegerField(min_value=0)
+    )
 
 
 @injections.has
@@ -22,25 +48,31 @@ class MessageSerializer(serializers.ModelSerializer):
     """
     next_handler = injections.depends(ProgressHandler)
 
-    next_point = serializers.CharField(source='get_next_point', read_only=True)
-    userInputType = serializers.CharField(source='get_next_input_type', read_only=True)
-    userInputUrl = serializers.CharField(source='get_next_url', read_only=True)
+    input = serializers.SerializerMethodField()
     errors = serializers.CharField(source='get_errors', read_only=True)
-    options = serializers.CharField(source='get_options', read_only=True)
     addMessages = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = (
             'id',
-            'contenttype',
-            'next_point',
-            'userInputType',
-            'userInputUrl',
+            'input',
             'addMessages',
             'errors',
-            'options'
         )
+
+    def get_input(self, obj):
+        """
+        Getting description for next message.
+        """
+        input_data = {
+            'type': obj.get_next_input_type(),
+            'url': obj.get_next_url(),
+            'options': obj.get_options(),
+            # for test purpose only
+            'messagesWithSelectables': [1]
+        }
+        return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
         print('get_messages')
