@@ -49,7 +49,7 @@ class MessageSerializer(serializers.ModelSerializer):
     next_handler = injections.depends(ProgressHandler)
 
     input = serializers.SerializerMethodField()
-    errors = serializers.CharField(source='get_errors', read_only=True)
+    # errors = serializers.CharField(source='get_errors', read_only=True)
     addMessages = serializers.SerializerMethodField()
 
     class Meta:
@@ -58,7 +58,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'input',
             'addMessages',
-            'errors',
+            # 'errors',
         )
 
     def set_group(self, obj):

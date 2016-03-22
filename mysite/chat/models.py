@@ -114,13 +114,15 @@ class Message(models.Model):
     def get_errors(self):
         print('get_errors')
         errors = None
-        if (
-            isinstance(self.content, Response) and
-            self.chat and
-            self.chat.next_point.contenttype == 'uniterror'
-        ):
-            error_list = UnitError.get_by_message(self).get_errors()
-            errors = {error.id: error.lesson.title for error in error_list}
+        # if (
+        #     isinstance(self.content, Response) and
+        #     self.chat and
+        #     self.contenttype == 'uniterror'
+        # ):
+        error_list = UnitError.objects.get(id=self.content_id).get_errors()
+        error_str = '<div class="chat-selectable" data-selectable-attribute="errorModel" ' \
+                    'data-selectable-value="%d">%s</div>'
+        errors = ''.join(map(lambda x: error_str % (x.id, x.lesson.title), error_list))
         return errors
 
     def get_options(self):
@@ -141,9 +143,14 @@ class Message(models.Model):
                 html = self.content.text
             elif self.contenttype == 'unitlesson':
                 html = self.content.lesson.text
+            elif self.contenttype == 'uniterror':
+                html = self.get_errors()
+        else:
+            html = self.text
         return html
 
     def get_name(self):
+        print self.__dict__
         name = None
         if self.content_id:
             if self.contenttype == 'response':
@@ -194,9 +201,14 @@ class UnitError(models.Model):
 
     @classmethod
     def get_by_message(cls, message):
-        if message.chat and isinstance(message.content, Response):
+        message_with_content = Message.objects.filter(chat=message.chat,
+                                                      kind='response',
+                                                      timestamp__lte=message.timestamp)\
+                                              .order_by('-timestamp').first()
+        if message.chat and isinstance(message_with_content.content, Response):
             return cls.objects.get_or_create(
-                unit=message.chat.enroll_code.courseUnit.unit, response=message.content
+                unit=message_with_content.chat.enroll_code.courseUnit.unit,
+                response=message_with_content.content
             )[0]
         else:
             raise AttributeError

@@ -148,33 +148,38 @@ class ChatMixin(object):
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
                               chat=chat,
-                              owner=chat.user)
+                              owner=chat.user,
+                              input_type='custom',
+                              kind=next_lesson.lesson.kind)
         if self.name == 'ASK':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
                               chat=chat,
                               owner=chat.user)
         if self.name == 'ASSESS':
+            answer = current.unitLesson.get_answers().first()
             message = Message(contenttype='unitlesson',
                               response_to_check=current,
                               content_id=current.unitLesson.get_answers().first().id,
                               chat=chat,
-                              owner=chat.user)
+                              owner=chat.user,
+                              kind=answer.kind)
         if self.name == 'ERRORS':
-            uniterror = UnitError.get_by_message(message)
-            message = Message(contenttype='uniterror',
-                              content_id=uniterror.id,
-                              input_type='errors',
+            message = Message(input_type='custom',
                               chat=chat,
-                              owner=chat.user)
+                              owner=chat.user,
+                              text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
+                              kind='message'
+                              )
         if self.name == 'END':
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message(contenttype='chatdivider',
                               content_id=divider.id,
                               input_type='finish',
-                              type='breakpoint',
+                              type='custom',
                               chat=chat,
-                              owner=chat.user)
+                              owner=chat.user,
+                              kind='message',)
         message.save()
         return message
