@@ -86,48 +86,37 @@ class MessageSerializer(serializers.ModelSerializer):
         return InternalMessageSerializer(many=True).to_representation(qs)
 
 
-class HistoryMessage(serializers.ModelSerializer):
-    """
-    Serializer to represent Message in histrory.
-    """
-    html = serializers.CharField(source='get_html', read_only=True)
-    name = serializers.CharField(source='get_name', read_only=True)
-
-    class Meta:
-        model = Message
-        fields = (
-            'id',
-            'type',
-            'name',
-            'html'
-        )
-
-
 class ChatHistorySerializer(serializers.ModelSerializer):
     """
     Serializer to implement /history API.
     """
-    userInputType = serializers.CharField(source='next_point.input_type', read_only=True)
-    userInputUrl = serializers.SerializerMethodField()
-    userInputOptions = serializers.CharField(source='get_options', read_only=True)
-    messages = serializers.SerializerMethodField()
+    input = serializers.SerializerMethodField()
+    addMessages = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
         fields = (
-            'userInputType',
-            'userInputUrl',
-            'userInputOptions',
-            'messages',
+            'input',
+            'addMessages',
         )
 
-    def get_userInputUrl(self, obj):
-        return reverse('chat:messages-detail', args=(obj.next_point.id,))
+    def get_input(self, obj):
+        """
+        Getting description for next message.
+        """
+        input_data = {
+            'type': obj.next_point.input_type,
+            'url': reverse('chat:messages-detail', args=(obj.next_point.id,)),
+            'options': obj.get_options(),
+            # for test purpose only
+            'messagesWithSelectables': [1]
+        }
+        return InputSerializer().to_representation(input_data)
 
-    def get_messages(self, obj):
-        return HistoryMessage(many=True).to_representation(obj.message_set.all()
-                                                              .exclude(timestamp__isnull=True)
-                                                              .order_by('timestamp'))
+    def get_addMessages(self, obj):
+        return InternalMessageSerializer(many=True).to_representation(
+            obj.message_set.all().exclude(timestamp__isnull=True).order_by('timestamp')
+        )
 
 
 class LessonSerializer(serializers.ModelSerializer):
