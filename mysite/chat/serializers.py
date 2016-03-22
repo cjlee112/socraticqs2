@@ -61,29 +61,36 @@ class MessageSerializer(serializers.ModelSerializer):
             'errors',
         )
 
+    def set_group(self, obj):
+        try:
+            getattr(self, 'qs')
+        except AttributeError:
+            print('Inside')
+            self.qs = [obj]
+            if obj.timestamp:
+                current = obj
+                for message in obj.chat.message_set.filter(timestamp__gt=obj.timestamp):
+                    if self.next_handler.group_filter(current, message):
+                        current = message
+                        self.qs.append(message)
+
     def get_input(self, obj):
         """
         Getting description for next message.
         """
+        self.set_group(obj)
         input_data = {
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
-            # for test purpose only
-            'messagesWithSelectables': [1]
+            'messagesWithSelectables': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
         print('get_messages')
-        qs = [obj]
-        if obj.timestamp:
-            current = obj
-            for message in obj.chat.message_set.filter(timestamp__gt=obj.timestamp):
-                if self.next_handler.group_filter(current, message):
-                    current = message
-                    qs.append(message)
-        return InternalMessageSerializer(many=True).to_representation(qs)
+        self.set_group(obj)
+        return InternalMessageSerializer(many=True).to_representation(self.qs)
 
 
 class ChatHistorySerializer(serializers.ModelSerializer):
