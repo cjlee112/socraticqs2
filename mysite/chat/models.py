@@ -113,16 +113,10 @@ class Message(models.Model):
 
     def get_errors(self):
         print('get_errors')
-        errors = None
-        # if (
-        #     isinstance(self.content, Response) and
-        #     self.chat and
-        #     self.contenttype == 'uniterror'
-        # ):
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
         error_str = '<div class="chat-selectable" data-selectable-attribute="errorModel" ' \
                     'data-selectable-value="%d">%s</div>'
-        errors = ''.join(map(lambda x: error_str % (x.id, x.lesson.title), error_list))
+        errors = reduce(lambda x, y: x+y, map(lambda x: error_str % (x.id, x.lesson.title), error_list))
         return errors
 
     def get_options(self):

@@ -154,7 +154,9 @@ class ChatMixin(object):
         if self.name == 'ASK':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
+                              input_type='custom',
                               chat=chat,
+                              kind=next_lesson.lesson.kind,
                               owner=chat.user)
         if self.name == 'ASSESS':
             answer = current.unitLesson.get_answers().first()

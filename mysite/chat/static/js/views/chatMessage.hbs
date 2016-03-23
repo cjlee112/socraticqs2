@@ -1,0 +1,23 @@
+<div class="chat-message chat-message-text {{#if userMessage}} chat-message-user {{/if}}" data-message-id="{{id}}">
+  <div class="chat-container">
+    <div class="inner">
+      <img src="{{avatar}}" alt="{{name}}" class="chat-avatar">
+
+      <div class="chat-bubble">
+        {{{html}}}
+
+        {{#if overflow}}
+          <div class="chat-actions">
+            <div class="chat-actions-toggle"><span></span><span></span><span></span></div>
+
+            <ul>
+              {{#each overflow}}
+              <li data-action="{{action}}">{{text}}</li>
+              {{/each}}
+            </ul>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>

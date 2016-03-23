@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="13px" height="16px" viewBox="0 0 13 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12081) - http://www.bohemiancoding.com/sketch -->
+    <title>chat-sidebar-breakpoint-locked</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Courselet---Sidebar" sketch:type="MSArtboardGroup" transform="translate(-29.000000, -338.000000)" fill="#B1B0B9">
+            <g id="Sidebar" sketch:type="MSLayerGroup">
+                <g id="Lessons" transform="translate(20.000000, 237.000000)" sketch:type="MSShapeGroup">
+                    <path d="M20.001,106.999 L20.001,105.5 C20.001,103.015 17.985,101 15.5,101 C13.015,101 11,103.015 11,105.5 L11,106.999 C9.895,106.999 9,107.895 9,108.999 L9,116.999 L22,116.999 L22,108.999 C22,107.895 21.105,107 20.001,106.999 L20.001,106.999 Z M12,105.5 C12,103.566 13.567,102 15.5,102 C17.433,102 19.001,103.566 19.001,105.5 L19.001,106.999 L12,106.999 L12,105.5 L12,105.5 Z M21,114.999 C21,115.551 20.552,115.999 20,115.999 L11,115.999 C10.448,115.999 10,115.551 10,114.999 L10,108.999 C10,108.447 10.448,107.999 11,107.999 L20,107.999 C20.552,107.999 21,108.447 21,108.999 L21,114.999 L21,114.999 Z M15.5,109.999 C15.224,109.999 15,110.223 15,110.499 L15,113.499 C15,113.775 15.224,113.999 15.5,113.999 C15.776,113.999 16,113.775 16,113.499 L16,110.499 C16,110.223 15.776,109.999 15.5,109.999 L15.5,109.999 Z" id="chat-sidebar-breakpoint-locked"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

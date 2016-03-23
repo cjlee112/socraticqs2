@@ -32,7 +32,7 @@ class GroupMessageMixin(object):
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
         Lesson.ERROR_MODEL: ('message'),
         'response': ('message'),
-        'message': ('message'),
+        'message': ('message', 'uniterror'),
     }
 
     def group_filter(self, message, next_message=None):

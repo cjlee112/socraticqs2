@@ -1,0 +1,32 @@
+<br>
+<form class="form-horizontal" id="issue_form">
+    <div class="form-group">
+        <label>Title</label>
+        <input name="title" type="text" class="form-control inp" value="<%= title %>">
+        <span class="help-block hidden"></span>
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-control inp" name="description" rows="3"><%= description %></textarea>
+        <label>Labels</label>
+        <section id="labels"></section><hr>
+        <div id="all_labels"></div>
+        <br>
+        <label>Assignee</label>
+        <select name="assignee" class="form-control">
+            <% _.each(all_users, function(x) {%>
+                <option value="<%= x.id %>"
+                    <% if (x.id == assignee) { %>
+                        selected = "selected"
+                    <% } %>
+                > <%= x.username %></option>
+            <% } ); %>
+        </select>
+        <input type="hidden" name="author" value="<%= author %>">
+        <input type="hidden" name="unit_lesson">
+        <input type="hidden" name="is_open" value="true">
+    </div>
+    <hr>
+</form>
+<button class="btn btn-success" id="ok_button">Ok</button>
+<button class="btn btn-warning" id="cancel_button">Cancel</button>

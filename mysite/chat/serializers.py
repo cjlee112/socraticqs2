@@ -168,6 +168,8 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     lessons = serializers.SerializerMethodField()
     progress = serializers.SerializerMethodField()
 
+    lessons_dict = None
+
     class Meta:
         model = Chat
         fields = (
@@ -176,19 +178,22 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         )
 
     def get_lessons(self, obj):
-        messages = obj.message_set.filter(contenttype='unitlesson')
-        lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
-        for each in messages:
-            if each.content in lessons:
-                lessons[lessons.index(each.content)].message = each.id
-            else:
-                if each.content.kind != 'answers':
-                    lesson = each.content
-                    lesson.message = each.id
-                    lessons.append(lesson)
-        return LessonSerializer(many=True).to_representation(lessons)
+        if not self.lessons_dict:
+            messages = obj.message_set.filter(contenttype='unitlesson')
+            lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
+            for each in messages:
+                if each.content in lessons:
+                    lessons[lessons.index(each.content)].message = each.id
+                else:
+                    if each.content.kind != 'answers':
+                        lesson = each.content
+                        lesson.message = each.id
+                        lessons.append(lesson)
+            self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)
+        return self.lessons_dict
 
     def get_progress(self, obj):
-        message_dict = self.get_lessons(obj)
-        done = reduce(lambda x, y: x+y, map(lambda x: x['done'], message_dict))
-        return round(float(done)/len(message_dict), 2)
+        if not self.lessons_dict:
+            self.get_lessons(obj)
+        done = reduce(lambda x, y: x+y, map(lambda x: x['done'], self.lessons_dict))
+        return round(float(done)/len(self.lessons_dict), 2)
