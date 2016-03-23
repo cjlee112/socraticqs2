@@ -5,8 +5,12 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
+
 
 from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson
+from ct.templatetags.ct_extras import md2html
+
 import fsm
 from .utils import enroll_generator
 
@@ -14,7 +18,6 @@ from .utils import enroll_generator
 TYPE_CHOICES = (
     ('text', 'text'),
     ('options', 'options'),
-    ('errors', 'errors'),
     ('custom', 'custom'),
 )
 
@@ -27,7 +30,7 @@ MODEL_CHOISES = (
 )
 
 MESSAGE_TYPES = (
-    ('default', 'default'),
+    ('message', 'message'),
     ('user', 'user'),
     ('breakpoint', 'breakpoint'),
 )
@@ -76,10 +79,10 @@ class Message(models.Model):
         max_length=16, choices=MODEL_CHOISES, null=True, default='NoneType'
     )
     content_id = models.IntegerField(null=True)
-    input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True)
+    input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True, default='options')
     lesson_to_answer = models.ForeignKey(UnitLesson, null=True)
     response_to_check = models.ForeignKey(Response, null=True)
-    type = models.CharField(max_length=16, default='default', choices=MESSAGE_TYPES)
+    type = models.CharField(max_length=16, default='message', choices=MESSAGE_TYPES)
     owner = models.ForeignKey(User, null=True)
     is_additional = models.BooleanField(default=False)
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
@@ -137,7 +140,7 @@ class Message(models.Model):
             if self.contenttype in ('chatdivider', 'response'):
                 html = self.content.text
             elif self.contenttype == 'unitlesson':
-                html = self.content.lesson.text
+                html = mark_safe(md2html(self.content.lesson.text))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         else:
@@ -145,7 +148,6 @@ class Message(models.Model):
         return html
 
     def get_name(self):
-        print self.__dict__
         name = None
         if self.content_id:
             if self.contenttype == 'response':
