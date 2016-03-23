@@ -75,7 +75,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                         type='user',
                         chat=chat,
                         owner=chat.user,
-                        kind='response')
+                        kind='response',
+                        userMessage=True)
             m.save()
             next_point = m
         elif isinstance(current, UnitLesson) and chat.state.fsmNode.name == 'ASSESS':
@@ -86,7 +87,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 type='user',
                 chat=chat,
                 owner=chat.user,
-                kind='response'
+                kind='response',
+                userMessage=True
             )
             m.save()
             next_point = m
@@ -97,7 +99,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                         input_type='errors',
                         chat=chat,
                         kind='uniterror',
-                        owner=chat.user)
+                        owner=chat.user,
+                        userMessage=True)
             m.save()
             next_point = m
         elif isinstance(current, Response) and current.selfeval:

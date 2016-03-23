@@ -25,7 +25,7 @@ router.register(r'alternative/messages', MessagesViewAlternative, base_name='mes
 
 urlpatterns = patterns(
     '',
-    url(r'^ui/$', TemplateView.as_view(template_name="cui/src/index.html")),
+    url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
         ChatInitialViewFSM.as_view(),

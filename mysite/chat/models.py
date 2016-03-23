@@ -83,6 +83,7 @@ class Message(models.Model):
     owner = models.ForeignKey(User, null=True)
     is_additional = models.BooleanField(default=False)
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
+    userMessage = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['timestamp']

@@ -21,6 +21,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             'id',
             'type',
             'name',
+            'userMessage',
             'avatar',
             'html'
         )
