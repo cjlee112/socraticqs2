@@ -27,7 +27,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
         )
 
     def get_avatar(self, obj):
-        return '/avatar.jpg'
+        return '/static/img/avatar-teacher.jpg'
 
 
 class InputSerializer(serializers.Serializer):
