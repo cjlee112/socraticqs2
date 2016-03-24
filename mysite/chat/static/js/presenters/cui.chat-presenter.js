@@ -255,7 +255,8 @@ CUI.ChatPresenter.prototype._postInput = function(input){
     url: this._inputUrl,
     method: 'PUT',
     dataType: 'json',
-    data: input,
+    contentType: 'application/json',
+    data: JSON.stringify(input),
     cache: false,
     context: this
   }).done(function(response){
@@ -481,7 +482,7 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
       var model;
 
       // Create a model based on type
-      if(m.type === 'message' || m.type === 'default') model = new CUI.ChatMessageModel(m);
+      if(m.type === 'message') model = new CUI.ChatMessageModel(m);
       else if(m.type === 'media') model = new CUI.ChatMediaModel(m);
       else if(m.type === 'breakpoint') model = new CUI.ChatBreakpointModel(m);
       else throw new Error("CUI.ChatPresenter._parseMessages(): Invalid m.type.");
@@ -766,8 +767,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
   //Disable input
   this._inputIsEnabled = false;
-  console.log(input);
-  
+
 
   // Find containers for the various input types
   $text = this._$inputContainer.find('.chat-input-text');
@@ -830,6 +830,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
    // No input url for custom
    this._inputUrl = null;
 
+   console.log(input);
    // Add custom HTML to input
    if(input.html){
      $custom.html(input.html);

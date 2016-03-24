@@ -1,5 +1,6 @@
 import injections
 from django.utils import timezone
+from rest_framework.parsers import JSONParser
 from rest_framework import viewsets, mixins, views, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
@@ -46,6 +47,9 @@ def get_additional_messages(chat):
 
 @injections.has
 class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
+
+    parser_classes = (JSONParser,)
+
     next_handler = injections.depends(ProgressHandler)
 
     serializer_class = MessageSerializer
@@ -137,16 +141,15 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 get_additional_messages(chat)
                 message.chat = chat
                 # message.timestamp = timezone.now()
+                selected = self.request.data.get('selected')[str(message.id)]['errorModel']
                 uniterror = message.content
-                uniterror.save_response(
-                    user=self.request.user, response_list=self.request.data.get('selected')
+                uniterror.save_response(user=self.request.user, response_list=selected)
+
+                # chat.next_point = message
+
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content, chat=chat, message=message, request=self.request
                 )
-
-                chat.next_point = message
-
-                # chat.next_point = self.next_handler.next_point(
-                #     current=message.content, chat=chat, message=message, request=self.request
-                # )
                 chat.save()
                 serializer.save(chat=chat)
             else:

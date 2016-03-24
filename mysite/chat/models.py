@@ -118,9 +118,13 @@ class Message(models.Model):
     def get_errors(self):
         print('get_errors')
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
-        error_str = '<li><div class="chat-check chat-selectable" data-selectable-attribute="errorModel" ' \
+        checked_errors = UnitError.objects.get(id=self.content_id).response.studenterror_set.all()\
+                                                                  .values_list('errorModel', flat=True)
+        error_str = '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="errorModel" ' \
                     'data-selectable-value="%d"></div><h3>%s</h3></li>'
-        errors = reduce(lambda x, y: x+y, map(lambda x: error_str % (x.id, x.lesson.title), error_list))
+        errors = reduce(lambda x, y: x+y, map(lambda x: error_str %
+                                              ('chat-selectable-selected' if x.id in checked_errors else '',
+                                               x.id, x.lesson.title), error_list))
         return '<ul class="chat-select-list">'+errors+'</ul>'
 
     def get_options(self):

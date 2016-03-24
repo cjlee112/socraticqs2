@@ -179,7 +179,7 @@ class ChatMixin(object):
             divider.save()
             message = Message(contenttype='chatdivider',
                               content_id=divider.id,
-                              input_type='finish',
+                              input_type='custom',
                               type='breakpoint',
                               chat=chat,
                               owner=chat.user,

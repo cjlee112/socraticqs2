@@ -31,9 +31,12 @@ class GroupMessageMixin(object):
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
         Lesson.ERROR_MODEL: ('message'),
-        'response': ('message', 'answers'),
+        'response': ('message', 'answers', Lesson.ORCT_QUESTION),
         # 'answers': ('response'),
-        'message': ('message', 'uniterror'),
+        'message': ('message',
+                    'uniterror',
+                    Lesson.BASE_EXPLANATION,
+                    Lesson.ORCT_QUESTION)
     }
 
     def group_filter(self, message, next_message=None):
@@ -118,10 +121,11 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         elif chat.state.fsmNode.name == 'END':
-            unitlesson = Message.objects.filter(is_additional=True,
+            additionals = Message.objects.filter(is_additional=True,
                                                 chat=chat,
-                                                timestamp__isnull=True).first().content
-            if unitlesson:
+                                                timestamp__isnull=True)
+            if additionals:
+                unitlesson = additionals.first().content
                 self.start_fsm(chat, request, 'additional', {'unitlesson': unitlesson})
                 print "Getting additional lessons"
                 print unitlesson
