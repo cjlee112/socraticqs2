@@ -162,16 +162,18 @@ class ChatMixin(object):
             answer = current.unitLesson.get_answers().first()
             message = Message(contenttype='unitlesson',
                               response_to_check=current,
+                              input_type='custom',
                               content_id=current.unitLesson.get_answers().first().id,
                               chat=chat,
                               owner=chat.user,
                               kind=answer.kind)
         if self.name == 'ERRORS':
-            message = Message(input_type='custom',
-                              chat=chat,
+            message = Message(chat=chat,
                               owner=chat.user,
+                              type='breakpoint',
                               text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
-                              kind='message'
+                              kind='message',
+                              input_type='custom',
                               )
         if self.name == 'END':
             divider = ChatDivider(text=self.title)
@@ -179,7 +181,7 @@ class ChatMixin(object):
             message = Message(contenttype='chatdivider',
                               content_id=divider.id,
                               input_type='finish',
-                              type='custom',
+                              type='breakpoint',
                               chat=chat,
                               owner=chat.user,
                               kind='message',)

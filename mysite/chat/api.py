@@ -62,25 +62,27 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
+
         if (
             message.input_type == 'text' or
             message.input_type == 'options' or
             message.contenttype == 'uniterror'
-        ):
+            ):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
         if message:
             # if message.input_type == 'finish':
             # Set next message for user
+            if not message.timestamp:
+                message.timestamp = timezone.now()
+            message.save()
             chat.next_point = self.next_handler.next_point(
                 current=message.content, chat=chat, message=message, request=request
             )
             chat.save()
             message.chat = chat
-            if not message.timestamp:
-                message.timestamp = timezone.now()
-            message.save()
+
 
         serializer = self.get_serializer(message)
         return Response(serializer.data)
@@ -108,6 +110,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.save()
             if not message.timestamp:
                 message.content_id = resp.id
+                # chat.next_point = message
                 chat.next_point = self.next_handler.next_point(
                     current=message.content, chat=chat, message=message, request=self.request
                     )
@@ -117,16 +120,19 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 serializer.save()
         if message.input_type == 'options':
             message.chat = chat
-            message.timestamp = timezone.now()
-            selfeval = self.request.data.get('selfeval')
+            # message.timestamp = timezone.now()
+            selfeval = self.request.data.get('option')
             resp = message.content
             resp.selfeval = selfeval
             resp.save()
+            # chat.next_point = message
+
             chat.next_point = self.next_handler.next_point(
                 current=message.content, chat=chat, message=message, request=self.request
             )
             chat.save()
-            serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
+            # serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
+            serializer.save(content_id=resp.id, chat=chat)
         if (
             message.input_type == 'custom' and
             message.contenttype == 'uniterror' and
@@ -134,11 +140,13 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         ):
             get_additional_messages(chat)
             message.chat = chat
-            message.timestamp = timezone.now()
+            # message.timestamp = timezone.now()
             uniterror = message.content
             uniterror.save_response(
                 user=self.request.user, response_list=self.request.data.get('err_list')
             )
+            # chat.next_point = message
+
             chat.next_point = self.next_handler.next_point(
                 current=message.content, chat=chat, message=message, request=self.request
             )

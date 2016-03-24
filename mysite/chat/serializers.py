@@ -37,7 +37,7 @@ class InputSerializer(serializers.Serializer):
     type = serializers.CharField(max_length=16, read_only=True)
     url = serializers.CharField(max_length=64, read_only=True)
     options = serializers.ListField()
-    messagesWithSelectables = serializers.ListField(
+    includeSelectedValuesFromMessages = serializers.ListField(
         child=serializers.IntegerField(min_value=0)
     )
 
@@ -52,6 +52,7 @@ class MessageSerializer(serializers.ModelSerializer):
     input = serializers.SerializerMethodField()
     # errors = serializers.CharField(source='get_errors', read_only=True)
     addMessages = serializers.SerializerMethodField()
+    nextMessagesUrl = serializers.CharField(source='get_next_url', read_only=True)
 
     class Meta:
         model = Message
@@ -59,6 +60,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'input',
             'addMessages',
+            'nextMessagesUrl',
             # 'errors',
         )
 
@@ -84,7 +86,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
-            'messagesWithSelectables': [i.id for i in self.qs if i.contenttype == 'uniterror']
+                       # or [{"value": 1, "text": "Continue"}],
+            'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
         return InputSerializer().to_representation(input_data)
 
@@ -117,7 +120,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)),
             'options': obj.get_options(),
             # for test purpose only
-            'messagesWithSelectables': [1]
+            'includeSelectedValuesFromMessages': []
         }
         return InputSerializer().to_representation(input_data)
 
@@ -131,27 +134,27 @@ class LessonSerializer(serializers.ModelSerializer):
     """
     Serializer for Lesson.
     """
-    name = serializers.CharField(source='lesson.title', read_only=True)
-    done = serializers.SerializerMethodField()
-    started = serializers.SerializerMethodField()
+    html = serializers.CharField(source='lesson.title', read_only=True)
+    isDone = serializers.SerializerMethodField()
+    isUnlocked = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
         fields = (
             'id',
-            'name',
-            'started',
-            'done'
+            'html',
+            'isUnlocked',
+            'isDone'
         )
 
-    def get_started(self, obj):
+    def get_isUnlocked(self, obj):
         if hasattr(obj, 'message'):
             message = Message.objects.get(id=obj.message)
             return message.timestamp is not None
         else:
             return False
 
-    def get_done(self, obj):
+    def get_isDone(self, obj):
         if hasattr(obj, 'message'):
             message = Message.objects.get(id=obj.message)
             last_message = Message.objects.filter(chat=message.chat,
@@ -166,7 +169,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     """
     Serializer to implement /progress API.
     """
-    lessons = serializers.SerializerMethodField()
+    breakpoints = serializers.SerializerMethodField()
     progress = serializers.SerializerMethodField()
 
     lessons_dict = None
@@ -175,10 +178,10 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         model = Chat
         fields = (
             'progress',
-            'lessons',
+            'breakpoints',
         )
 
-    def get_lessons(self, obj):
+    def get_breakpoints(self, obj):
         if not self.lessons_dict:
             messages = obj.message_set.filter(contenttype='unitlesson')
             lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
@@ -195,6 +198,6 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
     def get_progress(self, obj):
         if not self.lessons_dict:
-            self.get_lessons(obj)
-        done = reduce(lambda x, y: x+y, map(lambda x: x['done'], self.lessons_dict))
+            self.get_breakpoints(obj)
+        done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
         return round(float(done)/len(self.lessons_dict), 2)

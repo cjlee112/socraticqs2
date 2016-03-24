@@ -42,6 +42,8 @@ class GroupMessageMixin(object):
         if not next_message:
             return False
         elif next_message.kind in self.available_steps.get(message.kind, []):
+            next_message.timestamp = timezone.now()
+            next_message.save()
             return True
 
 
@@ -58,12 +60,13 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                        startArgs=start_args)
         chat.state = fsm_stack.state
 
+
     def start_point(self, unit, chat, request):
         self.start_fsm(chat, request, 'chat')
         m = chat.state.fsmNode.get_message(chat)
-        chat.next_point = m
+        chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
-        return m
+        return chat.next_point
 
     def next_point(self, current, chat, message, request):
         next_point = None
@@ -72,7 +75,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             m = Message(contenttype='response',
                         input_type='text',
                         lesson_to_answer=current,
-                        type='user',
                         chat=chat,
                         owner=chat.user,
                         kind='response',
@@ -84,7 +86,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 contenttype='response',
                 content_id=message.response_to_check.id,
                 input_type='options',
-                type='user',
                 chat=chat,
                 owner=chat.user,
                 kind='response',
@@ -96,7 +97,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             uniterror = UnitError.get_by_message(message)
             m = Message(contenttype='uniterror',
                         content_id=uniterror.id,
-                        input_type='errors',
+                        input_type='options',
                         chat=chat,
                         kind='uniterror',
                         owner=chat.user,
@@ -107,6 +108,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             if current.selfeval == Response.CORRECT:
                 edge = chat.state.fsmNode.outgoing.get(name='next')
             else:
+                print chat.state.fsmNode.name
                 edge = chat.state.fsmNode.outgoing.get(name='error')
         elif not chat.state.fsmNode.name == 'END':
             edge = chat.state.fsmNode.outgoing.get(name='next')
@@ -131,19 +133,21 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         if message.is_additional:
             next_point.is_additional = True
             next_point.save()
+        if not message.timestamp:
+            message.timestamp = timezone.now()
+            message.save()
+        if message.contenttype not in ['response', 'uniterror']:
+            group = True
+            while group:
+                if self.group_filter(message, next_point):
+                    if next_point.input_type in ['text', 'options']:
+                        break
+                    next_point = self.next_point(
+                        current=next_point.content, chat=chat, message=next_point, request=request
+                    )
 
-        group = True
-        while group:
-            if self.group_filter(message, next_point):
-                message.timestamp = timezone.now()
-                message.save()
-                next_point.timestamp = message.timestamp + timedelta(seconds=1)
-                next_point.save()
-                next_point = self.next_point(
-                    current=next_point.content, chat=chat, message=next_point, request=request
-                )
-            else:
-                group = False
+                else:
+                    group = False
 
         return next_point
 

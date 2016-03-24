@@ -120,18 +120,18 @@ class Message(models.Model):
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
         error_str = '<div class="chat-selectable" data-selectable-attribute="errorModel" ' \
                     'data-selectable-value="%d">%s</div>'
-        errors = reduce(lambda x, y: x+y, map(lambda x: error_str % (x.id, x.lesson.title), error_list))
+        errors = map(lambda x: error_str % (x.id, x.lesson.title), error_list)
         return errors
 
     def get_options(self):
         print('get_options')
         options = None
-        if (
-            isinstance(self.content, UnitLesson) and
-            self.chat and
-            self.chat.next_point.input_type == 'options'
-        ):
-            options = self.chat.get_options()
+        if (self.chat and
+            self.chat.next_point.input_type == 'options'):
+            if isinstance(self.content, UnitLesson):
+                options = self.chat.get_options()
+            elif isinstance(self.chat.next_point.content, UnitError):
+                options = self.chat.next_point.get_errors()
         return options
 
     def get_html(self):
@@ -148,7 +148,7 @@ class Message(models.Model):
         return html
 
     def get_name(self):
-        name = None
+        name = "Kris Lee"
         if self.content_id:
             if self.contenttype == 'response':
                 name = self.content.author.get_full_name()

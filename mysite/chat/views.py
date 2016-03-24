@@ -43,13 +43,14 @@ class ChatInitialView(View):
             next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
         else:
             next_point = chat.next_point
-        return render(
-            request,
-            'chat/main_view.html',
-            {
-                'chat_id': chat.id,
-                'lessons': unit.get_exercises(),
-                'next_point': next_point,
-                'fsmstate': chat.state
-            }
-        )
+        return render(request, 'cui/index.html')
+        # return render(
+        #     request,
+        #     'chat/main_view.html',
+        #     {
+        #         'chat_id': chat.id,
+        #         'lessons': unit.get_exercises(),
+        #         'next_point': next_point,
+        #         'fsmstate': chat.state
+        #     }
+        # )
