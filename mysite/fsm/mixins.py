@@ -170,7 +170,6 @@ class ChatMixin(object):
         if self.name == 'ERRORS':
             message = Message(chat=chat,
                               owner=chat.user,
-                              type='breakpoint',
                               text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
                               kind='message',
                               input_type='custom',

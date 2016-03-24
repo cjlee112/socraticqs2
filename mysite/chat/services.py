@@ -31,7 +31,8 @@ class GroupMessageMixin(object):
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
         Lesson.ERROR_MODEL: ('message'),
-        'response': ('message'),
+        'response': ('message', 'answers'),
+        # 'answers': ('response'),
         'message': ('message', 'uniterror'),
     }
 
@@ -101,7 +102,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                         chat=chat,
                         kind='uniterror',
                         owner=chat.user,
-                        userMessage=True)
+                        userMessage=False)
             m.save()
             next_point = m
         elif isinstance(current, Response) and current.selfeval:
@@ -136,18 +137,17 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         if not message.timestamp:
             message.timestamp = timezone.now()
             message.save()
-        if message.contenttype not in ['response', 'uniterror']:
-            group = True
-            while group:
-                if self.group_filter(message, next_point):
-                    if next_point.input_type in ['text', 'options']:
-                        break
-                    next_point = self.next_point(
-                        current=next_point.content, chat=chat, message=next_point, request=request
-                    )
+        group = True
+        while group:
+            if self.group_filter(message, next_point):
+                if next_point.input_type in ['text', 'options']:
+                    break
+                next_point = self.next_point(
+                    current=next_point.content, chat=chat, message=next_point, request=request
+                )
 
-                else:
-                    group = False
+            else:
+                group = False
 
         return next_point
 

@@ -64,7 +64,7 @@ class Chat(models.Model):
     def get_options(self):
         options = None
         if self.next_point.input_type == 'options':
-            options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+            options = self.next_point.get_options()
         return options
 
 
@@ -118,27 +118,34 @@ class Message(models.Model):
     def get_errors(self):
         print('get_errors')
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
-        error_str = '<div class="chat-selectable" data-selectable-attribute="errorModel" ' \
-                    'data-selectable-value="%d">%s</div>'
-        errors = map(lambda x: error_str % (x.id, x.lesson.title), error_list)
-        return errors
+        error_str = '<li><div class="chat-check chat-selectable" data-selectable-attribute="errorModel" ' \
+                    'data-selectable-value="%d"></div><h3>%s</h3></li>'
+        errors = reduce(lambda x, y: x+y, map(lambda x: error_str % (x.id, x.lesson.title), error_list))
+        return '<ul class="chat-select-list">'+errors+'</ul>'
 
     def get_options(self):
         print('get_options')
         options = None
         if (self.chat and
             self.chat.next_point.input_type == 'options'):
-            if isinstance(self.content, UnitLesson):
-                options = self.chat.get_options()
-            elif isinstance(self.chat.next_point.content, UnitError):
-                options = self.chat.next_point.get_errors()
+            # if isinstance(self.content, UnitLesson):
+            #     options = self.chat.get_options()
+            if isinstance(self.chat.next_point.content, UnitError):
+                options = [{"value": 1, "text": "Continue"}]
+            else:
+                options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
         return options
 
     def get_html(self):
         html = None
         if self.content_id:
-            if self.contenttype in ('chatdivider', 'response'):
+            if self.contenttype == 'chatdivider':
                 html = self.content.text
+            elif self.contenttype == 'response':
+                if self.input_type == 'text':
+                    html = self.content.text
+                else:
+                    html = self.content.selfeval
             elif self.contenttype == 'unitlesson':
                 html = mark_safe(md2html(self.content.lesson.text))
             elif self.contenttype == 'uniterror':
@@ -184,6 +191,7 @@ class UnitError(models.Model):
         return list(self.response.unitLesson.get_errors()) + self.unit.get_aborts()
 
     def save_response(self, user, response_list):
+        print response_list
         if user == self.response.author:
             status = self.response.status
         else:

@@ -86,7 +86,6 @@ class MessageSerializer(serializers.ModelSerializer):
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
-                       # or [{"value": 1, "text": "Continue"}],
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
         return InputSerializer().to_representation(input_data)

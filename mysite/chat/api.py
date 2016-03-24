@@ -56,6 +56,18 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
         chat = Chat.objects.filter(user=self.request.user).first()
+        next_point = chat.next_point
+
+        if (message.contenttype in ['response', 'uniterror'] and
+            message.content_id and
+            next_point == message):
+            chat.next_point = self.next_handler.next_point(
+                current=message.content, chat=chat, message=message, request=request
+            )
+            chat.save()
+            serializer = self.get_serializer(message)
+            return Response(serializer.data)
+
 
         if not message.chat or message.chat != chat or message.timestamp:
             print('FAULT')
@@ -94,7 +106,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
-
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
@@ -110,48 +121,50 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             resp.save()
             if not message.timestamp:
                 message.content_id = resp.id
-                # chat.next_point = message
-                chat.next_point = self.next_handler.next_point(
-                    current=message.content, chat=chat, message=message, request=self.request
-                    )
+                chat.next_point = message
+                # chat.next_point = self.next_handler.next_point(
+                #     current=message.content, chat=chat, message=message, request=self.request
+                #     )
                 chat.save()
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
         if message.input_type == 'options':
-            message.chat = chat
-            # message.timestamp = timezone.now()
-            selfeval = self.request.data.get('option')
-            resp = message.content
-            resp.selfeval = selfeval
-            resp.save()
-            # chat.next_point = message
+            if (
+                message.contenttype == 'uniterror' and
+                'selected' in self.request.data
+            ):
+                get_additional_messages(chat)
+                message.chat = chat
+                # message.timestamp = timezone.now()
+                uniterror = message.content
+                uniterror.save_response(
+                    user=self.request.user, response_list=self.request.data.get('selected')
+                )
 
-            chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=self.request
-            )
-            chat.save()
-            # serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
-            serializer.save(content_id=resp.id, chat=chat)
-        if (
-            message.input_type == 'custom' and
-            message.contenttype == 'uniterror' and
-            'err_list' in self.request.data
-        ):
-            get_additional_messages(chat)
-            message.chat = chat
-            # message.timestamp = timezone.now()
-            uniterror = message.content
-            uniterror.save_response(
-                user=self.request.user, response_list=self.request.data.get('err_list')
-            )
-            # chat.next_point = message
+                chat.next_point = message
 
-            chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=self.request
-            )
-            chat.save()
-            serializer.save(chat=chat)
+                # chat.next_point = self.next_handler.next_point(
+                #     current=message.content, chat=chat, message=message, request=self.request
+                # )
+                chat.save()
+                serializer.save(chat=chat)
+            else:
+                message.chat = chat
+                # message.timestamp = timezone.now()
+                selfeval = self.request.data.get('option')
+                resp = message.content
+                resp.selfeval = selfeval
+                resp.save()
+                chat.next_point = message
+
+                # chat.next_point = self.next_handler.next_point(
+                #     current=message.content, chat=chat, message=message, request=self.request
+                # )
+                chat.save()
+                # serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
+                serializer.save(content_id=resp.id, chat=chat)
+
 
 
 class HistoryView(generics.RetrieveAPIView):
