@@ -41,8 +41,9 @@ def store_errors(q, concept, parentUL, conceptIDdict=None):
                     raise ValueError('%s: not a valid error model'
                                     % ul.lesson.title)
         if not emUL: # create new error model lesson
-            emLesson = Lesson(title='(rename this)', addedBy=parentUL.addedBy,
-                              text=e)
+            emLesson = Lesson(title=e.get('title', '(rename this)'),
+                              addedBy=parentUL.addedBy,
+                              text=e.get('explanation', '(write an explanation)'))
             emUL = emLesson.save_as_error_model(concept, parentUL, em)
             if saveMapping: # allow other questions to fork this EM
                 conceptIDdict[mapID] = 'fork:%d' % emUL.pk
