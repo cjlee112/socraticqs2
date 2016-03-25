@@ -46,6 +46,13 @@ KIND_CHOICES = (
     ('message', 'message'),
 )
 
+EVAL_OPTIONS = {
+    'close': 'It was very close',
+    'different': 'No similarities at all',
+    'correct': 'Essentially the same'
+}
+
+
 
 class Chat(models.Model):
     """
@@ -105,15 +112,22 @@ class Message(models.Model):
 
     def get_next_point(self):
         print('get_next_point')
-        return self.chat.next_point.id if self.chat else None
+        return self.chat.next_point.id if self.chat and self.chat.next_point else None
 
     def get_next_input_type(self):
         print('get_next_input_type')
-        return self.chat.next_point.input_type if self.chat else None
+        if self.chat:
+            if self.chat.next_point:
+                input_type = self.chat.next_point.input_type
+            else:
+                input_type = 'custom'
+        else:
+            input_type = None
+        return input_type
 
     def get_next_url(self):
         print('get_next_url')
-        return reverse('chat:messages-detail', args=(self.chat.next_point.id,)) if self.chat else None
+        return reverse('chat:messages-detail', args=(self.chat.next_point.id,)) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
         print('get_errors')
@@ -130,7 +144,7 @@ class Message(models.Model):
     def get_options(self):
         print('get_options')
         options = None
-        if (self.chat and
+        if (self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'):
             # if isinstance(self.content, UnitLesson):
             #     options = self.chat.get_options()
@@ -149,7 +163,7 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = self.content.text
                 else:
-                    html = self.content.selfeval
+                    html = EVAL_OPTIONS[self.content.selfeval]
             elif self.contenttype == 'unitlesson':
                 html = mark_safe(md2html(self.content.lesson.text))
             elif self.contenttype == 'uniterror':
