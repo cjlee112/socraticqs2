@@ -141,7 +141,7 @@ class JSONBlobMixin(object):
 
 class ChatMixin(object):
 
-    def get_message(self, chat, current=None, message=None):
+    def get_message(self, chat, current=None, message=None, is_additional=False):
         print "Current node is " + self.name
         next_lesson = chat.state.unitLesson
         if self.name == 'LESSON':
@@ -150,14 +150,25 @@ class ChatMixin(object):
                               chat=chat,
                               owner=chat.user,
                               input_type='custom',
-                              kind=next_lesson.lesson.kind)
+                              kind=next_lesson.lesson.kind,
+                              is_additional=is_additional)
         if self.name == 'ASK':
             message = Message(contenttype='unitlesson',
                               content_id=next_lesson.id,
                               input_type='custom',
                               chat=chat,
                               kind=next_lesson.lesson.kind,
-                              owner=chat.user)
+                              owner=chat.user,
+                              is_additional=is_additional)
+        if self.name == 'GET_ANSWER':
+            message = Message(contenttype='response',
+                              input_type='text',
+                              lesson_to_answer=current,
+                              chat=chat,
+                              owner=chat.user,
+                              kind='response',
+                              userMessage=True,
+                              is_additional=is_additional)
         if self.name == 'ASSESS':
             answer = current.unitLesson.get_answers().first()
             message = Message(contenttype='unitlesson',
@@ -166,14 +177,36 @@ class ChatMixin(object):
                               content_id=current.unitLesson.get_answers().first().id,
                               chat=chat,
                               owner=chat.user,
-                              kind=answer.kind)
+                              kind=answer.kind,
+                              is_additional=is_additional)
+        if self.name == 'GET_ASSESS':
+            message = Message(contenttype='response',
+                              content_id=message.response_to_check.id,
+                              input_type='options',
+                              chat=chat,
+                              owner=chat.user,
+                              kind='response',
+                              userMessage=True,
+                              is_additional=is_additional
+                            )
         if self.name == 'ERRORS':
             message = Message(chat=chat,
                               owner=chat.user,
                               text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
                               kind='message',
                               input_type='custom',
+                              is_additional=is_additional
                               )
+        if self.name == 'GET_ERRORS':
+            uniterror = UnitError.get_by_message(message)
+            message = Message(contenttype='uniterror',
+                              content_id=uniterror.id,
+                              input_type='options',
+                              chat=chat,
+                              kind='uniterror',
+                              owner=chat.user,
+                              userMessage=False,
+                              is_additional=is_additional)
         if self.name == 'END':
             divider = ChatDivider(text=self.title)
             divider.save()
@@ -183,6 +216,7 @@ class ChatMixin(object):
                               type='breakpoint',
                               chat=chat,
                               owner=chat.user,
-                              kind='message',)
+                              kind='message',
+                              is_additional=is_additional)
         message.save()
         return message

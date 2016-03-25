@@ -74,41 +74,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
 
     def next_point(self, current, chat, message, request):
         next_point = None
-
-        if isinstance(current, UnitLesson) and chat.state.fsmNode.name == 'ASK':
-            m = Message(contenttype='response',
-                        input_type='text',
-                        lesson_to_answer=current,
-                        chat=chat,
-                        owner=chat.user,
-                        kind='response',
-                        userMessage=True)
-            m.save()
-            next_point = m
-        elif isinstance(current, UnitLesson) and chat.state.fsmNode.name == 'ASSESS':
-            m = Message(
-                contenttype='response',
-                content_id=message.response_to_check.id,
-                input_type='options',
-                chat=chat,
-                owner=chat.user,
-                kind='response',
-                userMessage=True
-            )
-            m.save()
-            next_point = m
-        elif chat.state.fsmNode.name == 'ERRORS' and message.kind == 'message':
-            uniterror = UnitError.get_by_message(message)
-            m = Message(contenttype='uniterror',
-                        content_id=uniterror.id,
-                        input_type='options',
-                        chat=chat,
-                        kind='uniterror',
-                        owner=chat.user,
-                        userMessage=False)
-            m.save()
-            next_point = m
-        elif isinstance(current, Response) and current.selfeval:
+        if isinstance(current, Response) and current.selfeval:
             if current.selfeval == Response.CORRECT:
                 edge = chat.state.fsmNode.outgoing.get(name='next')
             else:
@@ -122,15 +88,19 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         elif chat.state.fsmNode.name == 'END':
             additionals = Message.objects.filter(is_additional=True,
-                                                chat=chat,
-                                                timestamp__isnull=True)
+                                                 chat=chat,
+                                                 timestamp__isnull=True)
             if additionals:
                 unitlesson = additionals.first().content
                 self.start_fsm(chat, request, 'additional', {'unitlesson': unitlesson})
                 print "Getting additional lessons"
                 print unitlesson
                 chat.state.unitLesson = unitlesson
-                next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+                next_point = chat.state.fsmNode.get_message(chat,
+                                                            current=current,
+                                                            message=message,
+                                                            is_additional=True)
+                additionals.first().delete()
                 print next_point.__dict__
             else:
                 return None

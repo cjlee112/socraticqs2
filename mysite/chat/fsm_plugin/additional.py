@@ -77,28 +77,57 @@ class LESSON(object):
 
 
 class ASK(object):
-    get_path = get_lesson_url
+    # get_path = get_lesson_url
     # node specification data goes here
     title = 'View an explanation'
+    edges = (
+            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+        )
+
+
+class GET_ANSWER(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'It is time to answer'
     edges = (
             dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
         )
 
 
 class ASSESS(object):
+    # next_edge = next_lesson
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='END', title=''),
+            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+        )
+
+
+class GET_ASSESS(object):
+    next_edge = next_lesson
+    # node specification data goes here
+    title = 'Assess your answer'
+    edges = (
+            dict(name='next', toNode='LESSON', title='View Next Lesson'),
             dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
 
 class ERRORS(object):
+    # next_edge = next_lesson
+    # node specification data goes here
+    title = 'Error options'
+    edges = (
+            dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
+        )
+
+
+class GET_ERRORS(object):
+    next_edge = next_lesson
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='END', title=''),
+            dict(name='next', toNode='END', title='View Next Lesson'),
         )
 
 
@@ -125,6 +154,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, LESSON, ASK, ASSESS, ERRORS, END],
+        pluginNodes=[START, LESSON, ASK, GET_ANSWER, ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
     )
     return (spec,)
