@@ -133,7 +133,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
                 print next_point.__dict__
             else:
-                return message
+                return None
         # if current message is additional then the next one also will be additional
         if message.is_additional:
             next_point.is_additional = True

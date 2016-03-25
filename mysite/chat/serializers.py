@@ -40,6 +40,7 @@ class InputSerializer(serializers.Serializer):
     includeSelectedValuesFromMessages = serializers.ListField(
         child=serializers.IntegerField(min_value=0)
     )
+    html = serializers.CharField(max_length=300, read_only=True)
 
 
 @injections.has
@@ -88,6 +89,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'options': obj.get_options(),
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
+        if not obj.chat.next_point:
+            input_data['html'] = '<a href="http://google.com" class="btn">Close</a>'
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
@@ -115,12 +118,14 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         Getting description for next message.
         """
         input_data = {
-            'type': obj.next_point.input_type,
-            'url': reverse('chat:messages-detail', args=(obj.next_point.id,)),
-            'options': obj.get_options(),
+            'type': obj.next_point.input_type if obj.next_point else 'custom',
+            'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
+            'options': obj.get_options() if obj.next_point else None,
             # for test purpose only
             'includeSelectedValuesFromMessages': []
         }
+        if not obj.next_point:
+            input_data['html'] = '<a href="http://google.com" class="btn">Close</a>'
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
