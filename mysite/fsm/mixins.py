@@ -141,82 +141,79 @@ class JSONBlobMixin(object):
 
 class ChatMixin(object):
 
-    def get_message(self, chat, current=None, message=None, is_additional=False):
+    def get_message(self, chat, current=None, message=None):
         print "Current node is " + self.name
+        is_additional = chat.state.fsmNode.fsm.name == 'additional'
         next_lesson = chat.state.unitLesson
-        if self.name == 'LESSON':
-            message = Message(contenttype='unitlesson',
-                              content_id=next_lesson.id,
-                              chat=chat,
-                              owner=chat.user,
-                              input_type='custom',
-                              kind=next_lesson.lesson.kind,
-                              is_additional=is_additional)
-        if self.name == 'ASK':
-            message = Message(contenttype='unitlesson',
-                              content_id=next_lesson.id,
-                              input_type='custom',
-                              chat=chat,
-                              kind=next_lesson.lesson.kind,
-                              owner=chat.user,
-                              is_additional=is_additional)
+        if self.name in ['LESSON', 'ASK']:
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            content_id=next_lesson.id,
+                            chat=chat,
+                            owner=chat.user,
+                            input_type='custom',
+                            kind=next_lesson.lesson.kind,
+                            is_additional=is_additional)[0]
         if self.name == 'GET_ANSWER':
-            message = Message(contenttype='response',
-                              input_type='text',
-                              lesson_to_answer=current,
-                              chat=chat,
-                              owner=chat.user,
-                              kind='response',
-                              userMessage=True,
-                              is_additional=is_additional)
+            message = Message.objects.get_or_create(
+                            contenttype='response',
+                            input_type='text',
+                            lesson_to_answer=current,
+                            chat=chat,
+                            owner=chat.user,
+                            kind='response',
+                            userMessage=True,
+                            is_additional=is_additional)[0]
         if self.name == 'ASSESS':
             answer = current.unitLesson.get_answers().first()
-            message = Message(contenttype='unitlesson',
-                              response_to_check=current,
-                              input_type='custom',
-                              content_id=current.unitLesson.get_answers().first().id,
-                              chat=chat,
-                              owner=chat.user,
-                              kind=answer.kind,
-                              is_additional=is_additional)
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            response_to_check=current,
+                            input_type='custom',
+                            content_id=current.unitLesson.get_answers().first().id,
+                            chat=chat,
+                            owner=chat.user,
+                            kind=answer.kind,
+                            is_additional=is_additional)[0]
         if self.name == 'GET_ASSESS':
-            message = Message(contenttype='response',
-                              content_id=message.response_to_check.id,
-                              input_type='options',
-                              chat=chat,
-                              owner=chat.user,
-                              kind='response',
-                              userMessage=True,
-                              is_additional=is_additional
-                            )
+            message = Message.objects.get_or_create(
+                            contenttype='response',
+                            content_id=message.response_to_check.id,
+                            input_type='options',
+                            chat=chat,
+                            owner=chat.user,
+                            kind='response',
+                            userMessage=True,
+                            is_additional=is_additional)[0]
         if self.name == 'ERRORS':
-            message = Message(chat=chat,
-                              owner=chat.user,
-                              text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
-                              kind='message',
-                              input_type='custom',
-                              is_additional=is_additional
-                              )
+            message = Message.objects.get_or_create(
+                            chat=chat,
+                            owner=chat.user,
+                            text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
+                            kind='message',
+                            input_type='custom',
+                            is_additional=is_additional)[0]
         if self.name == 'GET_ERRORS':
             uniterror = UnitError.get_by_message(message)
-            message = Message(contenttype='uniterror',
-                              content_id=uniterror.id,
-                              input_type='options',
-                              chat=chat,
-                              kind='uniterror',
-                              owner=chat.user,
-                              userMessage=False,
-                              is_additional=is_additional)
+            message = Message.objects.get_or_create(
+                            contenttype='uniterror',
+                            content_id=uniterror.id,
+                            input_type='options',
+                            chat=chat,
+                            kind='uniterror',
+                            owner=chat.user,
+                            userMessage=False,
+                            is_additional=is_additional)[0]
         if self.name == 'END':
             divider = ChatDivider(text=self.title)
             divider.save()
-            message = Message(contenttype='chatdivider',
-                              content_id=divider.id,
-                              input_type='custom',
-                              type='breakpoint',
-                              chat=chat,
-                              owner=chat.user,
-                              kind='message',
-                              is_additional=is_additional)
-        message.save()
+            message = Message.objects.get_or_create(
+                            contenttype='chatdivider',
+                            content_id=divider.id,
+                            input_type='custom',
+                            type='breakpoint',
+                            chat=chat,
+                            owner=chat.user,
+                            kind='message',
+                            is_additional=is_additional)[0]
         return message

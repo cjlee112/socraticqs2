@@ -1,4 +1,5 @@
 from ct.models import UnitStatus
+from ..models import Message
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -23,6 +24,30 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         return edge.toNode
 
 
+def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    """
+    Edge method that moves us to right state for next lesson (or END).
+    """
+    fsm = edge.fromNode.fsm
+
+    additionals = Message.objects.filter(is_additional=True,
+                                         chat=fsmStack,
+                                         timestamp__isnull=True)
+    if additionals:
+        nextUL = additionals.first().content
+        try:
+            if nextUL.is_question():
+                fsmStack.state.unitLesson = nextUL
+                return fsm.get_node(name='ASK')
+            else:  # just a lesson to read
+                fsmStack.state.unitLesson = nextUL
+        except:
+            return fsm.get_node('END')
+    else:
+        return fsm.get_node('END')
+    return edge.toNode
+
+
 def get_lesson_url(self, node, state, request, **kwargs):
     """
     Get URL for any lesson.
@@ -44,6 +69,7 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
+
 
         try:  # use unitStatus if provided
             unitStatus = fsmStack.state.get_data_attr('unitStatus')
@@ -95,7 +121,6 @@ class GET_ANSWER(object):
 
 
 class ASSESS(object):
-    # next_edge = next_lesson
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
@@ -104,7 +129,7 @@ class ASSESS(object):
 
 
 class GET_ASSESS(object):
-    next_edge = next_lesson
+    next_edge = next_additional_lesson
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
@@ -114,7 +139,6 @@ class GET_ASSESS(object):
 
 
 class ERRORS(object):
-    # next_edge = next_lesson
     # node specification data goes here
     title = 'Error options'
     edges = (
@@ -123,11 +147,11 @@ class ERRORS(object):
 
 
 class GET_ERRORS(object):
-    next_edge = next_lesson
+    next_edge = next_additional_lesson
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='END', title='View Next Lesson'),
+            dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
 
@@ -139,7 +163,7 @@ class END(object):
         unitStatus = state.get_data_attr('unitStatus')
         return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
-    title = 'Courselet core lessons completed'
+    title = 'Additional lessons completed'
     help = '''Congratulations!  You have completed the core lessons for this
     courselet.  See below for suggested next steps for what to study now in
     this courselet.'''

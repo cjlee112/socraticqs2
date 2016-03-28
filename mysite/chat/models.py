@@ -11,7 +11,6 @@ from django.utils.safestring import mark_safe
 from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson
 from ct.templatetags.ct_extras import md2html
 
-import fsm
 from .utils import enroll_generator
 
 
@@ -146,8 +145,6 @@ class Message(models.Model):
         options = None
         if (self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'):
-            # if isinstance(self.content, UnitLesson):
-            #     options = self.chat.get_options()
             if isinstance(self.chat.next_point.content, UnitError):
                 options = [{"value": 1, "text": "Continue"}]
             else:
@@ -202,6 +199,9 @@ class EnrollUnitCode(models.Model):
 
 
 class UnitError(models.Model):
+    """
+    Model contains links between unit and user error models.
+    """
     unit = models.ForeignKey(Unit)
     response = models.ForeignKey(Response)
 

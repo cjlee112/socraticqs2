@@ -1,12 +1,12 @@
 import injections
 from django.utils import timezone
 from rest_framework.parsers import JSONParser
-from rest_framework import viewsets, mixins, views, generics
+from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Message, Chat, UnitError
+from .models import Message, Chat
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
 from .services import ProgressHandler, SequenceHandler
 from .permissions import IsOwner
@@ -28,28 +28,27 @@ def get_additional_messages(chat):
                        for ul in unit.get_serrorless_uls(chat.user)]
     addition_tasks += [(ul, 'resolve')
                        for ul in unit.get_unresolved_uls(chat.user)]
-    # map(lambda (ul, task): Message.objects.get_or_create(contenttype='unitlesson',
-    #                                                      content_id=ul.id,
-    #                                                      chat=chat,
-    #                                                      owner=chat.user,
-    #                                                      is_additional=True),
-    #     addition_tasks)
-    lesson_ids = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).values_list('id', flat=True)
-    print lesson_ids
+
+    lesson_ids = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)\
+                                                                .values_list('id', flat=True)
     for (ul, task) in addition_tasks:
         if ul not in lesson_ids:
-            m, cr = Message.objects.get_or_create(contenttype='unitlesson',
-                                                  content_id=ul.id,
-                                                  chat=chat,
-                                                  owner=chat.user,
-                                                  is_additional = True)
+            Message.objects.get_or_create(contenttype='unitlesson',
+                                          content_id=ul.id,
+                                          chat=chat,
+                                          owner=chat.user,
+                                          input_type='custom',
+                                          kind=ul.lesson.kind,
+                                          is_additional=True)
 
 
 @injections.has
 class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
+    """
+    GET or UPDATE one message.
+    """
 
     parser_classes = (JSONParser,)
-
     next_handler = injections.depends(ProgressHandler)
 
     serializer_class = MessageSerializer
@@ -72,23 +71,18 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-
         if not message.chat or message.chat != chat or message.timestamp:
             print('FAULT')
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-
-        if (
-            message.input_type == 'text' or
+        if (message.input_type == 'text' or
             message.input_type == 'options' or
-            message.contenttype == 'uniterror'
-            ):
+            message.contenttype == 'uniterror'):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
         if message:
-            # if message.input_type == 'finish':
             # Set next message for user
             if not message.timestamp:
                 message.timestamp = timezone.now()
@@ -98,7 +92,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             )
             chat.save()
             message.chat = chat
-
 
         serializer = self.get_serializer(message)
         return Response(serializer.data)
@@ -126,9 +119,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message
-                # chat.next_point = self.next_handler.next_point(
-                #     current=message.content, chat=chat, message=message, request=self.request
-                #     )
                 chat.save()
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
@@ -140,13 +130,9 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             ):
                 get_additional_messages(chat)
                 message.chat = chat
-                # message.timestamp = timezone.now()
                 selected = self.request.data.get('selected')[str(message.id)]['errorModel']
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
-
-                # chat.next_point = message
-
                 chat.next_point = self.next_handler.next_point(
                     current=message.content, chat=chat, message=message, request=self.request
                 )
@@ -154,20 +140,13 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 serializer.save(chat=chat)
             else:
                 message.chat = chat
-                # message.timestamp = timezone.now()
                 selfeval = self.request.data.get('option')
                 resp = message.content
                 resp.selfeval = selfeval
                 resp.save()
                 chat.next_point = message
-
-                # chat.next_point = self.next_handler.next_point(
-                #     current=message.content, chat=chat, message=message, request=self.request
-                # )
                 chat.save()
-                # serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
                 serializer.save(content_id=resp.id, chat=chat)
-
 
 
 class HistoryView(generics.RetrieveAPIView):
