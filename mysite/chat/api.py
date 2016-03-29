@@ -134,7 +134,10 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             ):
                 get_additional_messages(chat)
                 message.chat = chat
-                selected = self.request.data.get('selected')[str(message.id)]['errorModel']
+                try:
+                    selected = self.request.data.get('selected')[str(message.id)]['errorModel']
+                except KeyError:
+                    selected = []
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
                 chat.next_point = self.next_handler.next_point(
