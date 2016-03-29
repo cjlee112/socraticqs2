@@ -76,16 +76,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
 
     def next_point(self, current, chat, message, request):
         next_point = None
-        if (
-            isinstance(current, Response) and
-            current.selfeval and
-            current.selfeval != Response.CORRECT
-        ):
-            edge = chat.state.fsmNode.outgoing.get(name='error')
-        elif not chat.state.fsmNode.name == 'END':
-            edge = chat.state.fsmNode.outgoing.get(name='next')
-
         if not chat.state.fsmNode.name == 'END':
+            edge = chat.state.fsmNode.outgoing.get(name='next')
             chat.state.fsmNode = edge.transition(chat, {})
             chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
@@ -97,7 +89,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 unitlesson = additionals.first().content
                 self.start_fsm(chat, request, 'additional', {'unitlesson': unitlesson})
                 print "Getting additional lessons"
-                # chat.state.unitLesson = unitlesson
                 next_point = chat.state.fsmNode.get_message(chat,
                                                             current=current,
                                                             message=message)

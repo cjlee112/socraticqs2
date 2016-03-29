@@ -23,6 +23,15 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         return edge.toNode
 
 
+def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    fsm = edge.fromNode.fsm
+
+    if not fsmStack.next_point.content.selfeval == 'correct':
+        return fsm.get_node('ERRORS')
+
+    return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
+
+
 def get_lesson_url(self, node, state, request, **kwargs):
     """
     Get URL for any lesson.
@@ -95,7 +104,6 @@ class GET_ANSWER(object):
 
 
 class ASSESS(object):
-    # next_edge = next_lesson
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
@@ -104,17 +112,15 @@ class ASSESS(object):
 
 
 class GET_ASSESS(object):
-    next_edge = next_lesson
+    next_edge = check_selfassess_and_next_lesson
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
-            dict(name='error', toNode='ERRORS', title='Classify your error'),
         )
 
 
 class ERRORS(object):
-    # next_edge = next_lesson
     # node specification data goes here
     title = 'Error options'
     edges = (
