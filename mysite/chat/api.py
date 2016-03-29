@@ -8,13 +8,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
-from .services import ProgressHandler, SequenceHandler
+from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
 from ct.models import Response as StudentResponse
 
 
 inj_alternative = injections.Container()
-inj_alternative['next_handler'] = SequenceHandler()
+inj_alternative['next_handler'] = FsmHandler()
 MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 
@@ -61,9 +61,11 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         chat = Chat.objects.filter(user=self.request.user).first()
         next_point = chat.next_point
 
-        if (message.contenttype in ['response', 'uniterror'] and
+        if (
+            message.contenttype in ['response', 'uniterror'] and
             message.content_id and
-            next_point == message):
+            next_point == message
+        ):
             chat.next_point = self.next_handler.next_point(
                 current=message.content, chat=chat, message=message, request=request
             )
@@ -76,9 +78,11 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-        if (message.input_type == 'text' or
+        if (
+            message.input_type == 'text' or
             message.input_type == 'options' or
-            message.contenttype == 'uniterror'):
+            message.contenttype == 'uniterror'
+        ):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
