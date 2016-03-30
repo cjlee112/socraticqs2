@@ -90,12 +90,22 @@ class START(object):
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
-    next_edge = next_lesson
+
+    # next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='DIVIDER', title='View Next Lesson'),
         )
+
+
+class DIVIDER(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Additional lessons begin'
+    edges = (
+        dict(name='next', toNode='LESSON', title='View Next Lesson'),
+    )
 
 
 class LESSON(object):
@@ -103,7 +113,7 @@ class LESSON(object):
     View a lesson explanation.
     """
     get_path = get_lesson_url
-    next_edge = next_lesson
+    next_edge = next_additional_lesson
     # node specification data goes here
     title = 'View an explanation'
     edges = (
@@ -186,6 +196,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, LESSON, ASK, GET_ANSWER, ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
+        pluginNodes=[START, DIVIDER, LESSON, ASK, GET_ANSWER, ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
     )
     return (spec,)

@@ -204,7 +204,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             userMessage=False,
                             is_additional=is_additional)[0]
-        if self.name == 'END':
+        if self.name in ['END', 'DIVIDER']:
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(

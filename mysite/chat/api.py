@@ -18,21 +18,11 @@ inj_alternative['next_handler'] = FsmHandler()
 MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 
-def get_additional_messages(chat):
+def get_additional_messages(response, chat):
     print 'additional lessons'
-    course_unit = chat.enroll_code.courseUnit
-    unit = course_unit.unit
-    addition_tasks = [(ul, 'selfeval')
-                      for ul in unit.get_selfeval_uls(chat.user)]
-    addition_tasks += [(ul, 'classify')
-                       for ul in unit.get_serrorless_uls(chat.user)]
-    addition_tasks += [(ul, 'resolve')
-                       for ul in unit.get_unresolved_uls(chat.user)]
-
-    lesson_ids = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False)\
-                                                                .values_list('id', flat=True)
-    for (ul, task) in addition_tasks:
-        if ul not in lesson_ids:
+    student_errors = response.studenterror_set.all()
+    for each in student_errors:
+        for ul in each.errorModel.get_em_resolutions()[1]:
             Message.objects.get_or_create(contenttype='unitlesson',
                                           content_id=ul.id,
                                           chat=chat,
@@ -40,6 +30,7 @@ def get_additional_messages(chat):
                                           input_type='custom',
                                           kind=ul.lesson.kind,
                                           is_additional=True)
+
 
 
 @injections.has
@@ -132,7 +123,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
             ):
-                get_additional_messages(chat)
                 message.chat = chat
                 try:
                     selected = self.request.data.get('selected')[str(message.id)]['errorModel']
@@ -140,6 +130,8 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                     selected = []
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
+                get_additional_messages(uniterror.response, chat)
+
                 chat.next_point = self.next_handler.next_point(
                     current=message.content, chat=chat, message=message, request=self.request
                 )

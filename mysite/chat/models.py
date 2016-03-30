@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson
 from ct.templatetags.ct_extras import md2html
 
+
 from .utils import enroll_generator
 
 
@@ -221,6 +222,7 @@ class UnitError(models.Model):
                 author=user,
                 status=status
             )
+
 
     @classmethod
     def get_by_message(cls, message):

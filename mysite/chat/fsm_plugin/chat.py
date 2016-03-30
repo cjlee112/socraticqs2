@@ -86,7 +86,6 @@ class LESSON(object):
 
 
 class ASK(object):
-    # get_path = get_lesson_url
     # node specification data goes here
     title = 'View an explanation'
     edges = (
@@ -95,7 +94,6 @@ class ASK(object):
 
 
 class GET_ANSWER(object):
-    get_path = get_lesson_url
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
@@ -137,12 +135,6 @@ class GET_ERRORS(object):
         )
 
 class END(object):
-    def get_path(self, node, state, request, **kwargs):
-        """
-        Get URL for next steps in this unit.
-        """
-        unitStatus = state.get_data_attr('unitStatus')
-        return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
     title = 'Courselet core lessons completed'
     help = '''Congratulations!  You have completed the core lessons for this

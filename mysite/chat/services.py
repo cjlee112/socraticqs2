@@ -29,7 +29,7 @@ class GroupMessageMixin(object):
     Mixin should create additional messages via `self.next_point`.
     """
     available_steps = {
-        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION,),
+        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message'),
         Lesson.ERROR_MODEL: ('message'),
         'response': ('message',
                      'answers',
@@ -58,17 +58,28 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
-    def start_fsm(self, chat, request, name, start_args=None):
+
+    def push_state(self, chat, request, name, start_args=None):
         fsm_stack = FSMStack(request)
         course_unit = chat.enroll_code.courseUnit
         fsm_stack.push(request, name,
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course},
                        startArgs=start_args)
+        fsm_stack.state.parentState = chat.state
+        fsm_stack.state.save()
         chat.state = fsm_stack.state
+        chat.save()
+
+    def pop_state(self, chat):
+        next_state = chat.state.parentState
+        current_state = chat.state
+        chat.state = next_state
+        chat.save()
+        current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.start_fsm(chat, request, 'chat')
+        self.push_state(chat, request, 'chat')
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
@@ -76,24 +87,26 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
 
     def next_point(self, current, chat, message, request):
         next_point = None
-        if not chat.state.fsmNode.name == 'END':
+        additionals = Message.objects.filter(is_additional=True,
+                                             chat=chat,
+                                             timestamp__isnull=True)
+
+        if chat.state.fsmNode.name == 'END':
+            self.pop_state(chat)
+        if additionals and chat.state.fsmNode.fsm.name != 'additional':
+            unitlesson = additionals.first().content
+            self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
+            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+
+            print "Getting additional lessons"
+        elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
             chat.state.fsmNode = edge.transition(chat, {})
             chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         else:
-            additionals = Message.objects.filter(is_additional=True,
-                                                 chat=chat,
-                                                 timestamp__isnull=True)
-            if additionals:
-                unitlesson = additionals.first().content
-                self.start_fsm(chat, request, 'additional', {'unitlesson': unitlesson})
-                print "Getting additional lessons"
-                next_point = chat.state.fsmNode.get_message(chat,
-                                                            current=current,
-                                                            message=message)
-            else:
-                return None
+            return None
+
         if not message.timestamp:
             message.timestamp = timezone.now()
             message.save()
