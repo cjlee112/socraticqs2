@@ -173,9 +173,9 @@ class Message(models.Model):
         name = "Kris Lee"
         if self.content_id:
             if self.contenttype == 'response':
-                name = self.content.author.get_full_name()
+                name = self.content.author.get_full_name() or self.content.author.username
             elif self.contenttype == 'unitlesson':
-                name = self.content.addedBy.get_full_name()
+                name = self.content.addedBy.get_full_name() or self.content.addedBy.username
         return name
 
 
