@@ -195,7 +195,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
     def get_breakpoints(self, obj):
         if not self.lessons_dict:
             messages = obj.message_set.filter(contenttype='unitlesson', is_additional=False)
-            lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False))
+            lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order'))
             for each in messages:
                 if each.content in lessons:
                     lessons[lessons.index(each.content)].message = each.id
