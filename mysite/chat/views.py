@@ -31,7 +31,7 @@ class ChatInitialView(View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat = Chat.objects.filter(enroll_code=enroll_code).first()
+        chat = Chat.objects.filter(enroll_code=enroll_code, user=request.user).first()
         if not chat and enroll_key:
             chat = Chat(
                 user=request.user,
