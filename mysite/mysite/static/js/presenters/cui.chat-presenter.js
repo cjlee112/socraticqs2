@@ -219,6 +219,9 @@ CUI.ChatPresenter.prototype._getMessages = function(url){
     cache: false,
     context: this
   }).done(function(data){
+    // Update progress
+    this._getProgress();
+
     // Update the current input type in the chat
     if(data.input) this._setInput(data.input);
     else throw new Error("CUI.ChatPresenter._getMessages(): No data.input.");
@@ -264,8 +267,6 @@ CUI.ChatPresenter.prototype._postInput = function(input){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
 
-        // Update progress
-        this._getProgress();
     }else if(response.error){
       // Enable input
       this._inputIsEnabled = true;
@@ -347,9 +348,6 @@ CUI.ChatPresenter.prototype._postAction = function(actionUrl){
     if(response && response.nextMessagesUrl){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
-
-        // Update progress
-        this._getProgress();
     }else{
       throw new Error('CUI.ChatPresenter._postAction(): No response.nextMessagesUrl');
     }
