@@ -820,6 +820,7 @@ p + p {
     padding-top: 18px; }
 
 .chat-sidebar {
+  overflow: scroll;
   position: fixed;
   display: none;
   top: 0;
