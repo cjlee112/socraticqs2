@@ -2,7 +2,7 @@ import injections
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
-from .models import Message, Chat
+from .models import Message, Chat, ChatDivider
 from .services import ProgressHandler
 from ct.models import UnitLesson, Response
 
@@ -141,6 +141,7 @@ class LessonSerializer(serializers.ModelSerializer):
     html = serializers.CharField(source='lesson.title', read_only=True)
     isDone = serializers.SerializerMethodField()
     isUnlocked = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
@@ -150,6 +151,12 @@ class LessonSerializer(serializers.ModelSerializer):
             'isUnlocked',
             'isDone'
         )
+
+    def get_id(self, obj):
+        if hasattr(obj, 'message'):
+            return obj.message
+        else:
+            return obj.id
 
     def get_isUnlocked(self, obj):
         if hasattr(obj, 'message'):
