@@ -53,7 +53,6 @@ EVAL_OPTIONS = {
 }
 
 
-
 class Chat(models.Model):
     """
     Chat model that handles particular student chat.

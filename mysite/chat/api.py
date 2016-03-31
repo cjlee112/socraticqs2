@@ -32,7 +32,6 @@ def get_additional_messages(response, chat):
                                           is_additional=True)
 
 
-
 @injections.has
 class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     """
@@ -49,7 +48,8 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
-        chat = Chat.objects.filter(user=self.request.user).first()
+        chat_id = self.request.GET.get('chat_id')
+        chat = Chat.objects.get(id=chat_id, user=self.request.user)
         next_point = chat.next_point
 
         if (
@@ -92,8 +92,9 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         return Response(serializer.data)
 
     def perform_update(self, serializer):
+        chat_id = self.request.data.get('chat_id')
         message = self.get_object()
-        chat = Chat.objects.filter(user=self.request.user).first()
+        chat = Chat.objects.get(id=chat_id, user=self.request.user)
 
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
@@ -153,7 +154,8 @@ class HistoryView(generics.RetrieveAPIView):
     List all messages in chat w/ additional info.
     """
     def get(self, request, *args, **kwargs):
-        chat = Chat.objects.all().first()
+        chat_id = self.request.GET.get('chat_id')
+        chat = Chat.objects.get(id=chat_id, user=self.request.user)
         serializer = ChatHistorySerializer(chat)
         return Response(serializer.data)
 
@@ -163,6 +165,7 @@ class ProgressView(generics.RetrieveAPIView):
     Return progress for chat.
     """
     def get(self, request, *args, **kwargs):
-        chat = Chat.objects.all().first()
+        chat_id = self.request.GET.get('chat_id')
+        chat = Chat.objects.get(id=chat_id, user=self.request.user)
         serializer = ChatProgressSerializer(chat)
         return Response(serializer.data)

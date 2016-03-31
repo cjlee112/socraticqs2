@@ -19,25 +19,23 @@ class ChatInitialView(View):
 
     @method_decorator(login_required)
     def get(self, request, enroll_key):
-        if enroll_key:
-            courseUnit = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key).courseUnit
-            unit = courseUnit.unit
-            if not Role.objects.filter(
-                user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
-            ):
-                enrolling = Role.objects.get_or_create(user=request.user,
-                                                       course=courseUnit.course,
-                                                       role=Role.SELFSTUDY)[0]
-                enrolling.role = Role.ENROLLED
-                enrolling.save()
+        enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        courseUnit = enroll_code.courseUnit
+        unit = courseUnit.unit
+        if not Role.objects.filter(
+            user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
+        ):
+            enrolling = Role.objects.get_or_create(user=request.user,
+                                                   course=courseUnit.course,
+                                                   role=Role.SELFSTUDY)[0]
+            enrolling.role = Role.ENROLLED
+            enrolling.save()
 
-        else:
-            unit = Unit.objects.all().first()  # TODO add real Unit query
-        chat = Chat.objects.all().first()  # TODO add real Chat query
+        chat = Chat.objects.filter(enroll_code=enroll_code).first()
         if not chat and enroll_key:
             chat = Chat(
                 user=request.user,
-                enroll_code=EnrollUnitCode.objects.filter(enrollCode=enroll_key).first()
+                enroll_code=enroll_code
             )
             chat.save(request)
         if chat.message_set.count() == 0:
@@ -59,6 +57,7 @@ class ChatInitialView(View):
             request,
             'chat/main_view.html',
             {
+                'chat_id': chat.id,
                 'course': courseUnit.course,
                 'unit': unit,
                 'concepts': concepts,

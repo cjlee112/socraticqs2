@@ -183,6 +183,7 @@ CUI.ChatPresenter.prototype._getHistory = function(){
     url: this._historyUrl,
     method: 'GET',
     dataType: 'json',
+    data: {chat_id: this._chatID},
     cache: false,
     context: this
   }).done(this._parseHistory).fail(function(){ throw new Error("CUI.ChatPresenter._getHistory(): Failed to load history."); });
@@ -198,6 +199,7 @@ CUI.ChatPresenter.prototype._getProgress = function(){
     url: this._progressUrl,
     method: 'GET',
     dataType: 'json',
+    data: {chat_id: this._chatID},
     cache: false,
     context: this
   }).done(this._parseProgress).fail(function(){
@@ -216,6 +218,7 @@ CUI.ChatPresenter.prototype._getMessages = function(url){
     url: url,
     method: 'GET',
     dataType: 'json',
+    data: {chat_id: this._chatID},
     cache: false,
     context: this
   }).done(function(data){
@@ -246,6 +249,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
 
   // Add selected elements to input
   input.selected = this._findSelectedValues();
+  input.chat_id = this._chatID;
 
   // Show loading
   this._showLoading();
@@ -304,6 +308,7 @@ CUI.ChatPresenter.prototype._postText = function(){
 
   // Add text to input object if set
   input.text = text;
+  input.chat_id = this._chatID;
 
   this._postInput(input);
 };
@@ -316,6 +321,7 @@ CUI.ChatPresenter.prototype._postText = function(){
 CUI.ChatPresenter.prototype._postOption = function(optionValue){
   // Create input object
   var input = {option: optionValue};
+  input.chat_id = this._chatID;
 
   // Send input to server
   this._postInput(input);
