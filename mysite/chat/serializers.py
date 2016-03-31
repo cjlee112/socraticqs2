@@ -167,11 +167,13 @@ class LessonSerializer(serializers.ModelSerializer):
 
     def get_isDone(self, obj):
         if hasattr(obj, 'message'):
-            message = Message.objects.get(id=obj.message)
-            last_message = Message.objects.filter(chat=message.chat,
-                                                  timestamp__isnull=False)\
-                                          .order_by('timestamp').last()
-            return message.timestamp is not None and not message.timestamp == last_message.timestamp
+            lesson_order = Message.objects.get(id=obj.message).content.order
+            chat = Message.objects.get(id=obj.message).chat
+            if chat.state:
+                current_unitlesson_order = chat.state.unitLesson.order
+                return lesson_order < current_unitlesson_order
+            else:
+                return True
         else:
             return False
 

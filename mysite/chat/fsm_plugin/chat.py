@@ -64,6 +64,7 @@ class START(object):
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
+
     next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
@@ -86,6 +87,7 @@ class LESSON(object):
 
 
 class ASK(object):
+    get_path = get_lesson_url
     # node specification data goes here
     title = 'View an explanation'
     edges = (
@@ -94,6 +96,7 @@ class ASK(object):
 
 
 class GET_ANSWER(object):
+    get_path = get_lesson_url
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
@@ -102,6 +105,7 @@ class GET_ANSWER(object):
 
 
 class ASSESS(object):
+    get_path = get_lesson_url
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
@@ -110,6 +114,7 @@ class ASSESS(object):
 
 
 class GET_ASSESS(object):
+    get_path = get_lesson_url
     next_edge = check_selfassess_and_next_lesson
     # node specification data goes here
     title = 'Assess your answer'
@@ -119,6 +124,7 @@ class GET_ASSESS(object):
 
 
 class ERRORS(object):
+    get_path = get_lesson_url
     # node specification data goes here
     title = 'Error options'
     edges = (
@@ -127,6 +133,7 @@ class ERRORS(object):
 
 
 class GET_ERRORS(object):
+    get_path = get_lesson_url
     next_edge = next_lesson
     # node specification data goes here
     title = 'Classify your error(s)'
