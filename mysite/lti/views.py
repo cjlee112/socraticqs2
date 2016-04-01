@@ -1,6 +1,8 @@
 import oauth2
 import json
 import logging
+
+from django.utils import timezone
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -134,6 +136,7 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 RequestContext(request)
             )
 
+    user.enroll(roles, course_id)
     if Role.INSTRUCTOR in roles:
         if not unit_id:
             return redirect(reverse('ct:course', args=(course_id,)))
@@ -141,27 +144,23 @@ def lti_redirect(request, course_id=None, unit_id=None):
             return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
         course = get_object_or_404(Course, id=course_id)
-        unit = get_object_or_404(Unit, id=unit_id)
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            unit = course.courseunit_set.filter(
+                releaseTime__isnull=False,
+                releaseTime__lt=timezone.now()
+            ).order_by('order').first()
+
+        if not unit:
+            return render_to_response(
+                'lti/error.html',
+                {'message': 'There is no units to display for that Course.'},
+                RequestContext(request)
+            )
         course_unit = CourseUnit.objects.get(unit=unit, course=course)
         enroll_code = EnrollUnitCode.get_code(course_unit)
         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
-
-    # user.enroll(roles, course_id)
-    #
-    # if user.is_enrolled(roles, course_id):
-    #     # Redirect to course or unit page considering users role
-    #     if not unit_id:
-    #         dispatch = 'ct:course_student'
-    #         if Role.INSTRUCTOR in roles:
-    #             dispatch = 'ct:course'
-    #         return redirect(reverse(dispatch, args=(course_id,)))
-    #     else:
-    #         dispatch = 'ct:study_unit'
-    #         if Role.INSTRUCTOR in roles:
-    #             dispatch = 'ct:unit_tasks'
-    #         return redirect(reverse(dispatch, args=(course_id, unit_id)))
-    # else:
-    #     return redirect(reverse('ct:home'))
 
 
 @only_lti

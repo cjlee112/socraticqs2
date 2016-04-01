@@ -63,6 +63,7 @@ class FSMStack(object):
         stateData = stateData or {}
         startArgs = startArgs or {}
         fsm = FSM.objects.select_related('startNode').get(name=fsmName)
+        activity = None
         if not activity and self.state and fsmName not in ('chat', 'additional'):
             activity = self.state.activity
         self.state = FSMState(
@@ -77,7 +78,7 @@ class FSMStack(object):
             **kwargs
         )
         path = self.state.start_fsm(self, request, stateData, **startArgs)
-        if activity:
+        if fsmName not in ('chat', 'additional'):
             request.session['fsmID'] = self.state.pk
         return path
 
