@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 
-from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson
+from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson, STATUS_CHOICES, StudentError
 from ct.templatetags.ct_extras import md2html
 
 
@@ -52,6 +52,11 @@ EVAL_OPTIONS = {
     'correct': 'Essentially the same'
 }
 
+STATUS_OPTIONS = {
+    'help': 'Still confused, need help',
+    'review': 'OK, but need further review and practice',
+    'done': 'Solidly',
+}
 
 class Chat(models.Model):
     """
@@ -88,6 +93,7 @@ class Message(models.Model):
     input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True, default='options')
     lesson_to_answer = models.ForeignKey(UnitLesson, null=True)
     response_to_check = models.ForeignKey(Response, null=True)
+    student_error = models.ForeignKey(StudentError, null=True)
     type = models.CharField(max_length=16, default='message', choices=MESSAGE_TYPES)
     owner = models.ForeignKey(User, null=True)
     is_additional = models.BooleanField(default=False)
@@ -145,7 +151,9 @@ class Message(models.Model):
         options = None
         if (self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'):
-            if isinstance(self.chat.next_point.content, UnitError):
+            if self.chat.next_point.contenttype == 'unitlesson':
+                options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
+            elif isinstance(self.chat.next_point.content, UnitError):
                 options = [{"value": 1, "text": "Continue"}]
             else:
                 options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
@@ -162,9 +170,15 @@ class Message(models.Model):
                 else:
                     html = EVAL_OPTIONS[self.content.selfeval]
             elif self.contenttype == 'unitlesson':
-                html = mark_safe(md2html(self.content.lesson.text))
+                if self.content.kind == UnitLesson.MISUNDERSTANDS:
+                    html = 'Resolves for errormodel %s ' % self.content.lesson.title
+                elif self.input_type == 'options' and self.text:
+                    html = STATUS_OPTIONS[self.text]
+                else:
+                    html = mark_safe(md2html(self.content.lesson.text))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
+
         else:
             html = self.text
         return html

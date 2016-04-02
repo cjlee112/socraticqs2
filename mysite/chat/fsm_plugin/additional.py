@@ -1,4 +1,5 @@
-from ct.models import UnitStatus
+from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS, StudentError
+
 from ..models import Message
 
 
@@ -24,27 +25,58 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         return edge.toNode
 
 
+def get_resolves_for_errormodel(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    nextUL = unitStatus.get_lesson()
+    map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
+                                                 content_id=ul.id,
+                                                 chat=fsmStack,
+                                                 owner=fsmStack.user,
+                                                 input_type='custom',
+                                                 kind=ul.lesson.kind,
+                                                 is_additional=True),
+        nextUL.get_em_resolutions()[1])
+
+    return next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
+
+
 def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).
     """
     fsm = edge.fromNode.fsm
 
-    additionals = Message.objects.filter(is_additional=True,
-                                         chat=fsmStack,
-                                         timestamp__isnull=True)
-    if additionals:
-        nextUL = additionals.first().content
-        try:
-            if nextUL.is_question():
+    if fsmStack.next_point.student_error.status == NEED_HELP_STATUS:
+        additionals = Message.objects.filter(is_additional=True,
+                                             chat=fsmStack,
+                                             timestamp__isnull=True)
+
+        print 'get next resolve from that lesson'
+        if additionals:
+            nextUL = additionals.first().content
+            if additionals.first().student_error != fsmStack.next_point.student_error:
                 fsmStack.state.unitLesson = nextUL
-                return fsm.get_node(name='ASK')
-            else:  # just a lesson to read
-                fsmStack.state.unitLesson = nextUL
-        except:
+                return fsm.get_node('STUDENTERROR')
+        else:
             return fsm.get_node('END')
-    else:
-        return fsm.get_node('END')
+    elif fsmStack.next_point.student_error.status in [NEED_REVIEW_STATUS, DONE_STATUS]:
+        Message.objects.filter(student_error=fsmStack.next_point.student_error,
+                               is_additional=True,
+                               chat=fsmStack,
+                               timestamp__isnull=True).delete()
+        # TODO get rid of this strange message
+        additionals = Message.objects.filter(is_additional=True,
+                                             chat=fsmStack,
+                                             student_error__isnull=False,
+                                             timestamp__isnull=True)
+        if additionals:
+            nextUL = additionals.first().content
+            fsmStack.state.unitLesson = nextUL
+            return fsm.get_node('STUDENTERROR')
+        else:
+            return fsm.get_node('END')
+        print 'get resolve to next lesson and put status to that error'
+    fsmStack.state.unitLesson = nextUL
     return edge.toNode
 
 
@@ -104,72 +136,36 @@ class DIVIDER(object):
     # node specification data goes here
     title = 'Additional lessons begin'
     edges = (
-        dict(name='next', toNode='LESSON', title='View Next Lesson'),
+        dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
     )
 
 
-class LESSON(object):
-    """
-    View a lesson explanation.
-    """
+class STUDENTERROR(object):
     get_path = get_lesson_url
-    next_edge = next_additional_lesson
     # node specification data goes here
-    title = 'View an explanation'
+    title = 'Additional lessons begin'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='RESOLVE', title='View Next Lesson'),
+    )
 
 
-class ASK(object):
-    # get_path = get_lesson_url
-    # node specification data goes here
-    title = 'View an explanation'
-    edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
-        )
-
-
-class GET_ANSWER(object):
+class RESOLVE(object):
     get_path = get_lesson_url
+
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
+            dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
         )
 
-
-class ASSESS(object):
-    # node specification data goes here
-    title = 'Assess your answer'
-    edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
-
-
-class GET_ASSESS(object):
-    next_edge = check_selfassess_and_next_lesson
-    # node specification data goes here
-    title = 'Assess your answer'
-    edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
-        )
-
-
-class ERRORS(object):
-    # node specification data goes here
-    title = 'Error options'
-    edges = (
-            dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
-        )
-
-
-class GET_ERRORS(object):
+class GET_RESOLVE(object):
+    get_path = get_lesson_url
     next_edge = next_additional_lesson
+
     # node specification data goes here
-    title = 'Classify your error(s)'
+    title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='RESOLVE', title='Go to self-assessment'),
         )
 
 
@@ -196,6 +192,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, DIVIDER, LESSON, ASK, GET_ANSWER, ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
+        pluginNodes=[START, DIVIDER, STUDENTERROR, RESOLVE, GET_RESOLVE, END],
     )
     return (spec,)

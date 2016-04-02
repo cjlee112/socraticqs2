@@ -201,11 +201,10 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             for each in messages:
                 if each.content in lessons:
                     lessons[lessons.index(each.content)].message = each.id
-                else:
-                    if each.content.kind != 'answers':
-                        lesson = each.content
-                        lesson.message = each.id
-                        lessons.append(lesson)
+                elif each.content.kind != 'answers':
+                    lesson = each.content
+                    lesson.message = each.id
+                    lessons.append(lesson)
             self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)
         return self.lessons_dict
 

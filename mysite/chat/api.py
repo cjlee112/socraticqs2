@@ -22,14 +22,16 @@ def get_additional_messages(response, chat):
     print 'additional lessons'
     student_errors = response.studenterror_set.all()
     for each in student_errors:
-        for ul in each.errorModel.get_em_resolutions()[1]:
-            Message.objects.get_or_create(contenttype='unitlesson',
-                                          content_id=ul.id,
-                                          chat=chat,
-                                          owner=chat.user,
-                                          input_type='custom',
-                                          kind=ul.lesson.kind,
-                                          is_additional=True)
+        map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
+                                                     content_id=ul.id,
+                                                     chat=chat,
+                                                     owner=chat.user,
+                                                     input_type='custom',
+                                                     student_error=each,
+                                                     kind='message',
+                                                     is_additional=True),
+            each.errorModel.get_em_resolutions()[1])
+        print each.errorModel, each.errorModel.get_em_resolutions()[1]
 
 
 @injections.has
@@ -69,19 +71,11 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-        if (
-            message.input_type == 'text' or
-            message.input_type == 'options' or
-            message.contenttype == 'uniterror'
-        ):
-            serializer = self.get_serializer(message)
-            return Response(serializer.data)
-
         if message:
             # Set next message for user
             if not message.timestamp:
                 message.timestamp = timezone.now()
-            message.save()
+                message.save()
             chat.next_point = self.next_handler.next_point(
                 current=message.content, chat=chat, message=message, request=request
             )
@@ -138,7 +132,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 )
                 chat.save()
                 serializer.save(chat=chat)
-            else:
+            elif message.content_id and not message.student_error:
                 message.chat = chat
                 selfeval = self.request.data.get('option')
                 resp = message.content
@@ -147,6 +141,17 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 chat.next_point = message
                 chat.save()
                 serializer.save(content_id=resp.id, chat=chat)
+            else:
+                message.chat = chat
+                selfeval = self.request.data.get('option')
+                resp = message.student_error
+                resp.status = selfeval
+                resp.save()
+                chat.next_point = message
+                chat.save()
+                message.text = selfeval
+                message.save()
+
 
 
 class HistoryView(generics.RetrieveAPIView):

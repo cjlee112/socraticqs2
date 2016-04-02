@@ -145,7 +145,7 @@ class ChatMixin(object):
         print "Current node is " + self.name
         is_additional = chat.state.fsmNode.fsm.name == 'additional'
         next_lesson = chat.state.unitLesson
-        if self.name in ['LESSON', 'ASK']:
+        if self.name in ['LESSON', 'ASK', 'STUDENTERROR']:
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
@@ -185,6 +185,44 @@ class ChatMixin(object):
                             kind='response',
                             userMessage=True,
                             is_additional=is_additional)[0]
+        if self.name == 'STUDENTERROR':
+            resolve_message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            content_id=next_lesson.id,
+                            chat=chat,
+                            owner=chat.user,
+                            input_type='custom',
+                            kind='message',
+                            is_additional=True)[0]
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            content_id=resolve_message.student_error.errorModel.id,
+                            chat=chat,
+                            owner=chat.user,
+                            student_error=resolve_message.student_error,
+                            input_type='custom',
+                            kind='message',
+                            is_additional=True)[0]
+        if self.name == 'RESOLVE':
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            content_id=next_lesson.id,
+                            chat=chat,
+                            owner=chat.user,
+                            input_type='custom',
+                            kind='message',
+                            is_additional=True)[0]
+        if self.name == 'GET_RESOLVE':
+                message = Message.objects.create(
+                            contenttype='unitlesson',
+                            content_id=next_lesson.id,
+                            input_type='options',
+                            chat=chat,
+                            owner=chat.user,
+                            student_error=message.student_error,
+                            kind='response',
+                            userMessage=True,
+                            is_additional=is_additional)
         if self.name == 'ERRORS':
             message = Message.objects.get_or_create(
                             chat=chat,

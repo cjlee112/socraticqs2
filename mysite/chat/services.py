@@ -89,6 +89,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         next_point = None
         additionals = Message.objects.filter(is_additional=True,
                                              chat=chat,
+                                             student_error__isnull=False,
                                              timestamp__isnull=True)
 
         if chat.state.fsmNode.name == 'END':
