@@ -3,43 +3,6 @@ from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STA
 from ..models import Message
 
 
-def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    """
-    Edge method that moves us to right state for next lesson (or END).
-    """
-    fsm = edge.fromNode.fsm
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
-
-    if useCurrent:
-        nextUL = unitStatus.get_lesson()
-    else:
-        nextUL = unitStatus.start_next_lesson()
-    if not nextUL:
-        return fsm.get_node('END')
-    elif nextUL.is_question():
-        fsmStack.state.unitLesson = nextUL
-        return fsm.get_node(name='ASK')
-    else:  # just a lesson to read
-        fsmStack.state.unitLesson = nextUL
-
-        return edge.toNode
-
-
-def get_resolves_for_errormodel(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
-    nextUL = unitStatus.get_lesson()
-    map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
-                                                 content_id=ul.id,
-                                                 chat=fsmStack,
-                                                 owner=fsmStack.user,
-                                                 input_type='custom',
-                                                 kind=ul.lesson.kind,
-                                                 is_additional=True),
-        nextUL.get_em_resolutions()[1])
-
-    return next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
-
-
 def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).
@@ -50,33 +13,21 @@ def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kw
         additionals = Message.objects.filter(is_additional=True,
                                              chat=fsmStack,
                                              timestamp__isnull=True)
-
-        print 'get next resolve from that lesson'
-        if additionals:
-            nextUL = additionals.first().content
-            if additionals.first().student_error != fsmStack.next_point.student_error:
-                fsmStack.state.unitLesson = nextUL
-                return fsm.get_node('STUDENTERROR')
-        else:
-            return fsm.get_node('END')
     elif fsmStack.next_point.student_error.status in [NEED_REVIEW_STATUS, DONE_STATUS]:
         Message.objects.filter(student_error=fsmStack.next_point.student_error,
                                is_additional=True,
                                chat=fsmStack,
                                timestamp__isnull=True).delete()
-        # TODO get rid of this strange message
         additionals = Message.objects.filter(is_additional=True,
                                              chat=fsmStack,
-                                             student_error__isnull=False,
                                              timestamp__isnull=True)
-        if additionals:
-            nextUL = additionals.first().content
-            fsmStack.state.unitLesson = nextUL
+    if additionals:
+        nextUL = additionals.first().content
+        fsmStack.state.unitLesson = nextUL
+        if additionals.first().student_error != fsmStack.next_point.student_error:
             return fsm.get_node('STUDENTERROR')
-        else:
-            return fsm.get_node('END')
-        print 'get resolve to next lesson and put status to that error'
-    fsmStack.state.unitLesson = nextUL
+    else:
+        return fsm.get_node('END')
     return edge.toNode
 
 
@@ -123,7 +74,6 @@ class START(object):
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
 
-    # next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
