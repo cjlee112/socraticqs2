@@ -145,7 +145,7 @@ class ChatMixin(object):
         print "Current node is " + self.name
         is_additional = chat.state.fsmNode.fsm.name == 'additional'
         next_lesson = chat.state.unitLesson
-        if self.name in ['LESSON', 'ASK', 'STUDENTERROR']:
+        if self.name in ['LESSON', 'ASK']:
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
@@ -186,14 +186,14 @@ class ChatMixin(object):
                             userMessage=True,
                             is_additional=is_additional)[0]
         if self.name == 'STUDENTERROR':
-            resolve_message = Message.objects.get_or_create(
+            resolve_message = Message.objects.get(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
                             owner=chat.user,
                             input_type='custom',
                             kind='message',
-                            is_additional=True)[0]
+                            is_additional=True)
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=resolve_message.student_error.errorModel.id,
