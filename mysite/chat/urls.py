@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 
 from .views import ChatInitialView
-from .api import MessagesView, HistoryView, ProgressView
+from .api import MessagesView, HistoryView, ProgressView, ResourcesView
 from .services import FsmHandler
 
 
@@ -15,6 +15,7 @@ ChatInitialViewFSM = inj.inject(ChatInitialView)
 
 router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, base_name='messages')
+router.register(r'resources', ResourcesView, base_name='resources')
 
 urlpatterns = patterns(
     '',

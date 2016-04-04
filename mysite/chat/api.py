@@ -7,10 +7,11 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat
-from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer
+from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
 from ct.models import Response as StudentResponse
+from ct.models import UnitLesson
 
 
 inj_alternative = injections.Container()
@@ -31,7 +32,6 @@ def get_additional_messages(response, chat):
                                                      kind='message',
                                                      is_additional=True),
             each.errorModel.get_em_resolutions()[1])
-        print each.errorModel, each.errorModel.get_em_resolutions()[1]
 
 
 @injections.has
@@ -173,4 +173,31 @@ class ProgressView(generics.RetrieveAPIView):
         chat_id = self.request.GET.get('chat_id')
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         serializer = ChatProgressSerializer(chat)
+        return Response(serializer.data)
+
+
+class ResourcesView(viewsets.ModelViewSet):
+    """
+    Return progress for chat.
+    """
+    def list(self, request, *args, **kwargs):
+        chat_id = self.request.GET.get('chat_id')
+        chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        serializer = ChatResourcesSerializer(chat)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        chat_id = self.request.GET.get('chat_id')
+        chat = Chat.objects.get(id=chat_id)
+
+        unitlesson = UnitLesson.objects.get(pk=pk)
+        m = Message.objects.create(contenttype='unitlesson',
+                               content_id=unitlesson.id,
+                               chat=chat,
+                               owner=chat.user,
+                               input_type='custom',
+                               kind=unitlesson.lesson.kind,
+                               is_additional=True
+                                )
+        serializer = MessageSerializer(m)
         return Response(serializer.data)

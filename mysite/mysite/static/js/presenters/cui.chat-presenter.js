@@ -37,7 +37,7 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl){
    * @type {Array.<CUI.SidebarBreakpointPresenter>}
    * @protected
    */
-  this._sidebarBreakpoints = {};
+  this._sidebarResources = {};
 
   /**
    * The url for loading a user's chat history.
@@ -416,12 +416,12 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
     // Add breakpoints to the sidebar
     if(data.breakpoints instanceof Array && data.breakpoints.length > 0){
       // Remove existing breakpoints
-      $.each(this._sidebarBreakpoints, $.proxy(function(i, b){
+      $.each(this._sidebarResources, $.proxy(function(i, b){
         b.destroy();
       }, this));
 
       // Reset breakpoints Array
-      this._sidebarBreakpoints = [];
+      this._sidebarResources = [];
 
       // Add new breakpoints
       $.each(data.breakpoints, $.proxy(function(i, b){
@@ -429,7 +429,7 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
 
         // Add reference to breakpoint
-        this._sidebarBreakpoints.push(breakpoint);
+        this._sidebarResources.push(breakpoint);
 
         // Add breakpoint in sidebar
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
@@ -584,7 +584,7 @@ CUI.ChatPresenter.prototype._removeMessage = function(id){
     this._messages[id] = null;
 
     // Remove any sidebar breakpoints linking to this message
-    breakpoint = this._sidebarBreakpoints[id];
+    breakpoint = this._sidebarResources[id];
 
     if(breakpoint) breakpoint.destroy();
   }else{

@@ -136,6 +136,11 @@
         <h4>Lessons</h4>
         <ul class="chat-sidebar-breakpoints"></ul>
       </section>
+
+      <section>
+        <h4>Resources</h4>
+        <ul class="chat-sidebar-resources"></ul>
+      </section>
     </aside>
     <!-- /Sidebar -->
 
@@ -179,6 +184,7 @@
       CUI.config.chatID = {{ chat_id }};
       CUI.config.historyUrl = '/chat/history/';
       CUI.config.progressUrl = '/chat/progress/';
+      CUI.config.resourcesUrl = '/chat/resources/';
       CUI.config.defaultStudentAvatar = '{% static "img/avatar-student.jpg" %}';
       CUI.config.defaultTeacherAvatar = '{% static "img/avatar-teacher.jpg" %}';
     </script>
@@ -206,11 +212,13 @@
     <script src="{% static "js/models/cui.chat-message-model.js" %}"></script>
     <script src="{% static "js/models/cui.sidebar-breakpoint-model.js" %}"></script>
     <script src="{% static "js/models/cui.input-option-model.js" %}"></script>
+    <script src="{% static "js/models/cui.sidebar-resource-model.js" %}"></script>
     <script src="{% static "js/presenters/cui.chat-message-presenter.js" %}"></script>
     <script src="{% static "js/presenters/cui.chat-media-presenter.js" %}"></script>
     <script src="{% static "js/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
     <script src="{% static "js/presenters/cui.input-option-presenter.js" %}"></script>
     <script src="{% static "js/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.sidebar-resource-presenter.js" %}"></script>
     <script src="{% static "js/presenters/cui.chat-presenter.js" %}"></script>
     <script src="{% static "js/helpers.js" %}"></script>
     <script src="{% static "js/app.js" %}"></script>

@@ -24,7 +24,7 @@ $(function(){
     $('.chat-introduction .cta').hide();
 
     // Create the chat
-    var chat = new CUI.ChatPresenter(CUI.config.chatID, CUI.config.historyUrl, CUI.config.progressUrl);
+    var chat = new CUI.ChatPresenter(CUI.config.chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl);
   });
 });
 

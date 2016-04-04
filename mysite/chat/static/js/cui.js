@@ -46,6 +46,13 @@ CUI.text.errorNoFullscreenSupport = "Your browser does not support fullscreen mo
  CUI.config.progressUrl;
 
  /**
+  * The url for loading information about additional resources.
+  * @type {string}
+  * @public
+  */
+ CUI.config.resourcesUrl;
+
+ /**
   * A path to a default avatar for the student.
   * @type {string}
   * @public

@@ -12,11 +12,12 @@ var CUI = CUI || {};
  * @param {string} progressUrl      - A url for loading a user's progress.
  * @returns {CUI.ChatPresenter}
  */
-CUI.ChatPresenter = function(chatID, historyUrl, progressUrl){
+CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
   // Check arguments
   if(typeof chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
   if(!historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
   if(!progressUrl) throw new Error('CUI.ChatPresenter(): No progressUrl.');
+  if(!resourcesUrl) throw new Error('CUI.ChatPresenter(): No resourcesUrl.');
 
   /**
    * The chat's unique ID.
@@ -40,6 +41,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl){
   this._sidebarBreakpoints = {};
 
   /**
+   * An array with references to all resources currently in the sidebar.
+   * @type {Array.<CUI.SidebarBreakpointPresenter>}
+   * @protected
+   */
+  this._sidebarResources = {};
+
+  /**
    * The url for loading a user's chat history.
    * @type {string}
    * @protected
@@ -52,6 +60,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl){
    * @protected
    */
   this._progressUrl = progressUrl;
+
+  /**
+   * The url for loading a resources of the unit.
+   * @type {string}
+   * @protected
+   */
+  this._resourcesUrl = resourcesUrl;
 
   /**
    * The currently active input type in the chat. 'text', 'options', or 'custom'.
@@ -108,6 +123,14 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl){
    * @protected
    */
   this._$sidebarBreakpointsContainer = $('.chat-sidebar-breakpoints');
+
+  /**
+   * A jQuery reference to the container element for sidebar breakpoints.
+   * @type {jQuery}
+   * @protected
+   */
+  this._$sidebarResourcesContainer = $('.chat-sidebar-resources');
+
 
   /**
    * A jQuery reference to the container element for messages.
@@ -208,6 +231,24 @@ CUI.ChatPresenter.prototype._getProgress = function(){
 };
 
 /**
+ * Loads resources of the unit and sends the response to {@link CUI.ChatPresenter#_parseProgress}.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._getResources = function(){
+  // Get progress
+  $.ajax({
+    url: this._resourcesUrl,
+    method: 'GET',
+    dataType: 'json',
+    data: {chat_id: this._chatID},
+    cache: false,
+    context: this
+  }).done(this._parseResources).fail(function(){
+    throw new Error('CUI.ChatPresenter._getResources(): Could not load resources.');
+  });
+};
+
+/**
  * Loads a user's next set of messages and input type.
  * @protected
  * @param {string} url     - A url for loading a user's next set of messages and input type.
@@ -271,6 +312,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
 
         // Update progress
         this._getProgress();
+        this._getResources();
     }else if(response.error){
       // Enable input
       this._inputIsEnabled = true;
@@ -357,6 +399,7 @@ CUI.ChatPresenter.prototype._postAction = function(actionUrl){
 
         // Update progress
         this._getProgress();
+        this._getResources();
     }else{
       throw new Error('CUI.ChatPresenter._postAction(): No response.nextMessagesUrl');
     }
@@ -395,6 +438,7 @@ CUI.ChatPresenter.prototype._showChat = function(){
 
     // Update progress
     this._getProgress();
+    this._getResources();
   }, this)});
 };
 
@@ -445,6 +489,45 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
       }, this));
     }
   }else{
+    throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');
+  }
+};
+
+/**
+ * Parses resources data and updates the list of breakpoints in the sidebar.
+ * @protected
+ * @param {object} data               - An object containing the user's progress.
+ * @param {number} data.progress      - The user's progress 0 - 1.
+ * @param {Array} data.breakpoints    - An array of breakpoints to display in the sidebar.
+ */
+CUI.ChatPresenter.prototype._parseResources = function(data){
+  var breakpoint;
+
+    if(data){
+      // Add breakpoints to the sidebar
+      if(data.breakpoints instanceof Array && data.breakpoints.length > 0){
+        // Remove existing breakpoints
+        $.each(this._sidebarResources, $.proxy(function(i, b){
+          b.destroy();
+        }, this));
+
+        // Reset breakpoints Array
+        this._sidebarResources = [];
+
+        // Add new breakpoints
+        $.each(data.breakpoints, $.proxy(function(i, b){
+          // Create breakpoint from template
+          breakpoint = new CUI.SidebarResourcePresenter(new CUI.SidebarResourceModel(b));
+
+          // Add reference to breakpoint
+          this._sidebarResources.push(breakpoint);
+
+          // Add breakpoint in sidebar
+          this._$sidebarResourcesContainer.append(breakpoint.$el);
+        }, this));
+      }
+    }
+  else{
     throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');
   }
 };
@@ -738,6 +821,19 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(id){
   }
 };
 
+CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id){
+  var $message;
+  var top;
+
+  // Check that message exists
+  if(this._messages[id]){
+    $message = this._messages[id].$el;
+    top = $message.offset().top;
+    TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
+  } else {
+      $.when(this._getMessages(this._resourcesUrl+id+'/')).then(this._getResources());
+  };
+};
 /**
  * Calculates the scroll animation time for window based on distance.
  * @protected
@@ -892,6 +988,14 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
 
     // Scroll to message
     this._scrollToMessage($(e.currentTarget).data('href'));
+  }, this));
+
+  // Delegated events for sidebar resources links
+  this._$sidebarResourcesContainer.on('click', 'li', $.proxy(function(e){
+    e.preventDefault();
+
+    // Scroll to message
+    this._scrollToResourceMessage($(e.currentTarget).data('href'));
   }, this));
 
   // Text input submit

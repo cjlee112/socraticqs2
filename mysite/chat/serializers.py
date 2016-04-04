@@ -213,3 +213,78 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             self.get_breakpoints(obj)
         done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
         return round(float(done)/len(self.lessons_dict), 2)
+
+
+class ResourcesSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Lesson.
+    """
+    html = serializers.CharField(source='lesson.title', read_only=True)
+    isUnlocked = serializers.SerializerMethodField()
+    isDone = serializers.SerializerMethodField()
+    isStarted = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UnitLesson
+        fields = (
+            'id',
+            'html',
+            'isUnlocked',
+            'isStarted',
+            'isDone'
+        )
+
+    def get_id(self, obj):
+        if hasattr(obj, 'message'):
+            return obj.message
+        else:
+            return obj.id
+
+    def get_isUnlocked(self, obj):
+        return True
+
+    def get_isStarted(self, obj):
+        if hasattr(obj, 'message'):
+            message = Message.objects.get(id=obj.message)
+            return message.timestamp is not None
+        else:
+            return False
+        return True
+
+    def get_isDone(self, obj):
+        if hasattr(obj, 'message'):
+            lesson_order = Message.objects.get(id=obj.message).content.order
+            chat = Message.objects.get(id=obj.message).chat
+            if chat.state:
+                current_unitlesson_order = chat.state.unitLesson.order
+                return lesson_order < current_unitlesson_order
+            else:
+                return True
+        else:
+            return False
+
+class ChatResourcesSerializer(serializers.ModelSerializer):
+    """
+    Serializer to implement /progress API.
+    """
+    breakpoints = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Chat
+        fields = (
+            'breakpoints',
+        )
+
+    def get_breakpoints(self, obj):
+        courseUnit = obj.enroll_code.courseUnit
+        unit = courseUnit.unit
+        lessons = list(unit.unitlesson_set \
+                          .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        lessons.sort(lambda x, y: cmp(x.lesson.title, y.lesson.title))
+        messages = obj.message_set.filter(contenttype='unitlesson', is_additional=True)
+        for each in messages:
+            if each.content in lessons:
+                lessons[lessons.index(each.content)].message = each.id
+
+        return ResourcesSerializer(many=True).to_representation(lessons)
