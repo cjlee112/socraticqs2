@@ -25,7 +25,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # Tell nose to measure coverage on the 'lti' and 'psa' apps
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=lti,psa,ct,fsm',
+    '--cover-package=lti,psa,ct,fsm,chat',
     '--cover-inclusive',
 ]
 
