@@ -212,6 +212,15 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
+        if self.name == 'MESSAGE_NODE':
+            message = Message.objects.get_or_create(
+                            chat=chat,
+                            owner=chat.user,
+                            text=chat.state.fsmNode.title,
+                            student_error=message.student_error,
+                            input_type='custom',
+                            kind='message',
+                            is_additional=True)[0]
         if self.name == 'GET_RESOLVE':
                 message = Message.objects.create(
                             contenttype='unitlesson',

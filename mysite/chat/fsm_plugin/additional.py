@@ -101,12 +101,20 @@ class STUDENTERROR(object):
 
 class RESOLVE(object):
     get_path = get_lesson_url
-
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
+            dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
+        )
+
+class MESSAGE_NODE(object):
+        get_path = get_lesson_url
+        # node specification data goes here
+        title = 'Choose grade of your understanding'
+        edges = (
             dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
         )
+
 
 class GET_RESOLVE(object):
     get_path = get_lesson_url
@@ -142,6 +150,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, DIVIDER, STUDENTERROR, RESOLVE, GET_RESOLVE, END],
+        pluginNodes=[START, DIVIDER, STUDENTERROR, RESOLVE, MESSAGE_NODE, GET_RESOLVE, END],
     )
     return (spec,)
