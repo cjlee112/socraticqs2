@@ -22,9 +22,9 @@ def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kw
                                              chat=fsmStack,
                                              timestamp__isnull=True)
     if additionals:
-        nextUL = additionals.first().content
-        fsmStack.state.unitLesson = nextUL
-        if additionals.first().student_error != fsmStack.next_point.student_error:
+        next_message = additionals.order_by('student_error').first()
+        fsmStack.state.unitLesson = next_message.content
+        if next_message.student_error != fsmStack.next_point.student_error:
             return fsm.get_node('STUDENTERROR')
     else:
         return fsm.get_node('END')
