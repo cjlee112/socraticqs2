@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -6,19 +8,17 @@ from django.http.response import HttpResponseNotFound
 from mock import patch, Mock
 
 from ct.models import Course, Unit, Lesson, UnitLesson, CourseUnit, Role, Concept
+from ct.templatetags.ct_extras import md2html
 from .models import EnrollUnitCode
+from .fsm_plugin.chat import get_specs, MESSAGE
+from .fsm_plugin.additional import get_specs as get_specs_additional
 
 
-class MainChatViewTests(TestCase):
+class SetUpMixin(object):
     """
-    Tests for main view.
-
-    Should enroll user if not enrolled.
-    Should render main_view.html template.
+    Mixin to provide setUp method.
     """
     def setUp(self):
-        from chat.fsm_plugin.chat import get_specs
-        from chat.fsm_plugin.additional import get_specs as get_specs_additional
         self.client = Client()
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
         get_specs()[0].save_graph(self.user.username)
@@ -42,11 +42,19 @@ class MainChatViewTests(TestCase):
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
         lesson = Lesson(title='title', text='text', addedBy=self.user)
         lesson.save()
-        unitlesson = UnitLesson(
+        self.unitlesson = UnitLesson(
             unit=self.unit, order=0, lesson=lesson, addedBy=self.user, treeID=lesson.id
         )
-        unitlesson.save()
+        self.unitlesson.save()
 
+
+class MainChatViewTests(SetUpMixin, TestCase):
+    """
+    Tests for main view.
+
+    Should enroll user if not enrolled.
+    Should render main_view.html template.
+    """
     def test_main_view_enroll(self):
         """
         MainView should enroll Student that comes w/ enrollCode.
@@ -124,3 +132,107 @@ class MainChatViewTests(TestCase):
         response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
         mocked_start_point.assert_called_once()
         self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
+
+
+class HistoryAPIViewTests(SetUpMixin, TestCase):
+    """
+    Tests /history API.
+    """
+    def test_positive_response(self):
+        """
+        Test positive case for /history call.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 200)
+
+    def test_permission_denied(self):
+        """
+        Check that chat history can be viewed by chat author only.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
+        self.client.login(username='middle_man', password='test')
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 403)
+
+    def test_content(self):
+        """
+        Check that history content fits API documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        self.assertIsInstance(json_content['input'], dict)
+        self.assertIsInstance(json_content['addMessages'], list)
+        self.assertEquals(len(json_content['addMessages']), 3)
+        self.assertEquals(json_content['addMessages'][0]['name'], self.user.username)
+        self.assertEquals(
+            json_content['addMessages'][0]['html'], md2html(self.unitlesson.lesson.text)
+        )
+        self.assertEquals(json_content['addMessages'][1]['type'], 'message')
+        self.assertEquals(json_content['addMessages'][1]['html'], MESSAGE.help)
+        self.assertEquals(json_content['addMessages'][2]['type'], 'breakpoint')
+        self.assertEquals(json_content['addMessages'][2]['html'], 'Courselet core lessons completed')
+
+
+class ProgressAPIViewTests(SetUpMixin, TestCase):
+    """
+    Tests for /progress API.
+    """
+    def test_positive_response(self):
+        """
+        Test positive case for /progress call.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 200)
+
+    def test_permission_denied(self):
+        """
+        Check that chat progres can be viewed by chat author only.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
+        self.client.login(username='middle_man', password='test')
+        response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 403)
+
+    def test_content(self):
+        """
+        Check that history content fits API documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        self.assertIsInstance(json_content['progress'], float)
+        self.assertIsInstance(json_content['breakpoints'], list)
+        self.assertEquals(len(json_content['breakpoints']), 1)
+        self.assertEquals(json_content['progress'], 1.0)
+        self.assertEquals(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
+        self.assertEquals(json_content['breakpoints'][0]['isDone'], True)
+        self.assertEquals(json_content['breakpoints'][0]['isUnlocked'], True)

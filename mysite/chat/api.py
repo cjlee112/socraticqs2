@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Message, Chat
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer
 from .services import ProgressHandler, FsmHandler
-from .permissions import IsOwner
+from .permissions import IsOwner, IsOwnerUser
 from ct.models import Response as StudentResponse
 from ct.models import UnitLesson
 
@@ -153,25 +153,37 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 message.save()
 
 
+class GetObjectMixin(object):
+    """
+    Implement get_object method.
+    """
+    def get_object(self):
+        chat_id = self.request.GET.get('chat_id')
+        obj = Chat.objects.get(id=chat_id)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
-class HistoryView(generics.RetrieveAPIView):
+
+class HistoryView(GetObjectMixin, generics.RetrieveAPIView):
     """
     List all messages in chat w/ additional info.
     """
+    permission_classes = (IsAuthenticated, IsOwnerUser)
+
     def get(self, request, *args, **kwargs):
-        chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        chat = self.get_object()
         serializer = ChatHistorySerializer(chat)
         return Response(serializer.data)
 
 
-class ProgressView(generics.RetrieveAPIView):
+class ProgressView(GetObjectMixin, generics.RetrieveAPIView):
     """
     Return progress for chat.
     """
+    permission_classes = (IsAuthenticated, IsOwnerUser)
+
     def get(self, request, *args, **kwargs):
-        chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        chat = self.get_object()
         serializer = ChatProgressSerializer(chat)
         return Response(serializer.data)
 
