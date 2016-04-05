@@ -195,27 +195,30 @@ class ResourcesView(viewsets.ModelViewSet):
     """
 
     next_handler = FsmHandler()
-    permission_classes = (IsAuthenticated, IsOwner)
+    permission_classes = (IsAuthenticated, IsOwnerUser)
 
     def list(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        chat = Chat.objects.get(id=chat_id)
+        self.check_object_permissions(self.request, chat)
         serializer = ChatResourcesSerializer(chat)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         chat_id = self.request.GET.get('chat_id')
         chat = Chat.objects.get(id=chat_id)
+        self.check_object_permissions(self.request, chat)
 
         unitlesson = UnitLesson.objects.get(pk=pk)
-        m = Message.objects.get_or_create(contenttype='unitlesson',
-                                   content_id=unitlesson.id,
-                                   chat=chat,
-                                   owner=chat.user,
-                                   input_type='custom',
-                                   kind=unitlesson.lesson.kind,
-                                   is_additional=True
-                                    )[0]
+        m = Message.objects.get_or_create(
+            contenttype='unitlesson',
+            content_id=unitlesson.id,
+            chat=chat,
+            owner=chat.user,
+            input_type='custom',
+            kind=unitlesson.lesson.kind,
+            is_additional=True
+        )[0]
         chat.next_point = self.next_handler.next_point(
             current=m.content, chat=chat, message=m, request=request
         )

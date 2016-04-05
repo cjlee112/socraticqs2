@@ -12,6 +12,7 @@ from ct.templatetags.ct_extras import md2html
 from .models import EnrollUnitCode
 from .fsm_plugin.chat import get_specs, MESSAGE
 from .fsm_plugin.additional import get_specs as get_specs_additional
+from .fsm_plugin.resource import get_specs as get_specs_resource
 
 
 class SetUpMixin(object):
@@ -23,6 +24,7 @@ class SetUpMixin(object):
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
         get_specs()[0].save_graph(self.user.username)
         get_specs_additional()[0].save_graph(self.user.username)
+        get_specs_resource()[0].save_graph(self.user.username)
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -46,6 +48,14 @@ class SetUpMixin(object):
             unit=self.unit, order=0, lesson=lesson, addedBy=self.user, treeID=lesson.id
         )
         self.unitlesson.save()
+        resource_lesson = Lesson(
+            title='title for resource', text='text for resource', addedBy=self.user
+        )
+        resource_lesson.save()
+        self.resource_unitlesson = UnitLesson(
+            unit=self.unit, lesson=resource_lesson, addedBy=self.user, treeID=resource_lesson.id
+        )
+        self.resource_unitlesson.save()
 
 
 class MainChatViewTests(SetUpMixin, TestCase):
@@ -206,7 +216,7 @@ class ProgressAPIViewTests(SetUpMixin, TestCase):
 
     def test_permission_denied(self):
         """
-        Check that chat progres can be viewed by chat author only.
+        Check that chat progress can be viewed by chat author only.
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
@@ -236,3 +246,78 @@ class ProgressAPIViewTests(SetUpMixin, TestCase):
         self.assertEquals(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
         self.assertEquals(json_content['breakpoints'][0]['isDone'], True)
         self.assertEquals(json_content['breakpoints'][0]['isUnlocked'], True)
+
+
+class ResourcesViewTests(SetUpMixin, TestCase):
+    """
+    Tests for /resources API call.
+    """
+    def test_positive_case(self):
+        """
+        Test positive case for /resources call.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 200)
+
+    def test_permission_denied(self):
+        """
+        Check that chat resources can be viewed by chat author only.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
+        self.client.login(username='middle_man', password='test')
+        response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
+        self.assertEquals(response.status_code, 403)
+
+    def test_content(self):
+        """
+        Check that resources content fits ResourcesAPI documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        self.assertIsInstance(json_content['breakpoints'], list)
+        self.assertEquals(len(json_content['breakpoints']), 2)
+        # TODO Need to investigate why concepts also presented as Resources
+        self.assertEquals(
+            json_content['breakpoints'][1]['html'], self.resource_unitlesson.lesson.title
+        )
+        self.assertEquals(json_content['breakpoints'][1]['isDone'], False)
+        self.assertEquals(json_content['breakpoints'][1]['isStarted'], False)
+        self.assertEquals(json_content['breakpoints'][1]['isUnlocked'], True)
+
+    def test_get_resources_message_by_id(self):
+        """
+        Test got get resources message by id from /resources response.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        resource_response = self.client.get(
+            reverse('chat:resources-detail', args=(json_content['breakpoints'][0]['id'],)),
+            {'chat_id': chat_id}
+        )
+        # TODO add additional checks
+        self.assertEquals(resource_response.status_code, 200)
+        resource_response = self.client.get(
+            reverse('chat:resources-detail', args=(json_content['breakpoints'][1]['id'],)),
+            {'chat_id': chat_id}
+        )
+        self.assertEquals(resource_response.status_code, 200)
