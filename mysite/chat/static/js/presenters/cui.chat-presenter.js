@@ -263,6 +263,10 @@ CUI.ChatPresenter.prototype._getMessages = function(url){
     cache: false,
     context: this
   }).done(function(data){
+    // Update resources
+    this._getResources();
+    // Update progress
+    this._getProgress();
     // Update the current input type in the chat
     if(data.input) this._setInput(data.input);
     else throw new Error("CUI.ChatPresenter._getMessages(): No data.input.");
@@ -310,9 +314,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
 
-        // Update progress
-        this._getProgress();
-        this._getResources();
+
     }else if(response.error){
       // Enable input
       this._inputIsEnabled = true;
@@ -396,10 +398,6 @@ CUI.ChatPresenter.prototype._postAction = function(actionUrl){
     if(response && response.nextMessagesUrl){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
-
-        // Update progress
-        this._getProgress();
-        this._getResources();
     }else{
       throw new Error('CUI.ChatPresenter._postAction(): No response.nextMessagesUrl');
     }
@@ -831,7 +829,7 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id){
     top = $message.offset().top;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
-      $.when(this._getMessages(this._resourcesUrl+id+'/')).then(this._getResources());
+      this._getMessages(this._resourcesUrl+id+'/');
   };
 };
 /**
@@ -995,7 +993,9 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Scroll to message
+    if ($.inArray('unlocked', e.currentTarget.classList) > -1){
     this._scrollToResourceMessage($(e.currentTarget).data('href'));
+  }
   }, this));
 
   // Text input submit

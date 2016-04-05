@@ -8,18 +8,17 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
     unitStatus = fsmStack.state.get_data_attr('unitStatus')
 
+    nextUL = None
+
     if useCurrent:
-        nextUL = unitStatus.get_lesson()
-    else:
-        nextUL = unitStatus.start_next_lesson()
+        nextUL = fsmStack.state.unitLesson
     if not nextUL:
-        return fsm.get_node('MESSAGE')
+        return fsm.get_node('END')
     elif nextUL.is_question():
         fsmStack.state.unitLesson = nextUL
         return fsm.get_node(name='ASK')
     else:  # just a lesson to read
         fsmStack.state.unitLesson = nextUL
-
         return edge.toNode
 
 
@@ -60,7 +59,7 @@ class START(object):
             unitStatus = UnitStatus(unit=unit, user=request.user)
             unitStatus.save()
             fsmStack.state.set_data_attr('unitStatus', unitStatus)
-        fsmStack.state.unitLesson = unitStatus.get_lesson()
+        fsmStack.state.unitLesson = kwargs['unitlesson']
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
@@ -119,7 +118,7 @@ class GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='END', title='View Next Lesson'),
         )
 
 
@@ -134,28 +133,15 @@ class ERRORS(object):
 
 class GET_ERRORS(object):
     get_path = get_lesson_url
-    next_edge = next_lesson
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='MESSAGE', title='View Next Lesson'),
+            dict(name='next', toNode='END', title='View Next Lesson'),
         )
-
-class MESSAGE(object):
-    get_path = get_lesson_url
-    # node specification data goes here
-    title = 'Courselet core lessons completed'
-    help = '''Congratulations!  You have completed the core lessons for this
-    courselet.  See sidebar  for suggested additional resources related to
-    this courselet.'''
-    edges = (
-        dict(name='next', toNode='END', title='View Next Lesson'),
-    )
-
 
 class END(object):
     # node specification data goes here
-    title = 'Courselet core lessons completed'
+    title = 'Courselet resource lessons completed'
     help = '''Congratulations!  You have completed the core lessons for this
     courselet.  See below for suggested next steps for what to study now in
     this courselet.'''
@@ -167,11 +153,11 @@ def get_specs():
     """
     from fsm.fsmspec import FSMSpecification
     spec = FSMSpecification(
-        name='chat',
+        name='resource',
         hideTabs=True,
         title='Take the courselet core lessons',
         pluginNodes=[START, LESSON, ASK, GET_ANSWER,
                      ASSESS, GET_ASSESS, ERRORS,
-                     GET_ERRORS, MESSAGE, END],
+                     GET_ERRORS, END],
     )
     return (spec,)

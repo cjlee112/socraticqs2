@@ -176,10 +176,15 @@ class ProgressView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 
+@injections.has
 class ResourcesView(viewsets.ModelViewSet):
     """
-    Return progress for chat.
+    Return resources for chat.
     """
+
+    next_handler = FsmHandler()
+    permission_classes = (IsAuthenticated, IsOwner)
+
     def list(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
@@ -191,13 +196,16 @@ class ResourcesView(viewsets.ModelViewSet):
         chat = Chat.objects.get(id=chat_id)
 
         unitlesson = UnitLesson.objects.get(pk=pk)
-        m = Message.objects.create(contenttype='unitlesson',
-                               content_id=unitlesson.id,
-                               chat=chat,
-                               owner=chat.user,
-                               input_type='custom',
-                               kind=unitlesson.lesson.kind,
-                               is_additional=True
-                                )
+        m = Message.objects.get_or_create(contenttype='unitlesson',
+                                   content_id=unitlesson.id,
+                                   chat=chat,
+                                   owner=chat.user,
+                                   input_type='custom',
+                                   kind=unitlesson.lesson.kind,
+                                   is_additional=True
+                                    )[0]
+        chat.next_point = self.next_handler.next_point(
+            current=m.content, chat=chat, message=m, request=request
+        )
         serializer = MessageSerializer(m)
         return Response(serializer.data)

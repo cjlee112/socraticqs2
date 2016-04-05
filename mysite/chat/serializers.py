@@ -89,7 +89,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'options': obj.get_options(),
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
-        if not obj.chat.next_point:
+        if not obj.chat.next_point or obj.input_type == 'custom':
             input_data['html'] = '<a href="http://google.com" class="btn">Close</a>'
         return InputSerializer().to_representation(input_data)
 
@@ -242,25 +242,27 @@ class ResourcesSerializer(serializers.ModelSerializer):
             return obj.id
 
     def get_isUnlocked(self, obj):
-        return True
+        # try:
+        #     if hasattr(obj.chat.state, 'fsmNode'):
+        #         return False
+        #     else:
+        #         return True
+        # except:
+        #     return True
+        if obj.chat.state:
+            return False
+        else:
+            return True
 
     def get_isStarted(self, obj):
         if hasattr(obj, 'message'):
-            message = Message.objects.get(id=obj.message)
-            return message.timestamp is not None
+            return True
         else:
             return False
-        return True
 
     def get_isDone(self, obj):
         if hasattr(obj, 'message'):
-            lesson_order = Message.objects.get(id=obj.message).content.order
-            chat = Message.objects.get(id=obj.message).chat
-            if chat.state:
-                current_unitlesson_order = chat.state.unitLesson.order
-                return lesson_order < current_unitlesson_order
-            else:
-                return True
+            return True
         else:
             return False
 
@@ -282,9 +284,15 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
         lessons = list(unit.unitlesson_set \
                           .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
         lessons.sort(lambda x, y: cmp(x.lesson.title, y.lesson.title))
-        messages = obj.message_set.filter(contenttype='unitlesson', is_additional=True)
+        messages = obj.message_set.filter(contenttype='unitlesson',
+                                          is_additional=True,
+                                          student_error__isnull=True
+                                          )
         for each in messages:
             if each.content in lessons:
                 lessons[lessons.index(each.content)].message = each.id
+
+        for each in lessons:
+            each.chat = obj
 
         return ResourcesSerializer(many=True).to_representation(lessons)

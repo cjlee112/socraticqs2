@@ -30,6 +30,7 @@ class GroupMessageMixin(object):
     """
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message'),
+        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, Lesson.EXPLANATION, 'message'),
         Lesson.ERROR_MODEL: ('message'),
         'response': ('message',
                      'answers',
@@ -91,15 +92,26 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                              chat=chat,
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
+        resources = Message.objects.filter(is_additional=True,
+                                           chat=chat,
+                                           student_error__isnull=True,
+                                           timestamp__isnull=True)
 
-        if chat.state.fsmNode.name == 'END':
+        if chat.state and chat.state.fsmNode.name == 'END':
             self.pop_state(chat)
         if additionals and chat.state.fsmNode.fsm.name != 'additional':
             unitlesson = additionals.order_by('student_error').first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
-
             print "Getting additional lessons"
+        elif resources and not chat.state:
+            unitlesson = resources.first().content
+            self.push_state(chat, request, 'resource', {'unitlesson': unitlesson})
+            edge = chat.state.fsmNode.outgoing.get(name='next')
+            chat.state.fsmNode = edge.transition(chat, {})
+            chat.state.save()
+            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+            print "Getting resource lessons"
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
             chat.state.fsmNode = edge.transition(chat, {})
