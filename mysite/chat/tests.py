@@ -9,7 +9,8 @@ from mock import patch, Mock
 
 from ct.models import Course, Unit, Lesson, UnitLesson, CourseUnit, Role, Concept
 from ct.templatetags.ct_extras import md2html
-from .models import EnrollUnitCode
+from .models import EnrollUnitCode, Message
+from .serializers import InternalMessageSerializer, InputSerializer
 from .fsm_plugin.chat import get_specs, MESSAGE
 from .fsm_plugin.additional import get_specs as get_specs_additional
 from .fsm_plugin.resource import END, get_specs as get_specs_resource
@@ -344,3 +345,47 @@ class ResourcesViewTests(SetUpMixin, TestCase):
         self.assertIn('html', json_content['input'])
         self.assertIn('type', json_content['input'])
         self.assertIn('options', json_content['input'])
+
+
+class InternalMessageSerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for InternalMessageSerializer.
+    """
+    def test_serializer_data(self):
+        """
+        Check that InternalMessageSerializer result fits documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][0]['id']
+        msg = Message.objects.get(id=msg_id)
+        result = InternalMessageSerializer().to_representation(msg)
+        attrs = ('id', 'type', 'name', 'userMessage', 'avatar', 'html')
+        for attr in attrs:
+            self.assertIn(attr, result)
+
+
+class InputSerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for InputSerializer.
+    """
+    def test_serializer_data(self):
+        """
+        Check that InputSerializer result fits documentation.
+        """
+        input_data = {
+            'type': 'custom',
+            'url': None,
+            'options': ['option1', 'option2'],
+            'includeSelectedValuesFromMessages': [],
+            'html': 'some html'
+        }
+        result = InputSerializer().to_representation(input_data)
+        attrs = ('type', 'url', 'options', 'includeSelectedValuesFromMessages', 'html')
+        for attr in attrs:
+            self.assertIn(attr, result)
