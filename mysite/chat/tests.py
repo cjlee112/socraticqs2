@@ -12,7 +12,7 @@ from ct.templatetags.ct_extras import md2html
 from .models import EnrollUnitCode
 from .fsm_plugin.chat import get_specs, MESSAGE
 from .fsm_plugin.additional import get_specs as get_specs_additional
-from .fsm_plugin.resource import get_specs as get_specs_resource
+from .fsm_plugin.resource import END, get_specs as get_specs_resource
 
 
 class SetUpMixin(object):
@@ -301,7 +301,9 @@ class ResourcesViewTests(SetUpMixin, TestCase):
 
     def test_get_resources_message_by_id(self):
         """
-        Test got get resources message by id from /resources response.
+        Test get resources message by id from /resources response.
+
+        Checks that returned content fits resources API documentation.
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
@@ -314,10 +316,31 @@ class ResourcesViewTests(SetUpMixin, TestCase):
             reverse('chat:resources-detail', args=(json_content['breakpoints'][0]['id'],)),
             {'chat_id': chat_id}
         )
-        # TODO add additional checks
         self.assertEquals(resource_response.status_code, 200)
         resource_response = self.client.get(
             reverse('chat:resources-detail', args=(json_content['breakpoints'][1]['id'],)),
             {'chat_id': chat_id}
         )
         self.assertEquals(resource_response.status_code, 200)
+        json_content = json.loads(resource_response.content)
+        self.assertIsInstance(json_content['input'], dict)
+        self.assertIsInstance(json_content['addMessages'], list)
+        self.assertEquals(len(json_content['addMessages']), 2)
+
+        self.assertIn('nextMessagesUrl', json_content)
+        self.assertIsNone(json_content['nextMessagesUrl'])
+        self.assertIn('id', json_content)
+
+        self.assertEquals(json_content['addMessages'][0]['name'], self.user.username)
+        self.assertEquals(json_content['addMessages'][0]['type'], 'message')
+        self.assertEquals(
+            json_content['addMessages'][0]['html'], md2html(self.resource_unitlesson.lesson.text)
+        )
+        self.assertEquals(json_content['addMessages'][1]['type'], 'breakpoint')
+        self.assertEquals(json_content['addMessages'][1]['html'], END.title)
+
+        self.assertIn('url', json_content['input'])
+        self.assertIn('includeSelectedValuesFromMessages', json_content['input'])
+        self.assertIn('html', json_content['input'])
+        self.assertIn('type', json_content['input'])
+        self.assertIn('options', json_content['input'])
