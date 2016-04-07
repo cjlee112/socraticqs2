@@ -113,7 +113,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
-        if message.input_type == 'options':
+        if message.input_type == 'options' and message.kind != 'button':
             if (
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
@@ -151,6 +151,11 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
                 chat.save()
                 message.text = selfeval
                 message.save()
+        if message.kind == 'button':
+            chat.next_point = self.next_handler.next_point(
+                current=message.content, chat=chat, message=message, request=self.request
+            )
+            chat.save()
 
 
 class GetObjectMixin(object):

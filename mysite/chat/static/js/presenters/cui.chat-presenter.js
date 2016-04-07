@@ -814,7 +814,7 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(id){
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
-    top = $message.offset().top;
+    top = $message.offset().top - 14;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   }
 };

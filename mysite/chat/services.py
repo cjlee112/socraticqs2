@@ -29,16 +29,19 @@ class GroupMessageMixin(object):
     Mixin should create additional messages via `self.next_point`.
     """
     available_steps = {
-        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message'),
-        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, Lesson.EXPLANATION, 'message'),
-        Lesson.ERROR_MODEL: ('message'),
+        Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
+        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, Lesson.EXPLANATION, 'message', 'button'),
+        Lesson.ERROR_MODEL: ('message', 'button'),
         'response': ('message',
                      'answers',
+                     'button',
                      Lesson.ORCT_QUESTION,
                      Lesson.BASE_EXPLANATION),
+        'button': (),
         # 'answers': ('response'),
         'message': ('message',
                     'uniterror',
+                    'button',
                     Lesson.BASE_EXPLANATION,
                     Lesson.ORCT_QUESTION)
     }

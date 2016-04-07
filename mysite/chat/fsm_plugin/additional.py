@@ -77,18 +77,26 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='DIVIDER', title='View Next Lesson'),
+            dict(name='next', toNode='START_MESSAGE', title='View Next Lesson'),
         )
 
 
-class DIVIDER(object):
+class START_MESSAGE(object):
     get_path = get_lesson_url
     # node specification data goes here
-    title = 'Additional lessons begin'
+    title = 'Additional lessons for your errors'
+    edges = (
+        dict(name='next', toNode='CONTINUE_BUTTON', title='View Next Lesson'),
+    )
+
+
+class CONTINUE_BUTTON(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Now you can go throug lessons that explains some of your errors and misunderstandings'
     edges = (
         dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
     )
-
 
 class STUDENTERROR(object):
     get_path = get_lesson_url
@@ -150,6 +158,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, DIVIDER, STUDENTERROR, RESOLVE, MESSAGE_NODE, GET_RESOLVE, END],
+        pluginNodes=[START, START_MESSAGE, CONTINUE_BUTTON, STUDENTERROR, RESOLVE, MESSAGE_NODE, GET_RESOLVE, END],
     )
     return (spec,)

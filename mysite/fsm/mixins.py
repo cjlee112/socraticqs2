@@ -221,6 +221,15 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
+        if self.name == 'CONTINUE_BUTTON':
+            message = Message.objects.get_or_create(
+                            chat=chat,
+                            owner=chat.user,
+                            text=chat.state.fsmNode.title,
+                            student_error=message.student_error,
+                            input_type='options',
+                            kind='button',
+                            is_additional=True)[0]
         if self.name == 'MESSAGE':
             message = Message.objects.get_or_create(
                             chat=chat,
@@ -259,7 +268,20 @@ class ChatMixin(object):
                             owner=chat.user,
                             userMessage=False,
                             is_additional=is_additional)[0]
-        if self.name in ['END', 'DIVIDER']:
+        if self.name == 'TITLE':
+            divider = ChatDivider(text=next_lesson.lesson.title,
+                                         unitlesson=next_lesson)
+            divider.save()
+            message = Message.objects.get_or_create(
+                            contenttype='chatdivider',
+                            content_id=divider.id,
+                            input_type='custom',
+                            type='breakpoint',
+                            chat=chat,
+                            owner=chat.user,
+                            kind='message',
+                            is_additional=is_additional)[0]
+        if self.name in ['END', 'DIVIDER', 'START_MESSAGE']:
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(

@@ -44,6 +44,7 @@ KIND_CHOICES = (
     ('uniterror', 'uniterror'),
     ('response', 'response'),
     ('message', 'message'),
+    ('button', 'button')
 )
 
 EVAL_OPTIONS = {
@@ -153,10 +154,11 @@ class Message(models.Model):
             self.chat.next_point.input_type == 'options'):
             if self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
-            elif isinstance(self.chat.next_point.content, UnitError):
-                options = [{"value": 1, "text": "Continue"}]
-            else:
+            elif self.chat.next_point.contenttype == 'response':
                 options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+            else:
+                options = [{"value": 1, "text": "Continue"}]
+
         return options
 
     def get_html(self):
@@ -254,3 +256,4 @@ class UnitError(models.Model):
 
 class ChatDivider(models.Model):
     text = models.CharField(max_length=64)
+    unitlesson = models.ForeignKey(UnitLesson, null=True)

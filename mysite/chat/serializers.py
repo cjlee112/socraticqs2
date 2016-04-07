@@ -167,7 +167,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
     def get_isDone(self, obj):
         if hasattr(obj, 'message'):
-            lesson_order = Message.objects.get(id=obj.message).content.order
+            lesson_order = Message.objects.get(id=obj.message).content.unitlesson.order
             chat = Message.objects.get(id=obj.message).chat
             if chat.state:
                 current_unitlesson_order = chat.state.unitLesson.order
@@ -196,13 +196,13 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
     def get_breakpoints(self, obj):
         if not self.lessons_dict:
-            messages = obj.message_set.filter(contenttype='unitlesson', is_additional=False)
+            messages = obj.message_set.filter(contenttype='chatdivider', is_additional=False)
             lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order'))
             for each in messages:
-                if each.content in lessons:
-                    lessons[lessons.index(each.content)].message = each.id
-                elif each.content.kind != 'answers':
-                    lesson = each.content
+                if each.content.unitlesson in lessons:
+                    lessons[lessons.index(each.content.unitlesson)].message = each.id
+                elif each.content.unitlesson and each.content.unitlesson.kind != 'answers':
+                    lesson = each.content.unitlesson
                     lesson.message = each.id
                     lessons.append(lesson)
             self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)

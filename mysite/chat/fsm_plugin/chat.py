@@ -10,16 +10,27 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
 
     if useCurrent:
         nextUL = unitStatus.get_lesson()
+        return edge.toNode
     else:
         nextUL = unitStatus.start_next_lesson()
     if not nextUL:
         return fsm.get_node('MESSAGE')
-    elif nextUL.is_question():
-        fsmStack.state.unitLesson = nextUL
-        return fsm.get_node(name='ASK')
     else:  # just a lesson to read
         fsmStack.state.unitLesson = nextUL
 
+        return edge.toNode
+
+
+def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    """
+    Edge method that moves us to right state for next lesson (or END).
+    """
+    fsm = edge.fromNode.fsm
+    unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    nextUL = unitStatus.get_lesson()
+    if nextUL.is_question():
+        return fsm.get_node(name='ASK')
+    else:  # just a lesson to read
         return edge.toNode
 
 
@@ -69,8 +80,21 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
+
+
+class TITLE(object):
+    """
+    View a lesson explanation.
+    """
+    next_edge = next_lesson_after_title
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'View an explanation'
+    edges = (
+        dict(name='next', toNode='LESSON', title='View Next Lesson'),
+    )
 
 
 class LESSON(object):
@@ -82,7 +106,7 @@ class LESSON(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
 
 
@@ -119,7 +143,7 @@ class GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
 
 
@@ -138,7 +162,7 @@ class GET_ERRORS(object):
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='MESSAGE', title='View Next Lesson'),
+            dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
 
 class MESSAGE(object):
@@ -170,7 +194,7 @@ def get_specs():
         name='chat',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, LESSON, ASK, GET_ANSWER,
+        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER,
                      ASSESS, GET_ASSESS, ERRORS,
                      GET_ERRORS, MESSAGE, END],
     )
