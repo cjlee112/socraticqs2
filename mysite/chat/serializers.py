@@ -242,13 +242,6 @@ class ResourcesSerializer(serializers.ModelSerializer):
             return obj.id
 
     def get_isUnlocked(self, obj):
-        # try:
-        #     if hasattr(obj.chat.state, 'fsmNode'):
-        #         return False
-        #     else:
-        #         return True
-        # except:
-        #     return True
         if obj.chat.state:
             return False
         else:
@@ -262,7 +255,10 @@ class ResourcesSerializer(serializers.ModelSerializer):
 
     def get_isDone(self, obj):
         if hasattr(obj, 'message'):
-            return True
+            if obj.chat.state and obj.chat.state.unitLesson.id == obj.id:
+                return False
+            else:
+                return True
         else:
             return False
 

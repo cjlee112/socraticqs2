@@ -14,7 +14,7 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     else:
         nextUL = unitStatus.start_next_lesson()
     if not nextUL:
-        return fsm.get_node('MESSAGE')
+        return fsm.get_node('END')
     else:  # just a lesson to read
         fsmStack.state.unitLesson = nextUL
 
@@ -165,17 +165,6 @@ class GET_ERRORS(object):
             dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
 
-class MESSAGE(object):
-    get_path = get_lesson_url
-    # node specification data goes here
-    title = 'Courselet core lessons completed'
-    help = '''Congratulations!  You have completed the core lessons for this
-    courselet.  See sidebar  for suggested additional resources related to
-    this courselet.'''
-    edges = (
-        dict(name='next', toNode='END', title='View Next Lesson'),
-    )
-
 
 class END(object):
     # node specification data goes here
@@ -195,7 +184,6 @@ def get_specs():
         hideTabs=True,
         title='Take the courselet core lessons',
         pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER,
-                     ASSESS, GET_ASSESS, ERRORS,
-                     GET_ERRORS, MESSAGE, END],
+                     ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
     )
     return (spec,)

@@ -81,7 +81,7 @@ class LESSON(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
+            dict(name='next', toNode='END', title='View Next Lesson'),
         )
 
 
@@ -142,9 +142,8 @@ class GET_ERRORS(object):
 class END(object):
     # node specification data goes here
     title = 'Courselet resource lessons completed'
-    help = '''Congratulations!  You have completed the core lessons for this
-    courselet.  See below for suggested next steps for what to study now in
-    this courselet.'''
+    help = '''Congratulations!  You have completed one of the resources,
+    now you can try some more resources from the sidebar.'''
 
 
 def get_specs():

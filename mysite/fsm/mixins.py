@@ -230,7 +230,7 @@ class ChatMixin(object):
                             input_type='options',
                             kind='button',
                             is_additional=True)[0]
-        if self.name == 'MESSAGE':
+        if self.name == 'END':
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
@@ -281,7 +281,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='message',
                             is_additional=is_additional)[0]
-        if self.name in ['END', 'DIVIDER', 'START_MESSAGE']:
+        if self.name in ['DIVIDER', 'START_MESSAGE']:
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(
