@@ -85,6 +85,12 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         serializer = self.get_serializer(message)
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        message = self.get_object()
+        if message.input_type == 'text' and not self.request.data.get('text'):
+            return Response({'error': 'Empty response. Enter something!'})
+        return super(MessagesView, self).update(request, *args, **kwargs)
+
     def perform_update(self, serializer):
         chat_id = self.request.data.get('chat_id')
         message = self.get_object()
