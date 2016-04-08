@@ -105,11 +105,15 @@ this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(co
     return " unlocked ";
 },"3":function(container,depth0,helpers,partials,data) {
     return " done ";
+},"4":function(container,depth0,helpers,partials,data) {
+    return " started ";
 },"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function";
 
   return "<li class=\""
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isUnlocked : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + " "
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isStarted : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + " "
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isDone : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "\" data-href=\""

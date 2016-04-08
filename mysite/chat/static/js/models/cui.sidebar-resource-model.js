@@ -12,6 +12,7 @@ CUI.models = CUI.models || {};
  * @param {number} data.id            - The id of the message this breakpoint links to in the chat.
  * @param {string} data.html          - The html that is displayed within the breakpoint.
  * @param {boolean} data.isUnlocked   - If the user currently has access to this breakpint.
+ * @param {boolean} data.isStarted    - If the user currently has started this breakpint.
  * @param {boolean} data.isDone       - If this breakpoint should be marked as complete.
  * @returns {CUI.SidebarResourceModel}
  */

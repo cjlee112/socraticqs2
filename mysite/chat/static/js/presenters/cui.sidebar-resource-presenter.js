@@ -7,7 +7,7 @@ var CUI = CUI || {};
 /**
  * Represents a breakpoint in the sidebar.
  * @class
- * @param {CUI.SidebarBreakpointModel} model      - The model to present.
+ * @param {CUI.SidebarResourceModel} model      - The model to present.
  * @returns {CUI.SidebarBreakpointPresenter}
  */
 CUI.SidebarResourcePresenter = function(model){
@@ -27,7 +27,7 @@ CUI.SidebarResourcePresenter = function(model){
 
   /**
    * A reference to the model used to generate the breakpoint.
-   * @type {CUI.SidebarBreakpointModel}
+   * @type {CUI.SidebarResourceModel}
    * @protected
    */
   this._model = model;

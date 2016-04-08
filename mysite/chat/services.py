@@ -30,7 +30,7 @@ class GroupMessageMixin(object):
     """
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
-        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, Lesson.EXPLANATION, 'message', 'button'),
+        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
         Lesson.ERROR_MODEL: ('message', 'button'),
         'response': ('message',
                      'answers',
@@ -42,6 +42,7 @@ class GroupMessageMixin(object):
         'message': ('message',
                     'uniterror',
                     'button',
+                    Lesson.EXPLANATION,
                     Lesson.BASE_EXPLANATION,
                     Lesson.ORCT_QUESTION)
     }
@@ -110,9 +111,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         elif resources and not chat.state:
             unitlesson = resources.first().content
             self.push_state(chat, request, 'resource', {'unitlesson': unitlesson})
-            edge = chat.state.fsmNode.outgoing.get(name='next')
-            chat.state.fsmNode = edge.transition(chat, {})
-            chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
             print "Getting resource lessons"
         elif chat.state:

@@ -169,7 +169,7 @@ class LessonSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'message'):
             lesson_order = Message.objects.get(id=obj.message).content.unitlesson.order
             chat = Message.objects.get(id=obj.message).chat
-            if chat.state:
+            if chat.state and chat.state.fsmNode.fsm.name in ['chat', 'additional']:
                 current_unitlesson_order = chat.state.unitLesson.order
                 return lesson_order < current_unitlesson_order
             else:
