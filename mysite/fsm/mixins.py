@@ -270,7 +270,7 @@ class ChatMixin(object):
                             is_additional=is_additional)[0]
         if self.name == 'TITLE':
             divider = ChatDivider(text=next_lesson.lesson.title,
-                                         unitlesson=next_lesson)
+                                  unitlesson=next_lesson)
             divider.save()
             message = Message.objects.get_or_create(
                             contenttype='chatdivider',

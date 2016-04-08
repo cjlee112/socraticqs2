@@ -5,34 +5,12 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).
     """
-
     fsm = edge.fromNode.fsm
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
-
-    if useCurrent:
-        nextUL = unitStatus.get_lesson()
-        return edge.toNode
-    else:
-        nextUL = unitStatus.start_next_lesson()
-    if not nextUL:
-        return fsm.get_node('END')
+    nextUL = fsmStack.state.unitLesson
+    if nextUL.is_question():
+        return fsm.get_node(name='ASK')
     else:  # just a lesson to read
-        fsmStack.state.unitLesson = nextUL
-
         return edge.toNode
-
-
-def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-        """
-        Edge method that moves us to right state for next lesson (or END).
-        """
-        fsm = edge.fromNode.fsm
-        unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        nextUL = unitStatus.get_lesson()
-        if nextUL.is_question():
-            return fsm.get_node(name='ASK')
-        else:  # just a lesson to read
-            return edge.toNode
 
 
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -41,7 +19,7 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
     if not fsmStack.next_point.content.selfeval == 'correct':
         return fsm.get_node('ERRORS')
 
-    return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
+    return edge.toNode
 
 
 def get_lesson_url(self, node, state, request, **kwargs):
@@ -77,21 +55,10 @@ class START(object):
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
 
+    next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='TITLE', title='View Next Lesson'),
-        )
-
-class TITLE(object):
-        """
-        View a lesson explanation.
-        """
-        next_edge = next_lesson_after_title
-        get_path = get_lesson_url
-        # node specification data goes here
-        title = 'View an explanation'
-        edges = (
             dict(name='next', toNode='LESSON', title='View Next Lesson'),
         )
 
@@ -178,7 +145,7 @@ def get_specs():
         name='resource',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER,
+        pluginNodes=[START, LESSON, ASK, GET_ANSWER,
                      ASSESS, GET_ASSESS, ERRORS,
                      GET_ERRORS, END],
     )

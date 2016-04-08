@@ -993,7 +993,8 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Scroll to message
-    if ($.inArray('unlocked', e.currentTarget.classList) > -1){
+    if ($.inArray('started', e.currentTarget.classList) > -1 ||
+        $.inArray('unlocked', e.currentTarget.classList) > -1 ) {
     this._scrollToResourceMessage($(e.currentTarget).data('href'));
   }
   }, this));

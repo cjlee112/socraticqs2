@@ -30,7 +30,7 @@ class GroupMessageMixin(object):
     """
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
-        Lesson.EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
+        Lesson.EXPLANATION: ('message', 'button'),
         Lesson.ERROR_MODEL: ('message', 'button'),
         'response': ('message',
                      'answers',
@@ -90,16 +90,12 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         chat.save()
         return chat.next_point
 
-    def next_point(self, current, chat, message, request):
+    def next_point(self, current, chat, message, request, resources=False):
         next_point = None
         additionals = Message.objects.filter(is_additional=True,
                                              chat=chat,
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
-        resources = Message.objects.filter(is_additional=True,
-                                           chat=chat,
-                                           student_error__isnull=True,
-                                           timestamp__isnull=True)
 
         if chat.state and chat.state.fsmNode.name == 'END':
             self.pop_state(chat)
@@ -108,10 +104,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
             print "Getting additional lessons"
-        elif resources and not chat.state:
-            unitlesson = resources.first().content
-            self.push_state(chat, request, 'resource', {'unitlesson': unitlesson})
-            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+        elif resources:
+            self.push_state(chat, request, 'resource', {'unitlesson': current})
+            next_point = chat.state.fsmNode.get_message(chat)
             print "Getting resource lessons"
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')

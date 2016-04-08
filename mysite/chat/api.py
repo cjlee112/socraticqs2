@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Message, Chat
+from .models import Message, Chat, ChatDivider
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner, IsOwnerUser
@@ -215,17 +215,22 @@ class ResourcesView(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, chat)
 
         unitlesson = UnitLesson.objects.get(pk=pk)
+
+        divider = ChatDivider(text=unitlesson.lesson.title,
+                              unitlesson=unitlesson)
+
+        divider.save()
         m = Message.objects.get_or_create(
-            contenttype='unitlesson',
-            content_id=unitlesson.id,
-            chat=chat,
-            owner=chat.user,
-            input_type='custom',
-            kind=unitlesson.lesson.kind,
-            is_additional=True
-        )[0]
+                            contenttype='chatdivider',
+                            content_id=divider.id,
+                            input_type='custom',
+                            type='breakpoint',
+                            chat=chat,
+                            owner=chat.user,
+                            kind='message',
+                            is_additional=True)[0]
         chat.next_point = self.next_handler.next_point(
-            current=m.content, chat=chat, message=m, request=request
+            current=unitlesson, chat=chat, message=m, request=request, resources=True
         )
         serializer = MessageSerializer(m)
         return Response(serializer.data)
