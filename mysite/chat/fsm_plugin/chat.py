@@ -106,17 +106,8 @@ class LESSON(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='CONTINUE_BUTTON', title='View Next Lesson'),
+            dict(name='next', toNode='TITLE', title='View Next Lesson'),
         )
-
-
-class CONTINUE_BUTTON(object):
-    get_path = get_lesson_url
-    # node specification data goes here
-    title = 'Now you can go throug lessons that explains some of your errors and misunderstandings'
-    edges = (
-        dict(name='next', toNode='TITLE', title='View Next Lesson'),
-    )
 
 
 class ASK(object):

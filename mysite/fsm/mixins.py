@@ -145,15 +145,34 @@ class ChatMixin(object):
         print "Current node is " + self.name
         is_additional = chat.state.fsmNode.fsm.name in ['additional', 'resource']
         next_lesson = chat.state.unitLesson
-        if self.name in ['LESSON', 'ASK']:
+        if self.name == 'LESSON':
+            input_type = 'custom'
+            kind = next_lesson.lesson.kind
+            try:
+                unitStatus = chat.state.get_data_attr('unitStatus')
+                next_ul = unitStatus.unit.unitlesson_set.get(order=unitStatus.order+1)
+                if next_ul and next_ul.lesson.kind == kind:
+                    input_type = 'options'
+                    kind = 'button'
+            except UnitLesson.DoesNotExist:
+                pass
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
                             owner=chat.user,
-                            input_type='custom',
-                            kind=next_lesson.lesson.kind,
+                            input_type=input_type,
+                            kind=kind,
                             is_additional=is_additional)[0]
+        if self.name == 'ASK':
+            message = Message.objects.get_or_create(
+                contenttype='unitlesson',
+                content_id=next_lesson.id,
+                chat=chat,
+                owner=chat.user,
+                input_type='custom',
+                kind=next_lesson.lesson.kind,
+                is_additional=is_additional)[0]
         if self.name == 'GET_ANSWER':
             message = Message.objects.get_or_create(
                             contenttype='response',
@@ -220,15 +239,6 @@ class ChatMixin(object):
                             student_error=message.student_error,
                             input_type='custom',
                             kind='message',
-                            is_additional=True)[0]
-        if self.name == 'CONTINUE_BUTTON':
-            message = Message.objects.get_or_create(
-                            chat=chat,
-                            owner=chat.user,
-                            text=chat.state.fsmNode.title,
-                            student_error=message.student_error,
-                            input_type='options',
-                            kind='button',
                             is_additional=True)[0]
         if self.name == 'END':
             message = Message.objects.get_or_create(

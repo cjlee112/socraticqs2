@@ -152,7 +152,9 @@ class Message(models.Model):
         options = None
         if (self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'):
-            if self.chat.next_point.contenttype == 'unitlesson':
+            if self.chat.next_point.kind == 'button':
+                options = [{"value": 1, "text": "Continue"}]
+            elif self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif self.chat.next_point.contenttype == 'response':
                 options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
