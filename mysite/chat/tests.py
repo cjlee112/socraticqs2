@@ -138,7 +138,8 @@ class MainChatViewTests(SetUpMixin, TestCase):
         self.assertIn('next_point', response.context)
         self.assertIn('lessons', response.context)
         self.assertIn('chat_id', response.context)
-        self.assertIn('concepts', response.context)
+        self.assertIn('will_learn', response.context)
+        self.assertIn('need_to_know', response.context)
 
     @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
     def test_next_handler_start_point_called_once(self, mocked_start_point):
