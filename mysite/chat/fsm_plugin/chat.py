@@ -183,7 +183,7 @@ def get_specs():
         name='chat',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, TITLE, LESSON, CONTINUE_BUTTON, ASK, GET_ANSWER,
+        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER,
                      ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
     )
     return (spec,)

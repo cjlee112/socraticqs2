@@ -132,3 +132,10 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 group = False
 
         return next_point
+
+
+class TestHandler(GroupMessageMixin, ProgressHandler):
+    """
+    Test handler to implement specific for mocked FSM logic.
+    """
+    pass

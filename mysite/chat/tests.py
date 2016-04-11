@@ -6,12 +6,20 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.http.response import HttpResponseNotFound
 from mock import patch, Mock
+import injections
 
 from ct.models import Course, Unit, Lesson, UnitLesson, CourseUnit, Role, Concept
 from ct.templatetags.ct_extras import md2html
 from .models import EnrollUnitCode, Message
-from .serializers import InternalMessageSerializer, InputSerializer
-from .fsm_plugin.chat import get_specs, MESSAGE
+from .serializers import (
+    InternalMessageSerializer,
+    InputSerializer,
+    MessageSerializer,
+    ChatProgressSerializer
+)
+from .services import TestHandler
+from .models import Chat
+from .fsm_plugin.chat import get_specs, END as CHAT_END
 from .fsm_plugin.additional import get_specs as get_specs_additional
 from .fsm_plugin.resource import END, get_specs as get_specs_resource
 
@@ -189,14 +197,14 @@ class HistoryAPIViewTests(SetUpMixin, TestCase):
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
         self.assertEquals(len(json_content['addMessages']), 3)
-        self.assertEquals(json_content['addMessages'][0]['name'], self.user.username)
-        self.assertEquals(
-            json_content['addMessages'][0]['html'], md2html(self.unitlesson.lesson.text)
-        )
+        self.assertEquals(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
+        self.assertEquals(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
         self.assertEquals(json_content['addMessages'][1]['type'], 'message')
-        self.assertEquals(json_content['addMessages'][1]['html'], MESSAGE.help)
-        self.assertEquals(json_content['addMessages'][2]['type'], 'breakpoint')
-        self.assertEquals(json_content['addMessages'][2]['html'], 'Courselet core lessons completed')
+        self.assertEquals(
+            json_content['addMessages'][1]['html'], md2html(self.unitlesson.lesson.text)
+        )
+        self.assertEquals(json_content['addMessages'][2]['type'], 'message')
+        self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.help)
 
 
 class ProgressAPIViewTests(SetUpMixin, TestCase):
@@ -326,19 +334,21 @@ class ResourcesViewTests(SetUpMixin, TestCase):
         json_content = json.loads(resource_response.content)
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEquals(len(json_content['addMessages']), 3)
 
         self.assertIn('nextMessagesUrl', json_content)
         self.assertIsNone(json_content['nextMessagesUrl'])
         self.assertIn('id', json_content)
 
-        self.assertEquals(json_content['addMessages'][0]['name'], self.user.username)
-        self.assertEquals(json_content['addMessages'][0]['type'], 'message')
+        self.assertEquals(json_content['addMessages'][0]['name'], self.resource_unitlesson.addedBy.username)
+        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
+        self.assertEquals(json_content['addMessages'][0]['html'], self.resource_unitlesson.lesson.title)
+        self.assertEquals(json_content['addMessages'][1]['type'], 'message')
         self.assertEquals(
-            json_content['addMessages'][0]['html'], md2html(self.resource_unitlesson.lesson.text)
+            json_content['addMessages'][1]['html'], md2html(self.resource_unitlesson.lesson.text)
         )
-        self.assertEquals(json_content['addMessages'][1]['type'], 'breakpoint')
-        self.assertEquals(json_content['addMessages'][1]['html'], END.title)
+        self.assertEquals(json_content['addMessages'][2]['type'], 'message')
+        self.assertEquals(json_content['addMessages'][2]['html'], END.help)
 
         self.assertIn('url', json_content['input'])
         self.assertIn('includeSelectedValuesFromMessages', json_content['input'])
@@ -387,5 +397,57 @@ class InputSerializerTests(SetUpMixin, TestCase):
         }
         result = InputSerializer().to_representation(input_data)
         attrs = ('type', 'url', 'options', 'includeSelectedValuesFromMessages', 'html')
+        for attr in attrs:
+            self.assertIn(attr, result)
+
+
+class MesasageSerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for MessageSerializer.
+    """
+    def setUp(self):
+        inj = injections.Container()
+        inj['next_handler'] = TestHandler()
+        self.MessageSerializerForTest = inj.inject(MessageSerializer)
+        super(MesasageSerializerTests, self).setUp()
+
+    def test_serializer_data(self):
+        """
+        Check that MessageSerializer result fits documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][0]['id']
+        msg = Message.objects.get(id=msg_id)
+
+        result = self.MessageSerializerForTest().to_representation(msg)
+
+        attrs = ('id', 'input', 'addMessages', 'nextMessagesUrl')
+        for attr in attrs:
+            self.assertIn(attr, result)
+
+
+class ChatProgressSerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for ChatProgressSerializer.
+    """
+    def test_serializer_data(self):
+        """
+        Check that ChatProgressSerializer result fits documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+
+        result = ChatProgressSerializer().to_representation(Chat.objects.get(id=chat_id))
+
+        attrs = ('progress', 'breakpoints')
         for attr in attrs:
             self.assertIn(attr, result)

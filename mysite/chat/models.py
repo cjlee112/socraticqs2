@@ -194,6 +194,11 @@ class Message(models.Model):
                 name = self.content.author.get_full_name() or self.content.author.username
             elif self.contenttype == 'unitlesson':
                 name = self.content.addedBy.get_full_name() or self.content.addedBy.username
+            elif self.contenttype == 'chatdivider' and self.content.unitlesson:
+                name = (
+                    self.content.unitlesson.addedBy.get_full_name() or
+                    self.content.unitlesson.addedBy.username
+                )
         return name
 
 
