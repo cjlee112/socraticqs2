@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from .models import Message, Chat, ChatDivider
 from .services import ProgressHandler
 from ct.models import UnitLesson, Response
+from accounts.models import Instructor
 
 
 class InternalMessageSerializer(serializers.ModelSerializer):
@@ -27,7 +28,11 @@ class InternalMessageSerializer(serializers.ModelSerializer):
         )
 
     def get_avatar(self, obj):
-        return '/static/img/avatar-teacher.jpg'
+        if not obj.userMessage:
+            try:
+                return obj.chat.instructor.instructor.icon_url
+            except Instructor.DoesNotExist:
+                pass
 
 
 class InputSerializer(serializers.Serializer):

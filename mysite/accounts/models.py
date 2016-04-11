@@ -14,8 +14,8 @@ class Instructor(models.Model):
         - `page_url`
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    institution = models.CharField(max_length=100)
-    department = models.CharField(max_length=100)
-    job = models.CharField(max_length=100)
-    icon_url = models.URLField()
-    page_url = models.URLField()
+    institution = models.CharField(max_length=100, blank=True)
+    department = models.CharField(max_length=100, blank=True)
+    job = models.CharField(max_length=100, blank=True)
+    icon_url = models.URLField(blank=True)
+    page_url = models.URLField(blank=True)

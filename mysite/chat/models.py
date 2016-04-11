@@ -59,6 +59,7 @@ STATUS_OPTIONS = {
     'done': 'Solidly',
 }
 
+
 class Chat(models.Model):
     """
     Chat model that handles particular student chat.
@@ -69,6 +70,7 @@ class Chat(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True)
+    instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
 
     class Meta:
         ordering = ['-timestamp']
