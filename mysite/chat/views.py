@@ -1,4 +1,5 @@
 import injections
+from django.db.models import Q
 from django.views.generic import View
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -7,7 +8,7 @@ from django.utils.decorators import method_decorator
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-from ct.models import Unit, Role, UnitLesson
+from ct.models import Unit, Role, UnitLesson, ConceptLink, distinct_subset
 
 
 @injections.has
@@ -45,13 +46,24 @@ class ChatInitialView(View):
 
         lessons = unit.get_exercises()
 
-        concepts = []
-        for ul in unit.unitlesson_set.filter(lesson__concept__isnull=False, kind=UnitLesson.COMPONENT):
-            title = ul.lesson.concept.title
-            url = ul.lesson.url if ul.lesson.url else reverse(
-                'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
-            )
-            concepts.append((title, url))
+        concepts = set()
+        for unit_lesson in unit.get_exercises():
+            for concept_link in ConceptLink.objects.filter(
+                Q(lesson=unit_lesson.lesson),
+                (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
+            ):
+                title = concept_link.concept.title
+                if concept_link.lesson.url:
+                    url = concept_link.lesson.url
+                else:
+                    try:
+                        ul = UnitLesson.objects.get(lesson__concept=concept_link.concept)
+                    except UnitLesson.DoesNotExist:
+                        raise Http404
+                    url = reverse(
+                        'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
+                    )
+                    concepts.add((title, url))
 
         return render(
             request,
