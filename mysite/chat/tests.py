@@ -15,7 +15,9 @@ from .serializers import (
     InternalMessageSerializer,
     InputSerializer,
     MessageSerializer,
-    ChatProgressSerializer
+    ChatProgressSerializer,
+    ChatHistorySerializer,
+    LessonSerializer,
 )
 from .services import TestHandler
 from .models import Chat
@@ -452,3 +454,57 @@ class ChatProgressSerializerTests(SetUpMixin, TestCase):
         attrs = ('progress', 'breakpoints')
         for attr in attrs:
             self.assertIn(attr, result)
+
+
+class ChatHistorySerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for ChatHistorySerializer.
+    """
+    def test_serializer_data(self):
+        """
+        Check that ChatHistorySerializer result fits documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+
+        result = ChatHistorySerializer().to_representation(Chat.objects.get(id=chat_id))
+
+        attrs = ('input', 'addMessages')
+        for attr in attrs:
+            self.assertIn(attr, result)
+
+
+class LessonSerializerTests(SetUpMixin, TestCase):
+    """
+    Tests for LessonSerializer.
+    """
+    def test_serializer_data(self):
+        """
+        Check that LessonSerializer result fits documentation.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][1]['id']
+        msg = Message.objects.get(id=msg_id)
+
+        result = LessonSerializer().to_representation(msg.content)
+
+        attrs = (
+            'id',
+            'html',
+            'isUnlocked',
+            'isDone'
+        )
+        for attr in attrs:
+            self.assertIn(attr, result)
+
+        self.assertEquals(result['id'], msg_id)
+        self.assertEquals(result['html'], msg.content.lesson.title)
