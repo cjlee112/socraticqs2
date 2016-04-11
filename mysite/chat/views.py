@@ -1,6 +1,7 @@
 import injections
 from django.db.models import Q
 from django.views.generic import View
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,7 @@ from django.utils.decorators import method_decorator
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-from ct.models import Unit, Role, UnitLesson, ConceptLink, distinct_subset
+from ct.models import Unit, Role, UnitLesson, ConceptLink, ConceptGraph
 
 
 @injections.has
@@ -47,6 +48,7 @@ class ChatInitialView(View):
         lessons = unit.get_exercises()
 
         concepts = set()
+        will_learn = set()
         for unit_lesson in unit.get_exercises():
             for concept_link in ConceptLink.objects.filter(
                 Q(lesson=unit_lesson.lesson),
@@ -63,7 +65,25 @@ class ChatInitialView(View):
                     url = reverse(
                         'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
                     )
-                    concepts.add((title, url))
+                concepts.add(concept_link.concept)
+                will_learn.add((title, url))
+
+        need_to_know = set()
+        for concept in concepts:
+            for concept_graph in ConceptGraph.objects.filter(
+                fromConcept=concept, relationship=ConceptGraph.DEPENDS
+            ):
+                title = concept_graph.toConcept.title
+                unit_lesson = UnitLesson.objects.filter(
+                    lesson__concept=concept_graph.toConcept
+                ).first()
+                if unit_lesson.lesson.url:
+                    url = unit_lesson.lesson.url
+                else:
+                    url = reverse(
+                        'ct:study_concept', args=(courseUnit.course.id, unit.id, unit_lesson.id)
+                    )
+                need_to_know.add((title, url))
 
         return render(
             request,
@@ -73,7 +93,8 @@ class ChatInitialView(View):
                 'course': courseUnit.course,
                 'unit': unit,
                 'img_url': unit.img_url,
-                'concepts': concepts,
+                'will_learn': will_learn,
+                'need_to_know': need_to_know,
                 'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),

@@ -79,7 +79,7 @@
                   <div class="chat-col-5">
                     <h2>You will learn about</h2>
                     <ul>
-                      {% for title, url in concepts %}
+                      {% for title, url in will_learn %}
                       <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
                       {% endfor %}
                     </ul>
@@ -88,7 +88,9 @@
                   <div class="chat-col-5">
                     <h2>You need to know about</h2>
                     <ul>
-                      <li><a href="https://en.wikipedia.org/wiki/Venn_diagram" target="_blank">Venn diagrams</a></li>
+                      {% for title, url in need_to_know %}
+                      <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
+                      {% endfor %}
                     </ul>
                   </div>
                 </div>
