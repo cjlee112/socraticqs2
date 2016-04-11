@@ -86,8 +86,6 @@ class ChatInitialView(View):
                     )
                 need_to_know.add((title, url))
 
-        instructor_icon_url = unit.addedBy.instructor.icon_url
-
         return render(
             request,
             'chat/main_view.html',
@@ -104,6 +102,5 @@ class ChatInitialView(View):
                 'duration': len(lessons) * 3,
                 'next_point': next_point,
                 'fsmstate': chat.state,
-                'instructor_icon_url': instructor_icon_url,
             }
         )
