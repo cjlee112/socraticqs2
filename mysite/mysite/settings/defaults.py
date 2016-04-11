@@ -147,6 +147,7 @@ INSTALLED_APPS = (
     # Chat UI
     'chat',
     'rest_framework',
+    'accounts',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
