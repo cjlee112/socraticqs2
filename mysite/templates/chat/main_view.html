@@ -49,7 +49,11 @@
 
       <!-- Introduction -->
       <div class="chat-introduction">
+        {% if img_url %}
+        <header class="hero" style="background-image:url('{{ img_url }}');">
+        {% else %}
         <header class="hero" style="background-image:url('{% static "img/hero.jpg" %}');">
+        {% endif %}
           <div class="overlay"></div>
 
           <div class="chat-container">
@@ -68,7 +72,7 @@
 
               <div class="chat-col-8">
                 <p>
-                  In this courselet you'll learn to use some basic ideas in probability, and apply them to real-world problems such as interpreting the meaning of a medical diagnostic test result. Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
+                  {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
                 </p>
 
                 <div class="chat-row">

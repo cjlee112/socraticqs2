@@ -111,7 +111,7 @@ class Concept(models.Model):
         return l
     def __unicode__(self):
         return self.title
-            
+
 
 class ConceptGraph(models.Model):
     DEPENDS = 'depends'
@@ -167,7 +167,7 @@ class Lesson(models.Model):
     EXERCISE = 'exercise'
     PROJECT = 'project'
     PRACTICE_EXAM = 'practice'
-    
+
     ANSWER = 'answer'
     ERROR_MODEL = 'errmod'
 
@@ -349,7 +349,7 @@ class Lesson(models.Model):
                                        relationship=relationship).count() == 0:
             return self.conceptlink_set.create(concept=concept, addedBy=addedBy,
                                                relationship=relationship)
-        
+
     def __unicode__(self):
         return self.title
     ## def get_url(self):
@@ -368,8 +368,8 @@ def distinct_subset(inlist, distinct_func=lambda x:x.treeID):
             s.add(k)
             outlist.append(o)
     return outlist
-            
-    
+
+
 class ConceptLink(models.Model):
     DEFINES = 'defines'
     TESTS = 'tests'
@@ -425,7 +425,7 @@ DEFAULT_RELATION_MAP = {
     Lesson.EXERCISE:ConceptLink.TESTS,
     Lesson.PROJECT:ConceptLink.TESTS,
     Lesson.PRACTICE_EXAM:ConceptLink.TESTS,
-    
+
     Lesson.ANSWER:ConceptLink.ILLUSTRATES,
     Lesson.ERROR_MODEL:ConceptLink.DEFINES,
 
@@ -436,7 +436,7 @@ DEFAULT_RELATION_MAP = {
     Lesson.FORUM:ConceptLink.COMMENTS,
 }
 
-    
+
 class StudyList(models.Model):
     'list of materials of interest to each user'
     lesson = models.ForeignKey(Lesson)
@@ -692,7 +692,7 @@ def reorder_exercise(self, old=0, new=0, l=()):
             ex.save()
     return l # hand back the reordered list
 
-    
+
 class Unit(models.Model):
     'a container of exercises performed together'
     COURSELET = 'unit'
@@ -708,6 +708,9 @@ class Unit(models.Model):
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)
     addedBy = models.ForeignKey(User)
+    description = models.TextField(blank=True)
+    img_url = models.URLField(blank=True)
+
     def next_order(self):
         'get next order value for appending new UnitLesson.order'
         n = self.unitlesson_set.all().aggregate(n=Max('order'))['n']
@@ -829,7 +832,7 @@ class Unit(models.Model):
     def __unicode__(self):
         return self.title
 
-    
+
 
 ############################################################
 # student response and error data
@@ -870,7 +873,7 @@ STATUS_TABLE_LABELS = (
     (DONE_STATUS, 'Solid understanding'),
 )
 
-        
+
 class Response(models.Model):
     'answer entered by a student in response to a question'
     ORCT_RESPONSE = 'orct'
@@ -893,7 +896,7 @@ class Response(models.Model):
     UNSURE = 'notsure'
     SURE = 'sure'
     CONF_CHOICES = (
-        (GUESS, 'Just guessing'), 
+        (GUESS, 'Just guessing'),
         (UNSURE, 'Not quite sure'),
         (SURE, 'Pretty sure'),
     )
@@ -906,12 +909,12 @@ class Response(models.Model):
                             default=ORCT_RESPONSE)
     title = models.CharField(max_length=200, null=True)
     text = models.TextField()
-    confidence = models.CharField(max_length=10, choices=CONF_CHOICES, 
+    confidence = models.CharField(max_length=10, choices=CONF_CHOICES,
                                   blank=False, null=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES, 
+    selfeval = models.CharField(max_length=10, choices=EVAL_CHOICES,
                                 blank=False, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES,
                               blank=False, null=True)
     author = models.ForeignKey(User)
     needsEval = models.BooleanField(default=False)
@@ -973,14 +976,14 @@ class Response(models.Model):
             if self.studenterror_set.count() == 0:
                 return self.CLASSIFY_STEP, 'classify your error(s)'
 
-        
+
 
 class StudentError(models.Model):
     'identification of a specific error model made by a student'
     response = models.ForeignKey(Response)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     errorModel = models.ForeignKey(UnitLesson)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, 
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES,
                               blank=False, null=True)
     author = models.ForeignKey(User)
     activity = models.ForeignKey('fsm.ActivityLog', null=True)
@@ -1020,7 +1023,7 @@ class InquiryCount(models.Model):
     response = models.ForeignKey(Response)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    
+
 class Liked(models.Model):
     'record users who found UnitLesson showed them something they were missing'
     unitLesson = models.ForeignKey(UnitLesson)
@@ -1033,7 +1036,7 @@ class FAQ(models.Model):
     unitLesson = models.ForeignKey(UnitLesson)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    
+
 
 #######################################
 # Course and membership info
@@ -1047,7 +1050,7 @@ class Course(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField()
-    access = models.CharField(max_length=10, choices=ACCESS_CHOICES, 
+    access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
                               default=PUBLIC_ACCESS)
     enrollCode = models.CharField(max_length=64, null=True)
     lockout = models.CharField(max_length=200, null=True)
@@ -1062,7 +1065,7 @@ class Course(models.Model):
                         order=CourseUnit.objects.filter(course=self).count())
         cu.save()
         return unit
-        
+
     def get_user_role(self, user, justOne=True, raiseError=True):
         'return role(s) of specified user in this course'
         l = [r.role for r in self.role_set.filter(user=user)]
@@ -1098,7 +1101,7 @@ class CourseUnit(models.Model):
     releaseTime = models.DateTimeField('time released', null=True)
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
-    
+
 class Role(models.Model):
     'membership of a user in a course'
     INSTRUCTOR = 'prof'
@@ -1111,7 +1114,7 @@ class Role(models.Model):
         (ENROLLED, 'Enrolled Student'),
         (SELFSTUDY, 'Self-study'),
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, 
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES,
                             default=ENROLLED)
     course = models.ForeignKey(Course)
     user = models.ForeignKey(User)
@@ -1153,7 +1156,7 @@ class UnitStatus(models.Model):
         if not self.endTime:
             self.endTime = timezone.now() # mark as done
             self.save()
-            return True        
+            return True
         self.save()
     def start_next_lesson(self):
         'advance to the next lesson, if any, else return None'

@@ -37,7 +37,7 @@ class ErrorStatusForm(ResponseForm):
         model = StudentError
         fields = ['status']
         labels = dict(status=_('How well have you overcome this error?'))
-        
+
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES,
                 label='How does this answer compare with the right answer?')
@@ -66,7 +66,7 @@ class ReorderForm(forms.Form):
         self.fields['newOrder'].initial = str(initial)
         self.fields['newOrder'].choices = [(str(i),str(i + 1))
                                            for i in range(total)]
-        
+
 
 class NextLikeForm(forms.Form):
     liked = forms.BooleanField(required=False,
@@ -79,7 +79,7 @@ class NextLikeForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Next'))
-    
+
 
 class NextForm(forms.Form):
     fsmtask = forms.CharField(widget=forms.HiddenInput)
@@ -122,7 +122,7 @@ class LessonRoleForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Change Role'))
-    
+
 
 class ResponseListForm(forms.Form):
     ndisplay = forms.ChoiceField(choices=(('25', '25'), ('50', '50'),
@@ -130,7 +130,7 @@ class ResponseListForm(forms.Form):
     sortOrder = forms.ChoiceField(choices=(('-atime', 'Most recent first'),
                                            ('atime', 'Least recent first'),
                                            ('-confidence', 'Most confident first'),
-                                           ('confidence', 'Least confident first'))) 
+                                           ('confidence', 'Least confident first')))
 
 class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -142,7 +142,7 @@ class UnitTitleForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Unit
-        fields = ['title']
+        fields = ['title', 'description', 'img_url']
 
 class NewUnitTitleForm(UnitTitleForm):
     submitLabel = 'Add'
@@ -280,10 +280,10 @@ class LessonSearchForm(SearchFormBase):
                                       ('question', 'questions'),),
                              label='Search for')
     search = forms.CharField(label='containing')
-    
+
 class ErrorSearchForm(SearchFormBase):
     search = forms.CharField(label='Search for errors containing')
-    
+
 class LogoutForm(forms.Form):
     task = forms.CharField(initial='logout', widget=forms.HiddenInput)
     def __init__(self, *args, **kwargs):
@@ -310,5 +310,3 @@ def set_crispy_action(actionTarget, *forms):
     'set the form.helper.form_action for one or more forms'
     for form in forms:
         form.helper.form_action = actionTarget
-    
-    

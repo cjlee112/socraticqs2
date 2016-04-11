@@ -60,6 +60,7 @@ class ChatInitialView(View):
                 'chat_id': chat.id,
                 'course': courseUnit.course,
                 'unit': unit,
+                'img_url': unit.img_url,
                 'concepts': concepts,
                 'chat_id': chat.id,
                 'lessons': lessons,
