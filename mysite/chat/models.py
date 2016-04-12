@@ -177,7 +177,7 @@ class Message(models.Model):
                     html = EVAL_OPTIONS[self.content.selfeval]
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
-                    html = 'Resolves for errormodel %s ' % self.content.lesson.title
+                    html = mark_safe(md2html('**%s** \n %s' % (self.content.lesson.title, self.content.lesson.text)))
                 elif self.input_type == 'options' and self.text:
                     html = STATUS_OPTIONS[self.text]
                 else:

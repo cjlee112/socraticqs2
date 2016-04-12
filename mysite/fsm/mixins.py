@@ -212,6 +212,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             input_type='custom',
                             kind='message',
+                            timestamp__isnull=True,
                             is_additional=True)
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
@@ -219,8 +220,8 @@ class ChatMixin(object):
                             chat=chat,
                             owner=chat.user,
                             student_error=resolve_message.student_error,
-                            input_type='custom',
-                            kind='message',
+                            input_type='options',
+                            kind='button',
                             is_additional=True)[0]
         if self.name == 'RESOLVE':
             message = Message.objects.get_or_create(
@@ -230,6 +231,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             input_type='custom',
                             kind='message',
+                            timestamp__isnull=True,
                             is_additional=True)[0]
         if self.name == 'MESSAGE_NODE':
             message = Message.objects.get_or_create(
@@ -291,7 +293,15 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='message',
                             is_additional=is_additional)[0]
-        if self.name in ['DIVIDER', 'START_MESSAGE']:
+        if self.name == 'START_MESSAGE':
+            message = Message.objects.create(
+                            input_type='custom',
+                            text=self.title,
+                            chat=chat,
+                            owner=chat.user,
+                            kind='message',
+                            is_additional=is_additional)
+        if self.name == 'DIVIDER':
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(
