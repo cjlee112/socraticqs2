@@ -295,11 +295,11 @@ class ChatMixin(object):
                             is_additional=is_additional)[0]
         if self.name == 'START_MESSAGE':
             message = Message.objects.create(
-                            input_type='custom',
+                            input_type='options',
                             text=self.title,
                             chat=chat,
                             owner=chat.user,
-                            kind='message',
+                            kind='button',
                             is_additional=is_additional)
         if self.name == 'DIVIDER':
             divider = ChatDivider(text=self.title)

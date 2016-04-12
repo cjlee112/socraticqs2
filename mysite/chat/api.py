@@ -71,7 +71,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
-        if message:
+        if message and message.kind != 'button':
             # Set next message for user
             if not message.timestamp:
                 message.timestamp = timezone.now()
