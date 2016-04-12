@@ -156,6 +156,31 @@ class MainChatViewTests(SetUpMixin, TestCase):
         self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
 
 
+class MessagesViewTests(SetUpMixin, TestCase):
+    """
+    Test for MessagesView API.
+    """
+    def test_positive_case(self):
+        """
+        Check positive case for MessagesView response.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][1]['id']
+        response = self.client.get(
+            reverse('chat:messages-detail', args=(msg_id,)),
+            {'chat_id': chat_id},
+            follow=True
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(len(json.loads(response.content)['addMessages']), 2)
+
+
 class HistoryAPIViewTests(SetUpMixin, TestCase):
     """
     Tests /history API.
