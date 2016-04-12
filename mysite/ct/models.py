@@ -710,6 +710,7 @@ class Unit(models.Model):
     addedBy = models.ForeignKey(User)
     description = models.TextField(blank=True)
     img_url = models.URLField(blank=True)
+    small_img_url = models.URLField(blank=True)
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'

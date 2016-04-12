@@ -142,7 +142,7 @@ class UnitTitleForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Unit
-        fields = ['title', 'description', 'img_url']
+        fields = ['title', 'description', 'img_url', 'small_img_url']
 
 class NewUnitTitleForm(UnitTitleForm):
     submitLabel = 'Add'

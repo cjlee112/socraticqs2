@@ -67,7 +67,11 @@
           <div class="description chat-container">
             <div class="chat-row">
               <div class="chat-col-2">
+                {% if small_img_url %}
+                <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
+                {% else %}
                 <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
+                {% endif %}
               </div>
 
               <div class="chat-col-8">

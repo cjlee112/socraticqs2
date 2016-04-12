@@ -94,6 +94,7 @@ class ChatInitialView(View):
                 'course': courseUnit.course,
                 'unit': unit,
                 'img_url': unit.img_url,
+                'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
                 'chat_id': chat.id,
