@@ -20,7 +20,6 @@ MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 
 def get_additional_messages(response, chat):
-    print 'additional lessons'
     student_errors = response.studenterror_set.all()
     for each in student_errors:
         map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
@@ -67,7 +66,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             return Response(serializer.data)
 
         if not message.chat or message.chat != chat or message.timestamp:
-            print('FAULT')
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
@@ -222,19 +220,21 @@ class ResourcesView(viewsets.ModelViewSet):
 
         unitlesson = UnitLesson.objects.get(pk=pk)
 
-        divider = ChatDivider(text=unitlesson.lesson.title,
-                              unitlesson=unitlesson)
+        divider = ChatDivider(
+            text=unitlesson.lesson.title, unitlesson=unitlesson
+        )
 
         divider.save()
         m = Message.objects.get_or_create(
-                            contenttype='chatdivider',
-                            content_id=divider.id,
-                            input_type='custom',
-                            type='breakpoint',
-                            chat=chat,
-                            owner=chat.user,
-                            kind='message',
-                            is_additional=True)[0]
+            contenttype='chatdivider',
+            content_id=divider.id,
+            input_type='custom',
+            type='breakpoint',
+            chat=chat,
+            owner=chat.user,
+            kind='message',
+            is_additional=True
+        )[0]
         chat.next_point = self.next_handler.next_point(
             current=unitlesson, chat=chat, message=m, request=request, resources=True
         )

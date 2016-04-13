@@ -7,12 +7,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
-
-from ct.models import CourseUnit, UnitLesson, Response, Unit, NEED_REVIEW_STATUS, Lesson, STATUS_CHOICES, StudentError
-from ct.templatetags.ct_extras import md2html
-
-
 from .utils import enroll_generator
+from ct.models import (
+    CourseUnit,
+    UnitLesson,
+    Response,
+    Unit,
+    NEED_REVIEW_STATUS,
+    Lesson,
+    STATUS_CHOICES,
+    StudentError
+)
+from ct.templatetags.ct_extras import md2html
 
 
 TYPE_CHOICES = (
@@ -108,7 +114,6 @@ class Message(models.Model):
 
     @property
     def content(self):
-        print('content')
         if self.contenttype == 'NoneType':
             return self.text
         app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
@@ -119,11 +124,9 @@ class Message(models.Model):
             return self.contenttype
 
     def get_next_point(self):
-        print('get_next_point')
         return self.chat.next_point.id if self.chat and self.chat.next_point else None
 
     def get_next_input_type(self):
-        print('get_next_input_type')
         if self.chat:
             if self.chat.next_point:
                 input_type = self.chat.next_point.input_type
@@ -134,11 +137,12 @@ class Message(models.Model):
         return input_type
 
     def get_next_url(self):
-        print('get_next_url')
-        return reverse('chat:messages-detail', args=(self.chat.next_point.id,)) if self.chat and self.chat.next_point else None
+        return reverse(
+            'chat:messages-detail',
+            args=(self.chat.next_point.id,)
+        ) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
-        print('get_errors')
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
         checked_errors = UnitError.objects.get(id=self.content_id).response.studenterror_set.all()\
                                                                   .values_list('errorModel', flat=True)
@@ -150,10 +154,11 @@ class Message(models.Model):
         return '<ul class="chat-select-list">'+errors+'</ul>'
 
     def get_options(self):
-        print('get_options')
         options = None
-        if (self.chat and self.chat.next_point and
-            self.chat.next_point.input_type == 'options'):
+        if (
+            self.chat and self.chat.next_point and
+            self.chat.next_point.input_type == 'options'
+        ):
             if self.chat.next_point.kind == 'button':
                 options = [{"value": 1, "text": "Continue"}]
             elif self.chat.next_point.contenttype == 'unitlesson':
@@ -234,7 +239,6 @@ class UnitError(models.Model):
         return list(self.response.unitLesson.get_errors()) + self.unit.get_aborts()
 
     def save_response(self, user, response_list):
-        print response_list
         if user == self.response.author:
             status = self.response.status
         else:
@@ -246,7 +250,6 @@ class UnitError(models.Model):
                 author=user,
                 status=status
             )
-
 
     @classmethod
     def get_by_message(cls, message):

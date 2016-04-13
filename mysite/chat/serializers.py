@@ -74,7 +74,6 @@ class MessageSerializer(serializers.ModelSerializer):
         try:
             getattr(self, 'qs')
         except AttributeError:
-            print('Inside')
             self.qs = [obj]
             if obj.timestamp:
                 current = obj
@@ -99,7 +98,6 @@ class MessageSerializer(serializers.ModelSerializer):
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
-        print('get_messages')
         self.set_group(obj)
         return InternalMessageSerializer(many=True).to_representation(self.qs)
 
@@ -267,6 +265,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
         else:
             return False
 
+
 class ChatResourcesSerializer(serializers.ModelSerializer):
     """
     Serializer to implement /progress API.
@@ -282,13 +281,13 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
     def get_breakpoints(self, obj):
         courseUnit = obj.enroll_code.courseUnit
         unit = courseUnit.unit
-        lessons = list(unit.unitlesson_set \
-                          .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        lessons = list(
+            unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)
+        )
         lessons.sort(lambda x, y: cmp(x.lesson.title, y.lesson.title))
-        messages = obj.message_set.filter(contenttype='unitlesson',
-                                          is_additional=True,
-                                          student_error__isnull=True
-                                          )
+        messages = obj.message_set.filter(
+            contenttype='unitlesson', is_additional=True, student_error__isnull=True
+        )
         for each in messages:
             if each.content in lessons:
                 lessons[lessons.index(each.content)].message = each.id

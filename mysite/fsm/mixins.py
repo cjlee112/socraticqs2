@@ -140,9 +140,10 @@ class JSONBlobMixin(object):
 
 
 class ChatMixin(object):
-
+    """
+    Allow to create message based on current FSM node type.
+    """
     def get_message(self, chat, current=None, message=None):
-        print "Current node is " + self.name
         is_additional = chat.state.fsmNode.fsm.name in ['additional', 'resource']
         next_lesson = chat.state.unitLesson
         if self.name == 'LESSON':
@@ -265,7 +266,8 @@ class ChatMixin(object):
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
-                            text='Below are some common misconceptions. Select one or more that is similar to your reasoning.',
+                            text='''Below are some common misconceptions. '''
+                                 '''Select one or more that is similar to your reasoning.''',
                             kind='message',
                             input_type='custom',
                             is_additional=is_additional)[0]
