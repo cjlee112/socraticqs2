@@ -10,8 +10,8 @@ import injections
 
 from ct.models import Course, Unit, Lesson, UnitLesson, CourseUnit, Role, Concept
 from ct.templatetags.ct_extras import md2html
-from .models import EnrollUnitCode, Message
-from .serializers import (
+from ..models import EnrollUnitCode, Message
+from ..serializers import (
     InternalMessageSerializer,
     InputSerializer,
     MessageSerializer,
@@ -19,11 +19,11 @@ from .serializers import (
     ChatHistorySerializer,
     LessonSerializer,
 )
-from .services import TestHandler
-from .models import Chat
-from .fsm_plugin.chat import get_specs, END as CHAT_END
-from .fsm_plugin.additional import get_specs as get_specs_additional
-from .fsm_plugin.resource import END, get_specs as get_specs_resource
+from ..services import TestHandler
+from ..models import Chat
+from ..fsm_plugin.chat import get_specs, END as CHAT_END
+from ..fsm_plugin.additional import get_specs as get_specs_additional
+from ..fsm_plugin.resource import END, get_specs as get_specs_resource
 
 
 class SetUpMixin(object):
@@ -160,6 +160,8 @@ class MessagesViewTests(SetUpMixin, TestCase):
     """
     Test for MessagesView API.
     """
+    fixtures = ['chat/tests/fixtures/initial_data.json']
+
     def test_positive_case(self):
         """
         Check positive case for MessagesView response.
@@ -179,6 +181,206 @@ class MessagesViewTests(SetUpMixin, TestCase):
         )
         self.assertEquals(response.status_code, 200)
         self.assertEquals(len(json.loads(response.content)['addMessages']), 2)
+
+    def test_permission_denied(self):
+        """
+        Check for permissions check.
+
+        User from request should be the same as message owner.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][1]['id']
+
+        self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
+        self.client.login(username='middle_man', password='test')
+
+        response = self.client.get(
+            reverse('chat:messages-detail', args=(msg_id,)),
+            {'chat_id': chat_id},
+            follow=True
+        )
+        self.assertEquals(response.status_code, 403)
+
+    def test_inappropriate_message_put(self):
+        """
+        Check for inappropriate PUT request.
+        """
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        msg_id = json_content['addMessages'][1]['id']
+        msg_data = json_content['addMessages'][1]
+        msg_data['text'] = 'test text'
+        msg_data['chat_id'] = chat_id
+
+        response = self.client.put(
+            reverse('chat:messages-detail', args=(msg_id,)),
+            data=json.dumps(msg_data),
+            content_type='application/json',
+            follow=True
+        )
+
+        self.assertEquals(response.status_code, 200)
+        json_content = json.loads(response.content)
+        self.assertNotIn('text', json_content['addMessages'][0])
+
+    def test_valid_message_put(self):
+        """
+        Test a valid case when Student puts `text` to add `Response`.
+        """
+        course_unit = Course.objects.all()[0].get_course_units()[0]
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+
+        next_url = json_content['input']['url']
+
+        answer = 'My Answer'
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+        self.assertEquals(response.status_code, 200)
+        json_content = json.loads(response.content)
+
+        self.assertIn('html', json_content['addMessages'][0])
+        self.assertEquals(json_content['addMessages'][0]['html'], answer)
+
+    def test_valid_put(self):
+        """
+        Check for valid flow for putting different responses.
+        """
+        course_unit = Course.objects.all()[0].get_course_units()[0]
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        self.client.login(username='test', password='test')
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+
+        next_url = json_content['input']['url']
+
+        answer = 'My Answer'
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
+
+        self_eval = json_content['input']['options'][2]['value']
+        self_eval_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": self_eval, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(len(json_content['addMessages']), 3)
+        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self_eval = json_content['input']['options'][0]['value']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": self_eval, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        msg_id = json_content['input']['includeSelectedValuesFromMessages']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"selected": {"14": {"errorModel": ["80"]}}, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['input']['type'], 'text')
+        self.assertEquals(len(json_content['addMessages']), 4)
 
 
 class HistoryAPIViewTests(SetUpMixin, TestCase):

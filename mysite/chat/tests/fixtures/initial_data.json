@@ -1,0 +1,6023 @@
+[
+{
+  "fields": {
+    "username": "wikipedia",
+    "first_name": "Wikipedia",
+    "last_name": "Editors",
+    "is_active": true,
+    "is_superuser": false,
+    "is_staff": false,
+    "last_login": "2014-11-21T05:17:23.206Z",
+    "groups": [],
+    "user_permissions": [],
+    "password": "!AbYKiF8564tglhiTge7Uw1hltMqKwV6kEuS7UB84",
+    "email": "mail@wikipedia.org",
+    "date_joined": "2014-11-21T05:17:23.206Z"
+  },
+  "model": "auth.user",
+  "pk": 256
+},
+{
+  "fields": {
+    "username": "admin",
+    "first_name": "The",
+    "last_name": "Teacher",
+    "is_active": true,
+    "is_superuser": true,
+    "is_staff": true,
+    "last_login": "2015-04-23T23:48:55.130Z",
+    "groups": [],
+    "user_permissions": [],
+    "password": "pbkdf2_sha256$15000$9BKJnmqv2VkY$tuxD7vwIZpIo56kgMkG1bejPLCpqDMwbja6EdTUL8rU=",
+    "email": "me@example.com",
+    "date_joined": "2015-02-03T00:02:53.233Z"
+  },
+  "model": "auth.user",
+  "pk": 257
+},
+{
+  "fields": {
+    "expire_date": "2014-12-09T06:48:45.468Z",
+    "session_data": "Y2I4OGVkYTkyZWQzYjk2MWFiMzAzMDRjYTIwMjNhY2ZiMTE1M2ExZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjI4YjQ5NjI0NWFlZGNjNzg4ZDUxODAzZTUzODZkMTQ5ZWE4YzdiZmUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE4N30="
+  },
+  "model": "sessions.session",
+  "pk": "3rsoij4i7cb8pi1t1srhu4vqkd8mj74g"
+},
+{
+  "fields": {
+    "expire_date": "2014-12-28T21:57:17.472Z",
+    "session_data": "Y2I4OGVkYTkyZWQzYjk2MWFiMzAzMDRjYTIwMjNhY2ZiMTE1M2ExZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjI4YjQ5NjI0NWFlZGNjNzg4ZDUxODAzZTUzODZkMTQ5ZWE4YzdiZmUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE4N30="
+  },
+  "model": "sessions.session",
+  "pk": "91c0ouejmyxeivl2izfa7my8f1qk2dsb"
+},
+{
+  "fields": {
+    "expire_date": "2014-11-25T05:37:25.068Z",
+    "session_data": "Y2I4OGVkYTkyZWQzYjk2MWFiMzAzMDRjYTIwMjNhY2ZiMTE1M2ExZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjI4YjQ5NjI0NWFlZGNjNzg4ZDUxODAzZTUzODZkMTQ5ZWE4YzdiZmUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE4N30="
+  },
+  "model": "sessions.session",
+  "pk": "oomqxp311hp7hjp6hleyo5xj9gnp1tvm"
+},
+{
+  "fields": {
+    "expire_date": "2015-02-13T02:37:13.115Z",
+    "session_data": "Y2I4OGVkYTkyZWQzYjk2MWFiMzAzMDRjYTIwMjNhY2ZiMTE1M2ExZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjI4YjQ5NjI0NWFlZGNjNzg4ZDUxODAzZTUzODZkMTQ5ZWE4YzdiZmUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjE4N30="
+  },
+  "model": "sessions.session",
+  "pk": "p0gsxoxqhowc4z3nf0he168j3peo7njk"
+},
+{
+  "fields": {
+    "expire_date": "2015-02-13T02:37:10.575Z",
+    "session_data": "ZjdkMzJmNWZjOGE0NDliOGMyYTExNmE4YzAzNTIyYzM3MjNhNTdjNjp7InRpbWVyU3RhcnQiOjE0MjI1Njc3MDAuMjc5ODg2LCJfYXV0aF91c2VyX2hhc2giOiIyOGI0OTYyNDVhZWRjYzc4OGQ1MTgwM2U1Mzg2ZDE0OWVhOGM3YmZlIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2lkIjoxODd9"
+  },
+  "model": "sessions.session",
+  "pk": "s0jfx5m17xrumy6czd0v5ffgj2ct9bx7"
+},
+{
+  "fields": {
+    "expire_date": "2015-05-09T00:37:57.314Z",
+    "session_data": "MGUyMzUxYTA3OTM3NGZmNjk2MzI2YTZlYjkzNGE4NTVkMmE2MTRiZjp7Il9hdXRoX3VzZXJfaGFzaCI6ImJiNmY5YzI0ZTdmNzlhOWUxMTE5MDY5YmVmNzY1NzhiMDY4NDgxMWUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjI1N30="
+  },
+  "model": "sessions.session",
+  "pk": "xn12h5khp4en6x33ooi4ui7wxpr75lkd"
+},
+{
+  "fields": {
+    "domain": "example.com",
+    "name": "example.com"
+  },
+  "model": "sites.site",
+  "pk": 1
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Concept inventory",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-11T05:44:11.498Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 1
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Scientific misconceptions",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-12T19:10:02.807Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 2
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Conceptual Understanding Iceberg",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-12T19:55:17.303Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 3
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people thought we could overcome this by just explaining all the possible implications.",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-13T19:49:02.921Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 8
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Conceptual Understanding",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-14T23:48:55.654Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 9
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Chain rule (probability)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T22:19:58.361Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 11
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Projection of a joint probability (marginalization)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T22:30:52.634Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 12
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Probability normalization",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T22:40:11.823Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 13
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people didn't realize they can eliminate a variable from a joint probability by summation (projection).",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T23:09:33.957Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 14
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people thought a conditional probability sums to one (normalized) over all possible conditions",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T23:21:33.374Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 15
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people thought summing a conditional probability over all possible conditions would eliminate the conditions",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T23:27:43.093Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 16
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people thought p(A|B)=p(A)/p(B)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T23:31:56.030Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 17
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people misread the question (ABORT).",
+    "alwaysAsk": true,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": true,
+    "atime": "2014-11-17T23:58:07.955Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 18
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people didn't know a basic definition needed for this question (ABORT).",
+    "alwaysAsk": true,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": true,
+    "atime": "2014-11-17T23:58:07.993Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 19
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people couldn't figure out how to get started -- failed to apply concept(s) that they knew, e.g. due to 'trying to remember the answer' (ABORT).",
+    "alwaysAsk": true,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": true,
+    "atime": "2014-11-17T23:58:08.028Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 20
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people got hung up on a detail and didn't think through the main question (ABORT).",
+    "alwaysAsk": true,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": true,
+    "atime": "2014-11-17T23:58:08.057Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 21
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": true,
+    "approvedBy": null,
+    "title": "This question is mis-phrased: its literal meaning doesn't really ask what the author claimed (FAIL).",
+    "alwaysAsk": true,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-17T23:59:28.408Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 22
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Summation",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-18T00:15:20.041Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 23
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people moved a summation into the denominator",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-18T00:16:56.162Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 24
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Summation factoring independence",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-18T02:03:28.864Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 25
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people didn't consider that the summation factors due to independence",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-18T02:16:14.638Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 27
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Joint probability distribution",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T05:45:36.339Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 28
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people asserted that p(A|B)=p(A)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.486Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 29
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "some people asserted p(A & B)=p(A)p(B)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.507Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 30
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people said \"They are independent since they have no overlap\"",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.524Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 31
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people seemed to define independence as meaning p(A|B)=0",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.539Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 32
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people said \"they are independent, because an event in A has no effect on an event in B\"",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.551Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 33
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people seemed to mix up the ideas of a random state vs. random variable",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.565Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 34
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people said \"we do not have enough info because we don't know the correlation between A and B\"",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.579Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 35
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people confused p(A & B) with the union operation p(A or B)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.596Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 36
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people thought misconception rates on these basic concepts would be substantially lower.",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-21T22:46:25.607Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 37
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Independence (probability theory)",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-22T02:28:22.573Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 38
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Some people assumed statistical independence without justification",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-11-24T21:16:55.694Z",
+    "isError": true
+  },
+  "model": "ct.concept",
+  "pk": 39
+},
+{
+  "fields": {
+    "isPuzzled": false,
+    "isFail": false,
+    "approvedBy": null,
+    "title": "Conceptual synthesis",
+    "alwaysAsk": false,
+    "addedBy": [
+      "admin"
+    ],
+    "isAbort": false,
+    "atime": "2014-12-01T07:39:38.162Z",
+    "isError": false
+  },
+  "model": "ct.concept",
+  "pk": 40
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 8,
+    "atime": "2014-11-13T19:49:02.973Z",
+    "toConcept": 3
+  },
+  "model": "ct.conceptgraph",
+  "pk": 2
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 14,
+    "atime": "2014-11-17T23:09:33.969Z",
+    "toConcept": 12
+  },
+  "model": "ct.conceptgraph",
+  "pk": 4
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 15,
+    "atime": "2014-11-17T23:21:33.387Z",
+    "toConcept": 13
+  },
+  "model": "ct.conceptgraph",
+  "pk": 5
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 16,
+    "atime": "2014-11-17T23:27:43.104Z",
+    "toConcept": 13
+  },
+  "model": "ct.conceptgraph",
+  "pk": 6
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 17,
+    "atime": "2014-11-17T23:31:56.040Z",
+    "toConcept": 11
+  },
+  "model": "ct.conceptgraph",
+  "pk": 7
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 24,
+    "atime": "2014-11-18T00:16:56.193Z",
+    "toConcept": 23
+  },
+  "model": "ct.conceptgraph",
+  "pk": 8
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "depends",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 23,
+    "atime": "2014-11-18T02:03:28.905Z",
+    "toConcept": 25
+  },
+  "model": "ct.conceptgraph",
+  "pk": 9
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 27,
+    "atime": "2014-11-18T02:16:14.666Z",
+    "toConcept": 25
+  },
+  "model": "ct.conceptgraph",
+  "pk": 10
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 31,
+    "atime": "2014-11-22T02:31:56.914Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 11
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 33,
+    "atime": "2014-11-22T02:35:45.801Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 12
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 29,
+    "atime": "2014-11-22T02:37:19.113Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 13
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 30,
+    "atime": "2014-11-22T02:39:39.723Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 14
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 35,
+    "atime": "2014-11-22T02:41:07.080Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 15
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 36,
+    "atime": "2014-11-22T02:43:51.892Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 16
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 32,
+    "atime": "2014-11-22T02:45:40.724Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 17
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 34,
+    "atime": "2014-11-22T02:49:57.989Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 18
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "depends",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 3,
+    "atime": "2014-11-26T19:13:55.974Z",
+    "toConcept": 9
+  },
+  "model": "ct.conceptgraph",
+  "pk": 19
+},
+{
+  "fields": {
+    "approvedBy": null,
+    "relationship": "errmod",
+    "addedBy": [
+      "admin"
+    ],
+    "fromConcept": 39,
+    "atime": "2014-12-01T21:21:36.726Z",
+    "toConcept": 38
+  },
+  "model": "ct.conceptgraph",
+  "pk": 20
+},
+{
+  "fields": {
+    "treeID": 1,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Basic Probability Definitions Review",
+    "url": null,
+    "text": "* Let :math:`S` be the set of all possible events, :math:`H` and :math:`O` subsets of it, and :math:`|S|` the \"size\" (probability measure) of event set :math:`S`.  Then we define an *unconditional probability* as:\r\n\r\n  .. math:: p(H) = \\frac{|H \\cap S|}{|S|}\r\n\r\n* Define a *joint probability* as\r\n\r\n  .. math:: p(H \\cap O) = \\frac{|H \\cap O \\cap S|}{|S|}\r\n\r\n* Define a *conditional probability* as\r\n\r\n  .. math:: p(H|O) = \\frac{|H \\cap O \\cap S|}{|O \\cap S|}\r\n  \r\n* *Statistical independence* is defined as a relationship between\r\n  two random variables :math:`X,Y` in which the conditional probability of\r\n  one random variable is *always* equal to its unconditional\r\n  probability:\r\n  \r\n  .. math:: p(X|Y) = p(X)\r\n  \r\n  (i.e. this holds true for all possible values of \r\n  the random variables :math:`X,Y`).  Thus, knowing the value of :math:`Y`\r\n  tells you *nothing* about the likely value of :math:`X`; \r\n  its probabilities are totally unchanged.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:37:09.414Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 1
+},
+{
+  "fields": {
+    "treeID": 2,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "A Brief Definition of Conceptual Understanding",
+    "url": null,
+    "text": "Let's define a **concept** as a concise statement of a principle that is always true, and that furnishes a reliable tool for solving a wide variety of problems.\r\n\r\nWe can define **conceptual understanding** operationally, as the ability to use a concept correctly on a wide variety of problems.  Concretely, given a concept statement, there are many different ways we could try to apply that statement even to a single problem -- some of which are right, and some which are invalid.  To my mind, \"conceptual understanding\" means *both* knowing which ways are right vs. which ways are wrong, and also being able to explain *why* the right ways are right, and the wrong ways are wrong, from first principles.\r\n\r\nWithout the latter component, students' knowledge is fragile: even slight errors (which are inevitable) will knock them off the track to a correct solution.  By contrast, when they can reason from first principles, they will constantly catch their own errors and get back on track.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 9,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:37:09.446Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 2
+},
+{
+  "fields": {
+    "treeID": 3,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Different Strategies for Problem Solving",
+    "url": "",
+    "text": "It is self-evident that \"thinking about concepts\" is not the only possible strategy to use in a class, let alone the real world.  Let's contrast two basic strategies:\r\n\r\n* using **procedures that we've trained by repetition**.  Concretely, our operational focus is on following the steps (applying them to the current problem).  We will sometimes refer to this as \"mechanics\", both to reflect that it can perform complicated operations (such as solving an equation), and that it's \"mechanical\" in the sense of following a previously recorded procedure.\r\n* we can characterize **thinking about concepts** as original thinking, in that we think for ourselves about a newly encountered problem using basic concepts.  Concretely, our operational focus is on what conceptual questions to ask about this problem, and then answering them.  In other words, what do you do when you don't **already know** what to do?  You think about it.\r\n\r\nObviously, a good problem-solver uses both of these strategies, and mixes them as needed.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T00:37:09.464Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 3
+},
+{
+  "fields": {
+    "treeID": 4,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Basic Misconception Rates?",
+    "url": "",
+    "text": "Say you are teaching a bioinformatics theory class for Computer Science students (equal mix of graduate students and advanced undergrads) who have **completed** a statistics course on Probability.  You give them some `basic probability review definitions </ct/courses/2/units/2/lessons/1/>`_, lecture on them, solicit student questions and answer them.\r\n\r\n**What fraction of the students do you expect will have a basic misconception about these simple definitions?  The more accurate your prediction, the better.**",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T00:52:44.842Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 4
+},
+{
+  "fields": {
+    "treeID": 5,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Fastest Teaching Strategy?",
+    "url": null,
+    "text": "Say you wanted to quickly teach this class of CS students, to use these basic probability concepts correctly.  Let's consider the possible mixes of four distinct strategies:\r\n\r\n#. \"telling them the *right way*\" to use them: present correct usages in more or less detail.\r\n#. \"warning them about *wrong ways*\": lecture about mistakes they must avoid.\r\n#. open response concept testing: ungraded, \"in class\" teaching method, challenges a single concept, exposes all student misconceptions, empirically and immediately.\r\n#. problems to solve: exercises for them to use everything they learned, typically graded based on getting the right answer.\r\n\r\n**State briefly in one sentence what teaching strategy you would choose. Then explain briefly why that strategy would be fastest.**\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:52:44.873Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 5
+},
+{
+  "fields": {
+    "treeID": 6,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Summation Equalities",
+    "url": null,
+    "text": "Assume that a random variable :math:`B` has disjoint possible values\n:math:`\\{b_1, \\ldots, b_n\\}`.\nWhich of the following expressions if any are equal?\n\n1. :math:`\\sum_{i=1}^n p(A|B=b_i)`.\n\n2. :math:`\\sum_{i=1}^n p(A, B=b_i)`.\n\n3. :math:`\\sum_{i=1}^n p(A|B=b_i)p(B=b_i)`.\n\n4. :math:`\\sum_{i=1}^n \\frac{p(A)}{p(B=b_i)}`.\n\n5. :math:`\\sum_{i=1}^n p(A)p(B=b_i)`.\n\n6. :math:`p(A)`\n\n7. :math:`p(B)`\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:27.630Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 6
+},
+{
+  "fields": {
+    "treeID": 7,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Event Independence?",
+    "url": "",
+    "text": "Consider the following Venn diagram of a probability space (outer rectangle) containing two event subsets A, B:\r\n\r\n.. image:: STATICIMAGE/no_intersection.png\r\n   :width: 80%\r\n\r\nAre events A, B statistically independent?\r\nJustify your answer mathematically.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T00:53:27.658Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 7
+},
+{
+  "fields": {
+    "treeID": 8,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Types of ORCT Failure?",
+    "url": null,
+    "text": "What are the distinct ways that an ORCT exercise can **fail** to be useful for a student?  Briefly state the cases that you think are most likely, and how we can minimize them.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:46.948Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 8
+},
+{
+  "fields": {
+    "treeID": 9,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "What to Cover in Lecture Prior to ORCT?",
+    "url": null,
+    "text": "Say you've decided to teach a concept with\r\na combination of a lecture introduction followed by an ORCT.\r\nAssume there are several aspects\r\nyou want students to learn about that concept.\r\nPropose a rule for how to decide what kinds\r\nof aspects should be covered in lecture, and briefly\r\njustify why your rule will best improve student learning.\r\n\r\nExample: say we're teaching the importance of distinguishing\r\nobservable (O) vs hidden (H) variables, and\r\nwe *already know* that students often forget to distinguish\r\nthem, e.g. p(O|H) vs. p(H|O) (a simple case of this is the False\r\nPositive Rate vs. False Discovery Rate).\r\nWe could warn them of that error in lecture, or via\r\nan ORCT, or by some combination of the two.  Briefly state\r\nwhat you think would be best, and why.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:46.980Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 9
+},
+{
+  "fields": {
+    "treeID": 10,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Efficiency Concerns: When to Include an ORCT?",
+    "url": null,
+    "text": "Say we want to use our teaching time as efficiently as possible.  What principles should we follow for deciding whether to include an ORCT for a given topic or not, and if so how much time to give to lecturing on that topic vs. the ORCT.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:46.998Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 10
+},
+{
+  "fields": {
+    "treeID": 11,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Identify Student Misconceptions via an Active Learning Exercise?",
+    "url": null,
+    "text": "Say we want to train students to use a concept\r\ncorrectly for solving real-world problems, by\r\nexposing and identifying the specific ways they misunderstand\r\nand mis-apply it.  To do this, we want to give them a learning exercise in class or online.\r\nWhat guidelines would you propose for effective design of such an exercise?  Briefly state your proposed guidelines, and why each is needed.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:47.016Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 11
+},
+{
+  "fields": {
+    "treeID": 12,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Conceptual Thinking as a Student Strategy?",
+    "url": null,
+    "text": "Does the average student use *thinking about concepts* as their main strategy?  Putting yourself \"in their shoes\", when *should* they do this, vs. when *shouldn't* they?  Briefly justify your answer.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:47.037Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 12
+},
+{
+  "fields": {
+    "treeID": 13,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Measure Conceptual Understanding?",
+    "url": null,
+    "text": "Say we've identified a concept we want our students to understand and use correctly, and someone proposes a specific measurement (e.g. an exam question and grading method).  By what criteria could we evaluate whether it genuinely measures conceptual understanding?  Briefly explain your reasoning, and suggest some common examples that would vs. wouldn't be good measures of conceptual understanding.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T00:53:47.055Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 13
+},
+{
+  "fields": {
+    "treeID": 14,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Basic Misconception Rates? Answer",
+    "url": "",
+    "text": "* 73% failed to consider one of the most basic properties of\r\n  conditional probability (converses are not equal) on a\r\n  multiple choice question.\r\n* `77% made a basic error </ct/teach/courses/2/units/2/lessons/6/>`_ on fundamental `aspects of the definition\r\n  of probability </ct/teach/courses/2/units/2/lessons/6/errors/>`_, such as *normalization* (\"probabilities must sum to 1\").\r\n* `56% fundamentally misunderstood </ct/teach/courses/2/units/2/lessons/7/errors/>`_ the meaning of\r\n  *statistical independence* when applied to a `simple Venn diagram </ct/teach/courses/2/units/2/lessons/7/>`_.\r\n\r\nComments:\r\n\r\n* the only instructors who say \"this wouldn't happen in *my* class\"\r\n  are ones who have *not* performed systematic concept inventory\r\n  testing on their students.\r\n* seeing what *every* student in your class actually thinks,\r\n  on each concept you teach, is *eye-opening*,\r\n  and the necessary first step towards *correcting* their errors.\r\n  You cannot fix what you cannot see.\r\n\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T01:02:36.290Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 14
+},
+{
+  "fields": {
+    "treeID": 15,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Fastest Teaching Strategy? Answer",
+    "url": null,
+    "text": "To make a long story short, I find a mixed strategy necessary:\r\nsome lecture (#1) to introduce a concept; \r\nopen response concept testing (ORCT, #3)\r\nto get the students to actually understand it correctly;\r\nand lastly problems to solve (#4) to start using the concept in\r\ncombination with other concepts.\r\nA 10 minute ORCT exercise can empirically capture, categorize\r\nand measure all of the misconceptions that students make on\r\na given concept.  Then it can follow up with each student to\r\nfix their error with appropriate exercises.\r\n\r\nI find this mixed approach fastest for three reasons:\r\n\r\n* it quickly identifies students' specific misconceptions, whereas\r\n  without ORCT I would probably never identify most of them.\r\n* trying to lecture about all these misconceptions (to \"innoculate\"\r\n  students against them) would take a *long* time;\r\n* ORCT fixes students' misconceptions efficiently,\r\n  by giving each student follow-up exercises (outside of class)\r\n  tailored to fix just the mistake(s) that individual made.\r\n\r\nIn-depth:\r\n\r\nStrategy #1 is necessary but not sufficient.  If you keep it\r\nconcise, you leave many implications about correct usage unstated,\r\nand students will miss these implications, and use the concepts wrong.\r\nOn the other hand, trying to cover all possible usage cases\r\nand make every implication explicit is not only a mirage\r\n(impractical) but counter-productive.  The work of realizing\r\nwhat implications flow from the basic concepts is only \r\nuseful if the *student does it*, because *that* is conceptual\r\nunderstanding: using the concept correctly in all circumstances.  \r\nBlindly following a laundry\r\nlist of someone else's rules is the opposite of\r\nsuch understanding.\r\n\r\nMore to the point, our ability to transfer our knowledge to\r\nstudents is fundamentally limited by two things: \r\n\r\n* the \"noisy channel\": about half of what you say will get lost or\r\n  misinterpreted by each student;\r\n* the \"black hole\": we often don't\r\n  know precisely what misconceptions students will fall into\r\n  for a given concept.  This limits the value of strategy #2.\r\n\r\nIn general, *lecturing more* does not solve either of these\r\nproblems.  Open Response Concept Testing fills this gap.\r\n\r\nStrategy #4 is again necessary but not sufficient.  Ideally\r\nthese exercises function as a \"bridge\" to real-world problem\r\nsolving skills, by making students struggle with the important\r\nchallenges of figuring out *which* concept to use *when*, and \r\nhow to *combine multiple concepts* to solve a problem (synthesis).\r\nHowever, this requires *already* having a good grasp of the \r\nbasic concepts.  Students with basic misconceptions will often\r\nget stuck either in \"I can't figure out how to solve this problem\",\r\nor \"I can't figure out what I did wrong\".\r\n\r\nFundamentally, strategies 1, 2 and 4 are *one-way* (from the instructor\r\nto the student, e.g. \"here's how to do X\", or \"you got question Y wrong\").\r\nThey do not reveal the inner thinking of the student to the\r\ninstructor, a necessary precondition for identifying student\r\nerrors and fixing them.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:02:36.319Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 15
+},
+{
+  "fields": {
+    "treeID": 16,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Summation Equalities Answer",
+    "url": null,
+    "text": "2. :math:`\\sum_{i=1}^n p(A, B=b_i)`.\n\n3. :math:`\\sum_{i=1}^n p(A|B=b_i)p(B=b_i)`.\n\n5. :math:`\\sum_{i=1}^n p(A)p(B=b_i)`.\n\n6. :math:`p(A)`\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:03:10.295Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 16
+},
+{
+  "fields": {
+    "treeID": 17,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Event Independence? Answer",
+    "url": "",
+    "text": "We define random variables based on each event A, B: specifically, we define two binary variables :math:`X \\in \\{A,\\neg A\\}`, and :math:`Y \\in \\{B,\\neg B\\}`.  Now we can ask whether their joint probability mass function obeys independence, i.e.\r\n\r\n.. math:: p(X,Y) = p(X)p(Y)\r\n\r\nThe Venn diagram clearly fails this, e.g. \r\n\r\n.. math:: p(X=A,Y=B) \\ne p(X=A)p(Y=B)\r\n\r\nNote: it's important to understand that independence is only definable with respect to a pair of *variables*, not individual *events* or *states*.  In other words, independence is a statement about the complete joint probability *function*: the independence equality must hold for *all* possible values of *X,Y*.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T01:03:10.316Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 17
+},
+{
+  "fields": {
+    "treeID": 18,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Types of ORCT Failure? Answer",
+    "url": null,
+    "text": "In the worst case, an ORCT exercise may yield no useful information\r\nfor a student because s/he in effect never \"got to the starting line.\"\r\nI find it useful to distinguish whether the fault lies in the\r\nORCT question (FAIL) or the student (ABORT).\r\n\r\n* if the **wording of the ORCT is imprecise** (an important detail\r\n  is not nailed down, so students think you mean X when you actually\r\n  meant Y), **incorrect** (inconsistent with your own definitions\r\n  or with itself), or **obscure** (students don't understand what\r\n  specifically you're asking), it will FAIL.  \r\n\r\n  We can minimize this problem in two ways.  First, when we present\r\n  an ORCT question, it's a good idea to ask \"is there anything\r\n  you're wondering about what you're being asked, or that seems unclear?\"\r\n  Answering students' questions can both highlight potential wording\r\n  problems, and \"rescue\" some students from them.\r\n  Second, we need to detect and fix real wording problems.\r\n  Courselets.org tracks this case by asking\r\n  every student whether they think \"The question is mis-phrased:\r\n  its literal meaning doesn't really ask what you claimed\".\r\n  The instructor should carefully scrutinize such cases\r\n  and fix any wording errors.\r\n\r\n* if a student is **unfamiliar with a basic definition or concept**\r\n  needed for this question, s/he can't begin to think about it (ABORT).\r\n\r\n  Three steps can help minimize this.  First, lecture on the required\r\n  definitions and concept immediately before asking the ORCT.  This\r\n  works better than (for example) assigning reading on this material,\r\n  which the students may not bother to read.  Make sure to provide\r\n  necessary background, which may be different for different students\r\n  in your class.\r\n  Again, simply asking the students \"is there anything you're\r\n  wondering about?\" can help a lot (before starting the exercise).\r\n  Second, minimize the problem by simplifying your ORCT as much\r\n  as possible: the less jargon and assumptions it uses, the better.\r\n  Third, the Courselets.org system tracks every student's\r\n  ABORT frequencies, and should follow up with students who make\r\n  this error, on how to avoid it (i.e. provide recommended\r\n  *resolutions*, same as for any specific error model).\r\n\r\n* a student may \"get stuck\", and **fail to think** about how to\r\n  apply a concept that they actually know (ABORT).\r\n\r\n  This is a very common error, especially for students new to ORCT,\r\n  and actually a whole subject unto itself.  For the moment,\r\n  suffice it to say that Courselets.org tracks every occurence\r\n  of such an ABORT error, and directs the student to recommended\r\n  exercises (resolutions) for fixing this tendency.\r\n\r\n* a student may **misread the question**, and fail to answer part of\r\n  it, or address a rather different question (ABORT).\r\n\r\n  Same basic remedies as above.  In general, I present an ORCT\r\n  in two ways at the same time: as *text* (a highly tuned and concise\r\n  wording); and \"interactively\" (in a more informal and intuitive way,\r\n  dwelling at length on key points, and inviting questions).\r\n\r\n* a student's answer may **not explain his thinking**, making it impossible\r\n  to diagnose his error.  For example, just answering \"Yes\" gives us\r\n  no insight into the student's misconceptions.\r\n\r\n  Again, Courselets.org tracks this as a specific type of ABORT\r\n  error, and gives the student advice on how to avoid this error\r\n  in the future.  Of course, ORCT should be written to emphasize\r\n  \"explain your reasoning\" and when presenting them in class the\r\n  instructor should stress the importance of this.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:03:24.099Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 18
+},
+{
+  "fields": {
+    "treeID": 19,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "What to Cover in Lecture Prior to ORCT? Answer",
+    "url": null,
+    "text": "I favor lecturing just enough to state the concept clearly\r\nso the students can try using it.  That typically means\r\ngiving a simple, intuitive statement of its logic,\r\na formal statement they can rigorously apply to any problem,\r\nand probably a very simple example that shows that statement\r\nin action.  However, I do not try to feed them the many\r\nlogical implications of this concept in lecture.  Instead\r\nI proceed immediately to an ORCT that asks them to try\r\nusing the concept, on a very simple case that will bring\r\nan important implication into play.\r\n\r\nFor example, to teach the concept of observable vs. hidden\r\nvariables, I would\r\n\r\n* give a concise formal definition;\r\n* emphasize that generally \"hidden variables are what you\r\n  *want to know*, and observables are what you *do know*\";\r\n* emphasize that we should always ask which variables in\r\n  a problem are observable vs. hidden.\r\n* give an ORCT question **like this** -- which 73% of the students\r\n  will completely miss, even though it's a straight application\r\n  of what I told just them.  That really wakes them up!\r\n  Many times I've been bombarded with detailed technical\r\n  questions by students about some abstract implication\r\n  (that would have bored them if I'd lectured about it),\r\n  simply because it gave them a big surprise on an ORCT.\r\n\r\nTo answer why I favor this \"minimal lecture\" approach,\r\nlet's ask: why do 73% of the students get this simple question\r\nwrong?  It's not that the concept is hard, but that using\r\nthe concept to answer the ORCT requires *thinking*\r\n(inferring one of its clear implications).  If I were to\r\nteach this implication by lecturing about it (as I used to do),\r\nthen I would be *doing the thinking for them*.  If I teach\r\nit to them by posing this question, I *make them do the\r\nthinking*.  That is the change that we need to make, and\r\nthat ORCT drives.  ORCT gives students a straightforward\r\npath (that anyone can follow, if they put in the effort)\r\nto make the concepts their own.\r\n\r\nThis also helps explain fundamentally\r\nhow students get stuck in misinterpretations\r\nand incorrect usages of a concept: they simply have not\r\nthought through the implications of their own beliefs to\r\nsee that they lead to obvious inconsistencies, and they have\r\nnot thought through the implications of the simple concept\r\nstatement, which would disprove their wrong beliefs.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:03:24.131Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 19
+},
+{
+  "fields": {
+    "treeID": 20,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Efficiency Concerns: When to Include an ORCT? Answer",
+    "url": null,
+    "text": "In my four years of experience testing this, ORCT is\r\n\"where the rubber meets the road\", i.e. where student learning\r\ngains traction by exposing and fixing their many misconceptions.\r\nHence the decision of whether to include an ORCT (or not) for me is\r\nbasically a decision on whether I am genuinely teaching that\r\nconcept or not.  Material with no ORCT in effect becomes\r\nsupplemental; it may help the best students by giving them\r\nanother datapoint to extend their understanding, but I have\r\nno basis for expecting the class as a whole to understand how\r\nto use it correctly.\r\n\r\nNote: by \"lecture\" I simply mean any passive, one-way\r\ncommunication mode, such as lecturing in a classroom or\r\nan online video, or an assigned reading.\r\n\r\nSeeing students' ORCT responses every day has \r\nchanged how I view lecture, into an unreliable, \"noisy channel\"\r\nthat must be back-stopped by *frequent* empirical checkpoints\r\nand error correction.  To set up a 10 minute ORCT, I restrict\r\nmyself to 10 minutes of lecture giving a clear definition\r\nof the concept I want to teach.  In particular, I find that\r\nif I lecture for much longer at a stretch than this, the\r\nstudents switch to a passive mindset -- the number and quality\r\nof questions they ask crashes.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:03:24.148Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 20
+},
+{
+  "fields": {
+    "treeID": 21,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Identify Student Misconceptions via an Active Learning Exercise? Answer",
+    "url": null,
+    "text": "Concretely, we want to pose a question and get detailed responses from students that reveal their thinking, whatever it may be.  We'll refer to this as Open Response Concept Testing (ORCT), to emphasize that it accepts any text answer (not limited to multiple choice!).\r\nThe challenge of accurately identifying specific misconceptions suggests the following guidelines:\r\n\r\n* **focus**: an ORCT should exercise a *single* concept.  The purpose\r\n  of an ORCT is to *teach* a concept, not to test the ability\r\n  to *combine* multiple concepts (synthesis).\r\n  An ORCT that involves multiple\r\n  concepts will be opaque to students who don't yet correctly\r\n  understand one of the concepts, yielding no useful learning or\r\n  information.  Focusing on a single concept maximizes\r\n  the chance that students will be able to articulate an\r\n  answer that reveals how they think about that concept.\r\n* **real-world application**: the easiest and most useful model for\r\n  writing an ORCT is to take *any real-world problem that\r\n  involves the concept*, and to ask a question that's simple\r\n  enough to fit our other criteria (e.g. *focus* only on that concept).\r\n  Drawing on real world problems\r\n  that you want students to be able to solve after they complete\r\n  the course, both signals students what really matters, and\r\n  creates powerful motivation (because they see that the concepts\r\n  are key for figuring out real problems).\r\n* **hide in plain sight**: the question should be\r\n  easy for anyone who understands the concept,\r\n  but *requires* understanding (guessing won't work).  Aim for \r\n  1/3 to 2/3 of your students to get it \"mostly right\".\r\n\r\n  \"hide\" means the answer requires *thinking* about the concept,\r\n  not just remembering something you told them;\r\n  \"in plain sight\" means the answer lies directly in view of\r\n  such thought (not hidden under a rock!).\r\n\r\n* **speed**: once the student understands what the question is asking,\r\n  it should only take a minute or two to think out their answer,\r\n  and another couple minutes to type and submit their answer.  ORCT are for *teaching*, hence each ORCT should perform its function as quickly as possible, so that students can learn as many concepts *as possible* per unit time.  In other words, the limit on how much they can learn per unit time should not be *how long the ORCT takes to answer* but rather *how long the students' follow-up work takes* (to fix their misconceptions exposed by the ORCT).\r\n* **simplicity**: to achieve the above goals, we generally have\r\n  to dramatically simplify a real-world problem, down to an\r\n  extremely simple core question.\r\n* **conceptual thinking, not mechanics, and not remembering**:\r\n  the solution should depend only on \r\n  thinking about the concept, not on mechanical operations (e.g.\r\n  solving an algebra equation).  The purpose of ORCT is to reveal how each\r\n  student thinks about the concept; nothing extraneous should be\r\n  allowed to get in the way of that.  Note also that we need the\r\n  students to voice *their own thoughts*, in their own words, otherwise\r\n  we can't learn how they actually think.  In particular, we should\r\n  avoid triggering their instinct to echo back our original \r\n  definition of the concept -- all that would show is that they\r\n  *remember what we said*, not that they understand how to use it.\r\n* **identifiability**: the wording of the question should do its\r\n  best to elicit a specific statement of the student's reasoning,\r\n  so that we can diagnose the underlying conceptual error for\r\n  any wrong answer.  One simple way to do this is to ask for a\r\n  definite answer to a specific question (\"Are Propositions 1 and\r\n  2 in fact contradictory?\"), and then ask them to provide their\r\n  logical justification (\"If so, briefly explain why; if not, why not\").\r\n\r\n  Indeed, one could go so far as to say this is the key purpose of\r\n  ORCT: to elicit *interpretable wrong answers*.  That is, for\r\n  every student with a misconception about this concept, get them\r\n  to articulate it clearly.  (\"All right answers resemble one\r\n  another, but each wrong answer is wrong in its own way\").\r\n  Note that this is *difficult*: if one out of five of the students'\r\n  wrong answers is *lucidly* wrong, you are doing well!\r\n* **independence**: each ORCT should have as little connection as\r\n  possible to \"what you told them\" in your lecture intro.  The key\r\n  word of course is \"possible\": it *must* have some connection to\r\n  what you told them, namely the concept itself -- but no more.\r\n  In particular, it must not be\r\n  possible to \"remember the answer\" to an ORCT -- otherwise it\r\n  is merely testing *memory*, not thinking or understanding.\r\n\r\n  This is challenging, because students (especially undergraduates)\r\n  are trained to think success = \"knowing the right answer\",\r\n  via a process of training by repetition: repeat a procedure\r\n  over and over until you \"know how to do it\".  This \"algorithm\r\n  training\" emphasizes memory.  Concretely, what many students think\r\n  they want is for you to show in class how to solve many example problems,\r\n  for them to practice that repeatedly on related problems\r\n  (provided by homework and practice exams), and then for the exam\r\n  to include only the kinds of problems they trained for.\r\n  But such students are ill-prepared for the real world, which\r\n  will not ask the same questions they practiced in class.\r\n\r\n  One important function of ORCT is to force them out of this model,\r\n  by making it impossible to \"remember the answer\".\r\n  Some students' first reaction may be\r\n  \"why are you asking us questions you haven't already shown us how\r\n  to answer?\"  This is a *good* sign.\r\n\r\n  In the language of probability: *ORCTs should be conditionally\r\n  independent of the training given the concept*, otherwise they\r\n  are testing *memory of the training*, rather than *thinking about\r\n  the concept*.\r\n* **neutral language and context**: there should be nothing about\r\n  the wording of a question or its context that hints at the answer.\r\n  Unfortunately, even the slightest bias in wording (for example,\r\n  if you ask the students to choose between two options, but give\r\n  more text or specificity to one of them) will leak your desired\r\n  answer to the students.  This failure is almost inevitable\r\n  in a \"first draft\" ORCT text, and can only\r\n  be eliminated by very deliberate, explicit checking of the \"final\"\r\n  text, after all other considerations have been satisfied.\r\n\r\n  Note that deliberately reversing the leakage (biasing towards a wrong\r\n  answer) is also bad, both for the same reason (it obscures your view\r\n  of how the students actually think about the concept), and the\r\n  additional reason that it violates their trust.  No trick questions.\r\n\r\n  Furthermore, even if the question text is itself \"perfect\",\r\n  the overall pattern of questions you ask (\"context\") may also\r\n  give away your desired answer.  For example, say you ask many\r\n  questions that each offer a seemingly reasonable conclusion (\"the\r\n  bait\"), which always turns out to be wrong.  This will train students\r\n  to always *reject the bait* even if they don't really understand\r\n  the concept.  Such *language or context leakage* defeats the \r\n  purpose of concept testing.  Randomly vary your \"pattern\" in each\r\n  ORCT you write (i.e. 50% of \"seemingly reasonable conclusions\"\r\n  should turn out to be right).\r\n\r\nIn short, there are *many competing behaviors* students can fall\r\ninto besides \"showing how I think about this concept\".  ORCT design\r\nmust systematically de-select those behaviors and channel students\r\ninto lucidly showing you how they think.\r\n\r\nIt should be emphasized that ORCT is a purposefully *artificial* construct, in that it differs from typical real-world problems in several ways:\r\n\r\n* typically, real-world problems involve *multiple* concepts, which must be selected and combined to solve the problem.\r\n* typically, they require *mechanical operations*, e.g. solving algebra equations or performing substantial computations.\r\n* they take a lot longer to solve than an ORCT.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:03:24.169Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 21
+},
+{
+  "fields": {
+    "treeID": 22,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Conceptual Thinking as a Student Strategy? Answer",
+    "url": "",
+    "text": "The *average* student has a 50% chance of using a concept right (vs. having a basic misconception about it), and this is where the whole fabric of conceptual thinking and real-world problem solving unravels.  A sequence of thoughts half of which are right (and half wrong) is an extremely unreliable problem solving strategy -- like a novice trying to climb a treacherous rock wall solo, without a rope.  Far safer is to \"rope in\" to procedures they know how to follow.  Weak conceptual understanding *forces* students to retreat to a conservative focus on \"trained procedures\" as their strategy of choice, and of \"training by repetition\" as their learning method.  While we might object that they should instead focus on fixing their misconceptions, that only makes sense for the student if they are given a clear, reliable path to identify and fix each misconception, to climb this huge mountain (to attain **double** the conceptual understanding of their peers).\r\n\r\nReal world problems are especially problematic, since a typical problem requires using *multiple* concepts, reducing their odds of success to near zero.  Personally, I think students implicitly realize this, and this is one reason they get discouraged, focus instead on grades, or quit a class.\r\n\r\nA corollary is that a class will yield relatively little real-world problem solving ability, unless the student attains a high level of conceptual understanding on *core concepts* (concepts that are relevant to most problems).",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T01:03:24.206Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 22
+},
+{
+  "fields": {
+    "treeID": 23,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Measure Conceptual Understanding? Answer",
+    "url": "",
+    "text": "The basic challenge is that there are a lot of **other skills** besides conceptual understanding that a test question might be measuring, such as\r\n\r\n* synthesis (the ability to combine multiple concepts)\r\n* mechanics (e.g. solving an algebra equation)\r\n* trained procedures (a way of solving a problem that a student has practiced over and over)\r\n* memory\r\n\r\nFor example, consider my traditional criteria for grading exams, which I think are common:\r\n\r\n* for a problem-to-solve, did they get the right answer and / or show right steps?\r\n* to give out partial credit: did they use (some) right words / \"arguments\"?\r\n\r\nThe first criteria tend to be highly sensitive to mechanics and trained procedures (and problems-to-solve tend to involve synthesis).  The second criterion emphasizes memory.  These are by no means worthless skills, but they aren't the same as conceptual understanding.  Many studies have shown that students who score high on these traditional criteria actually have measurably poor conceptual understanding; the correlation between the two kinds of measures is poor, because they are *different* skills.\r\n\r\nBroadly speaking, we get a measure of conceptual understanding by taking the superset of everything that depends on conceptual understanding, and removing the subset that depends on the other skills.  What's left should be a question that people who understand the concept will uniformly consider to be easy (no mechanics; no procedure; no memory; no synthesis; the answer flows directly from applying the concept), but other people won't be able to guess (because there is a *specific* answer that depends on applying the concept correctly).  For example, such a question should be free of jargon, and knowledge of jargon should be useless for answering it.  Typically we draw on a real-world application problem that gets away both from the jargon and the cases we trained the students on in class.\r\n\r\nTo illustrate these principles, here's an example question paraphrased from the Force Concept Inventory, the \"mother of all concept tests\", designed to probe understanding of Newtonian mechanics:\r\n\r\n  A small car and large truck collide head-on.  Which of the following correctly describes the forces they exert on each other?\r\n\r\n  a. the car exerts a larger force on the truck than the truck exerts on the car;\r\n  b. they exert equal forces on each other;\r\n  c. the truck exerts a larger force on the car than the car exerts on the truck;\r\n  d. they do not exert any force on each other; they are simply in each other's way.\r\n\r\nWhile this question may seem \"trivial\", that is sort of the point:\r\n\r\n* it is easy for anyone who understands Newton's laws (\"interacting objects exert equal and opposite forces on each other\");\r\n* but a majority of students completing a first-year university physics course get it wrong -- even students who scored well on solving mathematically difficult mechanics problems. (This result has been replicated at many universities, and is not a fluke).\r\n* it is sobering to consider that a year's hard study by Harvard students, under a top-rated physics professor, would yield so little conceptual understanding.  It is even more sobering to consider that this went undetected for years -- until testing with the Force Concept Inventory exposed it.  It makes you wonder: **what misconceptions do your students have?**",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-11T01:03:24.232Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 23
+},
+{
+  "fields": {
+    "treeID": 24,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people asserted that p(A|B)=p(A)",
+    "url": null,
+    "text": "Some people asserted that :math:`p(A|B)=p(A)` in this Venn diagram,\r\nwhich implies a basic misunderstanding of what :math:`p(A|B)`\r\n*means*.  Suggestion: review the definition of conditional\r\nprobability until you can see clearly that this assertion\r\ndoes not fit this Venn diagram at all.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 29,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.649Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 24
+},
+{
+  "fields": {
+    "treeID": 25,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "some people asserted p(A & B)=p(A)p(B)",
+    "url": null,
+    "text": "Similarly, some people asserted :math:`p(A \\cap B)=p(A)p(B)` here,\r\nimplying they don't understand what a joint probability is\r\n(i.e. in this case that :math:`p(A \\cap B)=0`).",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 30,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.677Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 25
+},
+{
+  "fields": {
+    "treeID": 26,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people said \"They are independent since they have no overlap\"",
+    "url": null,
+    "text": "Asserting \"They are independent since they have no overlap\" mixes up the concepts of *independence* vs. *disjoint* (no intersection),\r\nwhich are totally different in meaning!\r\n\r\nSuggestion: Please go back and draw Venn diagrams of *independence* vs. *disjoint*.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 31,
+    "sourceDB": null,
+    "changeLog": "created a title",
+    "atime": "2014-11-11T01:34:33.699Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 26
+},
+{
+  "fields": {
+    "treeID": 27,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people seemed to define independence as meaning p(A|B)=0",
+    "url": null,
+    "text": "Some people seemed to define independence as\r\nmeaning :math:`p(A|B)=0`.  Suggestion: go back to the mathematical\r\ndefinition of independence.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 32,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.714Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 27
+},
+{
+  "fields": {
+    "treeID": 28,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people said \"they are independent, because an event in A has no effect on an event in B\"",
+    "url": null,
+    "text": "Apparently not thinking about drawing a random event: if we\r\ndraw a point in A, we know it can't be in B, and vice versa,\r\nso actually they are perfectly *anti-correlated*,\r\nnot independent.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 33,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.729Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 28
+},
+{
+  "fields": {
+    "treeID": 29,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people seemed to mix up the ideas of a random state vs. random variable",
+    "url": null,
+    "text": "Some people confused the concepts of *states* vs. *variables*.  Independence\r\nis by definition a statement about *variables*, not states.\r\nWatch out for mixing these up!  A state is just any subset of\r\nthe probability space; A variable is \"the whole picture\" of\r\na way of slicing up the entire space.\r\nSuggestion: draw a Venn diagram representing a single state, vs.\r\na Venn diagram representing a variable.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 34,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.744Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 29
+},
+{
+  "fields": {
+    "treeID": 30,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people said \"we do not have enough info because we don't know the correlation between A and B\"",
+    "url": null,
+    "text": "*Au contraire*, the Venn diagram shows they are perfectly anti-correlated.\r\nSuggestion: review the concepts of correlation and Venn diagrams\r\nuntil this is clear.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 35,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.759Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 30
+},
+{
+  "fields": {
+    "treeID": 31,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people confused p(A & B) with the union operation p(A or B)",
+    "url": null,
+    "text": "Some people confused p(A,B) with the union operation :math:`p(A \\cup B)`.  No, joint probability is *intersection*, i.e. :math:`p(A,B)=p(A \\cap B)`.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 36,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:34:33.775Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 31
+},
+{
+  "fields": {
+    "treeID": 32,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought #1 sums to 1",
+    "url": null,
+    "text": "No, normalization only applies to summing over the *subject* variable, not the *condition*.  Beware of summing over the condition of a conditional probability!!  This is a common error.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 15,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.042Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 32
+},
+{
+  "fields": {
+    "treeID": 33,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought #1 sums to p(A)",
+    "url": null,
+    "text": "No, this sum isn't even a valid probability!\r\nE.g. consider *p(rains in Seattle|day of week)*.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 16,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.080Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 33
+},
+{
+  "fields": {
+    "treeID": 34,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people realized 2 and 3 were equal, but then didn't see the connection to 5, 6.",
+    "url": null,
+    "text": "Many people realized 2 and 3 were equal, because :math:`p(A,B)=p(A|B)p(B)`,\r\nbut then didn't see the connection to 5, 6 (:math:`p(A)`).  This\r\nimplies they didn't realize that summing over *B* eliminates it from\r\nthe probability expression.\r\n\r\nThis is a *really* important tool.  It allows you to properly handle\r\na hidden variable that links what you know (obs) and what you want\r\nto know (some other hidden variable).  Just sum over all possible\r\nvalues of this \"nuisance variable\" and eliminate it from the equation!!",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 14,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.095Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 34
+},
+{
+  "fields": {
+    "treeID": 35,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people assumed A,B were independent",
+    "url": null,
+    "text": "Some people assumed A,B were independent, though the question\r\nmade no such stipulation.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 39,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.111Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 35
+},
+{
+  "fields": {
+    "treeID": 36,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought 1 & 4 were equal",
+    "url": null,
+    "text": "Some people thought 1 & 4 were equal, implying they think\r\n:math:`p(A|B)=p(A)/p(B)`.  No, :math:`p(A|B)=p(A,B)/p(B)`.\r\n#4 is an *odds-ratio*, not a probability; can be greater than 1!",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 17,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.128Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 36
+},
+{
+  "fields": {
+    "treeID": 37,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought the summation could be carried into the denominator in #4, so it sums to p(A)",
+    "url": null,
+    "text": "No.  You *can* factor p(A) out of the summation, but then you are summing :math:`1/p(B=b_i)` which does *not* sum to 1!",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 24,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.146Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 37
+},
+{
+  "fields": {
+    "treeID": 38,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people didn't see that in #5 again B can be eliminated by normalization",
+    "url": null,
+    "text": "Some people didn't see that p(A) could be factored out\r\nin #5 (and didn't see that again B can be eliminated\r\nby normalization).",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 27,
+    "sourceDB": null,
+    "changeLog": "added title",
+    "atime": "2014-11-11T01:36:56.162Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 38
+},
+{
+  "fields": {
+    "treeID": 39,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people assert p(A) cannot be factored out of #5 unless A and B are independent",
+    "url": null,
+    "text": "Some people assert p(A) *cannot* be factored out of #5 unless\r\nA and B are *independent*.  No -- please verify for yourself the\r\nassertion that\r\n:math:`\\sum_{i=1}^n p(A=a_j)p(B=b_i)=p(A=a_j)` for all possible\r\nvalues :math:`a_j`.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 27,
+    "sourceDB": null,
+    "changeLog": "added title\r\nfixed typo",
+    "atime": "2014-11-11T01:36:56.182Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 39
+},
+{
+  "fields": {
+    "treeID": 40,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought misconception rates on these basic concepts would be substantially lower.",
+    "url": "",
+    "text": "Optimists learn what pessimists \"know\"; that is their advantage...",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 37,
+    "sourceDB": null,
+    "changeLog": "first draft",
+    "atime": "2014-11-11T01:38:48.576Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 40
+},
+{
+  "fields": {
+    "treeID": 41,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "some people misread the question (ABORT).",
+    "url": null,
+    "text": "write more description please",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 18,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:50:28.182Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 41
+},
+{
+  "fields": {
+    "treeID": 42,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "some people didn't know a basic definition needed for this question (ABORT).",
+    "url": null,
+    "text": "write more description please",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 19,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:50:28.207Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 42
+},
+{
+  "fields": {
+    "treeID": 43,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "some people couldn't figure out how to get started -- failed to apply concept(s) that they knew, e.g. due to 'trying to remember the answer' (ABORT).",
+    "url": null,
+    "text": "write more description please",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 20,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:50:28.226Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 43
+},
+{
+  "fields": {
+    "treeID": 44,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "some people got hung up on a detail and didn't think through the main question (ABORT).",
+    "url": null,
+    "text": "write more description please",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 21,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:50:28.238Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 44
+},
+{
+  "fields": {
+    "treeID": 45,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "This question is mis-phrased: its literal meaning doesn't really ask what you claimed (FAIL).",
+    "url": null,
+    "text": "write more description please",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 22,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-11T01:50:28.257Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 45
+},
+{
+  "fields": {
+    "treeID": 46,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Concept inventory",
+    "url": "http://en.wikipedia.org/wiki/Concept_inventory",
+    "text": "A concept inventory is a criterion-referenced test designed to evaluate whether a student has an accurate working knowledge of a specific set of concepts. To ensure interpretability, it is common to have multiple items that address a single idea. Typically, concept inventories are organized as multiple-choice tests in order to ensure that they are scored in a reproducible manner, a feature that also facilitates administration in large classes. Unlike a typical, teacher-authored multiple-choice test, questions and response choices on concept inventories are the subject of extensive research. The aims of the research include ascertaining (a) the range of what individuals think a particular question is asking and (b) the most common responses to the questions. Concept inventories are evaluated to ensure test reliability and validity. In its final form, each question includes one correct answer and several distractors. The distractors are incorrect answers that are usually (but not always) based on students' commonly held misconceptions.\nIdeally, a score on a criterion-referenced test reflects the amount of content knowledge a student has mastered. Criterion-referenced tests differ from norm-referenced tests in that (in theory) the former is not used to compare an individual's score to the scores of the group. Ordinarily, the purpose of a criterion-referenced test is to ascertain whether a student mastered a predetermined amount of content knowledge; upon obtaining a test score that is at or above a cutoff score, the student can move on to study a body of content knowledge that follows next in a learning sequence. In general, item difficulty values ranging between 30% and 70% are best able to provide information about student understanding.\nDistractors are often based on ideas commonly held by students, as determined by years of research on misconceptions. Test developers often research student misconceptions by examining students' responses to open-ended essay questions and conducting \"think-aloud\" interviews with students. The distractors chosen by students help researchers understand student thinking and give instructors insights into students' prior knowledge (and, sometimes, firmly held beliefs). This foundation in research underlies instrument construction and design, and plays a role in helping educators obtain clues about students' ideas, scientific misconceptions, and didaskalogenic, that is, teacher-induced confusions and conceptual lacunae that interfere with learning.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Concept inventory",
+    "concept": 1,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-11T05:44:11.482Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 46
+},
+{
+  "fields": {
+    "treeID": 47,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Scientific misconceptions",
+    "url": "http://en.wikipedia.org/wiki/Scientific_misconceptions",
+    "text": "Scientific misconceptions are commonly held scientific beliefs that have no basis in actual scientific fact. Scientific misconceptions can also refer to preconceived notions based on religious and/or cultural influences. Many scientific misconceptions occur because of faulty teaching styles and the sometimes distancing nature of true scientific texts. Some topics, like Evolution, are fettered with so much moral injection that the truth is rarely revealed and the majority of common knowledge regarding the topic is erroneous.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Scientific misconceptions",
+    "concept": 2,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-12T19:10:02.791Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 47
+},
+{
+  "fields": {
+    "treeID": 48,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "The Conceptual Understanding Iceberg",
+    "url": "",
+    "text": "**Conceptual understanding** even of a seemingly simple concept is actually a large and complex object, most of which is *hidden* beneath the surface, both to experts who understand the concept, and beginners who don't.  \r\n\r\n* Operationally, understanding a concept means using it correctly in a wide variety of scenarios.  Even a simple concept will have many implications across all these scenarios.  Using it correctly means realizing and obeying all those implications.  \r\n* For experts, a simple definition of the concept will seem sufficient, because they long ago learned its implications and take them for granted as part of their unconscious assumptions.  \r\n* By contrast, beginners by definition have not yet thought through all these implications, and hence often go astray when they try to use the concept in different scenarios.\r\n* This \"iceberg\" of hidden implications often wrecks transfer of conceptual understanding from experts to beginners.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 3,
+    "sourceDB": null,
+    "changeLog": "initial",
+    "atime": "2014-11-12T23:15:41.251Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 48
+},
+{
+  "fields": {
+    "treeID": 53,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Photon",
+    "url": "http://en.wikipedia.org/wiki/Photon",
+    "text": "A photon is an elementary particle, the quantum of light and all other forms of electromagnetic radiation, and the force carrier for the electromagnetic force, even when static via virtual photons. The effects of this force are easily observable at both the microscopic and macroscopic level, because the photon has zero rest mass; this allows long distance interactions. Like all elementary particles, photons are currently best explained by quantum mechanics and exhibit wave\u2013particle duality, exhibiting properties of both waves and particles. For example, a single photon may be refracted by a lens or exhibit wave interference with itself, but also act as a particle giving a definite result when its position is measured.\nThe modern photon concept was developed gradually by Albert Einstein to explain experimental observations that did not fit the classical wave model of light. In particular, the photon model accounted for the frequency dependence of light's energy, and explained the ability of matter and radiation to be in thermal equilibrium. It also accounted for anomalous observations, including the properties of black-body radiation, that other physicists, most notably Max Planck, had sought to explain using semiclassical models, in which light is still described by Maxwell's equations, but the material objects that emit and absorb light do so in amounts of energy that are quantized (i.e., they change energy only by certain particular discrete amounts and cannot change energy in any arbitrary way). Although these semiclassical models contributed to the development of quantum mechanics, many further experiments starting with Compton scattering of single photons by electrons, first observed in 1923, validated Einstein's hypothesis that light itself is quantized. In 1926 the optical physicist Frithiof Wolfers and the chemist Gilbert N. Lewis coined the name photon for these particles, and after 1927, when Arthur H. Compton won the Nobel Prize for his scattering studies, most scientists accepted the validity that quanta of light have an independent existence, and the term photon for light quanta was accepted.\nIn the Standard Model of particle physics, photons are described as a necessary consequence of physical laws having a certain symmetry at every point in spacetime. The intrinsic properties of photons, such as charge, mass and spin, are determined by the properties of this gauge symmetry. The photon concept has led to momentous advances in experimental and theoretical physics, such as lasers, Bose\u2013Einstein condensation, quantum field theory, and the probabilistic interpretation of quantum mechanics. It has been applied to photochemistry, high-resolution microscopy, and measurements of molecular distances. Recently, photons have been studied as elements of quantum computers and for applications in optical imaging and optical communication such as quantum cryptography.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Photon",
+    "concept": null,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-13T06:44:54.280Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 53
+},
+{
+  "fields": {
+    "treeID": 56,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "Some people thought we could overcome this by just explaining all the possible implications.",
+    "url": null,
+    "text": "This is unrealistic for three reasons:\r\n\r\n* Experts' low-level knowledge must be mostly *unconscious* (so they can direct their conscious thought towards higher-level issues).  Hence experts are unaware of many implications that beginners do not understand, but that experts take for granted.\r\n* To explain all the implications is an infinite regress problem, limited only by what the individual student already understands -- which is different for each student.\r\n* Most fundamentally, explaining all the implications means the teacher does all the work of understanding the implications, so the students don't have to.  This is the opposite of what needs to happen: if the students cannot reason for themselves what implications flow from the concept, they don't understand it.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 8,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-13T19:49:02.941Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 56
+},
+{
+  "fields": {
+    "treeID": 58,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Answer",
+    "url": null,
+    "text": "write an answer",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-14T00:37:00.548Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 58
+},
+{
+  "fields": {
+    "treeID": 60,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Answer",
+    "url": null,
+    "text": "write an answer",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-14T00:39:40.603Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 60
+},
+{
+  "fields": {
+    "treeID": 62,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Answer",
+    "url": null,
+    "text": "write an answer",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-14T00:44:25.843Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 62
+},
+{
+  "fields": {
+    "treeID": 63,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "An obvious point",
+    "url": "",
+    "text": "scientific misconceptions are bad",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 2,
+    "sourceDB": null,
+    "changeLog": "go",
+    "atime": "2014-11-15T02:11:35.148Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 63
+},
+{
+  "fields": {
+    "treeID": 64,
+    "kind": "errmod",
+    "medium": "reading",
+    "parent": null,
+    "title": "this is a test",
+    "url": null,
+    "text": "woo boy",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-16T06:50:41.196Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 64
+},
+{
+  "fields": {
+    "treeID": 65,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "I like rats",
+    "url": "",
+    "text": "they are cute",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-17T07:45:33.078Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 65
+},
+{
+  "fields": {
+    "treeID": 66,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Chain rule (probability)",
+    "url": "http://en.wikipedia.org/wiki/Chain_rule_(probability)",
+    "text": "In probability theory, the chain rule (also called the general product rule) permits the calculation of any member of the joint distribution of a set of random variables using only conditional probabilities. The rule is useful in the study of Bayesian networks, which describe a probability distribution in terms of conditional probabilities.\nConsider an indexed set of sets . To find the value of this member of the joint distribution, we can apply the definition of conditional probability to obtain:\n\nRepeating this process with each final term creates the product:\n\nWith four variables, the chain rule produces this product of conditional probabilities:\n\nThis rule is illustrated in the following example. Urn 1 has 1 black ball and 2 white balls and Urn 2 has 1 black ball and 3 white balls. Suppose we pick an urn at random and then select a ball from that urn. Let event A be choosing the first urn: P(A) = P(~A) = 1/2. Let event B be the chance we choose a white ball. The chance of choosing a white ball, given that we've chosen the first urn, is P(B|A) = 2/3. Event A, B would be their intersection: choosing the first urn and a white ball from it. The probability can be found by the chain rule for probability:\n\n.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Chain rule (probability)",
+    "concept": 11,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-17T22:19:58.332Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 66
+},
+{
+  "fields": {
+    "treeID": 67,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Projection of a joint probability (marginalization)",
+    "url": null,
+    "text": "Reducing the dimensionality of a joint distribution by summing\r\nit over one or more possible random variables to eliminate them.\r\n\r\nBy the chain rule\r\n\r\n.. math:: \\sum_X{p(X,Y)} = \\left(\\sum_X{p(X|Y)}\\right)p(Y) = p(Y)\r\n\r\nThis generalizes to any number of variables.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 12,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-17T22:30:52.653Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 67
+},
+{
+  "fields": {
+    "treeID": 68,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Probability normalization",
+    "url": null,
+    "text": "The probabilities of a set of disjoint subsets (i.e. all possible states\r\nof any random variable) must sum to 1.\r\n\r\n.. math:: \\sum_X{p(X)}=1\r\n\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 13,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-17T22:40:11.832Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 68
+},
+{
+  "fields": {
+    "treeID": 69,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Summation",
+    "url": "http://en.wikipedia.org/wiki/Summation",
+    "text": "Summation is the operation of adding a sequence of numbers; the result is their sum or total. If numbers are added sequentially from left to right, any intermediate result is a partial sum, prefix sum, or running total of the summation. The numbers to be summed (called addends, or sometimes summands) may be integers, rational numbers, real numbers, or complex numbers. Besides numbers, other types of values can be added as well: vectors, matrices, polynomials and, in general, elements of any additive group (or even monoid). For finite sequences of such elements, summation always produces a well-defined sum (possibly by virtue of the convention for empty sums).\nThe summation of an infinite sequence of values is called a series. A value of such a series may often be defined, by means of a limit (although sometimes the value may be infinite, and often no value results at all). Another notion involving limits of finite sums is integration. The term summation has a special meaning related to extrapolation in the context of divergent series.\nThe summation of the sequence [1, 2, 4, 2] is an expression whose value is the sum of each of the members of the sequence. In the example, 1 + 2 + 4 + 2 = 9. Since addition is associative the value does not depend on how the additions are grouped, for instance (1 + 2) + (4 + 2) and 1 + ((2 + 4) + 2) both have the value 9; therefore, parentheses are usually omitted in repeated additions. Addition is also commutative, so permuting the terms of a finite sequence does not change its sum (for infinite summations this property may fail; see absolute convergence for conditions under which it still holds).\nThere is no special notation for the summation of such explicit sequences, as the corresponding repeated addition expression will do. There is only a slight difficulty if the sequence has fewer than two elements: the summation of a sequence of one term involves no plus sign (it is indistinguishable from the term itself) and the summation of the empty sequence cannot even be written down (but one can write its value \"0\" in its place). If, however, the terms of the sequence are given by a regular pattern, possibly of variable length, then a summation operator may be useful or even essential. For the summation of the sequence of consecutive integers from 1 to 100 one could use an addition expression involving an ellipsis to indicate the missing terms: 1 + 2 + 3 + 4 + ... + 99 + 100. In this case the reader easily guesses the pattern; however, for more complicated patterns, one needs to be precise about the rule used to find successive terms, which can be achieved by using the summation operator \"\u03a3\". Using this sigma notation the above summation is written as:\n\nThe value of this summation is 5050. It can be found without performing 99 additions, since it can be shown (for instance by mathematical induction) that\n\nfor all natural numbers n (see Triangular number). More generally, formulae exist for many summations of terms following a regular pattern.\nThe term \"indefinite summation\" refers to the search for an inverse image of a given infinite sequence s of values for the forward difference operator, in other words for a sequence, called antidifference of s, whose finite differences are given by s. By contrast, summation as discussed in this article is called \"definite summation\".\nWhen it is necessary to clarify that numbers are added with their signs, the term algebraic sum is used. For example, in electric circuit theory Kirchhoff's circuit laws consider the algebraic sum of currents in a network of conductors meeting at a point, assigning opposite signs to currents flowing in and out of the node.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Summation",
+    "concept": 23,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-18T00:15:20.021Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 69
+},
+{
+  "fields": {
+    "treeID": 71,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Summation factoring",
+    "url": null,
+    "text": "Any factor inside a summation that does not depend on the summation variable can be factored outside the summation.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 25,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-11-18T02:03:28.877Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 71
+},
+{
+  "fields": {
+    "treeID": 73,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Joint probability distribution",
+    "url": "http://en.wikipedia.org/wiki/Joint_probability_distribution",
+    "text": "In the study of probability, given at least two random variables X, Y, ..., that are defined on a probability space, the joint probability distribution for X, Y, ... is a probability distribution that gives the probability that each of X, Y, ... falls in any particular range or discrete set of values specified for that variable. In the case of only two random variables, this is called a bivariate distribution, but the concept generalizes to any number of random variables, giving a multivariate distribution.\nThe joint probability distribution can be expressed either in terms of a joint cumulative distribution function or in terms of a joint probability density function (in the case of continuous variables) or joint probability mass function (in the case of discrete variables). These in turn can be used to find two other types of distributions: the marginal distribution giving the probabilities for any one of the variables with no reference to any specific ranges of values for the other variables, and the conditional probability distribution giving the probabilities for any subset of the variables conditional on particular values of the remaining variables.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Joint probability distribution",
+    "concept": 28,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-21T05:45:36.317Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 73
+},
+{
+  "fields": {
+    "treeID": 74,
+    "kind": "explanation",
+    "medium": "reading",
+    "parent": null,
+    "title": "Independence (probability theory)",
+    "url": "http://en.wikipedia.org/wiki/Independence_(probability_theory)",
+    "text": "In probability theory, to say that two events are independent (alternatively called statistically independent or stochastically independent ) means that the occurrence of one does not affect the probability of the other. Similarly, two random variables are independent if the realization of one does not affect the probability distribution of the other.\nThe concept of independence extends to dealing with collections of more than two events or random variables.\n\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": "Independence (probability theory)",
+    "concept": 38,
+    "sourceDB": "wikipedia",
+    "changeLog": null,
+    "atime": "2014-11-22T02:28:22.546Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 74
+},
+{
+  "fields": {
+    "treeID": 75,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Venn Diagram of Independence?",
+    "url": "",
+    "text": " Draw a Venn diagram representing two *independent* variables. To keep the diagram clear and simple, restrict each variable to just three states, and draw the diagram so *area* represents (i.e. is proportional to) probability.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-29T05:38:20.331Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 75
+},
+{
+  "fields": {
+    "treeID": 76,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Venn Diagram of Independence?",
+    "url": "",
+    "text": "Draw a Venn diagram representing two *independent* variables. To keep the diagram clear and simple, restrict each variable to just three states, and draw the diagram so *area* represents (i.e. is proportional to) probability.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-29T06:15:43.240Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 76
+},
+{
+  "fields": {
+    "treeID": 77,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Venn Diagram of Independence Answer",
+    "url": "",
+    "text": "We can represent this Venn diagram as a rectangle with orthogonal \"slices\" representing the distinct values of our two variables:\r\n\r\n.. image:: STATICIMAGE/venn_indep.png\r\n\r\nThe X variable is shown as being split into three discrete values on the x-axis: white, red, green.  The Y variable is shown as being split into three discrete values on the y-axis: white, blue, gray.  The probability of a given X value or (X,Y) pair is shown by the area of that region in the figure.  Since the probability (area) of any given (X,Y) pair is indeed proportional to the product of the probabilities (areas) of that value of X and of that value of Y, X and Y are independent in this Venn diagram.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-29T06:15:43.272Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 77
+},
+{
+  "fields": {
+    "treeID": 78,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Fundamental cause and remedy?",
+    "url": "",
+    "text": "When students' conceptual understanding following a course is poor, what would you consider to be the most likely causes, and plausible fixes?  Some possibilities:\r\n\r\n* *insufficient explanation of the course material*: more extensive explanations should be supplied via lectures or reading.\r\n* *not enough worked examples demonstrating procedures for students to follow, or practice problems for students to train on these procedures*: provide more worked examples and practice problems.\r\n* *not enough real-world projects to provide active learning*\r\n\r\nBriefly state what you think are the main causes of poor conceptual understanding and propose how to fix them.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-29T08:17:51.089Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 78
+},
+{
+  "fields": {
+    "treeID": 79,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Answer",
+    "url": "",
+    "text": "In my view, conceptual understanding means being able to think for yourself about all the implications of a concept, so that you can use it correctly in a wide variety of situations (i.e. deducing and following its implications in each situation).  Just as it can be simple to define an axiom but challenging to deduce all its resulting theorems, so it may seem simple to define a concept, yet its implications may be numerous and non-obvious.  \r\n\r\nHence conceptual understanding mainly consists not of the \"headline\" concept definition that can be stated and memorized, but of its many hidden implications, and the ability to think through these implications from first principles.  I refer to this hidden understanding as the `Conceptual Understanding Iceberg </ct/courses/1/units/1/concepts/46/>`_.\r\n\r\nThis constitutes a huge gap between experts and beginners.  On the one hand, experts have typically internalized these implications as part of their working assumptions, such that they \"take them for granted\".  Experts must make such low-level knowledge unconscious so that they can focus their conscious thought on high-level issues.  By contrast, beginners have not thought through these implications, and will fail to follow them when they try to apply the concept to real problems.  Hence, neither side is really aware of exactly what knowledge (the hidden implications) needs to be transferred.  \r\n\r\n* This gap can only be bridged by a **systematic empirical process** that quickly finds discrepancies between expert vs. beginner thinking, to directly identify the many implications that students need to learn.  However, no step of this process can be left to chance (e.g. \"let the students ask questions if they are confused\") or it will fail, because *neither side can articulate what knowledge needs to be transferred*.\r\n* What students most need to learn is the habit of **thinking through the implications** of how a concept applies to different situations.  This is work that the students must do *themselves*.  Being given longer explanations in lecture or reading will not help develop this muscle.  Nor will practicing procedures taught in class.\r\n* Active learning exercises are clearly needed, but we next need to consider how to make them actually effective and fast at fixing student misconceptions.\r\n",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-29T08:17:51.114Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 79
+},
+{
+  "fields": {
+    "treeID": 80,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Specify a Course's Conceptual Learning Goals?",
+    "url": "",
+    "text": "One of the most important steps for making a course successful is deciding what its actual learning goals should be.  As we have seen, conceptual understanding can be a bit harder to define as a goal compared with other kinds of skills, such as trained procedures.  What would you propose as the most useful way of specifying the set of conceptual learning goals for your course?  Briefly state what you propose must be specified, and explain how it makes your course goals unambiguous and \"actionable\".",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-30T00:17:05.581Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 80
+},
+{
+  "fields": {
+    "treeID": 81,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "How to Specify a Course's Conceptual Learning Goals Answer",
+    "url": "",
+    "text": "The standard practice of writing a laundry list of topics (\"the syllabus\") does not truly define conceptual learning goals, for the simple reason that it is neither actionable nor measurable.  For example, on any given topic there are a wide range of skills students could learn, such as trained procedures or memory, that do not constitute conceptual understanding.  Writing a list of topics doesn't clarify specifically how you're going to teach conceptual understanding, rather than just the other skills -- as so often happens by default.  The real problem here is the `Conceptual Understanding Iceberg </ct/courses/1/units/1/concepts/46/>`_: most experts can't actually articulate what hidden knowledge beginners need to learn.  This makes a syllabus an empty husk: the *appearance* of a plan, without any of the specifics needed for an actionable plan.  Note that this is a very different situation vs. other kinds of skills that experts *can* articulate.  For example, simply writing the name of a procedure to teach is a valid statement of a learning goal, so long as the instructor can indeed articulate (demonstrate) the procedure in a form that students can follow.\r\n\r\nHow can we specify learning goals that we can't articulate? This is a genuine catch-22 that requires some consideration.  Since we can't fully specify exactly what knowledge constitutes understanding of a concept, we need an *empirical* measure that simply tests whether someone understands it (uses it correctly) or not.  Concretely, that means a **concept test** question that we can ask students, and a correct answer that we can score them against.  From this point of view, we would specify the conceptual learning goals for a class by providing a set of such concept tests for all the concepts we want to teach.  This is called a **concept inventory**.\r\n\r\n* it specifies learning goals in a form that is *measurable*: it defines a way of measuring how far we are from the target.\r\n* this also makes it *actionable*: we can use concept tests in class to show students what they need to learn.\r\n\r\nThe obvious downside is that this is a lot of work.  (But not necessarily more work than writing a conventional lecture or readings). We will address later how to cut this effort down to a manageable size.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-11-30T00:17:05.612Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 81
+},
+{
+  "fields": {
+    "treeID": 82,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Concept inventory conclusions",
+    "url": "",
+    "text": "The empirical data from concept inventory studies highlight some important challenges for instructors:\r\n\r\n* conventional lecture courses yield a poor level of conceptual understanding (basic misconceptions on about half the concepts).\r\n* when beginners try to *use* a concept on real-world problems, they fall into a wide variety of misconceptions.\r\n* conceptual understanding is distinct from other kinds of skills that students learn, such as problem-solving procedures, or memory.  In particular, students who have learned other skills well, may have poor conceptual understanding.\r\n* unless a question is designed very carefully to measure conceptual understanding and *not* other skills such as synthesis, procedures or memory, its scores will correlate poorly with conceptual understanding.\r\n* conceptual understanding is different from other skills, in that it consists largely of *hidden knowledge* -- the ability to think through and obey a concept's many implications.  This is both its power -- it applies to any new situation -- and its challenge.\r\n* Even for experts, these implications are often unconscious.  Concretely, they can neither articulate exactly what hidden implications students need to learn, nor reliably predict all the errors students will make.\r\n* In particular, conceptual understanding is not amenable to a conventional *prescriptive* teaching strategy (telling the students what to think).  It is a thinking skill, and can only be gained by the students thinking for themselves.  Hence an *active* (\"Socratic\") learning strategy is required: the students must be challenged to think, and to learn from their own errors.\r\n* for all these reasons, it is hard to write down a conceptual learning goal in the usual prescriptive way.  It is more useful to define such a goal empirically, by providing a test that measures correct usage of that concept.\r\n\r\nThese conclusions may seem largely negative, i.e. that our standard teaching methods are ineffective, and that we need to do a lot of new work (e.g. write concept inventory questions).  You may well wonder whether this is feasible (too much work for the average instructor?), or scalable for large classes.  We must consider these challenges next.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-12-01T01:04:46.341Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 82
+},
+{
+  "fields": {
+    "treeID": 83,
+    "kind": "base",
+    "medium": "reading",
+    "parent": null,
+    "title": "Conceptual synthesis",
+    "url": null,
+    "text": "The ability to select and combine multiple concepts to solve a problem.  That is, even if someone understood the individual concepts needed to solve a problem, they might either fail to apply one of those concepts, or fail to combine them successfully to achieve the solution.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": 40,
+    "sourceDB": null,
+    "changeLog": null,
+    "atime": "2014-12-01T07:39:38.161Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 83
+},
+{
+  "fields": {
+    "treeID": 84,
+    "kind": "orct",
+    "medium": "reading",
+    "parent": null,
+    "title": "Active Learning Approaches for Conceptual Understanding?",
+    "url": "",
+    "text": "It is evident that conceptual understanding requires *active learning* exercises.  Based on the challenges that we've outlined so far, briefly assess the value of the following kinds of active learning exercises for *teaching* conceptual understanding:\r\n\r\n* graded homework problems\r\n* real-world problem solving projects",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-12-01T07:57:06.018Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 84
+},
+{
+  "fields": {
+    "treeID": 85,
+    "kind": "answer",
+    "medium": "reading",
+    "parent": null,
+    "title": "Active Learning Approaches for Conceptual Understanding Answer",
+    "url": "",
+    "text": "Both of these approaches have fundamental failings as a method for teaching conceptual understanding:\r\n\r\n* real-world problems inevitably involve *multiple* concepts (unless \"pre-digested\" into an artificially simple form, which defeats the whole purpose of such \"real-world problem solving\" projects).  Hence these projects require **synthesis**, the ability to select and combine the right concepts for solving the problem.  Not only is synthesis a separate and challenging skill in its own right, but it requires as a pre-requisite that the student *already* understand the individual concepts.  If not, the problem may well simply be opaque (\"I wasn't sure how to get started\").  This is appropriate and necessary exercise, but mainly has value *after* students have understood the individual concepts.\r\n* both types of exercises tend to involve many skills *other* than conceptual understanding, such as mechanics, memory, using procedures taught in class, etc.  Again these are necessary skills, but they shift focus away from conceptual understanding, and hence are useful mainly *after* students have understood the individual concepts.\r\n* In my experience, *grading* such exercises (based on correctness of students' answers, as is standard practice) poses a catch-22 for their conceptual learning value.  On the one hand, this is commonly considered necessary motivation for the students to actually *do* the exercises.  On the other hand, taking \"points off\" for errors communicates that **errors are anathema**, and that *avoiding their exposure* is the path to success.  This is exactly backwards to what is needed for successful learning: rapid and specific exposure of errors; identifying your errors is a good thing!  \r\n\r\n  This cuts both ways.  For a graded assignment, students expect problems that are \"doable\" by following the recipe that was taught in lecture, and that is generally what we give them.  Again, this is backwards to what is needed for conceptual learning: to challenge them to use the concepts on problems that you did *not* tell them about, forcing them to think for themselves (rather than follow what you told them), and ideally to fail.  To be effective for teaching conceptual understanding, an exercise should *fail* (expose basic errors in) the majority of the students.  What is needed is a *safe, rewarding environment* for quickly exposing all their misconceptions, but graded assignments do not provide that.\r\n\r\nWhat all of these issues fundamentally reflect is that such exercises function more to *test* conceptual understanding, rather than to successfully *teach* it.",
+    "mergeParent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "sourceID": null,
+    "concept": null,
+    "sourceDB": null,
+    "changeLog": "",
+    "atime": "2014-12-01T07:57:06.048Z",
+    "data": null,
+    "commitTime": null
+  },
+  "model": "ct.lesson",
+  "pk": 85
+},
+{
+  "fields": {
+    "lesson": 4,
+    "concept": 2,
+    "atime": "2014-11-12T19:10:02.822Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "warns"
+  },
+  "model": "ct.conceptlink",
+  "pk": 3
+},
+{
+  "fields": {
+    "lesson": 4,
+    "concept": 3,
+    "atime": "2014-11-12T19:55:17.314Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 4
+},
+{
+  "fields": {
+    "lesson": 65,
+    "concept": 8,
+    "atime": "2014-11-17T07:45:33.096Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "resol"
+  },
+  "model": "ct.conceptlink",
+  "pk": 19
+},
+{
+  "fields": {
+    "lesson": 6,
+    "concept": 11,
+    "atime": "2014-11-17T22:19:58.380Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 22
+},
+{
+  "fields": {
+    "lesson": 6,
+    "concept": 12,
+    "atime": "2014-11-17T22:30:52.675Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 24
+},
+{
+  "fields": {
+    "lesson": 6,
+    "concept": 13,
+    "atime": "2014-11-17T22:40:11.859Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 26
+},
+{
+  "fields": {
+    "lesson": 1,
+    "concept": 28,
+    "atime": "2014-11-21T05:45:36.361Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "defines"
+  },
+  "model": "ct.conceptlink",
+  "pk": 28
+},
+{
+  "fields": {
+    "lesson": 7,
+    "concept": 38,
+    "atime": "2014-11-22T02:28:22.591Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 29
+},
+{
+  "fields": {
+    "lesson": 74,
+    "concept": 31,
+    "atime": "2014-11-29T05:18:24.054Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "resol"
+  },
+  "model": "ct.conceptlink",
+  "pk": 30
+},
+{
+  "fields": {
+    "lesson": 75,
+    "concept": 31,
+    "atime": "2014-11-29T05:38:20.356Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "resol"
+  },
+  "model": "ct.conceptlink",
+  "pk": 31
+},
+{
+  "fields": {
+    "lesson": 75,
+    "concept": 38,
+    "atime": "2014-11-29T05:39:49.817Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 32
+},
+{
+  "fields": {
+    "lesson": 76,
+    "concept": 31,
+    "atime": "2014-11-29T06:15:43.261Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "resol"
+  },
+  "model": "ct.conceptlink",
+  "pk": 33
+},
+{
+  "fields": {
+    "lesson": 76,
+    "concept": 38,
+    "atime": "2014-11-29T06:29:25.012Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 34
+},
+{
+  "fields": {
+    "lesson": 78,
+    "concept": 3,
+    "atime": "2014-11-29T08:17:51.102Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 35
+},
+{
+  "fields": {
+    "lesson": 80,
+    "concept": 1,
+    "atime": "2014-11-30T00:17:05.597Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 36
+},
+{
+  "fields": {
+    "lesson": 82,
+    "concept": 1,
+    "atime": "2014-12-01T01:04:46.364Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "defines"
+  },
+  "model": "ct.conceptlink",
+  "pk": 37
+},
+{
+  "fields": {
+    "lesson": 84,
+    "concept": 40,
+    "atime": "2014-12-01T07:57:06.035Z",
+    "addedBy": [
+      "admin"
+    ],
+    "relationship": "tests"
+  },
+  "model": "ct.conceptlink",
+  "pk": 38
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 1,
+    "branch": "master",
+    "lesson": 1,
+    "atime": "2014-11-11T00:37:09.433Z",
+    "order": 0,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 1
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 2,
+    "branch": "master",
+    "lesson": 2,
+    "atime": "2014-11-11T00:37:09.453Z",
+    "order": 0,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 2
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 3,
+    "branch": "master",
+    "lesson": 3,
+    "atime": "2014-11-11T00:37:09.471Z",
+    "order": 3,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 3
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 4,
+    "branch": "master",
+    "lesson": 4,
+    "atime": "2014-11-11T00:52:44.858Z",
+    "order": 1,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 4
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 6,
+    "branch": "master",
+    "lesson": 6,
+    "atime": "2014-11-11T00:53:27.645Z",
+    "order": 1,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 6
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 7,
+    "branch": "master",
+    "lesson": 7,
+    "atime": "2014-11-11T00:53:27.666Z",
+    "order": 2,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 7
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 12,
+    "branch": "master",
+    "lesson": 12,
+    "atime": "2014-11-11T00:53:47.044Z",
+    "order": 5,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 12
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 13,
+    "branch": "master",
+    "lesson": 13,
+    "atime": "2014-11-11T00:53:47.061Z",
+    "order": 4,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 13
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 14,
+    "branch": "master",
+    "lesson": 14,
+    "atime": "2014-11-11T01:02:36.303Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 14
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 16,
+    "branch": "master",
+    "lesson": 16,
+    "atime": "2014-11-11T01:03:10.301Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 16
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 17,
+    "branch": "master",
+    "lesson": 17,
+    "atime": "2014-11-11T01:03:10.326Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 17
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 12,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 22,
+    "branch": "master",
+    "lesson": 22,
+    "atime": "2014-11-11T01:03:24.214Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 22
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 13,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 23,
+    "branch": "master",
+    "lesson": 23,
+    "atime": "2014-11-11T01:03:24.238Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 23
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 24,
+    "branch": "master",
+    "lesson": 24,
+    "atime": "2014-11-11T01:34:33.656Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 24
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 25,
+    "branch": "master",
+    "lesson": 25,
+    "atime": "2014-11-11T01:34:33.685Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 25
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 26,
+    "branch": "master",
+    "lesson": 26,
+    "atime": "2014-11-11T01:34:33.703Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 26
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 27,
+    "branch": "master",
+    "lesson": 27,
+    "atime": "2014-11-11T01:34:33.720Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 27
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 28,
+    "branch": "master",
+    "lesson": 28,
+    "atime": "2014-11-11T01:34:33.734Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 28
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 29,
+    "branch": "master",
+    "lesson": 29,
+    "atime": "2014-11-11T01:34:33.749Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 29
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 30,
+    "branch": "master",
+    "lesson": 30,
+    "atime": "2014-11-11T01:34:33.764Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 30
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 7,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 31,
+    "branch": "master",
+    "lesson": 31,
+    "atime": "2014-11-11T01:34:33.779Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 31
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 32,
+    "branch": "master",
+    "lesson": 32,
+    "atime": "2014-11-11T01:36:56.066Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 32
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 33,
+    "branch": "master",
+    "lesson": 33,
+    "atime": "2014-11-11T01:36:56.086Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 33
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 34,
+    "branch": "master",
+    "lesson": 34,
+    "atime": "2014-11-11T01:36:56.100Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 34
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 35,
+    "branch": "master",
+    "lesson": 35,
+    "atime": "2014-11-11T01:36:56.115Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 35
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 36,
+    "branch": "master",
+    "lesson": 36,
+    "atime": "2014-11-11T01:36:56.136Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 36
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 37,
+    "branch": "master",
+    "lesson": 37,
+    "atime": "2014-11-11T01:36:56.151Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 37
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 38,
+    "branch": "master",
+    "lesson": 38,
+    "atime": "2014-11-11T01:36:56.167Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 38
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 39,
+    "branch": "master",
+    "lesson": 39,
+    "atime": "2014-11-11T01:36:56.187Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 39
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 40,
+    "branch": "master",
+    "lesson": 40,
+    "atime": "2014-11-11T01:38:48.589Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 40
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 41,
+    "branch": "master",
+    "lesson": 41,
+    "atime": "2014-11-11T01:50:28.193Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 41
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 42,
+    "branch": "master",
+    "lesson": 42,
+    "atime": "2014-11-11T01:50:28.214Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 42
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 43,
+    "branch": "master",
+    "lesson": 43,
+    "atime": "2014-11-11T01:50:28.230Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 43
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 44,
+    "branch": "master",
+    "lesson": 44,
+    "atime": "2014-11-11T01:50:28.244Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 44
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 45,
+    "branch": "master",
+    "lesson": 45,
+    "atime": "2014-11-11T01:50:28.264Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 45
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 48,
+    "branch": "master",
+    "lesson": 48,
+    "atime": "2014-11-12T23:15:41.267Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 46
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 46,
+    "branch": "master",
+    "lesson": 46,
+    "atime": "2014-11-13T23:31:37.314Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 50
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 47,
+    "branch": "master",
+    "lesson": 47,
+    "atime": "2014-11-13T23:32:09.111Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 51
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 56,
+    "branch": "master",
+    "lesson": 56,
+    "atime": "2014-11-14T17:42:28.378Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 61
+},
+{
+  "fields": {
+    "kind": "resol",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 65,
+    "branch": "master",
+    "lesson": 65,
+    "atime": "2014-11-17T07:45:33.104Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 65
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 66,
+    "branch": "master",
+    "lesson": 66,
+    "atime": "2014-11-17T22:19:58.373Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 66
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 67,
+    "branch": "master",
+    "lesson": 67,
+    "atime": "2014-11-17T22:30:52.672Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 67
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 68,
+    "branch": "master",
+    "lesson": 68,
+    "atime": "2014-11-17T22:40:11.854Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 68
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 69,
+    "branch": "master",
+    "lesson": 69,
+    "atime": "2014-11-18T00:15:20.053Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 69
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 71,
+    "branch": "master",
+    "lesson": 71,
+    "atime": "2014-11-18T02:03:28.899Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 71
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 73,
+    "branch": "master",
+    "lesson": 73,
+    "atime": "2014-11-21T05:45:36.350Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 73
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 74,
+    "branch": "master",
+    "lesson": 74,
+    "atime": "2014-11-22T02:28:22.585Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 75
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 41,
+    "branch": "master",
+    "lesson": 41,
+    "atime": "2014-11-24T20:52:31.535Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 77
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 42,
+    "branch": "master",
+    "lesson": 42,
+    "atime": "2014-11-24T20:52:31.552Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 78
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 43,
+    "branch": "master",
+    "lesson": 43,
+    "atime": "2014-11-24T20:52:31.560Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 79
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 44,
+    "branch": "master",
+    "lesson": 44,
+    "atime": "2014-11-24T20:52:31.567Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 80
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 45,
+    "branch": "master",
+    "lesson": 45,
+    "atime": "2014-11-24T20:52:31.578Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 81
+},
+{
+  "fields": {
+    "kind": "resol",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 76,
+    "branch": "master",
+    "lesson": 76,
+    "atime": "2014-11-29T06:15:43.265Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 83
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 83,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 77,
+    "branch": "master",
+    "lesson": 77,
+    "atime": "2014-11-29T06:15:43.284Z",
+    "order": null,
+    "unit": 2
+  },
+  "model": "ct.unitlesson",
+  "pk": 84
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 78,
+    "branch": "master",
+    "lesson": 78,
+    "atime": "2014-11-29T08:17:51.109Z",
+    "order": 2,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 85
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 85,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 79,
+    "branch": "master",
+    "lesson": 79,
+    "atime": "2014-11-29T08:17:51.129Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 86
+},
+{
+  "fields": {
+    "kind": "errmod",
+    "parent": 85,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 56,
+    "branch": "master",
+    "lesson": 56,
+    "atime": "2014-11-29T08:17:51.145Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 87
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 80,
+    "branch": "master",
+    "lesson": 80,
+    "atime": "2014-11-30T00:17:05.604Z",
+    "order": 6,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 88
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 88,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 81,
+    "branch": "master",
+    "lesson": 81,
+    "atime": "2014-11-30T00:17:05.623Z",
+    "order": null,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 89
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 82,
+    "branch": "master",
+    "lesson": 82,
+    "atime": "2014-12-01T01:04:46.374Z",
+    "order": 7,
+    "unit": 1
+  },
+  "model": "ct.unitlesson",
+  "pk": 90
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 8,
+    "branch": "master",
+    "lesson": 8,
+    "atime": "2014-12-01T01:13:52.287Z",
+    "order": 4,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 91
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 91,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 18,
+    "branch": "master",
+    "lesson": 18,
+    "atime": "2014-12-01T01:13:52.299Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 92
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 9,
+    "branch": "master",
+    "lesson": 9,
+    "atime": "2014-12-01T01:14:05.984Z",
+    "order": 3,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 93
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 93,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 19,
+    "branch": "master",
+    "lesson": 19,
+    "atime": "2014-12-01T01:14:05.996Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 94
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 10,
+    "branch": "master",
+    "lesson": 10,
+    "atime": "2014-12-01T01:14:22.749Z",
+    "order": 2,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 95
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 95,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 20,
+    "branch": "master",
+    "lesson": 20,
+    "atime": "2014-12-01T01:14:22.758Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 96
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 5,
+    "branch": "master",
+    "lesson": 5,
+    "atime": "2014-12-01T01:15:07.557Z",
+    "order": 1,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 97
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 97,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 15,
+    "branch": "master",
+    "lesson": 15,
+    "atime": "2014-12-01T01:15:07.568Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 98
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 83,
+    "branch": "master",
+    "lesson": 83,
+    "atime": "2014-12-01T07:39:38.179Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 99
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 84,
+    "branch": "master",
+    "lesson": 84,
+    "atime": "2014-12-01T07:57:06.042Z",
+    "order": 0,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 100
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 100,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 85,
+    "branch": "master",
+    "lesson": 85,
+    "atime": "2014-12-01T07:57:06.057Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 101
+},
+{
+  "fields": {
+    "kind": "part",
+    "parent": null,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 11,
+    "branch": "master",
+    "lesson": 11,
+    "atime": "2014-12-01T19:23:57.153Z",
+    "order": 5,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 102
+},
+{
+  "fields": {
+    "kind": "answers",
+    "parent": 102,
+    "addedBy": [
+      "admin"
+    ],
+    "treeID": 21,
+    "branch": "master",
+    "lesson": 21,
+    "atime": "2014-12-01T19:23:57.166Z",
+    "order": null,
+    "unit": 3
+  },
+  "model": "ct.unitlesson",
+  "pk": 103
+},
+{
+  "fields": {
+    "kind": "unit",
+    "atime": "2014-11-11T00:07:48.016Z",
+    "addedBy": [
+      "admin"
+    ],
+    "title": "What is a Concept Inventory?"
+  },
+  "model": "ct.unit",
+  "pk": 1
+},
+{
+  "fields": {
+    "kind": "unit",
+    "atime": "2014-11-11T00:40:07.284Z",
+    "addedBy": [
+      "admin"
+    ],
+    "title": "Basic Conditional Probability"
+  },
+  "model": "ct.unit",
+  "pk": 2
+},
+{
+  "fields": {
+    "kind": "unit",
+    "atime": "2014-12-01T01:13:04.312Z",
+    "addedBy": [
+      "admin"
+    ],
+    "title": "What is Open Response Concept Testing?"
+  },
+  "model": "ct.unit",
+  "pk": 3
+},
+{
+  "fields": {
+    "status": "help",
+    "kind": "sq",
+    "parent": null,
+    "title": "whassup?",
+    "text": "boo",
+    "author": [
+      "admin"
+    ],
+    "unitLesson": 2,
+    "confidence": "notsure",
+    "course": 1,
+    "selfeval": "different",
+    "activity": null,
+    "lesson": 2,
+    "atime": "2015-04-23T23:53:40.574Z",
+    "needsEval": true
+  },
+  "model": "ct.response",
+  "pk": 1
+},
+{
+  "fields": {
+    "status": "help",
+    "kind": "comment",
+    "parent": 1,
+    "title": "are you kidding me?",
+    "text": "nutsoid!",
+    "author": [
+      "admin"
+    ],
+    "unitLesson": 2,
+    "confidence": "sure",
+    "course": 1,
+    "selfeval": "different",
+    "activity": null,
+    "lesson": 2,
+    "atime": "2015-04-24T00:01:03.246Z",
+    "needsEval": true
+  },
+  "model": "ct.response",
+  "pk": 2
+},
+{
+  "fields": {
+    "status": null,
+    "kind": "comment",
+    "parent": 1,
+    "title": "A very long and complicated explanation",
+    "text": "Levels of VCS capability\r\n------------------------------\r\n\r\n* fork & commit: instructors can fork an existing material and commit their own versions\r\n* basic history: can view old versions, maybe rollback\r\n* merging (e.g. WINCL 3-way merge).\r\n* pull requests\r\n\r\n\r\n",
+    "author": [
+      "admin"
+    ],
+    "unitLesson": 2,
+    "confidence": "guess",
+    "course": 1,
+    "selfeval": null,
+    "activity": null,
+    "lesson": 2,
+    "atime": "2015-04-24T05:26:54.091Z",
+    "needsEval": true
+  },
+  "model": "ct.response",
+  "pk": 3
+},
+{
+  "fields": {
+    "status": "help",
+    "errorModel": 77,
+    "author": [
+      "admin"
+    ],
+    "activity": null,
+    "atime": "2015-04-24T06:01:27.869Z",
+    "response": 1
+  },
+  "model": "ct.studenterror",
+  "pk": 91
+},
+{
+  "fields": {
+    "status": "help",
+    "errorModel": 80,
+    "author": [
+      "admin"
+    ],
+    "activity": null,
+    "atime": "2015-04-24T06:17:04.630Z",
+    "response": 2
+  },
+  "model": "ct.studenterror",
+  "pk": 92
+},
+{
+  "fields": {
+    "description": "my first attempt to explain what it's all about",
+    "title": "An Introduction to Courselets",
+    "enrollCode": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "lockout": null,
+    "atime": "2014-11-11T00:07:08.648Z"
+  },
+  "model": "ct.course",
+  "pk": 1
+},
+{
+  "fields": {
+    "description": "basic intro course",
+    "title": "Intro Bioinformatics Theory",
+    "enrollCode": null,
+    "addedBy": [
+      "admin"
+    ],
+    "access": "public",
+    "lockout": null,
+    "atime": "2014-11-11T00:39:27.145Z"
+  },
+  "model": "ct.course",
+  "pk": 2
+},
+{
+  "fields": {
+    "addedBy": [
+      "admin"
+    ],
+    "course": 1,
+    "atime": "2014-11-11T00:07:48.036Z",
+    "order": 0,
+    "unit": 1,
+    "releaseTime": "2014-12-01T22:46:27.187Z"
+  },
+  "model": "ct.courseunit",
+  "pk": 1
+},
+{
+  "fields": {
+    "addedBy": [
+      "admin"
+    ],
+    "course": 2,
+    "atime": "2014-11-11T00:40:07.296Z",
+    "order": 0,
+    "unit": 2,
+    "releaseTime": null
+  },
+  "model": "ct.courseunit",
+  "pk": 2
+},
+{
+  "fields": {
+    "addedBy": [
+      "admin"
+    ],
+    "course": 1,
+    "atime": "2014-12-01T01:13:04.320Z",
+    "order": 1,
+    "unit": 3,
+    "releaseTime": null
+  },
+  "model": "ct.courseunit",
+  "pk": 3
+},
+{
+  "fields": {
+    "course": 1,
+    "atime": "2014-11-11T05:30:00.557Z",
+    "role": "prof",
+    "user": [
+      "admin"
+    ]
+  },
+  "model": "ct.role",
+  "pk": 1
+},
+{
+  "fields": {
+    "course": 2,
+    "atime": "2014-11-11T05:31:02.910Z",
+    "role": "prof",
+    "user": [
+      "admin"
+    ]
+  },
+  "model": "ct.role",
+  "pk": 2
+},
+{
+  "fields": {
+    "startNode": 2,
+    "hideTabs": true,
+    "description": "Guides you through the steps of adding a new\n                    lesson to this courselet",
+    "title": "Add a New Lesson",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "add_lesson",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.122Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 1
+},
+{
+  "fields": {
+    "startNode": 9,
+    "hideTabs": true,
+    "description": null,
+    "title": "Take the courselet core lessons",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "lessonseq",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.140Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 2
+},
+{
+  "fields": {
+    "startNode": 15,
+    "hideTabs": false,
+    "description": "You can begin teaching this courselet in a\n                    live classroom session by clicking here:",
+    "title": "Teach a live (classroom) session",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "liveteach",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.150Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 3
+},
+{
+  "fields": {
+    "startNode": 20,
+    "hideTabs": true,
+    "description": null,
+    "title": "Join a Live Classroom Session",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "livestudent",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.163Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 4
+},
+{
+  "fields": {
+    "startNode": 24,
+    "hideTabs": true,
+    "description": null,
+    "title": "Participate in a randomized trial",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "randomtrial",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.173Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 5
+},
+{
+  "fields": {
+    "startNode": 29,
+    "hideTabs": true,
+    "description": null,
+    "title": "View courselet as a slide show",
+    "hideLinks": false,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "slideshow",
+    "hideNav": false,
+    "atime": "2015-08-10T08:58:46.184Z",
+    "help": null
+  },
+  "model": "fsm.fsm",
+  "pk": 6
+},
+{
+  "fields": {
+    "group": "teach/unit_tasks",
+    "fsm": 1
+  },
+  "model": "fsm.fsmgroup",
+  "pk": 1
+},
+{
+  "fields": {
+    "group": "teach/unit/published",
+    "fsm": 3
+  },
+  "model": "fsm.fsmgroup",
+  "pk": 2
+},
+{
+  "fields": {
+    "description": "\n    In this stage, you write a new Lesson about the concept you chose.\n    ",
+    "title": "Write a new Lesson about this concept",
+    "funcName": "ct.fsm_plugin.add_lesson.WRITE",
+    "fsm": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "WRITE",
+    "doLogging": false,
+    "path": "ct:concept_lessons",
+    "atime": "2015-08-10T08:58:46.125Z",
+    "data": null,
+    "help": "Please write a new Lesson about this concept using the form below."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 1
+},
+{
+  "fields": {
+    "description": "\n    Typically this involves several steps:\n    search Courselets for an existing lesson that matches your goals;\n    if not, define the concept your new lesson will be about;\n    write a new lesson.\n    ",
+    "title": "How to Add a Lesson to a Courselet",
+    "funcName": "ct.fsm_plugin.add_lesson.START",
+    "fsm": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.126Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 2
+},
+{
+  "fields": {
+    "description": "\n    In this stage, you search Courselets to see if you can find\n    an existing Lesson that you can use as-is or with your own edits.\n    ",
+    "title": "Search for suitable Lessons",
+    "funcName": "ct.fsm_plugin.add_lesson.SEARCH",
+    "fsm": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "SEARCH",
+    "doLogging": false,
+    "path": "ct:unit_lessons",
+    "atime": "2015-08-10T08:58:46.128Z",
+    "data": null,
+    "help": "Enter a search term below to search Courselets for lessons,\n    then click on Lesson titles to see match your teaching goal.\n    If you find nothing suitable, click the Add a New Lesson button\n    on the Navigation bar above, then click Choose a Concept."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 3
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Done writing new lesson",
+    "funcName": "ct.fsm_plugin.add_lesson.END",
+    "fsm": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": "ct:ul_tasks",
+    "atime": "2015-08-10T08:58:46.129Z",
+    "data": null,
+    "help": "Thanks for writing this new Lesson!\n    See below for suggested next steps on concepts you can study in\n    this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 4
+},
+{
+  "fields": {
+    "description": "\n    In this stage, you identify the main concept that you want to\n    teach about in your new Lesson.\n    ",
+    "title": "What concept do you want to teach about?",
+    "funcName": "ct.fsm_plugin.add_lesson.CONCEPTS",
+    "fsm": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "CONCEPTS",
+    "doLogging": false,
+    "path": "ct:unit_concepts",
+    "atime": "2015-08-10T08:58:46.129Z",
+    "data": null,
+    "help": "The first step of writing a new Lesson, is to choose what concept\n    you want it to teach about.  You can either click one of the concepts\n    listed below, or enter a search term to search for the most relevant\n    concept, then click on a concept to see if it matches your main aim.\n    If searching finds nothing suitable, you can write a brief definition\n    of the concept you want to teach below."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 5
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Classify your error(s)",
+    "funcName": "ct.fsm_plugin.lessonseq.ERRORS",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ERRORS",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.140Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 6
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Courselet core lessons completed",
+    "funcName": "ct.fsm_plugin.lessonseq.END",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.141Z",
+    "data": null,
+    "help": "Congratulations!  You have completed the core lessons for this\n    courselet.  See below for suggested next steps for what to study now in\n    this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 7
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Assess your answer",
+    "funcName": "ct.fsm_plugin.lessonseq.ASSESS",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ASSESS",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.141Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 8
+},
+{
+  "fields": {
+    "description": "\n    Initialize data for viewing a courselet, and go immediately\n    to first lesson.\n    ",
+    "title": "Start This Courselet",
+    "funcName": "ct.fsm_plugin.lessonseq.START",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.142Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 9
+},
+{
+  "fields": {
+    "description": null,
+    "title": "View an explanation",
+    "funcName": "ct.fsm_plugin.lessonseq.ASK",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ASK",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.143Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 10
+},
+{
+  "fields": {
+    "description": "\n    View a lesson explanation.\n    ",
+    "title": "View an explanation",
+    "funcName": "ct.fsm_plugin.lessonseq.LESSON",
+    "fsm": 2,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "LESSON",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.143Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 11
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Live Session completed",
+    "funcName": "ct.fsm_plugin.live.END",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": "ct:unit_tasks",
+    "atime": "2015-08-10T08:58:46.151Z",
+    "data": null,
+    "help": "You have successfully ended this live-session.\n    See below for suggested next steps for what you can work on next\n    to help students with this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 12
+},
+{
+  "fields": {
+    "description": "\n    You have completed presenting this question.  Do you want to\n    ask the students another question, or end this live session?\n    ",
+    "title": "Do you want to ask another question?",
+    "funcName": "ct.fsm_plugin.live.RECYCLE",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "RECYCLE",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.152Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 13
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Ask a question to students in a classroom live-session",
+    "funcName": "ct.fsm_plugin.live.QUESTION",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "QUESTION",
+    "doLogging": false,
+    "path": "ct:live_question",
+    "atime": "2015-08-10T08:58:46.152Z",
+    "data": null,
+    "help": "Explain the question and ask if there are any aspects\n    where the students are unsure what exactly they are being asked.\n    Then click the START button and ask the students to think about\n    the question for a minute or so, then briefly type whatever\n    answer they come up with.  You will be able to monitor their\n    progress on this page in real-time."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 14
+},
+{
+  "fields": {
+    "description": "\n    This activity will allow you to select questions\n    for students to answer in-class.\n    ",
+    "title": "Start Teaching a Live Session",
+    "funcName": "ct.fsm_plugin.live.START",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.153Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 15
+},
+{
+  "fields": {
+    "description": "\n    At this step you choose a question to ask in this live session.\n    ",
+    "title": "Choose a Question to Ask",
+    "funcName": "ct.fsm_plugin.live.CHOOSE",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "CHOOSE",
+    "doLogging": false,
+    "path": "ct:unit_lessons",
+    "atime": "2015-08-10T08:58:46.154Z",
+    "data": null,
+    "help": "Select a question below that you want to ask your students in this\n    live session, then click its Ask this Question button. "
+  },
+  "model": "fsm.fsmnode",
+  "pk": 16
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Present the answer for students to self-assess",
+    "funcName": "ct.fsm_plugin.live.ANSWER",
+    "fsm": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ANSWER",
+    "doLogging": false,
+    "path": "ct:ul_teach",
+    "atime": "2015-08-10T08:58:46.155Z",
+    "data": null,
+    "help": "Explain the answer and ask if there are any aspects\n    the students are wondering about. Then ask them to assess\n    their own answer against the correct answer"
+  },
+  "model": "fsm.fsmnode",
+  "pk": 17
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Live classroom session completed",
+    "funcName": "ct.fsm_plugin.livestudent.END",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": "ct:unit_tasks_student",
+    "atime": "2015-08-10T08:58:46.163Z",
+    "data": null,
+    "help": "The instructor has ended the Live classroom session.\n    See below for suggested next steps for what to study now in\n    this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 18
+},
+{
+  "fields": {
+    "description": "\n    In this stage you assess your own answer vs. the correct answer.\n    ",
+    "title": "Assess your answer",
+    "funcName": "ct.fsm_plugin.livestudent.ASSESS",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ASSESS",
+    "doLogging": false,
+    "path": "ct:assess",
+    "atime": "2015-08-10T08:58:46.164Z",
+    "data": null,
+    "help": "Listen to your instructor's explanation of the answer,\n    then categorize your assessment, and how well you feel you\n    understand this concept now. "
+  },
+  "model": "fsm.fsmnode",
+  "pk": 19
+},
+{
+  "fields": {
+    "description": "\n    In this activity you will answer questions\n    presented by your instructor in-class.\n    ",
+    "title": "Now Joining a Live Classroom Session",
+    "funcName": "ct.fsm_plugin.livestudent.START",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.164Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 20
+},
+{
+  "fields": {
+    "description": "\n    The instructor has not assigned the next exercise yet.\n    Please wait, and click the Next button when the instructor tells\n    you to do so, or when the live classroom session is over.\n    ",
+    "title": "Wait for the Instructor to Assign a Question",
+    "funcName": "ct.fsm_plugin.livestudent.WAIT_ASK",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "WAIT_ASK",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.165Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 21
+},
+{
+  "fields": {
+    "description": "\n    In this stage you write a brief answer to a conceptual question.\n    ",
+    "title": "Answer this Question",
+    "funcName": "ct.fsm_plugin.livestudent.ASK",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "ASK",
+    "doLogging": false,
+    "path": "ct:ul_respond",
+    "atime": "2015-08-10T08:58:46.166Z",
+    "data": null,
+    "help": "Listen to your instructor's explanation of this question,\n    and ask about anything that's unclear about what you're being asked.\n    When the instructor tells you to start, think about the question\n    for a minute or two, then briefly write whatever answer you\n    come up with. "
+  },
+  "model": "fsm.fsmnode",
+  "pk": 22
+},
+{
+  "fields": {
+    "description": "\n    The instructor has not ended the question period yet.\n    Please wait, and click the Next button when the instructor tells\n    you to do so, or when the live classroom session is over.\n    ",
+    "title": "Wait for the Instructor to End the Question",
+    "funcName": "ct.fsm_plugin.livestudent.WAIT_ASSESS",
+    "fsm": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "WAIT_ASSESS",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.167Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 23
+},
+{
+  "fields": {
+    "description": "\n    In this activity you will answer a few preliminary questions, take\n    a lesson on your chosen topic, and finally answer a few questions\n    again. It should take about 15-30 minutes total.\n    ",
+    "title": "Start a Lesson",
+    "funcName": "ct.fsm_plugin.randomtrial.START",
+    "fsm": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.174Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 24
+},
+{
+  "fields": {
+    "description": "\n    Answer a few questions before starting the courselet.\n    ",
+    "title": "Brief Questionaire",
+    "funcName": "ct.fsm_plugin.randomtrial.PRETEST",
+    "fsm": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "PRETEST",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.175Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 25
+},
+{
+  "fields": {
+    "description": "\n    Study a lesson on your selected topic.\n    ",
+    "title": "Courselet to study",
+    "funcName": "ct.fsm_plugin.randomtrial.TREATMENT",
+    "fsm": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "TREATMENT",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.176Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 26
+},
+{
+  "fields": {
+    "description": "\n    Answer a few questions after finishing the courselet.\n    ",
+    "title": "Brief Questionaire",
+    "funcName": "ct.fsm_plugin.randomtrial.POSTTEST",
+    "fsm": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "POSTTEST",
+    "doLogging": false,
+    "path": "fsm:fsm_node",
+    "atime": "2015-08-10T08:58:46.176Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 27
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Courselet completed",
+    "funcName": "ct.fsm_plugin.randomtrial.END",
+    "fsm": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": "ct:unit_tasks_student",
+    "atime": "2015-08-10T08:58:46.177Z",
+    "data": null,
+    "help": "You have successfully completed this courselet.\n    See below for suggested next steps for what you can work on next\n    to help students with this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 28
+},
+{
+  "fields": {
+    "description": "\n    Initialize data for viewing a courselet, and go immediately\n    to first lesson.\n    ",
+    "title": "Start This Courselet",
+    "funcName": "ct.fsm_plugin.slideshow.START",
+    "fsm": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "START",
+    "doLogging": false,
+    "path": null,
+    "atime": "2015-08-10T08:58:46.185Z",
+    "data": null,
+    "help": null
+  },
+  "model": "fsm.fsmnode",
+  "pk": 29
+},
+{
+  "fields": {
+    "description": "\n    View a lesson explanation.\n    ",
+    "title": "View an explanation or question",
+    "funcName": "ct.fsm_plugin.slideshow.LESSON",
+    "fsm": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "LESSON",
+    "doLogging": false,
+    "path": "ct:lesson",
+    "atime": "2015-08-10T08:58:46.186Z",
+    "data": null,
+    "help": "After viewing this slide, click Next to move to the next slide,\n    or click the Slideshow menu above for more options such as discussion\n    of this slide, Table of Contents, etc."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 30
+},
+{
+  "fields": {
+    "description": "\n    Discussion of this slide.\n    ",
+    "title": "Comment on or view discussion of the last slide you viewed",
+    "funcName": "ct.fsm_plugin.slideshow.FAQ",
+    "fsm": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "FAQ",
+    "doLogging": false,
+    "path": "ct:ul_faq_student",
+    "atime": "2015-08-10T08:58:46.187Z",
+    "data": null,
+    "help": "You can click on discussion threads on this page, if any,\n    or write a new comment / question about this slide.  Or you can click\n    the Slideshow menu above for more options."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 31
+},
+{
+  "fields": {
+    "description": null,
+    "title": "Courselet slide show completed",
+    "funcName": "ct.fsm_plugin.slideshow.END",
+    "fsm": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "END",
+    "doLogging": false,
+    "path": "ct:unit_concepts_student",
+    "atime": "2015-08-10T08:58:46.188Z",
+    "data": null,
+    "help": "Thanks for viewing this slide show.\n    See below for suggested next steps on concepts you can study in\n    this courselet."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 32
+},
+{
+  "fields": {
+    "description": "\n    Overview list of slides, for you to jump to any slide in the slideshow.\n    ",
+    "title": "Slideshow Table of Contents",
+    "funcName": "ct.fsm_plugin.slideshow.CHOOSE",
+    "fsm": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "CHOOSE",
+    "doLogging": false,
+    "path": "ct:unit_lessons_student",
+    "atime": "2015-08-10T08:58:46.189Z",
+    "data": null,
+    "help": "View the table of contents below,\n    choose a slide you want to view,\n    then click its Jump to this slide button.\n    Alternatively, click the Slideshow menu item above for more options,\n    such as returning to your current slide."
+  },
+  "model": "fsm.fsmnode",
+  "pk": 33
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Search Lessons",
+    "fromNode": 2,
+    "toNode": 3,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.130Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 1
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Choose a Concept",
+    "fromNode": 3,
+    "toNode": 5,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.131Z",
+    "data": null,
+    "description": "If you want to write a new Lesson, click here\n                 to choose what concept your new lesson will be about"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 2
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Added a lesson",
+    "fromNode": 3,
+    "toNode": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "create_UnitLesson",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.132Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 3
+},
+{
+  "fields": {
+    "help": null,
+    "title": "write your lesson",
+    "fromNode": 5,
+    "toNode": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "add_Concept",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.132Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 4
+},
+{
+  "fields": {
+    "help": null,
+    "title": "write your lesson",
+    "fromNode": 5,
+    "toNode": 1,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "create_Concept",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.133Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 5
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Added a lesson",
+    "fromNode": 5,
+    "toNode": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "create_UnitLesson",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.133Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 6
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Added a lesson",
+    "fromNode": 1,
+    "toNode": 4,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "create_UnitLesson",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.134Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 7
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Lesson",
+    "fromNode": 9,
+    "toNode": 11,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.144Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 8
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Lesson",
+    "fromNode": 11,
+    "toNode": 11,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.144Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 9
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Go to self-assessment",
+    "fromNode": 10,
+    "toNode": 8,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.145Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 10
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Lesson",
+    "fromNode": 8,
+    "toNode": 11,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.145Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 11
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Classify your error",
+    "fromNode": 8,
+    "toNode": 6,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "error",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.146Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 12
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Lesson",
+    "fromNode": 6,
+    "toNode": 11,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.146Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 13
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Start asking a question",
+    "fromNode": 15,
+    "toNode": 16,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.155Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 14
+},
+{
+  "fields": {
+    "help": "Click here to start posing this question to your\n                 live session students.",
+    "title": "Ask this question",
+    "fromNode": 16,
+    "toNode": 14,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "select_UnitLesson",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.156Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 15
+},
+{
+  "fields": {
+    "help": "Click here to move to the assessment stage of this\n             exercise. ",
+    "title": "Present the answer",
+    "fromNode": 14,
+    "toNode": 17,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.156Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 16
+},
+{
+  "fields": {
+    "help": "Click here to end this question. ",
+    "title": "Finish this question",
+    "fromNode": 17,
+    "toNode": 13,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.157Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 17
+},
+{
+  "fields": {
+    "help": "Click here to end this live-session. ",
+    "title": "End this live-session",
+    "fromNode": 17,
+    "toNode": 12,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "quit",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.157Z",
+    "data": null,
+    "description": "If you have no more questions to ask, end\n    this live session."
+  },
+  "model": "fsm.fsmedge",
+  "pk": 18
+},
+{
+  "fields": {
+    "help": "Click here to choose another question to ask. ",
+    "title": "Move on to another question",
+    "fromNode": 13,
+    "toNode": 16,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.158Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 19
+},
+{
+  "fields": {
+    "help": "Click here to end this live-session. ",
+    "title": "End this live-session",
+    "fromNode": 13,
+    "toNode": 12,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "quit",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.159Z",
+    "data": null,
+    "description": "If you have no more questions to ask, end\n    this live session."
+  },
+  "model": "fsm.fsmedge",
+  "pk": 20
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Start answering questions",
+    "fromNode": 20,
+    "toNode": 22,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.167Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 21
+},
+{
+  "fields": {
+    "help": null,
+    "title": "See if question assigned",
+    "fromNode": 21,
+    "toNode": 22,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.168Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 22
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Proceed to assessment",
+    "fromNode": 22,
+    "toNode": 19,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.168Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 23
+},
+{
+  "fields": {
+    "help": null,
+    "title": "See if question done",
+    "fromNode": 23,
+    "toNode": 19,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.169Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 24
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Go to the next question",
+    "fromNode": 19,
+    "toNode": 22,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.169Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 25
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Go to the next question",
+    "fromNode": 19,
+    "toNode": 22,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "error",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.169Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 26
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Start initial questionaire",
+    "fromNode": 24,
+    "toNode": 25,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.178Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 27
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Start courselet",
+    "fromNode": 25,
+    "toNode": 26,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "return",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.178Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 28
+},
+{
+  "fields": {
+    "help": null,
+    "title": "run away!",
+    "fromNode": 25,
+    "toNode": 25,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "exceptCancel",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.179Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 29
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Start final questionaire",
+    "fromNode": 26,
+    "toNode": 27,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "return",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.179Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 30
+},
+{
+  "fields": {
+    "help": null,
+    "title": "run away!",
+    "fromNode": 26,
+    "toNode": 26,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "exceptCancel",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.179Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 31
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Complete trial",
+    "fromNode": 27,
+    "toNode": 28,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "return",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.180Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 32
+},
+{
+  "fields": {
+    "help": null,
+    "title": "run away!",
+    "fromNode": 27,
+    "toNode": 27,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "exceptCancel",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.180Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 33
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Lesson",
+    "fromNode": 29,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.190Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 34
+},
+{
+  "fields": {
+    "help": null,
+    "title": "View Next Slide",
+    "fromNode": 30,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "next",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.190Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 35
+},
+{
+  "fields": {
+    "help": "Click here to join the discussion",
+    "title": "Discussion of this slide",
+    "fromNode": 30,
+    "toNode": 31,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "faq",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.191Z",
+    "data": null,
+    "description": "Comment on or view discussion of this slide"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 36
+},
+{
+  "fields": {
+    "help": "Click here to view the Table of Contents",
+    "title": "View Table of Contents",
+    "fromNode": 30,
+    "toNode": 33,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "contents",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.192Z",
+    "data": null,
+    "description": "overview of all slides in the slideshow"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 37
+},
+{
+  "fields": {
+    "help": "Click here to end this slideshow. ",
+    "title": "End this slideshow",
+    "fromNode": 30,
+    "toNode": 32,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "quit",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.192Z",
+    "data": null,
+    "description": "If you don't want to view any more slides, exit the slideshow"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 38
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Go to Next Slide",
+    "fromNode": 31,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "create_Comment",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.193Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 39
+},
+{
+  "fields": {
+    "help": null,
+    "title": "Return to this slide",
+    "fromNode": 31,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "slide",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.193Z",
+    "data": null,
+    "description": "Go back to the last slide you viewed"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 40
+},
+{
+  "fields": {
+    "help": "Click here to view the Table of Contents",
+    "title": "View Table of Contents",
+    "fromNode": 31,
+    "toNode": 33,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "contents",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.193Z",
+    "data": null,
+    "description": "overview of all slides in the slideshow"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 41
+},
+{
+  "fields": {
+    "help": "Click here to end this slideshow. ",
+    "title": "End this slideshow",
+    "fromNode": 31,
+    "toNode": 32,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "quit",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.194Z",
+    "data": null,
+    "description": "If you don't want to view any more slides, exit the slideshow"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 42
+},
+{
+  "fields": {
+    "help": "Click here to jump to this slide.",
+    "title": "Jump to this slide",
+    "fromNode": 33,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "select_UnitLesson",
+    "showOption": false,
+    "atime": "2015-08-10T08:58:46.195Z",
+    "data": null,
+    "description": null
+  },
+  "model": "fsm.fsmedge",
+  "pk": 43
+},
+{
+  "fields": {
+    "help": "Click here to resume the slideshow.",
+    "title": "Resume slideshow at the current slide",
+    "fromNode": 33,
+    "toNode": 30,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "resume",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.195Z",
+    "data": null,
+    "description": "return to the last slide you viewed"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 44
+},
+{
+  "fields": {
+    "help": "Click here to end this slideshow. ",
+    "title": "End this slideshow",
+    "fromNode": 33,
+    "toNode": 32,
+    "addedBy": [
+      "admin"
+    ],
+    "name": "quit",
+    "showOption": true,
+    "atime": "2015-08-10T08:58:46.196Z",
+    "data": null,
+    "description": "If you don't want to view any more slides, exit the slideshow"
+  },
+  "model": "fsm.fsmedge",
+  "pk": 45
+}
+]

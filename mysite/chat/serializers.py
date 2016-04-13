@@ -94,7 +94,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'options': obj.get_options(),
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
-        if not obj.chat.next_point or obj.input_type == 'custom':
+        if not obj.chat.next_point:
             input_data['html'] = '<a href="http://google.com" class="btn">Close</a>'
         return InputSerializer().to_representation(input_data)
 
