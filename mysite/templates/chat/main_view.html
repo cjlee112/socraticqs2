@@ -126,7 +126,11 @@
     <aside class="chat-sidebar">
       <header>
         <div class="inner clearfix">
+          {% if small_img_url %}
+          <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
+          {% else %}
           <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
+          {% endif %}
 
           <div class="description">
             <h3 class="courselet">{{ unit.title }}</h3>
