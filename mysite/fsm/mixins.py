@@ -243,11 +243,16 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
-        if self.name == 'END':
+        if self.name in ['END', 'IF_RESOURCES']:
+            if not self.help:
+                text = self.get_help(chat.state, request=None)
+            else:
+                text = self.help
+            print text
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
-                            text=chat.state.fsmNode.help,
+                            text=text,
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]

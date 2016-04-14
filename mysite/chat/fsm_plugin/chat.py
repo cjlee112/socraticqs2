@@ -1,4 +1,4 @@
-from ct.models import UnitStatus
+from ct.models import UnitStatus, UnitLesson
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -14,7 +14,13 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     else:
         nextUL = unitStatus.start_next_lesson()
     if not nextUL:
-        return fsm.get_node('END')
+        unit = fsmStack.state.get_data_attr('unit')
+        lessons = list(unit.unitlesson_set \
+                       .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        if lessons:
+            return fsm.get_node('IF_RESOURCES')
+        else:
+            return fsm.get_node('END')
     else:  # just a lesson to read
         fsmStack.state.unitLesson = nextUL
 
@@ -166,12 +172,31 @@ class GET_ERRORS(object):
         )
 
 
+class IF_RESOURCES(object):
+    help = '''Congratulations!  You have completed the core lessons for this
+              courselet.  See below for suggested next steps for what to study now in
+              this courselet.'''
+
+    title = 'Courselet core lessons completed'
+    edges = (
+        dict(name='next', toNode='END', title='View Next Lesson'),
+    )
+
+
 class END(object):
     # node specification data goes here
+    def get_help(self, node, state, request):
+        'provide help messages for all views relevant to this stage.'
+        unit = state.get_data_attr('unit')
+        lessons = list(unit.unitlesson_set \
+                       .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        if lessons:
+            return '''Resources is there'''
+        else:
+            return '''Congratulations!  You have completed the core lessons for this
+                      courselet.  See below for suggested next steps for what to study now in
+                      this courselet.'''
     title = 'Courselet core lessons completed'
-    help = '''Congratulations!  You have completed the core lessons for this
-    courselet.  See below for suggested next steps for what to study now in
-    this courselet.'''
 
 
 def get_specs():
@@ -183,7 +208,8 @@ def get_specs():
         name='chat',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER,
-                     ASSESS, GET_ASSESS, ERRORS, GET_ERRORS, END],
+        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER, ASSESS,
+                     GET_ASSESS, ERRORS, GET_ERRORS, IF_RESOURCES, END],
+
     )
     return (spec,)
