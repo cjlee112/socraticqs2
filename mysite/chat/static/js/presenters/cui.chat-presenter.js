@@ -473,11 +473,15 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
 
       // Reset breakpoints Array
       this._sidebarBreakpoints = [];
-
+      this.isDone = 0
       // Add new breakpoints
       $.each(data.breakpoints, $.proxy(function(i, b){
         // Create breakpoint from template
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
+
+        if (b.isDone) {
+          this.isDone++;
+        }
 
         // Add reference to breakpoint
         this._sidebarBreakpoints.push(breakpoint);
@@ -485,6 +489,10 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         // Add breakpoint in sidebar
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
       }, this));
+
+      if (this.isDone == this._sidebarBreakpoints.length){
+        this._$sidebarToggle.trigger('resources');
+      }
     }
   }else{
     throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');
@@ -965,6 +973,15 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
 
     this._toggleSidebar();
   }, this));
+
+
+  // Sidebar toggle
+    this._$sidebarToggle.one('resources', $.proxy(function(e){
+      if(!this._isSidebarVisible){
+        this._toggleSidebar();
+      }
+  }, this));
+
 
   // Fullscreen toggle
   this._$fullscreenToggle.on('click', $.proxy(function(e){
