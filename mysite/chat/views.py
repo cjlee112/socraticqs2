@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-from ct.models import Unit, Role, UnitLesson, ConceptLink, ConceptGraph
+from ct.models import Unit, Role, UnitLesson, ConceptLink
 
 
 @injections.has
@@ -48,43 +48,33 @@ class ChatInitialView(View):
 
         lessons = unit.get_exercises()
 
-        concepts = set()
         will_learn = set()
-        for unit_lesson in unit.get_exercises():
-            for concept_link in ConceptLink.objects.filter(
-                Q(lesson=unit_lesson.lesson),
-                (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
-            ):
-                title = concept_link.concept.title
-                if concept_link.lesson.url:
-                    url = concept_link.lesson.url
-                else:
-                    try:
-                        ul = UnitLesson.objects.get(lesson__concept=concept_link.concept)
-                    except UnitLesson.DoesNotExist:
-                        raise Http404
-                    url = reverse(
-                        'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
-                    )
-                concepts.add(concept_link.concept)
-                will_learn.add((title, url))
-
         need_to_know = set()
-        for concept in concepts:
-            for concept_graph in ConceptGraph.objects.filter(
-                fromConcept=concept, relationship=ConceptGraph.DEPENDS
-            ):
-                title = concept_graph.toConcept.title
-                unit_lesson = UnitLesson.objects.filter(
-                    lesson__concept=concept_graph.toConcept
-                ).first()
-                if unit_lesson.lesson.url:
-                    url = unit_lesson.lesson.url
-                else:
-                    url = reverse(
-                        'ct:study_concept', args=(courseUnit.course.id, unit.id, unit_lesson.id)
-                    )
-                need_to_know.add((title, url))
+        for unit_lesson in unit.get_exercises():
+            # QuerySet for "You will learn" and "Need to know" section
+            containers_with_querysets = (
+                (will_learn, ConceptLink.objects.filter(
+                    Q(lesson=unit_lesson.lesson),
+                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
+                )),
+                (need_to_know, ConceptLink.objects.filter(
+                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES
+                ))
+            )
+            for contaner, qs in containers_with_querysets:
+                for concept_link in qs:
+                    title = concept_link.concept.title
+                    if concept_link.lesson.url:
+                        url = concept_link.lesson.url
+                    else:
+                        try:
+                            ul = UnitLesson.objects.get(lesson__concept=concept_link.concept)
+                        except UnitLesson.DoesNotExist:
+                            raise Http404
+                        url = reverse(
+                            'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
+                        )
+                    contaner.add((title, url))
 
         return render(
             request,
