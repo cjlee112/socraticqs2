@@ -1,5 +1,6 @@
 import injections
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from rest_framework.parsers import JSONParser
 from rest_framework import viewsets, generics
 from rest_framework.response import Response
@@ -9,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Message, Chat, ChatDivider
 from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer
 from .services import ProgressHandler, FsmHandler
-from .permissions import IsOwner, IsOwnerUser
+from .permissions import IsOwner
 from ct.models import Response as StudentResponse
 from ct.models import UnitLesson
 
@@ -50,7 +51,12 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
         chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
+        self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
         if (
@@ -84,6 +90,14 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
+        chat_id = self.request.data.get('chat_id')
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
+        self.check_object_permissions(self.request, chat)
+
         message = self.get_object()
         if message.input_type == 'text' and not self.request.data.get('text'):
             return Response({'error': 'Empty response. Enter something!'})
@@ -168,19 +182,29 @@ class GetObjectMixin(object):
     """
     def get_object(self):
         chat_id = self.request.GET.get('chat_id')
-        obj = Chat.objects.get(id=chat_id)
-        self.check_object_permissions(self.request, obj)
-        return obj
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
+        self.check_object_permissions(self.request, chat)
+        return chat
 
 
-class HistoryView(GetObjectMixin, generics.RetrieveAPIView):
+class HistoryView(generics.RetrieveAPIView):
     """
     List all messages in chat w/ additional info.
     """
-    permission_classes = (IsAuthenticated, IsOwnerUser)
+    permission_classes = (IsAuthenticated, IsOwner)
 
     def get(self, request, *args, **kwargs):
-        chat = self.get_object()
+        chat_id = self.request.GET.get('chat_id')
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
+        self.check_object_permissions(self.request, chat)
         serializer = ChatHistorySerializer(chat)
         return Response(serializer.data)
 
@@ -189,10 +213,16 @@ class ProgressView(GetObjectMixin, generics.RetrieveAPIView):
     """
     Return progress for chat.
     """
-    permission_classes = (IsAuthenticated, IsOwnerUser)
+    permission_classes = (IsAuthenticated, IsOwner)
 
     def get(self, request, *args, **kwargs):
-        chat = self.get_object()
+        chat_id = self.request.GET.get('chat_id')
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
+        self.check_object_permissions(self.request, chat)
         serializer = ChatProgressSerializer(chat)
         return Response(serializer.data)
 
@@ -202,23 +232,31 @@ class ResourcesView(viewsets.ModelViewSet):
     """
     Return resources for chat.
     """
-
     next_handler = FsmHandler()
-    permission_classes = (IsAuthenticated, IsOwnerUser)
+    permission_classes = (IsAuthenticated, IsOwner)
+    serializer_class = ChatResourcesSerializer
 
     def list(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id)
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
         self.check_object_permissions(self.request, chat)
         serializer = ChatResourcesSerializer(chat)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         chat_id = self.request.GET.get('chat_id')
-        chat = Chat.objects.get(id=chat_id)
+        if not chat_id:
+            return Response({'errors': 'Request should include chat_id.'})
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            return Response({'errors': 'There is no chat by chat_id.'})
         self.check_object_permissions(self.request, chat)
 
-        unitlesson = UnitLesson.objects.get(pk=pk)
+        unitlesson = get_object_or_404(UnitLesson, pk=pk)
 
         divider = ChatDivider(
             text=unitlesson.lesson.title, unitlesson=unitlesson
