@@ -160,7 +160,7 @@ class MessagesViewTests(SetUpMixin, TestCase):
     """
     Test for MessagesView API.
     """
-    fixtures = ['chat/tests/fixtures/initial_data.json']
+    fixtures = ['chat/tests/fixtures/initial_data_enchanced.json']
 
     def test_positive_case(self):
         """
@@ -360,11 +360,11 @@ class MessagesViewTests(SetUpMixin, TestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-        msg_id = json_content['input']['includeSelectedValuesFromMessages']
+        msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
         response = self.client.put(
             next_url,
-            data=json.dumps({"selected": {"14": {"errorModel": ["80"]}}, "chat_id": chat_id}),
+            data=json.dumps({"selected": {msg_id: {"errorModel": ["80"]}}, "chat_id": chat_id}),
             content_type='application/json',
             follow=True
         )
@@ -381,6 +381,115 @@ class MessagesViewTests(SetUpMixin, TestCase):
 
         self.assertEquals(json_content['input']['type'], 'text')
         self.assertEquals(len(json_content['addMessages']), 4)
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self_eval = json_content['input']['options'][1]['value']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": self_eval, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"selected": {msg_id: {"errorModel": ["104"]}}, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(
+            json_content['addMessages'][0]['html'],
+            '<dl>\n<dt><strong>Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
+        )
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        status_msg = json_content['input']['options'][0]['text']
+        status_value = json_content['input']['options'][0]['value']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": status_value, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(len(json_content['addMessages']), 4)
+        self.assertEquals(json_content['addMessages'][0]['html'], status_msg)
 
 
 class HistoryAPIViewTests(SetUpMixin, TestCase):
