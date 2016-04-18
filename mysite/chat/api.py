@@ -8,7 +8,12 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Message, Chat, ChatDivider
-from .serializers import MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer
+from .serializers import (
+    MessageSerializer,
+    ChatHistorySerializer,
+    ChatProgressSerializer,
+    ChatResourcesSerializer
+)
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
 from ct.models import Response as StudentResponse
@@ -39,7 +44,6 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     """
     GET or UPDATE one message.
     """
-
     parser_classes = (JSONParser,)
     next_handler = injections.depends(ProgressHandler)
 

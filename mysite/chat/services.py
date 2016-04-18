@@ -63,7 +63,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
-
     def push_state(self, chat, request, name, start_args=None):
         fsm_stack = FSMStack(request)
         course_unit = chat.enroll_code.courseUnit
