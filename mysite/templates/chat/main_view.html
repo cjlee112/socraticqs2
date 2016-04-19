@@ -79,6 +79,7 @@
                   {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
                 </p>
 
+                {% if will_learn %}
                 <div class="chat-row">
                   <div class="chat-col-5">
                     <h2>You will learn about</h2>
@@ -88,7 +89,9 @@
                       {% endfor %}
                     </ul>
                   </div>
+                  {% endif %}
 
+                  {% if need_to_know %}
                   <div class="chat-col-5">
                     <h2>You need to know about</h2>
                     <ul>
@@ -97,6 +100,7 @@
                       {% endfor %}
                     </ul>
                   </div>
+                  {% endif %}
                 </div>
               </div>
             </div>

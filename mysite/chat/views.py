@@ -67,14 +67,15 @@ class ChatInitialView(View):
                     if concept_link.lesson.url:
                         url = concept_link.lesson.url
                     else:
-                        try:
-                            ul = UnitLesson.objects.get(lesson__concept=concept_link.concept)
-                        except UnitLesson.DoesNotExist:
-                            raise Http404
-                        url = reverse(
-                            'ct:study_concept', args=(courseUnit.course.id, unit.id, ul.id)
-                        )
-                    contaner.add((title, url))
+                        ul = UnitLesson.objects.filter(
+                            lesson__concept=concept_link.concept
+                        ).values('id').first()
+                        if ul:
+                            url = reverse(
+                                'ct:study_concept', args=(courseUnit.course.id, unit.id, ul['id'])
+                            )
+                    if url:
+                        contaner.add((title, url))
 
         return render(
             request,
