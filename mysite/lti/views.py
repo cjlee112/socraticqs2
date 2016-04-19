@@ -144,21 +144,23 @@ def lti_redirect(request, course_id=None, unit_id=None):
             return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
         course = get_object_or_404(Course, id=course_id)
+        unit = None
         try:
             unit = Unit.objects.get(id=unit_id)
+            course_unit = CourseUnit.objects.get(unit=unit, course=course)
         except Unit.DoesNotExist:
-            unit = course.courseunit_set.filter(
+            # Get first CourseUnit by order if there is no Unit found
+            course_unit = course.courseunit_set.filter(
                 releaseTime__isnull=False,
                 releaseTime__lt=timezone.now()
             ).order_by('order').first()
 
-        if not unit:
+        if not unit and not course_unit:
             return render_to_response(
                 'lti/error.html',
                 {'message': 'There is no units to display for that Course.'},
                 RequestContext(request)
             )
-        course_unit = CourseUnit.objects.get(unit=unit, course=course)
         enroll_code = EnrollUnitCode.get_code(course_unit)
         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
 
