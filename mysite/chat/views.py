@@ -2,6 +2,7 @@ import injections
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
+from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -24,6 +25,12 @@ class ChatInitialView(View):
         enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
         courseUnit = enroll_code.courseUnit
         unit = courseUnit.unit
+        if not unit.unitlesson_set.filter(order__isnull=False).exists():
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'There are no Lessons to display for that Courselet.'}
+            )
         if not Role.objects.filter(
             user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
         ):

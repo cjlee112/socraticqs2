@@ -15,9 +15,9 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         nextUL = unitStatus.start_next_lesson()
     if not nextUL:
         unit = fsmStack.state.get_data_attr('unit')
-        lessons = list(unit.unitlesson_set \
-                       .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
-        if lessons:
+        if unit.unitlesson_set.filter(
+            kind=UnitLesson.COMPONENT, order__isnull=True
+        ).exists():
             return fsm.get_node('IF_RESOURCES')
         else:
             return fsm.get_node('END')

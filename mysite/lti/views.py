@@ -7,7 +7,11 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from ims_lti_py.tool_provider import DjangoToolProvider
-from django.shortcuts import render_to_response, redirect, get_object_or_404
+from django.shortcuts import (
+    redirect,
+    get_object_or_404,
+    render
+)
 
 from lti.utils import only_lti
 from lti import app_settings as settings
@@ -75,10 +79,10 @@ def lti_init(request, course_id=None, unit_id=None):
             msg = 'session: message = {}'.format(session.get('message'))
             LOGGER.info(msg)
     if not is_valid:
-        return render_to_response(
+        return render(
+            request,
             'lti/error.html',
-            {'message': 'LTI request is not valid'},
-            RequestContext(request)
+            {'message': 'LTI request is not valid'}
         )
 
     return lti_redirect(request, course_id, unit_id)
@@ -103,10 +107,10 @@ def lti_redirect(request, course_id=None, unit_id=None):
     roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
 
     if not user_id:
-        return render_to_response(
+        return render(
+            request,
             'lti/error.html',
-            {'message': 'There is not user_id required LTI param'},
-            RequestContext(request)
+            {'message': 'There is not user_id required LTI param'}
         )
 
     user, created = LTIUser.objects.get_or_create(
@@ -129,11 +133,11 @@ def lti_redirect(request, course_id=None, unit_id=None):
         elif Role.INSTRUCTOR in roles:
             return redirect(reverse('lti:create_courseref'))
         else:
-            return render_to_response(
+            return render(
+                request,
                 'lti/error.html',
                 {'message': """You are trying to access Course that does not exists but
-                            Students can not create new Courses automatically"""},
-                RequestContext(request)
+                            Students can not create new Courses automatically"""}
             )
 
     user.enroll(roles, course_id)
@@ -156,12 +160,21 @@ def lti_redirect(request, course_id=None, unit_id=None):
             ).order_by('order').first()
 
         if not unit and not course_unit:
-            return render_to_response(
+            return render(
+                request,
                 'lti/error.html',
-                {'message': 'There is no units to display for that Course.'},
-                RequestContext(request)
+                {'message': 'There are no units to display for that Course.'}
             )
         enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        if not course_unit.unit.unitlesson_set.filter(
+            order__isnull=False
+        ).exists():
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'There are no Lessons to display for that Courselet.'}
+            )
         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
 
 
