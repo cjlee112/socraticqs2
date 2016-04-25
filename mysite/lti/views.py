@@ -12,6 +12,7 @@ from django.shortcuts import (
     get_object_or_404,
     render
 )
+import waffle
 
 from lti.utils import only_lti
 from lti import app_settings as settings
@@ -175,7 +176,13 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
-        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
+        if waffle.switch_is_active('chat_ui'):
+            return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
+        else:
+            if not unit_id:
+                return redirect(reverse('ct:course_student', args=(course_id,)))
+            else:
+                return redirect(reverse('ct:study_unit', args=(course_id, unit_id)))
 
 
 @only_lti

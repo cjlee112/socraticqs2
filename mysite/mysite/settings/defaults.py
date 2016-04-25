@@ -117,6 +117,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'ct.middleware.MySocialAuthExceptionMiddleware',
+    'waffle.middleware.WaffleMiddleware',
 )
 
 ROOT_URLCONF = 'mysite.urls'
@@ -148,6 +149,7 @@ INSTALLED_APPS = (
     'chat',
     'rest_framework',
     'accounts',
+    'waffle',
 )
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'

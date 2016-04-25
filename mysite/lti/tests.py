@@ -93,11 +93,22 @@ class MethodsTest(LTITestCase):
     """
     Test for correct request method passed in view.
     """
-    def test_post(self, mocked):
+    @patch('lti.views.waffle.switch_is_active', return_value=False)
+    def test_post(self, switch, mocked):
         mocked.return_value.is_valid_request.return_value = True
-        response = self.client.post('/lti/',
-                                    data=self.headers,
-                                    follow=True)
+        response = self.client.post(
+            '/lti/',
+            data=self.headers,
+            follow=True
+        )
+        self.assertTemplateUsed(response, template_name='ct/course.html')
+
+        switch.return_value = True
+        response = self.client.post(
+            '/lti/',
+            data=self.headers,
+            follow=True
+        )
         self.assertTemplateUsed(response, template_name='chat/main_view.html')
 
     def test_failure_post(self, mocked):
@@ -314,13 +325,20 @@ class TestCourseRef(LTITestCase):
         self.assertEqual(res.url, reverse(langing_page, args=(_id,)))
 
 
+@patch('lti.views.waffle.switch_is_active', return_value=False)
 @patch('lti.views.DjangoToolProvider')
 class TestUnit(LTITestCase):
     """
     Testing Unit template rendering.
     """
-    def test_unit_render(self, mocked):
+    def test_unit_render(self, mocked, switch):
         mocked.return_value.is_valid_request.return_value = True
+        response = self.client.post(
+            '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
+        )
+        self.assertTemplateUsed(response, 'ct/study_unit.html')
+
+        switch.return_value = True
         response = self.client.post(
             '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
         )
