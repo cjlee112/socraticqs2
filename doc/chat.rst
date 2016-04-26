@@ -32,3 +32,13 @@ need to subclass ``ProgressHandler`` class.
 Chat API
 --------
 Backend API for ChatUI follow https://github.com/karlwho/cui API requirements.
+
+
+Enable/Disable ChatUI feature for LTI
+---------
+By default all LTI request from Student should be redirected to new ChatUI.
+
+But carefully test this new feature Enable/Disable switch was added to admin.
+
+So now this redirect is disabled by default until active ``chat_ui`` switch will be
+added in ``Admin -> Waffle -> Switches`` page.
