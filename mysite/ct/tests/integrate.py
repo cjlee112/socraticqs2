@@ -17,8 +17,10 @@ from fsm.fsm_base import FSMStack
 
 class OurTestCase(TestCase):
     def check_post_get(self, url, postdata, urlTail, expected):
-        '''do POST and associated redirect to GET.  Check the redirect
-        target and GET response content '''
+        """
+        Do POST and associated redirect to GET.  Check the redirect
+        target and GET response content.
+        """
         origin = 'http://testserver'
         if not url.startswith(origin):
             url = origin + url
