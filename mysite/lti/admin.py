@@ -9,7 +9,7 @@ class LtiConsumerForm(ModelForm):
         super(LtiConsumerForm, self).__init__(*args, **kwargs)
 
         class Meta:
-            model = LtiConsumerAdmin
+            model = LtiConsumer
 
     def clean(self):
         cleaned_data = self.cleaned_data
