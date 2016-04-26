@@ -121,6 +121,7 @@ from django.conf import settings as dj_settings
 import django
 django.setup()
 
+
 class BaseTask(Task):
     """
     Base class for all DB tasks.
@@ -152,15 +153,8 @@ class BaseTask(Task):
         if self.password:
             self.db_cfg['PASSWORD'] = self.password
 
-        if self.host:
-            self.db_cfg['HOST'] = self.host
-        elif not self.db_cfg['HOST']:
-            self.db_cfg['HOST'] = 'localhost'
-
-        if self.port:
-            self.db_cfg['PORT'] = self.port
-        elif not self.db_cfg['PORT']:
-            self.db_cfg['PORT'] = '5432'
+        self.db_cfg['HOST'] = self.host or self.db_cfg['HOST'] or 'localhost'
+        self.db_cfg['PORT'] = self.port or self.db_cfg['PORT'] or '5432'
 
         try:
             handlers[self.engine].__call__(self, suffix)
@@ -200,9 +194,8 @@ class BaseTask(Task):
                                                                        self.db_cfg['HOST'],
                                                                        self.db_cfg['PORT']))
             call_command('migrate')
-            call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
+            call_command('loaddata', os.path.join(path, 'mysite/dumpdata/debug-wo-fsm.json'))
             call_command('fsm_deploy')
-
 
     def init_db_sqlite(self, *args, **kwargs):
         """
@@ -216,9 +209,8 @@ class BaseTask(Task):
                 self.db_cfg['NAME'] = os.path.join(path, 'mysite/', self.db_cfg['NAME'])
             local('rm %s' % (self.db_cfg['NAME']))
             call_command('migrate')
-            call_command('loaddata', os.path.join(path,'mysite/dumpdata/debug-wo-fsm.json'))
+            call_command('loaddata', os.path.join(path, 'mysite/dumpdata/debug-wo-fsm.json'))
             call_command('fsm_deploy')
-
 
     @postgres
     def backup_db_postgres(self, suffix, *args, **kwargs):
@@ -264,7 +256,7 @@ class BaseTask(Task):
         """
         path = os.path.dirname(os.path.dirname(
                os.path.dirname(os.path.dirname(self.base_path))))
-        with lcd(os.path.join(path,'mysite/')), settings(hide('warnings'), warn_only=True):
+        with lcd(os.path.join(path, 'mysite/')), settings(hide('warnings'), warn_only=True):
             if not self.db_cfg['NAME'].startswith('/'):
                 self.db_cfg['NAME'] = os.path.join(path, 'mysite/', self.db_cfg['NAME'])
             local(
@@ -279,8 +271,7 @@ class BaseTask(Task):
         Restore Postgres DB.
         """
         with lcd(self.base_path), settings(hide('warnings'), warn_only=True):
-            if not local('ls %s/backup.postgres.%s' %
-                        (self.backup_path, suffix)).succeeded:
+            if not local('ls %s/backup.postgres.%s' % (self.backup_path, suffix)).succeeded:
                 return self.list_backups('postgres')
             local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
                                                                             self.db_cfg['USER'],
@@ -305,7 +296,8 @@ class BaseTask(Task):
                 if not log.stderr or (
                     'FATAL' not in log.stderr and
                     'no password supplied' not in log.stderr and
-                    'ERROR:  database "%s" is being accessed by other' % self.db_cfg['NAME'] not in log.stderr):
+                    'ERROR:  database "%s" is being accessed by other' % self.db_cfg['NAME'] not in log.stderr
+                ):
                     local('psql --username %s --host=%s --port=%s -w -c "ALTER DATABASE %s_temp RENAME TO %s"' %
                           (self.db_cfg['USER'],
                            self.db_cfg['HOST'],
