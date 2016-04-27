@@ -1,6 +1,7 @@
 import injections
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework import viewsets, generics
 from rest_framework.response import Response
@@ -39,8 +40,26 @@ def get_additional_messages(response, chat):
             each.errorModel.get_em_resolutions()[1])
 
 
+class ValidateMixin(object):
+    """
+    Validate request for `chat_id`.
+
+    Can raise ValidationError.
+
+    params: chat_id
+    return: Chat instance
+    """
+    def validate_and_get_chat(self, chat_id):
+        if not chat_id:
+            raise ValidationError('Request should include chat_id.')
+        chat = Chat.objects.filter(id=chat_id).first()
+        if not chat:
+            raise ValidationError('There is no chat by chat_id.')
+        return chat
+
+
 @injections.has
-class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
+class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     """
     GET or UPDATE one message.
     """
@@ -55,11 +74,10 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
         chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
@@ -95,11 +113,10 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
 
     def update(self, request, *args, **kwargs):
         chat_id = self.request.data.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
 
         message = self.get_object()
@@ -180,22 +197,7 @@ class MessagesView(generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
             chat.save()
 
 
-class GetObjectMixin(object):
-    """
-    Implement get_object method.
-    """
-    def get_object(self):
-        chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
-        self.check_object_permissions(self.request, chat)
-        return chat
-
-
-class HistoryView(generics.RetrieveAPIView):
+class HistoryView(ValidateMixin, generics.RetrieveAPIView):
     """
     List all messages in chat w/ additional info.
     """
@@ -203,17 +205,16 @@ class HistoryView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
         serializer = ChatHistorySerializer(chat)
         return Response(serializer.data)
 
 
-class ProgressView(GetObjectMixin, generics.RetrieveAPIView):
+class ProgressView(ValidateMixin, generics.RetrieveAPIView):
     """
     Return progress for chat.
     """
@@ -221,18 +222,17 @@ class ProgressView(GetObjectMixin, generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
         serializer = ChatProgressSerializer(chat)
         return Response(serializer.data)
 
 
 @injections.has
-class ResourcesView(viewsets.ModelViewSet):
+class ResourcesView(ValidateMixin, viewsets.ModelViewSet):
     """
     Return resources for chat.
     """
@@ -242,22 +242,20 @@ class ResourcesView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
         serializer = ChatResourcesSerializer(chat)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         chat_id = self.request.GET.get('chat_id')
-        if not chat_id:
-            return Response({'errors': 'Request should include chat_id.'})
-        chat = Chat.objects.filter(id=chat_id).first()
-        if not chat:
-            return Response({'errors': 'There is no chat by chat_id.'})
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
 
         unitlesson = get_object_or_404(UnitLesson, pk=pk)
