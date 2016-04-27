@@ -9,7 +9,7 @@ class IsOwner(permissions.BasePermission):
         check_result = False
         try:
             check_result = (obj.user == request.user)
-        except:
+        except AttributeError:
             check_result = (obj.owner == request.user)
         finally:
             return check_result
