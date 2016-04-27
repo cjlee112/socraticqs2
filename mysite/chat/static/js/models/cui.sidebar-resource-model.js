@@ -18,7 +18,7 @@ CUI.models = CUI.models || {};
  */
 CUI.SidebarResourceModel = function(data){
   // Check that data has all required properties
-  if(typeof data.id !== 'number') throw new Error('CUI.SidebarResourceModel(): Invalid data.id.');
+  // if(typeof data.id !== 'number') throw new Error('CUI.SidebarResourceModel(): Invalid data.id.');
   if(!data.html) throw new Error('CUI.SidebarResourceModel(): No data.html.');
   if(typeof data.isStarted !== 'boolean') throw new Error('CUI.SidebarResourceModel(): Invalid data.isStarted.');
   if(typeof data.isUnlocked !== 'boolean') throw new Error('CUI.SidebarResourceModel(): Invalid data.isUnlocked.');
@@ -30,6 +30,13 @@ CUI.SidebarResourceModel = function(data){
    * @public
    */
   this.id = data.id;
+
+    /**
+   * The id of the message this breakpoint links to in the chat.
+   * @type {number}
+   * @public
+   */
+  this.ul = data.ul;
 
   /**
    * The html that is displayed within the breakpoint.

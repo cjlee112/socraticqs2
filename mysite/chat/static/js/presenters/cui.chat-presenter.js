@@ -827,17 +827,16 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(id){
   }
 };
 
-CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id){
+CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul){
   var $message;
   var top;
-
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
     top = $message.offset().top;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
-      this._getMessages(this._resourcesUrl+id+'/');
+      this._getMessages(this._resourcesUrl+ul+'/');
   };
 };
 /**
@@ -1012,7 +1011,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Scroll to message
     if ($.inArray('started', e.currentTarget.classList) > -1 ||
         $.inArray('unlocked', e.currentTarget.classList) > -1 ) {
-    this._scrollToResourceMessage($(e.currentTarget).data('href'));
+    this._scrollToResourceMessage($(e.currentTarget).data('href'), $(e.currentTarget).data('ul'));
   }
   }, this));
 

@@ -43,7 +43,7 @@ CUI.SidebarResourcePresenter = function(model){
  * @protected
  */
 CUI.SidebarResourcePresenter.prototype._render = function(){
-  this.el = CUI.views.sidebarBreakpoint(this._model);
+  this.el = CUI.views.sidebarResources(this._model);
   this.$el = $(this.el);
 };
 

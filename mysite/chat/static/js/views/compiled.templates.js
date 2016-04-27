@@ -122,3 +122,26 @@ this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(co
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"html","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "\n</li>\n";
 },"useData":true});
+this["CUI"]["views"]["sidebarResources"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
+    return " unlocked ";
+},"3":function(container,depth0,helpers,partials,data) {
+    return " done ";
+},"4":function(container,depth0,helpers,partials,data) {
+    return " started ";
+},"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function";
+
+  return "<li class=\""
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isUnlocked : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + " "
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isStarted : depth0),{"name":"if","hash":{},"fn":container.program(4, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + " "
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isDone : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "\" data-href=\""
+    + container.escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"id","hash":{},"data":data}) : helper)))
+    + "\"  data-ul=\""
+    + container.escapeExpression(((helper = (helper = helpers.ul || (depth0 != null ? depth0.ul : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"ul","hash":{},"data":data}) : helper)))
+    + "\" >\n  "
+    + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"html","hash":{},"data":data}) : helper))) != null ? stack1 : "")
+    + "\n</li>\n";
+},"useData":true});

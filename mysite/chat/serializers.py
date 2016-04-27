@@ -227,11 +227,13 @@ class ResourcesSerializer(serializers.ModelSerializer):
     isDone = serializers.SerializerMethodField()
     isStarted = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
+    ul = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
         fields = (
             'id',
+            'ul',
             'html',
             'isUnlocked',
             'isStarted',
@@ -241,6 +243,12 @@ class ResourcesSerializer(serializers.ModelSerializer):
     def get_id(self, obj):
         if hasattr(obj, 'message'):
             return obj.message
+        else:
+            return None
+
+    def get_ul(self, obj):
+        if hasattr(obj, 'message'):
+            return None
         else:
             return obj.id
 
