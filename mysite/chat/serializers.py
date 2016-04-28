@@ -220,7 +220,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
 class ResourcesSerializer(serializers.ModelSerializer):
     """
-    Serializer for Lesson.
+    Serializer for Resource Lesson.
     """
     html = serializers.CharField(source='lesson.title', read_only=True)
     isUnlocked = serializers.SerializerMethodField()
@@ -241,30 +241,45 @@ class ResourcesSerializer(serializers.ModelSerializer):
         )
 
     def get_id(self, obj):
+        """
+        Return message id if message for this lesson has been already made or None
+        """
         if hasattr(obj, 'message'):
             return obj.message
         else:
             return None
 
     def get_ul(self, obj):
+        """
+        Return UnitLesson id if there is no message fot this resource yet
+        """
         if hasattr(obj, 'message'):
             return None
         else:
             return obj.id
 
     def get_isUnlocked(self, obj):
+        """
+        Return True if main sequence has ended and studen get access to resources
+        """
         if obj.chat.state:
             return False
         else:
             return True
 
     def get_isStarted(self, obj):
+        """
+        Return True if this resource started
+        """
         if hasattr(obj, 'message'):
             return True
         else:
             return False
 
     def get_isDone(self, obj):
+        """
+        Return True if all messages for that resource have already been showed
+        """
         if hasattr(obj, 'message'):
             if obj.chat.state and obj.chat.state.unitLesson.id == obj.id:
                 return False
