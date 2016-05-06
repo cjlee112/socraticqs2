@@ -16,7 +16,7 @@ from ct.models import (
     Response,
     DONE_STATUS
 )
-from ct.tests import (
+from ct.tests.integrate import (
     FakeRequest,
     OurTestCase,
     create_question_unit

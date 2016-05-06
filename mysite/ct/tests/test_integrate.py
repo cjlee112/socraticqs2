@@ -1,4 +1,3 @@
-
 """
 py.test tests for our Djngo application.
 """

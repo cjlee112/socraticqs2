@@ -315,7 +315,11 @@ boost but you can change this by commenting out next lines in you local_conf.py:
 
 Also you can run tests using py.test from ```mysite`` directory::
 
-    py.test --cov=. --cov-report term-missing --cov-config .coveragerc --ignore=ct/tests/selenium/
+    py.test
+
+
+All needed options has been added in ``pytest.ini``
+
 
 Running a test web server
 ...........................
