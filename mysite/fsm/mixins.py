@@ -34,6 +34,9 @@ KLASS_NAME_DICT = dict(
 )
 
 
+SIMILAR_KINDS = (Lesson.BASE_EXPLANATION, Lesson.EXPLANATION)
+
+
 class JSONBlobMixin(object):
     """
     Mixin to dump/load data to/from JSON blob fields.
@@ -152,7 +155,7 @@ class ChatMixin(object):
             try:
                 unitStatus = chat.state.get_data_attr('unitStatus')
                 next_ul = unitStatus.unit.unitlesson_set.get(order=unitStatus.order+1)
-                if next_ul and next_ul.lesson.kind == kind:
+                if next_ul and next_ul.lesson.kind in SIMILAR_KINDS and kind in SIMILAR_KINDS:
                     input_type = 'options'
                     kind = 'button'
             except UnitLesson.DoesNotExist:
