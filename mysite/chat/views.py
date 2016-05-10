@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
@@ -30,6 +31,19 @@ class ChatInitialView(View):
                 request,
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
+            )
+        if (
+            not courseUnit.is_published() and
+            not User.objects.filter(
+                id=request.user.id,
+                role__role=Role.INSTRUCTOR,
+                role__course=courseUnit.course
+            ).exists()
+        ):
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'This Courselet is not published yet.'}
             )
         if not Role.objects.filter(
             user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
