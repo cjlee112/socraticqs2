@@ -662,12 +662,12 @@ class ResourcesViewTests(SetUpMixin, TestCase):
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         resource_response = self.client.get(
-            reverse('chat:resources-detail', args=(json_content['breakpoints'][0]['id'],)),
+            reverse('chat:resources-detail', args=(json_content['breakpoints'][0]['ul'],)),
             {'chat_id': chat_id}
         )
         self.assertEquals(resource_response.status_code, 200)
         resource_response = self.client.get(
-            reverse('chat:resources-detail', args=(json_content['breakpoints'][1]['id'],)),
+            reverse('chat:resources-detail', args=(json_content['breakpoints'][1]['ul'],)),
             {'chat_id': chat_id}
         )
         self.assertEquals(resource_response.status_code, 200)

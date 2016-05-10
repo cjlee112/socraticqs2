@@ -1057,10 +1057,17 @@ class Course(models.Model):
     lockout = models.CharField(max_length=200, null=True)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    def create_unit(self, title, author=None):
+
+    def create_unit(self, title, description=None, img_url=None, small_img_url=None, author=None):
         if author is None:
             author = self.addedBy
-        unit = Unit(title=title, addedBy=author)
+        unit = Unit(
+            title=title,
+            addedBy=author,
+            description=description,
+            img_url=img_url,
+            small_img_url=small_img_url
+        )
         unit.save()
         cu = CourseUnit(unit=unit, course=self, addedBy=author,
                         order=CourseUnit.objects.filter(course=self).count())

@@ -358,7 +358,16 @@ def course_view(request, course_id):
             courseletform = NewUnitTitleForm(request.POST)
             if courseletform.is_valid():
                 title = courseletform.cleaned_data['title']
-                unit = course.create_unit(title, request.user)
+                description = courseletform.cleaned_data['description']
+                img_url = courseletform.cleaned_data['img_url']
+                small_img_url = courseletform.cleaned_data['small_img_url']
+                unit = course.create_unit(
+                    title=title,
+                    description=description,
+                    img_url=img_url,
+                    small_img_url=small_img_url,
+                    author=request.user
+                )
                 kwargs = dict(course_id=course_id, unit_id=unit.id)
                 defaultURL = reverse('ct:unit_tasks', kwargs=kwargs)
                 return pageData.fsm_redirect(request, 'create_Unit',
