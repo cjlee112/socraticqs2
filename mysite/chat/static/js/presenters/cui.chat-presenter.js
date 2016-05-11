@@ -977,6 +977,8 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
   // Sidebar toggle
     this._$sidebarToggle.one('resources', $.proxy(function(e){
       if(!this._isSidebarVisible){
+        $(e.currentTarget).toggleClass('active');
+
         this._toggleSidebar();
       }
   }, this));

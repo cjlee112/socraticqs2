@@ -153,6 +153,8 @@ class ChatMixin(object):
             input_type = 'custom'
             kind = next_lesson.lesson.kind
             try:
+                if is_additional:
+                    raise UnitLesson.DoesNotExist
                 unitStatus = chat.state.get_data_attr('unitStatus')
                 next_ul = unitStatus.unit.unitlesson_set.get(order=unitStatus.order+1)
                 if next_ul and next_ul.lesson.kind in SIMILAR_KINDS and kind in SIMILAR_KINDS:
