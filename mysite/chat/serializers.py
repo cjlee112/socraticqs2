@@ -128,7 +128,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'includeSelectedValuesFromMessages': []
         }
         if not obj.next_point:
-            input_data['html'] = '<a href="http://google.com" class="btn">Close</a>'
+            input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
