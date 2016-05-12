@@ -833,7 +833,7 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul){
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
-    top = $message.offset().top;
+    top = $message.offset().top - 60;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
       this._getMessages(this._resourcesUrl+ul+'/');

@@ -72,3 +72,4 @@ fab_settings.py
 backups/*
 bower_components/
 node_modules/
+.vscode/
