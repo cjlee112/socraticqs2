@@ -37,7 +37,7 @@ def get_additional_messages(response, chat):
                                                      student_error=each,
                                                      kind='message',
                                                      is_additional=True),
-            each.errorModel.get_em_resolutions()[1])
+            reversed(each.errorModel.get_em_resolutions()[1]))
 
 
 class ValidateMixin(object):
