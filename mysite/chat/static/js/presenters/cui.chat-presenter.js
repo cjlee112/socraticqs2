@@ -791,6 +791,10 @@ CUI.ChatPresenter.prototype._toggleSidebar = function(){
 CUI.ChatPresenter.prototype._toggleFullscreen = function(){
   // Toggle fullscreen if allowed by browser
   if(screenfull.enabled){
+   var scrollToPos = $(window).scrollTop();
+   $(document).one(screenfull.raw.fullscreenchange, () => {
+        $(window).scrollTop(scrollToPos);
+    });
    screenfull.toggle();
    if(screenfull.isFullscreen) this._$fullscreenToggle.addClass('active');
    else this._$fullscreenToggle.removeClass('active');
