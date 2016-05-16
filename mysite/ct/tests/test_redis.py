@@ -53,6 +53,7 @@ def redis_client(redis_server):
         try:
             client = redis.StrictRedis(host='127.0.0.1',
                                        port=redis_server, db=0)
+            # open connection to redis
             client.get('some_key')
             return client
         except redis.ConnectionError:
