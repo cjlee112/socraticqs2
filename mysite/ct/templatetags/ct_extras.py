@@ -182,7 +182,11 @@ def get_dummy_navbar(actionTarget, baseToken='courses'):
             m.append('<li><a href="%s/">%s</a></li>'
                      % ('/'.join(l[:j]), label))
     return mark_safe('\n'.join(m))
-        
+
+
+@register.filter(name='get_base_faq_url')
+def get_base_faq_url(actionTarget, ul):
+    return get_object_url(actionTarget, ul, subpath='faq')
 
 
 ##############################################################
