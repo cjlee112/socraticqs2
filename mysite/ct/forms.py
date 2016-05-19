@@ -273,9 +273,25 @@ class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
     changeLog = forms.CharField(required=False,
             label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
+
     class Meta:
         model = Lesson
         fields = ['title', 'text', 'changeLog']
+
+    def __clean_field(self, field_name):
+        """
+        Base helper method to check for space-only input data.
+        """
+        data = self.cleaned_data[field_name]
+        if len(data.strip()) == 0:
+            raise forms.ValidationError("This field should contains at least one letter.")
+        return data
+
+    def clean_title(self):
+        return self.__clean_field('title')
+
+    def clean_text(self):
+        return self.__clean_field('text')
 
 
 class LessonForm(ErrorForm):
