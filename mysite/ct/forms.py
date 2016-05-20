@@ -207,7 +207,7 @@ class NewConceptForm(forms.Form):
 
 
 class ConceptSearchForm(forms.Form):
-    search = forms.CharField(label='Search for concepts containing')
+    search = forms.CharField(max_length=300, label='Search for concepts containing')
 
 
 class ConceptLinkForm(forms.ModelForm):
