@@ -148,6 +148,7 @@ class ResponseListForm(forms.Form):
 
 class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(UnitTitleForm, self).__init__(*args, **kwargs)
         self.fields['title'].required = True
@@ -155,9 +156,16 @@ class UnitTitleForm(forms.ModelForm):
         self.helper.form_id = 'id-unitTitleForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Unit
         fields = ['title', 'description', 'img_url', 'small_img_url']
+    
+    def clean_title(self):
+         data = self.cleaned_data['title']
+         if len(data.strip()) == 0:
+             raise forms.ValidationError("Courselet title should contain at least 1 symbol.")
+         return data
 
 
 class NewUnitTitleForm(UnitTitleForm):
