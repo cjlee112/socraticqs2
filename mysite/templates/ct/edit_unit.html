@@ -34,6 +34,11 @@ Copy course URL
 <input class="textinput textInput form-control" id="id_title" maxlength="200" name="title" type="text" value="{{ domain }}/lti{% url 'ct:study_unit' courseUnit.course.id unit.id %}">
 </p>
 
+<hr>
+<p>
+Copy enrollment URL
+<input class="textinput textInput form-control" id="id_title" maxlength="200" name="title" type="text" value="{{ domain }}/chat/enrollcode/{{ enroll_code }}/">
+</p>
 
 <hr>
 Courselet created by: 

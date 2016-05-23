@@ -5,12 +5,13 @@ import oauth2
 
 from mock import patch, Mock
 from ddt import ddt, data, unpack
+from django.utils import timezone
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from psa.models import UserSocialAuth
-from ct.models import Course, Role, Unit, CourseUnit
+from ct.models import Course, Role, Unit, CourseUnit, UnitLesson, Lesson
 from lti.models import LTIUser, CourseRef
 from lti.views import create_courseref
 
@@ -20,8 +21,12 @@ class LTITestCase(TestCase):
         """
         Preconditions.
         """
+        from chat.fsm_plugin.chat import get_specs
+        from chat.fsm_plugin.additional import get_specs as get_specs_additional
         self.client = Client()
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
+        get_specs()[0].save_graph(self.user.username)
+        get_specs_additional()[0].save_graph(self.user.username)
 
         mocked_nonce = u'135685044251684026041377608307'
         mocked_timestamp = u'1234567890'
@@ -72,9 +77,15 @@ class LTITestCase(TestCase):
 
         self.courseunit = CourseUnit(
             unit=self.unit, course=self.course,
-            order=0, addedBy=self.user
+            order=0, addedBy=self.user, releaseTime=timezone.now()
         )
         self.courseunit.save()
+        lesson = Lesson(title='title', text='text', addedBy=self.user)
+        lesson.save()
+        unitlesson = UnitLesson(
+            unit=self.unit, order=0, lesson=lesson, addedBy=self.user, treeID=lesson.id
+        )
+        unitlesson.save()
 
 
 @patch('lti.views.DjangoToolProvider')
@@ -82,12 +93,23 @@ class MethodsTest(LTITestCase):
     """
     Test for correct request method passed in view.
     """
-    def test_post(self, mocked):
+    @patch('lti.views.waffle.switch_is_active', return_value=False)
+    def test_post(self, switch, mocked):
         mocked.return_value.is_valid_request.return_value = True
-        response = self.client.post('/lti/',
-                                    data=self.headers,
-                                    follow=True)
+        response = self.client.post(
+            '/lti/',
+            data=self.headers,
+            follow=True
+        )
         self.assertTemplateUsed(response, template_name='ct/course.html')
+
+        switch.return_value = True
+        response = self.client.post(
+            '/lti/',
+            data=self.headers,
+            follow=True
+        )
+        self.assertTemplateUsed(response, template_name='chat/main_view.html')
 
     def test_failure_post(self, mocked):
         mocked.return_value.is_valid_request.return_value = False
@@ -303,14 +325,21 @@ class TestCourseRef(LTITestCase):
         self.assertEqual(res.url, reverse(langing_page, args=(_id,)))
 
 
+@patch('lti.views.waffle.switch_is_active', return_value=False)
 @patch('lti.views.DjangoToolProvider')
 class TestUnit(LTITestCase):
     """
     Testing Unit template rendering.
     """
-    def test_unit_render(self, mocked):
+    def test_unit_render(self, mocked, switch):
         mocked.return_value.is_valid_request.return_value = True
         response = self.client.post(
             '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
         )
         self.assertTemplateUsed(response, 'ct/study_unit.html')
+
+        switch.return_value = True
+        response = self.client.post(
+            '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
+        )
+        self.assertTemplateUsed(response, 'chat/main_view.html')

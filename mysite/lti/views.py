@@ -1,16 +1,24 @@
 import oauth2
 import json
 import logging
+
+from django.utils import timezone
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from ims_lti_py.tool_provider import DjangoToolProvider
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import (
+    redirect,
+    get_object_or_404,
+    render
+)
+import waffle
 
 from lti.utils import only_lti
 from lti import app_settings as settings
 from lti.models import LTIUser, CourseRef
-from ct.models import Course, Role
+from ct.models import Course, Role, CourseUnit, Unit
+from chat.models import EnrollUnitCode
 
 
 ROLES_MAP = {
@@ -72,10 +80,10 @@ def lti_init(request, course_id=None, unit_id=None):
             msg = 'session: message = {}'.format(session.get('message'))
             LOGGER.info(msg)
     if not is_valid:
-        return render_to_response(
+        return render(
+            request,
             'lti/error.html',
-            {'message': 'LTI request is not valid'},
-            RequestContext(request)
+            {'message': 'LTI request is not valid'}
         )
 
     return lti_redirect(request, course_id, unit_id)
@@ -100,10 +108,10 @@ def lti_redirect(request, course_id=None, unit_id=None):
     roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
 
     if not user_id:
-        return render_to_response(
+        return render(
+            request,
             'lti/error.html',
-            {'message': 'There is not user_id required LTI param'},
-            RequestContext(request)
+            {'message': 'There is not user_id required LTI param'}
         )
 
     user, created = LTIUser.objects.get_or_create(
@@ -126,29 +134,55 @@ def lti_redirect(request, course_id=None, unit_id=None):
         elif Role.INSTRUCTOR in roles:
             return redirect(reverse('lti:create_courseref'))
         else:
-            return render_to_response(
+            return render(
+                request,
                 'lti/error.html',
                 {'message': """You are trying to access Course that does not exists but
-                            Students can not create new Courses automatically"""},
-                RequestContext(request)
+                            Students can not create new Courses automatically"""}
             )
 
     user.enroll(roles, course_id)
-
-    if user.is_enrolled(roles, course_id):
-        # Redirect to course or unit page considering users role
+    if Role.INSTRUCTOR in roles:
         if not unit_id:
-            dispatch = 'ct:course_student'
-            if Role.INSTRUCTOR in roles:
-                dispatch = 'ct:course'
-            return redirect(reverse(dispatch, args=(course_id,)))
+            return redirect(reverse('ct:course', args=(course_id,)))
         else:
-            dispatch = 'ct:study_unit'
-            if Role.INSTRUCTOR in roles:
-                dispatch = 'ct:unit_tasks'
-            return redirect(reverse(dispatch, args=(course_id, unit_id)))
+            return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
-        return redirect(reverse('ct:home'))
+        course = get_object_or_404(Course, id=course_id)
+        unit = None
+        try:
+            unit = Unit.objects.get(id=unit_id)
+            course_unit = CourseUnit.objects.get(unit=unit, course=course)
+        except Unit.DoesNotExist:
+            # Get first CourseUnit by order if there is no Unit found
+            course_unit = course.courseunit_set.filter(
+                releaseTime__isnull=False,
+                releaseTime__lt=timezone.now()
+            ).order_by('order').first()
+
+        if not unit and not course_unit:
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'There are no units to display for that Course.'}
+            )
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        if not course_unit.unit.unitlesson_set.filter(
+            order__isnull=False
+        ).exists():
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'There are no Lessons to display for that Courselet.'}
+            )
+        if waffle.switch_is_active('chat_ui'):
+            return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
+        else:
+            if not unit_id:
+                return redirect(reverse('ct:course_student', args=(course_id,)))
+            else:
+                return redirect(reverse('ct:study_unit', args=(course_id, unit_id)))
 
 
 @only_lti

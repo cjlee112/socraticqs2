@@ -63,7 +63,8 @@ class FSMStack(object):
         stateData = stateData or {}
         startArgs = startArgs or {}
         fsm = FSM.objects.select_related('startNode').get(name=fsmName)
-        if not activity and self.state:
+        activity = None
+        if not activity and self.state and fsmName not in ('chat', 'additional'):
             activity = self.state.activity
         self.state = FSMState(
             user=request.user,
@@ -77,7 +78,8 @@ class FSMStack(object):
             **kwargs
         )
         path = self.state.start_fsm(self, request, stateData, **startArgs)
-        request.session['fsmID'] = self.state.pk
+        if fsmName not in ('chat', 'additional'):
+            request.session['fsmID'] = self.state.pk
         return path
 
     def pop(self, request, eventName='return', pageData=None, **kwargs):

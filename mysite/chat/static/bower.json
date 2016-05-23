@@ -1,0 +1,26 @@
+{
+  "name": "courselet",
+  "version": "1.0.0",
+  "authors": [
+    "Karl Ollars <karlmagnusollars@gmail.com>"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "src/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.2.1",
+    "bootstrap": "~3.3.6",
+    "handlebars": "~4.0.5",
+    "html5shiv": "~3.7.3",
+    "respond": "~1.4.2",
+    "MathJax": "~2.6.1",
+    "gsap": "~1.18.2",
+    "screenfull": "~3.0.0",
+    "zoom.js": "~0.0.1",
+    "placeholders": "~4.0.1"
+  }
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12081) - http://www.bohemiancoding.com/sketch -->
+    <title>chat-action-bar-fullscreen-inactive</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Courselet---Chat" sketch:type="MSArtboardGroup" transform="translate(-1230.000000, -590.000000)" fill="#B1B0B9">
+            <g id="Bar" sketch:type="MSLayerGroup" transform="translate(-5.000000, 560.000000)">
+                <g id="Fullscreen-icon" transform="translate(1234.000000, 29.000000)" sketch:type="MSShapeGroup">
+                    <g id="chat-action-bar-fullscreen-inactive" transform="translate(1.000000, 1.000000)">
+                        <g id="arrow" transform="translate(11.000000, 0.000000)">
+                            <rect id="Rectangle-1777" x="1" y="0" width="8" height="2" rx="2"></rect>
+                            <rect id="Rectangle-1777-Copy" x="7" y="0" width="2" height="8" rx="2"></rect>
+                            <rect id="Rectangle-1777-Copy-2" transform="translate(3.996218, 4.789112) rotate(45.000000) translate(-3.996218, -4.789112) " x="2.99621849" y="0.289111711" width="2" height="9" rx="2"></rect>
+                        </g>
+                        <g id="arrow" transform="translate(4.500000, 15.500000) scale(-1, -1) translate(-4.500000, -15.500000) translate(0.000000, 11.000000)">
+                            <rect id="Rectangle-1777" x="1" y="0" width="8" height="2" rx="2"></rect>
+                            <rect id="Rectangle-1777-Copy" x="7" y="0" width="2" height="8" rx="2"></rect>
+                            <rect id="Rectangle-1777-Copy-2" transform="translate(3.996218, 4.789112) rotate(45.000000) translate(-3.996218, -4.789112) " x="2.99621849" y="0.289111711" width="2" height="9" rx="2"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
