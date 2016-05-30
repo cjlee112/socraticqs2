@@ -619,11 +619,14 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
         elif request.POST.get('task') == 'reverse' and 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
-            c = cg.fromConcept
-            cg.fromConcept = cg.toConcept
-            cg.toConcept = c
-            cg.save() # save the reversed relationship
-            toTable.move_between_tables(cg, fromTable)
+            if cg.fromConcept.relatedTo.filter(
+                toConcept__lesson__unitlesson__isnull=False
+            ).exists():
+                c = cg.fromConcept
+                cg.fromConcept = cg.toConcept
+                cg.toConcept = c
+                cg.save()  # save the reversed relationship
+                toTable.move_between_tables(cg, fromTable)
         elif 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
