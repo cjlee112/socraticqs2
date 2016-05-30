@@ -788,7 +788,9 @@ def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
 def concept_concepts(request, course_id, unit_id, ul_id):
     unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
                                                'Concepts')
-    toConcepts = concept.relatedTo.all()
+    toConcepts = concept.relatedTo.filter(
+        toConcept__lesson__unitlesson__isnull=False
+    )
     fromConcepts = concept.relatedFrom \
       .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
     toTable = ConceptLinkTable(toConcepts, ConceptGraphForm,
