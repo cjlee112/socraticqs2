@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {% block title %}
-  {{ pageData.title }}
+  {{ pageData.title|truncatechars:100 }}
 {% endblock %}
 
 {% block content %}
@@ -48,7 +48,7 @@ $( "#headtoggle" ).click(function() {
   <td><ul>
     {% if 'add_lesson' in pageData.fsmLauncher %}
     <li>To be guided through the process of adding a new lesson
-        to this courselet, click <b>Add a new lesson</b> on the 
+        to this courselet, click <b>Add a new lesson</b> on the
         <b>Start Activity</b> menu above.</li>
     {% endif %}
     <li>To search for existing lessons to add,
@@ -64,7 +64,7 @@ $( "#headtoggle" ).click(function() {
   <td><ul>
     {% if 'add_lesson' in pageData.fsmLauncher %}
     <li>To be guided through the process of adding a new lesson
-        to this courselet, click <b>Add a new lesson</b> on the 
+        to this courselet, click <b>Add a new lesson</b> on the
         <b>Start Activity</b> menu above.</li>
     {% endif %}
     <li>To search for existing questions to add,
