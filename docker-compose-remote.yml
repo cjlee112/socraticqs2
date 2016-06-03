@@ -2,10 +2,8 @@ db:
  image: postgres
 
 web:
- image: maxsocl/courselets:dev
+ build: .
  command: sh /code/docker-commands.sh
- volumes:
-   - .:/code
  ports:
    - "8000:8000"
  links:
