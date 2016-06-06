@@ -1058,15 +1058,20 @@ class Unit(models.Model):
     def get_related_concepts(self):
         'get dict of concepts linked to lessons in this unit'
         d = {}
+
         for ul in self.unitlesson_set.filter(lesson__concept__isnull=False,
                                              kind=UnitLesson.COMPONENT):
             cl = ConceptLink(lesson=ul.lesson, concept=ul.lesson.concept)
             cl.unitLesson = ul
             d[cl.concept] = [cl]
-        for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
-                                              concept__isError=False,
-                                              lesson__unitlesson__kind=UnitLesson.COMPONENT) \
-                .values('concept', 'relationship', 'lesson__unitlesson'):
+
+        # TODO need to decide how to remove Concepts correctly
+        for cld in ConceptLink.objects.filter(
+            lesson__unitlesson__unit=self,
+            concept__isError=False,
+            lesson__unitlesson__kind=UnitLesson.COMPONENT,
+            concept__lesson__unitlesson__isnull=False
+        ).values('concept', 'relationship', 'lesson__unitlesson'):
             concept = Concept.objects.get(pk=cld['concept'])
             ul = UnitLesson.objects.get(pk=cld['lesson__unitlesson'])
             cl = ConceptLink(concept=concept,
