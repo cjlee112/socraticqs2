@@ -210,6 +210,12 @@ class ConceptSearchForm(forms.Form):
     search = forms.CharField(max_length=300, label='Search for concepts containing')
 
 
+    def clean_search(self):
+        data = self.cleaned_data['search']
+        if len(data.strip()) == 0:
+            raise forms.ValidationError("This field should contains at least one letter.")
+        return data
+
 class ConceptLinkForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
