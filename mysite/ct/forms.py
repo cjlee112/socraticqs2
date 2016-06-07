@@ -390,7 +390,7 @@ class SearchFormBase(forms.Form):
         self.helper.form_id = 'id-lessonSearchForm'
         self.helper.form_method = 'get'
         self.helper.form_class = 'form-inline'
-    ##    self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+        self.helper.field_template = 'ct/inline_field_with_errors.html'
         self.helper.add_input(Submit('submit', 'Search'))
     ##    self.helper.add_input(StrictButton('Search', css_class='btn-default'))
     ## sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
