@@ -29,6 +29,8 @@ from fsm.models import FSM, FSMState
 from fsm.mixins import KLASS_NAME_DICT
 from chat.models import EnrollUnitCode
 
+from ct.exceptions import CommonDisambiguationError
+
 
 ###########################################################
 # WelcomeMat refactored utilities
@@ -912,6 +914,7 @@ def unit_resources(request, course_id, unit_id):
 @login_required
 def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
+    opt = None
     unit = get_object_or_404(Unit, pk=unit_id)
     sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     pageData = PageData(request, title=unit.title,
@@ -924,11 +927,18 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
         defaultURL = reverse('ct:concept_teach', kwargs=kwargs)
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      reverseArgs=kwargs, unitLesson=ul)
-    lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
-    if lesson.pk is not None:
-        addForm = None
+    try:
+        lesson = Lesson.get_from_sourceDB(sourceID, request.user, doSave=False)
+        if lesson.pk is not None:
+            addForm = None
+    except CommonDisambiguationError as e:
+        lesson = None
+        opt = [(s, reverse_path_args('ct:wikipedia_concept', request.path,
+                      source_id=urllib.unquote(s.replace('"', '').encode('utf-8')))) for s in e.options]
+
+
     return pageData.render(request, 'ct/wikipedia.html',
-                           dict(lesson=lesson, addForm=addForm))
+                           dict(lesson=lesson, addForm=addForm, opt=opt))
 
 @login_required
 def ul_teach(request, course_id, unit_id, ul_id):
