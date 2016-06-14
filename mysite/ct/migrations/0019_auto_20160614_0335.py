@@ -8,7 +8,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ct', '0016_auto_20150626_0301'),
+        ('ct', '0018_unit_small_img_url'),
     ]
 
     operations = [
