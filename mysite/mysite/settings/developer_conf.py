@@ -15,6 +15,7 @@ LTI_SECRET = "__lti_secret__"  # can be any random python string with enough len
 
 INSTALLED_APPS_LOCAL = (
     'django_nose',
+    'behave_django',
 )
 
 INSTALLED_APPS += INSTALLED_APPS_LOCAL
