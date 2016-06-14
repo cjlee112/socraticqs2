@@ -310,3 +310,15 @@ def set_crispy_action(actionTarget, *forms):
     'set the form.helper.form_action for one or more forms'
     for form in forms:
         form.helper.form_action = actionTarget
+
+
+class BaseForm(forms.ModelForm):
+    """
+    Base class for admin forms.
+    """
+    def __init__(self, *args, **kwargs):
+        super(BaseForm, self).__init__(*args, **kwargs)
+
+        for field_name in ('addedBy', 'author'):
+            if field_name in self.fields and not self.initial.get(field_name):
+                self.initial[field_name] = self.current_user
