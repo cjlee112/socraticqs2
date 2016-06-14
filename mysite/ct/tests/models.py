@@ -1292,12 +1292,19 @@ class CourseTest(TestCase):
         self.assertEqual(self.course.__unicode__(), self.course.title)
 
     def test_create_unit(self):
-        result = self.course.create_unit(title='new unit title', author=self.user)
+        result = self.course.create_unit(
+            title='new unit title',
+            author=self.user,
+            img_url='',
+            small_img_url='',
+            description='test_description')
         self.assertIsInstance(result, Unit)
         self.assertEqual(result.title, 'new unit title')
         self.assertEqual(result.addedBy, self.user)
         self.assertTrue(
-            CourseUnit.objects.filter(unit=result, course=self.course, addedBy=self.user, order=0).exists()
+            CourseUnit.objects.filter(
+                unit=result, course=self.course, addedBy=self.user, order=0
+            ).exists()
         )
 
     def test_get_user_role(self):
@@ -1315,7 +1322,9 @@ class CourseTest(TestCase):
         self.assertEqual(result[0], Role.ENROLLED)
 
     def test_get_course_units(self):
-        unit = self.course.create_unit('test unit')
+        unit = self.course.create_unit(
+            'test unit', img_url='', small_img_url='', description='test_description'
+        )
         result = self.course.get_course_units(publishedOnly=False)
         self.assertIsInstance(result, list)
         self.assertEqual(result[0], unit.courseunit_set.filter(course=self.course).first())
