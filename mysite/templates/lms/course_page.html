@@ -1,0 +1,52 @@
+{% extends "lms/base.html" %}
+
+{% comment %}
+  View a course
+{% endcomment %}
+
+{% block title %}
+  {{ course.title }}
+{% endblock %}
+
+
+{% if liveSession %}
+    {% block join_live_session %}
+      <h2>Live Session</h2>
+      <form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">
+      {% csrf_token %}
+      <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
+      <input type="submit" value="Join Live Session" />
+      </form>
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+<div class="tab-content">
+  <div class="tab-pane active" id="HomeTabDiv">
+
+{% if courslets %}
+<table class="table table-striped">
+<thead><tr>
+  <th>Courselets in this course</th><th>Instructor</th>
+</tr></thead>
+<tbody>
+{% for cu in courslets %}
+  <tr>
+    <td>
+    <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title }}</a>
+    {% if not cu.is_published %}
+      (not yet published)
+    {% endif %}
+    </td>
+    <td>
+    <a href="/ct/people/{{ cu.unit.addedBy.pk }}/">{{ cu.unit.addedBy.get_full_name }}</a>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+  </div><!-- @end #HomeTabDiv -->
+</div>
+{% endblock %}

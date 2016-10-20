@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% block head %}{% endblock %}
+    {% include "google-analytics.html" %}
+  </head>
+  <title>{% block titile %}{% endblock %}</title>
+
+  <body>
+    {% block join_live_session %}{% endblock %}
+    {% block header %}{% endblock %}
+    {% block content %}{% endblock %}
+  </body>
+</html>
