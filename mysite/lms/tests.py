@@ -30,7 +30,7 @@ class TestCourseView(TestCase):
         course_mock = Mock()
         course_units = Mock()
         course_mock.get_course_units = course_units
-        course_units.return_value = Mock()
+        course_units.return_value = [Mock()]
         get_obj_or_404.return_value = course_mock
 
 
