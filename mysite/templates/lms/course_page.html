@@ -9,16 +9,16 @@
 {% endblock %}
 
 
+{% block join_live_session %}
 {% if liveSession %}
-    {% block join_live_session %}
-      <h2>Live Session</h2>
-      <form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">
+<h2>Live Session</h2>
+<form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">
       {% csrf_token %}
       <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
       <input type="submit" value="Join Live Session" />
       </form>
-    {% endblock %}
 {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="tab-content">
