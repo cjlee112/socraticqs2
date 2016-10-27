@@ -1,4 +1,5 @@
 from django.contrib import admin
+from ct.models import Liked
 
 from .forms import BaseForm
 from .models import (
@@ -12,7 +13,8 @@ from .models import (
     StudentError,
     Course,
     CourseUnit,
-    Role
+    Role,
+    Liked
 )
 
 
@@ -58,3 +60,19 @@ class AdminResponse(admin.ModelAdmin):
 @admin.register(StudentError)
 class AdminStudentError(admin.ModelAdmin):
     raw_id_fields = ('response', 'errorModel')
+
+
+def user_username(obj):
+    return obj.addedBy.username
+user_username.short_description = 'Username'
+
+
+def lesson_title(obj):
+    return obj.unitLesson.lesson.title
+lesson_title.short_description = 'Lesson title'
+
+
+@admin.register(Liked)
+class AdminLiked(admin.ModelAdmin):
+    list_display = (user_username, lesson_title, 'atime')
+    list_filter = ('addedBy__username', 'unitLesson__lesson__title')
