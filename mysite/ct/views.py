@@ -945,6 +945,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
     addForm = roleForm = answer = None
+    needHelpResponses = []
     if pageData.fsmStack.state and pageData.fsmStack.state.isLiveSession:
         query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
@@ -955,6 +956,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
+        needHelpResponses = Response.objects.filter(query).filter(status=NEED_HELP_STATUS)
     if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
@@ -987,7 +989,8 @@ def ul_teach(request, course_id, unit_id, ul_id):
     return pageData.render(request, 'ct/lesson.html',
                   dict(unitLesson=ul, unit=unit, statusTable=statusTable,
                        evalTable=evalTable, answer=answer, addForm=addForm,
-                       roleForm=roleForm), addNextButton=True)
+                       roleForm=roleForm, needHelpResponses=needHelpResponses),
+                  addNextButton=True)
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'

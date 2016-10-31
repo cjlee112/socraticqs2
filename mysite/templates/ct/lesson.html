@@ -107,6 +107,32 @@ $( "#headtoggle" ).click(function() {
   <p>No students have responded yet.</p>
 {% endif %}
 
+
+{% if needHelpResponses %}
+  <h2>User responses still need help</h2>
+  <table class="table table-striped">
+    <thead><tr>
+        <th>Response</th>
+        <th>User</th>
+        </tr>
+    </thead>
+    <tbody>
+      {% for userResponse in needHelpResponses %}
+      <tr>
+        <td>
+            <a href="{% url 'ct:assess_teach' course_id=userResponse.course.id unit_id=userResponse.course.id ul_id=userResponse.unitLesson.id resp_id=userResponse.id%}">{{ userResponse.text }}</a>
+        </td>
+        <td>
+            <a href="{% url 'ct:person_profile' userResponse.author.pk %}">{{ userResponse.author }}</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+
+
 {% if evalTable %}
 <h2>Student Self-Assessments</h2>
 
