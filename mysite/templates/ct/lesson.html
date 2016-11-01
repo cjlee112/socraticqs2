@@ -127,7 +127,7 @@ $( "#headtoggle" ).click(function() {
             <a href="{% url 'ct:person_profile' userResponse.author.pk %}">{{ userResponse.author }}</a>
         </td>
         <td>
-            <a href="{% url 'ct:assess_teach' course_id=userResponse.course.id unit_id=userResponse.course.id ul_id=userResponse.unitLesson.id resp_id=userResponse.id%}">Assess</a>
+            <a href="{% url 'ct:assess_errors' course_id=userResponse.course.id unit_id=userResponse.course.id ul_id=userResponse.unitLesson.id resp_id=userResponse.id %}">Assess</a>
         </td>
         <td>
             {{ userResponse.text | md2html }}
