@@ -1,4 +1,7 @@
-{% extends "lms/base.html" %}
+{% extends "lms_base.html" %}
+
+{% load ct_extras %}
+{% load staticfiles %}
 
 {% comment %}
   View a course
@@ -20,6 +23,26 @@
 {% endif %}
 {% endblock %}
 
+{% block header %}
+<!-- Introduction -->
+<div class="chat-introduction">
+  {% if img_url %}
+  <header class="hero" style="background-image:url('{{ img_url }}');">
+  {% else %}
+  <header class="hero" style="background-image:url('{% static "img/hero.jpg" %}');">
+  {% endif %}
+    <div class="overlay"></div>
+
+    <div class="chat-container">
+      <div class="logo"></div>
+      <h1>{{ unit.title }}</h1>
+      <p>{{ course.title }}</p>
+    </div>
+  </header>
+<!-- /Introduction -->
+{% endblock %}
+
+
 {% block content %}
 <div class="tab-content">
   <div class="tab-pane active" id="HomeTabDiv">
@@ -33,8 +56,8 @@
 {% for cu in courslets %}
   <tr>
     <td>
-    <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title }}</a>
-    {% if not cu.is_published %}
+    <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">{{ cu.0.unit.title }}</a>
+    {% if not cu.0.is_published %}
       (not yet published)
     {% endif %}
     </td>

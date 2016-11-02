@@ -1,0 +1,105 @@
+{% load ct_extras %}
+{% load staticfiles %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ unit.title }}</title>
+
+    <link rel="icon" href="{% static "img/favicon.png" %}">
+    <link type="text/css" rel="stylesheet" href="//fast.fonts.net/cssapi/295027bc-49f8-4267-859a-8e5aea9f11b6.css"/>
+    <!-- build:css css/app.css -->
+    <link rel="stylesheet" href="{% static "bower_components/bootstrap/dist/css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/app.css" %}">
+    <!-- endbuild -->
+
+    <!-- Hide main content while page is loading if JavaScript is enabled -->
+    <script>
+    document.write('<style>main{display:none;}#page-preloader{display:block;}</style>');
+    </script>
+    <!-- End hide -->
+
+    <!-- HTML5 shim, Respond.js and jQuery for IE8 support of HTML5 elements and media queries -->
+    <!-- build:js js/ie8.js -->
+    <!--[if lt IE 9]>
+    <script src="{% static "bower_components/html5shiv/dist/html5shiv.min.js" %}"></script>
+    <script src="{% static "bower_components/respond/dest/respond.min.js" %}"></script>
+    <script src="{% static "js/plugins/jquery-1.9.1-for-ie8.min.js" %}"></script>
+    <![endif]-->
+    <!-- endbuild -->
+    <!-- Placeholder fill for IE9 and downwards -->
+    <!-- build:js js/ie9.js -->
+    <!--[if lt IE 10]>
+    <script src="{% static "bower_components/placeholders/dist/placeholders.jquery.min.js" %}"></script>
+    <![endif]-->
+    <!-- endbuild -->
+    {% block head %}{% endblock %}
+    {% include "google-analytics.html" %}
+  </head>
+  <title>{% block title %}{% endblock %}</title>
+
+  <body>
+    {% block join_live_session %}{% endblock %}
+    <div id="page-preloader"><span></span><span></span><span></span></div>
+
+    <!-- Main content -->
+    <main role="main">
+      <!--[if lt IE 10]>
+          <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a>.</p>
+      <![endif]-->
+    {% block header %}{% endblock %}
+    {% block content %}{% endblock %}
+    <!-- Chat config -->
+    <script>
+      var CUI = CUI || {};
+      CUI.config = CUI.config || {};
+
+      CUI.config.chatID = {{ chat_id }};
+      CUI.config.historyUrl = '/chat/history/';
+      CUI.config.progressUrl = '/chat/progress/';
+      CUI.config.resourcesUrl = '/chat/resources/';
+      CUI.config.defaultStudentAvatar = '{% static "img/avatar-student.jpg" %}';
+      CUI.config.defaultTeacherAvatar = '{% static "img/avatar-teacher.jpg" %}';
+    </script>
+    <!-- /Chat config -->
+
+    <!-- Mathjax -->
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- /Mathjax -->
+
+    <!-- build:js js/app.js -->
+    <script src="{% static "bower_components/jquery/dist/jquery.min.js" %}"></script>
+    <script src="{% static "bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "bower_components/handlebars/handlebars.runtime.min.js" %}"></script>
+    <script src="{% static "bower_components/gsap/src/minified/plugins/ScrollToPlugin.min.js" %}"></script>
+    <script src="{% static "bower_components/gsap/src/minified/TweenMax.min.js" %}"></script>
+    <script src="{% static "bower_components/screenfull/src/screenfull.js" %}"></script>
+    <script src="{% static "bower_components/zoom.js/dist/zoom.min.js" %}"></script>
+    <script src="{% static "js/plugins/jquery.more-less.js" %}"></script>
+    <script src="{% static "js/plugins/jquery.expanding-textarea.js" %}"></script>
+    <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
+    <script src="{% static "js/views/compiled.templates.js" %}"></script>
+    <script src="{% static "js/cui.js" %}"></script>
+    <script src="{% static "js/models/cui.chat-breakpoint-model.js" %}"></script>
+    <script src="{% static "js/models/cui.chat-media-model.js" %}"></script>
+    <script src="{% static "js/models/cui.chat-message-model.js" %}"></script>
+    <script src="{% static "js/models/cui.sidebar-breakpoint-model.js" %}"></script>
+    <script src="{% static "js/models/cui.input-option-model.js" %}"></script>
+    <script src="{% static "js/models/cui.sidebar-resource-model.js" %}"></script>
+    <script src="{% static "js/presenters/cui.chat-message-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.chat-media-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.input-option-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.sidebar-resource-presenter.js" %}"></script>
+    <script src="{% static "js/presenters/cui.chat-presenter.js" %}"></script>
+    <script src="{% static "js/helpers.js" %}"></script>
+    <script src="{% static "js/app.js" %}"></script>
+    <!-- endbuild -->
+  </body>
+</html>
