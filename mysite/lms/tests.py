@@ -12,14 +12,14 @@ class TestCourseView(TestCase):
         self.client.login(username='test', password='test')
 
     @patch('lms.views.get_object_or_404')
+    @patch('lms.views.EnrollUnitCode.get_code')
     @patch('fsm.models.FSMState.find_live_sessions')
-    def test_course_view(self, find_live_sessions, get_obj_or_404):
+    def test_course_view(self, find_live_sessions, get_code, get_obj_or_404):
         """
         This test tests that:
          - query FSMState.find_live_sessions(request.user).filter(activity__course=course).first()
            return live session and this live session is present in page's context
         """
-        
         filter_mock = Mock()
         filter_mock.filter = Mock()
         find_live_sessions.return_value = filter_mock
@@ -48,7 +48,6 @@ class TestCourseView(TestCase):
         self.assertIn('liveSession', response.context)
         self.assertIn('courslets', response.context)
 
-
     def test_course_view_negative(self):
         """
         This test tests case when teacher not yet (opened) joined live session and
@@ -60,7 +59,9 @@ class TestCourseView(TestCase):
         )
         self.course.save()
 
-        response = self.client.get(reverse('lms:course_view', kwargs={'course_id': self.course.id}))
+        response = self.client.get(
+            reverse('lms:course_view', kwargs={'course_id': self.course.id})
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'lms/course_page.html')
@@ -72,9 +73,3 @@ class TestCourseView(TestCase):
 
     #TODO: write test when teacher really creates Course and Courslets inside of the course and student open page.
     #TODO: user should see 'Join' button.
-
-
-
-
-
-
