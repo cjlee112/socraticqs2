@@ -1029,9 +1029,9 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     this._postText();
   }, this)).on('keyup', $.proxy(function(e){
     // Submit form on enter but ignore if ctrl, alt or shift is pressed
-    if(e.which == 13 && (!e.shiftKey && !e.ctrlKey && !e.altKey)) {
+    if(e.which == 13) {
       e.preventDefault();
-      this._$inputContainer.find('#chat-input-text-form').submit();
+//      this._$inputContainer.find('#chat-input-text-form').submit();
     }
   }, this));
 
