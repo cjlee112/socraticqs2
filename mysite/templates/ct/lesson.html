@@ -113,10 +113,10 @@ $( "#headtoggle" ).click(function() {
       <input name="showNeedHelpResponses" type="checkbox" id="tabletoggle">
   </h4>
 
-    <table class="table table-striped" id="needHelpResponses">
+    <table class="table table-striped" id="needHelpResponses" style="display: none;">
     <thead><tr>
-        <th>User</th>
-        <th>Status</th>
+        <th style="width: 5%">User</th>
+        <th style="width: 5%">Status</th>
         <th>Answer</th>
         </tr>
     </thead>
@@ -139,9 +139,6 @@ $( "#headtoggle" ).click(function() {
 
   <script>
     $(document).ready(function(){
-        $("table#needHelpResponses").hide();
-
-
         $( "#tabletoggle" ).click(function() {
             $("#needHelpResponses").toggle();
         });
