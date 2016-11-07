@@ -73,6 +73,7 @@ class Chat(models.Model):
     next_point = models.OneToOneField('Message', null=True, related_name='base_chat')
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
+    is_live = models.BooleanField(default=False)
     timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True)
@@ -86,6 +87,15 @@ class Chat(models.Model):
         if self.next_point.input_type == 'options':
             options = self.next_point.get_options()
         return options
+
+    def get_course_unit(self):
+        '''
+        Return CourseUnit or None if CourseUnit was not found
+        :return: CourseUnit instance or None
+        '''
+        data = self.state.get_all_state_data()
+        if 'course' in data and 'unit' in data:
+            return CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
 
 
 class Message(models.Model):

@@ -1,4 +1,5 @@
 import injections
+import logging
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -8,10 +9,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from chat.services import LiveChatFsmHandler
+from fsm.models import FSMState
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-from ct.models import Unit, Role, UnitLesson, ConceptLink
+from ct.models import Unit, Role, UnitLesson, ConceptLink, CourseUnit
 
 
 @injections.has
@@ -109,6 +112,92 @@ class ChatInitialView(View):
                 'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
+                'chat_id': chat.id,
+                'lessons': lessons,
+                'lesson_cnt': len(lessons),
+                'duration': len(lessons) * 3,
+                'next_point': next_point,
+                'fsmstate': chat.state,
+            }
+        )
+
+class InitializeLiveSession(View):
+    '''
+    Entry point for live session chat.
+    '''
+    next_handler = LiveChatFsmHandler()
+
+    def get(self, request, state_id):
+        '''
+        This method do init of live_chat FSM and return context needed to build chat on front end.
+        :param request: django request.
+        :param chat_id: chat id
+        :return: rendered template with proper context.
+        '''
+        state = get_object_or_404(FSMState, id=state_id)
+        # import ipdb; ipdb.set_trace()
+
+        data = state.get_all_state_data()
+        course, unit = data['course'], data['unit']
+        course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+        # NOTE: REMOVE comments!
+        # unit_lesson = state.unitLesson
+        # lesson = unit_lesson.lesson
+        # unit = unit_lesson.unit
+        # course_unit = get_object_or_404(CourseUnit, id=cu_id)
+
+        # unit = course_unit.unit
+        # if not unit.unitlesson_set.filter(order__isnull=False).exists():
+        #     return render(
+        #         request,
+        #         'lti/error.html',
+        #         {'message': 'There are no Lessons to display for that Courselet.'}
+        #     )
+        if (
+            not course_unit.is_published() and
+            not User.objects.filter(
+                id=request.user.id,
+                role__role=Role.INSTRUCTOR,
+                role__course=course_unit.course
+            ).exists()
+        ):
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'This Courselet is not published yet.'}
+            )
+
+        chat = Chat.objects.filter(user=request.user, is_live=True, state=state).first()
+
+        if not chat and state:
+            chat = Chat(
+                user=request.user,
+                instructor=course_unit.course.addedBy,
+                is_live=True,
+                state=state
+            )
+            chat.save(request)
+        import ipdb; ipdb.set_trace()
+        logging.error("InitializeLiveSession next_handler = {}".format(self.next_handler))
+
+        if chat.message_set.count() == 0:
+            next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
+        else:
+            next_point = chat.next_point
+
+        lessons = unit.get_exercises()
+
+        return render(
+            request,
+            'chat/main_view.html',
+            {
+                'chat_id': chat.id,
+                'course': course_unit.course,
+                'unit': unit,
+                'img_url': unit.img_url,
+                'small_img_url': unit.small_img_url,
+                # 'will_learn': will_learn,
+                # 'need_to_know': need_to_know,
                 'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),

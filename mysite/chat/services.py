@@ -63,6 +63,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
+    FMS_name = 'chat'
+
     def push_state(self, chat, request, name, start_args=None):
         fsm_stack = FSMStack(request)
         course_unit = chat.enroll_code.courseUnit
@@ -83,7 +85,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.push_state(chat, request, 'chat')
+        self.push_state(chat, request, FsmHandler.FMS_name)
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
@@ -129,6 +131,34 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 group = False
 
         return next_point
+
+
+class LiveChatFsmHandler(FsmHandler):
+    """
+    FSM  handler to implement specific for FSM logic.
+    """
+    FMS_name = 'live_session'
+
+    def push_state(self, chat, request, name, start_args=None):
+        fsm_stack = FSMStack(request)
+        # import ipdb; ipdb.set_trace()
+        course_unit = chat.get_course_unit()
+        fsm_stack.push(request, name,
+                       stateData={'unit': course_unit.unit,
+                                  'course': course_unit.course},
+                       startArgs=start_args,
+                       isLiveSession=True)
+        fsm_stack.state.parentState = chat.state
+        fsm_stack.state.save()
+        chat.state = fsm_stack.state
+        chat.save()
+
+    def start_point(self, unit, chat, request):
+        self.push_state(chat, request, FsmHandler.FMS_name)
+        m = chat.state.fsmNode.get_message(chat)
+        chat.next_point = self.next_point(m.content, chat, m, request)
+        chat.save()
+        return chat.next_point
 
 
 class TestHandler(GroupMessageMixin, ProgressHandler):

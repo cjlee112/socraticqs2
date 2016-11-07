@@ -490,6 +490,10 @@ class UnitLesson(models.Model):
     ##     'create lesson for initial concept definition'
     ##     lesson = Lesson.create_from_concept(concept, **kwargs)
     ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
+
+    def __unicode__(self):
+        return self.lesson.title
+
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,
                            addAnswer=False, **kwargs):
