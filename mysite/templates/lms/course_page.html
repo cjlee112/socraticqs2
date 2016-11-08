@@ -1,5 +1,4 @@
 {% extends "lms_base.html" %}
-
 {% load ct_extras %}
 {% load staticfiles %}
 
@@ -11,65 +10,97 @@
   {{ course.title }}
 {% endblock %}
 
-
-{% block join_live_session %}
-{% if liveSession %}
-<h2>Live Session</h2>
-<form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">
-      {% csrf_token %}
-      <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
-      <input type="submit" value="Join Live Session" />
-      </form>
-{% endif %}
-{% endblock %}
-
-{% block header %}
-<!-- Introduction -->
-<div class="chat-introduction">
-  {% if img_url %}
-  <header class="hero" style="background-image:url('{{ img_url }}');">
-  {% else %}
-  <header class="hero" style="background-image:url('{% static "img/hero.jpg" %}');">
-  {% endif %}
-    <div class="overlay"></div>
-
-    <div class="chat-container">
-      <div class="logo"></div>
-      <h1>{{ unit.title }}</h1>
-      <p>{{ course.title }}</p>
-    </div>
-  </header>
-<!-- /Introduction -->
-{% endblock %}
-
-
 {% block content %}
-<div class="tab-content">
-  <div class="tab-pane active" id="HomeTabDiv">
+  <main>
+    <!-- Header -->
+    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/hero.jpg" %}');" {% endif %}>
+      <div class="overlay"></div>
 
-{% if courslets %}
-<table class="table table-striped">
-<thead><tr>
-  <th>Courselets in this course</th><th>Instructor</th>
-</tr></thead>
-<tbody>
-{% for cu in courslets %}
-  <tr>
-    <td>
-    <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">{{ cu.0.unit.title }}</a>
-    {% if not cu.0.is_published %}
-      (not yet published)
-    {% endif %}
-    </td>
-    <td>
-    <a href="/ct/people/{{ cu.unit.addedBy.pk }}/">{{ cu.unit.addedBy.get_full_name }}</a>
-    </td>
-  </tr>
-{% endfor %}
-</tbody>
-</table>
-{% endif %}
+      <div class="container">
+        <div class="logo"></div>
 
-  </div><!-- @end #HomeTabDiv -->
-</div>
+        <h1>{{ course.title }}</h1>
+
+        <p>
+          by INSTRUCTOR NAME
+        </p>
+      </div>
+    </header>
+
+    <section class="course-content">
+      <div class="course-content-tabs">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <ul>
+                <li>
+                  <a href="#courselets" class="course-content-tabs--selected">Courselets</a>
+                </li>
+
+                <li>
+                  <a href="#live-sessions">Live Sessions</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="courselets" class="course-content-units">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <ul>
+                {% if courslets %}
+                  {% for cu in courslets %}
+                    <li>
+                      <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">
+                        <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
+
+                        <p>? lessons, ~? minutes</p>
+
+                        <div class="course-content-unit-progress">
+                          <span style="width: 10%;"></span>
+                        </div>
+                      </a>
+                    </li>
+                  {% endfor %}
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="live-sessions" class="course-content-units">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+              <p class="course-content-units-description">
+                This is your live session history. You can go back and view your previous sessions, but you can't submit new answers.
+              </p>
+
+              <ul>
+                {% if livesessions %}
+                  {% for lu in livesessions %}
+                    <li>
+                      <a href="{{ domain }}/chat/enrollcode/{{ lu.1 }}/">
+                        <h3>{{ lu.0.unit.title }}</h3>
+
+                        <p>? lessons</p>
+                      </a>
+                    </li>
+                  {% endfor %}
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static "js/course.js" %}"></script>
 {% endblock %}

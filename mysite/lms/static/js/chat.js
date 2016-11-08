@@ -33,10 +33,10 @@ $(window).on('load', function(){
   var timeline = new TimelineMax();
   var $loading = $('#page-preloader');
   var $main = $('main');
-  var $logo = $('.chat-introduction .logo');
-  var $title = $('.chat-introduction header h1');
-  var $course = $('.chat-introduction header p');
-  var $about = $('.chat-introduction-body');
+  var $logo = $('.course-header .logo');
+  var $title = $('.course-header h1');
+  var $course = $('.course-header p');
+  var $about = $('.chat-introduction-title, .chat-introduction-body');
 
   $.ajaxSetup({
      beforeSend: function(xhr, settings) {

@@ -1,0 +1,20 @@
+// -- Notification styling
+.jquery-notify {
+  font-size: 15px;
+  line-height: 22px;
+  color: #333;
+  width: 400px;
+  padding: 30px 36px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 1px 5px 0 rgba(0,0,0,0.12), 0 10px 30px 0 rgba(0,0,0,0.12);
+  -webkit-animation: jelly 1000ms linear both;
+  animation: jelly 1000ms linear both;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

@@ -18,7 +18,6 @@ CUI.models = CUI.models || {};
  * @returns {CUI.ChatMessageModel}
  */
 CUI.ChatMessageModel = function(data){
-
   // Check that data has all required properties
   if(typeof data.id !== 'number') throw new Error('CUI.ChatMessageModel(): Invalid data.id.');
   if(!data.type) throw new Error('CUI.ChatMessageModel(): No data.type.');

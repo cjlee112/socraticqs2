@@ -1,0 +1,33 @@
+.btn, .btn:visited, input[type=submit], button {
+	font-family: $brand-font;
+	background: $brand-green;
+	border: 0;
+	box-shadow: none;
+  box-sizing: border-box;
+	border-radius: 4px;
+	vertical-align: middle;
+	color: #fff;
+	font-weight: 500;
+	margin: 0;
+	display: inline-block;
+	transition: all 0.2s ease-out;
+  font-size: 15px;
+  line-height: 20px;
+  padding: 12px 28px;
+  text-decoration: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.btn, input[type=submit], button {
+  &:hover, &:active, &:focus, &:active:focus {
+    background: $brand-green;
+  	color: #fff;
+    // opacity: 0.8;
+    transform: scale(1.035);
+  	text-decoration: none;
+  	box-shadow: none;
+  	outline: none;
+    border: none;
+  }
+}

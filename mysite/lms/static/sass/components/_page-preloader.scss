@@ -1,0 +1,23 @@
+// -- Spinner for page loading
+#page-preloader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -4px;
+  margin-left: -20px;
+  width: 40px;
+  height: 8px;
+
+  span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: #B1B0B9;
+    margin-left: 8px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}

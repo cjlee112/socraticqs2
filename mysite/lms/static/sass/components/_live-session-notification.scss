@@ -1,0 +1,35 @@
+.live-session-notification {
+  @extend .clearfix;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.3);
+  width: 100%;
+  min-height: 88px;
+
+  img {
+    position: absolute;
+    top: 20px;
+    left: 20px;;
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: #F0F4F7;
+    box-shadow: 0 0 1px 0 rgba(0,0,0,0.3), 0 1px 3px 0 rgba(0,0,0,0.12);
+    border: none;
+  }
+
+  p {
+    padding: 32px 240px 20px 94px;
+  }
+
+  form {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+}

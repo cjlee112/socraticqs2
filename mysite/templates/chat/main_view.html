@@ -1,156 +1,206 @@
 {% extends "lms_base.html" %}
-
 {% load ct_extras %}
 {% load staticfiles %}
 
+{% block head %}
+  <!-- Hide main content while page is loading if JavaScript is enabled -->
+  <script>
+    document.write('<style>main{display:none;}#page-preloader{display:block;}</style>');
+  </script>
+  <!-- End hide -->
+{% endblock %}
 
-{% block header %}
-<!-- Introduction -->
-<div class="chat-introduction">
-  {% if img_url %}
-  <header class="hero" style="background-image:url('{{ img_url }}');">
-  {% else %}
-  <header class="hero" style="background-image:url('{% static "img/hero.jpg" %}');">
-  {% endif %}
-    <div class="overlay"></div>
+{% block content %}
+  <!-- Preloader -->
+  <div id="page-preloader"><span></span><span></span><span></span></div>
 
-    <div class="chat-container">
-      <div class="logo"></div>
-      <h1>{{ unit.title }}</h1>
-      <p>{{ course.title }}</p>
-    </div>
-  </header>
+  <!-- Chat -->
+  <main>
+    <!-- Header -->
+    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/hero.jpg" %}');" {% endif %}>
+      <div class="overlay"></div>
 
-  <div class="chat-introduction-body">
-    <div class="description chat-container">
-      <div class="chat-row">
-        <div class="chat-col-2">
+      <div class="container">
+        <div class="logo"></div>
+
+        <h1>{{ course.title }}</h1>
+
+        <p>
+          by INSTRUCTOR NAME
+        </p>
+      </div>
+    </header>
+
+    <!-- Introduction -->
+    <section class="chat-introduction">
+      <div class="chat-introduction-title">
+        <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
+
+        <h2>{{ unit.title }}</h2>
+      </div>
+
+      <div class="chat-introduction-body">
+        <div class="description container">
+          <div class="row">
+            <div class="col-lg-6 col-lg-offset-3">
+              <p>
+                {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
+              </p>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <h3>You will learn about</h3>
+
+                  {% if will_learn %}
+                    <ul>
+                      {% for title, url in will_learn %}
+                      <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+
+                <div class="col-lg-6">
+                  <h3>You need to know about</h3>
+
+                  {% if need_to_know %}
+                    <ul>
+                      {% for title, url in need_to_know %}
+                      <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="meta">
+          <div class="container">
+            <span class="lessons">{{ lesson_cnt }} lessons</span> <span class="duration">~ {{ duration }} minutes</span>
+          </div>
+        </div>
+
+        <div class="cta">
+          <div class="container">
+            <button class="chat-start">Let's Get Started!</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chat messages container -->
+    <section class="chat-messages"></section>
+  </main>
+
+  <!-- Chat sidebar -->
+  <aside class="chat-sidebar">
+    <header>
+      <a href="{{ domain }}/lms/courses/{{ course.id }}">
+        <div class="inner clearfix">
           {% if small_img_url %}
           <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
           {% else %}
           <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
           {% endif %}
-        </div>
 
-        <div class="chat-col-8">
-          <p>
-            {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
-          </p>
-
-          {% if will_learn %}
-          <div class="chat-row">
-            <div class="chat-col-5">
-              <h2>You will learn about</h2>
-              <ul>
-                {% for title, url in will_learn %}
-                <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
-            {% endif %}
-
-            {% if need_to_know %}
-            <div class="chat-col-5">
-              <h2>You need to know about</h2>
-              <ul>
-                {% for title, url in need_to_know %}
-                <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
-            {% endif %}
+          <div class="description">
+            <h3 class="courselet">{{ unit.title }}</h3>
+            <div class="course">{{ course.title }}</div>
           </div>
         </div>
-      </div>
-    </div>
+      </a>
+    </header>
 
-    <div class="meta">
-      <div class="chat-container">
-        <span class="lessons">{{ lesson_cnt }} lessons</span> <span class="duration">~ {{ duration }} minutes</span>
+    <section>
+      <h4>Formatting</h4>
+      <div class="formatting-info">
+        **<strong>bold</strong>** *<em>italic</em>* <a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html" target="_blank">more…</a>
       </div>
-    </div>
+    </section>
 
-    <div class="cta">
-      <div class="chat-container">
-        <button class="chat-start">Let's Get Started!</button>
+    <section>
+      <h4>Lessons</h4>
+      <ul class="chat-sidebar-breakpoints"></ul>
+    </section>
+
+    <section>
+      <h4>Resources</h4>
+      <ul class="chat-sidebar-resources"></ul>
+    </section>
+  </aside>
+
+  <!-- Chat input bar -->
+  <section class="chat-input-bar">
+    <div class="inner">
+      <div class="sidebar-toggle"><span></span></div>
+
+      <div class="chat-progress">
+        <span></span>
       </div>
+
+      <div class="chat-container">
+        <img src="{% static "img/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
+
+        <div class="chat-input">
+          <div class="chat-input-text">
+            <form id="chat-input-text-form" action="">
+              <textarea rows="1" placeholder="Type your answer here…"></textarea>
+              <input type="submit" value="Send">
+            </form>
+          </div>
+
+          <div class="chat-input-options"></div>
+
+          <div class="chat-input-custom"></div>
+        </div>
+
+        <div class="chat-loading"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="fullscreen-toggle"><span></span></div>
     </div>
-  </div>
-</div>
-<!-- /Introduction -->
+  </section>
 {% endblock %}
-{% block content %}
-<!-- Chat messages container -->
-<div class="chat-messages">
-</div> <!-- /Chat messages container -->
-</main> <!-- /Main content -->
 
-<!-- Chat sidebar -->
-<aside class="chat-sidebar">
-<header>
-  <div class="inner clearfix">
-    {% if small_img_url %}
-    <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
-    {% else %}
-    <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
-    {% endif %}
+{% block js %}
+  <!-- Chat config -->
+  <script>
+    var CUI = CUI || {};
+    CUI.config = CUI.config || {};
 
-    <div class="description">
-      <h3 class="courselet">{{ unit.title }}</h3>
-      <div class="course">{{ course.title }}</div>
-    </div>
-  </div>
-</header>
+    CUI.config.chatID = {{ chat_id }};
+    CUI.config.historyUrl = '/chat/history/';
+    CUI.config.progressUrl = '/chat/progress/';
+    CUI.config.resourcesUrl = '/chat/resources/';
+    CUI.config.defaultStudentAvatar = '{% static "img/avatar-student.jpg" %}';
+    CUI.config.defaultTeacherAvatar = '{% static "img/avatar-teacher.jpg" %}';
+  </script>
 
-<section>
-  <h4>Formatting</h4>
-  <div class="formatting-info">
-    **<strong>bold</strong>** *<em>italic</em>* <a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html" target="_blank">more…</a>
-  </div>
-</section>
+  <!-- Mathjax -->
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-<section>
-  <h4>Lessons</h4>
-  <ul class="chat-sidebar-breakpoints"></ul>
-</section>
-
-<section>
-  <h4>Resources</h4>
-  <ul class="chat-sidebar-resources"></ul>
-</section>
-</aside>
-<!-- /Sidebar -->
-
-<!-- Chat input bar -->
-<div class="chat-input-bar">
-<div class="inner">
-  <div class="sidebar-toggle"><span></span></div>
-
-  <div class="chat-progress">
-    <span></span>
-  </div>
-
-  <div class="chat-container">
-    <img src="{% static "img/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
-
-    <div class="chat-input">
-      <div class="chat-input-text">
-        <form id="chat-input-text-form" action="">
-          <textarea rows="1" placeholder="Type your answer here…"></textarea>
-          <input type="submit" value="Send">
-        </form>
-      </div>
-
-      <div class="chat-input-options"></div>
-
-      <div class="chat-input-custom"></div>
-    </div>
-
-    <div class="chat-loading"><span></span><span></span><span></span></div>
-  </div>
-
-  <div class="fullscreen-toggle"><span></span></div>
-</div>
-</div>
-<!-- /Chat input bar -->
+  <!-- Chat js -->
+  <script src="{% static "bower_components/screenfull/src/screenfull.js" %}"></script>
+  <script src="{% static "bower_components/zoom.js/dist/zoom.min.js" %}"></script>
+  <script src="{% static "js/plugins/jquery.more-less.js" %}"></script>
+  <script src="{% static "js/plugins/jquery.expanding-textarea.js" %}"></script>
+  <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
+  <script src="{% static "js/cui.js" %}"></script>
+  <script src="{% static "js/models/cui.chat-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/models/cui.chat-media-model.js" %}"></script>
+  <script src="{% static "js/models/cui.chat-message-model.js" %}"></script>
+  <script src="{% static "js/models/cui.sidebar-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/models/cui.input-option-model.js" %}"></script>
+  <script src="{% static "js/models/cui.sidebar-resource-model.js" %}"></script>
+  <script src="{% static "js/presenters/cui.chat-message-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.chat-media-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.input-option-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.sidebar-resource-presenter.js" %}"></script>
+  <script src="{% static "js/presenters/cui.chat-presenter.js" %}"></script>
+  <script src="{% static "js/helpers.js" %}"></script>
+  <script src="{% static "js/chat.js" %}"></script>
 {% endblock %}

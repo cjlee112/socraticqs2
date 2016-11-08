@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-open-unit</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="60" height="60" rx="30"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="60" height="60" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <path d="M31.1398453,24.2823465 C31.8637632,23.3050574 33.0377184,23.3053982 33.7613838,24.2823465 L41.9174353,35.2930161 C42.6413532,36.2703052 42.2460117,37.0625546 41.0227201,37.0625546 L23.878509,37.0625546 C22.6604535,37.0625546 22.2601283,36.2699644 22.9837937,35.2930161 L31.1398453,24.2823465 Z" id="path-3"></path>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="-2" y="-2" width="23.6557336" height="17.5130471">
+            <rect x="20.6233975" y="21.5495075" width="23.6557336" height="17.5130471" fill="white"></rect>
+            <use xlink:href="#path-3" fill="black"></use>
+        </mask>
+    </defs>
+    <g id="Course-Page" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="2" transform="translate(-290.000000, -607.000000)" stroke="#43B02A" stroke-width="4">
+            <g id="Courselet" transform="translate(240.000000, 557.000000)">
+                <g id="icon-open-unit" transform="translate(50.000000, 50.000000)">
+                    <use id="Rectangle-293" mask="url(#mask-2)" xlink:href="#path-1"></use>
+                    <use id="Triangle-2" mask="url(#mask-4)" transform="translate(32.451264, 30.306031) rotate(90.000000) translate(-32.451264, -30.306031) " xlink:href="#path-3"></use>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

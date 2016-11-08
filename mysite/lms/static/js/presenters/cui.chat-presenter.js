@@ -777,6 +777,8 @@ CUI.ChatPresenter.prototype._toggleSidebar = function(){
     this._isSidebarVisible = false;
   // Show sidebar if not visible
   }else{
+    $('main').css({overflowX: 'hidden'});
+
     timeline.to(this._$sidebar, 0.6, {left: 0, ease: Sine.easeInOut});
     timeline.to($('main, .chat-input-bar'), 0.6, {paddingLeft: 320, ease: Sine.easeInOut}, 0);
     timeline.fromTo(this._$sidebar.find('header .inner, section'), 0.5, {opacity: 0, x: -40}, {opacity: 1, x: 0, ease: Sine.easeInOut, force3D: 'auto', clearProps: 'transform'}, 0.3);
@@ -792,7 +794,7 @@ CUI.ChatPresenter.prototype._toggleFullscreen = function(){
   // Toggle fullscreen if allowed by browser
   if(screenfull.enabled){
    var scrollToPos = $(window).scrollTop();
-   $(document).one(screenfull.raw.fullscreenchange, () => {
+   $(document).one(screenfull.raw.fullscreenchange, function() {
         $(window).scrollTop(scrollToPos);
     });
    screenfull.toggle();
