@@ -149,6 +149,7 @@ class ChatMixin(object):
     def get_message(self, chat, current=None, message=None):
         is_additional = chat.state.fsmNode.fsm.name in ['additional', 'resource']
         next_lesson = chat.state.unitLesson
+        # import ipdb; ipdb.set_trace()
         if self.name == 'LESSON':
             input_type = 'custom'
             kind = next_lesson.lesson.kind
@@ -325,4 +326,13 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='message',
                             is_additional=is_additional)[0]
+        if self.name == 'START' and self.fsm.name == 'live_chat':
+            print "STOP HERE"
+            # import ipdb; ipdb.set_trace()
+            message = Message(
+                chat=chat,
+                text=self.title,
+                kind='response',
+                input_type='custom'
+            )
         return message

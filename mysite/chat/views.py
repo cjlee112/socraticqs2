@@ -134,25 +134,12 @@ class InitializeLiveSession(View):
         :param chat_id: chat id
         :return: rendered template with proper context.
         '''
-        state = get_object_or_404(FSMState, id=state_id)
         # import ipdb; ipdb.set_trace()
-
+        state = get_object_or_404(FSMState, id=state_id, isLiveSession=True)
         data = state.get_all_state_data()
         course, unit = data['course'], data['unit']
         course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
-        # NOTE: REMOVE comments!
-        # unit_lesson = state.unitLesson
-        # lesson = unit_lesson.lesson
-        # unit = unit_lesson.unit
-        # course_unit = get_object_or_404(CourseUnit, id=cu_id)
 
-        # unit = course_unit.unit
-        # if not unit.unitlesson_set.filter(order__isnull=False).exists():
-        #     return render(
-        #         request,
-        #         'lti/error.html',
-        #         {'message': 'There are no Lessons to display for that Courselet.'}
-        #     )
         if (
             not course_unit.is_published() and
             not User.objects.filter(
@@ -167,21 +154,22 @@ class InitializeLiveSession(View):
                 {'message': 'This Courselet is not published yet.'}
             )
 
-        chat = Chat.objects.filter(user=request.user, is_live=True, state=state).first()
+        chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 
         if not chat and state:
             chat = Chat(
                 user=request.user,
                 instructor=course_unit.course.addedBy,
                 is_live=True,
-                state=state
+                # state=state
             )
             chat.save(request)
-        import ipdb; ipdb.set_trace()
-        logging.error("InitializeLiveSession next_handler = {}".format(self.next_handler))
 
         if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
+            next_point = self.next_handler.start_point(
+                unit=unit, chat=chat, request=request,
+                linkState=state, courseUnit=course_unit
+            )
         else:
             next_point = chat.next_point
 

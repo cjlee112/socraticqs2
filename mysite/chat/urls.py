@@ -11,7 +11,7 @@ from .services import FsmHandler, LiveChatFsmHandler
 inj = injections.Container()
 inj['next_handler'] = FsmHandler()
 MessagesViewFSM = inj.inject(MessagesView)
-ChatInitialViewFSM = inj.inject(InitializeLiveSession)
+ChatInitialViewFSM = inj.inject(ChatInitialView)
 
 router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, base_name='messages')

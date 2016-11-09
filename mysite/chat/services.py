@@ -4,10 +4,11 @@ Handler container module.
 from datetime import timedelta
 
 from django.utils import timezone
+from chat.models import TYPE_CHOICES, MESSAGE_TYPES
 
 from fsm.fsm_base import FSMStack
 from fsm.models import FSMNode
-from ct.models import Unit, Lesson, UnitLesson, Response
+from ct.models import Unit, Lesson, UnitLesson, Response, CourseUnit
 from .models import Message, UnitError, ChatDivider, MODEL_CHOISES, Message
 
 
@@ -85,7 +86,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.push_state(chat, request, FsmHandler.FMS_name)
+        print "SERVICE.START_POINT = {}, FSM_NAME = {}".format(self, self.FSM_name)
+        self.push_state(chat, request, self.FMS_name)
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
@@ -118,6 +120,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         if not message.timestamp:
             message.timestamp = timezone.now()
             message.save()
+
+        # import ipdb; ipdb.set_trace()
         group = True
         while group:
             if self.group_filter(message, next_point):
@@ -137,24 +141,29 @@ class LiveChatFsmHandler(FsmHandler):
     """
     FSM  handler to implement specific for FSM logic.
     """
-    FMS_name = 'live_session'
+    FMS_name = 'live_chat'
 
-    def push_state(self, chat, request, name, start_args=None):
+    def push_state(self, chat, request, name, start_args=None, **kwargs):
         fsm_stack = FSMStack(request)
         # import ipdb; ipdb.set_trace()
-        course_unit = chat.get_course_unit()
+        linkState = kwargs.get('linkState')
+        # data = linkState.get_all_state_data()
+        course_unit = kwargs.get('courseUnit')
         fsm_stack.push(request, name,
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course},
                        startArgs=start_args,
-                       isLiveSession=True)
+                       isLiveSession=True,
+                       linkState=linkState
+        )
         fsm_stack.state.parentState = chat.state
         fsm_stack.state.save()
         chat.state = fsm_stack.state
         chat.save()
 
-    def start_point(self, unit, chat, request):
-        self.push_state(chat, request, FsmHandler.FMS_name)
+    def start_point(self, unit, chat, request, **kwargs):
+        self.push_state(chat, request, self.FMS_name, **kwargs)
+        # import ipdb; ipdb.set_trace()
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()

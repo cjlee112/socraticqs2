@@ -140,6 +140,7 @@ class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
         """
         Process event using plugin if available, otherwise generic processing.
         """
+        # import ipdb; ipdb.set_trace()
         if self.funcName:  # use plugin to process event
             if eventName:
                 func = getattr(self._plugin, eventName + '_event', None)

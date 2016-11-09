@@ -198,6 +198,10 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         )
 
     def get_breakpoints(self, obj):
+        if obj.is_live:
+            #NOTE: if it's a live chat there's no progress..,
+            self.lessons_dict = {}
+            return
         if not self.lessons_dict:
             messages = obj.message_set.filter(contenttype='chatdivider', is_additional=False)
             lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order'))
@@ -212,6 +216,9 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         return self.lessons_dict
 
     def get_progress(self, obj):
+        if obj.is_live:
+            #NOTE: if it's a live chat there's no progress..,
+            return 0.0
         if not self.lessons_dict:
             self.get_breakpoints(obj)
         done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
@@ -302,8 +309,12 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
         )
 
     def get_breakpoints(self, obj):
-        courseUnit = obj.enroll_code.courseUnit
-        unit = courseUnit.unit
+        if obj.is_live:
+            data = obj.state.get_all_state_data()
+            course, unit = data['course'], data['unit']
+        else:
+            courseUnit = obj.enroll_code.courseUnit
+            unit = courseUnit.unit
         lessons = list(
             unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)
         )
