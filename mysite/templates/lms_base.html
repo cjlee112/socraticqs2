@@ -45,7 +45,7 @@
         <img src="{% static "img/avatar-teacher.jpg" %}" alt="INSTRUCTOR NAME">
 
         <p>
-          INSTRUCTOR NAME has started a new live session in COURSE NAME.
+          {{ course.addedBy.get_full_name }} has started a new live session in {{ course.title }}.
         </p>
 
         <form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">

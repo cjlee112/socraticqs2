@@ -18,7 +18,11 @@ class CourseView(View):
             activity__course=course
         ).first()
         courselets = (
-            (courselet, EnrollUnitCode.get_code(courselet))
+            (
+                courselet,
+                EnrollUnitCode.get_code(courselet),
+                len(courselet.unit.get_exercises())
+            )
             for courselet in course.get_course_units(True)
         )
         return render(
