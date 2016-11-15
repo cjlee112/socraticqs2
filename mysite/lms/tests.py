@@ -29,10 +29,12 @@ class TestCourseView(TestCase):
         first_mock.first = Mock()
         first_mock.first.return_value = Mock()
 
+        unit = Mock()
+        unit.unit.get_exercises.return_value=[Mock()]
         course_mock = Mock()
         course_units = Mock()
         course_mock.get_course_units = course_units
-        course_units.return_value = [Mock()]
+        course_units.return_value = [unit]
         get_obj_or_404.return_value = course_mock
 
         response = self.client.get(reverse('lms:course_view', kwargs={'course_id': 1}))
