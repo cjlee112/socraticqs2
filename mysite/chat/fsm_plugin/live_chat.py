@@ -1,10 +1,26 @@
 
-print "\n\n\nLIVE_CHAT LOADING...\n\n\n"
+
+def check_selfassess_and_wait_ask(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    fsm = edge.fromNode.fsm
+
+    if fsmStack.next_point.content.selfeval != 'correct':
+        return fsm.get_node('ERRORS')
+    return edge.toNode
+
+def get_lesson_url(self, node, state, request, **kwargs):
+    """
+    Get URL for any lesson.
+    """
+    course = state.get_data_attr('course')
+    unitStatus = state.get_data_attr('unitStatus')
+    ul = unitStatus.get_lesson()
+    return ul.get_study_url(course.pk)
 
 def ask_edge(self, edge, fsmStack, request, **kwargs):
     """
     Try to transition to ASK, or WAIT_ASK if not ready.
     """
+    # import ipdb; ipdb.set_trace()
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
@@ -20,6 +36,7 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     Try to transition to ASSESS, or WAIT_ASSESS if not ready,
     or jump to ASK if a new question is being asked.
     """
+    # import ipdb; ipdb.set_trace()
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
@@ -41,8 +58,6 @@ class START(object):
     """
     def start_event(self, node, fsmStack, request, **kwargs):
         'event handler for START node'
-        print "\n\n\nLIVE_CHAT START\n\n\n"
-        # import ipdb; ipdb.set_trace()
         if hasattr(fsmStack.state.linkState, 'activity'):
             fsmStack.state.activity = fsmStack.state.linkState.activity
             unit = fsmStack.state.linkState.get_data_attr('unit')
@@ -56,7 +71,7 @@ class START(object):
     path = 'fsm:fsm_node'
     title = 'We are waiting for the first question from teacher'
     edges = (
-        dict(name='next', toNode='ASK', title='Start answering questions'),
+        dict(name='next', toNode='WAIT_ASK', title='Start answering questions'),
     )
 
 
@@ -94,9 +109,16 @@ class ASK(object):
     for a minute or two, then briefly write whatever answer you
     come up with. """
     edges = (
-        dict(name='next', toNode='ASSESS', title='Proceed to assessment'),
+        dict(name='next', toNode='GET_ANSWER', title='Proceed to assessment'),
     )
 
+class GET_ANSWER(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'It is time to answer'
+    edges = (
+            dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
+        )
 
 class WAIT_ASSESS(object):
     """
@@ -125,10 +147,27 @@ class ASSESS(object):
     then categorize your assessment, and how well you feel you
     understand this concept now. """
     edges = (
-        dict(name='next', toNode='ASK', title='Go to the next question'),
+        dict(name='next', toNode='WAIT_ASK', title='Wait for the next question'),
         dict(name='error', toNode='ERRORS', title='Classify your error'),
     )
 
+class GET_ASSESS(object):
+    get_path = get_lesson_url
+    next_edge = check_selfassess_and_wait_ask
+    # node specification data goes here
+    title = 'Assess your answer'
+    edges = (
+            dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
+        )
+
+class GET_ERRORS(object):
+    get_path = get_lesson_url
+    next_edge = ask_edge
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    edges = (
+            dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
+        )
 
 class ERRORS(object):
     """
@@ -140,7 +179,7 @@ class ERRORS(object):
     help = """If you have questions about the following common errors,
     you can ask your instructor. """
     edges = (
-            dict(name='next', toNode='ASK', title='Go to the next question'),
+            dict(name='next', toNode='GET_ERRORS', title='Go to the next question'),
         )
 
 
@@ -162,6 +201,6 @@ def get_specs():
         name='live_chat',
         hideTabs=True,
         title='Join a Live Classroom Session',
-        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS, ASSESS, ERRORS, END],
+        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS, GET_ANSWER, GET_ASSESS, GET_ERRORS, ASSESS, ERRORS, END],
     )
     return (spec,)

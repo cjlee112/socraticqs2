@@ -4,12 +4,13 @@ from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
 from django.template import RequestContext
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from chat.services import LiveChatFsmHandler
+from chat.utils import enroll_generator
 from fsm.models import FSMState
 
 from .models import Chat, EnrollUnitCode
@@ -24,9 +25,17 @@ class ChatInitialView(View):
     """
     next_handler = injections.depends(ProgressHandler)
 
+    def get_enroll_code_object(self, enroll_key):
+        """
+        Return EnrollUnitCode object
+        :param enroll_key: enroll code
+        :return: EnrollUnitCode instance
+        """
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+
     @method_decorator(login_required)
     def get(self, request, enroll_key):
-        enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
         unit = courseUnit.unit
         if not unit.unitlesson_set.filter(order__isnull=False).exists():
@@ -121,21 +130,48 @@ class ChatInitialView(View):
             }
         )
 
-class InitializeLiveSession(View):
+class InitializeLiveSession(ChatInitialView):
     '''
     Entry point for live session chat.
     '''
     next_handler = LiveChatFsmHandler()
 
-    def get(self, request, state_id):
+
+    def get_enroll_code_object(self, enroll_key):
+        """
+        Return EnrollUnitCode object
+        :param enroll_key: enroll code
+        :return: EnrollUnitCode instance
+        """
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isLive=True)
+
+    def get(self, request, **kwargs):
         '''
         This method do init of live_chat FSM and return context needed to build chat on front end.
         :param request: django request.
         :param chat_id: chat id
         :return: rendered template with proper context.
         '''
+        # if 'state_id' in kwargs:
+        #     # create new enroll code nad bind it to UL.
+        #     # thin just redirect user to this page again
+        #     state = get_object_or_404(FSMState, id=kwargs['state_id'], isLiveSession=True)
+        #     data = state.get_all_state_data()
+        #     course, unit = data['course'], data['unit']
+        #     course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+        #     enroll = EnrollUnitCode(isLive=True, courseUnit=course_unit)
+        #     enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
+        #     return redirect(
+        #         reverse('chat:live_session_chat', kwargs={'enroll_key': enroll.enrollCode})
+        #     )
+        # if 'enroll_key' in kwargs:
+        #     # Do I need to find state to pass it to super.get????s
+        #     return super(InitializeLiveSession, self).get(request, kwargs['enroll_key'])
+
+
+
         # import ipdb; ipdb.set_trace()
-        state = get_object_or_404(FSMState, id=state_id, isLiveSession=True)
+        state = get_object_or_404(FSMState, id=kwargs.get('state_id'), isLiveSession=True)
         data = state.get_all_state_data()
         course, unit = data['course'], data['unit']
         course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
@@ -154,6 +190,11 @@ class InitializeLiveSession(View):
                 {'message': 'This Courselet is not published yet.'}
             )
 
+        enroll, cr = EnrollUnitCode.objects.get_or_create(isLive=True, courseUnit=course_unit)
+        if cr:
+            enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
+            enroll.save()
+
         chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 
         if not chat and state:
@@ -161,7 +202,7 @@ class InitializeLiveSession(View):
                 user=request.user,
                 instructor=course_unit.course.addedBy,
                 is_live=True,
-                # state=state
+                enroll_code=enroll
             )
             chat.save(request)
 

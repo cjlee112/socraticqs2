@@ -356,7 +356,7 @@ class FSMState(JSONBlobMixin, models.Model):
         """
         return cls.objects.filter(
             isLiveSession=True, activity__course__role__user=user
-        )
+        ).distinct()
 
     def __unicode__(self):
         return u'::'.join((self.user.username, str(self.fsmNode)))

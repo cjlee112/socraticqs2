@@ -148,7 +148,7 @@ class LiveChatFsmHandler(FsmHandler):
         # import ipdb; ipdb.set_trace()
         linkState = kwargs.get('linkState')
         # data = linkState.get_all_state_data()
-        course_unit = kwargs.get('courseUnit')
+        course_unit = kwargs.get('courseUnit', chat.enroll_code.courseUnit)
         fsm_stack.push(request, name,
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course},

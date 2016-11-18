@@ -327,11 +327,11 @@ class ChatMixin(object):
                             is_additional=is_additional)[0]
 
         if self.name == 'START' and self.fsm.name == 'live_chat':
-            message = Message(
+            message = Message.objects.get_or_create(
                 chat=chat,
                 text=self.title,
                 kind='button',
                 is_additional=True,
                 owner=chat.user,
-            )
+            )[0]
         return message

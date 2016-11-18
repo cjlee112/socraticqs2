@@ -77,9 +77,6 @@ class FSMStack(object):
             hideNav=fsm.hideNav,
             **kwargs
         )
-        # if fsmName == 'live_chat':
-        #     #NOTE: do we really should use .first() here?
-        #     self.state.linkState = self.state.find_live_sessions(request.user).first()
         path = self.state.start_fsm(self, request, stateData, **startArgs)
         if fsmName not in ('chat', 'additional'):
             request.session['fsmID'] = self.state.pk

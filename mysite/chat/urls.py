@@ -28,7 +28,10 @@ urlpatterns = patterns(
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),
 
-    url(r'^initLiveSession/(?P<state_id>\d+)$',
+    url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),
+    url(r'^liveSessionChat/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        InitializeLiveSession.as_view(),
+        name='live_session_chat'),
     url(r'^', include(router.urls)),
 )

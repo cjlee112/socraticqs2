@@ -225,15 +225,17 @@ class EnrollUnitCode(models.Model):
     """
     enrollCode = models.CharField(max_length=32, default=enroll_generator)
     courseUnit = models.ForeignKey(CourseUnit)
+    isLive = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('enrollCode', 'courseUnit')
+        unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
-    def get_code(cls, course_unit):
-        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit)
+    def get_code(cls, course_unit, isLive=False):
+        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive)
         if cr:
             enroll_code.enrollCode = uuid4().hex
+            enroll_code.isLive = isLive
             enroll_code.save()
         return enroll_code.enrollCode
 
