@@ -239,6 +239,13 @@ class EnrollUnitCode(models.Model):
             enroll_code.save()
         return enroll_code.enrollCode
 
+    @classmethod
+    def get_code_for_user_chat(cls, course_unit, is_live, user):
+        # enroll = cls(course_unit=course_unit, isLive=is_live)
+        enrolls = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user)
+        if enrolls:
+            print enrolls
+
 
 class UnitError(models.Model):
     """

@@ -1,21 +1,3 @@
-
-
-def check_selfassess_and_wait_ask(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    fsm = edge.fromNode.fsm
-
-    if fsmStack.next_point.content.selfeval != 'correct':
-        return fsm.get_node('ERRORS')
-    return edge.toNode
-
-def get_lesson_url(self, node, state, request, **kwargs):
-    """
-    Get URL for any lesson.
-    """
-    course = state.get_data_attr('course')
-    unitStatus = state.get_data_attr('unitStatus')
-    ul = unitStatus.get_lesson()
-    return ul.get_study_url(course.pk)
-
 def ask_edge(self, edge, fsmStack, request, **kwargs):
     """
     Try to transition to ASK, or WAIT_ASK if not ready.
@@ -50,6 +32,23 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     else:
         return edge.toNode  # go to assessment
 
+def get_lesson_url(self, node, state, request, **kwargs):
+    """
+    Get URL for any lesson.
+    """
+    course = state.get_data_attr('course')
+    unitStatus = state.get_data_attr('unitStatus')
+    ul = unitStatus.get_lesson()
+    return ul.get_study_url(course.pk)
+
+def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    fsm = edge.fromNode.fsm
+
+    if not fsmStack.next_point.content.selfeval == 'correct':
+        return fsm.get_node('ERRORS')
+    return fsm.get_node('WAIT_ASK')
+    # return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
+
 
 class START(object):
     """
@@ -58,20 +57,19 @@ class START(object):
     """
     def start_event(self, node, fsmStack, request, **kwargs):
         'event handler for START node'
-        if hasattr(fsmStack.state.linkState, 'activity'):
-            fsmStack.state.activity = fsmStack.state.linkState.activity
-            unit = fsmStack.state.linkState.get_data_attr('unit')
-            course = fsmStack.state.linkState.get_data_attr('course')
-            fsmStack.state.set_data_attr('unit', unit)
-            fsmStack.state.set_data_attr('course', course)
-            fsmStack.state.title = 'Live: %s' % unit.title
+        fsmStack.state.activity = fsmStack.state.linkState.activity
+        unit = fsmStack.state.linkState.get_data_attr('unit')
+        course = fsmStack.state.linkState.get_data_attr('course')
+        fsmStack.state.set_data_attr('unit', unit)
+        fsmStack.state.set_data_attr('course', course)
+        fsmStack.state.title = 'Live: %s' % unit.title
         return node.get_path(fsmStack.state, request, **kwargs)
     next_edge = ask_edge
     # node specification data goes here
     path = 'fsm:fsm_node'
-    title = 'We are waiting for the first question from teacher'
+    title = 'Now Joining a Live Classroom Session'
     edges = (
-        dict(name='next', toNode='WAIT_ASK', title='Start answering questions'),
+        dict(name='next', toNode='ASK', title='Start answering questions'),
     )
 
 
@@ -94,12 +92,12 @@ class ASK(object):
     """
     In this stage you write a brief answer to a conceptual question.
     """
-    def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
-        if response:
-            fsmStack.state.set_data_attr('response', response)
-            fsmStack.state.save_json_data()
-        return assess_edge(self, edge, fsmStack, request, response=response,
-                           **kwargs)
+    # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
+    #     if response:
+    #         fsmStack.state.set_data_attr('response', response)
+    #         fsmStack.state.save_json_data()
+    #     return assess_edge(self, edge, fsmStack, request, response=response,
+    #                        **kwargs)
     # node specification data goes here
     path = 'ct:ul_respond'
     title = 'Answer this Question'
@@ -109,8 +107,9 @@ class ASK(object):
     for a minute or two, then briefly write whatever answer you
     come up with. """
     edges = (
-        dict(name='next', toNode='GET_ANSWER', title='Proceed to assessment'),
-    )
+            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+        )
+
 
 class GET_ANSWER(object):
     get_path = get_lesson_url
@@ -119,6 +118,9 @@ class GET_ANSWER(object):
     edges = (
             dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
         )
+
+
+
 
 class WAIT_ASSESS(object):
     """
@@ -146,25 +148,21 @@ class ASSESS(object):
     help = """Listen to your instructor's explanation of the answer,
     then categorize your assessment, and how well you feel you
     understand this concept now. """
+    # edges = (
+    #     dict(name='next', toNode='ASK', title='Go to the next question'),
+    #     dict(name='error', toNode='ERRORS', title='Classify your error'),
+    # )
+
     edges = (
-        dict(name='next', toNode='WAIT_ASK', title='Wait for the next question'),
-        dict(name='error', toNode='ERRORS', title='Classify your error'),
-    )
+            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+        )
+
 
 class GET_ASSESS(object):
     get_path = get_lesson_url
-    next_edge = check_selfassess_and_wait_ask
+    next_edge = check_selfassess_and_next_lesson
     # node specification data goes here
     title = 'Assess your answer'
-    edges = (
-            dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
-        )
-
-class GET_ERRORS(object):
-    get_path = get_lesson_url
-    next_edge = ask_edge
-    # node specification data goes here
-    title = 'Classify your error(s)'
     edges = (
             dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
         )
@@ -175,12 +173,20 @@ class ERRORS(object):
     """
     next_edge = ask_edge
     # node specification data goes here
-    title = 'Classify your error(s)'
-    help = """If you have questions about the following common errors,
-    you can ask your instructor. """
+    title = 'Error options'
     edges = (
-            dict(name='next', toNode='GET_ERRORS', title='Go to the next question'),
+            dict(name='next', toNode='ASK', title='Choose errors'),
         )
+
+class GET_ERRORS(object):
+    get_path = get_lesson_url
+    # next_edge = next_lesson
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    edges = (
+            dict(name='next', toNode='WAIT_ASK', title='View next question'),
+        )
+
 
 
 class END(object):
@@ -192,6 +198,7 @@ class END(object):
     this courselet.'''
 
 
+
 def get_specs():
     """
     Get FSM specifications stored in this file.
@@ -201,6 +208,8 @@ def get_specs():
         name='live_chat',
         hideTabs=True,
         title='Join a Live Classroom Session',
-        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS, GET_ANSWER, GET_ASSESS, GET_ERRORS, ASSESS, ERRORS, END],
-    )
+        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS,
+                     GET_ANSWER, GET_ASSESS, GET_ERRORS,
+                     ASSESS, ERRORS, END],
+        )
     return (spec,)

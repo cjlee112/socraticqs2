@@ -152,22 +152,20 @@ class InitializeLiveSession(ChatInitialView):
         :param chat_id: chat id
         :return: rendered template with proper context.
         '''
-        # if 'state_id' in kwargs:
-        #     # create new enroll code nad bind it to UL.
-        #     # thin just redirect user to this page again
-        #     state = get_object_or_404(FSMState, id=kwargs['state_id'], isLiveSession=True)
-        #     data = state.get_all_state_data()
-        #     course, unit = data['course'], data['unit']
-        #     course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
-        #     enroll = EnrollUnitCode(isLive=True, courseUnit=course_unit)
-        #     enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
-        #     return redirect(
-        #         reverse('chat:live_session_chat', kwargs={'enroll_key': enroll.enrollCode})
-        #     )
-        # if 'enroll_key' in kwargs:
-        #     # Do I need to find state to pass it to super.get????s
-        #     return super(InitializeLiveSession, self).get(request, kwargs['enroll_key'])
+        if 'enroll_key' in kwargs:
+            return super(InitializeLiveSession, self).get(request, kwargs['enroll_key'])
 
+        if 'state_id' in kwargs:
+            # create new enroll code nad bind it to UL.
+            # thin just redirect user to this page again
+            state = get_object_or_404(FSMState, id=kwargs['state_id'], isLiveSession=True)
+            data = state.get_all_state_data()
+            course, unit = data['course'], data['unit']
+            course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+            enroll = EnrollUnitCode.get_code_for_user_chat(
+                is_live=True, course_unit=course_unit, user=request.user,
+            )
+            # enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True, user=request.user)
 
 
         # import ipdb; ipdb.set_trace()

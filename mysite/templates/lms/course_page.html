@@ -84,9 +84,8 @@
                 {% if livesessions %}
                   {% for lu in livesessions %}
                     <li>
-                      <a href="{{ domain }}/chat/enrollcode/{{ lu.1 }}/">
-                        <h3>{{ lu.0.unit.title }}</h3>
-
+                      <a href="{{ domain }}/chat/enrollcode/{{ lu.enroll_code.enrollCode }}/">
+                        <h3>{{ lu.enroll_code.courseUnit.course.title }}</h3>
                         <p>? lessons</p>
                       </a>
                     </li>

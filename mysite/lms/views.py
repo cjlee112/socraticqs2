@@ -5,7 +5,7 @@ from django.views.generic.base import View
 
 from ct.models import Course
 from fsm.models import FSMState
-from chat.models import EnrollUnitCode
+from chat.models import EnrollUnitCode, Chat
 
 
 class CourseView(View):
@@ -19,17 +19,23 @@ class CourseView(View):
         ).first()
         courselets = (
             (
-                courselet,
-                EnrollUnitCode.get_code(courselet),
+                courselet, 'SOME _ENROLL_ CODE',
+                # EnrollUnitCode.get_code(courselet),
                 len(courselet.unit.get_exercises())
             )
             for courselet in course.get_course_units(True)
         )
+        livesessions=[
+            chat
+            for chat in
+            Chat.objects.filter(user=request.user, is_live=True)
+        ]
         return render(
             request, 'lms/course_page.html',
             dict(
                 course=course,
                 liveSession=liveSession,
-                courslets=courselets
+                courslets=courselets,
+                livesessions=livesessions
             )
         )

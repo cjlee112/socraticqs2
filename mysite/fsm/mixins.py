@@ -334,4 +334,12 @@ class ChatMixin(object):
                 is_additional=True,
                 owner=chat.user,
             )[0]
+        if self.name.startswith("WAIT_"):
+            message = Message.objects.get_or_create(
+                chat=chat,
+                text=self.title,
+                kind='button',
+                is_additional=True,
+                owner=chat.user,
+            )[0]
         return message
