@@ -48,9 +48,11 @@
           {{ course.addedBy.get_full_name }} has started a new live session in {{ course.title }}.
         </p>
 
-        <form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">
-          {% csrf_token %}
-          <input type="hidden" name="liveID" value="{{ liveSession.id }}" />
+        <!--<form action="{% url 'ct:home' %}" method="post" style=" display:inline!important;">-->
+        <!--</form>form>-->
+        <form action="{% url 'chat:init_live_chat' state_id=liveSession.id %}" method="get" style=" display:inline!important;">
+          <!--{% csrf_token %}-->
+          <!--<input type="hidden" name="liveID" value="{{ liveSession.id }}" />-->
           <input type="submit" value="Join Live Session" />
         </form>
       </div>

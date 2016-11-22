@@ -19,17 +19,14 @@ class CourseView(View):
         ).first()
         courselets = (
             (
-                courselet, 'SOME _ENROLL_ CODE',
-                # EnrollUnitCode.get_code(courselet),
+                courselet,
+                EnrollUnitCode.get_code(courselet),
                 len(courselet.unit.get_exercises())
             )
             for courselet in course.get_course_units(True)
         )
-        livesessions=[
-            chat
-            for chat in
-            Chat.objects.filter(user=request.user, is_live=True)
-        ]
+        livesessions = Chat.objects.filter(user=request.user, is_live=True)
+
         return render(
             request, 'lms/course_page.html',
             dict(

@@ -180,6 +180,7 @@ class ChatMixin(object):
                 kind=next_lesson.lesson.kind,
                 is_additional=is_additional)[0]
         if self.name == 'GET_ANSWER':
+            answer = current.get_answers().first()
             message = Message.objects.get_or_create(
                             contenttype='response',
                             input_type='text',
@@ -189,11 +190,31 @@ class ChatMixin(object):
                             kind='response',
                             userMessage=True,
                             is_additional=is_additional)[0]
+        if self.name == "WAIT_ASSESS":
+            if isinstance(current, Response):
+                resp_to_chk = current
+            else:
+                resp_to_chk = message.response_to_check
+            message = Message.objects.get_or_create(
+                chat=chat,
+                text=self.title,
+                kind='button',
+                response_to_check=resp_to_chk,
+                is_additional=is_additional,
+                owner=chat.user,
+            )[0]
+
         if self.name == 'ASSESS':
-            answer = current.unitLesson.get_answers().first()
+            # current here is Response instance
+            if isinstance(current, Response):
+                response_to_chk = current
+                answer = current.unitLesson.get_answers().first()
+            else:
+                response_to_chk = message.response_to_check
+                answer = message.lesson_to_answer.get_answers().first()
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
-                            response_to_check=current,
+                            response_to_check=response_to_chk,
                             input_type='custom',
                             content_id=current.unitLesson.get_answers().first().id,
                             chat=chat,
@@ -334,12 +355,29 @@ class ChatMixin(object):
                 is_additional=True,
                 owner=chat.user,
             )[0]
-        if self.name.startswith("WAIT_"):
+        # if self.name == 'WAIT_ASSESS':
+        #     # current here could be instance of Response or message.
+        #     if isinstance(current, Response):
+        #         answer = current.unitLesson.get_answers().first()
+        #     elif isinstance(current, Message):
+        #         answer = current.response_to_check
+        #     elif isinstance(current, UnitLesson):
+        #         answer = unitLesson.get_answers().first()
+        #     content_id = current.get_answers().first().id
+        #     message = Message.objects.get_or_create(
+        #                     contenttype='unitlesson',
+        #                     content_id=content_id,
+        #                     response_to_check=answer,
+        #                     chat=chat,
+        #                     owner=chat.user,
+        #                     kind='button',
+        #                     is_additional=is_additional)[0]
+        if self.name.startswith("WAIT_") and self.name != 'WAIT_ASSESS':
             message = Message.objects.get_or_create(
                 chat=chat,
                 text=self.title,
                 kind='button',
-                is_additional=True,
+                is_additional=False,
                 owner=chat.user,
             )[0]
         return message

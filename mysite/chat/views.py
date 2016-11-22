@@ -165,7 +165,9 @@ class InitializeLiveSession(ChatInitialView):
             enroll = EnrollUnitCode.get_code_for_user_chat(
                 is_live=True, course_unit=course_unit, user=request.user,
             )
-            # enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True, user=request.user)
+            if not enroll.id:
+                enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
+                enroll.save()
 
 
         # import ipdb; ipdb.set_trace()
@@ -187,11 +189,11 @@ class InitializeLiveSession(ChatInitialView):
                 'lti/error.html',
                 {'message': 'This Courselet is not published yet.'}
             )
-
-        enroll, cr = EnrollUnitCode.objects.get_or_create(isLive=True, courseUnit=course_unit)
-        if cr:
-            enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
-            enroll.save()
+        #
+        # enroll, cr = EnrollUnitCode.objects.get_or_create(isLive=True, courseUnit=course_unit)
+        # if cr:
+        #     enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
+        #     enroll.save()
 
         chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 

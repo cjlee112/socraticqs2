@@ -141,6 +141,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.unitLesson = message.lesson_to_answer
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
+                # NOTE: next line is a temporary solution.
+                resp.confidence = StudentResponse.SURE
             else:
                 resp = message.content
                 resp.text = text

@@ -92,13 +92,17 @@ class ASK(object):
     """
     In this stage you write a brief answer to a conceptual question.
     """
-    # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
-    #     if response:
-    #         fsmStack.state.set_data_attr('response', response)
-    #         fsmStack.state.save_json_data()
-    #     return assess_edge(self, edge, fsmStack, request, response=response,
-    #                        **kwargs)
+    def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
+        if response:
+            fsmStack.state.set_data_attr('response', response)
+            fsmStack.state.save_json_data()
+        return ask_edge(self, edge, fsmStack, request, response=response,
+                           **kwargs)
     # node specification data goes here
+
+    # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
+    #     return edge.toNode
+    # next_edge = ask_edge
     path = 'ct:ul_respond'
     title = 'Answer this Question'
     help = """Listen to your instructor's explanation of this question,
@@ -119,6 +123,12 @@ class GET_ANSWER(object):
             dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
         )
 
+    # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
+    #     if response:
+    #         fsmStack.state.set_data_attr('response', response)
+    #         fsmStack.state.save_json_data()
+    #     return edge.toNodes
+
 
 
 
@@ -128,7 +138,7 @@ class WAIT_ASSESS(object):
     Please wait, and click the Next button when the instructor tells
     you to do so, or when the live classroom session is over.
     """
-    next_edge = assess_edge
+    # next_edge = assess_edge
     # node specification data goes here
     path = 'fsm:fsm_node'
     title = 'Wait for the Instructor to End the Question'
@@ -136,12 +146,19 @@ class WAIT_ASSESS(object):
         dict(name='next', toNode='ASSESS', title='See if question done'),
     )
 
+    def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
+        if response:
+            fsmStack.state.set_data_attr('response', response)
+            fsmStack.state.save_json_data()
+        return assess_edge(self, edge, fsmStack, request, response=response,
+                           **kwargs)
+
 
 class ASSESS(object):
     """
     In this stage you assess your own answer vs. the correct answer.
     """
-    next_edge = ask_edge
+    next_edge = assess_edge
     # node specification data goes here
     path = 'ct:assess'
     title = 'Assess your answer'
