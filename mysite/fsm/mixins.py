@@ -211,12 +211,15 @@ class ChatMixin(object):
                 answer = current.unitLesson.get_answers().first()
             else:
                 response_to_chk = message.response_to_check
-                answer = message.lesson_to_answer.get_answers().first()
+                if not message.lesson_to_answer:
+                    answer = message.response_to_check.unitLesson.get_answers().first()
+                else:
+                    answer = message.lesson_to_answer.get_answers().first()
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             response_to_check=response_to_chk,
                             input_type='custom',
-                            content_id=current.unitLesson.get_answers().first().id,
+                            content_id=answer.id,
                             chat=chat,
                             owner=chat.user,
                             kind=answer.kind,

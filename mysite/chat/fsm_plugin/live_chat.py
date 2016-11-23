@@ -32,6 +32,7 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     else:
         return edge.toNode  # go to assessment
 
+
 def get_lesson_url(self, node, state, request, **kwargs):
     """
     Get URL for any lesson.
@@ -40,6 +41,7 @@ def get_lesson_url(self, node, state, request, **kwargs):
     unitStatus = state.get_data_attr('unitStatus')
     ul = unitStatus.get_lesson()
     return ul.get_study_url(course.pk)
+
 
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
@@ -96,8 +98,9 @@ class ASK(object):
         if response:
             fsmStack.state.set_data_attr('response', response)
             fsmStack.state.save_json_data()
-        return ask_edge(self, edge, fsmStack, request, response=response,
-                           **kwargs)
+        return ask_edge(
+            self, edge, fsmStack, request, response=response, **kwargs
+        )
     # node specification data goes here
 
     # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
@@ -128,8 +131,6 @@ class GET_ANSWER(object):
     #         fsmStack.state.set_data_attr('response', response)
     #         fsmStack.state.save_json_data()
     #     return edge.toNodes
-
-
 
 
 class WAIT_ASSESS(object):
@@ -184,6 +185,7 @@ class GET_ASSESS(object):
             dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
         )
 
+
 class ERRORS(object):
     """
     In this stage you assess whether you made any of the common errors for this concept.
@@ -195,6 +197,7 @@ class ERRORS(object):
             dict(name='next', toNode='ASK', title='Choose errors'),
         )
 
+
 class GET_ERRORS(object):
     get_path = get_lesson_url
     # next_edge = next_lesson
@@ -203,7 +206,6 @@ class GET_ERRORS(object):
     edges = (
             dict(name='next', toNode='WAIT_ASK', title='View next question'),
         )
-
 
 
 class END(object):
@@ -215,7 +217,6 @@ class END(object):
     this courselet.'''
 
 
-
 def get_specs():
     """
     Get FSM specifications stored in this file.
@@ -225,8 +226,17 @@ def get_specs():
         name='live_chat',
         hideTabs=True,
         title='Join a Live Classroom Session',
-        pluginNodes=[START, WAIT_ASK, ASK, WAIT_ASSESS,
-                     GET_ANSWER, GET_ASSESS, GET_ERRORS,
-                     ASSESS, ERRORS, END],
-        )
+        pluginNodes=[
+            START,
+            WAIT_ASK,
+            ASK,
+            GET_ANSWER,
+            WAIT_ASSESS,
+            ASSESS,
+            GET_ASSESS,
+            ERRORS,
+            GET_ERRORS,
+            END
+        ],
+    )
     return (spec,)
