@@ -190,12 +190,12 @@ class ERRORS(object):
     """
     In this stage you assess whether you made any of the common errors for this concept.
     """
-    next_edge = ask_edge
+    # next_edge = ask_edge
     # node specification data goes here
     title = 'Error options'
     edges = (
-            dict(name='next', toNode='ASK', title='Choose errors'),
-        )
+        dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
+    )
 
 
 class GET_ERRORS(object):
