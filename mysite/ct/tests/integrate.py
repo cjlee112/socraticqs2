@@ -513,7 +513,9 @@ class AltVersionsOfLessonsUITests(TestCase):
             u_lesson.save()
 
     def test_collapse_with_lessons_in_view(self):
-        url = '/ct/teach/courses/1/units/%s/lessons/?searchType=lesson&search=%s&submit=Search' \
-              % (self.unit.id, 't')
+        url = (
+            '/ct/teach/courses/1/units/{0}/lessons/?searchType=lesson&search={1}&submit=Search'
+            .format(self.unit.id, 't')
+        )
         response = self.client.get(url)
         self.assertContains(response, '<div class="collapse" id="1">')

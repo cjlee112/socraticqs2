@@ -1,0 +1,74 @@
+{% load ct_extras %}
+
+<table class="table table-striped">
+<thead><tr>
+  <th>Lesson</th><th></th><th>Type</th><th>Author</th>
+</tr></thead>
+<tbody>
+{% for tree, branch in found_lessons.items %}
+    {% if branch %}
+        <tr><td colspan="4">
+        {{ tree.lesson.title }} &nbsp;
+    <a role="button" data-toggle="collapse" class="btn btn-default" href="#{{ tree.id }}" aria-expanded="false" aria-controls="{{ tree.id }}">
+        Versions
+         </a>
+        <div class="collapse" id="{{ tree.id }}">
+            <table class="table table-striped">
+                <thead>
+                    <th>Lesson</th><th>Branch</th><th>Author</th><th>Commit message</th><th></th><th>Commit time</th><th>Type</th>
+                </thead>
+                <tr>
+                  <td>
+                    <a href="{{ actionTarget|get_object_url:tree }}">{{ tree.lesson.title }}</a>
+                  </td>
+                  <td>{{ tree.branch }}</td><td>{{ tree.lesson.addedBy.get_full_name }}</td><td>{{ tree.lesson.changeLog }}</td>
+                  <td>
+                  <form action="{{ actionTarget }}" method="post"
+                   style=" display:inline!important;" class="pull-right">
+                  {% csrf_token %}
+                  <input type="hidden" name="ulID" value="{{ tree.pk }}" />
+                  <input type="submit" value="{{ actionLabel }}" />
+                  </form>
+                  </td>
+                  <td>{{ tree.lesson.commitTime }}</td>
+                <td>{{ tree.lesson.get_kind_display }}</td>
+               </tr>
+               {% for unit_lesson in branch %}
+                  <tr>
+                  <td>
+                  <a href="{{ actionTarget|get_object_url:unit_lesson }}">{{ unit_lesson.lesson.title }}</a></td>
+                  <td>{{ unit_lesson.branch }}</td><td>{{ unit_lesson.lesson.addedBy.get_full_name }}</td>
+                  <td>{{ tree.lesson.changeLog }}</td>
+                  <td>
+                  <form action="{{ actionTarget }}" method="post"
+                   style=" display:inline!important;" class="pull-right">
+                  {% csrf_token %}
+                  <input type="hidden" name="ulID" value="{{ unit_lesson.pk }}" />
+                  <input type="submit" value="{{ actionLabel }}" />
+                  </form>
+                  </td>
+                  <td>{{ tree.lesson.commitTime }}</td>
+                  <td>{{ unit_lesson.lesson.get_kind_display }}</td>
+               </tr>
+               {% endfor %}
+            </table>
+        </div>
+        </tr>
+    {% else %}
+         <tr><td>
+          <a href="{{ actionTarget |get_object_url:tree }}">{{ tree.lesson.title }}</a>
+             </td><td>
+          <form action="{{ actionTarget }}" method="post"
+           style=" display:inline!important;" class="pull-right">
+          {% csrf_token %}
+          <input type="hidden" name="ulID" value="{{ tree.pk }}" />
+          <input type="submit" value="{{ actionLabel }}" />
+          </form>
+          </td>
+            <td>{{ tree.lesson.get_kind_display }}</td>
+            <td>{{ tree.lesson.addedBy.get_full_name }}</td>
+          </tr>
+    {% endif %}
+{% endfor %}
+</tbody>
+</table>

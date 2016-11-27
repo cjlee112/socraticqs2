@@ -805,7 +805,7 @@ def _lessons(request, pageData, concept=None, msg='',
                        creationInstructions=creationInstructions,
                        showReorderForm=showReorderForm,
                        foundNothing=foundNothing,
-                       full_list=tree_dict))
+                       found_lessons=tree_dict))
     return pageData.render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
