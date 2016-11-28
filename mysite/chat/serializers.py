@@ -309,12 +309,8 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
         )
 
     def get_breakpoints(self, obj):
-        if obj.is_live:
-            data = obj.state.get_all_state_data()
-            course, unit = data['course'], data['unit']
-        else:
-            courseUnit = obj.enroll_code.courseUnit
-            unit = courseUnit.unit
+        courseUnit = obj.enroll_code.courseUnit
+        unit = courseUnit.unit
         lessons = list(
             unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)
         )

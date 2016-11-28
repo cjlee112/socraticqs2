@@ -128,6 +128,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         chat_id = self.request.data.get('chat_id')
         message = self.get_object()
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
+        activity = chat.state and chat.state.activity
 
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
@@ -141,6 +142,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.unitLesson = message.lesson_to_answer
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
+                resp.activity = activity
                 # NOTE: next line is a temporary solution.
                 resp.confidence = StudentResponse.SURE
             else:
