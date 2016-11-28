@@ -25,17 +25,17 @@ class CourseView(View):
             )
             for courselet in course.get_course_units(True)
         )
-        livesessions_history = Chat.objects.filter(
+        live_sessions_history = Chat.objects.filter(
             user=request.user,
             is_live=True,
-            enroll_code__courseUnit__course=course)
-
+            enroll_code__courseUnit__course=course
+        )
         return render(
             request, 'lms/course_page.html',
             dict(
                 course=course,
                 liveSession=liveSession,
                 courslets=courselets,
-                livesessions=livesessions_history
+                livesessions=live_sessions_history
             )
         )
