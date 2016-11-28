@@ -178,7 +178,7 @@ class ParamsTest(LTITestCase):
                             User.objects.get(id=self.user.id))
 
     @patch('lti.utils.uuid4')
-    def test_lti_user_no_username_no_email(self, random, mocked):
+    def test_lti_user_no_username_no_email(self, mocked_uuid4, mocked):
         """Test for non-existent username field
 
         If there is no username in POST
@@ -189,7 +189,7 @@ class ParamsTest(LTITestCase):
         del self.headers[u'lis_person_name_full']
         del self.headers[u'lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
-        random().hex = test_random_username[:30]
+        mocked_uuid4().hex = test_random_username[:30]
 
         self.client.post('/lti/', data=self.headers, follow=True)
 
@@ -333,7 +333,7 @@ class TestUnit(LTITestCase):
 
 class AcceptanceTests(LTITestCase):
     """
-    Acceptance test for check different flows of handling LTI requests.
+    Acceptance test to check different flows of handling LTI requests.
     """
     def test_expired_consumer(self):
         """
@@ -346,7 +346,7 @@ class AcceptanceTests(LTITestCase):
     @patch('lti.views.LtiConsumer.objects.filter')
     def test_short_term_consumer(self, mocked_consumer):
         """
-        Test that user w/ short_term flag will be treated correctly w/.
+        Test that user w/ short_term flag will be treated correctly.
         """
         self.lti_consumer.expiration_date = date.today() + timedelta(days=1)
         self.headers['custom_short_term'] = 'true'

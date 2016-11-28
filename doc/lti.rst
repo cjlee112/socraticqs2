@@ -148,10 +148,11 @@ Finally Instructor can change LaunchURL to a ``/lti/unit/{unit_id}/`` pattern to
 Short-term LTI Consumer
 -----------------------
 
-There is an option to use ``Short term LTI settings`` for Universities that doesn't already have our LTI credentials in their campus eLearning system.
+There is an option to use ``Short term LTI settings`` for Universities that don't already have our LTI credentials in their campus eLearning system.
 
 In some cases we might need to give LTI credentials directly to the instructor (e.g. if the campus sysadmin isn't willing to add our credentials right away).
 
-To achieve this we should create a new LTI Consumer and set ``expiration date`` to make this LTI consumer to be really short-term.
+To achieve this we should create a new LTI Consumer and set ``expiration date`` to make this LTI consumer be really short-term.
 
-For Instructors there is one additional setting to be set on Tool Consumer - on link settings page Instructor should add custom param ``short_term=true`` to distinguish Tool Consumer system-wide LTI credentials from per-Instructor one.
+For Instructors there is one additional setting to be set on Tool Consumer - Instructor should add custom param ``short_term=true``.
+This param help us to distinguish Tool Consumer system-wide LTI credentials from per-Instructor one.

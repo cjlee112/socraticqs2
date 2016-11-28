@@ -29,6 +29,8 @@ def create_courselets_user():
     """Creates Courselets user w/ random username.
 
     We can't trust LTI request w/o email in details.
+    Using random username we need to check for
+    IntegrityError DB exception to avoid race condition.
     """
     password = str(uuid4())
 

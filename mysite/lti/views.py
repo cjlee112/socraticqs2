@@ -94,7 +94,9 @@ def lti_init(request, course_id=None, unit_id=None):
             AttributeError) as err:
         is_valid = False
         session['message'] = "{}".format(err)
-        LOGGER.error(err.__str__())
+        LOGGER.error(
+            "Error during processing LTI request: ".format(err.__str__())
+        )
 
     session['is_valid'] = is_valid
     session['LTI_POST'] = {k: v for (k, v) in request.POST.iteritems()}

@@ -22,7 +22,8 @@ class LtiConsumer(models.Model):
 
     @staticmethod
     def get_or_combine(instance_guid, consumer_key):
-        """Search for LtiConsumer instance by `instance_guid`.
+        """
+        Search for LtiConsumer instance by `instance_guid`.
 
         If there are no LtiConsumer found by `instance_guid`
         it will be searched by `consumer_key`.
