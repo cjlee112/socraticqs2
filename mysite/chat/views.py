@@ -108,6 +108,10 @@ class ChatInitialView(LoginRequiredMixin, View):
             chat.save(request)
         if chat.message_set.count() == 0:
             next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
+        elif not chat.state:
+            next_point = None
+            chat.next_point = next_point
+            chat.save()
         else:
             next_point = chat.next_point
 
@@ -119,6 +123,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             request,
             'chat/main_view.html',
             {
+                'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,
                 'unit': unit,
@@ -126,7 +131,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
-                'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
@@ -233,6 +237,7 @@ class InitializeLiveSession(ChatInitialView):
             'chat/main_view.html',
             {
                 'chat_id': chat.id,
+                'chat': chat,
                 'course': course_unit.course,
                 'unit': unit,
                 'img_url': unit.img_url,
