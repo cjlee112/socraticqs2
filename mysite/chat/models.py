@@ -1,4 +1,5 @@
 from uuid import uuid4
+import datetime
 
 from django.db import models
 from django.utils import timezone
@@ -78,6 +79,7 @@ class Chat(models.Model):
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
+    timestamp = models.DateTimeField(default=datetime.datetime.now, auto_now_add=True)
 
     class Meta:
         ordering = ['-timestamp']
