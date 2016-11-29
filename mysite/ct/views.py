@@ -755,6 +755,7 @@ def _lessons(request, pageData, concept=None, msg='',
     else:
         searchForm = None
     lessonSet = foundNothing = ()
+    tree_dict = {}
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks, unit)
@@ -788,7 +789,10 @@ def _lessons(request, pageData, concept=None, msg='',
             s = searchForm.cleaned_data['search']
             if searchType is None:
                 searchType = searchForm.cleaned_data['searchType']
-            lessonSet = UnitLesson.search_text(s, searchType)
+            lessonSet = UnitLesson.search_text(s, searchType, dedupe=False).exclude(unit=unit)
+            treeIDs_head = distinct_subset(lessonSet)
+            branches = lessonSet.exclude(id__in=[each.id for each in treeIDs_head])
+            tree_dict = {head_lesson: list(branches.filter(treeID=head_lesson.treeID)) for head_lesson in treeIDs_head}
             foundNothing = not lessonSet
     if showReorderForm and lessonTable:
         for ul in lessonTable:
@@ -800,7 +804,8 @@ def _lessons(request, pageData, concept=None, msg='',
                        actionLabel=actionLabel, lessonTable=lessonTable,
                        creationInstructions=creationInstructions,
                        showReorderForm=showReorderForm,
-                       foundNothing=foundNothing))
+                       foundNothing=foundNothing,
+                       found_lessons=tree_dict))
     return pageData.render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
