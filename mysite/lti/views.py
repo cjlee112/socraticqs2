@@ -63,11 +63,10 @@ def lti_init(request, course_id=None, unit_id=None):
     instance_guid = request.POST.get('tool_consumer_instance_guid')
     consumer_key = request.POST.get('oauth_consumer_key')
 
-    lti_consumer = (
-        LtiConsumer.objects.filter(consumer_key=consumer_key).first()
-        if short_term_lti else
-        LtiConsumer.get_or_combine(instance_guid, consumer_key)
-    )
+    if short_term_lti:
+        lti_consumer = LtiConsumer.objects.filter(consumer_key=consumer_key).first()
+    else:
+        lti_consumer = LtiConsumer.get_or_combine(instance_guid, consumer_key)
 
     if not lti_consumer:
         LOGGER.error('Consumer with key {} was not found.'.format(consumer_key))
