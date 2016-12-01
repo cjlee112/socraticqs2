@@ -230,8 +230,6 @@ class InitializeLiveSession(ChatInitialView):
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, course_unit)
 
-        print will_learn, need_to_know
-
         return render(
             request,
             'chat/main_view.html',

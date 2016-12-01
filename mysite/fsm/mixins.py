@@ -1,4 +1,6 @@
 import json
+import re
+from functools import partial
 
 from ct.models import (
     Role,
@@ -277,7 +279,6 @@ class ChatMixin(object):
                 text = self.get_help(chat.state, request=None)
             else:
                 text = self.help
-            print text
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
@@ -375,12 +376,14 @@ class ChatMixin(object):
         #                     owner=chat.user,
         #                     kind='button',
         #                     is_additional=is_additional)[0]
-        if self.name.startswith("WAIT_") and self.name != 'WAIT_ASSESS':
-            message = Message.objects.get_or_create(
+        WAIT_NODES = ["WAIT_.*", "RECYCLE",]
+        if any(map(partial(re.search, string=self.name), WAIT_NODES)) and self.name != "WAIT_ASSESS":
+            lookup = dict(
                 chat=chat,
                 text=self.title,
                 kind='button',
                 is_additional=False,
-                owner=chat.user,
-            )[0]
+                owner=chat.user
+            )
+            message = Message.objects.get_or_create(**lookup)[0]
         return message

@@ -46,6 +46,7 @@ class InputSerializer(serializers.Serializer):
         child=serializers.IntegerField(min_value=0)
     )
     html = serializers.CharField(max_length=300, read_only=True)
+    doWait = serializers.BooleanField(default=False)
 
 
 @injections.has
@@ -91,9 +92,10 @@ class MessageSerializer(serializers.ModelSerializer):
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
+            'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_'),
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
-        if not obj.chat.next_point:
+        if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
 
@@ -124,10 +126,11 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'type': obj.next_point.input_type if obj.next_point else 'custom',
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
+            'doWait': obj.state.fsmNode.name.startswith('WAIT_'),
             # for test purpose only
             'includeSelectedValuesFromMessages': []
         }
-        if not obj.next_point:
+        if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
 

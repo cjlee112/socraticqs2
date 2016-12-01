@@ -28,7 +28,8 @@ class CourseView(View):
         live_sessions_history = Chat.objects.filter(
             user=request.user,
             is_live=True,
-            enroll_code__courseUnit__course=course
+            enroll_code__courseUnit__course=course,
+            state__isnull=True
         )
         return render(
             request, 'lms/course_page.html',
