@@ -33,11 +33,6 @@ def test_check_instructor_auth(role, check, rf):
         assert result is None
 
 
-@pytest.mark.slowtest
-def test_slow():
-    sleep(5)
-
-
 @pytest.mark.parametrize('order, tabs', (
         (1, ('Home,Study:', 'Tasks', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit')),
         (None, ('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'))
