@@ -1,11 +1,10 @@
 from time import sleep
 
 import pytest
-from mock import Mock, patch
+from mock import Mock
 from django.http import HttpResponse
 
 from ct.views import check_instructor_auth, concept_tabs
-import ct
 
 
 @pytest.mark.parametrize('role, check', (
