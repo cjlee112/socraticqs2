@@ -5,7 +5,6 @@ from datetime import date
 import logging
 
 from django.utils import timezone
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.views.decorators.csrf import csrf_exempt
 from ims_lti_py.tool_provider import DjangoToolProvider
@@ -70,10 +69,10 @@ def lti_init(request, course_id=None, unit_id=None):
 
     if not lti_consumer:
         LOGGER.error('Consumer with key {} was not found.'.format(consumer_key))
-        return render_to_response(
+        return render(
+            request,
             'lti/error.html',
-            {'message': 'LTI request is not valid'},
-            RequestContext(request)
+            {'message': 'LTI request is not valid'}
         )
 
     try:
