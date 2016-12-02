@@ -17,10 +17,7 @@ class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         queryset = super(ResponseViewSet, self).get_queryset()
-        course_id = self.kwargs.get('course_id')
-        if course_id:
-            queryset = queryset.filter(course__id=course_id)
-        return queryset
+        return queryset.filter(course__id=self.kwargs.get('course_id'))
 
 
 class ErrorViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -34,7 +31,4 @@ class ErrorViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         queryset = super(ErrorViewSet, self).get_queryset()
-        course_id = self.kwargs.get('course_id')
-        if course_id:
-            queryset = queryset.filter(response__course__id=course_id)
-        return queryset
+        return queryset.filter(response__course__id=self.kwargs.get('course_id'))

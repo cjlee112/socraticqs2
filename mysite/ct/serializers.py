@@ -4,11 +4,11 @@ from ct.models import Response, StudentError, UnitLesson
 
 
 class ResponseSerializer(serializers.ModelSerializer):
-    author_id = serializers.IntegerField()
+    author_id = serializers.ReadOnlyField()
     author_name = serializers.SerializerMethodField()
     lti_identity = serializers.SerializerMethodField()
-    unitLesson_id = serializers.IntegerField()
-    unit_id = serializers.SerializerMethodField()
+    unitLesson_id = serializers.ReadOnlyField()
+    unit_id = serializers.ReadOnlyField(source='unitLesson.unit.id')
 
     class Meta:
         model = Response
@@ -29,10 +29,7 @@ class ResponseSerializer(serializers.ModelSerializer):
         """
         Returning author name.
         """
-        name = obj.author.get_full_name()
-        if not name:
-            name = obj.author.username
-        return name
+        return obj.author.get_full_name() or obj.author.username
 
     def get_lti_identity(self, obj):
         """
@@ -42,21 +39,15 @@ class ResponseSerializer(serializers.ModelSerializer):
         if lti_user:
             return lti_user.user_id
 
-    def get_unit_id(self, obj):
-        """
-        Returning Unit id.
-        """
-        return obj.unitLesson.unit.id
-
 
 class UnitLessonSerializer(serializers.ModelSerializer):
     """
     UnitLesson serializer for ErrorSerializer.
     """
-    lesson_concept_id = serializers.SerializerMethodField()
-    lesson_concept_isAbort = serializers.SerializerMethodField()
-    lesson_concept_isFail = serializers.SerializerMethodField()
-    lesson_text = serializers.SerializerMethodField()
+    lesson_concept_id = serializers.ReadOnlyField(source='lesson.concept.id')
+    lesson_concept_isAbort = serializers.ReadOnlyField(source='lesson.concept.isAbort')
+    lesson_concept_isFail = serializers.ReadOnlyField(source='lesson.concept.isFail')
+    lesson_text = serializers.ReadOnlyField(source='lesson.text')
 
     class Meta:
         model = UnitLesson
@@ -69,23 +60,11 @@ class UnitLessonSerializer(serializers.ModelSerializer):
             'treeID',
         )
 
-    def get_lesson_concept_id(self, obj):
-        return obj.lesson.concept.id
-
-    def get_lesson_concept_isAbort(self, obj):
-        return obj.lesson.concept.isAbort
-
-    def get_lesson_concept_isFail(self, obj):
-        return obj.lesson.concept.isFail
-
-    def get_lesson_text(self, obj):
-        return obj.lesson.text
-
 
 class ErrorSerializer(serializers.ModelSerializer):
-    response_id = serializers.IntegerField()
-    author_id = serializers.IntegerField()
-    errorModel_id = serializers.IntegerField()
+    response_id = serializers.ReadOnlyField()
+    author_id = serializers.ReadOnlyField()
+    errorModel_id = serializers.ReadOnlyField()
     em_data = serializers.SerializerMethodField()
 
     class Meta:

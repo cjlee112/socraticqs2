@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 from django.apps import apps
-from rest_framework import routers
 
 from mysite.views import *
 from ct.api import ResponseViewSet, ErrorViewSet
@@ -9,9 +8,6 @@ from ct.api import ResponseViewSet, ErrorViewSet
 from django.contrib import admin
 admin.autodiscover()
 
-router = routers.DefaultRouter()
-router.register(r'api/courses/responses', ResponseViewSet)
-router.register(r'api/courses/errors', ErrorViewSet)
 
 urlpatterns = patterns(
     '',
@@ -44,9 +40,16 @@ urlpatterns = patterns(
 
     url(r'^done/$', 'psa.views.done'),
 
-    url(r'^api/courses/(?P<course_id>\d+)/responses/$', ResponseViewSet.as_view({'get': 'list'}), name='responses'),
-    url(r'^api/courses/(?P<course_id>\d+)/errors/$', ErrorViewSet.as_view({'get': 'list'}), name='errors'),
-    url(r'^', include(router.urls)),
+    url(
+        r'^api/courses/(?P<course_id>\d+)/responses/$',
+        ResponseViewSet.as_view({'get': 'list'}),
+        name='responses'
+    ),
+    url(
+        r'^api/courses/(?P<course_id>\d+)/errors/$',
+        ErrorViewSet.as_view({'get': 'list'}),
+        name='errors'
+    ),
 )
 
 if apps.is_installed('lti'):
