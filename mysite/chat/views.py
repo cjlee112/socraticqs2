@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from chat.models import Message
 from chat.services import LiveChatFsmHandler
 from chat.utils import enroll_generator
 from fsm.models import FSMState
@@ -115,7 +116,15 @@ class ChatInitialView(LoginRequiredMixin, View):
         else:
             next_point = chat.next_point
 
-        lessons = unit.get_exercises()
+        if chat.is_live:
+            lessons = Message.objects.filter(
+                chat=chat,
+                contenttype='unitlesson',
+                type='message',
+                owner=request.user,
+            )
+        else:
+            lessons = unit.get_exercises()
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
