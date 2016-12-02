@@ -134,7 +134,11 @@ class MainChatViewTests(SetUpMixin, TestCase):
             ('duration', len(self.unit.get_exercises()) * 3),
         )
         for pair in variables:
-            self.assertEquals(response.context.get(pair[0]), pair[1])
+            try:
+                val_check = response.context[pair[0]]
+            except KeyError:
+                val_check = None
+            self.assertEquals(val_check, pair[1])
 
         self.assertIn('fsmstate', response.context)
         self.assertIn('next_point', response.context)
@@ -142,6 +146,7 @@ class MainChatViewTests(SetUpMixin, TestCase):
         self.assertIn('chat_id', response.context)
         self.assertIn('will_learn', response.context)
         self.assertIn('need_to_know', response.context)
+        self.assertIn('chat', response.context)
 
     @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
     def test_next_handler_start_point_called_once(self, mocked_start_point):
@@ -733,10 +738,11 @@ class InputSerializerTests(SetUpMixin, TestCase):
             'url': None,
             'options': ['option1', 'option2'],
             'includeSelectedValuesFromMessages': [],
-            'html': 'some html'
+            'html': 'some html',
+            'doWait': False
         }
         result = InputSerializer().to_representation(input_data)
-        attrs = ('type', 'url', 'options', 'includeSelectedValuesFromMessages', 'html')
+        attrs = ('type', 'url', 'options', 'includeSelectedValuesFromMessages', 'html', 'doWait')
         for attr in attrs:
             self.assertIn(attr, result)
 

@@ -92,7 +92,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
-            'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_'),
+            'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
             'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
         }
         if not obj.chat.next_point or input_data['doWait']:
@@ -126,7 +126,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'type': obj.next_point.input_type if obj.next_point else 'custom',
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
-            'doWait': obj.state.fsmNode.name.startswith('WAIT_'),
+            'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
             # for test purpose only
             'includeSelectedValuesFromMessages': []
         }
