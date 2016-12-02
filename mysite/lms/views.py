@@ -2,10 +2,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
+from django.db import models
 
 from ct.models import Course
 from fsm.models import FSMState
-from chat.models import EnrollUnitCode, Chat
+from chat.models import EnrollUnitCode, Chat, Message
 
 
 class CourseView(View):
@@ -31,12 +32,24 @@ class CourseView(View):
             enroll_code__courseUnit__course=course,
             state__isnull=True
         )
+        #TODO: once django updated to version >=1.8 change next lines to
+        #TODO: .annotate(lessons_count=models.Case()).
+        #TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
+
+        for chat in live_sessions_history:
+            chat.lessons_done = Message.objects.filter(
+                chat=chat,
+                contenttype='unitlesson',
+                type='message',
+                owner=request.user,
+            ).count()
+
         return render(
             request, 'lms/course_page.html',
             dict(
                 course=course,
                 liveSession=liveSession,
                 courslets=courselets,
-                livesessions=live_sessions_history
+                livesessions=live_sessions_history,
             )
         )
