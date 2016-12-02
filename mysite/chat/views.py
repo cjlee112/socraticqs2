@@ -16,10 +16,11 @@ from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from ct.models import Unit, Role, UnitLesson, ConceptLink, CourseUnit
+from mysite.mixins import LoginRequiredMixin
 
 
 @injections.has
-class ChatInitialView(View):
+class ChatInitialView(LoginRequiredMixin, View):
     """
     Entry point for Chat UI.
     """
@@ -33,7 +34,38 @@ class ChatInitialView(View):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
 
-    @method_decorator(login_required)
+
+    def get_will_learn_need_know(self, unit, courseUnit):
+        will_learn = set()
+        need_to_know = set()
+        for unit_lesson in unit.get_exercises():
+            # QuerySet for "You will learn" and "Need to know" section
+            containers_with_querysets = (
+                (will_learn, ConceptLink.objects.filter(
+                    Q(lesson=unit_lesson.lesson),
+                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
+                )),
+                (need_to_know, ConceptLink.objects.filter(
+                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES
+                ))
+            )
+            for contaner, qs in containers_with_querysets:
+                for concept_link in qs:
+                    title = concept_link.concept.title
+                    if concept_link.lesson.url:
+                        url = concept_link.lesson.url
+                    else:
+                        ul = UnitLesson.objects.filter(
+                            lesson__concept=concept_link.concept
+                        ).values('id').first()
+                        if ul:
+                            url = reverse(
+                                'ct:study_concept', args=(courseUnit.course.id, unit.id, ul['id'])
+                            )
+                    if url:
+                        contaner.add((title, url))
+            return will_learn, need_to_know
+
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
@@ -76,44 +108,22 @@ class ChatInitialView(View):
             chat.save(request)
         if chat.message_set.count() == 0:
             next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
+        elif not chat.state:
+            next_point = None
+            chat.next_point = next_point
+            chat.save()
         else:
             next_point = chat.next_point
 
         lessons = unit.get_exercises()
 
-        will_learn = set()
-        need_to_know = set()
-        for unit_lesson in unit.get_exercises():
-            # QuerySet for "You will learn" and "Need to know" section
-            containers_with_querysets = (
-                (will_learn, ConceptLink.objects.filter(
-                    Q(lesson=unit_lesson.lesson),
-                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
-                )),
-                (need_to_know, ConceptLink.objects.filter(
-                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES
-                ))
-            )
-            for contaner, qs in containers_with_querysets:
-                for concept_link in qs:
-                    title = concept_link.concept.title
-                    if concept_link.lesson.url:
-                        url = concept_link.lesson.url
-                    else:
-                        ul = UnitLesson.objects.filter(
-                            lesson__concept=concept_link.concept
-                        ).values('id').first()
-                        if ul:
-                            url = reverse(
-                                'ct:study_concept', args=(courseUnit.course.id, unit.id, ul['id'])
-                            )
-                    if url:
-                        contaner.add((title, url))
+        will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
         return render(
             request,
             'chat/main_view.html',
             {
+                'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,
                 'unit': unit,
@@ -121,7 +131,6 @@ class ChatInitialView(View):
                 'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
-                'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
@@ -133,6 +142,7 @@ class ChatInitialView(View):
 class InitializeLiveSession(ChatInitialView):
     '''
     Entry point for live session chat.
+    Checks that user is authenticated and creates a chat for him.
     '''
     next_handler = LiveChatFsmHandler()
 
@@ -169,13 +179,12 @@ class InitializeLiveSession(ChatInitialView):
                 enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
                 enroll.save()
 
-
-        # import ipdb; ipdb.set_trace()
-        state = get_object_or_404(FSMState, id=kwargs.get('state_id'), isLiveSession=True)
-        data = state.get_all_state_data()
-        course, unit = data['course'], data['unit']
-        course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
-
+        if not unit.unitlesson_set.filter(order__isnull=False).exists():
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'There are no Lessons to display for that Courselet.'}
+            )
         if (
             not course_unit.is_published() and
             not User.objects.filter(
@@ -189,11 +198,14 @@ class InitializeLiveSession(ChatInitialView):
                 'lti/error.html',
                 {'message': 'This Courselet is not published yet.'}
             )
-        #
-        # enroll, cr = EnrollUnitCode.objects.get_or_create(isLive=True, courseUnit=course_unit)
-        # if cr:
-        #     enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
-        #     enroll.save()
+        if not Role.objects.filter(
+            user=request.user.id, course=course_unit.course, role=Role.ENROLLED
+        ):
+            enrolling = Role.objects.get_or_create(user=request.user,
+                                                   course=course_unit.course,
+                                                   role=Role.SELFSTUDY)[0]
+            enrolling.role = Role.ENROLLED
+            enrolling.save()
 
         chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 
@@ -216,17 +228,20 @@ class InitializeLiveSession(ChatInitialView):
 
         lessons = unit.get_exercises()
 
+        will_learn, need_to_know = self.get_will_learn_need_know(unit, course_unit)
+
         return render(
             request,
             'chat/main_view.html',
             {
                 'chat_id': chat.id,
+                'chat': chat,
                 'course': course_unit.course,
                 'unit': unit,
                 'img_url': unit.img_url,
                 'small_img_url': unit.small_img_url,
-                # 'will_learn': will_learn,
-                # 'need_to_know': need_to_know,
+                'will_learn': will_learn,
+                'need_to_know': need_to_know,
                 'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),

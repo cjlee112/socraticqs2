@@ -35,14 +35,18 @@
     <section class="chat-introduction">
       <div class="chat-introduction-title">
         <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
-
+        {% if fsmstate %}
         <h2>{{ unit.title }}</h2>
+        {% else %}
+        <h2>Live Session - {{ chat.timestamp|date:"F j, Y" }} </h2>
+        {% endif %}
       </div>
 
       <div class="chat-introduction-body">
         <div class="description container">
           <div class="row">
             <div class="col-lg-6 col-lg-offset-3">
+              {% if fsmstate %}
               <p>
                 {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
               </p>
@@ -72,6 +76,11 @@
                   {% endif %}
                 </div>
               </div>
+              {% else %}
+              <p>This is your history from your live session with {{ course.addedBy.get_full_name }} on {{ chat.timestamp|date:"F j, Y" }}.
+                You can view your previous answers, but you can't submit new ones.
+              </p>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -84,7 +93,8 @@
 
         <div class="cta">
           <div class="container">
-            <button class="chat-start">Let's Get Started!</button>
+            <button class="chat-start">
+              {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
           </div>
         </div>
       </div>

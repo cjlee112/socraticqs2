@@ -8,19 +8,19 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    (r'^$', home_page),
+    url(r'^$', home_page),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
 
-    (r'^ct/', include('ct.urls', namespace='ct')),
-    (r'^fsm/', include('fsm.urls', namespace='fsm')),
-    (r'^chat/', include('chat.urls', namespace='chat')),
-    (r'^lms/', include('lms.urls', namespace='lms')),
+    url(r'^ct/', include('ct.urls', namespace='ct')),
+    url(r'^fsm/', include('fsm.urls', namespace='fsm')),
+    url(r'^chat/', include('chat.urls', namespace='chat')),
+    url(r'^lms/', include('lms.urls', namespace='lms')),
 
     # Login / logout.
-    (r'^login/$', 'psa.views.custom_login'),
-    (r'^logout/$', logout_page, {'next_page': '/login/'}),
+    url(r'^login/$', 'psa.views.custom_login', name='login'),
+    url(r'^logout/$', logout_page, {'next_page': '/login/'}, name='logout'),
 
 
     # Uncomment the admin/doc line below to enable admin documentation:

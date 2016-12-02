@@ -310,11 +310,15 @@ CUI.ChatPresenter.prototype._postInput = function(input){
     context: this
   }).done(function(response){
     // Check that nextMessagesUrl is in response
-    if(response && response.nextMessagesUrl){
+    if(response && response.nextMessagesUrl && !response.input.doWait){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
-
-
+    }else if(response && response.input.doWait) {
+      /* parse response to understand should we do more requests or not.
+       * this.setInput function will look into response.input.doWait parameter
+       * and if doWait is true will call setTimeout function with needed parameters.
+       */
+      this._setInput(response.input);
     }else if(response.error){
       // Enable input
       this._inputIsEnabled = true;
@@ -867,6 +871,27 @@ CUI.ChatPresenter.prototype._getScrollSpeed = function(scrollTo){
   return speed;
 };
 
+/* Inner function for runWaitTimer. This function will be called inside of setTimeout.
+ */
+CUI.ChatPresenter.prototype._waitTimerInnerFunc = function(input){
+  this._inputIsEnabled = true;
+  var me = this;
+  return function() {
+    me._postInput(input)
+  };
+}
+
+/**
+ * This function handles WAIT_* nodes of fsm looking at input.doWait field.
+ * If doWait field is true, it will be in cycle until doWait came to be false.
+ *
+*/
+CUI.ChatPresenter.prototype._runWaitTimer = function(input) {
+  if(input.url) this._inputUrl = input.url;
+   else throw new Error('CUI.ChatPresenter._setInput(): No input.url.');
+   var timeout_id = window.setTimeout(this._waitTimerInnerFunc(input), 1000*2); // run after 2 seconds.
+};
+
 /**
  * Updates the input type visible in the chat.
  * @protected
@@ -903,6 +928,13 @@ CUI.ChatPresenter.prototype._setInput = function(input){
   $text.find('textarea').val('').attr('rows', 1);
 
   // Create new input based on type
+  if(input.doWait === true) {
+   /*
+   * Cycle is HERE!
+   */
+   this._runWaitTimer(input);
+   return;
+  }
   if(input.type === 'text'){
    // Set input type
    this._inputType = 'text';
@@ -913,7 +945,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
    // Show text input
    $text.show();
-  }else if(input.type === 'options'){
+  } else if(input.type === 'options'){
    // Set input type
    this._inputType = 'options';
 
@@ -943,7 +975,6 @@ CUI.ChatPresenter.prototype._setInput = function(input){
    // No input url for custom
    this._inputUrl = null;
 
-   console.log(input);
    // Add custom HTML to input
    if(input.html){
      $custom.html(input.html);

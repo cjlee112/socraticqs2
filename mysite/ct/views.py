@@ -950,7 +950,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
         n = pageData.fsmStack.state.linkChildren.count() # livesession students
         statusTable, evalTable, n = Response.get_counts(query, n=n)
-        answer = ul.get_answers().all()[0]
+        answer = ul.get_answers().all().first()
     else: # default: all responses w/ selfeval
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)

@@ -14,7 +14,8 @@ class TestCourseView(TestCase):
     @patch('lms.views.get_object_or_404')
     @patch('lms.views.EnrollUnitCode.get_code')
     @patch('fsm.models.FSMState.find_live_sessions')
-    def test_course_view(self, find_live_sessions, get_code, get_obj_or_404):
+    @patch('chat.models.Chat.objects.filter')
+    def test_course_view(self, chatFilterMock, find_live_sessions, get_code, get_obj_or_404):
         """
         This test tests that:
          - query FSMState.find_live_sessions(request.user).filter(activity__course=course).first()
@@ -22,12 +23,14 @@ class TestCourseView(TestCase):
         """
         filter_mock = Mock()
         filter_mock.filter = Mock()
+
         find_live_sessions.return_value = filter_mock
 
         first_mock = Mock()
         filter_mock.filter.return_value = first_mock
         first_mock.first = Mock()
         first_mock.first.return_value = Mock()
+        first_mock.first.return_value.id = 1
 
         unit = Mock()
         unit.unit.get_exercises.return_value=[Mock()]
@@ -36,6 +39,9 @@ class TestCourseView(TestCase):
         course_mock.get_course_units = course_units
         course_units.return_value = [unit]
         get_obj_or_404.return_value = course_mock
+
+        chatFilterMock = Mock()
+        chatFilterMock.return_value = [Mock()]
 
         response = self.client.get(reverse('lms:course_view', kwargs={'course_id': 1}))
 
