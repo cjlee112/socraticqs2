@@ -29,8 +29,6 @@ from fsm.models import FSM, FSMState
 from fsm.mixins import KLASS_NAME_DICT
 from chat.models import EnrollUnitCode
 from ct.exceptions import CommonDisambiguationError
-from ct.serializers import ResponseSerializer
-
 
 
 ###########################################################
