@@ -142,6 +142,8 @@ INSTALLED_APPS = (
     'fsm',
     # LTI
     'lti',
+    # API
+    'api',
     # Socials
     'social.apps.django_app.default',
     'psa',
