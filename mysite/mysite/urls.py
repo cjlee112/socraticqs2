@@ -2,7 +2,6 @@ from django.conf.urls import patterns, include, url
 from django.apps import apps
 
 from mysite.views import *
-from ct.api import ResponseViewSet, ErrorViewSet
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -40,16 +39,8 @@ urlpatterns = patterns(
 
     url(r'^done/$', 'psa.views.done'),
 
-    url(
-        r'^api/courses/(?P<course_id>\d+)/responses/$',
-        ResponseViewSet.as_view({'get': 'list'}),
-        name='responses'
-    ),
-    url(
-        r'^api/courses/(?P<course_id>\d+)/errors/$',
-        ErrorViewSet.as_view({'get': 'list'}),
-        name='errors'
-    ),
+    # Base API
+    url(r'^api/', include('api.urls', namespace='api')),
 )
 
 if apps.is_installed('lti'):
