@@ -986,11 +986,12 @@ def ul_teach(request, course_id, unit_id, ul_id):
             return pageData.fsm_redirect(request, eventName, defaultURL,
                                          reverseArgs=kwargs, unitLesson=ulNew)
 
-    return pageData.render(request, 'ct/lesson.html',
-                  dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable, answer=answer, addForm=addForm,
-                       roleForm=roleForm, needHelpResponses=needHelpResponses),
-                  addNextButton=True)
+    return pageData.render(
+        request, 'ct/lesson.html',
+        dict(unitLesson=ul, unit=unit, statusTable=statusTable,
+             evalTable=evalTable, answer=answer, addForm=addForm,
+             roleForm=roleForm, needHelpResponses=needHelpResponses),
+        addNextButton=True)
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'

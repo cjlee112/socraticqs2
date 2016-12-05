@@ -107,45 +107,10 @@ $( "#headtoggle" ).click(function() {
   <p>No students have responded yet.</p>
 {% endif %}
 
-
+    
 {% if needHelpResponses %}
-  <h4>Show user's responses which still need help
-      <input name="showNeedHelpResponses" type="checkbox" id="tabletoggle">
-  </h4>
-
-    <table class="table table-striped" id="needHelpResponses" style="display: none;">
-    <thead><tr>
-        <th style="width: 5%">User</th>
-        <th style="width: 5%">Status</th>
-        <th>Answer</th>
-        </tr>
-    </thead>
-    <tbody>
-      {% for userResponse in needHelpResponses %}
-      <tr>
-        <td>
-            <a href="{% url 'ct:person_profile' userResponse.author.pk %}">{{ userResponse.author }}</a>
-        </td>
-        <td>
-            <a href="{% url 'ct:assess_errors' course_id=userResponse.course.id unit_id=userResponse.course.id ul_id=userResponse.unitLesson.id resp_id=userResponse.id %}">Assess</a>
-        </td>
-        <td>
-            {{ userResponse.text | md2html }}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <script>
-    $(document).ready(function(){
-        $( "#tabletoggle" ).click(function() {
-            $("#needHelpResponses").toggle();
-        });
-    });
-  </script>
+{% include 'steel_need_help_reponses.html' %}
 {% endif %}
-
 
 
 {% if evalTable %}
