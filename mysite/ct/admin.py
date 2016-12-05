@@ -23,8 +23,6 @@ MODELS = (
     ConceptLink,
     UnitLesson,
     Unit,
-    Response,
-    StudentError,
     Course,
     CourseUnit
 )
@@ -50,3 +48,13 @@ class AdminModel(BaseAdmin):
 @admin.register(Role)
 class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
+
+
+@admin.register(Response)
+class AdminResponse(admin.ModelAdmin):
+    raw_id_fields = ('lesson', 'unitLesson')
+
+
+@admin.register(StudentError)
+class AdminStudentError(admin.ModelAdmin):
+    raw_id_fields = ('response', 'errorModel')
