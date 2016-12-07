@@ -877,7 +877,13 @@ CUI.ChatPresenter.prototype._waitTimerInnerFunc = function(input){
   this._inputIsEnabled = true;
   var me = this;
   return function() {
-    me._postInput(input)
+    me._postInput({
+     chat_id: input.chat_id,
+     url: input.url,
+     type: 'options',
+     options: [],
+     selected: {}
+    }); //input)
   };
 }
 

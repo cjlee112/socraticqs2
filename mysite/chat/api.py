@@ -130,7 +130,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         activity = chat.state and chat.state.activity
 
-        in_wait_loop = lambda cht: cht.state.fsmNode.name.startswith('WAIT_')
+        in_wait_loop = lambda cht: chat.state and cht.state.fsmNode.name.startswith('WAIT_')
 
         print "perform_update"
         print "in_wait_loop ", in_wait_loop(chat)
