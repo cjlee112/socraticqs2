@@ -239,15 +239,21 @@ class ChatMixin(object):
                             kind=answer.kind,
                             is_additional=is_additional)[0]
         if self.name == 'GET_ASSESS':
-            message = Message.objects.get_or_create(
-                            contenttype='response',
-                            content_id=message.response_to_check.id,
-                            input_type='options',
-                            chat=chat,
-                            owner=chat.user,
-                            kind='response',
-                            userMessage=True,
-                            is_additional=is_additional)[0]
+            _data = dict(
+                contenttype='response',
+                content_id=message.response_to_check.id,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional
+            )
+            if not self.fsm.name == 'live_chat':
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
         if self.name == 'STUDENTERROR':
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',
