@@ -173,25 +173,37 @@ class ChatMixin(object):
                             kind=kind,
                             is_additional=is_additional)[0]
         if self.name == 'ASK':
-            message = Message.objects.get_or_create(
-                contenttype='unitlesson',
-                content_id=next_lesson.id,
-                chat=chat,
-                owner=chat.user,
-                input_type='custom',
-                kind=next_lesson.lesson.kind,
-                is_additional=is_additional)[0]
+            _data = {
+                'contenttype': 'unitlesson',
+                'content_id': next_lesson.id,
+                'chat': chat,
+                'owner': chat.user,
+                'input_type': 'custom',
+                'kind': next_lesson.lesson.kind,
+                'is_additional': is_additional
+            }
+            if not self.fsm.name == 'live_chat':
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
         if self.name == 'GET_ANSWER':
             answer = current.get_answers().first()
-            message = Message.objects.get_or_create(
-                            contenttype='response',
-                            input_type='text',
-                            lesson_to_answer=current,
-                            chat=chat,
-                            owner=chat.user,
-                            kind='response',
-                            userMessage=True,
-                            is_additional=is_additional)[0]
+            _data = {
+                'contenttype': 'response',
+                'input_type': 'text',
+                'lesson_to_answer': current,
+                'chat': chat,
+                'owner': chat.user,
+                'kind': 'response',
+                'userMessage': True,
+                'is_additional': is_additional
+            }
+            if not self.fsm.name == 'live_chat':
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
         if self.name == "WAIT_ASSESS":
             if isinstance(current, Response):
                 resp_to_chk = current
