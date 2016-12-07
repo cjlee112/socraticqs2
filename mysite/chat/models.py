@@ -191,7 +191,7 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = self.content.text
                 else:
-                    html = EVAL_OPTIONS[self.content.selfeval]
+                    html = EVAL_OPTIONS.get(self.content.selfeval, '')
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(md2html('**%s** \n %s' % (self.content.lesson.title, self.content.lesson.text)))

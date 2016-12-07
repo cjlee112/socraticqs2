@@ -121,7 +121,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             message.timestamp = timezone.now()
             message.save()
 
-        # import ipdb; ipdb.set_trace()
         group = True
         while group:
             if self.group_filter(message, next_point):
@@ -145,7 +144,6 @@ class LiveChatFsmHandler(FsmHandler):
 
     def push_state(self, chat, request, name, start_args=None, **kwargs):
         fsm_stack = FSMStack(request)
-        # import ipdb; ipdb.set_trace()
         linkState = kwargs.get('linkState')
         # data = linkState.get_all_state_data()
         course_unit = kwargs.get('courseUnit', chat.enroll_code.courseUnit)

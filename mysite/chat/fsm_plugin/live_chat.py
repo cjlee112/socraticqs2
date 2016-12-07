@@ -2,7 +2,6 @@ def ask_edge(self, edge, fsmStack, request, **kwargs):
     """
     Try to transition to ASK, or WAIT_ASK if not ready.
     """
-    # import ipdb; ipdb.set_trace()
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
@@ -18,7 +17,6 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     Try to transition to ASSESS, or WAIT_ASSESS if not ready,
     or jump to ASK if a new question is being asked.
     """
-    # import ipdb; ipdb.set_trace()
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
