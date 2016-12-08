@@ -1,0 +1,4 @@
+# Packages required for docs
+-r base.txt
+
+Sphinx==1.5

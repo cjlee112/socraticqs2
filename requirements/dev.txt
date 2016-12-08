@@ -1,0 +1,8 @@
+# Packages required for local development
+-r base.txt
+
+ipython
+ipdb
+
+pep8
+pylint

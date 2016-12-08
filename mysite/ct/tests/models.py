@@ -322,7 +322,10 @@ class LessonTest(TestCase):
         self.assertEqual(clone_attr_dict['concept'], concept)
 
     def test_checkout(self):
-        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now())
+        lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now()
+        )
+        lesson.save()
         result = lesson.checkout(self.user)
         self.assertIsInstance(result, Lesson)
         self.assertEqual(result.parent, lesson)
@@ -338,28 +341,29 @@ class LessonTest(TestCase):
         checkin.assert_called_once_with(commit=True)
 
     @patch('ct.models.Lesson.conceptlink_set')
-    @patch('ct.models.Lesson.save')
-    def test_checkin_save(self, save, conceptlink_set):
+    def test_checkin_save(self, conceptlink_set):
         parent = Lesson(title='parent', text='parent', addedBy=self.user)
-        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, parent=parent)
-        lesson.checkin(commit=False)
-        save.assert_called_once_with()
-        self.assertFalse(lesson.is_committed())
+        parent.save()
+        with patch('ct.models.Lesson.save') as save:
+            lesson = Lesson(title='ugh', text='brr', addedBy=self.user, parent=parent)
+            lesson.checkin(commit=False)
+            save.assert_called_once_with()
+            self.assertFalse(lesson.is_committed())
 
-        save.reset_mock()
+            save.reset_mock()
 
-        lesson.checkin(commit=True)
-        save.assert_called_with()
-        self.assertTrue(lesson.is_committed())
-        self.assertTrue(parent.is_committed())
+            lesson.checkin(commit=True)
+            save.assert_called_with()
+            self.assertTrue(lesson.is_committed())
+            self.assertTrue(parent.is_committed())
 
-        save.reset_mock()
+            save.reset_mock()
 
-        concept_link = Mock()
-        conceptlink_set.all.return_value = [concept_link, concept_link]
-        lesson.checkin(commit=False, copyLinks=True)
-        concept_link.copy.assert_called_with(lesson)
-        self.assertEqual(concept_link.copy.call_count, 2)
+            concept_link = Mock()
+            conceptlink_set.all.return_value = [concept_link, concept_link]
+            lesson.checkin(commit=False, copyLinks=True)
+            concept_link.copy.assert_called_with(lesson)
+            self.assertEqual(concept_link.copy.call_count, 2)
 
     def test_add_concept_link(self):
         concept = Concept(title='test title', addedBy=self.user)
