@@ -151,7 +151,9 @@ class MainChatViewTests(SetUpMixin, TestCase):
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
         self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        )
         mocked_start_point.assert_called_once()
         self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
 
