@@ -945,18 +945,17 @@ def ul_teach(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Home',
                                          False)
     addForm = roleForm = answer = None
-    needHelpResponses = []
     if pageData.fsmStack.state and pageData.fsmStack.state.isLiveSession:
         query = Q(unitLesson=ul, activity=pageData.fsmStack.state.activity,
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
         n = pageData.fsmStack.state.linkChildren.count() # livesession students
         statusTable, evalTable, n = Response.get_counts(query, n=n)
-        answer = ul.get_answers().all()[0]
+        answer = ul.get_answers().all().first()
     else: # default: all responses w/ selfeval
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
-        needHelpResponses = Response.objects.filter(query).filter(status=NEED_HELP_STATUS)
+    needHelpResponses = Response.objects.filter(query).filter(status=NEED_HELP_STATUS)
     if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
