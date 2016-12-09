@@ -959,11 +959,12 @@ def ul_teach(request, course_id, unit_id, ul_id):
                   selfeval__isnull=False, kind=Response.ORCT_RESPONSE)
         n = pageData.fsmStack.state.linkChildren.count() # livesession students
         statusTable, evalTable, n = Response.get_counts(query, n=n)
-        answer = ul.get_answers().all()[0]
+        answer = ul.get_answers().all().first()
     else: # default: all responses w/ selfeval
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
+    needHelpResponses = Response.objects.filter(query).filter(status=NEED_HELP_STATUS)
     if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
@@ -993,10 +994,21 @@ def ul_teach(request, course_id, unit_id, ul_id):
             return pageData.fsm_redirect(request, eventName, defaultURL,
                                          reverseArgs=kwargs, unitLesson=ulNew)
 
-    return pageData.render(request, 'ct/lesson.html',
-                  dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable, answer=answer, addForm=addForm,
-                       roleForm=roleForm), addNextButton=True)
+    return pageData.render(
+        request,
+        'ct/lesson.html',
+        dict(
+            unitLesson=ul,
+            unit=unit,
+            statusTable=statusTable,
+            evalTable=evalTable,
+            answer=answer,
+            addForm=addForm,
+            roleForm=roleForm,
+            needHelpResponses=needHelpResponses
+        ),
+        addNextButton=True
+    )
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'

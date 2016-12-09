@@ -1,6 +1,8 @@
 """
 Unit tests for core app views.py.
 """
+import re
+
 from django.test import TestCase
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -242,6 +244,95 @@ class MiscTests(TestCase):
         self.assertEqual(result[1], unit_lesson)
         self.assertIsNone(result[2])
         self.assertIsInstance(result[3], PageData)
+
+    def test_ul_responses_need_help_table(self):
+        '''
+        Tests that the table with responses which still need help is hidden by default on the page.
+        :return:
+        '''
+        def find_table(content):
+            '''
+            Recieves HTML and returns re.search result or None when search was not able to find table.
+            :param content: page html.
+            :return:
+            '''
+            return re.search(
+                r"^\s*<(?P<table>table .* id=\"needHelpResponses\").*style=\"(?P<style>.*display: none.*)\">$",
+                content,
+                re.MULTILINE
+            )
+
+        user = User.objects.create_user(username='test_username', password='test')
+        user.active = True
+        user.save()
+
+        student = User.objects.create_user(username='stud', password='test')
+        student.active = True
+        student.save()
+
+        unit = Unit(title='test title', kind='Courselet', addedBy=user)
+        unit.save()
+        lesson = Lesson(
+            title='test title',
+            addedBy=user,
+            treeID=1,
+            text='test text',
+            kind=Lesson.ORCT_QUESTION)
+        lesson.save()
+        unit_lesson = UnitLesson.create_from_lesson(lesson, unit)
+
+        course = Course(addedBy=user, title="Some title")
+        course.save()
+
+        self.client.login(username='test_username', password='test')
+        course_unit = CourseUnit(course=course, unit=unit, order=0, addedBy=user)
+        course_unit.save()
+
+        role = Role(course=course, user=user, role=Role.INSTRUCTOR)
+        role.save()
+
+        role_stud = Role(course=course, user=student, role=Role.ENROLLED)
+        role_stud.save()
+
+        response = self.client.get(
+            reverse("ct:ul_teach", kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': lesson.pk})
+        )
+        f = find_table(response.content)
+        self.assertFalse(f)
+
+        resp1 = Response(
+            unitLesson=unit_lesson,
+            kind=Response.ORCT_RESPONSE,
+            lesson=lesson,
+            course=course,
+            text="Some text user may respond",
+            author=student,
+            status=NEED_HELP_STATUS,
+            selfeval=Response.DIFFERENT
+        )
+        resp1.save()
+
+        resp2 = Response(
+            unitLesson=unit_lesson,
+            kind=Response.ORCT_RESPONSE,
+            lesson=lesson,
+            course=course,
+            text="Some text user may be responded 2",
+            author=student,
+            status=NEED_HELP_STATUS,
+            selfeval=Response.DIFFERENT
+        )
+        resp2.save()
+
+        response = self.client.get(
+            reverse("ct:ul_teach",
+                    kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': lesson.pk}))
+        f = find_table(response.content)
+        self.assertTrue(f)
+        grouped = f.groupdict()
+        self.assertIn('table', grouped)
+        self.assertIn('style', grouped,)
+        self.assertIn('display: none;', grouped['style'])
 
 
 class PageDataTests(TestCase):

@@ -107,6 +107,12 @@ $( "#headtoggle" ).click(function() {
   <p>No students have responded yet.</p>
 {% endif %}
 
+    
+{% if needHelpResponses %}
+{% include 'ct/steel_need_help_responses.html' %}
+{% endif %}
+
+
 {% if evalTable %}
 <h2>Student Self-Assessments</h2>
 
