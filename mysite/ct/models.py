@@ -1031,6 +1031,12 @@ class Liked(models.Model):
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+    def __unicode__(self):
+        return "User ({}) like ({})".format(self.addedBy.username, self.unitLesson.lesson.title)
+
+    class Meta:
+        verbose_name_plural = 'Likes'
+
 class FAQ(models.Model):
     'link a student inquiry to a follow-up lesson'
     response = models.ForeignKey(Response)
