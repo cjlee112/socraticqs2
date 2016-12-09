@@ -1563,6 +1563,77 @@ class ConceptLessonsStudentTest(TestCase):
         self.assertEqual(response.context['clTable'], [self.concept.conceptlink_set.first()])
 
 
+class ConceptLessonsTeacherTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root(self.concept)
+        self.lesson_error1 = Lesson(
+            title='some err', text='err1', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
+        )
+        self.lesson_error1.save()
+
+        self.lesson_error2 = Lesson(
+            title='some err1', text='err2', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
+        )
+        self.lesson_error2.save()
+
+        self.lesson_error3 = Lesson(
+            title='some err2', text='err3', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
+        )
+        self.lesson_error3.save()
+
+        self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
+        self.unit_lesson.save()
+        self.unit_lesson.response_set.create(lesson=self.lesson, course=self.course, text='test text', author=self.user)
+
+    def test_concept_lesson_page(self):
+        '''
+        This test actually check that we are linking old error models to lesson instead of creating new ones.
+        :return:
+        '''
+        linked_errors_count = ConceptGraph.objects.all().count()
+
+        kwargs = {
+            'course_id': self.course.id,
+            'unit_id': self.unit.id,
+            'ul_id': self.unit_lesson.id
+        }
+        post_data = {
+            'title': 'SomeTitle',
+            'kind': 'base',
+            'medium': 'reading',
+            'url': '/test/url/',
+            }
+
+        response = self.client.post(
+            reverse(
+                'ct:concept_lessons',
+                kwargs=kwargs
+            ),
+            follow=True,
+            data=post_data
+        )
+        self.assertTemplateUsed(response, 'ct/lessons.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ConceptGraph.objects.all().count(),
+            linked_errors_count
+        )
+
+
 class ResolutionsStudentTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
