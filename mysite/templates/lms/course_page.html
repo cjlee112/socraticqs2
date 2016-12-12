@@ -57,7 +57,9 @@
                       <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">
                         <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
 
-                        <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
+                        {% comment %}
+                          <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
+                        {% endcomment %}
 
                         <div class="course-content-unit-progress">
                           <span style="width: 10%;"></span>

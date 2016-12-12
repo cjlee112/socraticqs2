@@ -85,11 +85,13 @@
           </div>
         </div>
 
+        {% if not chat.is_live %}
         <div class="meta">
           <div class="container">
             <span class="lessons">{{ lesson_cnt }} lessons</span> <span class="duration">~ {{ duration }} minutes</span>
           </div>
         </div>
+        {% endif %}
 
         <div class="cta">
           <div class="container">
