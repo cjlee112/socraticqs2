@@ -222,36 +222,29 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         )
 
     def get_breakpoints(self, obj):
+        if obj.is_live:
+            #NOTE: if it's a live chat there's no progress..,
+            self.lessons_dict = {}
+            return
         if not self.lessons_dict:
             messages = obj.message_set.filter(contenttype='chatdivider', is_additional=False)
-            if obj.is_live:
-                lessons = []
-                # import ipdb; ipdb.set_trace()
-                for msg in messages:
-                    lesson = msg.content.unitlesson
-                    lesson.message = msg.id
+            lessons = list(obj.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order'))
+            for each in messages:
+                if each.content.unitlesson in lessons:
+                    lessons[lessons.index(each.content.unitlesson)].message = each.id
+                elif each.content.unitlesson and each.content.unitlesson.kind != 'answers':
+                    lesson = each.content.unitlesson
+                    lesson.message = each.id
                     lessons.append(lesson)
-            else:
-                lessons = list(
-                    obj.enroll_code.courseUnit.unit.unitlesson_set.filter(
-                        order__isnull=False
-                    ).order_by('order')
-                )
-                for each in messages:
-                    if each.content.unitlesson in lessons:
-                        lessons[lessons.index(each.content.unitlesson)].message = each.id
-                    elif each.content.unitlesson and each.content.unitlesson.kind != 'answers':
-                        lesson = each.content.unitlesson
-                        lesson.message = each.id
-                        lessons.append(lesson)
             self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)
         return self.lessons_dict
 
     def get_progress(self, obj):
+        if obj.is_live:
+            #NOTE: if it's a live chat there's no progress..,
+            return 0.0
         if not self.lessons_dict:
             self.get_breakpoints(obj)
-        if obj.is_live and not self.lessons_dict:
-            return 0.0
         done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
         return round(float(done)/len(self.lessons_dict), 2)
 
