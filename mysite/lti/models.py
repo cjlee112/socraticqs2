@@ -32,7 +32,9 @@ class LtiConsumer(models.Model):
         """
         consumer = None
         if instance_guid:
-            consumer = LtiConsumer.objects.filter(instance_guid=instance_guid).first()
+            consumer = LtiConsumer.objects.filter(
+                instance_guid=instance_guid
+            ).first()
 
         if not consumer:
             consumer = LtiConsumer.objects.filter(
@@ -117,7 +119,7 @@ class LTIUser(models.Model):
                 django_user = User.objects.filter(email=email).first()
                 if not django_user:
                     django_user, created = User.objects.get_or_create(
-                        username=email, defaults=defaults
+                        username=username, defaults=defaults
                     )
                 social = UserSocialAuth(
                     user=django_user,
