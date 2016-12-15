@@ -313,6 +313,10 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
         )
 
     def get_breakpoints(self, obj):
+        if obj.is_live:
+            #NOTE: if chat.is_live Don't show Resources.
+            return ResourcesSerializer(many=True).to_representation([])
+
         courseUnit = obj.enroll_code.courseUnit
         unit = courseUnit.unit
         lessons = list(
