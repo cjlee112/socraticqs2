@@ -174,8 +174,29 @@ class LessonSerializer(serializers.ModelSerializer):
 
     def get_isDone(self, obj):
         if hasattr(obj, 'message'):
-            lesson_order = Message.objects.get(id=obj.message).content.unitlesson.order
-            chat = Message.objects.get(id=obj.message).chat
+            msg = Message.objects.get(id=obj.message)
+            lesson_order = msg.content.unitlesson.order
+            chat = msg.chat
+            if chat.is_live and chat.state.fsmNode.fsm.name in ['live_chat']:
+                # here we assume that user can not get next question without answering for current one.
+                questions = chat.message_set.filter(
+                    kind='orct',
+                    contenttype='unitlesson',
+                    content_id__isnull=False,
+                )
+                responses = chat.message_set.filter(
+                    kind='response',
+                    contenttype='response',
+                    content_id__isnull=False,
+                    input_type='text'
+                )
+                diff = questions.count() - responses.count()
+                if diff >= 1:
+                    return False
+                elif diff == 0:
+                    return True
+                else:
+                    return False
             if chat.state and chat.state.fsmNode.fsm.name in ['chat', 'additional']:
                 current_unitlesson_order = chat.state.unitLesson.order
                 return lesson_order < current_unitlesson_order

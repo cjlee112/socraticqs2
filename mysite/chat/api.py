@@ -174,7 +174,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     selected = []
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
-                get_additional_messages(uniterror.response, chat)
+                if not message.chat.is_live:
+                    get_additional_messages(uniterror.response, chat)
 
                 chat.next_point = self.next_handler.next_point(
                     current=message.content, chat=chat, message=message, request=self.request

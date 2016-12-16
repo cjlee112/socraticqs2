@@ -26,7 +26,7 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
         else:  # jump to the new question
             fsmStack.state.unitLesson = fsmStack.state.linkState.unitLesson
             fsmStack.state.save()
-            return fsm.get_node('ASK')
+            return fsm.get_node('TITLE')
     else:
         return edge.toNode  # go to assessment
 
@@ -84,9 +84,20 @@ class WAIT_ASK(object):
     path = 'fsm:fsm_node'
     title = 'Wait for the Instructor to Assign a Question'
     edges = (
-        dict(name='next', toNode='ASK', title='See if question assigned'),
+        dict(name='next', toNode='TITLE', title='See if question assigned'),
     )
 
+
+class TITLE(object):
+    """
+    View a lesson explanation.
+    """
+    # get_path = get_lesson_url
+    # node specification data goes here
+    title = 'View an explanation'
+    edges = (
+        dict(name='next', toNode='ASK', title='View Next Lesson'),
+    )
 
 class ASK(object):
     """
@@ -227,6 +238,7 @@ def get_specs():
         pluginNodes=[
             START,
             WAIT_ASK,
+            TITLE,
             ASK,
             GET_ANSWER,
             WAIT_ASSESS,
