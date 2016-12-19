@@ -133,6 +133,14 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
 
 
   /**
+   * A jQuery reference to the container element for sidebar breakpoints header.
+   * @type {jQuery}
+   * @protected
+   */
+  this._$sidebarResourcesHeaderContainer = $('.chat-sidebar-resources-header');
+
+
+  /**
    * A jQuery reference to the container element for messages.
    * @type {jQuery}
    * @protected
@@ -521,6 +529,10 @@ CUI.ChatPresenter.prototype._parseResources = function(data){
           b.destroy();
         }, this));
 
+        // Show resources header.
+        // If no resources - hide resources header. Needed for live chat.
+        this._$sidebarResourcesHeaderContainer.show();
+
         // Reset breakpoints Array
         this._sidebarResources = [];
 
@@ -535,6 +547,9 @@ CUI.ChatPresenter.prototype._parseResources = function(data){
           // Add breakpoint in sidebar
           this._$sidebarResourcesContainer.append(breakpoint.$el);
         }, this));
+      } else {
+        // If no resources - hide resources header. Needed for live chat.
+        this._$sidebarResourcesHeaderContainer.hide();
       }
     }
   else{
