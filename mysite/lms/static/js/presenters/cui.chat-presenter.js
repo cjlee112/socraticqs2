@@ -23,7 +23,7 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
    * @type {bool}
    * @protected
    */
-  this._needShowMsg = false;
+  this._needShowMsg = true;
 
   /**
    * The chat's unique ID.
@@ -338,10 +338,9 @@ CUI.ChatPresenter.prototype._postInput = function(input){
         this._getMessages(response.nextMessagesUrl);
         // set to false cause we already shown messages.
         this._needShowMsg = false;
-        // no need to call to setInput that's why we do
-        return;
+      }else{
+        this._setInput(response.input);
       }
-      this._setInput(response.input);
     }else if(response.error){
       // Enable input
       this._inputIsEnabled = true;
