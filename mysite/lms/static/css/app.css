@@ -136,6 +136,7 @@ p + p {
   100% {
     -webkit-transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+
 @keyframes jelly {
   0% {
     -webkit-transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -215,6 +216,7 @@ p + p {
   100% {
     -webkit-transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+
 .browserupgrade {
   padding: 20px;
   background: #fff;
@@ -750,6 +752,7 @@ p + p {
   transform: rotate(45deg);
   border-radius: 4px;
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.12); }
+
 .chat-message.chat-message-text .chat-bubble:after {
   content: "";
   display: block;
@@ -783,17 +786,20 @@ p + p {
   .chat-message.chat-message-media .chat-bubble .chat-actions .chat-actions-toggle span {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.4); }
+
 .chat-message.chat-message-media img, .chat-message.chat-message-media iframe, .chat-message.chat-message-media audio, .chat-message.chat-message-media video {
   display: block;
   max-width: 100%;
   border-radius: 4px;
   margin: 0; }
+
 .chat-message.chat-message-media audio {
   margin: 40px !important; }
 
 /* --- Media message with caption --- */
 .chat-message.chat-message-media.chat-message-with-caption img, .chat-message.chat-message-media.chat-message-with-caption iframe, .chat-message.chat-message-media.chat-message-with-caption audio, .chat-message.chat-message-media.chat-message-with-caption video {
   border-radius: 4px 4px 0 0; }
+
 .chat-message.chat-message-media.chat-message-with-caption .caption {
   padding: 20px;
   font-size: 14px;
@@ -992,27 +998,36 @@ p + p {
       letter-spacing: 1px;
       color: #747381;
       margin: 0 0 12px 0; }
-  .chat-sidebar .chat-sidebar-breakpoints {
+  .chat-sidebar .chat-sidebar-breakpoints,
+  .chat-sidebar .chat-sidebar-resources {
     list-style: none;
     margin: 0;
     padding: 0; }
-    .chat-sidebar .chat-sidebar-breakpoints li {
+    .chat-sidebar .chat-sidebar-breakpoints li,
+    .chat-sidebar .chat-sidebar-resources li {
       padding: 0 0 0 44px;
       margin-top: 16px;
       cursor: default;
       opacity: 0.6;
       background: url(../img/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
       background-image: url(../img/chat-sidebar-breakpoint-locked.svg), none; }
-    .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done {
+    .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
+    .chat-sidebar .chat-sidebar-resources li.unlocked,
+    .chat-sidebar .chat-sidebar-resources li.done {
       cursor: pointer;
       opacity: 1;
       transition: opacity 0.3s; }
-      .chat-sidebar .chat-sidebar-breakpoints li.unlocked:hover, .chat-sidebar .chat-sidebar-breakpoints li.done:hover {
+      .chat-sidebar .chat-sidebar-breakpoints li.unlocked:hover, .chat-sidebar .chat-sidebar-breakpoints li.done:hover,
+      .chat-sidebar .chat-sidebar-resources li.unlocked:hover,
+      .chat-sidebar .chat-sidebar-resources li.done:hover {
         opacity: 0.6; }
-    .chat-sidebar .chat-sidebar-breakpoints li.unlocked {
+    .chat-sidebar .chat-sidebar-breakpoints li.unlocked,
+    .chat-sidebar .chat-sidebar-resources li.unlocked {
       background: url(../img/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
       background-image: url(../img/chat-sidebar-breakpoint-active.svg), none; }
-    .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done {
+    .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done,
+    .chat-sidebar .chat-sidebar-resources li.done,
+    .chat-sidebar .chat-sidebar-resources li.unlocked.done {
       background: url(../img/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
       background-image: url(../img/chat-sidebar-breakpoint-done.svg), none; }
 

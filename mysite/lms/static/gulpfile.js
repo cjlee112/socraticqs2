@@ -39,11 +39,11 @@ gulp.task('precompile-templates', function(){
 
 // Compile sass
 gulp.task('compile-sass', function(){
-  return gulp.src('src/sass/app.scss')
+  return gulp.src('sass/app.scss')
     .pipe(maps.init())
     .pipe(sass())
     .pipe(maps.write('./'))
-    .pipe(gulp.dest('src/css'));
+    .pipe(gulp.dest('css'));
 });
 
 // Optimize images
