@@ -130,16 +130,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         activity = chat.state and chat.state.activity
 
-        in_wait_loop = lambda cht: chat.state and cht.state.fsmNode.name.startswith('WAIT_')
-
-        print "perform_update"
-        print "in_wait_loop ", in_wait_loop(chat)
-        print "request.data ", self.request.data
-
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
-        if message.input_type == 'text' and not in_wait_loop(chat):
+        if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
             if not message.content_id:
@@ -162,14 +156,16 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
-        if message.input_type == 'options' and message.kind != 'button' and not in_wait_loop(chat):
+        if message.input_type == 'options' and message.kind != 'button':
             if (
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
             ):
                 message.chat = chat
                 try:
-                    selected = self.request.data.get('selected')[str(message.id)]['errorModel']
+                    selected = self.request.data.get(
+                        'selected'
+                    )[str(message.id)]['errorModel']
                 except KeyError:
                     selected = []
                 uniterror = message.content
@@ -178,7 +174,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     get_additional_messages(uniterror.response, chat)
 
                 chat.next_point = self.next_handler.next_point(
-                    current=message.content, chat=chat, message=message, request=self.request
+                    current=message.content,
+                    chat=chat,
+                    message=message,
+                    request=self.request
                 )
                 chat.save()
                 serializer.save(chat=chat)
@@ -203,7 +202,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.save()
         if message.kind == 'button':
             chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=self.request
+                current=message.content,
+                chat=chat,
+                message=message,
+                request=self.request
             )
             chat.save()
 

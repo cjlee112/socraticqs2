@@ -177,7 +177,11 @@ class LessonSerializer(serializers.ModelSerializer):
             msg = Message.objects.get(id=obj.message)
             lesson_order = msg.content.unitlesson.order
             chat = msg.chat
-            if chat.is_live and chat.state.fsmNode.fsm.name in ['live_chat']:
+            if (
+                chat.is_live and
+                chat.state and
+                chat.state.fsmNode.fsm.name in ['live_chat']
+            ):
                 # here we assume that user can not get next question without answering for current one.
                 questions = chat.message_set.filter(
                     kind='orct',
