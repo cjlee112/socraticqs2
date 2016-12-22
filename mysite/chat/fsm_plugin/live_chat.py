@@ -50,6 +50,21 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
     # return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
 
+def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
+    def wrapp(func):
+        def wrapper(self, edge, fsmStack, request, **kwargs):
+            if fsmStack.state.linkState.fsmNode.name not in nodes:
+                print "-------> Student in node {} and \n TEACHER in node {}, allowed nodes for teacher {}".format(
+                    fsmStack.state.fsmNode.name,
+                    fsmStack.state.linkState.fsmNode.name,
+                    nodes
+                    )
+                return edge.fromNode.fsm.get_node('WAIT_ASK')
+            return func(self, edge, fsmStack, request,  **kwargs)
+        return wrapper
+    return wrapp
+
+
 class START(object):
     """
     In this activity you will answer questions
@@ -103,6 +118,7 @@ class ASK(object):
     """
     In this stage you write a brief answer to a conceptual question.
     """
+    @next_edge_teacher_coherent(["QUESTION"])
     def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
         if response:
             fsmStack.state.set_data_attr('response', response)
@@ -130,16 +146,13 @@ class ASK(object):
 class GET_ANSWER(object):
     get_path = get_lesson_url
     # node specification data goes here
+    next_edge = next_edge_teacher_coherent(["QUESTION", "ANSWER"])(
+        lambda self, edge, *args, **kwargs: edge.toNode
+    )
     title = 'It is time to answer'
     edges = (
             dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
         )
-
-    # def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
-    #     if response:
-    #         fsmStack.state.set_data_attr('response', response)
-    #         fsmStack.state.save_json_data()
-    #     return edge.toNodes
 
 
 class WAIT_ASSESS(object):
@@ -156,6 +169,7 @@ class WAIT_ASSESS(object):
         dict(name='next', toNode='ASSESS', title='See if question done'),
     )
 
+    @next_edge_teacher_coherent(["QUESTION", "ANSWER", "RECYCLE"])
     def next_edge(self, edge, fsmStack, request, response=None, **kwargs):
         if response:
             fsmStack.state.set_data_attr('response', response)
@@ -168,17 +182,13 @@ class ASSESS(object):
     """
     In this stage you assess your own answer vs. the correct answer.
     """
-    next_edge = assess_edge
+    next_edge = next_edge_teacher_coherent(["QUESTION", "ANSWER", "RECYCLE"])(assess_edge)
     # node specification data goes here
     path = 'ct:assess'
     title = 'Assess your answer'
     help = """Listen to your instructor's explanation of the answer,
     then categorize your assessment, and how well you feel you
     understand this concept now. """
-    # edges = (
-    #     dict(name='next', toNode='ASK', title='Go to the next question'),
-    #     dict(name='error', toNode='ERRORS', title='Classify your error'),
-    # )
 
     edges = (
             dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
@@ -187,7 +197,7 @@ class ASSESS(object):
 
 class GET_ASSESS(object):
     get_path = get_lesson_url
-    next_edge = check_selfassess_and_next_lesson
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCYLE"])(check_selfassess_and_next_lesson)
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
@@ -205,6 +215,9 @@ class ERRORS(object):
     edges = (
         dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
     )
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCLE"])(
+        lambda self, edge, *args, **kwargs: edge.toNode
+    )
 
 
 class GET_ERRORS(object):
@@ -215,7 +228,9 @@ class GET_ERRORS(object):
     edges = (
             dict(name='next', toNode='WAIT_ASK', title='View next question'),
         )
-
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCLE"])(
+        lambda self, edge, *args, **kwargs: edge.toNode
+    )
 
 class END(object):
     # node specification data goes here

@@ -18,6 +18,13 @@ from ct.models import (
 )
 from chat.models import Message, ChatDivider, UnitError
 
+WAIT_NODES_REGS = [r"^WAIT_(?!ASSESS$).*$", r"^RECYCLE$"]
+
+
+def is_wait_node(name):
+    return any(
+        map(partial(re.search, string=name), WAIT_NODES_REGS)
+    )
 
 # index of types that can be saved in json blobs
 KLASS_NAME_DICT = dict(
@@ -377,25 +384,9 @@ class ChatMixin(object):
                 is_additional=True,
                 owner=chat.user,
             )[0]
-        # if self.name == 'WAIT_ASSESS':
-        #     # current here could be instance of Response or message.
-        #     if isinstance(current, Response):
-        #         answer = current.unitLesson.get_answers().first()
-        #     elif isinstance(current, Message):
-        #         answer = current.response_to_check
-        #     elif isinstance(current, UnitLesson):
-        #         answer = unitLesson.get_answers().first()
-        #     content_id = current.get_answers().first().id
-        #     message = Message.objects.get_or_create(
-        #                     contenttype='unitlesson',
-        #                     content_id=content_id,
-        #                     response_to_check=answer,
-        #                     chat=chat,
-        #                     owner=chat.user,
-        #                     kind='button',
-        #                     is_additional=is_additional)[0]
-        WAIT_NODES = ["WAIT_.*", "RECYCLE",]
-        if any(map(partial(re.search, string=self.name), WAIT_NODES)) and self.name != "WAIT_ASSESS":
+
+        # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS
+        if is_wait_node(self.name):
             lookup = dict(
                 chat=chat,
                 text=self.title,

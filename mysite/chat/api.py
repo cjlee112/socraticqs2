@@ -20,7 +20,6 @@ from .permissions import IsOwner
 from ct.models import Response as StudentResponse
 from ct.models import UnitLesson
 
-
 inj_alternative = injections.Container()
 inj_alternative['next_handler'] = FsmHandler()
 MessageSerializer = inj_alternative.inject(MessageSerializer)
