@@ -35,7 +35,7 @@
     <section class="chat-introduction">
       <div class="chat-introduction-title">
         <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
-        {% if fsmstate %}
+        {% if fsmstate or not chat.is_live %}
         <h2>{{ unit.title }}</h2>
         {% else %}
         <h2>Live Session - {{ chat.timestamp|date:"F j, Y" }} </h2>
@@ -46,7 +46,7 @@
         <div class="description container">
           <div class="row">
             <div class="col-lg-6 col-lg-offset-3">
-              {% if fsmstate %}
+              {% if fsmstate or not chat.is_live %}
               <p>
                 {{ unit.description }} Remember that it doesn't matter if your answers are correct on Courselets. They are only a starting point for learning more about a concept.
               </p>
