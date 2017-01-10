@@ -40,6 +40,7 @@ class CourseView(View):
             chat.lessons_done = Message.objects.filter(
                 chat=chat,
                 contenttype='unitlesson',
+                kind='orct',
                 type='message',
                 owner=request.user,
             ).count()

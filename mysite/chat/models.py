@@ -233,6 +233,16 @@ class EnrollUnitCode(models.Model):
         unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
+    def create_new(cls, course_unit, isLive):
+        enroll_code = EnrollUnitCode(
+            courseUnit=course_unit,
+            isLive=True,
+            enrollCode=uuid4().hex
+        )
+        enroll_code.save()
+        return enroll_code
+
+    @classmethod
     def get_code(cls, course_unit, isLive=False):
         enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive)
         if cr:

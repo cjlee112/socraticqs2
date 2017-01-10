@@ -175,18 +175,12 @@ class InitializeLiveSession(ChatInitialView):
             return super(InitializeLiveSession, self).get(request, kwargs['enroll_key'])
 
         if 'state_id' in kwargs:
-            # create new enroll code nad bind it to UL.
+            # create new enroll code and bind it to UL.
             # thin just redirect user to this page again
             state = get_object_or_404(FSMState, id=kwargs['state_id'], isLiveSession=True)
             data = state.get_all_state_data()
             course, unit = data['course'], data['unit']
             course_unit = CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
-            enroll = EnrollUnitCode.get_code_for_user_chat(
-                is_live=True, course_unit=course_unit, user=request.user,
-            )
-            if not enroll.id:
-                enroll.enrollCode = EnrollUnitCode.get_code(course_unit, isLive=True)
-                enroll.save()
 
         if not unit.unitlesson_set.filter(order__isnull=False).exists():
             return render(
@@ -219,11 +213,12 @@ class InitializeLiveSession(ChatInitialView):
         chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 
         if not chat and state:
+            enroll_code = EnrollUnitCode.create_new(course_unit=course_unit, isLive=True)
             chat = Chat(
                 user=request.user,
                 instructor=course_unit.course.addedBy,
                 is_live=True,
-                enroll_code=enroll
+                enroll_code=enroll_code
             )
             chat.save(request)
 

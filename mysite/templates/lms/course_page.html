@@ -87,7 +87,7 @@
                   {% for lu in livesessions %}
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ lu.enroll_code.enrollCode }}/">
-                        <h3>{{ lu.timestamp|date:"F j, Y" }}</h3>
+                        <h3>{{ lu.timestamp|date:"F j" }} {{ lu.timestamp|time }}</h3>
                         <p>{{ lu.lessons_done }} lessons</p>
                       </a>
                     </li>
