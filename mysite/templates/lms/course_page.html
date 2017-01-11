@@ -57,9 +57,7 @@
                       <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">
                         <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
 
-                        {% comment %}
                           <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
-                        {% endcomment %}
 
                         <div class="course-content-unit-progress">
                           <span style="width: 10%;"></span>
@@ -87,7 +85,7 @@
                   {% for lu in livesessions %}
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ lu.enroll_code.enrollCode }}/">
-                        <h3>{{ lu.timestamp|date:"F j" }} {{ lu.timestamp|time }}</h3>
+                        <h3>{{ lu.timestamp|date:"F j, Y P" }}</h3>
                         <p>{{ lu.lessons_done }} lessons</p>
                       </a>
                     </li>

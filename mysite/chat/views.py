@@ -120,6 +120,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             lessons = Message.objects.filter(
                 chat=chat,
                 contenttype='unitlesson',
+                kind='orct',
                 type='message',
                 owner=request.user,
             )
@@ -148,13 +149,13 @@ class ChatInitialView(LoginRequiredMixin, View):
             }
         )
 
+
 class InitializeLiveSession(ChatInitialView):
     '''
     Entry point for live session chat.
     Checks that user is authenticated and creates a chat for him.
     '''
     next_handler = LiveChatFsmHandler()
-
 
     def get_enroll_code_object(self, enroll_key):
         """

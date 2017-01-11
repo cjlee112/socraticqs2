@@ -38,7 +38,7 @@
         {% if fsmstate or not chat.is_live %}
         <h2>{{ unit.title }}</h2>
         {% else %}
-        <h2>Live Session - {{ chat.timestamp|date:"F j, Y" }} </h2>
+        <h2>Live Session - {{ chat.timestamp|date:"F j, Y P" }} </h2>
         {% endif %}
       </div>
 
@@ -54,26 +54,28 @@
               <div class="row">
                 <div class="col-lg-6">
                   <h3>You will learn about</h3>
-
-                  {% if will_learn %}
                     <ul>
+                      {% if will_learn %}
                       {% for title, url in will_learn %}
                       <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
                       {% endfor %}
+                      {% else %}
+                      <li>No prerequisities</li>
+                      {% endif %}
                     </ul>
-                  {% endif %}
                 </div>
 
                 <div class="col-lg-6">
                   <h3>You need to know about</h3>
-
-                  {% if need_to_know %}
                     <ul>
+                      {% if need_to_know %}
                       {% for title, url in need_to_know %}
                       <li><a href="{{ url }}" target="_blank">{{ title }}</a></li>
                       {% endfor %}
+                      {% else %}
+                      <li>No prerequisities</li>
+                      {% endif %}
                     </ul>
-                  {% endif %}
                 </div>
               </div>
               {% else %}
@@ -85,13 +87,11 @@
           </div>
         </div>
 
-        {% if not chat.is_live %}
         <div class="meta">
           <div class="container">
             <span class="lessons">{{ lesson_cnt }} lessons</span> <span class="duration">~ {{ duration }} minutes</span>
           </div>
         </div>
-        {% endif %}
 
         <div class="cta">
           <div class="container">
