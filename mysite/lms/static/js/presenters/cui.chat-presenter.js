@@ -324,12 +324,12 @@ CUI.ChatPresenter.prototype._postInput = function(input){
     context: this
   }).done(function(response){
     // Check that nextMessagesUrl is in response
-    if(response && response.nextMessagesUrl && !response.input.doWait){
+    if(response && response.nextMessagesUrl && response.input && !response.input.doWait){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
         // set flag to true, because we need to show messages
         this._needShowMsg = true;
-    }else if(response && response.input.doWait) {
+    }else if(response && response.input && response.input.doWait) {
       if(this._needShowMsg){
        /* parse response to understand should we do more requests or not.
         * this.setInput function will look into response.input.doWait parameter
