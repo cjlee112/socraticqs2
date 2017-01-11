@@ -18,9 +18,10 @@ class CourseView(View):
         liveSession = FSMState.find_live_sessions(request.user).filter(
             activity__course=course
         ).first()
-        liveSession.live_instructor_name = (
-            liveSession.user.get_full_name() or liveSession.user.username
-        )
+        if liveSession:
+            liveSession.live_instructor_name = (
+                liveSession.user.get_full_name() or liveSession.user.username
+            )
         courselets = (
             (
                 courselet,
