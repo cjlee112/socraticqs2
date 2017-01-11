@@ -224,6 +224,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         fields = (
             'progress',
             'breakpoints',
+            'is_live',
         )
 
     def get_breakpoints(self, obj):

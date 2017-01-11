@@ -327,7 +327,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
     if(response && response.nextMessagesUrl && !response.input.doWait){
         // Load next set of messages
         this._getMessages(response.nextMessagesUrl);
-        // set flag to true, because we need to show messages 
+        // set flag to true, because we need to show messages
         this._needShowMsg = true;
     }else if(response && response.input.doWait) {
       if(this._needShowMsg){
@@ -516,7 +516,7 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
       }, this));
 
-      if (this.isDone == this._sidebarBreakpoints.length){
+      if (!data.is_live || this.isDone == this._sidebarBreakpoints.length){
         this._$sidebarToggle.trigger('resources');
       }
     }
