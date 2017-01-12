@@ -100,7 +100,6 @@ class MessageSerializer(serializers.ModelSerializer):
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
-        # import ipdb; ipdb.set_trace()
         self.set_group(obj)
         return InternalMessageSerializer(many=True).to_representation(self.qs)
 

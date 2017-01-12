@@ -84,7 +84,7 @@ class START(object):
     path = 'fsm:fsm_node'
     title = 'Now Joining a Live Classroom Session'
     edges = (
-        dict(name='next', toNode='ASK', title='Start answering questions'),
+        dict(name='next', toNode='WAIT_ASK', title='Start answering questions'),
     )
 
 
