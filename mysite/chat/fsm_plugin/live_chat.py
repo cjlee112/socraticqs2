@@ -53,6 +53,8 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
 def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
     def wrapp(func):
         def wrapper(self, edge, fsmStack, request, **kwargs):
+            if not fsmStack.state.linkState:
+                return edge.fromNode.fsm.get_node('END')
             if fsmStack.state.linkState.fsmNode.name not in nodes:
                 print "-------> Student in node {} and \n TEACHER in node {}, allowed nodes for teacher {}".format(
                     fsmStack.state.fsmNode.name,
