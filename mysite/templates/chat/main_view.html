@@ -35,10 +35,10 @@
     <section class="chat-introduction">
       <div class="chat-introduction-title">
         <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
-        {% if fsmstate or not chat.is_live %}
-        <h2>{{ unit.title }}</h2>
-        {% else %}
+        {% if chat.is_live %}
         <h2>Live Session - {{ chat.timestamp|date:"F j, Y P" }} </h2>
+        {% else %}
+        <h2>{{ unit.title }}</h2>
         {% endif %}
       </div>
 
@@ -89,7 +89,12 @@
 
         <div class="meta">
           <div class="container">
-            <span class="lessons">{{ lesson_cnt }} lessons</span> <span class="duration">~ {{ duration }} minutes</span>
+            {% if not fsmstate %}
+              <span class="lessons">{{ lesson_cnt }} lessons</span>
+              {% if not chat.is_live %}
+              <span class="duration">~ {{ duration }} minutes</span>
+              {% endif %}
+            {% endif %}
           </div>
         </div>
 
