@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 
 from fsm.utils import get_plugin
 
@@ -353,8 +354,11 @@ class FSMState(JSONBlobMixin, models.Model):
         """
         Get live sessions relevant to this user.
         """
+        # QuerySet should return only Instructor FSMState's
         return cls.objects.filter(
-            isLiveSession=True, activity__course__role__user=user
+            ~Q(fsmNode__funcName__contains='live_chat'),
+            isLiveSession=True,
+            activity__course__role__user=user
         ).distinct()
 
     def __unicode__(self):
