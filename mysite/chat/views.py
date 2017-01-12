@@ -13,6 +13,7 @@ from chat.models import Message
 from chat.services import LiveChatFsmHandler
 from chat.utils import enroll_generator
 from fsm.models import FSMState
+import waffle
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
@@ -172,6 +173,12 @@ class InitializeLiveSession(ChatInitialView):
         :param chat_id: chat id
         :return: rendered template with proper context.
         '''
+        if not waffle.switch_is_active('live_session_enabled'):
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'This action is not allowed now.'}
+            )
         if 'enroll_key' in kwargs:
             return super(InitializeLiveSession, self).get(request, kwargs['enroll_key'])
 
