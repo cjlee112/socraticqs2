@@ -2,6 +2,7 @@ from fsm.models import ActivityLog
 
 FSM_NAMES_TO_RESET_ON_RECYCLE = ['live_chat']
 
+
 def quit_edge(self, edge, fsmStack, request, **kwargs):
     """
     Edge method that terminates this live-session.
@@ -107,6 +108,8 @@ class RECYCLE(object):
     You have completed presenting this question.  Do you want to
     ask the students another question, or end this live session?
     """
+    quit_edge = quit_edge
+
     def next_edge(self, edge, fsmStack, request, pageData=None, **kwargs):
         'make sure timer is reset before going to another question'
         pageData.set_refresh_timer(request, False)
