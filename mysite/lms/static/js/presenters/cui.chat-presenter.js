@@ -515,8 +515,7 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         // Add breakpoint in sidebar
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
       }, this));
-
-      if (!data.is_live || this.isDone == this._sidebarBreakpoints.length){
+      if (!data.is_live && this.isDone == this._sidebarBreakpoints.length){
         this._$sidebarToggle.trigger('resources');
       }
     }
