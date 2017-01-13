@@ -238,9 +238,7 @@ class END(object):
     # node specification data goes here
     path = 'ct:unit_tasks_student'
     title = 'Live classroom session completed'
-    help = '''The instructor has ended the Live classroom session.
-    See below for suggested next steps for what to study now in
-    this courselet.'''
+    help = '''The instructor has ended the Live classroom session.'''
 
 
 def get_specs():
