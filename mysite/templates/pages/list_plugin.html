@@ -1,0 +1,17 @@
+{% if not instance.hidden %}
+<h3>{{ instance.title }}</h3>
+
+{% if instance.list_type == 'list_numeric' %}
+<ol>
+{% else %}
+<ul class="{{ instance.list_type }}">
+{% endif %}
+  {% for i in list_text %}
+    {{ i|safe }}
+  {% endfor %}
+{% if instance.list_type == 'list_numeric' %}
+</ol>
+{% else %}
+</ul>
+{% endif %}
+{% endif %}

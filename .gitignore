@@ -61,6 +61,7 @@ target/
 settings_local.py
 #static/
 assets/
+mysite/static/
 deploy.sh
 celerybeat-schedule
 .idea/
@@ -73,3 +74,4 @@ backups/*
 bower_components/
 node_modules/
 .vscode/
+mysite/media/

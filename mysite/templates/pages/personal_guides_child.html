@@ -1,0 +1,15 @@
+{% load cms_tags thumbnail %}
+
+{% if not instance.hidden %}
+<div class="col-md-6">
+<div class="card">
+  <img src="{% thumbnail instance.image 572x356 crop %}" alt="{{ instance.title }}">
+
+  <div class="inner">
+    <h4>{{ instance.title }}</h4>
+
+    {{ instance.description|safe }}
+  </div>
+</div>
+</div>
+{% endif %}

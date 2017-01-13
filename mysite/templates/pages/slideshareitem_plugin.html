@@ -1,0 +1,7 @@
+{% if not instance.hidden %}
+{% if instance.title %}
+<h3>{{ instance.title }}</h3>
+{% endif %}
+
+{{ instance.slideshare_code | safe}}
+{% endif %}

@@ -1,0 +1,30 @@
+{% load static cms_tags %}
+
+{% if not instance.hidden %}
+<section class="section-text-with-image">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h2>{{ instance.title }}</h2>
+      </div>
+
+      <div class="col-sm-4 col-md-5 right">
+        <figure>
+          <img src="{% static "pages/img/attrition-chart@2x.png" %}" alt="{{ instance.fig_alt }}">
+          <figcaption>{{ instance.fig_caption }}</figcaption>
+        </figure>
+      </div>
+
+      <div class="col-sm-7 col-md-7">
+        {{ instance.description|safe }}
+
+        <ul>
+        {% for i in list_text %}
+          {{ i|safe }}
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}

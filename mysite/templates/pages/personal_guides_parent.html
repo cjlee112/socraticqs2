@@ -1,0 +1,19 @@
+{% load cms_tags %}
+
+{% if not instance.hidden %}
+<section class="section-2-cards">
+  <header>
+    <div class="container">
+      <h2>{{ instance.title }}</h2>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+{% for plugin in instance.child_plugin_instances %}
+      {% render_plugin plugin %}
+{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
