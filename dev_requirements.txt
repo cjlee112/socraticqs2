@@ -2,7 +2,7 @@ Django==1.7.8
 django-cms==3.1.3
 djangocms-text-ckeditor==2.6.0
 djangocms-admin-style==0.2.8
-django-filer==0.9.12
+django-filer==1.0.5
 PyJWT==1.1.0
 amqp==1.4.6
 anyjson==0.3.3
@@ -23,7 +23,7 @@ django-nose==1.4
 
 # integration with coveralls.io
 coveralls==1.0
-
+html5lib==0.9999999
 httplib2==0.9.1
 
 # LTI python implementation

@@ -10,8 +10,6 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url(r'^$', home_page),
-
     url(r'^ct/', include('ct.urls', namespace='ct')),
     url(r'^fsm/', include('fsm.urls', namespace='fsm')),
     url(r'^chat/', include('chat.urls', namespace='chat')),
