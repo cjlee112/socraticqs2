@@ -109,7 +109,7 @@ class MethodsTest(LTITestCase):
             data=self.headers,
             follow=True
         )
-        self.assertTemplateUsed(response, template_name='chat/main_view.html')
+        self.assertTemplateUsed(response, template_name='lms/course_page.html')
 
     def test_failure_post(self, mocked):
         mocked.return_value.is_valid_request.return_value = False

@@ -177,7 +177,10 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
         if waffle.switch_is_active('chat_ui'):
-            return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
+            if not unit_id:
+                return redirect(reverse('lms:course_view', kwargs={'course_id': course_id}))
+            else:
+                return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_code}))
         else:
             if not unit_id:
                 return redirect(reverse('ct:course_student', args=(course_id,)))
