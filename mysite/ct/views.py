@@ -28,7 +28,6 @@ from fsm.fsm_base import FSMStack
 from fsm.models import FSM, FSMState
 from fsm.mixins import KLASS_NAME_DICT
 from chat.models import EnrollUnitCode
-
 from ct.exceptions import CommonDisambiguationError
 
 
@@ -755,6 +754,7 @@ def _lessons(request, pageData, concept=None, msg='',
     else:
         searchForm = None
     lessonSet = foundNothing = ()
+    tree_dict = {}
     if request.method == 'POST' and not ignorePOST:
         if 'clID' in request.POST:
             update_concept_link(request, conceptLinks, unit)
@@ -788,7 +788,15 @@ def _lessons(request, pageData, concept=None, msg='',
             s = searchForm.cleaned_data['search']
             if searchType is None:
                 searchType = searchForm.cleaned_data['searchType']
-            lessonSet = UnitLesson.search_text(s, searchType)
+            lessonSet = UnitLesson.search_text(
+                s, searchType, dedupe=False
+            ).exclude(unit=unit)
+            treeIDs_head = distinct_subset(lessonSet)
+            branches = lessonSet.exclude(id__in=[each.id for each in treeIDs_head])
+            tree_dict = {
+                head_lesson: list(branches.filter(treeID=head_lesson.treeID))
+                for head_lesson in treeIDs_head
+            }
             foundNothing = not lessonSet
     if showReorderForm and lessonTable:
         for ul in lessonTable:
@@ -800,7 +808,8 @@ def _lessons(request, pageData, concept=None, msg='',
                        actionLabel=actionLabel, lessonTable=lessonTable,
                        creationInstructions=creationInstructions,
                        showReorderForm=showReorderForm,
-                       foundNothing=foundNothing))
+                       foundNothing=foundNothing,
+                       found_lessons=tree_dict))
     return pageData.render(request, templateFile, kwargs)
 
 def make_cl_table(concept, unit):
@@ -955,6 +964,7 @@ def ul_teach(request, course_id, unit_id, ul_id):
         query = Q(unitLesson=ul, selfeval__isnull=False,
                   kind=Response.ORCT_RESPONSE)
         statusTable, evalTable, n = Response.get_counts(query)
+    needHelpResponses = Response.objects.filter(query).filter(status=NEED_HELP_STATUS)
     if ul.unit == unit: # ul is part of this unit
         if request.method == 'POST':
             roleForm = LessonRoleForm('', request.POST)
@@ -984,10 +994,21 @@ def ul_teach(request, course_id, unit_id, ul_id):
             return pageData.fsm_redirect(request, eventName, defaultURL,
                                          reverseArgs=kwargs, unitLesson=ulNew)
 
-    return pageData.render(request, 'ct/lesson.html',
-                  dict(unitLesson=ul, unit=unit, statusTable=statusTable,
-                       evalTable=evalTable, answer=answer, addForm=addForm,
-                       roleForm=roleForm), addNextButton=True)
+    return pageData.render(
+        request,
+        'ct/lesson.html',
+        dict(
+            unitLesson=ul,
+            unit=unit,
+            statusTable=statusTable,
+            evalTable=evalTable,
+            answer=answer,
+            addForm=addForm,
+            roleForm=roleForm,
+            needHelpResponses=needHelpResponses
+        ),
+        addNextButton=True
+    )
 
 def push_button(request, taskName='start', label='Start', formClass=TaskForm):
     'return None if button was pressed, otherwise return button form'

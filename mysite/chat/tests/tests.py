@@ -156,7 +156,9 @@ class MainChatViewTests(SetUpMixin, TestCase):
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
         self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        )
         mocked_start_point.assert_called_once()
         self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
 
@@ -250,7 +252,9 @@ class MessagesViewTests(SetUpMixin, TestCase):
         chat_id = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
         ).context['chat_id']
-        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': chat_id}, follow=True
+        )
         json_content = json.loads(response.content)
 
         next_url = json_content['input']['url']
@@ -279,7 +283,9 @@ class MessagesViewTests(SetUpMixin, TestCase):
         chat_id = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
         ).context['chat_id']
-        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': chat_id}, follow=True
+        )
         json_content = json.loads(response.content)
 
         next_url = json_content['input']['url']

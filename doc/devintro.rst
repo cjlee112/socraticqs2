@@ -36,9 +36,9 @@ you need various things such as:
 * **PostgreSQL**: back-end database for Socraticqs2.  See further details below.
 * **Pandoc** (currently used for converting text to HTML): you can download
   this for Mac OS X; most linux package managers can install it automatically.
-* **RabbitMQ**: an open source message broker software that implements the 
+* **RabbitMQ**: an open source message broker software that implements the
   Advanced Message Queuing Protocol (AMQP) - used by Celery.
-* **Memcached**: free & open source, high-performance, distributed memory 
+* **Memcached**: free & open source, high-performance, distributed memory
   object caching system.
 * **Python packages** automatically installable by pip using our
   `dev_requirements.txt` requirements file:
@@ -57,16 +57,16 @@ you need various things such as:
 Installing Git version control software
 ...........................................
 
-We use `Git <http://www.git-scm.com>`_ and 
+We use `Git <http://www.git-scm.com>`_ and
 `GitHub <https://github.com>`_ for working on Socraticqs2 development.
-You'll first need to get Git: 
+You'll first need to get Git:
 
 * for Windows and Mac, you can download it from
   `the Git website <http://www.git-scm.com>`_ (command-line interface,
   recommended).  We also recommend installing a graphical
   interface for viewing Git code revision history such as
   `SourceTree <http://www.sourcetreeapp.com>`_.
-* Alternatively, you can download the 
+* Alternatively, you can download the
   GitHub for Windows / Mac app from GitHub (more limited, in our humble
   opinion).
 * On Linux, your package manager can install (and update) Git
@@ -79,10 +79,10 @@ control system, we suggest you review our :doc:`gitguide`.
 Getting the Socraticqs2 source code
 .....................................
 
-To get your own copy of the Socraticqs2 code, 
-first go to our Github repository 
+To get your own copy of the Socraticqs2 code,
+first go to our Github repository
 https://github.com/cjlee112/socraticqs2
-and Fork the repository (you'll need a Github account to do this).  
+and Fork the repository (you'll need a Github account to do this).
 This creates your own repository in your Github account, which you
 can make changes to, and issue pull requests for us to incorporate
 your changes.  Next clone the repository to your local computer,
@@ -119,7 +119,7 @@ You can check PostgreSQL installation manual for linux on official PostgreSQL `p
 Steps to install PostgreSQL on Ubuntu machine:
 
 * Create the file ``/etc/apt/sources.list.d/pgdg.list``, and
-  add a line for the repository 
+  add a line for the repository
     ::
 
      deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main
@@ -132,7 +132,7 @@ Steps to install PostgreSQL on Ubuntu machine:
    sudo apt-get update
 
 * Install postgres-9.4::
-   
+
    sudo apt-get install postgresql-9.4
 
 .. warning::
@@ -207,7 +207,7 @@ There are couple of ways to prevent PostgreSQL to start on system boot:
   In this case we prevent to start ``main`` postgres cluster and need to use next commands to ``stop|start`` pg_cluster::
 
       sudo pg_ctlcluster 9.4 main stop
-      sudo pg_ctlcluster 9.4 main start 
+      sudo pg_ctlcluster 9.4 main start
 
 
 More information you can find on PostgreSQL 9.4 `documentation`_ page.
@@ -271,7 +271,7 @@ Assuming you have the above pre-requisites installed, within the
 Run the test suite
 ....................
 
-To make sure your setup is working properly, try running the 
+To make sure your setup is working properly, try running the
 test suite::
 
   cd socraticqs2/mysite
@@ -305,13 +305,20 @@ boost but you can change this by commenting out next lines in you local_conf.py:
 
 
 .. warning::
-   
+
     For Mac developer if you see ``ValueError: unknown locale: UTF-8`` do the following::
 
         export LC_ALL=en_US.UTF-8
         export LANG=en_US.UTF-8
 
     Or add this lines to your ``~/.bash_profile``
+
+Also you can run tests using py.test from ```mysite`` directory::
+
+    py.test
+
+
+All needed options has been added in ``pytest.ini``
 
 
 Running a test web server
@@ -370,7 +377,7 @@ See our :doc:`gitguide`.
 Database Operations
 .....................
 
-Updating your database schema 
+Updating your database schema
 :::::::::::::::::::::::::::::
 
 If upstream code changes (i.e. made by someone else, and pulled
@@ -438,7 +445,7 @@ At this point you should be able to run the ``runserver``, etc.
      git commit -m 'added UnitStatus to models'
 
    where ``ct/migrations/0005_unitstatus.py`` is the new migration file
-   created by ``makemigrations`` to represent the changes you made to 
+   created by ``makemigrations`` to represent the changes you made to
    ``models.py``.
 
 .. warning::
@@ -454,14 +461,14 @@ At this point you should be able to run the ``runserver``, etc.
      your data models, ANOTHER migration file
      will be added, and EVERY migration file will be
      required for the migration to work.
-     Multiple migration files increase the risk of errors either in 
+     Multiple migration files increase the risk of errors either in
      your committing them or other people attempting to apply them.
      So ideally, when you change the models to introduce a new feature,
      you want that to be represented by a single new migration file.
 
    * Because of this, in theory you shouldn't
      run ``makemigrations`` / ``migrate`` until
-     *after* you are pretty sure your model changes are final.  
+     *after* you are pretty sure your model changes are final.
      But you can't even start manual testing of your changes until after
      both steps.
      This is an unpleasant catch-22.
@@ -473,8 +480,8 @@ At this point you should be able to run the ``runserver``, etc.
    * Once you change your database schema (via ``migrate``), all *other*
      code versions (i.e. not matching the new schema stored in your
      database) will NOT run.
-     This would destroy the key virtue of Git -- your ability to 
-     have many different code branches and switch between them 
+     This would destroy the key virtue of Git -- your ability to
+     have many different code branches and switch between them
      effortlessly.
 
    * Because of this, to make developer life easier, we provide Fabriс ``db.init|db.backup|db.restore``
@@ -496,7 +503,7 @@ migration:
 
     fab db.backup
 
-  By default without providing any custom params to task it  will use 
+  By default without providing any custom params to task it  will use
   you current branch name as suffix for backup file.
 
   Next you can checkput to new bigchange::
@@ -544,7 +551,7 @@ migration:
   and REGENERATE a new migration to replace it, like this::
 
     rm ct/migrations/0005_unitstatus.py
-    fab db.restore 
+    fab db.restore
     python manage.py makemigrations ct
     python manage.py migrate ct
 
@@ -560,7 +567,7 @@ migration:
 
   where 0004 is a number of your previous migration file.
 
-   
+
 Backing up, flushing, and restoring your local database
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::
 

@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
+from django.apps import apps
 
 from mysite.views import *
 from pages.views import interested_form
@@ -37,6 +38,8 @@ urlpatterns = patterns(
     url(r'^lti/', include('lti.urls', namespace='lti')),
     url(r'^interested-form/', interested_form, name='interested-form'),
     url(r'^', include('cms.urls')),
+    # Base API
+    url(r'^api/', include('api.urls', namespace='api')),
 )
 
 

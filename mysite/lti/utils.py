@@ -1,6 +1,13 @@
+import string
+import random
+import hashlib
+from uuid import uuid4
 from functools import wraps
 
 from django.http import HttpResponse
+from django.db import IntegrityError, transaction
+from django.contrib.auth.models import User
+from django.conf import settings
 
 
 def only_lti(fn):
@@ -16,3 +23,37 @@ def only_lti(fn):
         else:
             return fn(request, *args, **kwargs)
     return wrapped
+
+
+def create_courselets_user():
+    """Creates Courselets user w/ random username.
+
+    We can't trust LTI request w/o email in details.
+    Using random username we need to check for
+    IntegrityError DB exception to avoid race condition.
+    """
+    password = str(uuid4())
+
+    created = False
+    while not created:
+        try:
+            username = uuid4().hex[:30]
+            with transaction.atomic():
+                courselets_user = User.objects.create_user(
+                    username=username,
+                    password=password,
+                )
+            created = True
+        except IntegrityError:
+            pass
+
+    return courselets_user
+
+
+def key_secret_generator():
+    """
+    Generate a key/secret for LtiConsumer.
+    """
+    hash = hashlib.sha1(uuid4().hex)
+    hash.update(settings.SECRET_KEY)
+    return hash.hexdigest()[::2]

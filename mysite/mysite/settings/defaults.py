@@ -160,6 +160,8 @@ INSTALLED_APPS = (
     'fsm',
     # LTI
     'lti',
+    # API
+    'api',
     # Socials
     'social.apps.django_app.default',
     'psa',
@@ -308,6 +310,11 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -318,6 +325,12 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'django.request': {
@@ -325,9 +338,8 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'lti_debug': {
-            'handlers': ['console'],
-            'level': 'INFO',
+        'lti.views': {
+            'handlers': ['console', 'file'],
         },
         'celery_warn': {
             'handlers': ['console'],

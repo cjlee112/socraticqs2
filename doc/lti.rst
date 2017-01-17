@@ -50,18 +50,6 @@ Allow debug information about LTI request
   LTI_DEBUG = True
 
 
-Allow to uniquely identify Tool Consumer
-::
-
-  CONSUMER_KEY = "__consumer_key__"
-
-
-To secure communications between the Tool Provider and Tool Consumer using OAuth
-::
-
-  LTI_SECRET = "__lti_secret__"
-
-
 To permit cross-origin framing
 ::
 
@@ -72,6 +60,11 @@ Heroku SSL proxy fix
 ::
 
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https'))
+
+LTI Consumer can be added on admin page in section ``lti > Lti consumers``.
+Consumer key and consumer secret will be generated automatically.
+By default ``Instance guid`` field should be empty.
+Typically ``expiration date`` also should be empty.
 
 
 Adding new External tool on Moodle LTI consumer
@@ -106,7 +99,7 @@ Next we store LTIUser entry with appropriate LTI params.
 
 Launch LTI request is handled by followed views:
 
-  .. automodule:: lti.views   
+  .. automodule:: lti.views
       :members:
 
 To work with Socraticqs2 courses we need to create/get django user to authorize him and need to have Role objects to have access to courses.
@@ -125,7 +118,7 @@ When Instructor set ``/lti/`` as the LaunchURL for External Tool he can create a
 **To implement this we follow the next logic:**
 
 
-* First of all, we look at the ``roles`` LTI param to decide whether the user can create courses or not. 
+* First of all, we look at the ``roles`` LTI param to decide whether the user can create courses or not.
 * Next we look for ``context_id`` LTI param to search our ``CourseRef`` models.
 * That models is a link between Course and particular University identified by ``context_id``.
 
@@ -147,8 +140,19 @@ When Instructor set ``/lti/`` as the LaunchURL for External Tool he can create a
 
 Also we ensure that user is requests for Course creation only from LTI session using ``only_lti`` decorator:
 
-  .. autofunction:: lti.utils.only_lti 
+  .. autofunction:: lti.utils.only_lti
 
 Finally Instructor can change LaunchURL to a ``/lti/unit/{unit_id}/`` pattern to point directly to a particular unit of the Course if he has created one previously.
 
 
+Short-term LTI Consumer
+-----------------------
+
+There is an option to use ``Short term LTI settings`` for Universities that don't already have our LTI credentials in their campus eLearning system.
+
+In some cases we might need to give LTI credentials directly to the instructor (e.g. if the campus sysadmin isn't willing to add our credentials right away).
+
+To achieve this we should create a new LTI Consumer and set ``expiration date`` to make this LTI consumer be really short-term.
+
+For Instructors there is one additional setting to be set on Tool Consumer - Instructor should add custom param ``short_term=true``.
+This param help us to distinguish Tool Consumer system-wide LTI credentials from per-Instructor one.
