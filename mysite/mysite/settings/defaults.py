@@ -3,13 +3,9 @@ import os
 from datetime import timedelta
 
 gettext = lambda s: s
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-# Set template_path and template_dir
-TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
-TEMPLATE_DIRS = (
-    TEMPLATE_PATH,
-)
 
 CMS_TEMPLATES = (
     ('pages/main_page.html', 'Main Page'),
@@ -114,13 +110,6 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/done/'
 URL_PATH = ''
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -189,22 +178,37 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-   'django.contrib.auth.context_processors.auth',
-   'django.core.context_processors.debug',
-   'django.core.context_processors.i18n',
-   'django.core.context_processors.request',
-   'django.core.context_processors.media',
-   'django.core.context_processors.static',
-   'django.core.context_processors.tz',
-   'django.contrib.messages.context_processors.messages',
-   'social.apps.django_app.context_processors.backends',
-   'social.apps.django_app.context_processors.login_redirect',
-   'psa.context_processors.debug_settings',
-   'mysite.context_processors.google_analytics',
-   'sekizai.context_processors.sekizai',
-   'cms.context_processors.cms_settings',
-)
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'OPTIONS': {
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.core.context_processors.debug',
+                'django.core.context_processors.i18n',
+                'django.core.context_processors.request',
+                'django.core.context_processors.media',
+                'django.core.context_processors.static',
+                'django.core.context_processors.tz',
+                'django.template.context_processors.csrf',
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
+                'psa.context_processors.debug_settings',
+                'mysite.context_processors.google_analytics',
+                'sekizai.context_processors.sekizai',
+                'cms.context_processors.cms_settings',
+            )
+        }
+    },
+]
+
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
