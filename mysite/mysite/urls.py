@@ -37,9 +37,10 @@ urlpatterns = patterns(
     url(r'^done/$', 'psa.views.done'),
     url(r'^lti/', include('lti.urls', namespace='lti')),
     url(r'^interested-form/', interested_form, name='interested-form'),
-    url(r'^', include('cms.urls')),
     # Base API
     url(r'^api/', include('api.urls', namespace='api')),
+    # CMS
+    url(r'^', include('cms.urls')),
 )
 
 
