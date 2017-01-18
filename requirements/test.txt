@@ -12,5 +12,4 @@ ddt
 mock==1.0.1
 selenium==2.47.1
 behave-django==0.3.0
-Faker>=0.7.0
-factory-boy==2.7.0
+factory-boy==2.8.1
