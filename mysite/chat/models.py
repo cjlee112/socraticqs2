@@ -75,11 +75,10 @@ class Chat(models.Model):
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
-    timestamp = models.DateTimeField(default=timezone.now)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
-    timestamp = models.DateTimeField(default=datetime.datetime.now, auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-timestamp']

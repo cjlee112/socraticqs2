@@ -6,3 +6,4 @@ class InterestedModelForm(ModelForm):
 
     class Meta:
         model = InterestedForm
+        fields = '__all__'
