@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from mock import Mock, patch
 from ddt import ddt, data, unpack
@@ -1561,6 +1562,72 @@ class ConceptLessonsStudentTest(TestCase):
         self.assertEqual(response.context['unitLesson'], self.unit_lesson)
         self.assertEqual(response.context['unit'], self.unit)
         self.assertEqual(response.context['clTable'], [self.concept.conceptlink_set.first()])
+
+
+class ConceptLessonsTeacherTest(TestCase):
+    """
+    Test for issue #194.
+
+    Lssson created from Concept should not copy Concepts EM's.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        em = self.concept.create_error_model(addedBy=self.user, title='Error model 1')
+        lesson = Lesson(
+            title='title',
+            text='text',
+            addedBy=self.user,
+            commitTime=timezone.now(),
+            changeLog='initial commit',
+            kind=Lesson.ERROR_MODEL,
+            concept=em
+        )
+        lesson.save_root()
+
+    def test_concept_lesson_page(self):
+        """
+        Check that we are not linking parent Concept error models to the lesson
+        :return:
+        """
+        kwargs = {
+            'course_id': self.course.id,
+            'unit_id': self.unit.id,
+            'ul_id': UnitLesson.objects.get(
+                lesson=self.concept.lesson_set.filter(title='bad')
+            ).id,
+        }
+        post_data = {
+            'title': 'SomeTitle',
+            'text': 'text',
+            'kind': 'orct',
+            'medium': 'reading',
+            'url': '/test/url/',
+            }
+
+        response = self.client.post(
+            reverse(
+                'ct:concept_lessons',
+                kwargs=kwargs
+            ),
+            follow=True,
+            data=post_data
+        )
+        self.assertTemplateUsed(response, 'ct/edit_lesson.html')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            len(UnitLesson.objects.get(lesson__title='SomeTitle').get_errors()),
+            0
+        )
 
 
 class ResolutionsStudentTest(TestCase):

@@ -831,8 +831,10 @@ def concept_lessons(request, course_id, unit_id, ul_id):
     if isinstance(r, UnitLesson): # created new lesson
         defaultURL = None
         if r.lesson.kind == Lesson.ORCT_QUESTION:
-            if r.get_errors().count() == 0: # copy error models from concept
-                concept.copy_error_models(r)
+            #NOTE: for now we are not copying errors from concept.
+            #LINK: pls look ticket https://github.com/cjlee112/socraticqs2/issues/194
+            # if r.get_errors().count() == 0: # copy error models from concept
+            #     concept.copy_error_models(r)
             if getattr(r, '_answer', None): # redirect to edit empty answer
                 defaultURL = reverse('ct:edit_lesson',
                                      args=(course_id, unit_id, r._answer.id,))
