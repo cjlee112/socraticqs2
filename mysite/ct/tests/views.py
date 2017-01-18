@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from mock import Mock, patch
 from ddt import ddt, data, unpack
@@ -1564,6 +1565,11 @@ class ConceptLessonsStudentTest(TestCase):
 
 
 class ConceptLessonsTeacherTest(TestCase):
+    """
+    Test for issue #194.
+
+    Lssson created from Concept should not copy Concepts EM's.
+    """
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -1576,44 +1582,34 @@ class ConceptLessonsTeacherTest(TestCase):
         self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
         self.role.save()
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
-        self.lesson = Lesson(
-            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        em = self.concept.create_error_model(addedBy=self.user, title='Error model 1')
+        lesson = Lesson(
+            title='title',
+            text='text',
+            addedBy=self.user,
+            commitTime=timezone.now(),
+            changeLog='initial commit',
+            kind=Lesson.ERROR_MODEL,
+            concept=em
         )
-        self.lesson.save_root(self.concept)
-        self.lesson_error1 = Lesson(
-            title='some err', text='err1', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
-        )
-        self.lesson_error1.save()
-
-        self.lesson_error2 = Lesson(
-            title='some err1', text='err2', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
-        )
-        self.lesson_error2.save()
-
-        self.lesson_error3 = Lesson(
-            title='some err2', text='err3', addedBy=self.user, kind=Lesson.ERROR_MODEL, concept=self.concept
-        )
-        self.lesson_error3.save()
-
-        self.unit_lesson = UnitLesson(unit=self.unit, lesson=self.lesson, addedBy=self.user, treeID=self.lesson.id)
-        self.unit_lesson.save()
-        self.unit_lesson.response_set.create(lesson=self.lesson, course=self.course, text='test text', author=self.user)
+        lesson.save_root()
 
     def test_concept_lesson_page(self):
-        '''
-        This test actually check that we are linking old error models to lesson instead of creating new ones.
+        """
+        Check that we are not linking parent Concept error models to the lesson
         :return:
-        '''
-        linked_errors_count = ConceptGraph.objects.all().count()
-
+        """
         kwargs = {
             'course_id': self.course.id,
             'unit_id': self.unit.id,
-            'ul_id': self.unit_lesson.id
+            'ul_id': UnitLesson.objects.get(
+                lesson=self.concept.lesson_set.filter(title='bad')
+            ).id,
         }
         post_data = {
             'title': 'SomeTitle',
-            'kind': 'base',
+            'text': 'text',
+            'kind': 'orct',
             'medium': 'reading',
             'url': '/test/url/',
             }
@@ -1626,11 +1622,11 @@ class ConceptLessonsTeacherTest(TestCase):
             follow=True,
             data=post_data
         )
-        self.assertTemplateUsed(response, 'ct/lessons.html')
+        self.assertTemplateUsed(response, 'ct/edit_lesson.html')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            ConceptGraph.objects.all().count(),
-            linked_errors_count
+            len(UnitLesson.objects.get(lesson__title='SomeTitle').get_errors()),
+            0
         )
 
 
