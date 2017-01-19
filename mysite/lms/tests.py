@@ -1,10 +1,13 @@
+import datetime
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from mock import patch, Mock
-from ct.models import Course, Unit, CourseUnit, Role
+from chat.models import Chat, EnrollUnitCode
+from ct.models import Course, Unit, CourseUnit, Role, Concept, Lesson, UnitLesson
 from views import CourseView
-
+from django.utils import timezone
 
 class TestCourseView(TestCase):
     def setUp(self):
@@ -84,3 +87,130 @@ class TestCourseView(TestCase):
 
     #TODO: write test when teacher really creates Course and Courslets inside of the course and student open page.
     #TODO: user should see 'Join' button.
+
+
+
+class TestCoursletViewHistoryTab(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.client.login(username='test', password='test')
+
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+        self.course_unit = CourseUnit(
+            course=self.course,
+            unit=self.unit,
+            order=0,
+            addedBy=self.user
+        )
+        self.course_unit.releaseTime = timezone.now() - datetime.timedelta(days=1)
+        self.course_unit.save()
+
+        self.enroll = EnrollUnitCode(courseUnit=self.course_unit)
+        self.enroll.save()
+
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+
+        self.student_role = Role(course=self.course, user=self.user, role=Role.ENROLLED)
+        self.student_role.save()
+
+        self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
+        self.lesson = Lesson(title='New York Test Lesson', text='brr', addedBy=self.user)
+        self.lesson.save_root(self.concept)
+
+        self.unit_lesson = UnitLesson(
+            unit=self.unit,
+            lesson=self.lesson,
+            addedBy=self.user,
+            treeID=self.lesson.id,
+            order=0
+        )
+        self.unit_lesson.save()
+        self.user = User.objects.create_user(username='admin', password='admin')
+        call_command('fsm_deploy')
+
+    def test_courslet_history_tab(self):
+        '''
+        tests that if we have a chat with state == None this chat will be shown in history tab.
+        :return:
+        '''
+        # test that there's no history yet
+        response = self.client.get(
+            reverse('lms:course_view', kwargs={'course_id': self.course.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['courslet_history']), 0)
+        self.assertTrue(len(list(response.context['courslets'])) > 0, True)
+
+        # now we call chat:chat_enroll view to init chat
+        response = self.client.get(
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Chat.objects.all().count(), 1)
+
+        chat = Chat.objects.all().first()
+        self.assertIsNotNone(chat)
+        chat.state = None
+        chat.save()
+
+        response = self.client.get(
+            reverse('lms:course_view', kwargs={'course_id': self.course.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['courslet_history']), 1)
+        self.assertTrue(len(list(response.context['courslets'])) > 0, True)
+
+    def test_click_on_courslet_creates_new_chat(self):
+        # test that there's no history yet
+        response = self.client.get(
+            reverse('lms:course_view', kwargs={'course_id': self.course.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['courslet_history']), 0)
+        self.assertIsNotNone(list(response.context['courslets']))
+
+        self.assertEqual(response.status_code, 200)
+
+        chats_count_1 = Chat.objects.all().count()
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+        )
+        self.assertEqual(response.context['chat'].id, Chat.objects.all().first().id)
+        self.assertEqual(response.status_code, 200)
+        chats_count_2 = Chat.objects.count()
+
+        self.assertNotEqual(chats_count_2, chats_count_1)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+        )
+        chats_count_3 = Chat.objects.count()
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+        )
+        chats_count_4 = Chat.objects.count()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(chats_count_4, chats_count_2)
+        self.assertEqual(chats_count_3, chats_count_2)
+
+        self.assertEqual(response.context['chat'].id, Chat.objects.all().first().id)
+
+        chat = Chat.objects.all().first()
+        # get chat and set state to None it means that courslet finished.
+        chat.state = None
+        chat.save()
+
+        response = self.client.get(
+            reverse('lms:course_view', kwargs={'course_id': self.course.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Chat.objects.count(), chats_count_2 + 1)
+        self.assertEqual(len(response.context['courslet_history']), 1)
+

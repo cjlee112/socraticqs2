@@ -94,9 +94,12 @@ class Chat(models.Model):
         Return CourseUnit or None if CourseUnit was not found
         :return: CourseUnit instance or None
         '''
-        data = self.state.get_all_state_data()
-        if 'course' in data and 'unit' in data:
-            return CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+        if self.state:
+            data = self.state.get_all_state_data()
+            if 'course' in data and 'unit' in data:
+                return CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+        else:
+            return self.enroll_code.courseUnit
 
 
 class Message(models.Model):

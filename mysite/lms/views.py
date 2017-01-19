@@ -62,12 +62,20 @@ class CourseView(View):
                 owner=request.user,
             ).count()
 
+        courslet_history = Chat.objects.filter(
+            user=request.user,
+            is_live=False,
+            enroll_code__courseUnit__course=course,
+            state__isnull=True
+        )
+
         return render(
             request, 'lms/course_page.html',
             dict(
                 course=course,
                 liveSession=liveSession,
                 courslets=courselets,
+                courslet_history=courslet_history,
                 livesessions=live_sessions_history,
             )
         )
