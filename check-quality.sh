@@ -3,26 +3,23 @@
 PEP8_CONF_PATH="./config/pep8rc"
 PYLINT_CONF_PATH="./config/pylintrc"
 LOGS_PATH="./logs"
+APPS="accounts chat ct fsm lms lti pages psa mysite test"
 
 function run_pep8 {
+    echo "" > $PEP8_CONF_PATH
+    for app in $APPS; do
+        pep8 --config=$PEP8_CONF_PATH "mysite/${app}" >> $LOGS_PATH/pep8.log
+    done
 
-    pep8 --config=$PEP8_CONF_PATH mysite/lti > $LOGS_PATH/pep8.log
-    pep8 --config=$PEP8_CONF_PATH mysite/psa >> $LOGS_PATH/pep8.log
-    pep8 --config=$PEP8_CONF_PATH mysite/ct >> $LOGS_PATH/pep8.log
-    pep8 --config=$PEP8_CONF_PATH mysite/fsm >> $LOGS_PATH/pep8.log
-    pep8 --config=$PEP8_CONF_PATH mysite/mysite >> $LOGS_PATH/pep8.log
-    
     cat $LOGS_PATH/pep8.log
 
 }
 
 function run_pylint {
-
-    pylint --rcfile=$PYLINT_CONF_PATH mysite/lti > $LOGS_PATH/pylint.log
-    pylint --rcfile=$PYLINT_CONF_PATH mysite/psa >> $LOGS_PATH/pylint.log
-    pylint --rcfile=$PYLINT_CONF_PATH mysite/ct >> $LOGS_PATH/pylint.log
-    pylint --rcfile=$PYLINT_CONF_PATH mysite/fsm >> $LOGS_PATH/pylint.log
-    pylint --rcfile=$PYLINT_CONF_PATH mysite/mysite >> $LOGS_PATH/pylint.log
+    echo "" > $PYLINT_CONF_PATH
+    for app in $APPS; do
+        pylint --rcfile=$PYLINT_CONF_PATH "mysite/${app}" >> $LOGS_PATH/pylint.log
+    done
 
     cat $LOGS_PATH/pylint.log
 
@@ -44,9 +41,12 @@ function run_pylint_spec {
 
 }
 
+function join_by { local IFS="$1"; shift; echo "$*"; }
+
+
 case $1 in
     pep8)
-            if [ $2 = "all" ]; then
+            if [ $2 = "all" ] || [ $2 = '' ]; then
                 echo "Running pep8 on all apps."
                 run_pep8
             else
@@ -56,7 +56,7 @@ case $1 in
         ;;
 
     pylint)
-            if [ $2 = "all" ]; then
+            if [ $2 = "all" ] || [ $2 = '' ]; then
                 echo "Running pylint on all apps."
                 run_pylint
             else
@@ -66,6 +66,7 @@ case $1 in
         ;;
 
     *)
-        echo "Usage: $0 {pep8|pylint} {lti|psa|fsm|ct|mysite|all}"
+        res="${APPS// /|}"
+        echo "Usage: $0 {pep8|pylint} {$res}"
         exit 1
 esac
