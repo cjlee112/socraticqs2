@@ -329,7 +329,14 @@ def course_view(request, course_id):
     'show courselets in a course'
     course = get_object_or_404(Course, pk=course_id)
     if is_teacher_url(request.path):
-        notInstructor = check_instructor_auth(course, request)
+        try:
+            notInstructor = check_instructor_auth(course, request)
+        except KeyError as e:
+            return render(
+                request,
+                'lti/error.html',
+                {'message': 'This action is not allowed for this user ({})'.format(e.message)}
+            )
         if notInstructor: # redirect students to live session or student page
             return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
         navTabs = course_tabs(request.path, 'Home')
@@ -387,7 +394,14 @@ def course_view(request, course_id):
 @login_required
 def edit_course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
-    notInstructor = check_instructor_auth(course, request)
+    try:
+        notInstructor = check_instructor_auth(course, request)
+    except KeyError as e:
+        return render(
+            request,
+            'lti/error.html',
+            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
+        )
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
 
@@ -464,7 +478,14 @@ def edit_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     course_unit = CourseUnit.objects.get(unit=unit, course=course)
     enroll_code = EnrollUnitCode.get_code(course_unit)
-    notInstructor = check_instructor_auth(course, request)
+    try:
+        notInstructor = check_instructor_auth(course, request)
+    except KeyError as e:
+        return render(
+            request,
+            'lti/error.html',
+            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
+        )
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
                                         args=(course_id, unit_id)))
@@ -1067,7 +1088,14 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
     course = get_object_or_404(Course, pk=course_id)
-    notInstructor = check_instructor_auth(course, request)
+    try:
+        notInstructor = check_instructor_auth(course, request)
+    except KeyError as e:
+        return render(
+            request,
+            'lti/error.html',
+            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
+        )
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
             formClass = AnswerLessonForm
