@@ -10,7 +10,6 @@ cache:
 install:
   - pip install -r requirements.txt
 before_script:
-  - mv mysite/mysite/settings/local_conf_example.py mysite/mysite/settings/local_conf.py
   - mv fab_settings.py.example fab_settings.py
 script:
   - cd mysite
