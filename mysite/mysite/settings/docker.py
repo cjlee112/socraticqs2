@@ -1,7 +1,17 @@
 # coding: utf-8
-
-import os
 import sys
+
+from base import *
+
+
+SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
+
+
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
+# LTI Parameters
+LTI_DEBUG = True
 
 # Default DB settings for docker postgres container
 DATABASES = {

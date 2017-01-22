@@ -1,5 +1,5 @@
 # coding: utf-8
-from defaults import *
+from base import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -8,10 +8,8 @@ TEMPLATE_DEBUG = DEBUG
 # this key is only used for dev localhost testing, not for production
 SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
 
-## LTI Parameters
+# LTI Parameters
 LTI_DEBUG = True
-CONSUMER_KEY = "__consumer_key__"  # can be any random python string with enough length for OAuth
-LTI_SECRET = "__lti_secret__"  # can be any random python string with enough length for OAuth
 
 INSTALLED_APPS_LOCAL = (
     'django_nose',
@@ -33,8 +31,8 @@ NOSE_ARGS = [
 GOOGLE_ANALYTICS_CODE = ""
 
 try:
-    from local_conf import *
+    from local import *
 except ImportError:
-    print '''You must provide a settings/local_conf.py file,
-    e.g. by copying the provided local_conf_example.py'''
+    print '''You must provide a settings/local.py file,
+    e.g. by copying the provided local_example.py'''
     raise
