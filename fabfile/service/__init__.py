@@ -51,7 +51,6 @@ class NginxTask(Task):
     project_name = 'courselets'
     config_path = os.path.join(BASE_PATH, '../config')
 
-
     def restart_service(self):
         self.func('sudo service nginx restart')
 
