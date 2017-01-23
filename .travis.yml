@@ -8,7 +8,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 install:
-  - pip install --upgrade pip
   - pip install -r requirements.txt
 before_script:
   - mv fab_settings.py.example fab_settings.py
