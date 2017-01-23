@@ -21,7 +21,7 @@ urlpatterns = patterns(
     '',
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(
-        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',
         ChatInitialViewFSM.as_view(),
         name='chat_enroll'
     ),
