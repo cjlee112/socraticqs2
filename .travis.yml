@@ -1,14 +1,14 @@
 language: python
 python:
-  - 2.7.11
+  - '2.7.6'
+  - '2.7.10'
+  - '2.7.11'
+  - '2.7.12'
 addons:
   apt_packages:
     - pandoc
-cache:
-  directories:
-    - $HOME/.cache/pip
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt -U pip
 before_script:
   - mv fab_settings.py.example fab_settings.py
 script:
