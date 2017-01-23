@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load crispy_forms_tags menu_tags %}
+{% load crispy_forms_tags menu_tags staticfiles %}
 {% load ct_extras %}
 
 {% comment %}
@@ -10,29 +10,7 @@
 {% block head %}
 <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,Safe">
 </script>
-
-<script type="text/javascript">
-function setInterest(targeturl, state, csrftoken)
-{
-  $.post(targeturl,
-  {
-    csrfmiddlewaretoken:csrftoken,
-    state:state
-  });
-}
-
-function toggleInterest(o, targeturl, csrftoken)
-{
-  if (o.value == "1")
-  {
-    o.value="0";
-  }
-  else
-  {
-    o.value="1";
-  }
-  setInterest(targeturl, o.value, csrftoken);
-}
+<script type="text/javascript" src='{% static "js/ct.js" %}'>
 </script>
 
 {% block refresher %}{% endblock %}
@@ -43,17 +21,7 @@ function toggleInterest(o, targeturl, csrftoken)
   <title>Courselets</title>
 {% endif %}
 
-<style>
-  .buttons { display: block; table-layout: fixed; border-radius: 7px; border: 1px solid #ccc;
-             margin: 20px; background: #eee; padding: 30px; }
-  .buttons > div a { margin: 5px 10px; }
-  .buttons > div:not(:first-child) { margin-top: 10px; border-top: 1px solid #ccc;
-                                     padding-top: 10px; text-align: center; }
-  .user-details { text-align: center; font-size: 16px; font-weight: bold; }
-  .disconnect-form { padding: 0; margin: 0px 10px; }
-  .disconnect-form > a { display: block; margin: 5px 0 !important; }
-  ul.messages > li { color: red; }
-</style>
+<link rel="stylesheet" href='{% static "css/ct.css" %}'>
 
 {% endblock %}
 
@@ -142,7 +110,7 @@ function toggleInterest(o, targeturl, csrftoken)
     <header>
       <h1>{% block title %}{% endblock %}</h1>
     </header>
-  
+
     {% block content %}{% endblock %}
   </div>
 

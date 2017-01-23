@@ -8,3 +8,9 @@ omit =
     */test/*
     */tests/*
     */*tests*.py
+    conftest.py
+    */__init__.py
+    manage.py
+    mysite/settings/*
+    mysite/urls.py
+    mysite/wsgi.py
