@@ -1095,6 +1095,7 @@ class Course(models.Model):
             return l[0]
         else:
             return l
+
     def get_course_units(self, publishedOnly=True):
         'ordered list of cunits for this course'
         if publishedOnly: # only those already released
@@ -1103,11 +1104,14 @@ class Course(models.Model):
                         releaseTime__lt=timezone.now()).order_by('order'))
         else:
             return  list(self.courseunit_set.all().order_by('order'))
+
     reorder_course_unit = reorder_exercise
+
     def get_users(self, role=None):
         if not role:
             role = Role.INSTRUCTOR
         return User.objects.filter(role__role=role, role__course=self)
+
     def __unicode__(self):
         return self.title
 

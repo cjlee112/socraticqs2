@@ -453,8 +453,8 @@ class CourseViewTest(TestCase):
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
         self.client.login(username='test', password='test')
-        with self.assertRaises(KeyError):
-            self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}))
+        response = self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}))
+        self.assertEqual(response.status_code, 302)
 
     def test_course_view_teacher_get_redirect(self):
         """
@@ -586,8 +586,8 @@ class EditCourseTest(TestCase):
 
     def test_edit_course_no_role(self):
         self.role.delete()
-        with self.assertRaises(KeyError):
-            self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
+        response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
+        self.assertEqual(response.status_code, 302)
 
     def test_edit_course_no_course(self):
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': 99}))
@@ -682,6 +682,16 @@ class EditUnitTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:study_unit', args=(self.course.id, self.unit.id)))
+
+
+    def test_edit_unit_no_role(self):
+        self.role.delete()
+        response = self.client.get(
+            reverse('ct:edit_unit', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id})
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('ct:study_unit', args=(self.course.id, self.unit.id)))
+
 
     def test_edit_unit_post(self):
         response = self.client.post(
@@ -942,6 +952,24 @@ class EditLessonTest(TestCase):
         self.assertIn('titleform', response.context)
         self.assertEqual(response.context['unitLesson'], self.unit_lesson)
         self.assertIsInstance(response.context['titleform'], LessonForm)
+
+    def test_edit_lesson_no_role(self):
+        '''
+        Tests thath if user has no assigneg role for this lesson he will see error page with error message.
+        '''
+        self.role.role = Role.ENROLLED
+        self.role.delete()
+        response = self.client.get(
+            reverse(
+                'ct:edit_lesson',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unit_lesson.id}
+            ),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, 'lti/error.html')
+        self.assertTrue('This action is not allowed for this user' in response.context['message'])
+
 
     def test_edit_lesson_update(self):
         response = self.client.post(

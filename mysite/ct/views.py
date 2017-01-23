@@ -332,11 +332,8 @@ def course_view(request, course_id):
         try:
             notInstructor = check_instructor_auth(course, request)
         except KeyError as e:
-            return render(
-                request,
-                'lti/error.html',
-                {'message': 'This action is not allowed for this user ({})'.format(e.message)}
-            )
+            notInstructor = True
+
         if notInstructor: # redirect students to live session or student page
             return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
         navTabs = course_tabs(request.path, 'Home')
@@ -397,11 +394,8 @@ def edit_course(request, course_id):
     try:
         notInstructor = check_instructor_auth(course, request)
     except KeyError as e:
-        return render(
-            request,
-            'lti/error.html',
-            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
-        )
+        notInstructor = True
+
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
 
@@ -481,11 +475,8 @@ def edit_unit(request, course_id, unit_id):
     try:
         notInstructor = check_instructor_auth(course, request)
     except KeyError as e:
-        return render(
-            request,
-            'lti/error.html',
-            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
-        )
+        notInstructor = True
+
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
                                         args=(course_id, unit_id)))
@@ -1094,7 +1085,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         return render(
             request,
             'lti/error.html',
-            {'message': 'This action is not allowed for this user ({})'.format(e.message)}
+            {'message': 'This action is not allowed for this user ({})'.format(e.message)},
+            status=404
         )
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
