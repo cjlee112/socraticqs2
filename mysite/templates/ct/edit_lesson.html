@@ -34,27 +34,36 @@
 <p>
 Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 </p>
+
 <p>
 <form action="." method="post">
+  <div class="form-group">
   {% csrf_token %}
-  <select id="js-slct-unit" name="unit_to_move" class="form-control">
-    {% for unit in units %}
-      {% if not unit == ul.unit %}
-      <option selected="selected" value="{{ unit.id }}">{{ unit.title }}</option>
-      {% else %}
-      <option value="{{ unit.id }}">{{ unit.title }}</option>
-      {% endif %}
-    {% endfor %}
-  </select>
-  <input type="submit" class="btn btn-primary" value="Move to select unit" />
+    <select id="js-slct-unit" name="unit_to_move" class="form-control">
+      {% for unit in units %}
+        {% if not unit == ul.unit %}
+        <option selected="selected" value="{{ unit.id }}">{{ unit.title }}</option>
+        {% else %}
+        <option value="{{ unit.id }}">{{ unit.title }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <div class="controls">
+      <input type="submit" class="btn btn-primary" value="Move to select unit" />
+    </div>
+  </div>
 </form>
 </p>
+
+<p>
 <form action="{{ actionTarget }}" method="post">
   {% csrf_token %}
   <input type="hidden" name="task" value="delete" />
   <input type="submit" value="Delete this Lesson" />
 </form>
-
+</p>
   </div><!-- @end #EditTabDiv -->
 </div>
 <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" rel="stylesheet" />
