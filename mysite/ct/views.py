@@ -1067,6 +1067,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
     course = get_object_or_404(Course, pk=course_id)
+    other_units_qs = Unit.objects.filter(~models.Q(courseunit__course__id=course.id))
     notInstructor = check_instructor_auth(course, request)
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
@@ -1081,8 +1082,23 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
         if request.method == 'POST':
             if 'unit_to_move' in request.POST:
-                ul.unit = Unit.objects.get(id=request.POST['unit_to_move'])
-                ul.save()
+                # check that incoming unit_id is acceptable for us - is in Unit queryset
+                unit_ids = [i['id'] for i in other_units_qs.values('id')]
+                unit_to_move = Unit.objects.filter(
+                    models.Q(id=request.POST.get('unit_to_move'))&\
+                    models.Q(id__in=unit_ids)
+                ).first()
+                if unit_to_move:
+                    ul.unit = unit_to_move
+                    ul.save()
+                    return HttpResponseRedirect(reverse(
+                        'ct:edit_lesson',
+                        kwargs={
+                            'course_id': course.id,
+                            'unit_id': unit_id,
+                            'ul_id': ul.lesson.id,
+                        }
+                    ))
             if 'title' in request.POST:
                 lesson = ul.checkout(request.user)
                 titleform = formClass(request.POST, instance=lesson)
@@ -1102,7 +1118,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         set_crispy_action(request.path, titleform)
     return pageData.render(request, 'ct/edit_lesson.html',
                   dict(unitLesson=ul, atime=display_datetime(ul.atime),
-                       titleform=titleform, units=Unit.objects.all()))
+                       titleform=titleform, units=other_units_qs))
 
 
 def create_error_ul(lesson, concept, unit, parentUL):
