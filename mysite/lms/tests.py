@@ -89,8 +89,7 @@ class TestCourseView(TestCase):
     #TODO: user should see 'Join' button.
 
 
-
-class TestCoursletViewHistoryTab(TestCase):
+class TestCourseletViewHistoryTab(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -118,7 +117,13 @@ class TestCoursletViewHistoryTab(TestCase):
         self.student_role.save()
 
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
-        self.lesson = Lesson(title='New York Test Lesson', text='brr', addedBy=self.user)
+
+        self.lesson = Lesson(
+            title='New York Test Lesson',
+            text='brr',
+            addedBy=self.user,
+            kind=Lesson.ORCT_QUESTION
+        )
         self.lesson.save_root(self.concept)
 
         self.unit_lesson = UnitLesson(
@@ -129,6 +134,7 @@ class TestCoursletViewHistoryTab(TestCase):
             order=0
         )
         self.unit_lesson.save()
+
         self.user = User.objects.create_user(username='admin', password='admin')
         call_command('fsm_deploy')
 
@@ -143,7 +149,7 @@ class TestCoursletViewHistoryTab(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['courslet_history']), 0)
-        self.assertTrue(len(list(response.context['courslets'])) > 0, True)
+        self.assertTrue(len(list(response.context['courslets'])) > 0)
 
         # now we call chat:chat_enroll view to init chat
         response = self.client.get(
@@ -163,7 +169,7 @@ class TestCoursletViewHistoryTab(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['courslet_history']), 1)
-        self.assertTrue(len(list(response.context['courslets'])) > 0, True)
+        self.assertTrue(len(list(response.context['courslets'])) > 0)
 
     def test_click_on_courslet_creates_new_chat(self):
         # test that there's no history yet
@@ -211,6 +217,7 @@ class TestCoursletViewHistoryTab(TestCase):
             reverse('lms:course_view', kwargs={'course_id': self.course.id})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Chat.objects.count(), chats_count_2 + 1)
+        self.assertEqual(Chat.objects.count(), chats_count_2)
+        self.assertEqual(len(response.context['courslets']), 1)
         self.assertEqual(len(response.context['courslet_history']), 1)
 
