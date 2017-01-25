@@ -4,10 +4,11 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from mock import patch, Mock
-from chat.models import Chat, EnrollUnitCode
+from chat.models import Chat, EnrollUnitCode, Message
 from ct.models import Course, Unit, CourseUnit, Role, Concept, Lesson, UnitLesson
 from views import CourseView
 from django.utils import timezone
+import json
 
 class TestCourseView(TestCase):
     def setUp(self):
@@ -90,6 +91,7 @@ class TestCourseView(TestCase):
 
 
 class TestCourseletViewHistoryTab(TestCase):
+
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -135,7 +137,18 @@ class TestCourseletViewHistoryTab(TestCase):
         )
         self.unit_lesson.save()
 
+        self.unit_lesson_answer = UnitLesson(
+            parent=self.unit_lesson,
+            unit=self.unit,
+            lesson=self.lesson,
+            addedBy=self.user,
+            treeID=self.lesson.id,
+            kind=UnitLesson.ANSWERS
+        )
+        self.unit_lesson_answer.save()
+
         self.user = User.objects.create_user(username='admin', password='admin')
+
         call_command('fsm_deploy')
 
     def test_courslet_history_tab(self):
@@ -220,4 +233,66 @@ class TestCourseletViewHistoryTab(TestCase):
         self.assertEqual(Chat.objects.count(), chats_count_2)
         self.assertEqual(len(response.context['courslets']), 1)
         self.assertEqual(len(response.context['courslet_history']), 1)
+
+    def test_courslet_history(self):
+        enroll_code = EnrollUnitCode.get_code(self.course_unit)
+        chat_id = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+        ).context['chat_id']
+
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+
+        next_url = json_content['input']['url']
+
+        answer = 'My Answer'
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
+
+        # emulate chat finished - set state to None
+
+        Chat.objects.filter(id=chat_id).update(state=None)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+
+        self.assertIsNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 4)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
