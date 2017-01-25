@@ -61,6 +61,8 @@ class CourseView(View):
                 type='message',
                 owner=request.user,
             ).count()
+            if not chat.lessons_done:
+                chat.delete()
 
         courslet_history = Chat.objects.filter(
             user=request.user,
