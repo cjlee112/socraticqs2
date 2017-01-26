@@ -1085,7 +1085,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 # check that incoming unit_id is acceptable for us - is in Unit queryset
                 unit_ids = [i['id'] for i in other_units_qs.values('id')]
                 unit_to_move = Unit.objects.filter(
-                    models.Q(id=request.POST.get('unit_to_move'))&\
+                    models.Q(id=request.POST.get('unit_to_move')) &
                     models.Q(id__in=unit_ids)
                 ).first()
                 if unit_to_move:
