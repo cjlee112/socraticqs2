@@ -87,6 +87,7 @@
                       <a href="{{ domain }}/chat/enrollcode/{{ lu.enroll_code.enrollCode }}/">
                         <h3>{{ lu.timestamp|date:"F j, Y P" }}</h3>
                         <p>{{ lu.lessons_done }} lessons</p>
+                        <p>Time spent: {{ lu.get_formatted_time_spent }} </p>
                       </a>
                     </li>
                   {% endfor %}

@@ -1,7 +1,9 @@
+import datetime
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from mock import patch, Mock
+from chat.models import Chat, EnrollUnitCode
 from ct.models import Course, Unit, CourseUnit, Role
 from views import CourseView
 
@@ -10,6 +12,28 @@ class TestCourseView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
+
+        self.course = Course(title='test_title', addedBy=self.user)
+        self.course.save()
+
+        self.unit = Unit(title='test unit title', addedBy=self.user)
+        self.unit.save()
+
+        self.course_unit = CourseUnit(course=self.course, unit=self.unit, order=0, addedBy=self.user)
+        self.course_unit.save()
+
+        self.role = Role(course=self.course, user=self.user, role=Role.INSTRUCTOR)
+        self.role.save()
+
+        self.enroll = EnrollUnitCode.get_code_for_user_chat(self.course_unit, True, self.user)
+
+        self.history_live_chat = Chat(
+            user=self.user,
+            is_live=True,
+            enroll_code=self.enroll
+        )
+        self.history_live_chat.save()
+
 
     @patch('lms.views.ChatProgressSerializer')
     @patch('lms.views.get_object_or_404')
@@ -65,11 +89,6 @@ class TestCourseView(TestCase):
         student opens course page.
         Student should not see 'Join Live Session' button on the top of the page.
         """
-        self.course = Course(
-            title='Great Course', description='the bestest', addedBy=self.user
-        )
-        self.course.save()
-
         response = self.client.get(
             reverse('lms:course_view', kwargs={'course_id': self.course.id})
         )
@@ -84,3 +103,13 @@ class TestCourseView(TestCase):
 
     #TODO: write test when teacher really creates Course and Courslets inside of the course and student open page.
     #TODO: user should see 'Join' button.
+
+    @patch('chat.models.Chat.get_spent_time')
+    def test_live_chat_history_time_spent(self, get_spent_time):
+        get_spent_time.return_value = datetime.timedelta(days=1, hours=1)
+        response = self.client.get(reverse('lms:course_view', kwargs={'course_id': self.course.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'lms/course_page.html')
+        self.assertIn('livesessions', response.context)
+        self.assertNotEquals(response.context['livesessions'], [])
+        self.assertEqual(response.context['livesessions'][0].get_formatted_time_spent(), '1 day, 1:00:00')

@@ -78,6 +78,7 @@ class Chat(models.Model):
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
+    last_modify_timestamp = models.DateTimeField(auto_now=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -97,6 +98,18 @@ class Chat(models.Model):
         data = self.state.get_all_state_data()
         if 'course' in data and 'unit' in data:
             return CourseUnit.objects.filter(unit=data['unit'], course=data['course']).first()
+
+    def get_spent_time(self):
+        '''
+        Return timestamp - start_timestamp.
+        It's actual time spent for live session.
+        :return: datetime.timedelta
+        '''
+        return self.last_modify_timestamp - self.timestamp
+
+    def get_formatted_time_spent(self):
+        spent_time = self.get_spent_time()
+        return str(spent_time).split('.', 2)[0].replace('-', '')
 
 
 class Message(models.Model):
