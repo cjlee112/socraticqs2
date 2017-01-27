@@ -24,10 +24,10 @@ class MiscTests(TestCase):
     """
     @unpack
     @data(
-        ('prof', 'assertIsNone'),
-        ('student', 'assertIsNotNone'),
-        (['prof', 'student'], 'assertIsNone'),
-        (['student'], 'assertIsNotNone')
+        ('prof', 'assertFalse'),
+        ('student', 'assertTrue'),
+        (['prof', 'student'], 'assertFalse'),
+        (['student'], 'assertTrue')
     )
     def test_check_instructor_auth(self, role, check):
         """
@@ -38,10 +38,6 @@ class MiscTests(TestCase):
         request = Mock()
         result = check_instructor_auth(course, request)
         getattr(self, check)(result)  # Checking returned result for None or for value depending on role
-        if check == 'assertIsNotNone':  # If student we need to test 403 Forbidden HttpResponce
-            self.assertTrue(isinstance(result, HttpResponse))
-            self.assertEqual(result.content, 'Only the instructor can access this')
-            self.assertEqual(result.status_code, 403)
 
     @patch('ct.views.get_base_url')
     @unpack
@@ -434,7 +430,7 @@ class BaseViewsTests(TestCase):
             {'task': 'logout'}
         )
         self.assertEqual(logout.call_count, 1)
-        self.assertRedirects(response, reverse('ct:home'), status_code=302)
+        self.assertRedirects(response, reverse('ct:home'))
 
     def test_about(self):
         response = self.client.get(reverse('ct:about'))
@@ -444,7 +440,7 @@ class BaseViewsTests(TestCase):
 
 class CourseViewTest(TestCase):
     def test_course_view_no_role(self):
-        """Test KeyError if user has not Instructor role to desired Course.
+        """Test if user has not Instructor role to desired Course.
 
         KeyError raises in Course.get_user_role method if user has no role
         to access this Course. In this view we chech Instructor role.
@@ -453,13 +449,12 @@ class CourseViewTest(TestCase):
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
         self.client.login(username='test', password='test')
-        response = self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}), follow=False)
+        self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
     def test_course_view_teacher_get_redirect(self):
         """
-        Check redirection from teacher course url to student course url if user has
-        only Student role to the Course.
+        Check redirection from teacher course url to student course url if there's no role to this user for such the Course.
         """
         self.user = User.objects.create_user(username='test', password='test')
         self.course = Course(title='test_title', addedBy=self.user)
@@ -587,7 +582,7 @@ class EditCourseTest(TestCase):
     def test_edit_course_no_role(self):
         self.role.delete()
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
     def test_edit_course_no_course(self):
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': 99}))
@@ -597,7 +592,6 @@ class EditCourseTest(TestCase):
         self.role.role = Role.ENROLLED
         self.role.save()
         response = self.client.get(reverse('ct:edit_course', kwargs={'course_id': self.course.id}))
-        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
     def test_edit_course_get(self):
@@ -643,7 +637,6 @@ class SubscribeTest(TestCase):
         self.course = Course(title='test_title', addedBy=self.user)
         self.course.save()
         response = self.client.get(reverse('ct:subscribe', kwargs={'course_id': self.course.id}))
-        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:course_student', args=(self.course.id,)))
 
 
@@ -680,7 +673,6 @@ class EditUnitTest(TestCase):
         response = self.client.get(
             reverse('ct:edit_unit', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id})
         )
-        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:study_unit', args=(self.course.id, self.unit.id)))
 
 
@@ -689,7 +681,6 @@ class EditUnitTest(TestCase):
         response = self.client.get(
             reverse('ct:edit_unit', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id})
         )
-        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('ct:study_unit', args=(self.course.id, self.unit.id)))
 
 
@@ -966,9 +957,9 @@ class EditLessonTest(TestCase):
             ),
             follow=True
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateUsed(response, 'lti/error.html')
-        self.assertTrue('This action is not allowed for this user' in response.context['message'])
+        self.assertIsNotNone(response.context['message'])
 
 
     def test_edit_lesson_update(self):

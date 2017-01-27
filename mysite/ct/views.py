@@ -36,12 +36,13 @@ from ct.exceptions import CommonDisambiguationError
 
 def check_instructor_auth(course, request):
     'return 403 if not course instructor, else None'
-    role = course.get_user_role(request.user, justOne=False)
+    try:
+        role = course.get_user_role(request.user, justOne=False)
+    except KeyError:
+        return True
     if not isinstance(role, list):
         role = [role]
-    if not Role.INSTRUCTOR in role:
-        return HttpResponse("Only the instructor can access this",
-                            status=403)
+    return not (Role.INSTRUCTOR in role)
 
 
 @cache_this
@@ -329,11 +330,7 @@ def course_view(request, course_id):
     'show courselets in a course'
     course = get_object_or_404(Course, pk=course_id)
     if is_teacher_url(request.path):
-        try:
-            notInstructor = check_instructor_auth(course, request)
-        except KeyError as e:
-            notInstructor = True
-
+        notInstructor = check_instructor_auth(course, request)
         if notInstructor: # redirect students to live session or student page
             return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
         navTabs = course_tabs(request.path, 'Home')
@@ -391,11 +388,7 @@ def course_view(request, course_id):
 @login_required
 def edit_course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
-    try:
-        notInstructor = check_instructor_auth(course, request)
-    except KeyError as e:
-        notInstructor = True
-
+    notInstructor = check_instructor_auth(course, request)
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
 
@@ -472,10 +465,7 @@ def edit_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     course_unit = CourseUnit.objects.get(unit=unit, course=course)
     enroll_code = EnrollUnitCode.get_code(course_unit)
-    try:
-        notInstructor = check_instructor_auth(course, request)
-    except KeyError as e:
-        notInstructor = True
+    notInstructor = check_instructor_auth(course, request)
 
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
@@ -1079,15 +1069,16 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
     course = get_object_or_404(Course, pk=course_id)
-    try:
-        notInstructor = check_instructor_auth(course, request)
-    except KeyError as e:
+    notInstructor = check_instructor_auth(course, request)
+
+    if notInstructor:
         return render(
             request,
             'lti/error.html',
-            {'message': 'This action is not allowed for this user ({})'.format(e.message)},
-            status=404
+            {"message": "Only instructor can access this"},
+            status=403
         )
+
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
             formClass = AnswerLessonForm
