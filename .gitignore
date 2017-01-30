@@ -59,6 +59,7 @@ target/
 .env/
 *.db
 settings_local.py
+local.py
 #static/
 assets/
 mysite/static/
