@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 echo "Clearing .pyc files."
-find /code/ -name "*.pyc" -delete
+find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 echo "Done."
 
 
