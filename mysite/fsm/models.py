@@ -8,7 +8,7 @@ from django.db.models import Q
 from fsm.utils import get_plugin
 
 from ct.ct_util import reverse_path_args
-from ct.models import Course
+from ct.models import Course, Role
 from mixins import JSONBlobMixin, ChatMixin
 
 
@@ -358,8 +358,10 @@ class FSMState(JSONBlobMixin, models.Model):
         return cls.objects.filter(
             ~Q(fsmNode__funcName__contains='live_chat'),
             isLiveSession=True,
-            activity__course__role__user=user
+            activity__course__role__user=user,
+            user__role__role__in=[Role.ENROLLED, Role.SELFSTUDY]
         ).distinct()
+
 
     def __unicode__(self):
         return u'::'.join((self.user.username, str(self.fsmNode)))
