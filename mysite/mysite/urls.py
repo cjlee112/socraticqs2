@@ -18,6 +18,7 @@ urlpatterns = patterns(
 
     # Login / logout.
     url(r'^login/$', 'psa.views.custom_login', name='login'),
+    url(r'^signup/$', 'psa.views.new_custom_login', {'next_page': '/'}, name='new_login'),
     url(r'^logout/$', logout_page, {'next_page': '/login/'}, name='logout'),
 
 
