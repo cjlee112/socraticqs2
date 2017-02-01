@@ -3,12 +3,14 @@ from django.conf import settings
 from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render_to_response, render
 from django.contrib.auth import logout, login, authenticate
 from social.backends.utils import load_backends
+from accounts.models import Instructor
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
+from psa.forms import SignUpForm
 
 
 def context(**extra):
@@ -75,6 +77,79 @@ def custom_login(request):
         kwargs['next'] = params['next']
     return render_to_response(
         'psa/custom_login.html', context_instance=RequestContext(request, kwargs)
+    )
+
+def check_username_and_create_user(username, email, password, **kwargs):
+    already_exists = User.objects.filter(
+        username=username
+    )
+    if not already_exists:
+        return User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=kwargs['first_name'],
+            last_name=kwargs['last_name'],
+
+        )
+    else:
+        username += '_'
+        return check_username_and_create_user(username, email, password, **kwargs)
+
+def send_confirmation_email(user):
+    '''
+    This function will send email about successful registration to user.
+    :param user: user instance
+    :return: None
+    '''
+    return True
+
+def new_custom_login(request, next_page=None):
+    """
+    Fields to handle on:
+        Email
+        Re-enter email
+        First name
+        Last name
+        Institution
+        Password
+    Custom login to integrate social auth and default login.
+    """
+    username = password = ''
+    logout(request)
+    form = SignUpForm(initial={'next': next_page})
+    kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
+    if request.POST:
+        form = SignUpForm(request.POST)
+        params = request.POST
+        if form.is_valid():
+            username = form.cleaned_data['email'].split('@', 2)[0]
+            user = check_username_and_create_user(
+                username=username,
+                **form.cleaned_data
+            )
+            instructor = Instructor.objects.create(
+                user=user,
+                institution=form.cleaned_data['institution'],
+            )
+            params = form.cleaned_data
+            username = user.username
+            password = params['password']
+
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                email_sent = send_confirmation_email(user)
+                if user.is_active:
+                    login(request, user)
+                    return redirect(request.POST.get('next', next_page))
+    else:
+        params = request.GET
+    if 'next' in params:  # must pass through for both GET or POST
+        kwargs['next'] = params['next']
+    kwargs['form'] = form
+    return render_to_response(
+        'psa/signup.html',
+        context_instance=RequestContext(request, kwargs)
     )
 
 
