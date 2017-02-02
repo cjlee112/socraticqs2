@@ -11,7 +11,7 @@ from accounts.models import Instructor
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail, AnonymEmail
-from psa.forms import SignUpForm
+from psa.forms import SignUpForm, EmailLoginForm, UsernameLoginForm
 
 
 def context(**extra):
@@ -55,7 +55,7 @@ def validation_sent(request):
     )
 
 
-def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/'):
+def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/', login_form_cls=EmailLoginForm):
     """
     Custom login to integrate social auth and default login.
     """
@@ -63,32 +63,33 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     logout(request)
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
-        params = request.POST
-        username = request.POST.get('username')
-        password = request.POST['password']
-        email = request.POST.get('email')
+        form = login_form_cls(request.POST)
+        if form.is_valid():
+            params = form.cleaned_data
+            username = params.get('username')
+            password = params.get('password')
+            email = params.get('email')
 
-        if not username and email:
-            user = User.objects.filter(email=email).first()
-            if not user:
-                sec_mail = SecondaryEmail.objects.filter(
-                    email=email
-                ).first()
-                if sec_mail:
-                    user = sec_mail.user
-            if user:
-                username = user.username
+            if not username and email:
+                user = User.objects.filter(email=email).first()
+                if not user:
+                    sec_mail = SecondaryEmail.objects.filter(
+                        email=email
+                    ).first()
+                    if sec_mail:
+                        user = sec_mail.user
+                if user:
+                    username = user.username
 
-        # remove empty value
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect(request.POST.get('next', next_page))
+            # remove empty value
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect(request.POST.get('next', next_page))
     else:
-        params = request.GET
-    if 'next' in params:  # must pass through for both GET or POST
-        kwargs['next'] = params['next']
+        form = login_form_cls(initial={'next': next_page})
+    kwargs['form'] = form
     return render(
         request,
         template_name,
