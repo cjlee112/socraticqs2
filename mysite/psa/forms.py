@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 from psa.models import SecondaryEmail
 
@@ -48,7 +49,25 @@ class EmailLoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput())
 
+
 class UsernameLoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
     next = forms.CharField(required=False, widget=forms.HiddenInput())
+
+
+class SocialForm(forms.ModelForm):
+    class Meta:
+        model = Instructor
+        fields = (
+            'user',
+            'institution',
+            'id',
+            # 'department',
+            # 'job'
+        )
+        widgets = {
+            'user': forms.HiddenInput(),
+            'id': forms.HiddenInput(),
+
+        }
