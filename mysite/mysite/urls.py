@@ -17,8 +17,15 @@ urlpatterns = patterns(
     url(r'^lms/', include('lms.urls', namespace='lms')),
 
     # Login / logout.
-    url(r'^login/$', 'psa.views.custom_login', name='login'),
+    url(r'^login/$', 'psa.views.custom_login', {'next_page': '/ct/'}, name='login'),
     url(r'^signup/$', 'psa.views.signup', {'next_page': 'login'}, name='signup'),
+    url(r'^new_login/$',
+        'psa.views.custom_login',
+        {
+            'template_name': 'psa/new_custom_login.html',
+            'next_page': '/'
+        },
+        name='new_login'),
     url(r'^logout/$', logout_page, {'next_page': '/login/'}, name='logout'),
 
 
