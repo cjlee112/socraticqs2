@@ -1,17 +1,19 @@
 from django.db.models import Q
 from django.conf import settings
+from django.http.response import HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render_to_response, render
 from django.contrib.auth import logout, login, authenticate
+from django.core.urlresolvers import reverse
 from social.backends.utils import load_backends
 from social.apps.django_app.views import complete
 from accounts.models import Instructor
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail, AnonymEmail
-from psa.forms import SignUpForm, EmailLoginForm, UsernameLoginForm
+from psa.forms import SignUpForm, EmailLoginForm, UsernameLoginForm, SocialForm
 
 
 def context(**extra):
@@ -176,7 +178,35 @@ def done(request):
     """
     Login complete view, displays user data.
     """
-    return context(person=request.user)
+    form = None
+    instructor = None
+    try:
+        instructor = request.user.instructor
+        has_inst  = bool(instructor.institution)
+    except request.user._meta.model.instructor.RelatedObjectDoesNotExist as e:
+        has_inst = False
+
+    if not has_inst:
+        initial = {
+            'user': request.user,
+        }
+        if request.POST:
+            form = SocialForm(
+                request.POST,
+                initial=initial,
+                instance=instructor
+            )
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(reverse('ct:courses'))
+        else:
+            form = SocialForm(
+                initial=initial,
+                instance=instructor
+            )
+    return context(
+        person=request.user, form=form
+    )
 
 
 @login_required
