@@ -42,3 +42,13 @@ class SignUpForm(forms.Form):
             raise already_exists_exc
         return email
 
+
+class EmailLoginForm(forms.Form):
+    next = forms.CharField(required=False, widget=forms.HiddenInput())
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput())
+
+class UsernameLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
+    next = forms.CharField(required=False, widget=forms.HiddenInput())
