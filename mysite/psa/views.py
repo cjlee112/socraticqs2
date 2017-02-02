@@ -10,9 +10,8 @@ from social.apps.django_app.views import complete
 from accounts.models import Instructor
 
 from psa.utils import render_to
-from psa.models import SecondaryEmail
+from psa.models import SecondaryEmail, AnonymEmail
 from psa.forms import SignUpForm
-
 
 
 def context(**extra):
@@ -56,7 +55,7 @@ def validation_sent(request):
     )
 
 
-def custom_login(request):
+def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/'):
     """
     Custom login to integrate social auth and default login.
     """
@@ -65,20 +64,35 @@ def custom_login(request):
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
         params = request.POST
-        username = request.POST['username']
+        username = request.POST.get('username')
         password = request.POST['password']
+        email = request.POST.get('email')
 
+        if not username and email:
+            user = User.objects.filter(email=email).first()
+            if not user:
+                sec_mail = SecondaryEmail.objects.filter(
+                    email=email
+                ).first()
+                if sec_mail:
+                    user = sec_mail.user
+            if user:
+                username = user.username
+
+        # remove empty value
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect(request.POST.get('next', '/ct/'))
+                return redirect(request.POST.get('next', next_page))
     else:
         params = request.GET
     if 'next' in params:  # must pass through for both GET or POST
         kwargs['next'] = params['next']
-    return render_to_response(
-        'psa/custom_login.html', context_instance=RequestContext(request, kwargs)
+    return render(
+        request,
+        template_name,
+        kwargs
     )
 
 def check_username_and_create_user(username, email, password, **kwargs):
