@@ -1,16 +1,18 @@
 from django.db.models import Q
 from django.conf import settings
 from django.template import RequestContext
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render_to_response, render
 from django.contrib.auth import logout, login, authenticate
 from social.backends.utils import load_backends
+from social.apps.django_app.views import complete
 from accounts.models import Instructor
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
 from psa.forms import SignUpForm
+
 
 
 def context(**extra):
@@ -86,7 +88,6 @@ def check_username_and_create_user(username, email, password, **kwargs):
     if not already_exists:
         return User.objects.create_user(
             username=username,
-            email=email,
             password=password,
             first_name=kwargs['first_name'],
             last_name=kwargs['last_name'],
@@ -104,7 +105,7 @@ def send_confirmation_email(user):
     '''
     return True
 
-def new_custom_login(request, next_page=None):
+def signup(request, next_page=None):
     """
     Fields to handle on:
         Email
@@ -132,25 +133,26 @@ def new_custom_login(request, next_page=None):
                 user=user,
                 institution=form.cleaned_data['institution'],
             )
-            params = form.cleaned_data
-            username = user.username
-            password = params['password']
+            # params = form.cleaned_data
+            # username = user.username
+            # password = params['password']
 
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                email_sent = send_confirmation_email(user)
-                if user.is_active:
-                    login(request, user)
-                    return redirect(request.POST.get('next', next_page))
+            request.user = user
+            response = complete(request, 'email')
+            request.user = AnonymousUser()
+            return response
+            # user = authenticate(username=username, password=password)
+            # if user is not None:
+            #     email_sent = send_confirmation_email(user)
+            #     if user.is_active:
+            #         login(request, user)
+            #         return redirect(request.POST.get('next', next_page))
     else:
         params = request.GET
     if 'next' in params:  # must pass through for both GET or POST
         kwargs['next'] = params['next']
     kwargs['form'] = form
-    return render_to_response(
-        'psa/signup.html',
-        context_instance=RequestContext(request, kwargs)
-    )
+    return render(request, 'psa/signup.html', kwargs)
 
 
 @login_required
