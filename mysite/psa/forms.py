@@ -1,4 +1,7 @@
 from django import forms
+from django.contrib.auth.models import User
+from psa.custom_django_storage import CustomCode
+from psa.models import SecondaryEmail
 
 
 class SignUpForm(forms.Form):
@@ -18,8 +21,8 @@ class SignUpForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
 
     def clean(self):
-        confirm_email = self.cleaned_data['email_confirmation']
-        email = self.cleaned_data['email']
+        confirm_email = self.cleaned_data.get('email_confirmation')
+        email = self.cleaned_data.get('email')
         if confirm_email and email and email == confirm_email:
             return self.cleaned_data
         else:
@@ -29,4 +32,13 @@ class SignUpForm(forms.Form):
                     'email',
                     'email confirmation')
             )
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        already_exists_exc = forms.ValidationError('This email is already registered in the system.')
+        if User.objects.filter(email=email):
+            raise already_exists_exc
+        if CustomCode.objects.filter(email=email, verified=True):
+            raise already_exists_exc
+        return email
 
