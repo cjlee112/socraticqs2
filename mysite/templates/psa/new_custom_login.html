@@ -1,0 +1,48 @@
+{% extends "ct/portal.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+<div class="buttons">
+{% if not user.is_authenticated %}
+{% endif %}
+
+{% include "psa/social_backends.html" %}
+
+<br>
+
+<div id="login">
+  <h4>Login</h4>
+    <form class="form-horizontal" name="LoginForm" action="." method="post">
+    {% csrf_token %}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    <div class="control-group">
+        <label class="control-label" for="email">Email</label>
+        <div class="controls">
+            <input type="text" id="email" name="email"  placeholder="Email">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="password">Password</label>
+        <div class="controls">
+            <input type="password" name="password" id="password" placeholder="Password">
+        </div>
+    </div>
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn">Login</button>
+        </div>
+    </div>
+    </form>
+</div>
+
+{% if DEBUG %}
+    {% include "psa/user_details.html" %}
+{% endif %}
+
+{% endblock %}
