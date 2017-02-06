@@ -40,7 +40,6 @@ class AccountSettingsView(LoginRequiredMixin, View):
                 if form.is_valid():
                     if form_id == 'email_form':
                         resp = form.save(request, commit=False)
-                        # print user.email
                     else:
                         form.save()
                 else:
