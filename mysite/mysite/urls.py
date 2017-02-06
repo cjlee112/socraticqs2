@@ -8,6 +8,7 @@ from pages.views import interested_form
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from psa.forms import UsernameLoginForm, EmailLoginForm
+from accounts.views import AccountSettingsView
 
 admin.autodiscover()
 
@@ -34,13 +35,13 @@ urlpatterns = patterns(
         name='new_login'),
     url(r'^logout/$', logout_page, {'next_page': '/login/'}, name='logout'),
 
+    url(r'^account/', include('accounts.urls', namespace='accounts')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-
 
     url(r'^email-sent/$', 'psa.views.validation_sent'),
     url('', include('social.apps.django_app.urls', namespace='social')),
