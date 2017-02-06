@@ -49,7 +49,7 @@ from psa.models import AnonymEmail, SecondaryEmail
 
 
 @partial
-def custom_mail_validation(backend, details, user=None, is_new=False, *args, **kwargs):
+def custom_mail_validation(backend, details, user=None, is_new=False, force_update=False, *args, **kwargs):
     """Email validation pipeline
 
     Verify email or send email with validation link.
@@ -80,7 +80,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
                     backend.strategy.session_set('next', _next)
-                    return {'user': user}
+                    return {'user': user, 'force_update': force_update}
         else:
             if user and user.groups.filter(name='Temporary').exists():
                 AnonymEmail.objects.get_or_create(
@@ -88,7 +88,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, *args, **k
                     email=details.get('email'),
                     defaults={'date': datetime.now()}
                 )
-            backend.strategy.send_email_validation(backend, details.get('email'))
+            backend.strategy.send_email_validation(backend, details.get('email'), force_update=force_update)
             backend.strategy.session_set('email_validation_address', details.get('email'))
             backend.strategy.session_set('next', data.get('next'))
             return backend.strategy.redirect(
@@ -234,11 +234,28 @@ def social_user(backend, uid, user=None, *args, **kwargs):
             'new_association': False}
 
 
-def associate_user(backend, details, uid, user=None, social=None, *args, **kwargs):
+def associate_user(backend, details, uid, user=None, social=None, force_update=False, *args, **kwargs):
     """
     Create UserSocialAuth.
     """
     email = details.get('email')
+
+    if user and force_update:
+        if not social:
+            try:
+                social = backend.strategy.storage.user.create_social_auth(
+                    user, uid, backend.name
+                )
+            except Exception as err:
+                if not backend.strategy.storage.is_integrity_error(err):
+                    raise
+        user.email = email
+        user.save()
+        return {
+            'social': social,
+            'user': social.user,
+            'new_association': False
+        }
     if user and not social:
         try:
             social = backend.strategy.storage.user.create_social_auth(
@@ -252,7 +269,7 @@ def associate_user(backend, details, uid, user=None, social=None, *args, **kwarg
             # https://github.com/omab/django-social-auth/issues/131
             return social_user(backend, uid, user, *args, **kwargs)
         else:
-            if email and user.email and not user.email == email:
+            if not force_update and email and user.email and not user.email == email:
                 secondary = SecondaryEmail(
                     user=user,
                     email=email,
