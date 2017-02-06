@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.db import models
+from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from ct.models import Course
 from fsm.models import FSMState
@@ -21,6 +22,9 @@ class CourseView(View):
         if liveSession:
             liveSession.live_instructor_name = (
                 liveSession.user.get_full_name() or liveSession.user.username
+            )
+            liveSession.icon_url = (
+                liveSession.user.instructor.icon_url or static('img/avatar-teacher.jpg')
             )
         courselets = (
             (
