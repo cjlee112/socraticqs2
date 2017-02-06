@@ -1,0 +1,184 @@
+{% extends "ct/portal.html" %}
+{% load social_tags %}
+
+{% block title %}
+Account settings page
+{% endblock %}
+
+{% block content %}
+{% if person and user.id == person.id %}
+
+<div class="buttons">
+  {% if user.is_authenticated and not 'anonymous' in user.username %}
+    <div class="user-details">
+      You are logged in as <code>{{ user.username }}</code>!
+    </div>
+  {% endif %}
+  {% if user and 'anonymous' in user.username %}
+  <h4>You are in a temporary anonymous session.</h4>
+  <h4>Please confirm your email to be able to restore progress.</h4>
+  <h4>This session may expire without email confirmation.</h4>
+  <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
+  <i class="fa fa-envelope"></i>
+  re-send
+  </a>
+  </h4>
+  {% endif %}
+
+{% comment %}
+  {% if user and not 'anonymous' in user.username %}
+  You can associate social account, email or set/change password as this page.
+
+  <div class="social">
+    {% include 'psa/social_backends.html' %}
+  </div>
+  <br>
+  <a class="btn btn-default" name="set-pass">
+  Set password
+  </a>
+
+  <div class="legacy">
+    {% include 'psa/legacy_backends.html' %}
+  </div>
+  {% endif %}
+{% endcomment %}
+
+<div class="container-fluid UserForm" style="text-align: left">
+{% if user and not 'anonymous' in user.username %}
+  {% comment %}
+  <div class="container-fluid">
+    {% include 'psa/user_details.html' %}
+  </div>
+  {% endcomment %}
+  <form class="form-horizontal" name="" action="." method="post">
+
+    {% csrf_token %}
+    {% if user_form %}
+      {% for field in user_form %}
+        {% if not field.is_hidden %}
+        <div class="control-group">
+          {{ field.label_tag }}
+            <div class="controls">
+              {{ field.errors }}
+              {{ field }}
+            </div>
+        </div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+
+
+    {% if email_form %}
+      {% for field in email_form %}
+        {% if not field.is_hidden %}
+        <div class="control-group">
+          {{ field.label_tag }}
+            <div class="controls">
+              {{ field.errors }}
+              {{ field }}
+            </div>
+        </div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if instructor_form %}
+      {% for field in instructor_form %}
+        {% if not field.is_hidden %}
+        <div class="control-group">
+          {{ field.label_tag }}
+            <div class="controls">
+              {{ field.errors }}
+              {{ field }}
+            </div>
+        </div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+    </form>
+
+  {% if password_form %}
+   <form class="form-horizontal" name="" action="." method="post">
+  {% csrf_token %}
+  {% for field in password_form %}
+    {% if not field.is_hidden %}
+    <div class="control-group">
+      {{ field.label_tag }}
+        <div class="controls">
+          {{ field.errors }}
+          {{ field }}
+        </div>
+    </div>
+    {% else %}
+      {{ field }}
+    {% endif %}
+  {% endfor %}
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+  </form>
+  {% endif %}
+
+  <h3>I want to delete my account</h3>
+  {% if delete_account_form %}
+  <form class="form-horizontal" name="" action="{% url 'accounts:delete' %}" method="post">
+  {% csrf_token %}
+    {% for field in delete_account_form %}
+    {% if not field.is_hidden %}
+    <div class="control-group">
+      <div class="controls">
+        {{ field.label_tag }}
+        {{ field.errors }}
+        {{ field }}
+      </div>
+    </div>
+    {% else %}
+      {{ field }}
+    {% endif %}
+  {% endfor %}
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+  </form>
+  {% endif %}
+
+{% endif %}
+
+
+  </div>
+
+
+
+  <div>
+    <a class="btn btn-primary" href="/logout/">
+      <i class="fa fa-sign-out"></i>
+      {% if user and 'anonymous' in user.username %}
+      Leave anonymous session
+      {% else %}
+      Logout
+      {% endif %}
+    </a>
+  </div>
+  </div>
+
+{% endif %}
+{% endblock %}
