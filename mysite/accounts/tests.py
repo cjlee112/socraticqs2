@@ -83,7 +83,7 @@ class AccountSettingsTests(TestCase):
         )
         user = self.get_user()
         self.assertEqual(user.email, 'mm@mail.com')
-        self.assertRedirects(response)
+        self.assertRedirects(response, reverse('done'))
 
 
 class DeleteAcountTests(AccountSettingsTests):
