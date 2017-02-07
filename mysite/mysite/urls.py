@@ -49,7 +49,7 @@ urlpatterns = patterns(
     url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
-    url(r'^done/$', 'psa.views.done'),
+    url(r'^done/$', 'psa.views.done', name='done'),
     url(r'^lti/', include('lti.urls', namespace='lti')),
     url(r'^interested-form/', interested_form, name='interested-form'),
     # Base API
