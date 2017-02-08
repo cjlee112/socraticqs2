@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import PasswordResetForm
 from django.db.models import Q
 from django.contrib.auth.models import User
 from accounts.models import Instructor
@@ -95,3 +96,10 @@ class DeleteAccountForm(forms.ModelForm):
         widgets = {
             'id': forms.HiddenInput(),
         }
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def clean_email(self):
+        if not User.objects.filter(email=self.cleaned_data['email']):
+            raise forms.ValidationError('No registered account with such email.')
+        return self.cleaned_data['email']
