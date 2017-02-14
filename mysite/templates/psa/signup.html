@@ -3,23 +3,13 @@
 {% block content %}
 
 <div class="buttons">
-{% if not user.is_authenticated %}
-  <a href="{% url 'login' %}">Login</a>
-{% endif %}
-
 {% include "psa/social_backends.html" %}
 
-<br>
-<div class="container-fluid">
-{% if not user.is_authenticated %}
-{% endif %}
-  {% include "psa/legacy_backends.html" %}
-</div>
 <br>
 
 <div id="login">
 <h4>Signup:</h4>
-    <form class="form-horizontal" name="LoginForm" action="." method="post">
+    <form class="form-horizontal" name="RegistrationForm" action="." method="post">
     {% csrf_token %}
 
     {% for field in form %}
@@ -35,18 +25,11 @@
       {{ field }}
       {% endif %}
     {% endfor %}
-      {% if form.errors %}
-      {% comment %} {{ form.errors }} {% endcomment %}
-      {% endif %}
 
-    {% comment %} {%if next %}
-        <input type="hidden" name="next" value="{{ next }}" />
-    {% endif %}
-    {% endcomment %}
     <br>
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn">Login</button>
+            <button type="submit" class="btn btn-success">Register</button>
         </div>
     </div>
     </form>

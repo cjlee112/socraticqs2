@@ -1,10 +1,15 @@
+from functools import partial
+
 from django.contrib.auth import logout
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import View
 from django.core.urlresolvers import reverse
-from functools import partial
-from accounts.forms import UserForm, InstructorForm, ChangePasswordForm, DeleteAccountForm, ChangeEmailForm
+
+from accounts.forms import (
+    UserForm, InstructorForm, ChangePasswordForm,
+    DeleteAccountForm, ChangeEmailForm
+)
 from mysite.mixins import LoginRequiredMixin
 
 

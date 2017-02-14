@@ -1,4 +1,4 @@
-{% extends "ct/portal.html" %}
+{% extends "accounts/base.html" %}
 {% load social_tags %}
 
 {% block title %}
@@ -9,39 +9,11 @@ Account settings page
 {% if person and user.id == person.id %}
 
 <div class="buttons">
-  {% if user.is_authenticated and not 'anonymous' in user.username %}
+  {% if user.is_authenticated  %}
     <div class="user-details">
       You are logged in as <code>{{ user.username }}</code>!
     </div>
   {% endif %}
-  {% if user and 'anonymous' in user.username %}
-  <h4>You are in a temporary anonymous session.</h4>
-  <h4>Please confirm your email to be able to restore progress.</h4>
-  <h4>This session may expire without email confirmation.</h4>
-  <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
-  <i class="fa fa-envelope"></i>
-  re-send
-  </a>
-  </h4>
-  {% endif %}
-
-{% comment %}
-  {% if user and not 'anonymous' in user.username %}
-  You can associate social account, email or set/change password as this page.
-
-  <div class="social">
-    {% include 'psa/social_backends.html' %}
-  </div>
-  <br>
-  <a class="btn btn-default" name="set-pass">
-  Set password
-  </a>
-
-  <div class="legacy">
-    {% include 'psa/legacy_backends.html' %}
-  </div>
-  {% endif %}
-{% endcomment %}
 
 <div class="container-fluid UserForm" style="text-align: left">
 {% if user and not 'anonymous' in user.username %}
@@ -172,9 +144,7 @@ Account settings page
   <div>
     <a class="btn btn-primary" href="/logout/">
       <i class="fa fa-sign-out"></i>
-      {% if user and 'anonymous' in user.username %}
-      Leave anonymous session
-      {% else %}
+      {% if user.is_authenticated %}
       Logout
       {% endif %}
     </a>

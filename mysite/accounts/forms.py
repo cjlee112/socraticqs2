@@ -2,12 +2,20 @@ from django import forms
 from django.contrib.auth.forms import PasswordResetForm
 from django.db.models import Q
 from django.contrib.auth.models import User
+from social.apps.django_app.views import complete
+
 from accounts.models import Instructor
 from psa.models import SecondaryEmail
-from social.apps.django_app.views import complete
 
 
 class UserForm(forms.ModelForm):
+    '''
+    This form allow user to edit his profile.
+    On profile page there are a couple of forms with required fields.
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
     form_id = forms.CharField(max_length=255, initial='user_form', widget=forms.HiddenInput())
 
     class Meta:
@@ -20,6 +28,11 @@ class UserForm(forms.ModelForm):
 
 
 class ChangeEmailForm(forms.Form):
+    '''
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
     form_id = forms.CharField(max_length=255, initial='email_form', widget=forms.HiddenInput())
     email = forms.EmailField()
 
@@ -35,6 +48,13 @@ class ChangeEmailForm(forms.Form):
         return email
 
     def save(self, request, commit=True):
+        '''
+        This form calls to `complete` function of python-social-auth
+        to send email to the user with confirmation link when user changes his email.
+        :param request: django request
+        :param commit: save to db or not?
+        :return:
+        '''
         if self.initial['email'] != self.cleaned_data['email']:
             complete(request, 'email', force_update=True)
             return True
@@ -42,6 +62,11 @@ class ChangeEmailForm(forms.Form):
 
 
 class InstructorForm(forms.ModelForm):
+    '''
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
     form_id = forms.CharField(max_length=255, initial='instructor_form', widget=forms.HiddenInput())
 
     class Meta:
@@ -53,6 +78,11 @@ class InstructorForm(forms.ModelForm):
         }
 
 class ChangePasswordForm(forms.ModelForm):
+    '''
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
     form_id = forms.CharField(max_length=255, initial='password_form', widget=forms.HiddenInput())
     confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput())
     password = forms.CharField(max_length=255, widget=forms.PasswordInput())
@@ -77,6 +107,11 @@ class ChangePasswordForm(forms.ModelForm):
 
 
 class DeleteAccountForm(forms.ModelForm):
+    '''
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
     form_id = forms.CharField(max_length=255, initial='delete_account_form', widget=forms.HiddenInput())
     confirm_delete_account = forms.BooleanField(
         required=True,
@@ -99,6 +134,12 @@ class DeleteAccountForm(forms.ModelForm):
 
 
 class CustomPasswordResetForm(PasswordResetForm):
+    '''
+    Field form_id is here to check what form was submitted.
+    In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
+    If form_id not found in request.POST we will not validate this form.
+    '''
+
     def clean_email(self):
         if not User.objects.filter(email=self.cleaned_data['email']):
             raise forms.ValidationError('No registered account with such email.')

@@ -167,6 +167,9 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
 
     user.enroll(roles, course_id)
     if Role.INSTRUCTOR in roles:
+        # TODO: change redirect urls when instructor UI completed
+        # NOTE: waffle allow to disable\enable features in the project through admin UI.
+        # Here we enable\disable redirecting user to instructor UI.
         if waffle.switch_is_active('instructor_UI'):
             if not unit_id:
                 return redirect(reverse('ct:course', args=(course_id,)))
