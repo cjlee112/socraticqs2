@@ -1,12 +1,10 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.apps import apps
+from django.contrib import admin
 
 from mysite.views import *
 from pages.views import interested_form
-
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
 from psa.forms import UsernameLoginForm, EmailLoginForm
 from accounts.views import AccountSettingsView
 
@@ -20,10 +18,11 @@ urlpatterns = patterns(
     url(r'^lms/', include('lms.urls', namespace='lms')),
 
     # Login / logout.
-    url(r'^login/$',
-        'psa.views.custom_login',
-        {'next_page': '/ct/',
-         'login_form_cls': UsernameLoginForm}, name='login'),
+    url(r'^login/$', 'psa.views.custom_login',
+        {
+            'next_page': '/ct/',
+            'login_form_cls': UsernameLoginForm
+        }, name='login'),
     url(r'^signup/$', 'psa.views.signup', {'next_page': 'login'}, name='signup'),
     url(r'^new_login/$',
         'psa.views.custom_login',
