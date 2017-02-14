@@ -1,0 +1,23 @@
+ <h4>{{ list_name }}</h4>
+ <table class="table table-striped">
+   <thead>
+   <th>
+     Course
+   </th>
+   <th>
+     Settings
+   </th>
+   </thead>
+   <tbody>
+   {% for course in courses %}
+   <tr>
+     <td>
+      <a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a>
+     </td>
+     <td>
+      <a href="{% url 'ctms:course_settings' pk=course.id %}">settings</a><br>
+     </td>
+   </tr>
+   {% endfor %}
+   </tbody>
+ </table>

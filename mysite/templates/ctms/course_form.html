@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ object.title }}
+{% endblock %}
+
+{% block base_content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h4><a href="{% url 'ctms:course_view' pk=object.id %}">{{ object.title }}</a></h4>
+  <h6>Added by {{ object.addedBy }}</h6>
+</div>
+
+<form action="{% url 'ctms:course_settings' pk=object.id %}" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="Save course" class="btn btn-success">
+</form>
+<br>
+
+<form action="{% url 'ctms:course_delete' pk=object.id %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Delete Course" class="btn btn-danger">
+</form>
+
+
+{% endblock %}

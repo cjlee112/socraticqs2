@@ -1,0 +1,8 @@
+<h4>Create new course</h4>
+<h5>Course is ... </h5>
+
+    <form method="POST" action="{% url 'ctms:create_course' %}">
+      {{ form.as_p }}
+      {% csrf_token %}
+      <input type="submit" name="Save" />
+    </form>

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ object.title }}
+{% endblock %}
+
+{% block base_content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h5><a href="{% url 'ctms:course_view' pk=course_pk %}">{{ object.course.title }}</a></h5>
+</div>
+<div class="text-center">
+  <h6>Courslet</h6>
+  <h4><a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=object.id %}">{{ object.unit.title }}</a></h4>
+</div>
+
+
+<table class="table">
+  <thead>
+  <th>
+    Unit
+  </th>
+  <th>
+    User responses count
+  </th>
+  <th>
+    View responses
+  </th>
+  <th>
+    Settings
+  </th>
+  </thead>
+  <tbody>
+  {% for u_lesson in u_lessons %}
+  <tr>
+    <td>
+      <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+        {{ u_lesson.lesson.title }}
+      </a>
+    </td>
+    <td>
+      {{ u_lesson.responses_count }}
+    </td>
+    <td>
+      <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+        View responses
+      </a>
+    </td>
+    <td>
+      <a href="{% url 'ctms:unit_settings' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+        Unit Settings
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<!--Settings-->
+<a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk  %}" class="btn btn-info">
+  Create new Unit
+</a>
+<a href="" class="btn btn-primary">
+  Add Unit by chat
+</a>
+{# <a class="btn btn-success" href="{% url 'ctms:courslet_create' course_pk=object.course.id %}">Create new courslet</a> #}
+{% endblock %}

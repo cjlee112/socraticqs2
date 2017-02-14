@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block base_content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h5><a href="{% url 'ctms:course_view' pk=course_pk %}">{{ course.title }}</a></h5>
+</div>
+<div class="text-center">
+  <h5>Courslet</h5>
+  <h5><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h5>
+  <h6>Added by {{ course.addedBy }}</h6>
+</div>
+
+<h5 class="text-center">Responses:</h5>
+
+<table class="table">
+  <thead>
+  <th>
+    User
+  </th>
+  <th>
+    Timestamp
+  </th>
+  <th>
+    Response
+  </th>
+  <th>
+    Open
+  </th>
+  </thead>
+  <tbody>
+  {% for answer in responses %}
+  <tr>
+    <td>
+      {{ answer.author }}
+    </td>
+    <td>
+      {{ answer.atime|date }}
+    </td>
+    <td>
+      {{ answer.text|truncatechars:150 }}
+    </td>
+    <td>
+      <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">open</a>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+{% endblock %}

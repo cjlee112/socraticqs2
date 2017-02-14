@@ -52,9 +52,14 @@ class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
 
 
+def short_text(obj):
+    return obj.text[:25]+" ..."
+
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
     raw_id_fields = ('lesson', 'unitLesson')
+    list_display = ('author', 'kind', 'course', 'lesson', short_text)
+    list_filter = ('author', 'unitLesson')
 
 
 @admin.register(StudentError)
