@@ -1,18 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
+
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 from psa.models import SecondaryEmail
 
 
 class SignUpForm(forms.Form):
-    '''Fields to handle on:
-        Email
-        Re-enter email
-        First name
-        Last name
-        Institution
-        Password'''
+    """
+    This form handles and validate data for signup process.
+    """
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
     email = forms.EmailField()
     email_confirmation = forms.EmailField()
@@ -37,9 +34,7 @@ class SignUpForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data['email']
         already_exists_exc = forms.ValidationError('This email is already registered in the system.')
-        if User.objects.filter(email=email):
-            raise already_exists_exc
-        if CustomCode.objects.filter(email=email, verified=True):
+        if User.objects.filter(email=email) or CustomCode.objects.filter(email=email, verified=True):
             raise already_exists_exc
         return email
 
@@ -63,8 +58,6 @@ class SocialForm(forms.ModelForm):
             'user',
             'institution',
             'id',
-            # 'department',
-            # 'job'
         )
         widgets = {
             'user': forms.HiddenInput(),

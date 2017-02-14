@@ -98,6 +98,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
         kwargs
     )
 
+
 def check_username_and_create_user(username, email, password, **kwargs):
     already_exists = User.objects.filter(
         username=username
@@ -114,24 +115,10 @@ def check_username_and_create_user(username, email, password, **kwargs):
         username += '_'
         return check_username_and_create_user(username, email, password, **kwargs)
 
-def send_confirmation_email(user):
-    '''
-    This function will send email about successful registration to user.
-    :param user: user instance
-    :return: None
-    '''
-    return True
 
 def signup(request, next_page=None):
     """
-    Fields to handle on:
-        Email
-        Re-enter email
-        First name
-        Last name
-        Institution
-        Password
-    Custom login to integrate social auth and default login.
+    This function handles custom login to integrate social auth and default login.
     """
     username = password = ''
     logout(request)
@@ -150,20 +137,14 @@ def signup(request, next_page=None):
                 user=user,
                 institution=form.cleaned_data['institution'],
             )
-            # params = form.cleaned_data
-            # username = user.username
-            # password = params['password']
-
+            # here we put just created user into request.user
+            # because python-social-auth.compolete function implies that just created user will be authenticated,
+            # but we don't authenticate it, so we do this trick.
             request.user = user
             response = complete(request, 'email')
+            # after calling complete function we don't need request.user, so we replace it with AnonymousUser
             request.user = AnonymousUser()
             return response
-            # user = authenticate(username=username, password=password)
-            # if user is not None:
-            #     email_sent = send_confirmation_email(user)
-            #     if user.is_active:
-            #         login(request, user)
-            #         return redirect(request.POST.get('next', next_page))
     else:
         params = request.GET
     if 'next' in params:  # must pass through for both GET or POST
