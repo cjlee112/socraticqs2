@@ -10,10 +10,10 @@ from accounts.forms import (
     UserForm, InstructorForm, ChangePasswordForm,
     DeleteAccountForm, ChangeEmailForm
 )
-from mysite.mixins import LoginRequiredMixin
+from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
 
 
-class AccountSettingsView(LoginRequiredMixin, View):
+class AccountSettingsView(NotAnonymousRequiredMixin, View):
     def get(self, request):
         return render(
             request,
@@ -62,7 +62,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
             kwargs
         )
 
-class DeleteAccountView(LoginRequiredMixin, View):
+class DeleteAccountView(NotAnonymousRequiredMixin, View):
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
         if form.is_valid():
