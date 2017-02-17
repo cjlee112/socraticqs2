@@ -69,7 +69,7 @@ class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, View):
             course = form.save(commit=False)
             course.addedBy = request.user
             course.save()
-            return redirect(reverse('lms:course_view', kwargs={'course_id': course.id}))
+            return redirect(reverse('ctms:course_view', kwargs={'course_id': course.id}))
         return render(
             request,
             'ctms/my_courses.html',
@@ -159,7 +159,9 @@ class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
     def get_queryset(self):
         # UnitLesson
-        return self.get_my_or_shared_with_me_course_units()
+        return self.get_my_or_shared_with_me_course_units().filter(
+            course=self.get_course()
+        )
 
     def get_context_data(self, **kwargs):
         kwargs.update({
