@@ -104,3 +104,41 @@ class DeleteAcountTests(AccountSettingsTests):
 
         self.assertTemplateUsed(response, 'accounts/settings.html')
         self.assertTrue(bool(response.context['delete_account_form'].errors))
+
+
+class AnonymousUserAccountSettingsTests(TestCase):
+    def setUp(self):
+        self.username = 'anonymous'
+        self.user_pw = '123'
+        self.create_user()
+        self.url = reverse('accounts:settings')
+        self.client.login(username=self.username, password=self.user_pw)
+
+    def create_user(self):
+        self.user = User.objects.create_user(
+            username=self.username,
+            email='email@mail.com',
+            password=self.user_pw
+        )
+        self.instructor = Instructor(user=self.user)
+        self.instructor.save()
+
+    def test_login_required(self):
+        '''
+        Checks that user with username anonymous will be redirected to login page
+        '''
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse('login')+'?next='+self.url)
+
+    def test_login_usual_user(self):
+        '''
+        Checks that usual user will not be redirected to login page
+        '''
+        self.username = 'user123'
+        self.create_user()
+        self.client.login(username=self.username, password=self.user_pw)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+
+
