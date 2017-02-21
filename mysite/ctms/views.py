@@ -350,6 +350,16 @@ class CoursletSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateVi
 
 class CoursletDeleteView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = CourseUnit
+    template_name = 'ctms/courseunit_confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs.update(self.kwargs)
+        kwargs.update({
+            'course': self.get_course(),
+            'courslet': self.get_courslet(),
+        })
+        return kwargs
+
     def get_success_url(self):
         course = self.get_course()
         if course:
