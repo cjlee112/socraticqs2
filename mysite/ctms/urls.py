@@ -12,7 +12,7 @@ urlpatterns = patterns(
 
     url(r'^courses/new/?$', CreateCourseView.as_view(), name='create_course'),
     url(r'^courses/(?P<pk>\d+)/?$', CourseView.as_view(), name='course_view'),
-    url(r'^courses/(?P<pk>\d+)/edit/?$', UpdateCourseView.as_view(), name='course_settings'),
+    url(r'^courses/(?P<pk>\d+)/settings/?$', UpdateCourseView.as_view(), name='course_settings'),
     url(r'^courses/(?P<pk>\d+)/delete/?$', DeleteCourseView.as_view(), name='course_delete'),
 
     # new courslet

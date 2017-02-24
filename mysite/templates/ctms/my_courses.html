@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "ctms/ctms_base.html" %}
 {% load staticfiles %}
 
 
@@ -13,7 +13,7 @@
 {% endif %}
 {% endblock %}
 
-{% block base_content %}
+{% block content %}
 <div class="course-content">
   {% if form %}
     {% include 'ctms/includes/create_course.html' %}

@@ -38,11 +38,22 @@ class CourseCoursletUnitMixin(object):
         ).distinct()
 
     def get_my_or_shared_with_me_course_units(self):
-        # UnitLesson
         return CourseUnit.objects.filter(
             models.Q(addedBy=self.request.user) |
             models.Q(course__shared_courses__to_user=self.request.user)
         ).distinct()
+
+    def get_units_by_course_unit(self, course_unit):
+        # UnitLesson
+        return course_unit.unit.unitlesson_set.filter(
+            kind=UnitLesson.COMPONENT,
+            order__isnull=False
+        ).order_by(
+            'order'
+        ).annotate(
+            responses_count=models.Count('response')
+        )
+
 
 class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, View):
     def get(self, request):
@@ -117,7 +128,7 @@ class UpdateCourseView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
 
 class DeleteCourseView(LoginRequiredMixin, DeleteView):
     model = Course
-    
+
     def get_queryset(self):
         return Course.objects.filter(addedBy=self.request.user)
 
@@ -165,16 +176,7 @@ class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'u_lessons': self.object.unit.unitlesson_set.filter(
-                kind=UnitLesson.COMPONENT,
-                order__isnull=False
-            ).order_by(
-                'order'
-            ).annotate(
-                responses_count=models.Count('response')
-            ),
-            # 'course_pk': self.kwargs['course_pk'],
-            # 'courslet_pk': self.kwargs['pk'],
+            'u_lessons': self.get_units_by_course_unit(self.object)
         })
         kwargs.update(self.kwargs)
         return kwargs

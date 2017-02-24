@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "ctms/ctms_base.html" %}
 
 {% block title %}
 {{ object.title }}
 {% endblock %}
 
-{% block base_content %}
+{% block content %}
 <div class="text-center">
   <h6>Course</h6>
   <h4><a href="{% url 'ctms:course_view' pk=object.id %}">{{ object.title }}</a></h4>
