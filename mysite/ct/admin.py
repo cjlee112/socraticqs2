@@ -53,7 +53,7 @@ class AdminRole(admin.ModelAdmin):
 
 
 def short_text(obj):
-    return obj.text[:25]+" ..."
+    return obj.text[:25] + " ..."
 
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):

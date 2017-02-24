@@ -6,9 +6,6 @@ from django.conf import settings
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
 from ctms.urls import urlpatterns as ctms_urls
-from ctms.forms import CourseForm, CourseUnitForm, CreateCoursletForm, CreateUnitForm, EditUnitForm  #, CreateUnitForm
-from ctms.models import SharedCourse
-from mysite.mixins import LoginRequiredMixin
 from .views import CourseCoursletUnitMixin
 
 # course, courslet, unit
@@ -31,6 +28,7 @@ class SideBarUtils(object):
     Utils class.
     '''
     def __init__(self):
+        # before using this mixin we have to attach request to mixin's instance
         self.course_mixin = CourseCoursletUnitMixin()
 
     def _get_model_ids(self, kwargs):
@@ -165,6 +163,7 @@ class SideBarUtils(object):
 
 class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
+        print "Process View" * 10
         if 'ctms' in request.path:
             model_ids = self._get_model_ids(view_kwargs)
             objects = self._get_objects(model_ids)
@@ -174,20 +173,20 @@ class SideBarMiddleware(SideBarUtils):
         return None
 
     def process_template_response(self, request, response):
+        print "process_template_response"
         if 'ctms' in request.path:
             sidebar_context = {}
+            # add request to mixin
+            self.course_mixin.request = request
+            my_courses = self.course_mixin.get_my_or_shared_with_me_courses()
+            sidebar_context['user_courses'] = my_courses
+
             for model, name in MODEL_NAMES_MAPPING.items():
                 sidebar_context[name] = getattr(request, name, None)
 
             urls = self._get_urls(request)
             sidebar_context['urls'] = urls
 
-            # add request to mixin
-            self.course_mixin.request = request
-
-            my_courses = self.course_mixin.get_my_or_shared_with_me_courses()
-
-            sidebar_context['user_courses'] = my_courses
             if sidebar_context.get('course'):
                 courslets = self.course_mixin.get_my_or_shared_with_me_course_units()
                 sidebar_context['course_courslets'] = courslets

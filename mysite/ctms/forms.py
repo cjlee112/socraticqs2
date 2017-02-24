@@ -10,11 +10,6 @@ class CourseForm(forms.ModelForm):
             'addedBy': forms.HiddenInput
         }
 
-class CourseUnitForm(forms.ModelForm):
-    class Meta:
-        model = Unit
-        fields = ('title',)
-
 
 class CreateUnitForm(forms.ModelForm):
     class Meta:
@@ -37,7 +32,7 @@ class EditUnitForm(forms.ModelForm):
         self.instance.kind = self.cleaned_data['unit_type']
         return super(EditUnitForm, self).save(commit)
 
-class CreateCoursletForm(forms.ModelForm):
+class CreateCourseletForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = ('title',)

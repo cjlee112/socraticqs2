@@ -2,13 +2,14 @@ from django.http.response import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.views.generic.base import View, TemplateView
+from django.views.generic.base import View
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
+
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
-from ctms.forms import CourseForm, CourseUnitForm, CreateCoursletForm, CreateUnitForm, EditUnitForm  #, CreateUnitForm
+from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm
 from ctms.models import SharedCourse
 from mysite.mixins import LoginRequiredMixin
 
@@ -34,13 +35,13 @@ class CourseCoursletUnitMixin(object):
     def get_my_or_shared_with_me_courses(self):
         return Course.objects.filter(
             models.Q(addedBy=self.request.user) |
-            models.Q(shared_courses__to_user=self.request.user)
+            models.Q(shares__to_user=self.request.user)
         ).distinct()
 
     def get_my_or_shared_with_me_course_units(self):
         return CourseUnit.objects.filter(
             models.Q(addedBy=self.request.user) |
-            models.Q(course__shared_courses__to_user=self.request.user)
+            models.Q(course__shares__to_user=self.request.user)
         ).distinct()
 
     def get_units_by_course_unit(self, course_unit):
@@ -55,24 +56,25 @@ class CourseCoursletUnitMixin(object):
         )
 
 
-class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, View):
-    def get(self, request):
+class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, ListView):
+    template_name = 'ctms/my_courses.html'
+    model = Course
+
+    def get_context_data(self, **kwargs):
         my_courses = Course.objects.filter(
             models.Q(addedBy=self.request.user) # |
             # models.Q(shared_courses__to_user=self.request.user)
         )
-        shared_courses = SharedCourse.objects.filter(to_user=request.user)
+        shared_courses = self.request.user.shares_to_me.all()
+        # SharedCourse.objects.filter(to_user=request.user)
         course_form = None
         if not my_courses and not shared_courses:
             course_form = CourseForm()
-        return render(
-            request,
-            'ctms/my_courses.html',
-            {'my_courses': my_courses,
-             'shared_courses': shared_courses,
-             'course_form': course_form,
-            }
-        )
+        return {
+            'my_courses': my_courses,
+            'shared_courses': shared_courses,
+            'course_form': course_form,
+        }
 
     def post(self, request):
         form = CourseForm(request.POST)
@@ -163,7 +165,7 @@ class CourseView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = CourseUnit
-    template_name = 'ctms/courseunit_detail.html'
+    template_name = 'ctms/courselet_detail.html'
     course_pk_name = 'course_pk'
     courslet_pk_name = 'pk'
     unit_pk_name = None
@@ -186,7 +188,7 @@ class CreateCoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView
     model = Unit
     template_name = 'ctms/unit_form.html'
     fields = ('title',)
-    form = CreateCoursletForm
+    form = CreateCourseletForm
 
     def get_success_url(self):
         return reverse(
@@ -225,7 +227,7 @@ class CreateCoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
 
 class UnitView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
-    template_name = 'ctms/unitlesson_detail.html'
+    template_name = 'ctms/unit_detail.html'
     model = UnitLesson
 
     course_pk_name = 'course_pk'
@@ -352,7 +354,7 @@ class CoursletSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateVi
 
 class CoursletDeleteView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = CourseUnit
-    template_name = 'ctms/courseunit_confirm_delete.html'
+    template_name = 'ctms/courselet_confirm_delete.html'
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
@@ -388,7 +390,7 @@ class UnitSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
     unit_pk_name = 'pk'
-    template_name = 'ctms/unitlesson_settings.html'
+    template_name = 'ctms/unit_settings.html'
 
     def get_object(self, queryset=None):
         return self.get_unit_lesson().lesson

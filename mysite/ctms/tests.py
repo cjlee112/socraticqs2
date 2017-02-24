@@ -675,7 +675,7 @@ class CoursletDeleteViewTests(MyTestCase):
         response = self.get_page()
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts, must_equal=True)
-        self.assertTemplateUsed(response, 'ctms/courseunit_confirm_delete.html')
+        self.assertTemplateUsed(response, 'ctms/courselet_confirm_delete.html')
 
     def post_page_test(self):
         counts = self.get_model_counts()

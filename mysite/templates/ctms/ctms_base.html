@@ -14,6 +14,9 @@
 <nav class="col-xs-7 col-sm-3 col-md-2 sidebar sidebar-left sidebar-animate">
   <h4>Courses</h4>
   <select id="courses_list" class="go-on-select">
+    {% if sidebar.course not in sidebar.user_courses %}
+      <option selected="selected">Select course</option>
+    {% endif %}
     {% for course in sidebar.user_courses %}
       <option value="{% url 'ctms:course_view' pk=course.id %}" {% if sidebar.course.id == course.id %}selected="selected"{%endif%}>
         {{ course.title }}
@@ -47,6 +50,9 @@
   <hr>
     <h4>Courslets</h4>
     <select id="courslets_list" class="go-on-select">
+      {% if sidebar.courslet not in sidebar.course_courslets %}
+       <option selected="selected">Select courselet</option>
+      {% endif %}
       {% for courslet in sidebar.course_courslets %}
       <option value={% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %} {% if sidebar.courslet.id == courslet.id %}selected="selected"{%endif%}>
         {{ courslet.unit.title }}
