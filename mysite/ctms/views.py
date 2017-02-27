@@ -186,7 +186,7 @@ class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CreateCoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Unit
-    template_name = 'ctms/unit_form.html'
+    template_name = 'ctms/courselet_form.html'
     fields = ('title',)
     form = CreateCourseletForm
 
