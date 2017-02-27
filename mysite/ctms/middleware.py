@@ -192,7 +192,7 @@ class SideBarMiddleware(SideBarUtils):
                 sidebar_context['course_courslets'] = courslets
 
             if sidebar_context['courslet']:
-                sidebar_context['courslet_units'] = self.course_mixin.get_units_by_course_unit(
+                sidebar_context['courslet_units'] = self.course_mixin.get_units_by_courselet(
                     sidebar_context['courslet']
                 )
 

@@ -32,6 +32,7 @@ class EditUnitForm(forms.ModelForm):
         self.instance.kind = self.cleaned_data['unit_type']
         return super(EditUnitForm, self).save(commit)
 
+
 class CreateCourseletForm(forms.ModelForm):
     class Meta:
         model = Unit

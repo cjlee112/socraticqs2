@@ -44,9 +44,9 @@ class CourseCoursletUnitMixin(object):
             models.Q(course__shares__to_user=self.request.user)
         ).distinct()
 
-    def get_units_by_course_unit(self, course_unit):
+    def get_units_by_courselet(self, courselet):
         # UnitLesson
-        return course_unit.unit.unitlesson_set.filter(
+        return courselet.unit.unitlesson_set.filter(
             kind=UnitLesson.COMPONENT,
             order__isnull=False
         ).order_by(
@@ -178,7 +178,7 @@ class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs.update({
-            'u_lessons': self.get_units_by_course_unit(self.object)
+            'u_lessons': self.get_units_by_courselet(self.object)
         })
         kwargs.update(self.kwargs)
         return kwargs
@@ -264,18 +264,11 @@ class CreateUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
         })
 
     def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.addedBy = self.request.user
-        self.object.save()
         courslet = self.get_courslet()
         unit = courslet.unit
-        unit_lesson = UnitLesson.objects.create(
-            unit=unit,
-            order=0,
-            lesson=self.object,
-            addedBy=self.request.user,
-            treeID=self.object.id,
-        )
+        self.object = unit.create_lesson(title=form.cleaned_data['title'], text='', author=self.request.user)
+        # create UnitLesson with blank answer for this unit
+        unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=True)
         self.object.unit_lesson = unit_lesson
         return redirect(self.get_success_url())
 
