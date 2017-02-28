@@ -163,7 +163,6 @@ class SideBarUtils(object):
 
 class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
-        print "Process View" * 10
         if 'ctms' in request.path:
             model_ids = self._get_model_ids(view_kwargs)
             objects = self._get_objects(model_ids)
@@ -173,7 +172,6 @@ class SideBarMiddleware(SideBarUtils):
         return None
 
     def process_template_response(self, request, response):
-        print "process_template_response"
         if 'ctms' in request.path:
             sidebar_context = {}
             # add request to mixin
@@ -188,7 +186,7 @@ class SideBarMiddleware(SideBarUtils):
             sidebar_context['urls'] = urls
 
             if sidebar_context.get('course'):
-                courslets = self.course_mixin.get_my_or_shared_with_me_course_units()
+                courslets = self.course_mixin.get_courselets_by_course(sidebar_context['course'])
                 sidebar_context['course_courslets'] = courslets
 
             if sidebar_context['courslet']:

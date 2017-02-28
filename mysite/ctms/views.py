@@ -44,6 +44,9 @@ class CourseCoursletUnitMixin(object):
             models.Q(course__shares__to_user=self.request.user)
         ).distinct()
 
+    def get_courselets_by_course(self, course):
+        return course.courseunit_set.filter(order__isnull=False)
+
     def get_units_by_courselet(self, courselet):
         # UnitLesson
         return courselet.unit.unitlesson_set.filter(
@@ -113,7 +116,7 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
                 models.Q(id=self.kwargs.get('pk')) &
                 (
                     models.Q(addedBy=self.request.user) |
-                    models.Q(shared_courses__to_user=self.request.user)
+                    models.Q(shares__to_user=self.request.user)
                 )
             ).distinct().first()
 
