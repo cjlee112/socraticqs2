@@ -115,7 +115,7 @@ class UpdateCourseView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
                 models.Q(id=self.kwargs.get('pk')) &
                 (
                     models.Q(addedBy=self.request.user) |
-                    models.Q(shared_courses__to_user=self.request.user)
+                    models.Q(shares__to_user=self.request.user)
                 )
             ).distinct().first()
 
