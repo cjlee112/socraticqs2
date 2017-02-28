@@ -11,7 +11,7 @@ from django.db import models
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm
 from ctms.models import SharedCourse
-from mysite.mixins import LoginRequiredMixin
+from mysite.mixins import NewLoginRequiredMixin
 
 
 class CourseCoursletUnitMixin(object):
@@ -56,13 +56,13 @@ class CourseCoursletUnitMixin(object):
         )
 
 
-class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, ListView):
+class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     template_name = 'ctms/my_courses.html'
     model = Course
 
     def get_context_data(self, **kwargs):
         my_courses = Course.objects.filter(
-            models.Q(addedBy=self.request.user) # |
+            models.Q(addedBy=self.request.user)  # |
             # models.Q(shared_courses__to_user=self.request.user)
         )
         shared_courses = self.request.user.shares_to_me.all()
@@ -89,7 +89,8 @@ class MyCoursesView(LoginRequiredMixin, CourseCoursletUnitMixin, ListView):
             {'course_form': form}
         )
 
-class CreateCourseView(LoginRequiredMixin, CreateView):
+
+class CreateCourseView(NewLoginRequiredMixin, CreateView):
     template_name = 'ctms/my_courses.html'
     model = Course
     fields = ['title']
@@ -101,7 +102,7 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
         return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
 
 
-class UpdateCourseView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
+class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     template_name = 'ctms/course_form.html'
     model = Course
     fields = ['title']
@@ -128,7 +129,8 @@ class UpdateCourseView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         kwargs['object'] = self.object
         return kwargs
 
-class DeleteCourseView(LoginRequiredMixin, DeleteView):
+
+class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
     model = Course
 
     def get_queryset(self):
@@ -138,7 +140,7 @@ class DeleteCourseView(LoginRequiredMixin, DeleteView):
         return reverse('ctms:my_courses')
 
 
-class SharedCoursesListView(LoginRequiredMixin, ListView):
+class SharedCoursesListView(NewLoginRequiredMixin, ListView):
     context_object_name = 'shared_courses'
     model = SharedCourse
 
@@ -147,7 +149,7 @@ class SharedCoursesListView(LoginRequiredMixin, ListView):
         return qs.filter(to_user=self.request.user)
 
 
-class CourseView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
+class CourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = Course
     template_name = 'ctms/course_detail.html'
     pk_url_kwarg = 'pk'
@@ -163,7 +165,7 @@ class CourseView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         return kwargs
 
 
-class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
+class CoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = CourseUnit
     template_name = 'ctms/courselet_detail.html'
     course_pk_name = 'course_pk'
@@ -184,7 +186,7 @@ class CoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         return kwargs
 
 
-class CreateCoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
+class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Unit
     template_name = 'ctms/courselet_form.html'
     fields = ('title',)
@@ -226,7 +228,7 @@ class CreateCoursletView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return kwargs
 
 
-class UnitView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
+class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     template_name = 'ctms/unit_detail.html'
     model = UnitLesson
 
@@ -246,7 +248,7 @@ class UnitView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         return kwargs
 
 
-class CreateUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
+class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Lesson
     fields = ('title',)
     template_name = 'ctms/unit_form.html'
@@ -261,12 +263,15 @@ class CreateUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
                 'course_pk': self.get_course().id,
                 'courslet_pk': self.get_courslet().id,
                 'pk': self.object.unit_lesson.id
-        })
+            }
+        )
 
     def form_valid(self, form):
         courslet = self.get_courslet()
         unit = courslet.unit
-        self.object = unit.create_lesson(title=form.cleaned_data['title'], text='', author=self.request.user)
+        self.object = unit.create_lesson(
+            title=form.cleaned_data['title'], text='', author=self.request.user
+        )
         # create UnitLesson with blank answer for this unit
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=True)
         self.object.unit_lesson = unit_lesson
@@ -282,7 +287,7 @@ class CreateUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
         return kwargs
 
 
-class EditUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
+class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = UnitLesson
     template_name = 'ctms/unit_form.html'
     course_pk_name = 'course_pk'
@@ -311,7 +316,7 @@ class EditUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         return kwargs
 
 
-class ResponseView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
+class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = Response
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
@@ -323,7 +328,7 @@ class ResponseView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         return kwargs
 
 
-class CoursletSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
+class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = Unit
     fields = ('title',)
     course_pk_name = 'course_pk'
@@ -345,7 +350,7 @@ class CoursletSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, UpdateVi
         return kwargs
 
 
-class CoursletDeleteView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
+class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = CourseUnit
     template_name = 'ctms/courselet_confirm_delete.html'
 
@@ -364,7 +369,7 @@ class CoursletDeleteView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView
         return reverse('ctms:my_courses')
 
 
-class DeleteUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
+class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = UnitLesson
 
     def get_success_url(self):
@@ -378,7 +383,7 @@ class DeleteUnitView(LoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
         return reverse('ctms:my_courses')
 
 
-class UnitSettingsView(LoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
+class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = UnitLesson
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
