@@ -13,6 +13,8 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^ct/', include('ct.urls', namespace='ct')),
+    url(r'^ctms/', include('ctms.urls', namespace='ctms')),
+
     url(r'^fsm/', include('fsm.urls', namespace='fsm')),
     url(r'^chat/', include('chat.urls', namespace='chat')),
     url(r'^lms/', include('lms.urls', namespace='lms')),

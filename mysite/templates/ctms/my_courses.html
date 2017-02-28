@@ -1,0 +1,37 @@
+{% extends "ctms/ctms_base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}
+{% if course_form %}Create new course
+{% else %}
+  {% if my_courses %}
+  My courses
+  {% elif shared_courses %}
+  Shared courses
+  {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="course-content">
+  {% if form %}
+    {% include 'ctms/includes/create_course.html' %}
+  {% else %}
+    {% if my_courses %}
+      {% with 'My courses' as list_name %}
+        {% with my_courses as courses %}
+          {% include 'ctms/includes/courses_list.html' %}
+        {% endwith %}
+      {% endwith %}
+    {% elif shared_courses %}
+      {% with 'Shared courses' as list_name %}
+        {% with shared_courses as courses %}
+          {% include 'ctms/includes/courses_list.html' %}
+        {% endwith %}
+      {% endwith %}
+    {% endif %}
+  <a href="{% url 'ctms:create_course' %}" class="btn btn-success">Create new course</a>
+  {% endif %}
+</div>
+{% endblock %}

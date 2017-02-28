@@ -1,0 +1,17 @@
+{% extends "ctms/ctms_base.html" %}
+
+{% block title %}
+{{ object.title }}
+{% endblock %}
+
+
+{% block content %}
+<h4>
+  Are you sure want to delete  "{{ object.unit.title }}"
+</h4>
+<form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=object.id %}" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" class="btn btn-danger" value="Delete">
+</form>
+{% endblock %}

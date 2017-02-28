@@ -102,6 +102,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -125,6 +126,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'ct.middleware.MySocialAuthExceptionMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'ctms.middleware.SideBarMiddleware',
 )
 
 ROOT_URLCONF = 'mysite.urls'
@@ -146,6 +148,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
+    'ctms',
     'fsm',
     # LTI
     'lti',
@@ -170,6 +173,8 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     # CMS pages
     'pages',
+    # bower requirements
+    'djangobower',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -204,6 +209,7 @@ TEMPLATES = [
                 'mysite.context_processors.google_analytics',
                 'sekizai.context_processors.sekizai',
                 'cms.context_processors.cms_settings',
+                # 'ctms.context_processors.sidebar_context_processor',
             )
         }
     },
@@ -408,3 +414,20 @@ CMS_PLACEHOLDER_CONF = {
         'plugins': ['ParentPersonalGuidesPagePlugin']
     }
 }
+
+CTMS_URL_NAMESPACE = 'ctms'
+
+BOWER_COMPONENTS_ROOT = '{}/chat/static/'.format(BASE_DIR)
+BOWER_INSTALLED_APPS = (
+    'MathJax#2.6.1',
+    'bootstrap#3.3.7',
+    'gsap#1.18.5',
+    'handlebars#4.0.5',
+    'html5shiv#3.7.3',
+    'jquery#2.2.4',
+    'placeholders#4.0.1',
+    'respond#1.4.2',
+    'screenfull#3.0.2',
+    'zoom.js#0.0.1',
+    'bootstrap-sidebar',
+)

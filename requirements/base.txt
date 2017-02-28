@@ -37,3 +37,4 @@ Fabric==1.12.1
 injections==0.2.2
 djangorestframework==3.5.3
 django-waffle==0.11.1
+django-bower==5.2.0

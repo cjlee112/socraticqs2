@@ -1,0 +1,41 @@
+{% extends "ctms/ctms_base.html" %}
+
+{% block title %}
+{{ object.title }}
+{% endblock %}
+
+{% block content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h4><a href="{% url 'ctms:course_view' pk=object.id %}">{{ object.title }}</a></h4>
+  <h6>Added by {{ object.addedBy }}</h6>
+</div>
+
+<hr>
+<table class="table table-striped">
+  <thead>
+    <th>
+      Courslet
+    </th>
+    <th>
+      Settings
+    </th>
+  </thead>
+  <tbody>
+    {% for clt in courslets %}
+    <tr>
+      <td>
+        <a href="{% url 'ctms:courslet_view' course_pk=clt.course.id pk=clt.id %}">{{ clt.unit.title }}</a>
+      </td>
+      <td>
+        <a href="{% url 'ctms:courslet_settings' course_pk=clt.course.id pk=clt.id %}">Settings</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="text-right">
+  <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="btn btn-success">Create courslet</a>
+</div>
+{% endblock %}

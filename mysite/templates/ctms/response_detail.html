@@ -1,0 +1,22 @@
+{% extends "ctms/ctms_base.html" %}
+
+{% block content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h4><a href="{% url 'ctms:course_view' pk=object.course.id %}">{{ object.course.title }}</a></h4>
+  <hr>
+  <h5>Courslet</h5>
+  <h5><a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=courslet_pk%}">{{ object.unitLesson.unit.title }}</a></h5>
+  <h6>Added by {{ object.author}}</h6>
+</div>
+
+<div class="text-center">
+  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}" class="btn btn-danger">Back to responses</a>
+</div>
+
+<h6>{{ object.atime|date }}</h6>
+<h5>User {{ object.author }} respond:</h5>
+<div class="userResponse">
+<span>{{ object.text }}</span>
+</div>
+{% endblock %}
