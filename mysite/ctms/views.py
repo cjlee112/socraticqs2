@@ -444,7 +444,7 @@ class FormSetMixin(object):
 
 
 
-class AddUnitEditView(LoginRequiredMixin, CourseCoursletUnitMixin, FormSetMixin, UpdateView):
+class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMixin, UpdateView):
     model = Lesson
     form_class = AddEditUnitForm
     formset_class = ErrorModelFormSet
