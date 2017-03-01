@@ -9,7 +9,8 @@ from django.views.generic.list import ListView
 from django.db import models
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
-from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, AddEditUnitForm, ErrorModelFormSet
+from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, AddEditUnitForm, ErrorModelFormSet, \
+    AddEditUnitAnswerForm
 from ctms.models import SharedCourse
 from mysite.mixins import NewLoginRequiredMixin
 
@@ -451,6 +452,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
     # fields = ('title', '')
     unit_pk_name = 'pk'
     template_name = 'ctms/unit_edit.html'
+    HANDLE_FORMSET = False
 
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs={
@@ -462,20 +464,47 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
+
+
+        answer_form = AddEditUnitAnswerForm(**self.get_answer_form_kwargs())
+
         formset = self.get_formset()
         if form.is_valid():
+            if answer_form.is_valid():
+                answer = answer_form.save(self.object.unit, self.request.user, self.object)
+
             response = self.form_valid(form)
+
+            if not self.HANDLE_FORMSET:
+                return response
             if self.object.lesson.kind == Lesson.ORCT_QUESTION and formset.is_valid():
                 return self.formset_valid(formset)
+
         return self.render_to_response(
             {
                 'course': self.get_course(),
                 'courslet': self.get_courslet(),
                 'unit': self.object,
                 'errors_formset': formset,
-                'form': form
+                'form': form,
+                'answer_form': answer_form,
             }
         )
+
+    def get_answer_form_kwargs(self):
+        ul = self.get_unit_lesson()
+        answer = ul.get_answers().last()
+        kwargs = {}
+        kwargs['initial'] = {'answer': answer.lesson.text} if answer else {}
+        kwargs['instance'] = answer.lesson if answer else None
+        kwargs['prefix'] = 'answer_form'
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs['data'] = self.request.POST
+            kwargs['files'] = self.request.FILES
+        return kwargs
+
+
 
     def formset_valid(self, formset):
         error_models = []
@@ -484,14 +513,12 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
         return HttpResponseRedirect(self.get_success_url())
 
     def form_valid(self, form):
-        form.save(self.object.unit, self.request.user, self.object, commit=True)
+        form.save(commit=True)
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_initial(self):
         init = super(AddUnitEditView, self).get_initial()
         ul = self.get_unit_lesson()
-        answer = ul.get_answers().last()
-        if answer:
-            init['answer'] = answer.lesson.text
         init['unit_type'] = ul.lesson.kind
         return init
 
@@ -539,8 +566,8 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
             'course': self.get_course(),
             'courslet': self.get_courslet(),
             'unit': self.object,
-            'errors_formset': ErrorModelFormSet()
-
+            'errors_formset': ErrorModelFormSet(),
+            'answer_form': AddEditUnitAnswerForm(**self.get_answer_form_kwargs()),
         })
         return kwargs
 

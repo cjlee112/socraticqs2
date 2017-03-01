@@ -30,17 +30,24 @@ Create new courslet
     {% elif field.name == 'unit_type' %}
       <h4>Unit type</h4>
       <p>Try to create questions for students. You can also create passive introductions without answers or self-assessment</p>
-    {% elif field.name == 'answer' %}
-      <h4>Answer</h4>
-      <p>Add your answer to the question here.
-        <a href="">How to write a good answer</a>
-      </p>
-    {% else %}
     {% endif %}
       <p>
         {{ field.label_tag }}
         {{ field }}
       </p>
+  {% endfor %}
+  {% for field in answer_form %}
+  <div class="{{ field.name }}">
+    {% if field.name == 'answer' %}
+        <h4>Answer</h4>
+        <p>Add your answer to the question here.
+          <a href="">How to write a good answer</a>
+        </p>
+      {% else %}
+      {% endif %}
+    {{ field.label_tag }}
+    {{ field }}
+  </div>
   {% endfor %}
   <br>
   <hr>
@@ -49,7 +56,7 @@ Create new courslet
   <p>An error model explains a common misconception. You students will select an error model when they self-assess.
     <a href="">How to write a good error model</a>
   </p>
-
+{{ errors_formset.management_form }}
 
 {% comment %}
 {% if errors_formset %}
@@ -95,10 +102,10 @@ Create new courslet
     $("#id_unit_type").change(function(){
       if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
           $(".errors_formset").toggle();
-          $("label[for='id_answer'],textarea#id_answer").toggle();
+          $(".answer").toggle();
       } else {
         $(".errors_formset").hide();
-        $("label[for='id_answer'],textarea#id_answer").hide();
+        $(".answer").hide();
       }
       $('html, body').animate({
           scrollTop: $(".errors_formset").position().top-200

@@ -37,21 +37,31 @@ class EditUnitForm(forms.ModelForm):
 
 
 class AddEditUnitForm(EditUnitForm):
-    answer = forms.CharField(required=False, widget=forms.Textarea)
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'unit_type', )
 
+
+class AddEditUnitAnswerForm(forms.ModelForm):
+    answer = forms.CharField(required=False, widget=forms.Textarea)
+
+    class Meta:
+        model = Lesson
+        fields = ('answer', )
+
     def save(self, unit, user, ul, commit=True):
-        self.instance.kind = self.cleaned_data['unit_type']
-        if self.cleaned_data['unit_type'] == Lesson.ORCT_QUESTION:
-            answer, created = Lesson.objects.get_or_create(
-                title='Answer', text=self.cleaned_data['answer'],
-                addedBy=user, kind=Lesson.ANSWER
-            )
-            answer.save_root()
-            ul = UnitLesson.create_from_lesson(answer, unit, kind=UnitLesson.ANSWERS, parent=ul)
-        lesson = super(EditUnitForm, self).save(commit)
+        self.instance.text = self.cleaned_data['answer']
+        # if self.instance.id:
+        self.instance.title = 'Answer'
+        self.instance.addedBy = user
+        self.instance.kind = Lesson.ANSWER
+        # answer, _ = Lesson.objects.get_or_create(
+        #     title='Answer', text=self.cleaned_data['answer'],
+        #     addedBy=user, kind=Lesson.ANSWER
+        # )
+        self.instance.save_root()
+        ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
+        lesson = super(AddEditUnitAnswerForm, self).save(commit)
         return lesson
 
 
