@@ -20,13 +20,41 @@ Create new courslet
 <h4 class="text-center">Question</h4>
 
 <form action="{% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=unit.id%}" method="post">
-{{ form.as_p }}
+  {% csrf_token %}
+  {% for field in form %}
+    {% if field.name == 'title' %}
+      <h4>Unit name</h4>
+      <p>Give our unit descriptive name. This will show up as one unit in your student's side bar.
+        <a href="">How to name a unit</a>
+      </p>
+    {% elif field.name == 'unit_type' %}
+      <h4>Unit type</h4>
+      <p>Try to create questions for students. You can also create passive introductions without answers or self-assessment</p>
+    {% elif field.name == 'answer' %}
+      <h4>Answer</h4>
+      <p>Add your answer to the question here.
+        <a href="">How to write a good answer</a>
+      </p>
+    {% else %}
+    {% endif %}
+      <p>
+        {{ field.label_tag }}
+        {{ field }}
+      </p>
+  {% endfor %}
+  <br>
+  <hr>
+
+  <h4>Error Models - optional</h4>
+  <p>An error model explains a common misconception. You students will select an error model when they self-assess.
+    <a href="">How to write a good error model</a>
+  </p>
+
 
 {% comment %}
 {% if errors_formset %}
 <div class="errors_formset">
   <h4>Error Models</h4>
-    {% csrf_token %}
     {{ errors_formset.management_form }}
     <div id="items-form-container">
     {% for item_form in errors_formset %}
@@ -58,8 +86,7 @@ Create new courslet
     $(".errors_formset").hide();
 
     if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-      $(".errors_formset").toggle();
-      $("label[for='id_answer'],textarea#id_answer").toggle();
+      $("label[for='id_answer'],textarea#id_answer,.errors_formset").show();
     } else {
       $(".errors_formset").hide();
       $("label[for='id_answer'],textarea#id_answer").hide();
