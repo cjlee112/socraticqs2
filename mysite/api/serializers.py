@@ -8,7 +8,8 @@ class ResponseSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     lti_identity = serializers.SerializerMethodField()
     unitLesson_id = serializers.ReadOnlyField()
-    unit_id = serializers.ReadOnlyField(source='unitLesson.unit.id')
+    courselet_id = serializers.ReadOnlyField(source='unitLesson.unit.id')
+    submitted_time = serializers.SerializerMethodField()
 
     class Meta:
         model = Response
@@ -22,7 +23,8 @@ class ResponseSerializer(serializers.ModelSerializer):
             'selfeval',
             'status',
             'unitLesson_id',
-            'unit_id',
+            'courselet_id',
+            'submitted_time',
         )
 
     def get_author_name(self, obj):
@@ -38,6 +40,12 @@ class ResponseSerializer(serializers.ModelSerializer):
         lti_user = obj.author.lti_auth.first()
         if lti_user:
             return lti_user.user_id
+
+    def get_submitted_time(self, obj):
+        """
+        Return Response submitted time.
+        """
+        return obj.atime.strftime("%d-%m-%Y-%H:%M:%S")
 
 
 class UnitLessonSerializer(serializers.ModelSerializer):
