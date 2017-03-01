@@ -1,0 +1,101 @@
+{% extends 'ctms/ctms_base.html' %}
+
+{% block title %}
+Create new courslet
+{% endblock %}
+
+{% block content %}
+<div class="text-center">
+  <h6>Course</h6>
+  <h5><a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a></h5>
+</div>
+
+{% if courslet %}
+<div class="text-center">
+  <h6>Courslet</h6>
+  <h4><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h4>
+</div>
+{% endif %}
+
+<h4 class="text-center">Question</h4>
+
+<form action="{% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=unit.id%}" method="post">
+{{ form.as_p }}
+
+{% comment %}
+{% if errors_formset %}
+<div class="errors_formset">
+  <h4>Error Models</h4>
+    {% csrf_token %}
+    {{ errors_formset.management_form }}
+    <div id="items-form-container">
+    {% for item_form in errors_formset %}
+      <div id="item-{{ forloop.counter0 }}">
+        {{ item_form.id }}
+        {{ item_form.as_p }}
+        {# <!-- or for crispy forms --> {% crispy item_form %} #}
+      </div>
+    {% endfor %}
+    </div>
+</div>
+  {% endif %}
+  {% endcomment %}
+  <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
+  <br>
+  <input type="submit" class="btn btn-primary" value="Save">
+</form>
+
+<script type="text/html" id="item-template">
+  <div id="item-__prefix__">
+      {{ errors_formset.empty_form.as_p }}
+      <!-- crispy: {#% crispy item_forms.empty_form item_forms.form.helper %#} -->
+  </div>
+</script>
+
+
+<script>
+  $(document).ready(function(){
+    $(".errors_formset").hide();
+
+    if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+      $(".errors_formset").toggle();
+      $("label[for='id_answer'],textarea#id_answer").toggle();
+    } else {
+      $(".errors_formset").hide();
+      $("label[for='id_answer'],textarea#id_answer").hide();
+    };
+
+    $("#id_unit_type").change(function(){
+      if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+          $(".errors_formset").toggle();
+          $("label[for='id_answer'],textarea#id_answer").toggle();
+      } else {
+        $(".errors_formset").hide();
+        $("label[for='id_answer'],textarea#id_answer").hide();
+      }
+      $('html, body').animate({
+          scrollTop: $(".errors_formset").position().top-200
+      }, 800);
+    });
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $('.add-item').click(function(ev) {
+        ev.preventDefault();
+        var count = $('#items-form-container').children().length;
+        var tmplMarkup = $('#item-template').html();
+        var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+        $('div#items-form-container').append(compiledTmpl);
+
+        // update form count
+        $('#id_form-TOTAL_FORMS').attr('value', count+1);
+
+        // some animate to scroll to view our new form
+        $('html, body').animate({
+                scrollTop: $("#add-item-button").position().top-200
+            }, 800);
+    });
+});
+</script>
+{% endblock %}

@@ -4,7 +4,7 @@ from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, EditUnitView, ResponseView, UnitSettingsView, CoursletSettingsView,
-    CoursletDeleteView, DeleteUnitView)
+    CoursletDeleteView, DeleteUnitView, AddUnitEditView)
 
 urlpatterns = patterns(
     '',
@@ -40,6 +40,10 @@ urlpatterns = patterns(
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/edit/?$',
         EditUnitView.as_view(),
         name='unit_edit'),
+    # new unit edit
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/new_unit_edit/?$',
+        AddUnitEditView.as_view(),
+        name='add_unit_edit'),
     # delete unit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/delete/?$',
         DeleteUnitView.as_view(),
