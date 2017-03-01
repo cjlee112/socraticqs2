@@ -58,30 +58,36 @@ def lti_init(request, course_id=None, unit_id=None):
     # Code from ims_lti_py_django example
     session.clear()
 
-    short_term_lti = request.POST.get('custom_short_term')
-    instance_guid = request.POST.get('tool_consumer_instance_guid')
-    consumer_key = request.POST.get('oauth_consumer_key')
 
-    if short_term_lti:
-        lti_consumer = LtiConsumer.objects.filter(consumer_key=consumer_key).first()
-    else:
-        lti_consumer = LtiConsumer.get_or_combine(instance_guid, consumer_key)
-
-    if not lti_consumer:
-        LOGGER.error('Consumer with key {} was not found.'.format(consumer_key))
-        return render(
-            request,
-            'lti/error.html',
-            {'message': 'LTI request is not valid'}
-        )
+    # TODO uncomment for next release
+    # short_term_lti = request.POST.get('custom_short_term')
+    # instance_guid = request.POST.get('tool_consumer_instance_guid')
+    # consumer_key = request.POST.get('oauth_consumer_key')
+    #
+    # if short_term_lti:
+    #     lti_consumer = LtiConsumer.objects.filter(consumer_key=consumer_key).first()
+    # else:
+    #     lti_consumer = LtiConsumer.get_or_combine(instance_guid, consumer_key)
+    #
+    # if not lti_consumer:
+    #     LOGGER.error('Consumer with key {} was not found.'.format(consumer_key))
+    #     return render(
+    #         request,
+    #         'lti/error.html',
+    #         {'message': 'LTI request is not valid'}
+    #     )
 
     try:
-        if lti_consumer.expiration_date and lti_consumer.expiration_date < date.today():
-            raise oauth2.Error('Consumer Key has expired.')
-        if lti_consumer.consumer_key != consumer_key:
-            raise oauth2.Error('Wrong Consumer Key: {}'.format(consumer_key))
-        consumer_key = lti_consumer.consumer_key
-        secret = lti_consumer.consumer_secret
+        consumer_key = settings.CONSUMER_KEY
+        secret = settings.LTI_SECRET
+
+        # TODO uncomment for next release
+        # if lti_consumer.expiration_date and lti_consumer.expiration_date < date.today():
+        #     raise oauth2.Error('Consumer Key has expired.')
+        # if lti_consumer.consumer_key != consumer_key:
+        #     raise oauth2.Error('Wrong Consumer Key: {}'.format(consumer_key))
+        # consumer_key = lti_consumer.consumer_key
+        # secret = lti_consumer.consumer_secret
 
         tool = DjangoToolProvider(consumer_key, secret, request.POST)
         is_valid = tool.is_valid_request(request)
@@ -112,10 +118,10 @@ def lti_init(request, course_id=None, unit_id=None):
             {'message': 'LTI request is not valid'}
         )
 
-    return lti_redirect(request, lti_consumer, course_id, unit_id)
+    return lti_redirect(request, course_id, unit_id)
 
 
-def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
+def lti_redirect(request, course_id=None, unit_id=None):
     """Create user and redirect to Course
 
     |  Create LTIUser with all needed link to Django user
@@ -128,6 +134,7 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
 
     context_id = request_dict.get('context_id')
     course_ref = CourseRef.objects.filter(context_id=context_id).first()
+    consumer_name = request_dict.get('tool_consumer_info_product_family_code', 'lti')
     user_id = request_dict.get('user_id', None)
     roles_from_request = request_dict.get('roles', '').split(',')
     roles = list(set((ROLES_MAP.get(role, Role.ENROLLED) for role in roles_from_request)))
@@ -141,7 +148,10 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
 
     user, created = LTIUser.objects.get_or_create(
         user_id=user_id,
-        lti_consumer=lti_consumer
+        consumer=consumer_name,
+        context_id=request_dict.get('context_id')
+        # TODO uncomment for next release
+        # lti_consumer=lti_consumer
     )
     extra_data = {k: v for (k, v) in request_dict.iteritems()
                   if k in MOODLE_PARAMS}

@@ -31,17 +31,5 @@ class Migration(migrations.Migration):
             name='lti_consumer',
             field=models.ForeignKey(to='lti.LtiConsumer', null=True),
             preserve_default=True,
-        ),
-        migrations.AlterUniqueTogether(
-            name='ltiuser',
-            unique_together=set([('user_id', 'lti_consumer')]),
-        ),
-        migrations.RemoveField(
-            model_name='ltiuser',
-            name='context_id',
-        ),
-        migrations.RemoveField(
-            model_name='ltiuser',
-            name='consumer',
-        ),
+        )
     ]
