@@ -7,6 +7,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
+from chat.models import EnrollUnitCode
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, AddEditUnitForm, ErrorModelFormSet, \
@@ -465,7 +466,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
         self.object = self.get_object()
         form = self.get_form()
 
-
         answer_form = AddEditUnitAnswerForm(**self.get_answer_form_kwargs())
 
         formset = self.get_formset()
@@ -503,8 +503,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
             kwargs['data'] = self.request.POST
             kwargs['files'] = self.request.FILES
         return kwargs
-
-
 
     def formset_valid(self, formset):
         error_models = []
@@ -570,4 +568,25 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
             'answer_form': AddEditUnitAnswerForm(**self.get_answer_form_kwargs()),
         })
         return kwargs
+
+
+class RedirectToCourseletPreview(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    course_pk_name = 'course_pk'
+
+    def get(self, request, course_pk, pk):
+        course = self.get_course()
+        course_unit = course.courseunit_set.filter(id=pk).first()
+        if course_unit:
+            # create EnrollCode
+            enroll = EnrollUnitCode.get_code_for_user_chat(
+                course_unit=course_unit,
+                is_live=False,
+                user=request.user,
+                is_preview=True
+            )
+
+        return redirect('chat:preview_courselet', **{'enroll_key': enroll.enrollCode})
+
+
+
 

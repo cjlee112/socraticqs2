@@ -20,6 +20,7 @@
     <th>
       Settings
     </th>
+    <th>Preview</th>
   </thead>
   <tbody>
     {% for clt in courslets %}
@@ -30,6 +31,9 @@
       <td>
         <a href="{% url 'ctms:courslet_settings' course_pk=clt.course.id pk=clt.id %}">Settings</a>
       </td>
+      <td>
+       <a href="{% url 'ctms:courselet_preview' course_pk=clt.course.id pk=clt.id %}">Preview this course</a>
+     </td>
     </tr>
     {% endfor %}
   </tbody>

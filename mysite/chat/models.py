@@ -75,6 +75,7 @@ class Chat(models.Model):
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
+    is_preview = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
@@ -251,9 +252,12 @@ class EnrollUnitCode(models.Model):
         return enroll_code.enrollCode
 
     @classmethod
-    def get_code_for_user_chat(cls, course_unit, is_live, user):
+    def get_code_for_user_chat(cls, course_unit, is_live, user, is_preview=False):
         # enroll = cls(course_unit=course_unit, isLive=is_live)
-        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user).first()
+        filter_kw = {}
+        if is_preview:
+            filter_kw['chat__is_preview'] = True
+        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll
         enroll = cls(courseUnit=course_unit, isLive=is_live)

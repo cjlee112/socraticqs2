@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from chat.models import Message
-from chat.services import LiveChatFsmHandler
+from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
 from chat.utils import enroll_generator
 from fsm.models import FSMState
 import waffle
@@ -68,6 +68,29 @@ class ChatInitialView(LoginRequiredMixin, View):
                         contaner.add((title, url))
             return will_learn, need_to_know
 
+    def check_course_not_published(self, request, courseUnit):
+        return (not courseUnit.is_published() and
+            not User.objects.filter(
+                id=request.user.id,
+                role__role=Role.INSTRUCTOR,
+                role__course=courseUnit.course
+            ).exists())
+
+    def user_enrolled(self, request, courseUnit):
+        return Role.objects.filter(
+            user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
+        )
+
+    def create_new_chat(self, request, enroll_code, courseUnit):
+        chat = Chat(
+                user=request.user,
+                enroll_code=enroll_code,
+                instructor=courseUnit.course.addedBy,
+                is_preview=False
+            )
+        chat.save(request)
+        return chat
+
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
@@ -78,22 +101,13 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
-        if (
-            not courseUnit.is_published() and
-            not User.objects.filter(
-                id=request.user.id,
-                role__role=Role.INSTRUCTOR,
-                role__course=courseUnit.course
-            ).exists()
-        ):
+        if self.check_course_not_published(request, courseUnit):
             return render(
                 request,
                 'lti/error.html',
                 {'message': 'This Courselet is not published yet.'}
             )
-        if not Role.objects.filter(
-            user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
-        ):
+        if not self.user_enrolled(request, courseUnit):
             enrolling = Role.objects.get_or_create(user=request.user,
                                                    course=courseUnit.course,
                                                    role=Role.SELFSTUDY)[0]
@@ -102,12 +116,7 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         chat = Chat.objects.filter(enroll_code=enroll_code, user=request.user).first()
         if not chat and enroll_key:
-            chat = Chat(
-                user=request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy
-            )
-            chat.save(request)
+            chat = self.create_new_chat(request, enroll_code, courseUnit)
         if chat.message_set.count() == 0:
             next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
         elif not chat.state:
@@ -149,6 +158,37 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'fsmstate': chat.state,
             }
         )
+
+
+class CourseletPreviewView(ChatInitialView):
+    next_handler = ChatPreviewFsmHandler()
+
+    def get_enroll_code_object(self, enroll_key):
+        """
+        Return EnrollUnitCode object
+        :param enroll_key: enroll code
+        :return: EnrollUnitCode instance
+        """
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+
+    def create_new_chat(self, request, enroll_code, courseUnit):
+        chat = Chat(
+            user=request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy,
+            is_preview=True
+        )
+        chat.save(request)
+        return chat
+
+    def check_course_not_published(self, request, courseUnit):
+        return False
+
+    def get(self, request, enroll_key):
+        request.user.fsmstate_set.filter(chat__is_preview=True).delete()
+        request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
+        return super(CourseletPreviewView, self).get(request, enroll_key)
+
 
 
 class InitializeLiveSession(ChatInitialView):
