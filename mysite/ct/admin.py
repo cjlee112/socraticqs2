@@ -54,7 +54,7 @@ class AdminRole(admin.ModelAdmin):
 
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
-    raw_id_fields = ('lesson', 'unitLesson')
+    raw_id_fields = ('lesson', 'unitLesson', 'author', 'parent')
 
 
 @admin.register(StudentError)

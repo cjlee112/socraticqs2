@@ -1031,14 +1031,12 @@ class InquiryCount(models.Model):
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+
 class Liked(models.Model):
     'record users who found UnitLesson showed them something they were missing'
     unitLesson = models.ForeignKey(UnitLesson)
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-
-    def __unicode__(self):
-        return "User ({}) like ({})".format(self.addedBy.username, self.unitLesson.lesson.title)
 
     class Meta:
         verbose_name_plural = 'Likes'
