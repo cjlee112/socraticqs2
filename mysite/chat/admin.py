@@ -12,10 +12,13 @@ def chat_id(obj):
     if obj.chat:
         return obj.chat.id
 
+def chat_state(obj):
+    if obj.chat:
+        return obj.chat.state
 
 @admin.register(Message)
 class AdminRole(admin.ModelAdmin):
     list_display = (
-        'id', chat_id, 'text', 'owner', 'contenttype',
-        'input_type', 'type', 'kind'
+        'id', chat_id, chat_state, 'timestamp',  'text', 'owner', 'contenttype', 'content_id',
+        'input_type', 'type', 'kind', 'userMessage'
     )

@@ -4,7 +4,7 @@ from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, EditUnitView, ResponseView, UnitSettingsView, CoursletSettingsView,
-    CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreview)
+    CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView)
 
 urlpatterns = patterns(
     '',
@@ -16,7 +16,7 @@ urlpatterns = patterns(
     url(r'^course/(?P<pk>\d+)/delete/?$', DeleteCourseView.as_view(), name='course_delete'),
 
     # go to preview
-    url(r'course/(?P<course_pk>\d+)/courslet/(?P<pk>\d+)/preview/?$', RedirectToCourseletPreview.as_view(), name='courselet_preview'),
+    url(r'course/(?P<course_pk>\d+)/courslet/(?P<pk>\d+)/preview/?$', RedirectToCourseletPreviewView.as_view(), name='courselet_preview'),
 
     # new courslet
     url(r'^course/(?P<course_pk>\d+)/courselet/new/?$',
@@ -68,4 +68,8 @@ urlpatterns = patterns(
     # shares
     url(r'^shared_course/$', SharedCoursesListView.as_view(),
         name='shared_courses'),
+
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
+        RedirectToAddUnitsView.as_view(),
+        name='add_units_chat'),
 )

@@ -66,6 +66,11 @@ STATUS_OPTIONS = {
     'done': 'Solidly',
 }
 
+YES_NO_OPTIONS = (
+    (1, 'Yes!'),
+    (0, 'No!')
+)
+
 
 class Chat(models.Model):
     """
@@ -171,6 +176,8 @@ class Message(models.Model):
             self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'
         ):
+            if self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
+                return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             if self.chat.next_point.kind == 'button':
                 options = [{"value": 1, "text": "Continue"}]
             elif self.chat.next_point.contenttype == 'unitlesson':
@@ -184,7 +191,7 @@ class Message(models.Model):
 
     def get_html(self):
         html = None
-        if self.content_id:
+        if self.content_id and self.chat.state.fsmNode.fsm.name != 'chat_add_lesson':
             if self.contenttype == 'chatdivider':
                 html = self.content.text
             elif self.contenttype == 'response':
@@ -243,8 +250,8 @@ class EnrollUnitCode(models.Model):
         return enroll_code
 
     @classmethod
-    def get_code(cls, course_unit, isLive=False):
-        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive)
+    def get_code(cls, course_unit, isLive=False, isPreview=False):
+        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive, chat__is_preview=isPreview)
         if cr:
             enroll_code.enrollCode = uuid4().hex
             enroll_code.isLive = isLive

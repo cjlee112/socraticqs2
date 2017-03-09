@@ -60,7 +60,7 @@
 <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk  %}" class="btn btn-info">
   Create new Unit
 </a>
-<a href="" class="btn btn-primary">
+<a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="btn btn-primary">
   Add Unit by chat
 </a>
 {# <a class="btn btn-success" href="{% url 'ctms:courslet_create' course_pk=object.course.id %}">Create new courslet</a> #}

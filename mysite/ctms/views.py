@@ -570,7 +570,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMix
         return kwargs
 
 
-class RedirectToCourseletPreview(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+class RedirectToCourseletPreviewView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     course_pk_name = 'course_pk'
 
     def get(self, request, course_pk, pk):
@@ -586,6 +586,28 @@ class RedirectToCourseletPreview(NewLoginRequiredMixin, CourseCoursletUnitMixin,
             )
 
         return redirect('chat:preview_courselet', **{'enroll_key': enroll.enrollCode})
+
+
+class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    course_pk_name = 'course_pk'
+    courslet_pk_name = 'courset_pk'
+
+    def get(self, request, course_pk, pk):
+        course = self.get_course()
+        course_unit = course.courseunit_set.filter(id=pk).first()
+
+        if course_unit:
+            # create EnrollCode
+            enroll = EnrollUnitCode.get_code_for_user_chat(
+                course_unit=course_unit,
+                is_live=False,
+                user=request.user,
+            )
+        return redirect('chat:add_units_by_chat',
+                        **{'enroll_key': enroll.enrollCode, 'course_id': course.id, 'courselet_id': course_unit.id})
+
+
+
 
 
 

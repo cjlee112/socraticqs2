@@ -10,8 +10,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from chat.models import Message
-from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
+from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnitFsmHandler
 from chat.utils import enroll_generator
+from ctms.views import CourseCoursletUnitMixin
 from fsm.models import FSMState
 import waffle
 
@@ -27,6 +28,7 @@ class ChatInitialView(LoginRequiredMixin, View):
     Entry point for Chat UI.
     """
     next_handler = injections.depends(ProgressHandler)
+    template_name = 'chat/main_view.html'
 
     def get_enroll_code_object(self, enroll_key):
         """
@@ -83,19 +85,25 @@ class ChatInitialView(LoginRequiredMixin, View):
 
     def create_new_chat(self, request, enroll_code, courseUnit):
         chat = Chat(
-                user=request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy,
-                is_preview=False
-            )
+            user=request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy,
+            is_preview=False
+        )
         chat.save(request)
         return chat
+
+    def get_unitlessons_with_order_null(self, unit):
+        return unit.unitlesson_set.filter(order__isnull=False).exists()
+
+    def get_chat(self, request, enroll_code, **kwargs):
+        return Chat.objects.filter(enroll_code=enroll_code, user=request.user, **kwargs).first()
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
         unit = courseUnit.unit
-        if not unit.unitlesson_set.filter(order__isnull=False).exists():
+        if not self.get_unitlessons_with_order_null(unit):
             return render(
                 request,
                 'lti/error.html',
@@ -114,7 +122,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat = Chat.objects.filter(enroll_code=enroll_code, user=request.user).first()
+        chat = self.get_chat(request, enroll_code, state__fsmNode__fsm__name=self.next_handler.FMS_name)
         if not chat and enroll_key:
             chat = self.create_new_chat(request, enroll_code, courseUnit)
         if chat.message_set.count() == 0:
@@ -141,7 +149,7 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         return render(
             request,
-            'chat/main_view.html',
+            self.template_name,
             {
                 'chat': chat,
                 'chat_id': chat.id,
@@ -184,11 +192,31 @@ class CourseletPreviewView(ChatInitialView):
     def check_course_not_published(self, request, courseUnit):
         return False
 
+    def get_chat(self, request, enroll_code, **kwargs):
+        return super(CourseletPreviewView, self).get_chat(request, enroll_code, is_preview=True)
+
     def get(self, request, enroll_key):
         request.user.fsmstate_set.filter(chat__is_preview=True).delete()
         request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
         return super(CourseletPreviewView, self).get(request, enroll_key)
 
+
+class ChatAddLessonView(ChatInitialView):
+    next_handler = ChatAddUnitFsmHandler()
+    template_name = 'chat/add_unit_chat.html'
+
+    def get(self, request, enroll_key, **kwargs):
+        response = super(ChatAddLessonView, self).get(request, enroll_key)
+        # response.context_data.update(kwargs)
+        # response.render()
+        return response
+
+    def get_unitlessons_with_order_null(self, unit):
+        return True
+
+    def get_chat(self, request, enroll_code, **kwargs):
+        return super(ChatAddLessonView, self).get_chat(request, enroll_code, is_preview=False,
+                                                       state__fsmNode__fsm__name=self.next_handler.FMS_name)
 
 
 class InitializeLiveSession(ChatInitialView):
