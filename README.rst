@@ -53,9 +53,27 @@ For a developer / test version to access social-auth, you will need to add the f
        'django.contrib.auth.backends.ModelBackend',
     )
 
+To run project in Docker:
+-------------------------
+Go to the root of the project and run this command:
+ ::
+    # coding: utf-8
+
+    docker-compose up web
+
+Here we have 2 docker config files:
+ - Dockerfile - runs docker-commands.sh file
+ - Dockerfile-prepare - installs requirements (python libs and so on)
+
+There are a couple of files related to docker. They are:
+ - docker-compose.yml - config file
+ - docker-commands.sh - clear *.pyc files and starts web server
+
 
 Quality check
 -------------
 
 We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.
+
+
