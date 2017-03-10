@@ -136,9 +136,7 @@ class END(object):
         return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
     title = 'Additional lessons completed'
-    help = '''Congratulations!  You have completed the core lessons for this
-    courselet.  See below for suggested next steps for what to study now in
-    this courselet.'''
+    help = '''You've finished resolving previous Unit.'''
 
 
 def get_specs():
