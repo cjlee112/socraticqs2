@@ -36,8 +36,25 @@ class ChatInitialView(LoginRequiredMixin, View):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
 
-
     def get_will_learn_need_know(self, unit, courseUnit):
+        """
+        Steps to define Concepts for Will learn and Need to know:
+
+            `/ct/teach/courses/:id/units/:id/`
+            `/ct/teach/courses/:id/units/:id/lessons/`
+            `/ct/teach/courses/:id/units/:id/lessons/:id/`
+            `/ct/teach/courses/:id/units/:id/lessons/:id/concepts/`
+
+        `Will learn`
+
+            * We want all Concepts that Defines or Tests Understanding of Lesson
+            * Choose Defines or Test for Concept
+
+        `Need to know`
+
+            * We want all Concepts that Assumes a Lesson
+            * Choose Assumes for Concept
+        """
         will_learn = set()
         need_to_know = set()
         for unit_lesson in unit.get_exercises():
@@ -66,7 +83,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                             )
                     if url:
                         contaner.add((title, url))
-            return will_learn, need_to_know
+        return will_learn, need_to_know
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
