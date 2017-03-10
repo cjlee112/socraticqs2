@@ -1093,10 +1093,14 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Validate and post text to server
     this._postText();
   }, this)).on('keyup', $.proxy(function(e){
-    // Submit form on enter but ignore if ctrl, alt or shift is pressed
-    if(e.which == 13 && (!e.shiftKey && !e.ctrlKey && !e.altKey)) {
+    // Submit form on ctrl-enter but ignore enter
+    if(e.which === 13 && e.ctrlKey) {
       e.preventDefault();
       this._$inputContainer.find('#chat-input-text-form').submit();
+    }
+    if (e.which === 13) {
+        var value = this._$inputContainer.find('textarea').val();
+        this._$inputContainer.find('textarea').val(value + '  \r\n');
     }
   }, this));
 
