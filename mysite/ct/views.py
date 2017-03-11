@@ -478,12 +478,15 @@ def edit_unit(request, course_id, unit_id):
     if request.method == 'POST':
         if request.POST.get('task') == 'release':
             cu.releaseTime = timezone.now()
-            cu.save() # publish for student access
+            cu.save()  # publish for student access
             red = pageData.fsm_redirect(request, 'release_Unit',
                                         defaultURL=None, courseUnit=cu)
-            if red: # let FSM redirect us if desired
+            if red:  # let FSM redirect us if desired
                 return red
-        else: # update unit description
+        if request.POST.get('task') == 'unrelease':
+            cu.releaseTime = None
+            cu.save()
+        else:  # update unit description
             unitform = UnitTitleForm(request.POST, instance=unit)
             if unitform.is_valid():
                 unitform.save()

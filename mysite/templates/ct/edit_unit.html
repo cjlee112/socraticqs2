@@ -41,13 +41,21 @@ Copy enrollment URL
 </p>
 
 <hr>
-Courselet created by: 
-<a href="/ct/people/{{ user.pk }}/">{{ unit.addedBy.get_full_name }}</a>, 
+Courselet created by:
+<a href="/ct/people/{{ user.pk }}/">{{ unit.addedBy.get_full_name }}</a>,
 {{ unit.atime|display_datetime }}
+
+<div class="publish-form" style="margin-top: 10px; margin-bottom: 20px;">
 {% if courseUnit.releaseTime %}
   (published {{ courseUnit.releaseTime|display_datetime }})
+  <form action="{{ actionTarget }}" method="post"
+        style=" display:inline!important;">
+  {% csrf_token %}
+  <input type="hidden" name="task" value="unrelease" />
+  <input type="submit" value="Unpublish" />
+  </form>
 {% else %}
-  <br><b>This courselet has not yet been published for student access.</b>
+  <b>This courselet has not yet been published for student access.</b>
     <form action="{{ actionTarget }}" method="post"
           style=" display:inline!important;">
     {% csrf_token %}
@@ -55,8 +63,7 @@ Courselet created by:
     <input type="submit" value="Publish" />
     </form>
 {% endif %}
-
+    </div>
   </div><!-- @end #EditTabDiv -->
 </div>
 {% endblock %}
-
