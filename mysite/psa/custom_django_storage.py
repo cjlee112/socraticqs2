@@ -13,6 +13,7 @@ class CustomCode(Code):
     Custom Code object to track user_id through different sessions.
     """
     user_id = models.IntegerField(null=True)
+    force_update = models.BooleanField(default=False)
 
 
 class CustomDjangoStorage(DjangoStorage):

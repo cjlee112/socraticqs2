@@ -1,0 +1,42 @@
+{% extends "ct/portal.html" %}
+
+{% block content %}
+
+<div class="buttons">
+{% include "psa/social_backends.html" %}
+
+<br>
+
+<div id="login">
+<h4>Signup:</h4>
+    <form class="form-horizontal" name="RegistrationForm" action="." method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+      {% if not field.is_hidden %}
+      <div class="control-group">
+        {{ field.label_tag }}
+        <div class="controls">
+          {{ field.errors }}
+          {{ field }}
+        </div>
+      </div>
+      {% else %}
+      {{ field }}
+      {% endif %}
+    {% endfor %}
+
+    <br>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-success">Register</button>
+        </div>
+    </div>
+    </form>
+</div>
+
+{% if DEBUG %}
+    {% include "psa/user_details.html" %}
+{% endif %}
+
+{% endblock %}
