@@ -7,12 +7,15 @@ import time
 
 from django.test import TestCase
 from django.contrib.auth.models import User
-
+from mock import patch
 from ct.models import *
 from ct import views, ct_util
 from ct.fsm_plugin import live, livestudent, add_lesson
 from fsm.models import *
 from fsm.fsm_base import FSMStack
+import wikipedia
+
+from ct.exceptions import CommonDisambiguationError
 
 
 class OurTestCase(TestCase):
@@ -519,3 +522,33 @@ class AltVersionsOfLessonsUITests(TestCase):
         )
         response = self.client.get(url)
         self.assertContains(response, '<div class="collapse" id="1">')
+
+
+class WikiDisambiguationErrorTests(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='jacob', email='jacob@_',
+                                             password='top_secret')
+        self.client.login(username='jacob', password='top_secret')
+        self.ul = Unit(title='test', addedBy=self.user)
+        self.ul.save()
+
+    @patch('ct.sourcedb_plugin.wikipedia_plugin.wikipedia.page')
+    def test_exception_hande(self, mocked):
+        mocked.side_effect = wikipedia.exceptions.DisambiguationError('Exception title', ['1', '2', '3'])
+        dataClass = Lesson.get_sourceDB_plugin('wikipedia')
+        try:
+            data = dataClass(None)
+        except Exception as e:
+            self.assertTrue(type(e), CommonDisambiguationError)
+            self.assertEqual(e.options, ['1', '2', '3'])
+
+    @patch('ct.sourcedb_plugin.wikipedia_plugin.wikipedia.page')
+    def test_exception_hande_in_view(self, mocked):
+        mocked.side_effect = wikipedia.exceptions.DisambiguationError('Exception title', ['1', '2', '3'])
+        url = '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % (self.ul.id, '1', '1')
+        opt = [(x, '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % (self.ul.id, '1', x))
+               for x in ['1', '2', '3']]
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['opt'], opt)
