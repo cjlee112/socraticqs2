@@ -36,12 +36,13 @@ from ct.exceptions import CommonDisambiguationError
 
 def check_instructor_auth(course, request):
     'return 403 if not course instructor, else None'
-    role = course.get_user_role(request.user, justOne=False)
+    try:
+        role = course.get_user_role(request.user, justOne=False)
+    except KeyError:
+        return True
     if not isinstance(role, list):
         role = [role]
-    if not Role.INSTRUCTOR in role:
-        return HttpResponse("Only the instructor can access this",
-                            status=403)
+    return not (Role.INSTRUCTOR in role)
 
 
 @cache_this
@@ -465,6 +466,7 @@ def edit_unit(request, course_id, unit_id):
     course_unit = CourseUnit.objects.get(unit=unit, course=course)
     enroll_code = EnrollUnitCode.get_code(course_unit)
     notInstructor = check_instructor_auth(course, request)
+
     if notInstructor: # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:study_unit',
                                         args=(course_id, unit_id)))
@@ -1069,6 +1071,15 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     course = get_object_or_404(Course, pk=course_id)
     other_units_qs = Unit.objects.filter(~models.Q(courseunit__course__id=course.id))
     notInstructor = check_instructor_auth(course, request)
+
+    if notInstructor:
+        return render(
+            request,
+            'lti/error.html',
+            {"message": "Only instructor can access this"},
+            status=403
+        )
+
     if ul.get_type() == IS_LESSON:
         if ul.lesson.kind == Lesson.ANSWER:
             formClass = AnswerLessonForm
