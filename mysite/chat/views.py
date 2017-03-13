@@ -1,5 +1,7 @@
-import injections
 import logging
+
+import waffle
+import injections
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -9,12 +11,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from django.contrib.staticfiles.templatetags.staticfiles import static
+
 from chat.models import Message
 from chat.services import LiveChatFsmHandler
 from chat.utils import enroll_generator
 from fsm.models import FSMState
-import waffle
-
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from ct.models import Unit, Role, UnitLesson, ConceptLink, CourseUnit
@@ -147,6 +149,14 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
+        try:
+            instructor_icon = (
+                courseUnit.course.addedBy.instructor.icon_url or
+                static('img/avatar-teacher.jpg')
+            )
+        except AttributeError:
+            instructor_icon = static('img/avatar-teacher.jpg')
+
         return render(
             request,
             'chat/main_view.html',
@@ -154,6 +164,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,
+                'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,
                 'small_img_url': unit.small_img_url,

@@ -1,3 +1,4 @@
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -22,6 +23,12 @@ class CourseView(View):
             liveSession.live_instructor_name = (
                 liveSession.user.get_full_name() or liveSession.user.username
             )
+            try:
+                liveSession.live_instructor_icon = (
+                    liveSession.user.instructor.icon_url or static('img/avatar-teacher.jpg')
+                )
+            except AttributeError:
+                liveSession.live_instructor_icon = static('img/avatar-teacher.jpg')
         courselets = (
             (
                 courselet,
@@ -36,9 +43,9 @@ class CourseView(View):
             enroll_code__courseUnit__course=course,
             state__isnull=True
         )
-        #TODO: once django updated to version >=1.8 change next lines to
-        #TODO: .annotate(lessons_count=models.Case()).
-        #TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
+        # TODO: once django updated to version >=1.8 change next lines to
+        # TODO: .annotate(lessons_count=models.Case()).
+        # TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
 
         for chat in live_sessions_history:
             chat.lessons_done = Message.objects.filter(

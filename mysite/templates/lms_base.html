@@ -43,7 +43,7 @@
     {% switch "live_session_enabled" %}
     {% if liveSession %}
       <div class="live-session-notification">
-        <img src="{% static "img/avatar-teacher.jpg" %}" alt="INSTRUCTOR NAME">
+        <img src="{{ liveSession.live_instructor_icon }}" alt="{{ liveSession.live_instructor_name }}">
 
         <p>
           {{ liveSession.live_instructor_name }} has started a new live session in {{ course.title }}.
