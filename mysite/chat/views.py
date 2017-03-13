@@ -270,6 +270,14 @@ class InitializeLiveSession(ChatInitialView):
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, course_unit)
 
+        try:
+            instructor_icon = (
+                course_unit.course.addedBy.instructor.icon_url or
+                static('img/avatar-teacher.jpg')
+            )
+        except AttributeError:
+            instructor_icon = static('img/avatar-teacher.jpg')
+
         return render(
             request,
             'chat/main_view.html',
@@ -277,6 +285,7 @@ class InitializeLiveSession(ChatInitialView):
                 'chat_id': chat.id,
                 'chat': chat,
                 'course': course_unit.course,
+                'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,
                 'small_img_url': unit.small_img_url,
