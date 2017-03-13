@@ -213,7 +213,10 @@ class Message(models.Model):
             elif self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif self.chat.next_point.contenttype == 'response':
-                options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+                if not self.chat.next_point.content.confidence:
+                    options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
+                else:
+                    options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
             else:
                 options = [{"value": 1, "text": "Continue"}]
 
@@ -228,7 +231,7 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                 else:
-                    html = EVAL_OPTIONS.get(self.content.selfeval, '')
+                    html = EVAL_OPTIONS.get(self.content.selfeval, '111')
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(

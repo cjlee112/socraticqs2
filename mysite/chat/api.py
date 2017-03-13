@@ -142,8 +142,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
                 resp.activity = activity
-                # NOTE: next line is a temporary solution.
-                resp.confidence = StudentResponse.SURE
             else:
                 resp = message.content
                 resp.text = text
@@ -182,9 +180,12 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(chat=chat)
             elif message.content_id and not message.student_error:
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                opt_data = self.request.data.get('option')
                 resp = message.content
-                resp.selfeval = selfeval
+                if chat.state.fsmNode.name == 'GET_CONFIDENCE':
+                    resp.confidence = opt_data
+                else:
+                    resp.selfeval = opt_data
                 resp.save()
                 chat.next_point = message
                 chat.save()
