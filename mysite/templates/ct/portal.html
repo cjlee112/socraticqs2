@@ -38,7 +38,7 @@
       </div>
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/ct/courses/">Courses</a></li>
+          <li><a href="{% url 'ct:home' %}">Courses</a></li>
         </ul>
         <ul class="nav navbar-nav">
           {% if not fsmStack.state or not fsmStack.state.hideNav %}
