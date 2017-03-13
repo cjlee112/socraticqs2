@@ -47,7 +47,7 @@ Click on any of the following courses to start working on it!
     {% if role.role == 'prof' %}
     <a href="{% url 'ct:course' role.course.id %}">{{ role.course.title }}</a>
     {% else %}
-    <a href="{% url 'ct:course_student' role.course.id %}">{{ role.course.title }}</a>
+    <a href="{% url 'lms:course_view' role.course.id %}">{{ role.course.title }}</a>
     {% endif %}
     </td>
     <td>{{ role.get_role_display }}</td>
