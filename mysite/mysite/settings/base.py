@@ -107,7 +107,7 @@ STATICFILES_FINDERS = (
 
 # URL of the login page.
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/done/'
+LOGIN_REDIRECT_URL = '/ct/'
 URL_PATH = ''
 
 MIDDLEWARE_CLASSES = (
