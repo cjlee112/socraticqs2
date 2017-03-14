@@ -304,5 +304,5 @@ class UnitError(models.Model):
 
 
 class ChatDivider(models.Model):
-    text = models.CharField(max_length=64)
+    text = models.CharField(max_length=200)
     unitlesson = models.ForeignKey(UnitLesson, null=True)
