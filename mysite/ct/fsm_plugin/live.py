@@ -22,7 +22,7 @@ QuitEdgeData = dict(
 )
 
 CancelActivityEdgeData = dict(
-    name='exceptCancel', toNode='END', title='Canceled this live-session',
+    name='exceptCancel', toNode='END', title='Cancel this live-session',
     showOption=True
 )
 
@@ -118,7 +118,7 @@ class ANSWER(CancelOrEndHandler):
     )
 
 
-class RECYCLE(object):
+class RECYCLE(CancelOrEndHandler):
     """
     You have completed presenting this question.  Do you want to
     ask the students another question, or end this live session?
@@ -147,6 +147,7 @@ class RECYCLE(object):
         dict(name='next', toNode='CHOOSE', title='Move on to another question',
              help='''Click here to choose another question to ask. '''),
         QuitEdgeData,
+        CancelActivityEdgeData
     )
 
 
