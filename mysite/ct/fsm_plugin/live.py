@@ -21,16 +21,6 @@ QuitEdgeData = dict(
     showOption=True,
 )
 
-CancelActivityEdgeData = dict(
-    name='exceptCancel', toNode='END', title='Cancel this live-session',
-    showOption=True
-)
-
-
-class CancelOrEndHandler(object):
-    quit_edge = quit_edge
-    exceptCancel_edge = quit_edge
-
 
 class START(object):
     """
@@ -59,7 +49,7 @@ class START(object):
         )
 
 
-class CHOOSE(CancelOrEndHandler):
+class CHOOSE(object):
     """
     At this step you choose a question to ask in this live session.
     """
@@ -80,12 +70,11 @@ class CHOOSE(CancelOrEndHandler):
                  title='Ask this question',
                  help='''Click here to start posing this question to your
                  live session students.'''),
-            QuitEdgeData,
-            CancelActivityEdgeData
+            QuitEdgeData
         )
 
 
-class QUESTION(CancelOrEndHandler):
+class QUESTION(object):
     path = 'ct:live_question'
     title = 'Ask a question to students in a classroom live-session'
     help = '''Explain the question and ask if there are any aspects
@@ -98,12 +87,11 @@ class QUESTION(CancelOrEndHandler):
         dict(name='next', toNode='ANSWER', title='Present the answer',
              help='''Click here to move to the assessment stage of this
              exercise. '''),
-        QuitEdgeData,
-        CancelActivityEdgeData
+        QuitEdgeData
     )
 
 
-class ANSWER(CancelOrEndHandler):
+class ANSWER(object):
     quit_edge = quit_edge
     path = 'ct:ul_teach'
     title = 'Present the answer for students to self-assess'
@@ -113,12 +101,11 @@ class ANSWER(CancelOrEndHandler):
     edges = (
         dict(name='next', toNode='RECYCLE', title='Finish this question',
              help='''Click here to end this question. '''),
-        QuitEdgeData,
-        CancelActivityEdgeData
+        QuitEdgeData
     )
 
 
-class RECYCLE(CancelOrEndHandler):
+class RECYCLE(object):
     """
     You have completed presenting this question.  Do you want to
     ask the students another question, or end this live session?
@@ -146,8 +133,7 @@ class RECYCLE(CancelOrEndHandler):
     edges = (
         dict(name='next', toNode='CHOOSE', title='Move on to another question',
              help='''Click here to choose another question to ask. '''),
-        QuitEdgeData,
-        CancelActivityEdgeData
+        QuitEdgeData
     )
 
 
