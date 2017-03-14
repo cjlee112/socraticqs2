@@ -1100,7 +1100,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     }
     if (e.which === 13) {
         var value = this._$inputContainer.find('textarea').val();
-        this._$inputContainer.find('textarea').val(value + '  \r\n');
+        this._$inputContainer.find('textarea').val(value + '\r\n\r\n');
     }
   }, this));
 
