@@ -681,20 +681,25 @@ class UnitLesson(models.Model):
         'is this a question?'
         return self.lesson.kind == Lesson.ORCT_QUESTION
 
+
 def reorder_exercise(self, old=0, new=0, l=()):
-    'renumber exercises to move an exercise from old -> new position'
+    """
+    Renumber exercises to move an exercise from old -> new position
+
+    Can be used to reorder all list of Lesson's(UnitLesson's).
+    """
     if not l:
         l = self.get_exercises()
-    if not l: # no lessons, so nothing to do
+    if not l:  # no lessons, so nothing to do
         return l
-    ex = l[old] # select desired exercise by old position
-    l = l[:old] + l[old + 1:] # exclude this exercise
-    l = l[:new] + [ex] + l[new:] # insert ex in new position
+    ex = l[old]  # select desired exercise by old position
+    l = l[:old] + l[old + 1:]  # exclude this exercise
+    l = l[:new] + [ex] + l[new:]  # insert ex in new position
     for i, ex in enumerate(l):
-        if i != ex.order: # order changed, have to update
+        if i != ex.order:  # order changed, have to update
             ex.order = i
             ex.save()
-    return l # hand back the reordered list
+    return l  # hand back the reordered list
 
 
 class Unit(models.Model):

@@ -1117,6 +1117,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 if unit_to_move:
                     ul.unit = unit_to_move
                     ul.save()
+                    unit.reorder_exercise()
+                    unit_to_move.reorder_exercise()
                     return HttpResponseRedirect(reverse(
                         'ct:edit_lesson',
                         kwargs={
