@@ -1115,10 +1115,10 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                     Q(id__in=unit_ids)
                 ).first()
                 if unit_to_move:
+                    ul.order = None
                     ul.unit = unit_to_move
-                    ul.save()
+                    unit_to_move.append(ul, ul.addedBy)
                     unit.reorder_exercise()
-                    unit_to_move.reorder_exercise()
                     return HttpResponseRedirect(reverse(
                         'ct:edit_lesson',
                         kwargs={
