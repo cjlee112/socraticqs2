@@ -195,9 +195,8 @@ class END(object):
         if lessons:
             return '''Please look over the available resources in the side panel.'''
         else:
-            return '''Congratulations!  You have completed the core lessons for this
-                      courselet.  See below for suggested next steps for what to study now in
-                      this courselet.'''
+            return '''Congratulations! You have completed the core lessons for this
+                      courselet.'''
     title = 'Courselet core lessons completed'
 
 

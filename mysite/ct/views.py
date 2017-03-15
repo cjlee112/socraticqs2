@@ -1082,7 +1082,9 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     unit, ul, _, pageData = ul_page_data(request, unit_id, ul_id, 'Edit',
                                          False)
     course = get_object_or_404(Course, pk=course_id)
-    other_units_qs = Unit.objects.filter(~models.Q(courseunit__course__id=course.id))
+    other_units_qs = Unit.objects.filter(
+        Q(courseunit__course__id=course.id) & ~Q(id=unit_id)
+    )
     notInstructor = check_instructor_auth(course, request)
 
     if notInstructor:
@@ -1102,15 +1104,15 @@ def edit_lesson(request, course_id, unit_id, ul_id):
         formClass = ErrorForm
     if notInstructor:
         titleform = None
-    else: # let instructor edit this lesson
+    else:  # let instructor edit this lesson
         titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
         if request.method == 'POST':
             if 'unit_to_move' in request.POST:
                 # check that incoming unit_id is acceptable for us - is in Unit queryset
                 unit_ids = [i['id'] for i in other_units_qs.values('id')]
                 unit_to_move = Unit.objects.filter(
-                    models.Q(id=request.POST.get('unit_to_move')) &
-                    models.Q(id__in=unit_ids)
+                    Q(id=request.POST.get('unit_to_move')) &
+                    Q(id__in=unit_ids)
                 ).first()
                 if unit_to_move:
                     ul.unit = unit_to_move
@@ -1119,8 +1121,8 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                         'ct:edit_lesson',
                         kwargs={
                             'course_id': course.id,
-                            'unit_id': unit_id,
-                            'ul_id': ul.lesson.id,
+                            'unit_id': unit_to_move.id,
+                            'ul_id': ul.id,
                         }
                     ))
             if 'title' in request.POST:
