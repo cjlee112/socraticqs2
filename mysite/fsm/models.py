@@ -359,9 +359,10 @@ class FSMState(JSONBlobMixin, models.Model):
             ~Q(fsmNode__funcName__contains='live_chat'),
             isLiveSession=True,
             activity__course__role__user=user,
-            user__role__role__in=[Role.ENROLLED, Role.SELFSTUDY]
+            activity__course__role__in=Role.objects.filter(
+                role__in=[Role.ENROLLED, Role.SELFSTUDY], user=user
+            )
         ).distinct()
-
 
     def __unicode__(self):
         return u'::'.join((self.user.username, str(self.fsmNode)))

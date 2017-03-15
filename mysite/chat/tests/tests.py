@@ -270,7 +270,7 @@ class MessagesViewTests(SetUpMixin, TestCase):
         json_content = json.loads(response.content)
 
         self.assertIn('html', json_content['addMessages'][0])
-        self.assertEquals(json_content['addMessages'][0]['html'], answer)
+        self.assertEquals(json_content['addMessages'][0]['html'], u'<p>My Answer</p>\n')
 
     def test_typical_chat_flow(self):
         """

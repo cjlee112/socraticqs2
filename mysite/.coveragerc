@@ -14,3 +14,12 @@ omit =
     mysite/settings/*
     mysite/urls.py
     mysite/wsgi.py
+    fsm/fsm_plugin/testme.py
+    ct/urls.py
+    fsm/urls.py
+    lms/urls.py
+    lti/urls.py
+    psa/urls.py
+    api/urls.py
+    api/v0/urls.py
+    chat/urls.py

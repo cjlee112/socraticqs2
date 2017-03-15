@@ -25,11 +25,9 @@ def test_check_instructor_auth(role, check, rf):
     request.user = Mock()  # In our case real User instance is unnecesary
     result = check_instructor_auth(course, request)
     if check == 'assertIsNotNone':  # If student we need to test 403 Forbidden HttpResponce
-        assert isinstance(result, HttpResponse)
-        assert result.content == 'Only the instructor can access this'
-        assert result.status_code == 403
+        assert result is True
     else:
-        assert result is None
+        assert result is False
 
 
 @pytest.mark.parametrize('order, tabs', (
