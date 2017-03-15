@@ -467,9 +467,10 @@ def edit_unit(request, course_id, unit_id):
     enroll_code = EnrollUnitCode.get_code(course_unit)
     notInstructor = check_instructor_auth(course, request)
 
-    if notInstructor: # redirect students to live session or student page
-        return HttpResponseRedirect(reverse('ct:study_unit',
-                                        args=(course_id, unit_id)))
+    if notInstructor:  # redirect students to live session or student page
+        return HttpResponseRedirect(
+            reverse('ct:study_unit', args=(course_id, unit_id))
+        )
 
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Edit'))
@@ -479,11 +480,12 @@ def edit_unit(request, course_id, unit_id):
         if request.POST.get('task') == 'release':
             cu.releaseTime = timezone.now()
             cu.save()  # publish for student access
-            red = pageData.fsm_redirect(request, 'release_Unit',
-                                        defaultURL=None, courseUnit=cu)
+            red = pageData.fsm_redirect(
+                request, 'release_Unit', defaultURL=None, courseUnit=cu
+            )
             if red:  # let FSM redirect us if desired
                 return red
-        if request.POST.get('task') == 'unrelease':
+        elif request.POST.get('task') == 'unrelease':
             cu.releaseTime = None
             cu.save()
         else:  # update unit description
@@ -492,13 +494,21 @@ def edit_unit(request, course_id, unit_id):
                 unitform.save()
                 kwargs = dict(course_id=course_id, unit_id=unit_id)
                 defaultURL = reverse('ct:unit_tasks', kwargs=kwargs)
-                return pageData.fsm_redirect(request, 'update_Unit',
-                                defaultURL, reverseArgs=kwargs, unit=unit)
+                return pageData.fsm_redirect(
+                    request, 'update_Unit', defaultURL, reverseArgs=kwargs, unit=unit
+                )
     set_crispy_action(request.path, unitform)
-    return pageData.render(request, 'ct/edit_unit.html',
-                  dict(unit=unit, courseUnit=cu, unitform=unitform,
-                       domain='https://{0}'.format(Site.objects.get_current().domain),
-                       enroll_code=enroll_code))
+    return pageData.render(
+        request,
+        'ct/edit_unit.html',
+        dict(
+            unit=unit,
+            courseUnit=cu,
+            unitform=unitform,
+            domain='https://{0}'.format(Site.objects.get_current().domain),
+            enroll_code=enroll_code
+        )
+    )
 
 
 def update_concept_link(request, conceptLinks, unit):

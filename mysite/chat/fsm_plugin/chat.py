@@ -173,9 +173,8 @@ class GET_ERRORS(object):
 
 
 class IF_RESOURCES(object):
-    help = '''Congratulations!  You have completed the core lessons for this
-              courselet.  See below for suggested next steps for what to study now in
-              this courselet.'''
+    help = '''Congratulations! You have completed the core lessons for this
+              courselet.'''
 
     title = 'Courselet core lessons completed'
     edges = (
@@ -188,8 +187,11 @@ class END(object):
     def get_help(self, node, state, request):
         'provide help messages for all views relevant to this stage.'
         unit = state.get_data_attr('unit')
-        lessons = list(unit.unitlesson_set \
-                       .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        lessons = list(
+            unit.unitlesson_set.filter(
+                kind=UnitLesson.COMPONENT, order__isnull=True
+            )
+        )
         if lessons:
             return '''Please look over the available resources in the side panel.'''
         else:
