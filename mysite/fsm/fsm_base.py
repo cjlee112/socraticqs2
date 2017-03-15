@@ -87,6 +87,10 @@ class FSMStack(object):
         Pop current FSM state and pass event to next stack state if any.
         """
         nextState = self.state.parentState
+        if '.live.' in self.state.fsmNode.funcName:
+            for child in self.state.linkChildren.all():
+                child.linkState = None
+                child.save()
         self.state.delete()
         self.state = nextState
         if nextState is not None:
