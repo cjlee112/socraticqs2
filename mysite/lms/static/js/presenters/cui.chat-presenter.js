@@ -375,7 +375,6 @@ CUI.ChatPresenter.prototype._postText = function(){
 
   // Find text
   var text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
-
   // Add text to input object if set
   input.text = text;
   input.chat_id = this._chatID;
@@ -1099,8 +1098,15 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
       this._$inputContainer.find('#chat-input-text-form').submit();
     }
     if (e.which === 13) {
-        var value = this._$inputContainer.find('textarea').val();
-        this._$inputContainer.find('textarea').val(value + '\r\n\r\n');
+        // when user clicks on ENTER - we just put 2 new lines into inputContainer
+        // but don't submit data to the server.
+//        var $textarea = this._$inputContainer.find('textarea');
+//        var value = $textarea.val();
+//        var position = $textarea.getCursorPosition();
+//        var new_val = value.slice(0, position) + "\r\n" + value.slice(position);
+//        $textarea.val(new_val);
+//        $textarea.selectRange(position+1);
+//        $textarea.trigger({ type : 'keypress' });
     }
   }, this));
 

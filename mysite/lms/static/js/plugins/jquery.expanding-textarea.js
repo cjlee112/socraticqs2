@@ -14,8 +14,9 @@
         this.value = savedValue;
       }).on('keydown', function(e){
         // Disable new linebreaks when pressing enter as it is used for submit
-        if(e.which == 13 && (!e.shiftKey && !e.ctrlKey && !e.altKey))
-          return false;
+//        if(e.which == 13) {
+//          return false;
+//        }
       }).on('input', function(e){
           this.rows = settings.minRows;
           var rows = Math.ceil((this.scrollHeight - this.baseScrollHeight) / parseInt($(this).css('line-height')));
