@@ -100,6 +100,7 @@ class CourseCoursletUnitMixin(object):
             code=code
         )
 
+
 class FormSetBaseView(object):
     formset_prefix = None
 
