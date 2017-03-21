@@ -10,8 +10,14 @@ from django.db import models
 from chat.models import EnrollUnitCode
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
-from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, AddEditUnitForm, ErrorModelFormSet, \
+from ctms.forms import (
+    CourseForm,
+    CreateCourseletForm,
+    EditUnitForm,
+    AddEditUnitForm,
+    ErrorModelFormSet,
     AddEditUnitAnswerForm
+)
 from ctms.models import SharedCourse
 from mysite.mixins import NewLoginRequiredMixin
 
@@ -405,7 +411,7 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         return kwargs
 
 
-class FormSetMixin(object):
+class FormSetBaseView(object):
     formset_prefix = None
 
     def get_formset_class(self):
@@ -446,7 +452,7 @@ class FormSetMixin(object):
 
 
 
-class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetMixin, UpdateView):
+class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
     model = Lesson
     form_class = AddEditUnitForm
     formset_class = ErrorModelFormSet

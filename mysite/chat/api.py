@@ -145,7 +145,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
             if is_in_node('GET_UNIT_NAME_TITLE'):
                 if course_unit and unit:
-                    # import ipdb; ipdb.set_trace()
                     if not message.content_id:
                         lesson = Lesson.objects.create(title=text, addedBy=self.request.user,
                                                        kind=Lesson.ORCT_QUESTION, text='')
@@ -155,33 +154,19 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                                                           treeID=lesson.treeID, addedBy=self.request.user)
                     else:
                         ul = message.content
-                    # if not message.timestamp:
                     chat.next_point = message
                     chat.save()
                     serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat, text=text,
                                     contenttype='unitlesson')
-                    # else:
-                    #     serializer.save()
 
             if is_in_node('GET_UNIT_QUESTION'):
                 ul = message.content
                 ul.lesson.text = text
                 ul.lesson.save()
-                # if not message.timestamp:
                 chat.next_point = message
-                # self.next_handler.next_point(
-                #     current=message.content,
-                #     chat=chat,
-                #     message=message,
-                #     request=self.request
-                # )
                 chat.save()
-                # chat.next_point = message
-                # chat.save()
                 serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat,
                             contenttype='unitlesson', text=text)
-                # else:
-                #     serializer.save()
 
             if is_in_node('GET_UNIT_ANSWER'):
                 #  create answer

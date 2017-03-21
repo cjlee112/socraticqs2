@@ -1,8 +1,6 @@
 from django import forms
-from django.forms.models import inlineformset_factory
 from django.forms.formsets import formset_factory
-from django.forms.models import modelformset_factory
-from ct.models import Course, CourseUnit, Unit, Lesson, UnitLesson
+from ct.models import Course, Unit, Lesson, UnitLesson
 
 
 class CourseForm(forms.ModelForm):
@@ -55,10 +53,6 @@ class AddEditUnitAnswerForm(forms.ModelForm):
         self.instance.title = 'Answer'
         self.instance.addedBy = user
         self.instance.kind = Lesson.ANSWER
-        # answer, _ = Lesson.objects.get_or_create(
-        #     title='Answer', text=self.cleaned_data['answer'],
-        #     addedBy=user, kind=Lesson.ANSWER
-        # )
         self.instance.save_root()
         ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
         lesson = super(AddEditUnitAnswerForm, self).save(commit)
