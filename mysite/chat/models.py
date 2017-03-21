@@ -191,7 +191,7 @@ class Message(models.Model):
 
     def get_html(self):
         html = None
-        if self.content_id and self.chat.state.fsmNode.fsm.name != 'chat_add_lesson':
+        if self.content_id: # self.chat.state.fsmNode.fsm.name != 'chat_add_lesson':
             if self.contenttype == 'chatdivider':
                 html = self.content.text
             elif self.contenttype == 'response':

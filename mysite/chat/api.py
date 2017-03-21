@@ -57,7 +57,7 @@ class ValidateMixin(object):
         return chat
 
 
-is_chat_add_lesson = lambda msg: msg.chat.state.fsmNode.fsm.name == 'chat_add_lesson'
+is_chat_add_lesson = lambda msg: msg.chat.state and msg.chat.state.fsmNode.fsm.name == 'chat_add_lesson'
 
 
 @injections.has
@@ -131,8 +131,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         message = self.get_object()
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         activity = chat.state and chat.state.activity
-        # import ipdb;ipdb.set_trace()
-
 
         is_in_node = lambda node: message.chat.state.fsmNode.name == node
 
@@ -144,7 +142,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             text = self.request.data.get('text')
             course_unit = message.chat.enroll_code.courseUnit
             unit = course_unit.unit
-            print "MESSAGE.ID = {}".format(message.id)
 
             if is_in_node('GET_UNIT_NAME_TITLE'):
                 if course_unit and unit:
@@ -168,9 +165,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
             if is_in_node('GET_UNIT_QUESTION'):
                 ul = message.content
-                print "GET_UNIT_QUESTION text ===>", text
-                print "msg.id", message.id
-
                 ul.lesson.text = text
                 ul.lesson.save()
                 # if not message.timestamp:

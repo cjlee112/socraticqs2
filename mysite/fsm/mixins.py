@@ -387,8 +387,6 @@ class ChatMixin(object):
                 owner=chat.user,
             )[0]
 
-        print "== == "*10, "NODE NAME => ", self.name
-
         if self.name in ('GET_UNIT_NAME_TITLE', 'GET_UNIT_QUESTION', 'GET_UNIT_ANSWER'):
             _data = dict(
                 chat=chat,
@@ -408,8 +406,6 @@ class ChatMixin(object):
 
             # content_id = current.id if current else None
             message = Message.objects.create(**_data)
-
-            print "mixins {} message.id = {}".format(self.name, message.id)
 
         if self.name in ('START', 'UNIT_QUESTION', 'WELL_DONE') and self.is_chat_add_lesson():
             text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
@@ -439,25 +435,6 @@ class ChatMixin(object):
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'
             message = Message.objects.get_or_create(**_data)[0]
-
-
-        '''
-        NOT_A_QUESTION
-        WELL_DONE
-
-        '''
-        # if self.name == 'GET_TITLE':
-        #     _data = {
-        #         'chat': chat,
-        #         'input_type': 'text',
-        #         'owner': chat.user,
-        #         'kind': 'response',
-        #         'userMessage': True,
-        #         'is_additional': is_additional
-        #     }
-        #     message = Message.objects.create(**_data)
-
-
 
         # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS
         if is_wait_node(self.name):
