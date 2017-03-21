@@ -60,8 +60,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 id=self.request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
-            ).exists()
-        )
+            ).exists())
 
     def get_will_learn_need_know(self, unit, courseUnit):
         """

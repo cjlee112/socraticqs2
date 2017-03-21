@@ -11,7 +11,6 @@ from django.db import models
 
 from chat.models import EnrollUnitCode
 
-from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import (
     CourseForm,
     CreateCourseletForm,
@@ -20,7 +19,7 @@ from ctms.forms import (
     ErrorModelFormSet,
     AddEditUnitAnswerForm
 )
-from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
+from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
@@ -144,6 +143,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     def get_context_data(self, **kwargs):
         my_courses = Course.objects.filter(
             models.Q(addedBy=self.request.user)  # |
+            # models.Q(shared_courses__to_user=self.request.user)
         )
         shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
         courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
@@ -377,6 +377,35 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
         self.object.unit_lesson = unit_lesson
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs.update(self.kwargs)
+        kwargs.update({
+            'unit_lesson': self.get_unit_lesson(),
+            'course': self.get_course(),
+            'courslet': self.get_courslet()
+        })
+        return kwargs
+
+
+class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
+    model = UnitLesson
+    template_name = 'ctms/unit_form.html'
+    course_pk_name = 'course_pk'
+    courslet_pk_name = 'courslet_pk'
+    unit_pk_name = 'pk'
+    form_class = EditUnitForm
+
+    def get_object(self, queryset=None):
+        return self.get_unit_lesson().lesson
+
+    def get_success_url(self):
+        return reverse('ctms:unit_view', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=True)
+        # self.object.save()
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
