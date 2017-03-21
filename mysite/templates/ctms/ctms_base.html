@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{#% load dictionary_extras %#}
+
+
+{% block head %}
+{{ block.super }}
+<!--<link rel="stylesheet" href="{% static 'bower_components/' %}">-->
+{% endblock %}
+
+{% block base_content %}
+
+{% block sidebar %}
+<nav class="col-xs-7 col-sm-3 col-md-2 sidebar sidebar-left sidebar-animate">
+  <h4>Courses</h4>
+  <select id="courses_list" class="go-on-select">
+    {% if sidebar.course not in sidebar.user_courses %}
+      <option selected="selected">Select course</option>
+    {% endif %}
+    {% for course in sidebar.user_courses %}
+      <option value="{% url 'ctms:course_view' pk=course.id %}" {% if sidebar.course.id == course.id %}selected="selected"{%endif%}>
+        {{ course.title }}
+      </option>
+    {% endfor %}
+  </select>
+
+
+  {% if sidebar.course %}
+  <span class="glyphicon glyphicon-wrench label label-info">
+    <a href="{% url 'ctms:course_settings' pk=sidebar.course.id %}" class="text-red">Settings</a>&nbsp;
+  </span>&nbsp;
+
+  <span class="glyphicon glyphicon-thumbs-up label label-info">
+    <a href="{% url 'ctms:course_view' pk=sidebar.course.id %}">Courslets</a>&nbsp;
+  </span>&nbsp;
+
+  <span class="glyphicon glyphicon-globe label label-warning">
+    <span class="glyphicon glyphicon-plus">
+      <a href="{% url 'ctms:share_course' pk=sidebar.course.id %}">Share this course</a>&nbsp;
+    </span>
+  </span>&nbsp;
+
+  <span class="glyphicon glyphicon-globe label label-warning">
+    <a href="{% url 'ctms:shared_courses' %}">Shared courses</a>&nbsp;
+  </span>
+  {% endif %}
+
+
+  {% if sidebar.course_courslets %}
+  <hr>
+    <h4>Courslets</h4>
+    <select id="courslets_list" class="go-on-select">
+      {% if sidebar.courslet not in sidebar.course_courslets %}
+       <option selected="selected">Select courselet</option>
+      {% endif %}
+      {% for courslet in sidebar.course_courslets %}
+      <option value={% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %} {% if sidebar.courslet.id == courslet.id %}selected="selected"{%endif%}>
+        {{ courslet.unit.title }}
+      </option>
+      {% endfor %}
+    </select>
+    {% if sidebar.courslet %}
+      <span class="glyphicon glyphicon-wrench label label-info">
+        <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="text-red">Settings</a>&nbsp;
+      </span>&nbsp;
+
+      <span class="glyphicon glyphicon-thumbs-up label label-info">
+        <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Units</a>&nbsp;
+      </span>&nbsp;
+    {% endif %}
+  {% endif %}
+
+
+  {% if sidebar.courslet_units %}
+  <hr>
+    <h4>Units</h4>
+      {% for unit in sidebar.courslet_units %}
+      <a href={% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}>
+        {{ unit.lesson.title }}
+      </a>
+      <br>
+      {% endfor %}
+    {% if sidebar.unit %}
+      <span class="glyphicon glyphicon-wrench label label-info">
+        <a href="{% url 'ctms:unit_settings' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=sidebar.unit.id %}" class="text-red">
+          Settings
+        </a>&nbsp;
+      </span>&nbsp;
+
+      <span class="glyphicon glyphicon-thumbs-up label label-info">
+        <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=sidebar.unit.id %}">
+          Responses
+        </a>&nbsp;
+      </span>&nbsp;
+    {% endif %}
+
+    {% if sidebar.courslet %}
+    <span class="glyphicon glyphicon-plus label label-info">
+      <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}">Add unit</a>
+    </span>
+
+    <span class="glyphicon glyphicon-plus label label-info">
+      <a href="">Add unit by chat</a>
+    </span>
+    {% endif %}
+  {% endif %}
+</nav>
+{% endblock %}
+
+<div class="col-xs-5 col-sm-9 col-md-10 ">
+  <!-- content -->
+  {% block content %}
+  {% endblock %}
+</div>
+
+<script language="JavaScript">
+    $(".go-on-select").change(function() {
+        document.location.href = $(this).val();
+    })
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+<table class="table">
+  <thead>
+    <th>{{ list_name }}</th>
+    <th></th>
+    <th></th>
+    <th>Status</th>
+    <th></th>
+  </thead>
+  <tbody>
+    {% for obj in objects %}
+    <tr>
+      <td>
+        {{ obj.email }}
+      </td>
+      <td>
+        <a href="{% url 'ctms:tester_join_course' code=obj.code %}">open course</a>
+      </td>
+      <td>
+        <a href="">Send new invite</a>
+      </td>
+      <td>
+        {{ obj.status }}
+      </td>
+      <td>
+        <form action="{% url 'ctms:delete_invite' code=obj.code %}" method="post">
+          {% csrf_token %}
+          <input type="submit" value="Remove" class="btn btn-danger">
+        </form>
+      </td>
+    </tr>
+
+    {% endfor %}
+  </tbody>
+</table>

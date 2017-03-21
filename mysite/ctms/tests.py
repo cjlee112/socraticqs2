@@ -7,7 +7,7 @@ from django.db import models
 
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
-from ctms.models import SharedCourse
+from ctms.models import Invite
 
 
 class MyTestCase(TestCase):
@@ -195,11 +195,7 @@ class MyCoursesTests(MyTestCase):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
-        shared_course = SharedCourse.objects.create(
-            from_user=self.user2,
-            to_user=self.user,
-            course=self.course
-        )
+        shared_course = Invite.create_new(True, self.course, self.user2, self.user.email, 'tester')
         response = self.client.get(self.url)
         # should return shared courses
         self.assertEqual(response.status_code, 200)

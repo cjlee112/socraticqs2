@@ -203,6 +203,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
                 resp.activity = activity
+                resp.is_test = chat.is_test
                 # NOTE: next line is a temporary solution.
                 resp.confidence = StudentResponse.SURE
             else:

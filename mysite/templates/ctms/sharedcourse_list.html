@@ -29,7 +29,7 @@
           {% for sh in shared_courses %}
             <tr>
               <td><a href="{% url 'lms:course_view' course_id=sh.course.id %}">{{ sh.course.title }}</a></td>
-              <td>{{ sh.from_user }}</td>
+              <td>{{ sh.instructor }}</td>
             </tr>
           {% endfor %}
         </tbody>
