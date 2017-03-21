@@ -1,3 +1,4 @@
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -5,11 +6,24 @@ from django.views.generic.base import View
 from django.db import models
 
 from ct.models import Course
+from ctms.models import Invite
 from fsm.models import FSMState
 from chat.models import EnrollUnitCode, Chat, Message
+from mysite.mixins import NewLoginRequiredMixin
 
 
 class CourseView(View):
+    template_name = 'lms/course_page.html'
+
+    def get_courselets(self, request, course):
+        return (
+            (
+                courselet,
+                EnrollUnitCode.get_code(courselet),
+                len(courselet.unit.get_exercises())
+            )
+            for courselet in course.get_course_units(True)
+        )
 
     @method_decorator(login_required)
     def get(self, request, course_id):
@@ -22,14 +36,13 @@ class CourseView(View):
             liveSession.live_instructor_name = (
                 liveSession.user.get_full_name() or liveSession.user.username
             )
-        courselets = (
-            (
-                courselet,
-                EnrollUnitCode.get_code(courselet),
-                len(courselet.unit.get_exercises())
-            )
-            for courselet in course.get_course_units(True)
-        )
+            try:
+                liveSession.live_instructor_icon = (
+                    liveSession.user.instructor.icon_url or static('img/avatar-teacher.jpg')
+                )
+            except AttributeError:
+                liveSession.live_instructor_icon = static('img/avatar-teacher.jpg')
+        courselets = self.get_courselets(request, course)
         live_sessions_history = Chat.objects.filter(
             user=request.user,
             is_live=True,
@@ -50,7 +63,8 @@ class CourseView(View):
             ).count()
 
         return render(
-            request, 'lms/course_page.html',
+            request,
+            self.template_name,
             dict(
                 course=course,
                 liveSession=liveSession,
@@ -58,3 +72,24 @@ class CourseView(View):
                 livesessions=live_sessions_history,
             )
         )
+
+class TesterCourseView(NewLoginRequiredMixin, CourseView):
+
+    template_name = 'lms/tester_course_page.html'
+
+    def get_courselets(self, request, course):
+        invite = get_object_or_404(
+            Invite,
+            models.Q(user=request.user) | models.Q(email=request.user.email),
+            course=course,
+            status='joined', type='tester'
+        )
+        return (
+            (
+                courselet,
+                EnrollUnitCode.get_code(courselet),
+                len(courselet.unit.get_exercises())
+            )
+            for courselet in course.get_course_units(False)
+        )
+
