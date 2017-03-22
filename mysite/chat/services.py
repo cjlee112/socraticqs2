@@ -168,6 +168,14 @@ class LiveChatFsmHandler(FsmHandler):
         return chat.next_point
 
 
+class ChatPreviewFsmHandler(FsmHandler):
+    FMS_name = 'courselet_preview'
+
+
+class ChatAddUnitFsmHandler(FsmHandler):
+    FMS_name = 'chat_add_lesson'
+
+
 class TestHandler(GroupMessageMixin, ProgressHandler):
     """
     Test handler to implement specific for mocked FSM logic.

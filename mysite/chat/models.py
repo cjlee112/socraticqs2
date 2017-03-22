@@ -66,6 +66,11 @@ STATUS_OPTIONS = {
     'done': 'Solidly',
 }
 
+YES_NO_OPTIONS = (
+    (1, 'Yes!'),
+    (0, 'No!')
+)
+
 
 class Chat(models.Model):
     """
@@ -75,6 +80,7 @@ class Chat(models.Model):
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
+    is_preview = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
@@ -170,6 +176,8 @@ class Message(models.Model):
             self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'
         ):
+            if self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
+                return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             if self.chat.next_point.kind == 'button':
                 options = [{"value": 1, "text": "Continue"}]
             elif self.chat.next_point.contenttype == 'unitlesson':
@@ -183,7 +191,7 @@ class Message(models.Model):
 
     def get_html(self):
         html = None
-        if self.content_id:
+        if self.content_id: # self.chat.state.fsmNode.fsm.name != 'chat_add_lesson':
             if self.contenttype == 'chatdivider':
                 html = self.content.text
             elif self.contenttype == 'response':
@@ -242,8 +250,8 @@ class EnrollUnitCode(models.Model):
         return enroll_code
 
     @classmethod
-    def get_code(cls, course_unit, isLive=False):
-        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive)
+    def get_code(cls, course_unit, isLive=False, isPreview=False):
+        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive, chat__is_preview=isPreview)
         if cr:
             enroll_code.enrollCode = uuid4().hex
             enroll_code.isLive = isLive
@@ -251,9 +259,12 @@ class EnrollUnitCode(models.Model):
         return enroll_code.enrollCode
 
     @classmethod
-    def get_code_for_user_chat(cls, course_unit, is_live, user):
+    def get_code_for_user_chat(cls, course_unit, is_live, user, is_preview=False):
         # enroll = cls(course_unit=course_unit, isLive=is_live)
-        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user).first()
+        filter_kw = {}
+        if is_preview:
+            filter_kw['chat__is_preview'] = True
+        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll
         enroll = cls(courseUnit=course_unit, isLive=is_live)

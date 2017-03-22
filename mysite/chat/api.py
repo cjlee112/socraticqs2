@@ -17,7 +17,7 @@ from .serializers import (
 )
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
-from ct.models import Response as StudentResponse
+from ct.models import Response as StudentResponse, Lesson, CourseUnit
 from ct.models import UnitLesson
 
 inj_alternative = injections.Container()
@@ -57,6 +57,9 @@ class ValidateMixin(object):
         return chat
 
 
+is_chat_add_lesson = lambda msg: msg.chat.state and msg.chat.state.fsmNode.fsm.name == 'chat_add_lesson'
+
+
 @injections.has
 class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.GenericViewSet):
     """
@@ -81,7 +84,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         next_point = chat.next_point
 
         if (
-            message.contenttype in ['response', 'uniterror'] and
+            (message.contenttype in ['response', 'uniterror'] or is_chat_add_lesson(message)) and
             message.content_id and
             next_point == message
         ):
@@ -129,10 +132,68 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         activity = chat.state and chat.state.activity
 
+        is_in_node = lambda node: message.chat.state.fsmNode.name == node
+
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
-        if message.input_type == 'text':
+        if message.input_type == 'text' and is_chat_add_lesson(message):
+            message.chat = chat
+            text = self.request.data.get('text')
+            course_unit = message.chat.enroll_code.courseUnit
+            unit = course_unit.unit
+
+            if is_in_node('GET_UNIT_NAME_TITLE'):
+                if course_unit and unit:
+                    if not message.content_id:
+                        lesson = Lesson.objects.create(title=text, addedBy=self.request.user,
+                                                       kind=Lesson.ORCT_QUESTION, text='')
+                        lesson.treeID = lesson.id
+                        lesson.save()
+                        ul = lesson.unitlesson_set.create(unit=unit, lesson=lesson,
+                                                          treeID=lesson.treeID, addedBy=self.request.user)
+                    else:
+                        ul = message.content
+                    chat.next_point = message
+                    chat.save()
+                    serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat, text=text,
+                                    contenttype='unitlesson')
+
+            if is_in_node('GET_UNIT_QUESTION'):
+                ul = message.content
+                ul.lesson.text = text
+                ul.lesson.save()
+                chat.next_point = message
+                chat.save()
+                serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat,
+                            contenttype='unitlesson', text=text)
+
+            if is_in_node('GET_UNIT_ANSWER'):
+                #  create answer
+                ul = message.content
+
+                if not message.timestamp:
+                    unit_lesson_answer = UnitLesson.create_from_lesson(
+                        unit=ul.unit, lesson=self.lesson, parent=ul, kind=UnitLesson.ANSWERS
+                    )
+                    chat.next_point = message
+                    chat.save()
+                    serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat,
+                                    contenttype='unitlesson', text=text)
+                else:
+                    serializer.save()
+
+            # if is_in_node('GET_UNIT_QUESTION'):
+            #     ul = message.content
+            #
+            #     if not message.timestamp:
+
+            if is_in_node('GET_UNIT_ANSWER'):
+                chat.next_point = None
+                chat.save()
+                serializer.save(chat=chat)
+
+        if message.input_type == 'text' and not is_chat_add_lesson(message):
             message.chat = chat
             text = self.request.data.get('text')
             if not message.content_id:

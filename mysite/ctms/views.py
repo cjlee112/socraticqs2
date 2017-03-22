@@ -1,4 +1,4 @@
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -7,9 +7,17 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
+from chat.models import EnrollUnitCode
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
-from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm
+from ctms.forms import (
+    CourseForm,
+    CreateCourseletForm,
+    EditUnitForm,
+    AddEditUnitForm,
+    ErrorModelFormSet,
+    AddEditUnitAnswerForm
+)
 from ctms.models import SharedCourse
 from mysite.mixins import NewLoginRequiredMixin
 
@@ -272,11 +280,8 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     def form_valid(self, form):
         courslet = self.get_courslet()
         unit = courslet.unit
-        self.object = unit.create_lesson(
-            title=form.cleaned_data['title'], text='', author=self.request.user
-        )
-        # create UnitLesson with blank answer for this unit
-        unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=True)
+        self.object = unit.create_lesson(title=form.cleaned_data['title'], text='', author=self.request.user)
+        unit_lesson = self.object.unitlesson_set.filter(order__isnull=False).order_by('-order')[0]
         self.object.unit_lesson = unit_lesson
         return redirect(self.get_success_url())
 
@@ -404,3 +409,212 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
             'courslet': self.get_courslet()
         })
         return kwargs
+
+
+class FormSetBaseView(object):
+    formset_prefix = None
+
+    def get_formset_class(self):
+        return self.formset_class
+
+    def get_formset(self, formset_class=None):
+        """
+        Returns an instance of the form to be used in this view.
+        """
+        if formset_class is None:
+            formset_class = self.get_formset_class()
+        return formset_class(**self.get_formset_kwargs())
+
+    def formset_valid(self, formset):
+        pass
+
+    def get_formset_prefix(self):
+        """
+        Returns the prefix to use for forms on this view
+        """
+        return self.formset_prefix
+
+    def get_formset_kwargs(self):
+        kwargs = {
+            'initial': self.get_formset_initial(),
+            # 'prefix': self.get_formset_prefix(),
+        }
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs.update({
+                'data': self.request.POST,
+                'files': self.request.FILES,
+            })
+        return kwargs
+
+    def get_formset_initial(self):
+        return [{}]
+
+
+
+class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
+    model = Lesson
+    form_class = AddEditUnitForm
+    formset_class = ErrorModelFormSet
+    # fields = ('title', '')
+    unit_pk_name = 'pk'
+    template_name = 'ctms/unit_edit.html'
+    HANDLE_FORMSET = False
+
+    def get_success_url(self):
+        return reverse('ctms:courslet_view', kwargs={
+            'course_pk': self.kwargs['course_pk'],
+            'pk': self.kwargs['courslet_pk'],
+        })
+
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+
+        answer_form = AddEditUnitAnswerForm(**self.get_answer_form_kwargs())
+
+        formset = self.get_formset()
+        if form.is_valid():
+            if answer_form.is_valid():
+                answer = answer_form.save(self.object.unit, self.request.user, self.object)
+
+            response = self.form_valid(form)
+
+            if not self.HANDLE_FORMSET:
+                return response
+            if self.object.lesson.kind == Lesson.ORCT_QUESTION and formset.is_valid():
+                return self.formset_valid(formset)
+
+        return self.render_to_response(
+            {
+                'course': self.get_course(),
+                'courslet': self.get_courslet(),
+                'unit': self.object,
+                'errors_formset': formset,
+                'form': form,
+                'answer_form': answer_form,
+            }
+        )
+
+    def get_answer_form_kwargs(self):
+        ul = self.get_unit_lesson()
+        answer = ul.get_answers().last()
+        kwargs = {}
+        kwargs['initial'] = {'answer': answer.lesson.text} if answer else {}
+        kwargs['instance'] = answer.lesson if answer else None
+        kwargs['prefix'] = 'answer_form'
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs['data'] = self.request.POST
+            kwargs['files'] = self.request.FILES
+        return kwargs
+
+    def formset_valid(self, formset):
+        error_models = []
+        for err_form in formset:
+            error_models.append(err_form.save(self.get_unit_lesson()))
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+        form.save(commit=True)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_initial(self):
+        init = super(AddUnitEditView, self).get_initial()
+        ul = self.get_unit_lesson()
+        init['unit_type'] = ul.lesson.kind
+        return init
+
+    def get_form_kwargs(self):
+        kwargs = {
+            'initial': self.get_initial(),
+            'prefix': self.get_prefix(),
+            'instance': self.get_form_initial()
+        }
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs.update({
+                'data': self.request.POST,
+                'files': self.request.FILES,
+            })
+        return kwargs
+
+    def get_queryset(self):
+        courselet = self.get_courslet()
+        return self.get_units_by_courselet(courselet)
+
+    def get_object(self, queryset=None):
+        if queryset:
+            return queryset.filter(id=self.kwargs.get(self.unit_pk_name)).first()
+        else:
+            return self.get_unit_lesson()
+
+    def get_form_initial(self):
+        ul = self.get_unit_lesson()
+        return ul.lesson
+
+    def get_formset_initial(self):
+        lessons = [
+            {
+                'title': q.lesson.title,
+                'text': q.lesson.text
+            }
+            for q in self.get_unit_lesson().get_errors()
+        ]
+        return lessons
+
+    def get_context_data(self, **kwargs):
+        kwargs.update(self.kwargs)
+        kwargs.update({
+            'course': self.get_course(),
+            'courslet': self.get_courslet(),
+            'unit': self.object,
+            'errors_formset': ErrorModelFormSet(),
+            'answer_form': AddEditUnitAnswerForm(**self.get_answer_form_kwargs()),
+        })
+        return kwargs
+
+
+class RedirectToCourseletPreviewView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    course_pk_name = 'course_pk'
+
+    def get(self, request, course_pk, pk):
+        course = self.get_course()
+        course_unit = course.courseunit_set.filter(id=pk).first()
+        if course_unit:
+            # create EnrollCode
+            enroll = EnrollUnitCode.get_code_for_user_chat(
+                course_unit=course_unit,
+                is_live=False,
+                user=request.user,
+                is_preview=True
+            )
+
+        return redirect('chat:preview_courselet', **{'enroll_key': enroll.enrollCode})
+
+
+class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    course_pk_name = 'course_pk'
+    courslet_pk_name = 'courset_pk'
+
+    def get(self, request, course_pk, pk):
+        course = self.get_course()
+        course_unit = course.courseunit_set.filter(id=pk).first()
+
+        if course_unit:
+            # create EnrollCode
+            enroll = EnrollUnitCode.get_code_for_user_chat(
+                course_unit=course_unit,
+                is_live=False,
+                user=request.user,
+            )
+        return redirect('chat:add_units_by_chat',
+                        **{'enroll_key': enroll.enrollCode, 'course_id': course.id, 'courselet_id': course_unit.id})
+
+
+
+
+
+
+

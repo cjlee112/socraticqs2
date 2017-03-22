@@ -23,11 +23,14 @@ MODELS = (
     ConceptGraph,
     Lesson,
     ConceptLink,
-    UnitLesson,
     Unit,
     Course,
     CourseUnit
 )
+
+@admin.register(UnitLesson)
+class UnitLessonAdmin(admin.ModelAdmin):
+    list_display = ('unit', 'lesson', 'order', 'addedBy')
 
 
 class BaseAdmin(admin.ModelAdmin):
