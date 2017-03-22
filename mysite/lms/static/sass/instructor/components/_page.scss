@@ -1,0 +1,18 @@
+.page {
+
+}
+
+.page__topbar {
+  background: $color-dark;
+}
+
+.page__topbar-inner {
+  height: 61px;
+  background: #fff;
+  border-bottom: 1px solid #DDE2E6;
+  border-radius: 5px 0 0 0; // TODO Move to media query
+}
+
+.page__account {
+  
+}

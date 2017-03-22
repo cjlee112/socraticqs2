@@ -278,8 +278,8 @@ p + p {
     width: 44px;
     height: 44px;
     margin: 44px 0 0 0;
-    background: url(../../img/courselets-logo.png) no-repeat top left;
-    background-image: url(../../img/courselets-logo.svg), none; }
+    background: url(../../img/student/courselets-logo.png) no-repeat top left;
+    background-image: url(../../img/student/courselets-logo.svg), none; }
   .course-header h1 {
     font-size: 34px;
     font-weight: normal;
@@ -339,8 +339,8 @@ p + p {
     padding: 50px 50px 50px 160px;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
-    background: #fff url(../../img/course-open-unit.png) no-repeat 50px 50px;
-    background-image: url(../../img/course-open-unit.svg), none;
+    background: #fff url(../../img/student/course-open-unit.png) no-repeat 50px 50px;
+    background-image: url(../../img/student/course-open-unit.svg), none;
     background-size: 60px 60px;
     transition: all 0.3s; }
     .course-content-units a:hover, .course-content-units a:active, .course-content-units a:focus {
@@ -493,8 +493,8 @@ p + p {
       font-size: 17px;
       line-height: 20px;
       color: #43B02A;
-      background: url(../../img/chat-back.png) no-repeat 42px 42px;
-      background-image: url(../../img/chat-back.svg), none;
+      background: url(../../img/student/chat-back.png) no-repeat 42px 42px;
+      background-image: url(../../img/student/chat-back.svg), none;
       padding: 40px 60px 40px 82px;
       border-right: 1px solid #E8E8EB;
       transition: all 0.2s; }
@@ -543,11 +543,11 @@ p + p {
       margin-right: 25px;
       line-height: 20px;
       padding: 0 0 0 36px;
-      background: url(../../img/chat-meta-lessons.png) no-repeat left center;
-      background-image: url(../../img/chat-meta-lessons.svg), none; }
+      background: url(../../img/student/chat-meta-lessons.png) no-repeat left center;
+      background-image: url(../../img/student/chat-meta-lessons.svg), none; }
       .chat-introduction .meta span.duration {
-        background: url(../../img/chat-meta-duration.png) no-repeat left center;
-        background-image: url(../../img/chat-meta-duration.svg), none; }
+        background: url(../../img/student/chat-meta-duration.png) no-repeat left center;
+        background-image: url(../../img/student/chat-meta-duration.svg), none; }
   .chat-introduction .cta {
     background: #F0F4F7;
     padding: 30px 0;
@@ -672,14 +672,14 @@ p + p {
         height: 44px;
         transition: transform 0.2s ease-out;
         cursor: pointer;
-        background: url(../../img/chat-select-list-inactive.png) no-repeat top left;
-        background-image: url(../../img/chat-select-list-inactive.svg), none;
+        background: url(../../img/student/chat-select-list-inactive.png) no-repeat top left;
+        background-image: url(../../img/student/chat-select-list-inactive.svg), none;
         backface-visibility: hidden; }
         .chat-message .chat-bubble .chat-select-list .chat-check:hover {
           transform: scale(1.05); }
         .chat-message .chat-bubble .chat-select-list .chat-check.chat-selectable-selected {
-          background: url(../../img/chat-select-list-active.png) no-repeat top left;
-          background-image: url(../../img/chat-select-list-active.svg), none; }
+          background: url(../../img/student/chat-select-list-active.png) no-repeat top left;
+          background-image: url(../../img/student/chat-select-list-active.svg), none; }
       .chat-message .chat-bubble .chat-select-list h3 {
         font-size: 15px;
         line-height: 22px;
@@ -865,22 +865,22 @@ p + p {
     height: 40px;
     transition: all 0.2s ease-out; }
   .chat-input-bar .sidebar-toggle span {
-    background: url(../../img/chat-action-bar-sidebar-inactive.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-sidebar-inactive.svg), none; }
+    background: url(../../img/student/chat-action-bar-sidebar-inactive.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-sidebar-inactive.svg), none; }
   .chat-input-bar .sidebar-toggle.active span {
-    background: url(../../img/chat-action-bar-sidebar-active.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-sidebar-active.svg), none; }
+    background: url(../../img/student/chat-action-bar-sidebar-active.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-sidebar-active.svg), none; }
   .chat-input-bar .fullscreen-toggle {
     left: auto;
     right: 0;
     border-right: none;
     border-left: 1px solid #EBEEF0; }
   .chat-input-bar .fullscreen-toggle span {
-    background: url(../../img/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-fullscreen-inactive.svg), none; }
+    background: url(../../img/student/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-fullscreen-inactive.svg), none; }
   .chat-input-bar .fullscreen-toggle.active span {
-    background: url(../../img/chat-action-bar-fullscreen-active.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-fullscreen-active.svg), none; }
+    background: url(../../img/student/chat-action-bar-fullscreen-active.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-fullscreen-active.svg), none; }
   .chat-input-bar .chat-avatar {
     position: absolute;
     top: 18px;
@@ -1005,8 +1005,8 @@ p + p {
       margin-top: 16px;
       cursor: default;
       opacity: 0.6;
-      background: url(../../img/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
-      background-image: url(../../img/chat-sidebar-breakpoint-locked.svg), none; }
+      background: url(../../img/student/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
     .chat-sidebar .chat-sidebar-resources li.unlocked,
     .chat-sidebar .chat-sidebar-resources li.done {
@@ -1019,13 +1019,13 @@ p + p {
         opacity: 0.6; }
     .chat-sidebar .chat-sidebar-breakpoints li.unlocked,
     .chat-sidebar .chat-sidebar-resources li.unlocked {
-      background: url(../../img/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
-      background-image: url(../../img/chat-sidebar-breakpoint-active.svg), none; }
+      background: url(../../img/student/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-active.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done,
     .chat-sidebar .chat-sidebar-resources li.done,
     .chat-sidebar .chat-sidebar-resources li.unlocked.done {
-      background: url(../../img/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
-      background-image: url(../../img/chat-sidebar-breakpoint-done.svg), none; }
+      background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-done.svg), none; }
 
 /* --- Chat spinner --- */
 .chat-loading {

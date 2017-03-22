@@ -99,8 +99,8 @@
       line-height: 20px;
       color: $brand-green;
       // IE8 SVG fallback https://css-tricks.com/using-svg/
-      background: url(../../img/chat-back.png) no-repeat 42px 42px;
-      background-image: url(../../img/chat-back.svg), none;
+      background: url(../../img/student/chat-back.png) no-repeat 42px 42px;
+      background-image: url(../../img/student/chat-back.svg), none;
       padding: 40px 60px 40px 82px;
       border-right: 1px solid #E8E8EB;
       transition: all 0.2s;
@@ -168,13 +168,13 @@
       line-height: 20px;
       padding: 0 0 0 36px;
       // IE8 SVG fallback https://css-tricks.com/using-svg/
-      background: url(../../img/chat-meta-lessons.png) no-repeat left center;
-      background-image: url(../../img/chat-meta-lessons.svg), none;
+      background: url(../../img/student/chat-meta-lessons.png) no-repeat left center;
+      background-image: url(../../img/student/chat-meta-lessons.svg), none;
 
       &.duration {
         // IE8 SVG fallback https://css-tricks.com/using-svg/
-        background: url(../../img/chat-meta-duration.png) no-repeat left center;
-        background-image: url(../../img/chat-meta-duration.svg), none;
+        background: url(../../img/student/chat-meta-duration.png) no-repeat left center;
+        background-image: url(../../img/student/chat-meta-duration.svg), none;
       }
     }
   }
@@ -353,8 +353,8 @@
         transition: transform 0.2s ease-out;
         cursor: pointer;
         // IE8 SVG fallback https://css-tricks.com/using-svg/
-        background: url(../../img/chat-select-list-inactive.png) no-repeat top left;
-        background-image: url(../../img/chat-select-list-inactive.svg), none;
+        background: url(../../img/student/chat-select-list-inactive.png) no-repeat top left;
+        background-image: url(../../img/student/chat-select-list-inactive.svg), none;
         backface-visibility: hidden;
 
         &:hover {
@@ -363,8 +363,8 @@
 
         &.chat-selectable-selected {
           // IE8 SVG fallback https://css-tricks.com/using-svg/
-          background: url(../../img/chat-select-list-active.png) no-repeat top left;
-          background-image: url(../../img/chat-select-list-active.svg), none;
+          background: url(../../img/student/chat-select-list-active.png) no-repeat top left;
+          background-image: url(../../img/student/chat-select-list-active.svg), none;
         }
       }
 
@@ -627,15 +627,15 @@
 
   .sidebar-toggle span {
     // IE8 SVG fallback https://css-tricks.com/using-svg/
-    background: url(../../img/chat-action-bar-sidebar-inactive.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-sidebar-inactive.svg), none;
+    background: url(../../img/student/chat-action-bar-sidebar-inactive.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-sidebar-inactive.svg), none;
 
   }
 
   .sidebar-toggle.active span {
     // IE8 SVG fallback https://css-tricks.com/using-svg/
-    background: url(../../img/chat-action-bar-sidebar-active.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-sidebar-active.svg), none;
+    background: url(../../img/student/chat-action-bar-sidebar-active.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-sidebar-active.svg), none;
   }
 
   .fullscreen-toggle {
@@ -647,14 +647,14 @@
 
   .fullscreen-toggle span {
     // IE8 SVG fallback https://css-tricks.com/using-svg/
-    background: url(../../img/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-fullscreen-inactive.svg), none;
+    background: url(../../img/student/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-fullscreen-inactive.svg), none;
   }
 
   .fullscreen-toggle.active span {
     // IE8 SVG fallback https://css-tricks.com/using-svg/
-    background: url(../../img/chat-action-bar-fullscreen-active.png) no-repeat center center;
-    background-image: url(../../img/chat-action-bar-fullscreen-active.svg), none;
+    background: url(../../img/student/chat-action-bar-fullscreen-active.png) no-repeat center center;
+    background-image: url(../../img/student/chat-action-bar-fullscreen-active.svg), none;
   }
 
   .chat-avatar {
@@ -831,8 +831,8 @@
       cursor:default;
       opacity: 0.6;
       // IE8 SVG fallback https://css-tricks.com/using-svg/
-      background: url(../../img/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
-      background-image: url(../../img/chat-sidebar-breakpoint-locked.svg), none;
+      background: url(../../img/student/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none;
     }
 
     li.unlocked, li.done {
@@ -847,14 +847,14 @@
 
     li.unlocked {
       // IE8 SVG fallback https://css-tricks.com/using-svg/
-      background: url(../../img/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
-      background-image: url(../../img/chat-sidebar-breakpoint-active.svg), none;
+      background: url(../../img/student/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-active.svg), none;
     }
 
     li.done, li.unlocked.done {
       // IE8 SVG fallback https://css-tricks.com/using-svg/
-      background: url(../../img/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
-      background-image: url(../../img/chat-sidebar-breakpoint-done.svg), none;
+      background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
+      background-image: url(../../img/student/chat-sidebar-breakpoint-done.svg), none;
     }
   }
 }

@@ -4,4 +4,51 @@ body {
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
   color: #333; }
 
+/**
+ * Links
+ */
+a {
+  color: #43B02A;
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s; }
+  a:hover, a:active, a:focus {
+    color: #8ED07F;
+    text-decoration: none; }
+
+.sidebar {
+  background: #1E1A34; }
+  .sidebar header {
+    background: #1B172F;
+    border-bottom: 1px solid #2F2B43;
+    height: 61px; }
+    .sidebar header:before, .sidebar header:after {
+      content: " ";
+      display: table; }
+    .sidebar header:after {
+      clear: both; }
+    .sidebar header a {
+      float: left;
+      line-height: 60px;
+      padding: 0 9px;
+      color: #B1B0B9; }
+      .sidebar header a:hover, .sidebar header a:focus, .sidebar header a:active {
+        color: #B1B0B9;
+        opacity: 0.6; }
+    .sidebar header .sidebar__logo {
+      display: block;
+      padding: 18px 9px 18px 24px; }
+      .sidebar header .sidebar__logo img {
+        display: block;
+        width: 24px;
+        height: 24px; }
+
+.page__topbar {
+  background: #1E1A34; }
+
+.page__topbar-inner {
+  height: 61px;
+  background: #fff;
+  border-bottom: 1px solid #DDE2E6;
+  border-radius: 5px 0 0 0; }
+
 /*# sourceMappingURL=app.css.map */

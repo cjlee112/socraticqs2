@@ -8,3 +8,19 @@ body {
   font: normal 14px/24px $font-family;
   color: $color-text-primary;
 }
+
+
+
+/**
+ * Links
+ */
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s;
+
+  &:hover, &:active, &:focus {
+    color: #8ED07F;
+    text-decoration: none;
+  }
+}

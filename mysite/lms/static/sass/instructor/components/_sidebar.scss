@@ -1,0 +1,41 @@
+.sidebar {
+  background: $color-dark;
+
+  header {
+    @include clearfix;
+    background: #1B172F;
+    border-bottom: 1px solid #2F2B43;
+    height: 61px;
+
+    a {
+      float: left;
+      line-height: 60px;
+      padding: 0 9px;
+      color: #B1B0B9;
+
+      &:hover, &:focus, &:active {
+        color: #B1B0B9;
+        opacity: 0.6;
+      }
+    }
+
+    .sidebar__logo {
+      display: block;
+      padding: 18px 9px 18px 24px;
+
+      img {
+        display: block;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  section {
+
+  }
+
+  h4 {
+
+  }
+}
