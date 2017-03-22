@@ -7,12 +7,12 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0006_auto_20170117_0513'),
+        ('ct', '0020_auto_20170209_0518'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='chat',
+            model_name='response',
             name='is_test',
             field=models.BooleanField(default=False),
         ),

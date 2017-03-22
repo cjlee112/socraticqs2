@@ -9,9 +9,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('ct', '0020_auto_20170209_0518'),
+        ('ct', '0021_response_is_test'),
         ('accounts', '0002_auto_20160411_1313'),
-        ('ctms', '0001_initial'),
+        ('ctms', '0002_auto_20170302_0658'),
     ]
 
     operations = [
@@ -29,23 +29,23 @@ class Migration(migrations.Migration):
                 ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='sharedcourse',
             name='course',
-            field=models.ForeignKey(related_name='shares', to='ct.Course'),
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='sharedcourse',
             name='from_user',
-            field=models.ForeignKey(related_name='my_shares', to=settings.AUTH_USER_MODEL),
         ),
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='sharedcourse',
             name='to_user',
-            field=models.ForeignKey(related_name='shares_to_me', to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.DeleteModel(
+            name='SharedCourse',
         ),
         migrations.AlterUniqueTogether(
-            name='sharedcourse',
-            unique_together=set([('from_user', 'to_user', 'course')]),
+            name='invite',
+            unique_together=set([('instructor', 'email', 'type', 'course')]),
         ),
     ]
