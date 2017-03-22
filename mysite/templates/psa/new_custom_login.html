@@ -37,10 +37,15 @@
         </div>
     </div>
     </form>
+
+  <br />
+  <a href="{% url 'signup' %}" class="btn btn-success">Sign Up</a>
+  <a href="{% url 'accounts:password_reset' %}" class="btn btn-warning">Forgot password</a>
 </div>
 
 {% if DEBUG %}
     {% include "psa/user_details.html" %}
 {% endif %}
+
 
 {% endblock %}
