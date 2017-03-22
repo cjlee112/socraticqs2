@@ -201,12 +201,12 @@ class CourseletPreviewView(ChatInitialView):
     @staticmethod
     def create_new_chat(request, enroll_code, courseUnit, **kwargs):
         return ChatInitialView.create_new_chat(
-            dict(
-                user=request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy,
-                is_preview=True
-            )
+            request=request,
+            courseUnit=courseUnit,
+            user=request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy,
+            is_preview=True
         )
 
     @staticmethod
