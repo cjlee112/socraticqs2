@@ -1,3 +1,13 @@
+.clearfix:before, .course-content-tabs ul:before, .live-session-notification:before,
+.clearfix:after,
+.course-content-tabs ul:after,
+.live-session-notification:after {
+  content: " ";
+  display: table; }
+
+.clearfix:after, .course-content-tabs ul:after, .live-session-notification:after {
+  clear: both; }
+
 html {
   height: 100%; }
 
@@ -10,13 +20,6 @@ body {
 
 main {
   height: 100%; }
-
-/* -- Upgrade-message for old browsers */
-.browserupgrade {
-  padding: 20px;
-  background: #fff;
-  text-align: center;
-  z-index: 10; }
 
 /* -- Element defaults */
 a, a:visited {
@@ -45,35 +48,6 @@ p {
 p + p {
   margin-top: 22px; }
 
-.btn, .btn:visited, input[type=submit], button {
-  font-family: "Avenir Next Rounded W01", sans-serif;
-  background: #43B02A;
-  border: 0;
-  box-shadow: none;
-  box-sizing: border-box;
-  border-radius: 4px;
-  vertical-align: middle;
-  color: #fff;
-  font-weight: 500;
-  margin: 0;
-  display: inline-block;
-  transition: all 0.2s ease-out;
-  font-size: 15px;
-  line-height: 20px;
-  padding: 12px 28px;
-  text-decoration: none;
-  backface-visibility: hidden;
-  transform: translateZ(0); }
-
-.btn:hover, .btn:active, .btn:focus, .btn:active:focus, input[type=submit]:hover, input[type=submit]:active, input[type=submit]:focus, input[type=submit]:active:focus, button:hover, button:active, button:focus, button:active:focus {
-  background: #43B02A;
-  color: #fff;
-  transform: scale(1.035);
-  text-decoration: none;
-  box-shadow: none;
-  outline: none;
-  border: none; }
-
 ::-webkit-input-placeholder {
   color: #999; }
 
@@ -82,43 +56,6 @@ p + p {
 
 :-ms-input-placeholder {
   color: #999; }
-
-/* -- Spinner for page loading */
-#page-preloader {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-top: -4px;
-  margin-left: -20px;
-  width: 40px;
-  height: 8px; }
-  #page-preloader span {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: #B1B0B9;
-    margin-left: 8px; }
-    #page-preloader span:first-child {
-      margin-left: 0; }
-
-/* -- Notification styling */
-.jquery-notify {
-  font-size: 15px;
-  line-height: 22px;
-  color: #333;
-  width: 400px;
-  padding: 30px 36px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 10px 30px 0 rgba(0, 0, 0, 0.12);
-  -webkit-animation: jelly 1000ms linear both;
-  animation: jelly 1000ms linear both;
-  cursor: pointer; }
-  .jquery-notify:hover {
-    opacity: 0.8; }
 
 @-webkit-keyframes jelly {
   0% {
@@ -199,7 +136,6 @@ p + p {
   100% {
     -webkit-transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
-
 @keyframes jelly {
   0% {
     -webkit-transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -279,10 +215,204 @@ p + p {
   100% {
     -webkit-transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+.browserupgrade {
+  padding: 20px;
+  background: #fff;
+  text-align: center;
+  z-index: 10; }
 
-/* -- MathJax loading message */
-#MathJax_Message {
-  display: none !important; }
+.btn, .btn:visited, input[type=submit], button {
+  font-family: "Avenir Next Rounded W01", sans-serif;
+  background: #43B02A;
+  border: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  border-radius: 4px;
+  vertical-align: middle;
+  color: #fff;
+  font-weight: 500;
+  margin: 0;
+  display: inline-block;
+  transition: all 0.2s ease-out;
+  font-size: 15px;
+  line-height: 20px;
+  padding: 12px 28px;
+  text-decoration: none;
+  backface-visibility: hidden;
+  transform: translateZ(0); }
+
+.btn:hover, .btn:active, .btn:focus, .btn:active:focus, input[type=submit]:hover, input[type=submit]:active, input[type=submit]:focus, input[type=submit]:active:focus, button:hover, button:active, button:focus, button:active:focus {
+  background: #43B02A;
+  color: #fff;
+  transform: scale(1.035);
+  text-decoration: none;
+  box-shadow: none;
+  outline: none;
+  border: none; }
+
+.course-header {
+  position: relative;
+  background-color: #F0F4F7;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #fff;
+  text-align: center; }
+  .course-header .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(41, 46, 51, 0.3);
+    z-index: 1; }
+  .course-header .container {
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
+    padding-bottom: 164px; }
+  .course-header .logo {
+    display: inline-block;
+    top: 44px;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    margin: 44px 0 0 0;
+    background: url(../../img/courselets-logo.png) no-repeat top left;
+    background-image: url(../../img/courselets-logo.svg), none; }
+  .course-header h1 {
+    font-size: 34px;
+    font-weight: normal;
+    line-height: 40px;
+    color: #fff;
+    margin-top: 130px; }
+  .course-header p {
+    font-size: 17px;
+    line-height: 24px;
+    margin-top: 18px; }
+
+.course-content #live-sessions {
+  display: none; }
+
+.course-content-tabs {
+  background: #fff;
+  border-bottom: 1px solid #E8E8EB; }
+  .course-content-tabs ul {
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+  .course-content-tabs li {
+    display: block;
+    width: 50%;
+    float: left; }
+    .course-content-tabs li:first-child a {
+      border-right: 1px solid #E8E8EB; }
+  .course-content-tabs a {
+    display: block;
+    font-size: 17px;
+    line-height: 20px;
+    color: #B1B0B9;
+    padding: 30px 0 28px 0;
+    text-align: center;
+    transition: all 0.3s;
+    border-bottom: 2px solid #fff; }
+    .course-content-tabs a:hover, .course-content-tabs a:active, .course-content-tabs a:focus, .course-content-tabs a.course-content-tabs--selected {
+      color: #43B02A;
+      padding-bottom: 28px;
+      border-color: #43B02A;
+      color: #43B02A;
+      text-decoration: none; }
+
+.course-content-units {
+  padding: 35px 0 50px 0;
+  min-height: 500px; }
+  .course-content-units ul {
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+  .course-content-units li {
+    display: block;
+    margin: 15px 0 0 0; }
+  .course-content-units a {
+    position: relative;
+    display: block;
+    padding: 50px 50px 50px 160px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
+    background: #fff url(../../img/course-open-unit.png) no-repeat 50px 50px;
+    background-image: url(../../img/course-open-unit.svg), none;
+    background-size: 60px 60px;
+    transition: all 0.3s; }
+    .course-content-units a:hover, .course-content-units a:active, .course-content-units a:focus {
+      text-decoration: none;
+      opacity: 0.5; }
+    .course-content-units a h3 {
+      font-size: 19px;
+      font-weight: normal;
+      line-height: 25px;
+      color: #333;
+      margin: 5px 0 0 0; }
+    .course-content-units a p {
+      font-size: 15px;
+      line-height: 20px;
+      color: #808080;
+      margin: 5px 0; }
+
+.course-content-unit-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 8px;
+  z-index: 1003;
+  background: #F6FBF5;
+  border-top: 1px solid #AEDDA4;
+  border-radius: 0 0 4px 4px; }
+  .course-content-unit-progress span {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2px;
+    height: 8px;
+    border-radius: 0 4px 4px 4px;
+    border: 1px solid #43B02A;
+    background: #43B02A;
+    background: repeating-linear-gradient(45deg, #43B02A, #43B02A 6px, #61BD4D 6px, #61BD4D 12px); }
+
+.course-content-units-description {
+  max-width: 500px;
+  margin: 10px auto 45px auto;
+  font-size: 15px;
+  line-height: 22px;
+  color: #808080;
+  text-align: center; }
+
+.live-session-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2000;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  min-height: 88px; }
+  .live-session-notification img {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: #F0F4F7;
+    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    border: none; }
+  .live-session-notification p {
+    padding: 32px 240px 20px 94px; }
+  .live-session-notification form {
+    position: absolute;
+    top: 20px;
+    right: 20px; }
 
 /* --- Chat grid system --- */
 .chat-container {
@@ -340,46 +470,40 @@ p + p {
 /* --- Introduction --- */
 .chat-introduction {
   background: #fff; }
-  .chat-introduction .hero {
+  .chat-introduction .container {
+    max-width: 100%; }
+  .chat-introduction .chat-introduction-title {
     position: relative;
-    background-color: #F0F4F7;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    color: #fff;
-    text-align: center; }
-    .chat-introduction .hero .overlay {
+    padding: 0 240px;
+    border-bottom: 1px solid #E8E8EB; }
+    .chat-introduction .chat-introduction-title h2 {
+      font-size: 21px;
+      line-height: 30px;
+      font-weight: normal;
+      color: #333;
+      text-align: center;
+      margin: 0;
+      padding: 35px 0; }
+    .chat-introduction .chat-introduction-title a {
+      display: block;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(41, 46, 51, 0.5);
-      z-index: 1; }
-    .chat-introduction .hero .chat-container {
-      z-index: 2;
-      padding-bottom: 194px; }
-    .chat-introduction .hero .logo {
-      display: inline-block;
-      top: 44px;
-      left: 50%;
-      width: 44px;
-      height: 44px;
-      margin: 44px 0 0 0;
-      background: url(../img/courselets-logo.png) no-repeat top left;
-      background-image: url(../img/courselets-logo.svg), none; }
-    .chat-introduction .hero h1 {
-      font-size: 34px;
-      font-weight: normal;
-      line-height: 40px;
-      color: #fff;
-      margin-top: 136px; }
-    .chat-introduction .hero p {
       font-size: 17px;
-      line-height: 24px;
-      margin-top: 18px; }
+      line-height: 20px;
+      color: #43B02A;
+      background: url(../../img/chat-back.png) no-repeat 42px 42px;
+      background-image: url(../../img/chat-back.svg), none;
+      padding: 40px 60px 40px 82px;
+      border-right: 1px solid #E8E8EB;
+      transition: all 0.2s; }
+      .chat-introduction .chat-introduction-title a:hover, .chat-introduction .chat-introduction-title a :active, .chat-introduction .chat-introduction-title a:focus {
+        color: #43B02A;
+        text-decoration: none;
+        opacity: 0.5; }
   .chat-introduction .description {
-    margin-top: 80px; }
+    margin-top: 50px; }
     .chat-introduction .description p:first-child {
       margin-top: 4px; }
   .chat-introduction .cover {
@@ -391,14 +515,14 @@ p + p {
     background-size: cover;
     border-radius: 4px;
     box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.12); }
-  .chat-introduction h2 {
+  .chat-introduction h3 {
     font-size: 11px;
     font-weight: 500;
     line-height: 12px;
     color: #333;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin: 43px 0 4px 0; }
+    margin: 53px 0 4px 0; }
   .chat-introduction ul {
     margin: 0;
     padding: 0;
@@ -408,7 +532,7 @@ p + p {
     padding: 16px 0;
     border-bottom: 1px solid #EDEDEF; }
   .chat-introduction .meta {
-    margin-top: 76px;
+    margin-top: 56px;
     padding-bottom: 27px;
     text-align: center;
     color: #666;
@@ -419,11 +543,11 @@ p + p {
       margin-right: 25px;
       line-height: 20px;
       padding: 0 0 0 36px;
-      background: url(../img/chat-meta-lessons.png) no-repeat left center;
-      background-image: url(../img/chat-meta-lessons.svg), none; }
+      background: url(../../img/chat-meta-lessons.png) no-repeat left center;
+      background-image: url(../../img/chat-meta-lessons.svg), none; }
       .chat-introduction .meta span.duration {
-        background: url(../img/chat-meta-duration.png) no-repeat left center;
-        background-image: url(../img/chat-meta-duration.svg), none; }
+        background: url(../../img/chat-meta-duration.png) no-repeat left center;
+        background-image: url(../../img/chat-meta-duration.svg), none; }
   .chat-introduction .cta {
     background: #F0F4F7;
     padding: 30px 0;
@@ -548,14 +672,14 @@ p + p {
         height: 44px;
         transition: transform 0.2s ease-out;
         cursor: pointer;
-        background: url(../img/chat-select-list-inactive.png) no-repeat top left;
-        background-image: url(../img/chat-select-list-inactive.svg), none;
+        background: url(../../img/chat-select-list-inactive.png) no-repeat top left;
+        background-image: url(../../img/chat-select-list-inactive.svg), none;
         backface-visibility: hidden; }
         .chat-message .chat-bubble .chat-select-list .chat-check:hover {
           transform: scale(1.05); }
         .chat-message .chat-bubble .chat-select-list .chat-check.chat-selectable-selected {
-          background: url(../img/chat-select-list-active.png) no-repeat top left;
-          background-image: url(../img/chat-select-list-active.svg), none; }
+          background: url(../../img/chat-select-list-active.png) no-repeat top left;
+          background-image: url(../../img/chat-select-list-active.svg), none; }
       .chat-message .chat-bubble .chat-select-list h3 {
         font-size: 15px;
         line-height: 22px;
@@ -629,7 +753,6 @@ p + p {
   transform: rotate(45deg);
   border-radius: 4px;
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.12); }
-
 .chat-message.chat-message-text .chat-bubble:after {
   content: "";
   display: block;
@@ -663,20 +786,17 @@ p + p {
   .chat-message.chat-message-media .chat-bubble .chat-actions .chat-actions-toggle span {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.4); }
-
 .chat-message.chat-message-media img, .chat-message.chat-message-media iframe, .chat-message.chat-message-media audio, .chat-message.chat-message-media video {
   display: block;
   max-width: 100%;
   border-radius: 4px;
   margin: 0; }
-
 .chat-message.chat-message-media audio {
   margin: 40px !important; }
 
 /* --- Media message with caption --- */
 .chat-message.chat-message-media.chat-message-with-caption img, .chat-message.chat-message-media.chat-message-with-caption iframe, .chat-message.chat-message-media.chat-message-with-caption audio, .chat-message.chat-message-media.chat-message-with-caption video {
   border-radius: 4px 4px 0 0; }
-
 .chat-message.chat-message-media.chat-message-with-caption .caption {
   padding: 20px;
   font-size: 14px;
@@ -745,22 +865,22 @@ p + p {
     height: 40px;
     transition: all 0.2s ease-out; }
   .chat-input-bar .sidebar-toggle span {
-    background: url(../img/chat-action-bar-sidebar-inactive.png) no-repeat center center;
-    background-image: url(../img/chat-action-bar-sidebar-inactive.svg), none; }
+    background: url(../../img/chat-action-bar-sidebar-inactive.png) no-repeat center center;
+    background-image: url(../../img/chat-action-bar-sidebar-inactive.svg), none; }
   .chat-input-bar .sidebar-toggle.active span {
-    background: url(../img/chat-action-bar-sidebar-active.png) no-repeat center center;
-    background-image: url(../img/chat-action-bar-sidebar-active.svg), none; }
+    background: url(../../img/chat-action-bar-sidebar-active.png) no-repeat center center;
+    background-image: url(../../img/chat-action-bar-sidebar-active.svg), none; }
   .chat-input-bar .fullscreen-toggle {
     left: auto;
     right: 0;
     border-right: none;
     border-left: 1px solid #EBEEF0; }
   .chat-input-bar .fullscreen-toggle span {
-    background: url(../img/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
-    background-image: url(../img/chat-action-bar-fullscreen-inactive.svg), none; }
+    background: url(../../img/chat-action-bar-fullscreen-inactive.png) no-repeat center center;
+    background-image: url(../../img/chat-action-bar-fullscreen-inactive.svg), none; }
   .chat-input-bar .fullscreen-toggle.active span {
-    background: url(../img/chat-action-bar-fullscreen-active.png) no-repeat center center;
-    background-image: url(../img/chat-action-bar-fullscreen-active.svg), none; }
+    background: url(../../img/chat-action-bar-fullscreen-active.png) no-repeat center center;
+    background-image: url(../../img/chat-action-bar-fullscreen-active.svg), none; }
   .chat-input-bar .chat-avatar {
     position: absolute;
     top: 18px;
@@ -803,8 +923,7 @@ p + p {
       border: 0;
       color: #333;
       font-size: 15px;
-      line-height: 24px;
-      overflow-x: !important; }
+      line-height: 24px; }
       .chat-input-bar .chat-input-text textarea:focus {
         outline: none; }
     .chat-input-bar .chat-input-text input[type=submit] {
@@ -820,7 +939,6 @@ p + p {
     padding-top: 18px; }
 
 .chat-sidebar {
-  overflow: scroll;
   position: fixed;
   display: none;
   top: 0;
@@ -829,11 +947,17 @@ p + p {
   height: 100%;
   background: #1E1A34;
   z-index: 1100;
-  color: #B1B0B9; }
+  color: #B1B0B9;
+  overflow-y: auto; }
   .chat-sidebar header {
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
     padding: 20px; }
+    .chat-sidebar header > a {
+      display: block; }
+      .chat-sidebar header > a:hover, .chat-sidebar header > a:active, .chat-sidebar header > a:focus {
+        text-decoration: none;
+        opacity: 0.6; }
     .chat-sidebar header .cover {
       float: left;
       width: 56px;
@@ -871,7 +995,7 @@ p + p {
       color: #747381;
       margin: 0 0 12px 0; }
   .chat-sidebar .chat-sidebar-breakpoints,
-  .chat-sidebar .chat-sidebar-resources  {
+  .chat-sidebar .chat-sidebar-resources {
     list-style: none;
     margin: 0;
     padding: 0; }
@@ -881,25 +1005,27 @@ p + p {
       margin-top: 16px;
       cursor: default;
       opacity: 0.6;
-      background: url(../img/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
-      background-image: url(../img/chat-sidebar-breakpoint-locked.svg), none; }
+      background: url(../../img/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
+      background-image: url(../../img/chat-sidebar-breakpoint-locked.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
-    .chat-sidebar .chat-sidebar-resources li.unlocked, .chat-sidebar .chat-sidebar-resources li.done  {
+    .chat-sidebar .chat-sidebar-resources li.unlocked,
+    .chat-sidebar .chat-sidebar-resources li.done {
       cursor: pointer;
       opacity: 1;
       transition: opacity 0.3s; }
       .chat-sidebar .chat-sidebar-breakpoints li.unlocked:hover, .chat-sidebar .chat-sidebar-breakpoints li.done:hover,
-      .chat-sidebar .chat-sidebar-resources li.started:hover, .chat-sidebar .chat-sidebar-resources li.done:hover  {
+      .chat-sidebar .chat-sidebar-resources li.unlocked:hover,
+      .chat-sidebar .chat-sidebar-resources li.done:hover {
         opacity: 0.6; }
-    .chat-sidebar .chat-sidebar-breakpoints li.unlocked,   .chat-sidebar .chat-sidebar-resources li.started  {
-      background: url(../img/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
-      background-image: url(../img/chat-sidebar-breakpoint-active.svg), none; }
-    .chat-sidebar .chat-sidebar-resources li.unlocked  {
-      background-image: url(../img/chat-sidebar-breakpoint-unlocked.png), none; }
+    .chat-sidebar .chat-sidebar-breakpoints li.unlocked,
+    .chat-sidebar .chat-sidebar-resources li.unlocked {
+      background: url(../../img/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
+      background-image: url(../../img/chat-sidebar-breakpoint-active.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done,
-    .chat-sidebar .chat-sidebar-resources li.done, .chat-sidebar .chat-sidebar-resources li.started.done {
-      background: url(../img/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
-      background-image: url(../img/chat-sidebar-breakpoint-done.svg), none; }
+    .chat-sidebar .chat-sidebar-resources li.done,
+    .chat-sidebar .chat-sidebar-resources li.unlocked.done {
+      background: url(../../img/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
+      background-image: url(../../img/chat-sidebar-breakpoint-done.svg), none; }
 
 /* --- Chat spinner --- */
 .chat-loading {
@@ -955,5 +1081,44 @@ img.zoom-img {
 .zoom-overlay-open,
 .zoom-overlay-transitioning {
   cursor: default; }
+
+/* -- MathJax loading message */
+#MathJax_Message {
+  display: none !important; }
+
+.jquery-notify {
+  font-size: 15px;
+  line-height: 22px;
+  color: #333;
+  width: 400px;
+  padding: 30px 36px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 10px 30px 0 rgba(0, 0, 0, 0.12);
+  -webkit-animation: jelly 1000ms linear both;
+  animation: jelly 1000ms linear both;
+  cursor: pointer; }
+  .jquery-notify:hover {
+    opacity: 0.8; }
+
+#page-preloader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -4px;
+  margin-left: -20px;
+  width: 40px;
+  height: 8px; }
+  #page-preloader span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: #B1B0B9;
+    margin-left: 8px; }
+    #page-preloader span:first-child {
+      margin-left: 0; }
 
 /*# sourceMappingURL=app.css.map */

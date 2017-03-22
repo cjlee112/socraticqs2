@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAIA,IAAK;EACH,UAAU,EAAE,OAAO;EACnB,sBAAsB,EAAE,WAAW;EACnC,IAAI,EAAE,sDAA6B;EACnC,KAAK,ECHc,IAAI",
+"sources": ["../../sass/instructor/base/_elements.scss","../../sass/instructor/base/_variables.scss"],
+"names": [],
+"file": "app.css"
+}
