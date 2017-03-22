@@ -67,24 +67,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     if request.POST:
         form = login_form_cls(request.POST)
         if form.is_valid():
-            params = form.cleaned_data
-            username = params.get('username')
-            password = params.get('password')
-            email = params.get('email')
-
-            if not username and email:
-                user = User.objects.filter(email=email).first()
-                if not user:
-                    sec_mail = SecondaryEmail.objects.filter(
-                        email=email
-                    ).first()
-                    if sec_mail:
-                        user = sec_mail.user
-                if user:
-                    username = user.username
-
-            # remove empty value
-            user = authenticate(username=username, password=password)
+            user = form.get_user()
             if user is not None:
                 if user.is_active:
                     login(request, user)
