@@ -1,11 +1,11 @@
-{% extends "accounts/base.html" %}
+{% extends "ctms_base.html" %}
 {% load social_tags %}
 
 {% block title %}
 Account settings page
 {% endblock %}
 
-{% block content %}
+{% block base_content %}
 {% if person and user.id == person.id %}
 
 <div class="buttons">
@@ -81,7 +81,7 @@ Account settings page
         </div>
     </div>
     </form>
-  <br>  
+  <br>
 
   {% if password_form %}
    <form class="form-horizontal" name="" action="." method="post">
@@ -142,7 +142,7 @@ Account settings page
 
 
   <div>
-    <a class="btn btn-primary" href="/logout/">
+    <a class="btn btn-primary" href="/new_logout/">
       <i class="fa fa-sign-out"></i>
       {% if user.is_authenticated %}
       Logout

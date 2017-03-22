@@ -36,4 +36,3 @@ urlpatterns = patterns(
 
     url(r'^$', AccountSettingsView.as_view(), name='settings'),
 )
-

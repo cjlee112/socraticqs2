@@ -62,6 +62,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, View):
             kwargs
         )
 
+
 class DeleteAccountView(NotAnonymousRequiredMixin, View):
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
@@ -80,5 +81,3 @@ class DeleteAccountView(NotAnonymousRequiredMixin, View):
                 person=request.user
             )
         )
-
-

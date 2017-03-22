@@ -92,6 +92,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     else:
         form = login_form_cls(initial={'next': next_page})
     kwargs['form'] = form
+    kwargs['next'] = next_page
     return render(
         request,
         template_name,
@@ -150,6 +151,7 @@ def signup(request, next_page=None):
     if 'next' in params:  # must pass through for both GET or POST
         kwargs['next'] = params['next']
     kwargs['form'] = form
+    kwargs['next'] = next_page
     return render(request, 'psa/signup.html', kwargs)
 
 
@@ -163,7 +165,7 @@ def done(request):
     instructor = None
     try:
         instructor = request.user.instructor
-        has_inst  = bool(instructor.institution)
+        has_inst = bool(instructor.institution)
     except request.user._meta.model.instructor.RelatedObjectDoesNotExist as e:
         has_inst = False
 

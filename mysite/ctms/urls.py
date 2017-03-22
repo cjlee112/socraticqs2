@@ -8,7 +8,7 @@ from ctms.views import (
 
 urlpatterns = patterns(
     '',
-    url(r'^course/?$', MyCoursesView.as_view(), name='my_courses'),
+    url(r'^$', MyCoursesView.as_view(), name='my_courses'),
 
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
     url(r'^course/(?P<pk>\d+)/courselet/?$', CourseView.as_view(), name='course_view'),
@@ -16,7 +16,11 @@ urlpatterns = patterns(
     url(r'^course/(?P<pk>\d+)/delete/?$', DeleteCourseView.as_view(), name='course_delete'),
 
     # go to preview
-    url(r'course/(?P<course_pk>\d+)/courslet/(?P<pk>\d+)/preview/?$', RedirectToCourseletPreviewView.as_view(), name='courselet_preview'),
+    url(
+        r'course/(?P<course_pk>\d+)/courslet/(?P<pk>\d+)/preview/?$',
+        RedirectToCourseletPreviewView.as_view(),
+        name='courselet_preview'
+    ),
 
     # new courslet
     url(r'^course/(?P<course_pk>\d+)/courselet/new/?$',
