@@ -2,14 +2,16 @@ from django.http.response import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.views.generic.base import View
+from django.template.response import TemplateResponse
+from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
+
 from chat.models import EnrollUnitCode
 
-from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
+from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role
 from ctms.forms import (
     CourseForm,
     CreateCourseletForm,
@@ -18,7 +20,9 @@ from ctms.forms import (
     ErrorModelFormSet,
     AddEditUnitAnswerForm
 )
-from ctms.models import SharedCourse
+from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
+from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
+from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
 
 
@@ -26,6 +30,14 @@ class CourseCoursletUnitMixin(object):
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
     unit_pk_name = 'unit_pk'
+    response_class = TemplateResponse
+
+    def render(self, template_name, context):
+        return self.response_class(
+            request=self.request,
+            template=template_name,
+            context=context,
+        )
 
     def get_course(self):
         return Course.objects.filter(id=self.kwargs.get(self.course_pk_name)).first()
@@ -42,14 +54,21 @@ class CourseCoursletUnitMixin(object):
 
     def get_my_or_shared_with_me_courses(self):
         return Course.objects.filter(
-            models.Q(addedBy=self.request.user) |
-            models.Q(shares__to_user=self.request.user)
+            models.Q(addedBy=self.request.user) | (
+             models.Q(invite__user=self.request.user) |
+             models.Q(invite__email=self.request.user.email)
+            ) |
+            models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         ).distinct()
 
     def get_my_or_shared_with_me_course_units(self):
         return CourseUnit.objects.filter(
-            models.Q(addedBy=self.request.user) |
-            models.Q(course__shares__to_user=self.request.user)
+            models.Q(addedBy=self.request.user) | (
+             models.Q(course__invite__user=self.request.user) |
+             models.Q(course__invite__email=self.request.user.email)
+            ) |
+            models.Q(course__role__role=Role.INSTRUCTOR, course__role__user=self.request.user) |
+            models.Q(course__addedBy=self.request.user)
         ).distinct()
 
     def get_courselets_by_course(self, course):
@@ -66,6 +85,14 @@ class CourseCoursletUnitMixin(object):
             responses_count=models.Count('response')
         )
 
+    def get_invite_by_code_request_or_404(self, code):
+        return get_object_or_404(
+            Invite,
+            models.Q(user__email=self.request.user.email) |
+            models.Q(email=self.request.user.email),
+            code=code
+        )
+
 
 class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     template_name = 'ctms/my_courses.html'
@@ -74,17 +101,19 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     def get_context_data(self, **kwargs):
         my_courses = Course.objects.filter(
             models.Q(addedBy=self.request.user)  # |
-            # models.Q(shared_courses__to_user=self.request.user)
         )
-        shared_courses = self.request.user.shares_to_me.all()
-        # SharedCourse.objects.filter(to_user=request.user)
+        shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
+        courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         course_form = None
         if not my_courses and not shared_courses:
             course_form = CourseForm()
+
         return {
             'my_courses': my_courses,
             'shared_courses': shared_courses,
             'course_form': course_form,
+            'instructor_role_courses': courses_shared_by_role
+
         }
 
     def post(self, request):
@@ -123,8 +152,11 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
             return Course.objects.filter(
                 models.Q(id=self.kwargs.get('pk')) &
                 (
-                    models.Q(addedBy=self.request.user) |
-                    models.Q(shares__to_user=self.request.user)
+                    models.Q(addedBy=self.request.user) | (
+                        models.Q(invite__user=self.request.user) |
+                        models.Q(invite__email=self.request.user.email)
+                    ) |
+                    models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
                 )
             ).distinct().first()
 
@@ -142,6 +174,10 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
 
 
 class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
+    """
+    Delete course view
+    Delete course can only owner.
+    """
     model = Course
 
     def get_queryset(self):
@@ -153,11 +189,22 @@ class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
 
 class SharedCoursesListView(NewLoginRequiredMixin, ListView):
     context_object_name = 'shared_courses'
-    model = SharedCourse
+    template_name = 'ctms/sharedcourse_list.html'
+    model = Invite
+    queryset = Invite.objects.all()
 
     def get_queryset(self):
         qs = super(SharedCoursesListView, self).get_queryset()
-        return qs.filter(to_user=self.request.user)
+        q = qs.shared_for_me(self.request)
+        print "Shared for me ", q
+        return q
+
+    def get_context_data(self, **kwargs):
+        kwargs = super(SharedCoursesListView, self).get_context_data(**kwargs)
+        kwargs['instructor_role_courses'] = Course.objects.filter(
+            role__role=Role.INSTRUCTOR, role__user=self.request.user
+        )
+        return kwargs
 
 
 class CourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -280,8 +327,13 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     def form_valid(self, form):
         courslet = self.get_courslet()
         unit = courslet.unit
-        self.object = unit.create_lesson(title=form.cleaned_data['title'], text='', author=self.request.user)
-        unit_lesson = self.object.unitlesson_set.filter(order__isnull=False).order_by('-order')[0]
+    
+        self.object = unit.create_lesson(
+            title=form.cleaned_data['title'], text='', author=self.request.user
+        )
+        # create UnitLesson with blank answer for this unit
+        unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=True)
+        
         self.object.unit_lesson = unit_lesson
         return redirect(self.get_success_url())
 
@@ -344,7 +396,10 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
     template_name = 'ctms/courslet_settings.html'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(CourseUnit, pk=self.kwargs.get('pk')).unit
+        if queryset:
+            return queryset.get(pk=self.kwargs.get('pk')).unit
+        else:
+            return self.get_my_or_shared_with_me_courses().get(pk=self.kwargs.get('pk')).unit
 
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs=self.kwargs)
@@ -613,8 +668,86 @@ class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Vie
                         **{'enroll_key': enroll.enrollCode, 'course_id': course.id, 'courselet_id': course_unit.id})
 
 
+class SendInvite(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
+    model = Invite
+    form_class = InviteForm
+    course_pk_name = 'pk'
+    template_name = 'ctms/invite_list.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['tester_invites'] = Invite.testers.my_invites(self.request)
+        kwargs['student_invites'] = Invite.students.my_invites(self.request)
+        return kwargs
+
+    def get_form_kwargs(self):
+        kwargs = super(SendInvite, self).get_form_kwargs()
+        # kwargs['']
+        return kwargs
+
+    def get_initial(self):
+        return {
+            'course': self.get_course(),
+        }
 
 
+class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateView):
+    model = Invite
+    form_class = InviteForm
+    course_pk_name = 'pk'
+    template_name = 'ctms/invite_list.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
+        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
+        kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        return kwargs
+
+    def post(self, *args, **kwargs):
+        form = self.form_class(self.get_course(), self.request.user.instructor, data=self.request.POST)
+        if form.is_valid():
+            invite = form.save()
+            response = invite.send_mail(self.request, self)
+            return response
+        return render(
+            self.request,
+            self.template_name,
+            self.get_context_data()
+        )
 
 
+class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+
+    def get(self, *args, **kwargs):
+        invite = self.get_invite_by_code_request_or_404(code=self.kwargs['code'])
+        invite.status = 'joined'
+        invite.save()
+        if invite.type == 'tester':
+            return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
+        elif invite.type == 'student':
+            return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+        else:
+            raise Http404()
+
+
+class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    def post(self, request, code):
+        invite = self.get_invite_by_code_request_or_404(code=code)
+        response = invite.send_mail(self.request, self)
+        return response
+
+
+class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
+    query_pk_and_slug = True
+    slug_url_kwarg = 'code'
+    slug_field = 'code'
+    pk_url_kwarg = 'pk'
+    model = Invite
+
+    def get_queryset(self, queryset=None):
+        if queryset:
+            return queryset.my_invitest(self.request)
+        return Invite.objects.my_invites(self.request)
+
+    def get_success_url(self):
+        return reverse('ctms:share_course', kwargs={'pk': self.get_object().course.id})
 

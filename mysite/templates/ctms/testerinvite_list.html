@@ -1,0 +1,70 @@
+{% extends 'ctms/ctms_base.html' %}
+
+{% block title %}
+Create new shared course
+{% endblock %}
+
+{% block content %}
+<h4>Share</h4>
+<form class="form" action="." method="POST">
+  {{ form.as_p }}
+  {% csrf_token %}
+  <input type="submit" value="Send invite">
+</form>
+
+<table class="table">
+  <thead>
+    <th>Testers</th>
+    <th></th>
+    <th>Status</th>
+    <th></th>
+  </thead>
+  <tbody>
+    {% for obj in tester_invites %}
+    <tr>
+      <td>
+        {{ obj.email }}
+      </td>
+      <td>
+        <a href="">Send new invite</a>
+      </td>
+      <td>
+        {{ obj.status }}
+      </td>
+      <td>
+        <a href="">Remove</a>
+      </td>
+    </tr>
+
+    {% endfor %}
+  </tbody>
+</table>
+<table class="table">
+  <thead>
+    <th>Students</th>
+    <th></th>
+    <th>Status</th>
+    <th></th>
+  </thead>
+  <tbody>
+    {% for obj in student_invites %}
+    <tr>
+      <td>
+        {{ obj.email }}
+      </td>
+      <td>
+        <a href="">Send new invite</a>
+      </td>
+      <td>
+        {{ obj.status }}
+      </td>
+      <td>
+        <a href="">Remove</a>
+      </td>
+    </tr>
+
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
