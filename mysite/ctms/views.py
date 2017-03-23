@@ -11,7 +11,7 @@ from django.db import models
 
 from chat.models import EnrollUnitCode
 
-from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
+from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role
 from ctms.forms import (
     CourseForm,
     CreateCourseletForm,
@@ -57,7 +57,8 @@ class CourseCoursletUnitMixin(object):
             models.Q(addedBy=self.request.user) | (
              models.Q(invite__user=self.request.user) |
              models.Q(invite__email=self.request.user.email)
-            )
+            ) |
+            models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         ).distinct()
 
     def get_my_or_shared_with_me_course_units(self):
@@ -65,7 +66,9 @@ class CourseCoursletUnitMixin(object):
             models.Q(addedBy=self.request.user) | (
              models.Q(course__invite__user=self.request.user) |
              models.Q(course__invite__email=self.request.user.email)
-            )
+            ) |
+            models.Q(course__role__role=Role.INSTRUCTOR, course__role__user=self.request.user) |
+            models.Q(course__addedBy=self.request.user)
         ).distinct()
 
     def get_courselets_by_course(self, course):
@@ -100,14 +103,17 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
             models.Q(addedBy=self.request.user)  # |
         )
         shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
-
+        courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         course_form = None
         if not my_courses and not shared_courses:
             course_form = CourseForm()
+
         return {
             'my_courses': my_courses,
             'shared_courses': shared_courses,
             'course_form': course_form,
+            'instructor_role_courses': courses_shared_by_role
+
         }
 
     def post(self, request):
@@ -149,7 +155,8 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
                     models.Q(addedBy=self.request.user) | (
                         models.Q(invite__user=self.request.user) |
                         models.Q(invite__email=self.request.user.email)
-                    )
+                    ) |
+                    models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
                 )
             ).distinct().first()
 
@@ -167,6 +174,10 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
 
 
 class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
+    """
+    Delete course view
+    Delete course can only owner.
+    """
     model = Course
 
     def get_queryset(self):
@@ -180,11 +191,20 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
     context_object_name = 'shared_courses'
     template_name = 'ctms/sharedcourse_list.html'
     model = Invite
+    queryset = Invite.objects.all()
 
     def get_queryset(self):
         qs = super(SharedCoursesListView, self).get_queryset()
         q = qs.shared_for_me(self.request)
+        print "Shared for me ", q
         return q
+
+    def get_context_data(self, **kwargs):
+        kwargs = super(SharedCoursesListView, self).get_context_data(**kwargs)
+        kwargs['instructor_role_courses'] = Course.objects.filter(
+            role__role=Role.INSTRUCTOR, role__user=self.request.user
+        )
+        return kwargs
 
 
 class CourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -376,7 +396,10 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
     template_name = 'ctms/courslet_settings.html'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(CourseUnit, pk=self.kwargs.get('pk')).unit
+        if queryset:
+            return queryset.get(pk=self.kwargs.get('pk')).unit
+        else:
+            return self.get_my_or_shared_with_me_courses().get(pk=self.kwargs.get('pk')).unit
 
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs=self.kwargs)

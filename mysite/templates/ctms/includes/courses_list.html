@@ -21,3 +21,34 @@
    {% endfor %}
    </tbody>
  </table>
+
+ {% if list_name == 'Shared courses' and instructor_role_courses %}
+ <h4>Has instructor role in these courses:</h4>
+  <table class="table table-striped">
+    <thead >
+      <th>
+        User who shared
+      </th>
+      <th>
+        Course name
+      </th>
+      <th>
+        link
+      </th>
+
+    </thead>
+    {% for course in instructor_role_courses %}
+    <tr>
+      <td>
+        {{ course.addedBy }}
+      </td>
+      <td>
+        {{ course.title }}
+      </td>
+      <td>
+        <a href="{% url 'lms:course_view' course_id=course.id %}">open</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+ {% endif %}

@@ -2,6 +2,7 @@
 
 {% block content %}
 <h4 class="text-center">Shared with me courses</h4>
+<h4>Invited to these courses:</h4>
 <table class="table table-striped">
   <thead >
     <th>
@@ -15,6 +16,7 @@
   </th>
 
   </thead>
+  <tbody>
   {% for sh in shared_courses %}
   <tr>
     <td>
@@ -24,10 +26,43 @@
       {{ sh.course.title }}
     </td>
     <td>
-      <a href="{% url 'lms:course_view' course_id=sh.course.id %}">open</a>
+      <a href="{% url 'ctms:tester_join_course' code=sh.code %}">open</a>
     </td>
   </tr>
-
   {% endfor %}
+  </tbody>
 </table>
+
+{% if instructor_role_courses %}
+<h4>Has instructor role in these courses:</h4>
+  <table class="table table-striped">
+    <thead >
+      <th>
+        User who shared
+      </th>
+      <th>
+        Course name
+      </th>
+      <th>
+        link
+      </th>
+
+    </thead>
+    <tbody>
+    {% for course in instructor_role_courses %}
+    <tr>
+      <td>
+        {{ course.addedBy }}
+      </td>
+      <td>
+        {{ course.title }}
+      </td>
+      <td>
+        <a href="{% url 'lms:course_view' course_id=course.id %}">open</a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
 {% endblock %}
