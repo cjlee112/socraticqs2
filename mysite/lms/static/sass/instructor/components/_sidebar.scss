@@ -1,5 +1,12 @@
 .sidebar {
+  display: none;
   background: $color-dark;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  min-height: 100%;
 
   header {
     @include clearfix;
@@ -36,6 +43,14 @@
   }
 
   h4 {
+    margin: 0;
+  }
+}
 
+// Larger viewports
+@media (min-width: 1024px) {
+  .sidebar {
+    display: block;
+    width: 308px;
   }
 }

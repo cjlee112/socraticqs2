@@ -4,11 +4,10 @@
 // Base
 @import 'base/variables';
 @import 'base/mixins';
-// @import 'base/bootstrap';
 @import 'base/elements';
 
 // Components
-// @import 'components/button';
 @import 'components/sidebar';
 @import 'components/page';
+@import 'components/card';
 @import 'components/avatar';

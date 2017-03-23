@@ -1,0 +1,35 @@
+.card {
+  background: #fff;
+  border-top: 1px solid #DDE2E6;
+  border-bottom: 1px solid #DDE2E6;
+  margin: 24px 0 0 0;
+}
+
+.card__topbar {
+  height: 96px;
+  border-bottom: 1px solid #DDE2E6;
+  padding: 36px 24px;
+}
+
+.card__content {
+  padding: 48px 24px;
+}
+
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .card {
+    margin: 60px;
+    border-radius: 4px;
+    border-left: 1px solid #DDE2E6;
+    border-right: 1px solid #DDE2E6;
+  }
+
+  .card__topbar {
+    padding: 36px 60px;
+  }
+
+  .card__content {
+    padding: 60px;
+  }
+}

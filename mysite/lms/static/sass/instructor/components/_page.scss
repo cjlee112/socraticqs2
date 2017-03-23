@@ -1,8 +1,14 @@
 .page {
-
+  padding-top: 60px;
+  padding-bottom: 24px;
 }
 
 .page__topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
   background: $color-dark;
 }
 
@@ -10,9 +16,55 @@
   height: 61px;
   background: #fff;
   border-bottom: 1px solid #DDE2E6;
-  border-radius: 5px 0 0 0; // TODO Move to media query
 }
 
 .page__account {
-  
+  display: block;
+  float: right;
+  line-height: 60px;
+  height: 60px;
+  color: #333;
+  padding-right: 15px;
+
+  &:hover, &:active, &:focus {
+    color: #333;
+    opacity: 0.6;
+  }
+
+  .avatar {
+    float: left;
+    margin-top: 15px;
+  }
+
+  span {
+    display: none;
+    float: left;
+    margin-left: 18px;
+  }
+}
+
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .page {
+    padding-left: 308px;
+    padding-bottom: 60px;
+  }
+
+  .page__topbar {
+    left: 308px;
+    width: calc(100% - 308px);
+  }
+
+  .page__topbar-inner {
+    border-radius: 5px 0 0 0;
+  }
+
+  .page__account {
+    padding-right: 72px;
+
+    span {
+      display: block;
+    }
+  }
 }

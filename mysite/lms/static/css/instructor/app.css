@@ -15,8 +15,35 @@ a {
     color: #8ED07F;
     text-decoration: none; }
 
+/**
+ * Text
+ */
+h1, h2, h3, h4, h5, h6 {
+  margin: 24px 0 0 0;
+  font-family: "Avenir Next Rounded W01", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #000; }
+
+h1 {
+  margin-top: 0; }
+
+p {
+  margin: 24px 0 0 0; }
+
+b, strong {
+  font-weight: 500; }
+
 .sidebar {
-  background: #1E1A34; }
+  display: none;
+  background: #1E1A34;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  min-height: 100%; }
   .sidebar header {
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
@@ -41,14 +68,95 @@ a {
         display: block;
         width: 24px;
         height: 24px; }
+  .sidebar h4 {
+    margin: 0; }
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: block;
+    width: 308px; } }
+.page {
+  padding-top: 60px;
+  padding-bottom: 24px; }
 
 .page__topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
   background: #1E1A34; }
 
 .page__topbar-inner {
   height: 61px;
   background: #fff;
+  border-bottom: 1px solid #DDE2E6; }
+
+.page__account {
+  display: block;
+  float: right;
+  line-height: 60px;
+  height: 60px;
+  color: #333;
+  padding-right: 15px; }
+  .page__account:hover, .page__account:active, .page__account:focus {
+    color: #333;
+    opacity: 0.6; }
+  .page__account .avatar {
+    float: left;
+    margin-top: 15px; }
+  .page__account span {
+    display: none;
+    float: left;
+    margin-left: 18px; }
+
+@media (min-width: 1024px) {
+  .page {
+    padding-left: 308px;
+    padding-bottom: 60px; }
+
+  .page__topbar {
+    left: 308px;
+    width: calc(100% - 308px); }
+
+  .page__topbar-inner {
+    border-radius: 5px 0 0 0; }
+
+  .page__account {
+    padding-right: 72px; }
+    .page__account span {
+      display: block; } }
+.card {
+  background: #fff;
+  border-top: 1px solid #DDE2E6;
   border-bottom: 1px solid #DDE2E6;
-  border-radius: 5px 0 0 0; }
+  margin: 24px 0 0 0; }
+
+.card__topbar {
+  height: 96px;
+  border-bottom: 1px solid #DDE2E6;
+  padding: 36px 24px; }
+
+.card__content {
+  padding: 48px 24px; }
+
+@media (min-width: 1024px) {
+  .card {
+    margin: 60px;
+    border-radius: 4px;
+    border-left: 1px solid #DDE2E6;
+    border-right: 1px solid #DDE2E6; }
+
+  .card__topbar {
+    padding: 36px 60px; }
+
+  .card__content {
+    padding: 60px; } }
+.avatar {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3); }
 
 /*# sourceMappingURL=app.css.map */
