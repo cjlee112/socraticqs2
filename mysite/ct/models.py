@@ -888,12 +888,12 @@ class ResponseManager(models.Manager):
     def get_queryset(self):
         return super(ResponseManager, self).get_queryset().filter(is_test=False)
 
-    def test_responses(self):
+    def test_responses(self, **kwargs):
         '''
         Return only test responses marked with flag is_test=True
         :return:
         '''
-        return self.get_queryset().filter(is_test=True)
+        return super(ResponseManager, self).get_queryset().filter(is_test=True, **kwargs)
 
 
 class Response(models.Model):

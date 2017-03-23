@@ -1249,7 +1249,7 @@ class ResponseManagerTest(TestCase):
         self.unit_lesson.save()
         self.responses = []
         for cnt in xrange(100):
-            self.responses[cnt] = Response(
+            self.responses.append(Response(
                 lesson=self.lesson,
                 unitLesson=self.unit_lesson,
                 course=self.course,
@@ -1260,30 +1260,43 @@ class ResponseManagerTest(TestCase):
                 status=NEED_HELP_STATUS,
                 author=self.user,
                 is_test=choice([False, True])
-            )
+            ))
             self.responses[cnt].save()
 
     def test_has_no_test_responses(self):
         responses = Response.objects.all()
         has_test = any(i.is_test for i in responses)
+        # should be False
         self.assertFalse(has_test)
 
     def test_filter_by_is_test__response_is_empty(self):
         responses = Response.objects.filter(is_test=True)
-        self.assertFalse(list(responses))
+        # should be empty
+        self.assertFalse(bool(list(responses)))
 
     def test_test_responses_method(self):
         responses = Response.objects.test_responses()
         has_test = any(i.is_test for i in responses)
+        # should be True
         self.assertTrue(has_test)
 
     def test_test_responses_method_get_kwargs(self):
-        responses = Response.objects.test_responses(**{'kind': 'dasd'})  # response should be empty
-        self.assertFalse(responses)
+        responses = Response.objects.test_responses(**{'kind': 'dasd'})
+        # response should be empty
+        self.assertFalse(bool(responses))
 
     def test_test_responses_method_get_kwargs2(self):
-        responses = Response.objects.test_responses(**dict(course=self.course))  # response should be empty
-        self.assertTrue(responses)
+        responses = Response.objects.test_responses(**dict(course=self.course))
+        # response should be not empty
+        self.assertTrue(bool(responses))
+
+    def test_test_responses(self):
+        responses = Response.objects.test_responses()
+        count_resp = responses.count()
+        cnt = len([r for r in self.responses if r.is_test])
+        # should be True
+        self.assertTrue(cnt == count_resp)
+
 
 
 
