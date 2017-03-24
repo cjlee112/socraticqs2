@@ -43,33 +43,7 @@ User profile page
   <div class="container-fluid">
     {% include 'psa/user_details.html' %}
   </div>
-  {% if form %}
-  <form class="form-horizontal" name="" action="." method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      {% if not field.is_hidden %}
-      <div class="control-group">
-        {{ field.label_tag }}
-          <div class="controls">
-            {{ field.errors }}
-            {{ field }}
-          </div>
-      </div>
-      {% else %}
-        {{ field }}
-      {% endif %}
-    {% endfor %}
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn">Save</button>
-        </div>
-    </div>
-    </form>
-  </div>
   {% endif %}
-  {% endif %}
-
   <div>
     <a class="btn btn-primary" href="/logout/">
       <i class="fa fa-sign-out"></i>

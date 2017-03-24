@@ -12,6 +12,7 @@ from accounts.forms import (
 )
 from accounts.models import Instructor
 from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
+from .forms import SocialForm
 
 
 class AccountSettingsView(NotAnonymousRequiredMixin, View):
@@ -71,7 +72,6 @@ class AccountSettingsView(NotAnonymousRequiredMixin, View):
             kwargs
         )
 
-
 class DeleteAccountView(NotAnonymousRequiredMixin, View):
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
@@ -90,3 +90,54 @@ class DeleteAccountView(NotAnonymousRequiredMixin, View):
                 person=request.user
             )
         )
+
+
+class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
+    template_name = 'accounts/profile_edit.html'
+
+    model = Instructor
+    form_class = SocialForm
+    def get_success_url(self):
+        return reverse('ctms:my_courses')
+
+    def get_initial(self):
+        return {
+           'user': self.request.user,
+        }
+
+    def get_form_kwargs(self):
+        """
+        Returns the keyword arguments for instantiating the form.
+        """
+        kwargs = {
+            'initial': self.get_initial(),
+            'prefix': self.get_prefix(),
+            'instance': self.get_instance()
+        }
+
+        if self.request.method in ('POST', 'PUT'):
+            kwargs.update({
+                'data': self.request.POST,
+                'files': self.request.FILES,
+            })
+        return kwargs
+
+    def get_instance(self):
+        try:
+            instructor = self.request.user.instructor
+        except self.request.user._meta.model.instructor.RelatedObjectDoesNotExist as e:
+            instructor = None
+        return instructor
+
+
+    def get(self, request):
+        instructor = self.get_instance()
+        if instructor is not None and instructor.institution:
+            return redirect(self.get_success_url())
+        else:
+            form = self.get_form()
+            return render(
+                request,
+                'accounts/profile_edit.html',
+                {'form': form}
+            )

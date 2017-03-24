@@ -25,12 +25,12 @@ urlpatterns = patterns(
             'next_page': '/ct/',
             'login_form_cls': UsernameLoginForm
         }, name='login'),
-    url(r'^signup/$', 'psa.views.signup', {'next_page': '/ctms/'}, name='signup'),
+    url(r'^signup/$', 'psa.views.signup', {'next_page': 'login'}, name='signup'),
     url(r'^new_login/$',
         'psa.views.custom_login',
         {
             'template_name': 'psa/new_custom_login.html',
-            'next_page': '/ctms/',
+            'next_page': 'accouts:profile_update',
             'login_form_cls': EmailLoginForm
         },
         name='new_login'),
@@ -52,6 +52,7 @@ urlpatterns = patterns(
     url(r'^set-pass/$', 'psa.views.set_pass'),
 
     url(r'^done/$', 'psa.views.done', name='done'),
+
     url(r'^lti/', include('lti.urls', namespace='lti')),
     url(r'^interested-form/', interested_form, name='interested-form'),
     # Base API
