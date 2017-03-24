@@ -1,4 +1,28 @@
-<aside>
+{% load staticfiles %}
+
+<aside class="sidebar" id="sidebar">
+  <header>
+    <a href="#" class="sidebar__logo">
+      <img src="{% static "img/instructor/courselets-logo.svg" %}" alt="Courselets logo">
+    </a>
+
+    <a href="">Courses</a>
+  </header>
+
+  <section>
+    <h4>Course</h4>
+  </section>
+
+  <section>
+    <h4>Courselet</h4>
+  </section>
+
+  <section>
+    <h4>Units</h4>
+  </section>
+
+  <!--
+
   <h4>Course</h4>
 
   <ul>
@@ -18,7 +42,6 @@
 
     <a href="{% url 'ctms:course_settings' pk=sidebar.course.id %}">Settings</a>
   {% endif %}
-
 
   {% if sidebar.course_courslets %}
     <h4>Courselet</h4>
@@ -59,4 +82,6 @@
       <a href="">Add Units by Chat</a>
     {% endif %}
   {% endif %}
+
+  -->
 </aside>

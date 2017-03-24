@@ -58,3 +58,56 @@ p {
 b, strong {
   font-weight: 500;
 }
+
+
+
+/**
+ * Tables
+ */
+ table, tr, th, td {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 48px;
+}
+
+thead {
+  border-bottom: 1px solid #DDE2E6;
+}
+
+tbody tr {
+  border-bottom: 1px solid #DDE2E6;
+
+  &:nth-child(odd) {
+    background: #FAFBFD;
+  }
+}
+
+th, td {
+  padding: 18px 12px;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+th {
+  color: $color-headline;
+  font-weight: 500;
+}
+
+td {
+  color: $color-text-primary;
+}
+
+td:first-child a {
+  color: $color-text-primary;
+
+  &:hover, &:active, &:focus {
+    color: $color-text-primary;
+    opacity: 0.6;
+  }
+}

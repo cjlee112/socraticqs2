@@ -1,45 +1,64 @@
 {% extends "ctms/ctms_base.html" %}
 
 {% block title %}
-{{ object.title }}
+  {{ object.title }}
 {% endblock %}
 
+<!--
+
+  object.addedBy
+-->
+
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h4><a href="{% url 'ctms:course_view' pk=object.id %}">{{ object.title }}</a></h4>
-  <h6>Added by {{ object.addedBy }}</h6>
-</div>
 
-<hr>
-<table class="table table-striped">
-  <thead>
-    <th>
-      Courslet
-    </th>
-    <th>
-      Settings
-    </th>
-    <th>Preview</th>
-  </thead>
-  <tbody>
-    {% for clt in courslets %}
-    <tr>
-      <td>
-        <a href="{% url 'ctms:courslet_view' course_pk=clt.course.id pk=clt.id %}">{{ clt.unit.title }}</a>
-      </td>
-      <td>
-        <a href="{% url 'ctms:courslet_settings' course_pk=clt.course.id pk=clt.id %}" class="btn btn-info">Settings</a>
-      </td>
-      <td>
-       <a href="{% url 'ctms:courselet_preview' course_pk=clt.course.id pk=clt.id %}" class="btn btn-warning">Preview</a>
-     </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.title }}</h1>
+    </header>
 
-<div class="text-right">
-  <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="btn btn-success">Create courslet</a>
-</div>
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:course_view' pk=object.id %}" class="card__nav-active">Courselets</a>
+        </li>
+
+        <li>
+          <a href="">Share</a>
+        </li>
+
+        <li>
+          <a href="">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <h2>Courselets</h2>
+      <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button">Add courslet</a>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Courselet</th>
+
+            <th>Answers</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for clt in courslets %}
+            <tr>
+              <td>
+                <a href="{% url 'ctms:courslet_view' course_pk=clt.course.id pk=clt.id %}">{{ clt.unit.title }}</a>
+              </td>
+
+              <td>
+                TODO
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </main>
+  </div>
 {% endblock %}

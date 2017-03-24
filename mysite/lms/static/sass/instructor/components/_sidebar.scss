@@ -4,7 +4,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: 101;
   width: 100%;
   min-height: 100%;
 
@@ -13,6 +13,7 @@
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
     height: 61px;
+    padding-left: 50px; // Make room for hamburger
 
     a {
       float: left;
@@ -50,7 +51,11 @@
 // Larger viewports
 @media (min-width: 1024px) {
   .sidebar {
-    display: block;
+    display: block !important;
     width: 308px;
+
+    header {
+      padding-left: 0;
+    }
   }
 }

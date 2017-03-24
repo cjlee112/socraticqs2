@@ -17,7 +17,7 @@
   <!-- Chat -->
   <main>
     <!-- Header -->
-    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/hero.jpg" %}');" {% endif %}>
+    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/student/hero.jpg" %}');" {% endif %}>
       <div class="overlay"></div>
 
       <div class="container">
@@ -119,7 +119,7 @@
           {% if small_img_url %}
           <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
           {% else %}
-          <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
+          <div class="cover" style="background-image:url('{% static "img/student/hero.jpg" %}');"></div>
           {% endif %}
 
           <div class="description">
@@ -205,19 +205,19 @@
   <script src="{% static "js/plugins/jquery.expanding-textarea.js" %}"></script>
   <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
   <script src="{% static "js/cui.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-breakpoint-model.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-media-model.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-message-model.js" %}"></script>
-  <script src="{% static "js/models/cui.sidebar-breakpoint-model.js" %}"></script>
-  <script src="{% static "js/models/cui.input-option-model.js" %}"></script>
-  <script src="{% static "js/models/cui.sidebar-resource-model.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-message-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-media-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.input-option-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.sidebar-resource-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-presenter.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-media-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-message-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.sidebar-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.input-option-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.sidebar-resource-model.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-message-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-media-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.input-option-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.sidebar-resource-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-presenter.js" %}"></script>
   <script src="{% static "js/helpers.js" %}"></script>
-  <script src="{% static "js/chat.js" %}"></script>
+  <script src="{% static "js/chat/chat.js" %}"></script>
 {% endblock %}

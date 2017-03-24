@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   background: #fff;
   border-top: 1px solid #DDE2E6;
   border-bottom: 1px solid #DDE2E6;
@@ -9,6 +10,45 @@
   height: 96px;
   border-bottom: 1px solid #DDE2E6;
   padding: 36px 24px;
+
+  h1 {
+    @include ellipsis;
+  }
+}
+
+.card__nav {
+  border-bottom: 1px solid #DDE2E6;
+  padding-left: 9px;
+  height: 48px;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0; // Removes space between inline-block elements
+    white-space: nowrap;
+    overflow: scroll; // Make long navigation scrollable on smaller viewports
+  }
+
+  li {
+    display: inline-block;
+  }
+
+  a {
+    position: relative;
+    display: inline-block;
+    color: #333;
+    font-size: 14px;
+    line-height: 24px;
+    padding: 12px 15px 10px 15px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+
+    &.card__nav-active, &:hover, &:active, &:focus {
+      color: $color-primary;
+      border-bottom: 2px solid $color-primary;
+    }
+  }
 }
 
 .card__content {
@@ -26,7 +66,24 @@
   }
 
   .card__topbar {
-    padding: 36px 60px;
+    padding: 36px 400px 36px 60px;
+  }
+
+  .card__nav {
+    position: absolute;
+    top: 0;
+    right: 45px;
+    height: 96px;
+    padding-left: 0;
+
+    ul {
+      overflow: auto;
+    }
+
+    a {
+      padding-top: 39px;
+      padding-bottom: 31px;
+    }
   }
 
   .card__content {

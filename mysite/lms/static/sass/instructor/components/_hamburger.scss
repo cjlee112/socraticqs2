@@ -1,0 +1,46 @@
+.hamburger {
+  position: fixed;
+  display: block;
+  width: 60px;
+  height: 60px;
+  top: 0;
+  left: 7px;
+  z-index: 102;
+  cursor: pointer;
+
+  &:before, &:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 25px;
+    left: 18px;
+    width: 24px;
+    height: 1px;
+    background: #333;
+    transform: rotate(0);
+    transition: all 0.25s;
+  }
+
+  &:after {
+    top: 34px;
+  }
+}
+
+.hamburger--active {
+  &:before, &:after {
+    background: #B1B0B9;
+    transform: rotate(45deg);
+    top: 30px;
+  }
+
+  &:after {
+    transform: rotate(-45deg);
+  }
+}
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .hamburger {
+    display: none;
+  }
+}
