@@ -33,8 +33,10 @@
     </nav>
 
     <main class="card__content">
-      <h2>Courselets</h2>
-      <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button">Add courslet</a>
+      <h2>
+        <span>Courselets</span>
+        <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary">Add courselet</a>
+      </h2>
 
       <table>
         <thead>

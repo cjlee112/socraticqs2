@@ -53,13 +53,27 @@
 
 .card__content {
   padding: 48px 24px;
+
+  > *:first-child {
+    margin-top: 0;
+  }
+}
+
+.card__headline-with-button {
+  h2 {
+    margin: 0;
+  }
+
+  .button {
+    margin-top: 24px;
+  }
 }
 
 
 // Larger viewports
 @media (min-width: 1024px) {
   .card {
-    margin: 60px;
+    margin: 60px 60px 0 60px;
     border-radius: 4px;
     border-left: 1px solid #DDE2E6;
     border-right: 1px solid #DDE2E6;
