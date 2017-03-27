@@ -74,17 +74,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 for concept_link in qs:
                     title = concept_link.concept.title
                     if concept_link.lesson.url:
-                        url = concept_link.lesson.url
-                    else:
-                        ul = UnitLesson.objects.filter(
-                            lesson__concept=concept_link.concept
-                        ).values('id').first()
-                        if ul:
-                            url = reverse(
-                                'ct:study_concept', args=(courseUnit.course.id, unit.id, ul['id'])
-                            )
-                    if url:
-                        contaner.add((title, url))
+                        contaner.add((title, concept_link.lesson.url))
         return will_learn, need_to_know
 
     def get(self, request, enroll_key):
