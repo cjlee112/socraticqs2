@@ -1,4 +1,8 @@
 {% if not instance.hidden %}
-<dt>{{ instance.question }}</dt>
-<dd>{{ instance.answer }}</dd>
+<div>
+<dt>Q: {{ instance.question }}</dt>
+<br>
+<dd>A: {{ instance.answer }}</dd>
+<hr>
+</div>
 {% endif %}

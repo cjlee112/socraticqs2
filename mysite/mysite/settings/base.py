@@ -10,7 +10,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 CMS_TEMPLATES = (
     ('pages/main_page.html', 'Main Page'),
     ('pages/about_page.html', 'About Page'),
-    ('pages/landing_page.html', 'Landing Page')
+    ('pages/landing_page.html', 'Landing Page'),
+    ('pages/faq_page.html', 'FAQ Page')
 
 )
 
