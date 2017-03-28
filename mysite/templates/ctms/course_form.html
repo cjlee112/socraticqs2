@@ -18,7 +18,7 @@
 </form>
 <br>
 
-<form action="{% url 'ctms:course_delete' pk=object.id %}" method="post">
+<form action="{% url 'ctms:course_delete' pk=object.id %}" method="post" onsubmit="return confirm('Do you really want to delete course \'{{ object.title }}\'')">
   {% csrf_token %}
   <input type="submit" value="Delete Course" class="btn btn-danger">
 </form>
