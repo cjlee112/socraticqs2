@@ -81,6 +81,78 @@ td:first-child a {
     color: #333;
     opacity: 0.6; }
 
+/**
+ * Forms
+ */
+form {
+  margin: 0;
+  padding: 0; }
+  form:before, form:after {
+    content: " ";
+    display: table; }
+  form:after {
+    clear: both; }
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #000;
+  margin: 54px 0 0 0; }
+  label:first-of-type {
+    margin-top: 0; }
+
+label + p {
+  color: #7F7F7F;
+  margin: 6px 0 0 0; }
+
+input[type=text], input[type=password], input[type=email], textarea {
+  display: block;
+  width: 100%;
+  height: 54px;
+  font-family: "Avenir Next Rounded W01", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 24px;
+  padding: 15px 24px;
+  background: #fff;
+  border: 1px solid #D0D5D9;
+  border-radius: 4px;
+  color: #333;
+  margin: 12px 0 0 0; }
+
+textarea {
+  height: 150px; }
+
+input[type=submit] {
+  display: inline-block;
+  width: auto;
+  float: right;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-decoration: none;
+  background: #43B02A;
+  color: #fff;
+  margin: 48px 0 0 0;
+  padding: 14px 30px;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid #43B02A;
+  cursor: pointer;
+  transition: all 0.2s; }
+  input[type=submit]:hover, input[type=submit]:active, input[type=submit]:focus {
+    opacity: 0.6;
+    outline: 0; }
+
+.checkbox, .radio, .checkbox-inline, .radio-inline {
+  margin: 12px 0 0 0;
+  color: #333; }
+
+.checkbox-inline + .checkbox-inline, .radio-inline + .radio-inline {
+  margin: 12px 0 0 12px; }
+
 .sidebar {
   display: none;
   background: #1E1A34;

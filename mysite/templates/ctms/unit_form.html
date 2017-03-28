@@ -1,25 +1,61 @@
 {% extends 'ctms/ctms_base.html' %}
 
-{% block title %}
-Create new courslet
-{% endblock %}
-
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a></h5>
-</div>
+<div class="card">
+  <header class="card__topbar">
+    <h1>TODO: Unit name</h1>
+  </header>
 
-{% if courslet %}
-<div class="text-center">
-  <h6>Courslet</h6>
-  <h4><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h4>
-</div>
-{% endif %}
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="" class="card__nav-active">Edit</a>
+      </li>
 
-<form action="" method="POST">
-  {{ form.as_p }}
-  {% csrf_token %}
-  <input type="submit" value="Save">
-</form>
+      <li>
+        <a href="">Answers</a>
+      </li>
+
+      <li>
+        <a href="">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    <form action="" method="POST">
+      <!-- TODO: Add missing inputs in this form
+        {{ form.as_p }}
+      -->
+
+      <label for="name">Unit Name</label>
+      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
+      <input type="text" name="name">
+
+      <label for="type">Unit Type</label>
+      <p>You can create interactive questions or passive introductions (without answers and self-assessment).</p>
+      <label class="radio-inline">
+        <input type="radio" name="type" value="question" checked> Question
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="type" value="introduction"> Introduction
+      </label>
+
+      <label for="question">Question</label>
+      <p>Write your question here.</p>
+      <textarea name="question"></textarea>
+
+      <label for="answer">Answer</label>
+      <p>Add your answer to the question here.</p>
+      <textarea name="answer"></textarea>
+
+      <label for="error-models">TODO: Error Models <span>– optional</span></label>
+      <p>An error model explains a common misconception. Your students can select error models when they self-assess.</p>
+
+      {% csrf_token %}
+
+      <input type="submit" value="Save">
+    </form>
+  </main>
+</div>
 {% endblock %}
