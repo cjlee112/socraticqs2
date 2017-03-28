@@ -879,6 +879,23 @@ STATUS_TABLE_LABELS = (
 )
 
 
+class ResponseManager(models.Manager):
+    '''
+    Manager for Response model which will return by default Response's with field is_test equals to False
+    To get test responses (marked with flag is_test=True) you should use method test_responses,
+    which will return only test responses.
+    '''
+    def get_queryset(self):
+        return super(ResponseManager, self).get_queryset().filter(is_test=False)
+
+    def test_responses(self, **kwargs):
+        '''
+        Return only test responses marked with flag is_test=True
+        :return:
+        '''
+        return super(ResponseManager, self).get_queryset().filter(is_test=True, **kwargs)
+
+
 class Response(models.Model):
     'answer entered by a student in response to a question'
     ORCT_RESPONSE = 'orct'
@@ -912,6 +929,7 @@ class Response(models.Model):
     course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
+    is_test = models.BooleanField(default=False)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES,
@@ -925,6 +943,8 @@ class Response(models.Model):
     needsEval = models.BooleanField(default=False)
     parent = models.ForeignKey('Response', null=True, blank=True)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
+
+    objects = ResponseManager()
 
     def __unicode__(self):
         return 'answer by ' + self.author.username
@@ -965,7 +985,7 @@ class Response(models.Model):
                 raise ValueError('no query and no unitLesson?!?')
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
-                    Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
+                    Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'URL for this response'

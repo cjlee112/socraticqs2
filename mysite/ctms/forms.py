@@ -1,6 +1,12 @@
 from django import forms
 from django.forms.formsets import formset_factory
 from ct.models import Course, Unit, Lesson, UnitLesson
+from django.contrib.sites.models import Site
+from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
+from ct.models import Course, CourseUnit, Unit, Lesson, UnitLesson
+from ctms.models import Invite
+from django.contrib.auth.models import User
 
 
 class CourseForm(forms.ModelForm):
@@ -74,3 +80,33 @@ class CreateCourseletForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = ('title',)
+
+
+class InviteForm(forms.ModelForm):
+    def __init__(self, course=None, instructor=None, *args, **kwargs):
+        self.course = course
+        self.instructor = instructor
+        super(InviteForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Invite
+        fields = ('email', 'type', 'course')
+        widgets = {
+            'type': forms.HiddenInput,
+            'course': forms.HiddenInput,
+
+        }
+
+    def save(self, commit=True):
+        invite = Invite.create_new(
+            commit=False,
+            instructor=self.instructor,
+            course=self.course,
+            email=self.cleaned_data['email'],
+            invite_type=self.cleaned_data['type'],
+        )
+        self.instance = invite
+        return super(InviteForm, self).save(commit=commit)
+
+
+

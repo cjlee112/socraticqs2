@@ -2,8 +2,8 @@ import injections
 from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
-from chat.views import CourseletPreviewView, ChatAddLessonView
 
+from chat.views import CourseletPreviewView, ChatAddLessonView, TestChatInitialView
 from .views import ChatInitialView, InitializeLiveSession
 from .api import MessagesView, HistoryView, ProgressView, ResourcesView
 from .services import FsmHandler
@@ -26,6 +26,11 @@ urlpatterns = patterns(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
         ChatInitialViewFSM.as_view(),
         name='chat_enroll'
+    ),
+    url(
+        r'^tester/enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        TestChatInitialView.as_view(),
+        name='tester_chat_enroll'
     ),
     # preview
     url(

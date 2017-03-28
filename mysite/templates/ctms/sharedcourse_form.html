@@ -1,0 +1,14 @@
+{% extends 'ctms/ctms_base.html' %}
+
+{% block title %}
+Create new shared course
+{% endblock %}
+
+{% block content %}
+<form class="form" action="." method="POST">
+  {{ form.as_p }}
+  {% csrf_token %}
+  <input type="submit" value="Share course">
+</form>
+
+{% endblock %}

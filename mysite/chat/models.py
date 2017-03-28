@@ -81,6 +81,7 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
     is_preview = models.BooleanField(default=False)
+    is_test = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
