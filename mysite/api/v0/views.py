@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.generics import get_object_or_404
 
 from ..serializers import ResponseSerializer, ErrorSerializer
 from ..permissions import IsInstructor
@@ -15,9 +16,11 @@ class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Response.objects.filter(kind='orct', unitLesson__order__isnull=False)
     serializer_class = ResponseSerializer
 
+
     def get_queryset(self):
+        course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
         self.check_object_permissions(
-            self.request, Course.objects.filter(id=self.kwargs.get('course_id')).first()
+            self.request, course
         )
         queryset = super(ResponseViewSet, self).get_queryset()
         return queryset.filter(course__id=self.kwargs.get('course_id'))
@@ -33,8 +36,9 @@ class ErrorViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ErrorSerializer
 
     def get_queryset(self):
+        course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
         self.check_object_permissions(
-            self.request, Course.objects.filter(id=self.kwargs.get('course_id')).first()
+            self.request, course
         )
         queryset = super(ErrorViewSet, self).get_queryset()
         return queryset.filter(response__course__id=self.kwargs.get('course_id'))
