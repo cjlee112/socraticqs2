@@ -6,6 +6,8 @@ from .models import Message, Chat, ChatDivider
 from .services import ProgressHandler
 from ct.models import UnitLesson, Response
 from accounts.models import Instructor
+from mysite.celery import send_outcome
+from lti.models import GradedLaunch
 
 
 class InternalMessageSerializer(serializers.ModelSerializer):
@@ -256,10 +258,17 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             self.get_breakpoints(obj)
         if self.lessons_dict:
             done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
-            return round(float(done)/len(self.lessons_dict), 2)
+            progress = round(float(done)/len(self.lessons_dict), 2)
         else:
             # if no lessons passed yet - return 1
-            return 1
+            progress = 1
+        assignment = GradedLaunch.objects.filter(
+            course_id=obj.enroll_code.courseUnit.course.id
+        ).first()
+        if assignment:
+            # this is very simplt implementation and should be changed
+            send_outcome.delay(progress, assignment.id)
+        return progress
 
 
 class ResourcesSerializer(serializers.ModelSerializer):

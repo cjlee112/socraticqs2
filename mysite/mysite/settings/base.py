@@ -346,6 +346,9 @@ LOGGING = {
         'lti.views': {
             'handlers': ['console', 'file'],
         },
+        'lti.outcomes': {
+            'handlers': ['console', 'file'],
+        },
         'celery_warn': {
             'handlers': ['console'],
             'level': 'INFO',

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.forms.models import ModelForm
 
-from lti.models import LTIUser, CourseRef, LtiConsumer
+from lti.models import LTIUser, CourseRef, LtiConsumer, OutcomeService, GradedLaunch
 
 
 class LtiConsumerForm(ModelForm):
@@ -38,6 +38,15 @@ class LtiConsumerAdmin(admin.ModelAdmin):
     list_display = ('consumer_name', 'consumer_key', 'instance_guid', 'expiration_date')
 
 
+class OutcomeServiceAdmin(admin.ModelAdmin):
+    list_display = ('lis_outcome_service_url',)
+
+
+class GradedLaunchAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course_id', 'outcome_service', 'lis_result_sourcedid',)
+
+
 admin.site.register(LTIUser, LTIUserAdmin)
 admin.site.register(CourseRef, CourseRefAdmin)
-admin.site.register(LtiConsumer, LtiConsumerAdmin)
+admin.site.register(OutcomeService, OutcomeServiceAdmin)
+admin.site.register(GradedLaunch, GradedLaunchAdmin)

@@ -18,6 +18,7 @@ import waffle
 from lti.utils import only_lti
 from lti import app_settings as settings
 from lti.models import LTIUser, CourseRef, LtiConsumer
+from .outcomes import store_outcome_parameters
 from ct.models import Course, Role, CourseUnit, Unit
 from chat.models import EnrollUnitCode
 
@@ -193,7 +194,6 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 releaseTime__isnull=False,
                 releaseTime__lt=timezone.now()
             ).order_by('order').first()
-
         if not unit and not course_unit:
             return render(
                 request,
@@ -210,6 +210,12 @@ def lti_redirect(request, course_id=None, unit_id=None):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
+        params = {}
+        params['course_id'] = course_id
+        params['lis_result_sourcedid'] = request.POST.get('lis_result_sourcedid')
+        params['lis_outcome_service_url'] = request.POST.get('lis_outcome_service_url')
+
+        store_outcome_parameters(params, request.user)
         if waffle.switch_is_active('chat_ui'):
             if not unit_id:
                 return redirect(reverse('lms:course_view', kwargs={'course_id': course_id}))

@@ -222,3 +222,24 @@ class CourseRef(models.Model):  # pragma: no cover
         return '{0} {1}'.format(
             self.course.title, str(self.date.strftime('%H:%M %d-%m-%y'))
         )
+
+
+class OutcomeService(models.Model):
+    lis_outcome_service_url = models.CharField(max_length=255, unique=True)
+    # lti_consumer = models.ForeignKey(LtiConsumer)
+
+    def __unicode__(self):
+        return self.lis_outcome_service_url
+
+
+class GradedLaunch(models.Model):
+    user = models.ForeignKey(User, db_index=True)
+    course_id = models.IntegerField(db_index=True)
+    outcome_service = models.ForeignKey(OutcomeService)
+    lis_result_sourcedid = models.CharField(max_length=255, db_index=True)
+
+    class Meta(object):
+        unique_together = ('outcome_service', 'lis_result_sourcedid')
+
+    def __unicode__(self):
+        return self.lis_result_sourcedid
