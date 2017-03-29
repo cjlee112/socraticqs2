@@ -572,18 +572,37 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
             if errorModels is not None: # search errors only
-                cset = [(ul.lesson.title, get_object_url(request.path, ul))
-                        for ul in UnitLesson.search_text(s, IS_ERROR)]
+                cset = [
+                    (
+                        ul.lesson.title,
+                        get_object_url(request.path, ul),
+                        ul
+                    )
+                    for ul in UnitLesson.search_text(s, IS_ERROR)
+                ]
             else: # search correct concepts only
                 cset = UnitLesson.search_text(s, IS_CONCEPT)
                 cset2, wset = UnitLesson.search_sourceDB(s, unit=unit)
-                cset = distinct_subset(cset2 + cset, lambda x:x.lesson.concept)
-                cset = [(ul.lesson.title, get_object_url(request.path, ul, subpath=''),
-                         ul) for ul in cset]
-                cset += [(t[0],
-                    reverse_path_args('ct:wikipedia_concept', request.path,
-                            source_id=urllib.quote(t[0].encode('utf-8'), '')),
-                          None) for t in wset]
+                cset = distinct_subset(cset2 + cset, lambda x: x.lesson.concept)
+                cset = [
+                    (
+                        ul.lesson.title,
+                        get_object_url(request.path, ul, subpath=''),
+                        ul
+                    )
+                    for ul in cset
+                ]
+                cset += [
+                    (
+                        t[0],
+                        reverse_path_args(
+                            'ct:wikipedia_concept',
+                            request.path,
+                            source_id=urllib.quote(t[0].encode('utf-8'), '')
+                        ),
+                        None
+                    )
+                    for t in wset]
                 cset.sort()
             conceptForm = NewConceptForm() # let user define new concept
     if conceptForm:
