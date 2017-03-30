@@ -69,7 +69,8 @@ tbody tr {
 th, td {
   padding: 18px 12px;
   font-size: 14px;
-  line-height: 24px; }
+  line-height: 24px;
+  vertical-align: top; }
 
 th {
   color: #000;
@@ -421,7 +422,8 @@ a.sidebar__add {
       padding-bottom: 31px; }
 
   .card__content {
-    padding: 60px; }
+    padding: 60px;
+    min-height: 168px; }
 
   .card__delete .button, .card__delete input[type=submit], .card__delete input[type=submit].button {
     position: absolute;
@@ -516,5 +518,24 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     float: right;
     margin-top: -12px;
     margin-left: 18px; } }
+.user-info {
+  position: relative;
+  padding: 6px 0 0 48px; }
+  .user-info .avatar {
+    position: absolute;
+    top: 6px;
+    left: 0; }
+  .user-info h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 18px; }
+  .user-info p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: #B1B0B9; }
+
+.table-answer {
+  padding: 0 0 0 48px; }
 
 /*# sourceMappingURL=app.css.map */

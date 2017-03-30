@@ -3,28 +3,28 @@
 {% block content %}
 <div class="card">
   <header class="card__topbar">
-    <h1>TODO: Unit name</h1>
+    <h1>{{ courslet.unit.title }}</h1>
   </header>
 
   <nav class="card__nav">
     <ul>
       <li>
-        <a href="" class="card__nav-active">Edit</a>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
       </li>
 
       <li>
-        <a href="">Answers</a>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
       </li>
 
       <li>
-        <a href="">Settings</a>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
       </li>
     </ul>
   </nav>
 
   <main class="card__content">
     <form action="" method="POST">
-      <!-- TODO: Add missing inputs in this form
+      <!-- TODO: Replace with real inputs
         {{ form.as_p }}
       -->
 
@@ -49,7 +49,8 @@
       <p>Add your answer to the question here.</p>
       <textarea name="answer"></textarea>
 
-      <label for="error-models">TODO: Error Models <span>– optional</span></label>
+      <!-- TODO: How should we add error models here? -->
+      <label for="error-models">Error Models <span>– optional</span></label>
       <p>An error model explains a common misconception. Your students can select error models when they self-assess.</p>
 
       {% csrf_token %}

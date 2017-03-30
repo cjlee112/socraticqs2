@@ -1,33 +1,39 @@
 {% extends "ctms/ctms_base.html" %}
 
 {% block content %}
-<h4 class="text-center">Shared with me courses</h4>
-<table class="table table-striped">
-  <thead >
-    <th>
-      User who shared
-    </th>
-    <th>
-      Course name
-    </th>
-  <th>
-    link
-  </th>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Courses</h1>
+    </header>
 
-  </thead>
-  {% for sh in shared_courses %}
-  <tr>
-    <td>
-      {{ sh.from_user }}
-    </td>
-    <td>
-      {{ sh.course.title }}
-    </td>
-    <td>
-      <a href="{% url 'lms:course_view' course_id=sh.course.id %}">open</a>
-    </td>
-  </tr>
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:my_courses' %}">My Courses</a>
+        </li>
 
-  {% endfor %}
-</table>
+        <li>
+          <a href="{% url 'ctms:shared_courses' %}" class="card__nav-active">Shared with Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <table class="table table-striped">
+        <thead >
+          <th>Course</th>
+          <th>Author</th>
+        </thead>
+
+        <tbody>
+          {% for sh in shared_courses %}
+            <tr>
+              <td><a href="{% url 'lms:course_view' course_id=sh.course.id %}">{{ sh.course.title }}</a></td>
+              <td>{{ sh.from_user }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </main>
+  </div>
 {% endblock %}

@@ -1,0 +1,23 @@
+.user-info {
+  position: relative;
+  padding: 6px 0 0 48px;
+
+  .avatar {
+    position: absolute;
+    top: 6px;
+    left: 0;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    color: #B1B0B9;
+  }
+}

@@ -1,25 +1,29 @@
-{% extends 'ctms/ctms_base.html' %}
+{% extends "ctms/ctms_base.html" %}
 
 {% block title %}
-Create new courslet
+  Create Courselet
 {% endblock %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a></h5>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Create Courselet</h1>
+    </header>
 
-{% if courslet %}
-<div class="text-center">
-  <h6>Courslet</h6>
-  <h4><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h4>
-</div>
-{% endif %}
+    <main class="card__content">
+      <form action="" method="POST">
+        {% csrf_token %}
 
-<form action="" method="POST">
-  {{ form.as_p }}
-  {% csrf_token %}
-  <input type="submit" value="Save">
-</form>
+        <label for="name">Courselet Name</label>
+        <p>Your students will see this, so give your courselet a descriptive name.</p>
+        <input type="text" name="name">
+
+        <!-- TODO: Replace label, description and input with real form
+          {{ form.as_p }}
+        -->
+
+        <input type="submit" value="Create Courselet">
+      </form>
+    </main>
+  </div>
 {% endblock %}

@@ -1,13 +1,28 @@
 <div class="card">
-  <header class="card__topbar">
-    <h1>Create a New Course</h1>
+  <!-- TODO: Show this instead if the user has already created a course
+    <header class="card__topbar">
+      <h1>Create a New Course</h1>
+    </header>
+  -->
+
+  <header class="card__topbar card__topbar--with-description">
+    <h1>Welcome, (TODO: First name)!</h1>
+    <p>Let’s create a new course to get started.</p>
   </header>
 
   <main class="card__content">
     <form method="POST" action="{% url 'ctms:create_course' %}">
-      {{ form.as_p }}
+      <label for="name">Course Name</label>
+      <p>Your students will see this, so give your course a descriptive name.</p>
+      <input type="text" name="name">
+
+      <!-- TODO: Replace label, description (p) and input with real form
+        {{ form.as_p }}
+      -->
+
       {% csrf_token %}
-      <input type="submit" name="Save" />
+
+      <input type="submit" name="Create Course" />
     </form>
   </main>
 </div>

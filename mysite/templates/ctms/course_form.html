@@ -1,27 +1,52 @@
 {% extends "ctms/ctms_base.html" %}
 
 {% block title %}
-{{ object.title }}
+  {{ object.title }}
 {% endblock %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h4><a href="{% url 'ctms:course_view' pk=object.id %}">{{ object.title }}</a></h4>
-  <h6>Added by {{ object.addedBy }}</h6>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Courses</h1>
+    </header>
 
-<form action="{% url 'ctms:course_settings' pk=object.id %}" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Save course" class="btn btn-success">
-</form>
-<br>
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:course_view' pk=object.id %}">Courselets</a>
+        </li>
 
-<form action="{% url 'ctms:course_delete' pk=object.id %}" method="post">
-  {% csrf_token %}
-  <input type="submit" value="Delete Course" class="btn btn-danger">
-</form>
+        <li>
+          <!-- TODO: Add link to share -->
+          <a href="#">Share</a>
+        </li>
 
+        <li>
+          <a href="{% url 'ctms:course_settings' pk=object.id %}" class="card__nav-active">Settings</a>
+        </li>
+      </ul>
+    </nav>
 
+    <main class="card__content">
+      <form action="{% url 'ctms:course_settings' pk=object.id %}" method="post">
+        {% csrf_token %}
+
+        <label for="name">Course Name</label>
+        <p>Give your course a descriptive name.</p>
+        <input type="text" name="name">
+
+        <!-- TODO: Replace label, description and input with real form
+          {{ form.as_p }}
+        -->
+
+        <input type="submit" value="Save">
+      </form>
+
+      <form action="{% url 'ctms:course_delete' pk=object.id %}" class="card__delete" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Course" class="button">
+      </form>
+    </main>
+  </div>
 {% endblock %}

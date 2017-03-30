@@ -4,11 +4,6 @@
   {{ object.title }}
 {% endblock %}
 
-<!--
-
-  object.addedBy
--->
-
 {% block content %}
 
   <div class="card">
@@ -23,11 +18,12 @@
         </li>
 
         <li>
+          <!-- TODO: Add link to share -->
           <a href="">Share</a>
         </li>
 
         <li>
-          <a href="">Settings</a>
+          <a href="{% url 'ctms:course_settings' pk=object.id %}">Settings</a>
         </li>
       </ul>
     </nav>
@@ -35,7 +31,7 @@
     <main class="card__content">
       <h2>
         <span>Courselets</span>
-        <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary">Add courselet</a>
+        <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary">Create Courselet</a>
       </h2>
 
       <table>
@@ -55,7 +51,8 @@
               </td>
 
               <td>
-                TODO
+                <!-- TODO: Display total amount of answers -->
+                100
               </td>
             </tr>
           {% endfor %}

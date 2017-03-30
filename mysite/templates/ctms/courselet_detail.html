@@ -1,67 +1,77 @@
 {% extends "ctms/ctms_base.html" %}
 
 {% block title %}
-{{ object.title }}
+  {{ object.title }}
 {% endblock %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course_pk %}">{{ object.course.title }}</a></h5>
-</div>
-<div class="text-center">
-  <h6>Courslet</h6>
-  <h4><a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=object.id %}">{{ object.unit.title }}</a></h4>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.unit.title }}</h1>
+    </header>
 
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=object.id %}" class="card__nav-active">Units</a>
+        </li>
 
-<table class="table">
-  <thead>
-  <th>
-    Unit
-  </th>
-  <th>
-    User responses count
-  </th>
-  <th>
-    View responses
-  </th>
-  <th>
-    Settings
-  </th>
-  </thead>
-  <tbody>
-  {% for u_lesson in u_lessons %}
-  <tr>
-    <td>
-      <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
-        {{ u_lesson.lesson.title }}
-      </a>
-    </td>
-    <td>
-      {{ u_lesson.responses_count }}
-    </td>
-    <td>
-      <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
-        View responses
-      </a>
-    </td>
-    <td>
-      <a href="{% url 'ctms:unit_settings' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
-        Unit Settings
-      </a>
-    </td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
+        <li>
+          <!-- TODO: Add link to preview -->
+          <a href="">Preview</a>
+        </li><li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=object.course.id pk=object.id %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
 
-<!--Settings-->
-<a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk  %}" class="btn btn-info">
-  Create new Unit
-</a>
-<a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="btn btn-primary">
-  Add Unit by chat
-</a>
-{# <a class="btn btn-success" href="{% url 'ctms:courslet_create' course_pk=object.course.id %}">Create new courslet</a> #}
+    <main class="card__content">
+      {% if u_lessons %}
+        <h2>
+          <span>Units</span>
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary">Add Unit</a>
+          <!-- TODO: Add link to add units by chat -->
+          <a href="" class="button">Add Units by Chat</a>
+        </h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Unit Name</th>
+              <th>Answers</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for u_lesson in u_lessons %}
+              <tr>
+                <td>
+                  <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.lesson.title }}
+                  </a>
+                </td>
+
+                <td>
+                  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.responses_count }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <h3>Units</h3>
+
+        <p>
+          A courselet is a series of short “chat” messages, called units, that help students understand one or more important concepts. You can create these units by filling out a form if you click on Add Unit. If you’re new to active learning, we recommend that you create your first courselet by clicking on Add Units by Chat. You will be presented with a chat interface, just like the one your students will be using, that’ll guide you through the authoring process. Meta!
+        </p>
+
+        <!-- TODO: Add link to add units by chat -->
+        <a href="" class="button">Add Units by Chat</a>
+
+        <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary">Add Unit</a>
+      {% endif %}
+    </main>
+  </div>
 {% endblock %}

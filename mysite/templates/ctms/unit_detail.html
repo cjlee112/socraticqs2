@@ -1,50 +1,69 @@
-{% extends "ctms/ctms_base.html" %}
+{% extends 'ctms/ctms_base.html' %}
+{% load staticfiles %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course_pk %}">{{ course.title }}</a></h5>
-</div>
-<div class="text-center">
-  <h5>Courslet</h5>
-  <h5><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h5>
-  <h6>Added by {{ course.addedBy }}</h6>
-</div>
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ courslet.unit.title }}</h1>
+  </header>
 
-<h5 class="text-center">Responses:</h5>
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Edit</a>
+      </li>
 
-<table class="table">
-  <thead>
-  <th>
-    User
-  </th>
-  <th>
-    Timestamp
-  </th>
-  <th>
-    Response
-  </th>
-  <th>
-    Open
-  </th>
-  </thead>
-  <tbody>
-  {% for answer in responses %}
-  <tr>
-    <td>
-      {{ answer.author }}
-    </td>
-    <td>
-      {{ answer.atime|date }}
-    </td>
-    <td>
-      {{ answer.text|truncatechars:150 }}
-    </td>
-    <td>
-      <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">open</a>
-    </td>
-  </tr>
-  {% endfor %}
-  </tbody>
-  </table>
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    {% if responses %}
+      <table>
+        <thead>
+          <tr>
+            <th>Answer</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for answer in responses %}
+            <tr>
+              <td>
+                <div class="user-info">
+                  <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt="TODO: Username" class="avatar">
+                  <h3>{{ answer.author }}</h3>
+                  <p>{{ answer.atime|date }}</p>
+                </div>
+
+                <div class="table-answer">
+                  {{ answer.text|truncatechars:150 }}
+                </div>
+              </td>
+
+              <td>
+                <!-- TODO: Add status here -->
+                Still confused
+              </td>
+
+              <td>
+                <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No answers yet.</p>
+    {% endif %}
+  </main>
+</div>
 {% endblock %}

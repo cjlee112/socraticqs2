@@ -1,7 +1,6 @@
 {% extends "ctms/ctms_base.html" %}
 {% load staticfiles %}
 
-
 {% block title %}
 {% if course_form %}Create new course
 {% else %}
@@ -14,7 +13,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="course-content">
   {% if form %}
     {% include 'ctms/includes/create_course.html' %}
   {% else %}
@@ -31,7 +29,5 @@
         {% endwith %}
       {% endwith %}
     {% endif %}
-  <a href="{% url 'ctms:create_course' %}" class="btn btn-success">Create new course</a>
   {% endif %}
-</div>
 {% endblock %}

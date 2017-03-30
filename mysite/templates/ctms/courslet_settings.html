@@ -1,28 +1,48 @@
 {% extends "ctms/ctms_base.html" %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course_pk %}">{{ course.title }}</a></h5>
-</div>
-<div class="text-center">
-  <h5>Courslet</h5>
-  <h5><a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=pk %}">{{ courslet.unit.title }}</a></h5>
-  <h6>Added by {{ course.addedBy }}</h6>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Settings</h1>
+    </header>
 
-{% if form %}
-<form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Save">
-</form>
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=pk %}">Units</a>
+        </li>
 
-<form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" method="post">
-  <input type="submit" onclick="return confirm('Are you sure want to delete this courslet?')"
-         class="btn btn-danger" value="Delete this courslet">
-  {% csrf_token %}
+        <li>
+          <!-- TODO: Add link to preview -->
+          <a href="">Preview</a>
+        </li>
 
-</form>
-{% endif %}
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
+        {% csrf_token %}
+
+        <label for="name">Courselet Name</label>
+        <p>Give your courselet a descriptive name.</p>
+        <input type="text" name="name">
+
+        <!-- TODO: Replace label, description and input with real form
+          {{ form.as_p }}
+        -->
+
+        <input type="submit" value="Save">
+      </form>
+
+      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Courselet" class="button" onclick="return confirm('Do you really want to remove this courselet?')">
+      </form>
+    </main>
+  </div>
 {% endblock %}
