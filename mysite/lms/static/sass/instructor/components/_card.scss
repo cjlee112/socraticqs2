@@ -16,6 +16,15 @@
   }
 }
 
+.card__topbar.card__topbar--with-description {
+  height: auto;
+
+  p {
+    color: #7F7F7F;
+    margin: 6px 0 0 0;
+  }
+}
+
 .card__nav {
   border-bottom: 1px solid #DDE2E6;
   padding-left: 9px;
@@ -52,6 +61,7 @@
 }
 
 .card__content {
+  position: relative;
   padding: 48px 24px;
 
   > *:first-child {
@@ -59,15 +69,6 @@
   }
 }
 
-.card__headline-with-button {
-  h2 {
-    margin: 0;
-  }
-
-  .button {
-    margin-top: 24px;
-  }
-}
 
 
 // Larger viewports
@@ -102,5 +103,14 @@
 
   .card__content {
     padding: 60px;
+  }
+
+  .card__delete {
+    .button, input[type=submit], input[type=submit].button {
+      position: absolute;
+      bottom: 60px;
+      left: 60px;
+      margin: 0;
+    }
   }
 }

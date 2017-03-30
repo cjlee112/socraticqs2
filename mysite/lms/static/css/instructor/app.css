@@ -29,6 +29,9 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
   margin-top: 0; }
 
+h3 {
+  font-size: 18px; }
+
 h4, h5, h6 {
   font-size: 10px;
   line-height: 24px;
@@ -75,9 +78,9 @@ th {
 td {
   color: #333; }
 
-td:first-child a {
+td a {
   color: #333; }
-  td:first-child a:hover, td:first-child a:active, td:first-child a:focus {
+  td a:hover, td a:active, td a:focus {
     color: #333;
     opacity: 0.6; }
 
@@ -123,7 +126,8 @@ input[type=text], input[type=password], input[type=email], textarea {
   margin: 12px 0 0 0; }
 
 textarea {
-  height: 150px; }
+  height: 150px;
+  padding: 24px; }
 
 input[type=submit] {
   display: inline-block;
@@ -356,6 +360,12 @@ a.sidebar__add {
     overflow: hidden;
     text-overflow: ellipsis; }
 
+.card__topbar.card__topbar--with-description {
+  height: auto; }
+  .card__topbar.card__topbar--with-description p {
+    color: #7F7F7F;
+    margin: 6px 0 0 0; }
+
 .card__nav {
   border-bottom: 1px solid #DDE2E6;
   padding-left: 9px;
@@ -383,14 +393,10 @@ a.sidebar__add {
       border-bottom: 2px solid #43B02A; }
 
 .card__content {
+  position: relative;
   padding: 48px 24px; }
   .card__content > *:first-child {
     margin-top: 0; }
-
-.card__headline-with-button h2 {
-  margin: 0; }
-.card__headline-with-button .button {
-  margin-top: 24px; }
 
 @media (min-width: 1024px) {
   .card {
@@ -415,7 +421,13 @@ a.sidebar__add {
       padding-bottom: 31px; }
 
   .card__content {
-    padding: 60px; } }
+    padding: 60px; }
+
+  .card__delete .button, .card__delete input[type=submit], .card__delete input[type=submit].button {
+    position: absolute;
+    bottom: 60px;
+    left: 60px;
+    margin: 0; } }
 .avatar {
   display: inline-block;
   width: 30px;
@@ -456,7 +468,7 @@ a.sidebar__add {
 @media (min-width: 1024px) {
   .hamburger {
     display: none; } }
-.button {
+.button, input[type=submit].button {
   display: inline-block;
   width: auto;
   font-size: 13px;
@@ -472,12 +484,13 @@ a.sidebar__add {
   border: 1px solid #DDE2E6;
   cursor: pointer;
   transition: all 0.2s; }
-  .button:hover, .button:active, .button:focus {
+  .button:hover, .button:active, .button:focus, input[type=submit].button:hover, input[type=submit].button:active, input[type=submit].button:focus {
     text-decoration: none;
     border-color: #43B02A;
     background: #43B02A;
     color: #fff;
-    outline: 0; }
+    outline: 0;
+    opacity: 1; }
 
 .button--primary {
   border-color: #43B02A;
@@ -487,6 +500,9 @@ a.sidebar__add {
   font-weight: 500; }
   .button--primary:hover, .button--primary:active, .button--primary:focus {
     opacity: 0.6; }
+
+.button + .button {
+  margin-left: 18px; }
 
 h1 span, h2 span, h3 span, h4 span, h5 span, h6 span {
   display: block; }
@@ -498,6 +514,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     display: inline; }
   h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     float: right;
-    margin-top: -12px; } }
+    margin-top: -12px;
+    margin-left: 18px; } }
 
 /*# sourceMappingURL=app.css.map */
