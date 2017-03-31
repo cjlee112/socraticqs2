@@ -9,84 +9,167 @@
     <a href="">Courses</a>
   </header>
 
-  <section>
-    <h4>Course</h4>
+  <!-- Show a message if the user has 0 courses -->
+  {% if not sidebar.user_courses %}
+    <section class="sidebar__empty">
+      <p>
+        This sidebar will give you quick access to the content you’re currently working on.
+      </p>
 
-    <div class="dropdown">
-      <div class="dropdown-toggle" id="dropdown-courses" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span>Course Name</span><span class="sidebar__arrow"></span>
+      <a href="{% url 'ctms:create_course' %}">Create Course</a>
+    </section>
+
+  <!-- Show the course section if the user has 1 or more courses -->
+  {% else %}
+    <section>
+      <h4>Course</h4>
+
+      <div class="dropdown">
+        <div class="dropdown-toggle" id="dropdown-courses" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <!-- TODO: Add the name of the active course here -->
+          <span>Course Name</span><span class="sidebar__arrow"></span>
+        </div>
+
+        <ul class="dropdown-menu" aria-labelledby="dropdown-courses">
+          {% for course in sidebar.user_courses %}
+            <li>
+              <a href="{% url 'ctms:course_view' pk=course.id %}">
+                {{ course.title }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
 
-      <ul class="dropdown-menu" aria-labelledby="dropdown-courses">
+      <!-- TODO: This should always be visible if the user has a course and this if should not be necessary -->
+      {% if sidebar.course %}
+        <nav class="sidebar__actions">
+          <ul>
+            <li>
+              <a href="{% url 'ctms:course_view' pk=sidebar.course.id %}" class="sidebar__actions__active">Courselets</a>
+            </li>
 
-      </ul>
-    </div>
+            <li>
+              <!-- TODO: Add link to share -->
+              <a href="#">Share</a>
+            </li>
 
-    <nav class="sidebar__actions">
-      <ul>
-        <li>
-          <a href="#" class="sidebar__actions__active">Courselets</a>
-        </li>
+            <li>
+              <a href="{% url 'ctms:course_settings' pk=sidebar.course.id %}">Settings</a>
+            </li>
+          </ul>
+        </nav>
+      {% endif %}
+    </section>
 
-        <li>
-          <a href="#">Share</a>
-        </li>
+    <!-- Show a message if the user has 0 courselets in the active course -->
+    {% if not sidebar.course_courslets %}
+      <section class="sidebar__empty">
+        <p>
+          This course doesn't have any courselets yet.
+        </p>
 
-        <li>
-          <a href="#">Settings</a>
-        </li>
-      </ul>
-    </nav>
-  </section>
+        <!-- TODO: This should always be visible if the user has a course and this if should not be necessary -->
+        {% if sidebar.course %}
+          <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create Courselet</a>
+        {% endif %}
+      </section>
+
+    <!-- Show the courselet and units section if the user has 1 or more courselets in the active course -->
+    {% else %}
+      <section>
+        <h4>Courselet</h4>
+
+        <div class="dropdown">
+          <div class="dropdown-toggle" id="dropdown-courselets" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <!-- TODO: Add name of the active courselet here -->
+            <span>Courselet Name</span><span class="sidebar__arrow"></span>
+          </div>
+
+          <ul class="dropdown-menu" aria-labelledby="dropdown-courselets">
+            {% for courslet in sidebar.course_courslets %}
+              <li>
+                <a href="{% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %}">
+                  {{ courslet.title }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
+        {% if sidebar.courslet %}
+          <nav class="sidebar__actions">
+            <ul>
+              <li>
+                <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Units</a>
+              </li>
+
+              <li>
+                <!-- TODO: Add link to preview -->
+                <a href="#">Preview</a>
+              </li>
+
+              <li>
+                <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Settings</a>
+              </li>
+            </ul>
+          </nav>
+        {% endif %}
+      </section>
+
+      <section>
+        <h4>Units</h4>
+
+        <nav class="sidebar__units">
+          <ul>
+            {% if sidebar.courslet_units %}
+              {% for unit in sidebar.courslet_units %}
+                <li>
+                  <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}">
+                    {{ unit.lesson.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            {% endif %}
+
+            <li>
+              <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
+              {% if sidebar.courslet %}
+                <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Unit</a>
+              {% endif %}
+            </li>
+
+            <li>
+              <!-- TODO: Add link to add units by chat -->
+              <a href="#" class="sidebar__add">Add Units by Chat</a>
+            </li>
+          </ul>
+        </nav>
+      </section>
+    {% endif %}
+  {% endif %}
+</aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   <section>
-    <h4>Courselet</h4>
 
-    <div class="dropdown">
-      <div class="dropdown-toggle" id="dropdown-courselets" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span>Courselet Name</span><span class="sidebar__arrow"></span>
-      </div>
 
-      <ul class="dropdown-menu" aria-labelledby="dropdown-courselets">
 
-      </ul>
-    </div>
 
-    <nav class="sidebar__actions">
-      <ul>
-        <li>
-          <a href="#">Units</a>
-        </li>
 
-        <li>
-          <a href="#">Preview</a>
-        </li>
-
-        <li>
-          <a href="#">Share</a>
-        </li>
-      </ul>
-    </nav>
-  </section>
-
-  <section>
-    <h4>Units</h4>
-
-    <nav class="sidebar__units">
-      <ul>
-        <li>
-          <a href="#">Unit name</a>
-        </li>
-
-        <li>
-          <a href="#">Unit name</a>
-        </li>
-      </ul>
-
-      <a href="#" class="sidebar__add">Add Unit</a>
-      <a href="#" class="sidebar__add">Add Units by Chat</a>
-    </nav>
-  </section>
 
   <!--
 

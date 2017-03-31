@@ -6,6 +6,8 @@
     <h1>{{ courslet.unit.title }}</h1>
   </header>
 
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
   <nav class="card__nav">
     <ul>
       <li>
@@ -21,6 +23,7 @@
       </li>
     </ul>
   </nav>
+  {% endif %}
 
   <main class="card__content">
     <form action="" method="POST">

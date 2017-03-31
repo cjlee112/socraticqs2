@@ -261,7 +261,7 @@ input[type=submit] {
       visibility: visible; }
 
 .sidebar__units ul {
-  margin: 0 0 6px 0;
+  margin: 0 0 0 0;
   padding: 0;
   list-style: none; }
 .sidebar__units li {
@@ -273,7 +273,7 @@ input[type=submit] {
   display: block;
   color: #B1B0B9;
   line-height: 30px;
-  padding-right: 24px; }
+  padding-right: 48px; }
   .sidebar__units a:hover, .sidebar__units a:active, .sidebar__units a:focus {
     opacity: 0.6; }
 
@@ -283,10 +283,24 @@ a.sidebar__add {
   font-size: 12px;
   line-height: 30px;
   padding-left: 30px;
-  background: url(../../img/instructor/sidebar-add.svg) no-repeat left center; }
+  background: url(../../img/instructor/sidebar-add.svg) no-repeat left center;
+  margin-top: 6px;
+  margin-bottom: -6px; }
   a.sidebar__add:hover, a.sidebar__add:active, a.sidebar__add:focus {
     color: #B1B0B9;
     opacity: 1; }
+
+.sidebar__empty p {
+  margin: 0;
+  padding-right: 12px;
+  color: #8C8A98; }
+.sidebar__empty a {
+  display: block;
+  color: #B1B0B9;
+  margin-top: 12px; }
+  .sidebar__empty a:hover, .sidebar__empty a:active, .sidebar__empty a:focus {
+    color: #B1B0B9;
+    opacity: 0.6; }
 
 @media (min-width: 1024px) {
   .sidebar {

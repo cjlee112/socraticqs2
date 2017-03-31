@@ -132,7 +132,7 @@
 
 .sidebar__units {
   ul {
-    margin: 0 0 6px 0;
+    margin: 0 0 0 0;
     padding: 0;
     list-style: none;
   }
@@ -146,7 +146,7 @@
     display: block;
     color: #B1B0B9;
     line-height: 30px;
-    padding-right: 24px;
+    padding-right: 48px;
 
     &:hover, &:active, &:focus {
       opacity: 0.6;
@@ -161,10 +161,31 @@ a.sidebar__add {
   line-height: 30px;
   padding-left: 30px;
   background: url(../../img/instructor/sidebar-add.svg) no-repeat left center;
+  margin-top: 6px;
+  margin-bottom: -6px;
 
   &:hover, &:active, &:focus {
     color: #B1B0B9;
     opacity: 1;
+  }
+}
+
+.sidebar__empty {
+  p {
+    margin: 0;
+    padding-right: 12px;
+    color: #8C8A98;
+  }
+
+  a {
+    display: block;
+    color: #B1B0B9;
+    margin-top: 12px;
+
+    &:hover, &:active, &:focus {
+      color: #B1B0B9;
+      opacity: 0.6;
+    }
   }
 }
 

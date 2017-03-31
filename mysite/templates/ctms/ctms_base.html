@@ -27,9 +27,10 @@
     <div class="page">
       <header class="page__topbar">
         <div class="page__topbar-inner">
+          <!-- TODO: Add first name and link to account settings -->
           <a class="page__account" href="#">
             <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt="TODO: Username" class="avatar">
-            <span>TODO: First name</span>
+            <span>First name</span>
           </a>
         </div>
       </header>
@@ -44,6 +45,7 @@
 
     <script>
       $(function(){
+        // Mobile navigation
         $('.hamburger').on('click', function(e){
           e.preventDefault();
           var sidebarSelector = $(this).attr('href');
@@ -52,14 +54,8 @@
           $(sidebarSelector).stop().fadeToggle();
         });
       });
-    </script>
 
-    <!--
-    <script language="JavaScript">
-        $(".go-on-select").change(function() {
-            document.location.href = $(this).val();
-        })
+      //
     </script>
-    -->
   </body>
 </html>
