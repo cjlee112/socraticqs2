@@ -2,11 +2,11 @@
 
 <aside class="sidebar" id="sidebar">
   <header>
-    <a href="#" class="sidebar__logo">
+    <a href="{% url 'ctms:my_courses' %}" class="sidebar__logo">
       <img src="{% static "img/instructor/courselets-logo.svg" %}" alt="Courselets logo">
     </a>
 
-    <a href="">Courses</a>
+    <a href="{% url 'ctms:my_courses' %}">Courses</a>
   </header>
 
   <!-- Show a message if the user has 0 courses -->
@@ -149,89 +149,4 @@
       </section>
     {% endif %}
   {% endif %}
-</aside>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <section>
-
-
-
-
-
-
-  <!--
-
-  <h4>Course</h4>
-
-  <ul>
-    {% for course in sidebar.user_courses %}
-      <li>
-        <a href="{% url 'ctms:course_view' pk=course.id %}" {% if sidebar.course.id == course.id %}class="selected"{%endif%}>
-          {{ course.title }}
-        </a>
-      </li>
-    {% endfor %}
-  </ul>
-
-  {% if sidebar.course %}
-    <a href="{% url 'ctms:course_view' pk=sidebar.course.id %}">Courselets</a>
-
-    <a href="">Share</a>
-
-    <a href="{% url 'ctms:course_settings' pk=sidebar.course.id %}">Settings</a>
-  {% endif %}
-
-  {% if sidebar.course_courslets %}
-    <h4>Courselet</h4>
-
-    <ul>
-      {% for courslet in sidebar.course_courslets %}
-        <li>
-          <a href={% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %} {% if sidebar.courslet.id == courslet.id %}class="selected"{%endif%}>
-            {{ courslet.unit.title }}
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-
-    {% if sidebar.courslet %}
-      <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Units</a>
-
-      <a href="">Preview</a>
-
-      <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Settings</a>
-
-      <h4>Units</h4>
-
-      <ul>
-        {% if sidebar.courslet_units %}
-          {% for unit in sidebar.courslet_units %}
-            <li>
-              <a href={% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}>
-                {{ unit.lesson.title }}
-              </a>
-            </li>
-          {% endfor %}
-        {% endif %}
-      </ul>
-
-      <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}">Add Unit</a>
-
-      <a href="">Add Units by Chat</a>
-    {% endif %}
-  {% endif %}
-
-  -->
 </aside>

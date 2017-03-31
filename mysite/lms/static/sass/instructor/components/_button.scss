@@ -37,6 +37,11 @@
   }
 }
 
+.button--small {
+  padding: 11px 18px;
+  font-size: 13px;
+}
+
 .button + .button {
   margin-left: 18px;
 }
@@ -59,7 +64,7 @@ h1, h2, h3, h4, h5, h6 {
 
     .button {
       float: right;
-      margin-top: -12px;
+      margin-top: -9px;
       margin-left: 18px;
     }
   }

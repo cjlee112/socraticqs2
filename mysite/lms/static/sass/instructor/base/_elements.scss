@@ -81,7 +81,7 @@ b, strong {
 table {
   border-collapse: collapse;
   width: 100%;
-  margin-top: 48px;
+  margin-top: 36px;
 }
 
 thead {
@@ -97,7 +97,7 @@ tbody tr {
 }
 
 th, td {
-  padding: 18px 12px;
+  padding: 18px 12px 17px 12px;
   font-size: 14px;
   line-height: 24px;
   vertical-align: top;
@@ -138,7 +138,8 @@ label {
   font-weight: 400;
   line-height: 24px;
   color: $color-headline;
-  margin: 54px 0 0 0;
+  margin: 48px 0 0 0;
+  padding: 6px 0 0 0;
 
   &:first-of-type {
     margin-top: 0;
@@ -163,11 +164,11 @@ input[type=text], input[type=password], input[type=email], textarea {
   border: 1px solid #D0D5D9;
   border-radius: 4px;
   color: $color-text-primary;
-  margin: 12px 0 0 0;
+  margin: 18px 0 0 0;
 }
 
 textarea {
-  height: 150px;
+  height: 144px;
   padding: 24px;
 }
 
@@ -181,7 +182,7 @@ input[type=submit] {
   text-decoration: none;
   background: $color-primary;
   color: #fff;
-  margin: 48px 0 0 0;
+  margin: 60px 0 0 0;
   padding: 14px 30px;
   text-align: center;
   border-radius: 4px;

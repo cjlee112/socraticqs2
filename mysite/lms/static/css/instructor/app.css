@@ -1,4 +1,24 @@
 body {
+  position: relative; }
+
+body:after {
+  position: absolute;
+  width: auto;
+  height: auto;
+  z-index: 9999;
+  content: '';
+  display: block;
+  pointer-events: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: url(http://basehold.it/i/12/ff00ff) repeat top left; }
+
+body:active:after {
+  display: none; }
+
+body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -56,7 +76,7 @@ table, tr, th, td {
 table {
   border-collapse: collapse;
   width: 100%;
-  margin-top: 48px; }
+  margin-top: 36px; }
 
 thead {
   border-bottom: 1px solid #DDE2E6; }
@@ -67,7 +87,7 @@ tbody tr {
     background: #FAFBFD; }
 
 th, td {
-  padding: 18px 12px;
+  padding: 18px 12px 17px 12px;
   font-size: 14px;
   line-height: 24px;
   vertical-align: top; }
@@ -103,7 +123,8 @@ label {
   font-weight: 400;
   line-height: 24px;
   color: #000;
-  margin: 54px 0 0 0; }
+  margin: 48px 0 0 0;
+  padding: 6px 0 0 0; }
   label:first-of-type {
     margin-top: 0; }
 
@@ -124,10 +145,10 @@ input[type=text], input[type=password], input[type=email], textarea {
   border: 1px solid #D0D5D9;
   border-radius: 4px;
   color: #333;
-  margin: 12px 0 0 0; }
+  margin: 18px 0 0 0; }
 
 textarea {
-  height: 150px;
+  height: 144px;
   padding: 24px; }
 
 input[type=submit] {
@@ -140,7 +161,7 @@ input[type=submit] {
   text-decoration: none;
   background: #43B02A;
   color: #fff;
-  margin: 48px 0 0 0;
+  margin: 60px 0 0 0;
   padding: 14px 30px;
   text-align: center;
   border-radius: 4px;
@@ -411,7 +432,7 @@ a.sidebar__add {
   position: relative;
   padding: 48px 24px; }
   .card__content > *:first-child {
-    margin-top: 0; }
+    margin-top: -12px; }
 
 @media (min-width: 1024px) {
   .card {
@@ -517,6 +538,10 @@ a.sidebar__add {
   .button--primary:hover, .button--primary:active, .button--primary:focus {
     opacity: 0.6; }
 
+.button--small {
+  padding: 11px 18px;
+  font-size: 13px; }
+
 .button + .button {
   margin-left: 18px; }
 
@@ -530,7 +555,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     display: inline; }
   h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     float: right;
-    margin-top: -12px;
+    margin-top: -9px;
     margin-left: 18px; } }
 .user-info {
   position: relative;
