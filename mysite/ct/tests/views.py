@@ -991,6 +991,7 @@ class EditLessonTest(TestCase):
         unit = Unit.objects.create(title='test unit 2 title', addedBy=self.user)
         course_unit2 = CourseUnit(course=self.course, unit=unit, order=0, addedBy=self.user)
         course_unit2.save()
+        self.assertEqual(self.unit_lesson.lesson.conceptlink_set.count(), 1)
         response = self.client.post(
             reverse(
                 'ct:edit_lesson',
