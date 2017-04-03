@@ -27,10 +27,22 @@
       <header class="page__topbar">
         <div class="page__topbar-inner">
           <!-- TODO: Add first name and link to account settings -->
-          <a class="page__account" href="#">
-            <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt="TODO: Username" class="avatar">
-            <span>First name</span>
+          {% if user and user.is_authenticated %}
+          <a class="page__account" href={% url "accounts:settings" %}>
+            <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt={% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %} class="avatar">
+            <span>
+            {% if user.first_name %}
+                {{ user.first_name }}
+            {% else %}
+                {{ user.username }}
+            {% endif %}
+            </span>
           </a>
+          {% else %}
+          <a class="page__account" href={% url "new_login" %}>
+            <span>Sign in</span>
+          </a>
+          {% endif %}
         </div>
       </header>
 
