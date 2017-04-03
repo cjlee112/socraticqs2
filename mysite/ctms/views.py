@@ -451,7 +451,6 @@ class FormSetBaseView(object):
         return [{}]
 
 
-
 class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
     model = Lesson
     form_class = AddEditUnitForm
@@ -466,7 +465,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
             'course_pk': self.kwargs['course_pk'],
             'pk': self.kwargs['courslet_pk'],
         })
-
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -611,10 +609,3 @@ class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Vie
             )
         return redirect('chat:add_units_by_chat',
                         **{'enroll_key': enroll.enrollCode, 'course_id': course.id, 'courselet_id': course_unit.id})
-
-
-
-
-
-
-
