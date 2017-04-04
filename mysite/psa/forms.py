@@ -1,10 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 from psa.models import SecondaryEmail
 
+PASSWORD_MIN_CHARS = 6
+password_validator = RegexValidator(
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{%s,}$' % (PASSWORD_MIN_CHARS,),
+    message="Password should contain minimum 6 chars with 1 capital char and 1 digit char.")
 
 class SignUpForm(forms.Form):
     """
@@ -16,7 +21,10 @@ class SignUpForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     institution = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput())
+    password = forms.CharField(
+        widget=forms.PasswordInput(), min_length=6,
+        validators=[password_validator]
+    )
 
     def clean(self):
         confirm_email = self.cleaned_data.get('email_confirmation')
