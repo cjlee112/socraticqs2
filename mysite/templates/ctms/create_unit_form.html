@@ -1,0 +1,68 @@
+{% extends 'ctms_base.html' %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ courslet.unit.title }}</h1>
+  </header>
+
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+  <main class="card__content">
+    <form action="" method="POST">
+      <!-- TODO: Replace with real inputs
+        {{ form.as_p }}
+      -->
+    {% if not pk %}
+      {{ form.title.label_tag }}
+      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
+      {{ form.title }}
+      {% else %}
+
+      {{ form.unit_type.label_tag }}
+      <p>You can create interactive questions or passive introductions (without answers and self-assessment).</p>
+      {{ form.unit_type }}
+
+      <!--<label for="question">Question</label>-->
+      <div class="text">
+        {{ form.text.label_tag }}
+        <p>Write your question here.</p>
+        {{ form.text }}
+      </div>
+
+      <div class="answer">
+      {{ answer_form.answer.label_tag }}
+      <p>Write your answer here.</p>
+      {{ answer_form.answer }}
+      </div>
+
+      <!-- TODO: How should we add error models here? -->
+      <label for="error-models">Error Models <span>– optional</span></label>
+      <p>An error model explains a common misconception. Your students can select error models when they self-assess. <a href="">How to write a good error model</a></p>
+
+
+    {% endif %}
+      {% csrf_token %}
+
+      <input type="submit" value="Save">
+    </form>
+  </main>
+</div>
+{% endblock %}
