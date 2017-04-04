@@ -10,17 +10,25 @@ from accounts.forms import (
     UserForm, InstructorForm, ChangePasswordForm,
     DeleteAccountForm, ChangeEmailForm
 )
+from accounts.models import Instructor
 from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
 
 
 class AccountSettingsView(NotAnonymousRequiredMixin, View):
+    def get_instructor(self):
+        try:
+            return self.request.user.instructor
+        except Instructor.DoesNotExist:
+            return
+
     def get(self, request):
+        instructor = self.get_instructor()
         return render(
             request,
             'accounts/settings.html',
             dict(
                 user_form=UserForm(instance=request.user),
-                instructor_form=InstructorForm(instance=request.user.instructor),
+                instructor_form=InstructorForm(instance=instructor),
                 password_form=ChangePasswordForm(),
                 delete_account_form=DeleteAccountForm(instance=request.user),
                 email_form=ChangeEmailForm(initial={'email': request.user.email}),
@@ -29,9 +37,10 @@ class AccountSettingsView(NotAnonymousRequiredMixin, View):
         )
 
     def post(self, request):
+        instructor = self.get_instructor()
         form_name = {
             'user_form': partial(UserForm, instance=request.user),
-            'instructor_form': partial(InstructorForm, instance=request.user.instructor),
+            'instructor_form': partial(InstructorForm, instance=instructor),
             'email_form': partial(ChangeEmailForm, initial={'email': request.user.email}),
             'password_form': partial(ChangePasswordForm, instance=request.user),
             'delete_account_form': partial(DeleteAccountForm, instance=request.user),

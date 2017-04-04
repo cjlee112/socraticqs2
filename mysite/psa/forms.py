@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 
@@ -52,12 +53,32 @@ class EmailLoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput())
 
+    def get_user(self):
+        user = User.objects.filter(email=self.cleaned_data['email']).first()
+        if not user:
+            sec_mail = SecondaryEmail.objects.filter(
+                email=self.cleaned_data['email']
+            ).first()
+            if sec_mail:
+                user = sec_mail.user
+        if user:
+            username = user.username
+
+        user = authenticate(username=username, password=self.cleaned_data['password'])
+        if user and user.is_active:
+            # create instructor if not exist
+            Instructor.objects.get_or_create(user=user)
+        return user
+
 
 class UsernameLoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput())
     next = forms.CharField(required=False, widget=forms.HiddenInput())
 
+    def get_user(self):
+        return authenticate(username=self.cleaned_data['username'], 
+                            password=self.cleaned_data['password'])
 
 class SocialForm(forms.ModelForm):
     class Meta:
