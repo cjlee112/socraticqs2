@@ -1138,6 +1138,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                 if unit_to_move:
                     ul.order = None
                     ul.unit = unit_to_move
+                    ul.lesson.conceptlink_set.all().delete()
                     unit_to_move.append(ul, ul.addedBy)
                     unit.reorder_exercise()
                     return HttpResponseRedirect(reverse(

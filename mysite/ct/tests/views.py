@@ -987,6 +987,23 @@ class EditLessonTest(TestCase):
         self.assertIn('addForm', response.context)
         self.assertIn('roleForm', response.context)
 
+    def test_edit_lesson_move_ul(self):
+        unit = Unit.objects.create(title='test unit 2 title', addedBy=self.user)
+        course_unit2 = CourseUnit(course=self.course, unit=unit, order=0, addedBy=self.user)
+        course_unit2.save()
+        self.assertEqual(self.unit_lesson.lesson.conceptlink_set.count(), 1)
+        response = self.client.post(
+            reverse(
+                'ct:edit_lesson',
+                kwargs={'course_id': self.course.id, 'unit_id': self.unit.id, 'ul_id': self.unit_lesson.id}
+            ),
+            {'unit_to_move': course_unit2.id},
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ct/edit_lesson.html')
+        self.assertFalse(len(self.unit_lesson.lesson.conceptlink_set.all()))
+
     def test_edit_lesson_delete(self):
         response = self.client.post(
             reverse(
