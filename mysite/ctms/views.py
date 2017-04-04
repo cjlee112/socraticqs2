@@ -316,7 +316,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
 
     def get_success_url(self):
         return reverse(
-            'ctms:unit_edit',
+            'ctms:add_unit_edit',
             kwargs={
                 'course_pk': self.get_course().id,
                 'courslet_pk': self.get_courslet().id,
@@ -510,7 +510,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
     model = Lesson
     form_class = AddEditUnitForm
     formset_class = ErrorModelFormSet
-    # fields = ('title', '')
     unit_pk_name = 'pk'
     template_name = 'ctms/unit_edit.html'
     HANDLE_FORMSET = False

@@ -30,12 +30,18 @@ Create new courslet
     {% elif field.name == 'unit_type' %}
       <h4>Unit type</h4>
       <p>Try to create questions for students. You can also create passive introductions without answers or self-assessment</p>
+    {% elif field.name == 'text' %}
+      <h4>Question</h4>
+      <p>Write the question here</p>
     {% endif %}
       <p>
         {{ field.label_tag }}
         {{ field }}
       </p>
+
   {% endfor %}
+
+
   {% for field in answer_form %}
   <div class="{{ field.name }}">
     {% if field.name == 'answer' %}
@@ -58,7 +64,6 @@ Create new courslet
   </p>
 {{ errors_formset.management_form }}
 
-{% comment %}
 {% if errors_formset %}
 <div class="errors_formset">
   <h4>Error Models</h4>
@@ -74,7 +79,6 @@ Create new courslet
     </div>
 </div>
   {% endif %}
-  {% endcomment %}
   <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
   <br>
   <input type="submit" class="btn btn-primary" value="Save">
@@ -94,42 +98,45 @@ Create new courslet
 
     if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
       $("label[for='id_answer'],textarea#id_answer,.errors_formset").show();
+      $("#add-item-button").addClass('active').removeClass('disabled');
     } else {
-      $(".errors_formset").hide();
-      $("label[for='id_answer'],textarea#id_answer").hide();
+      $(".errors_formset,label[for='id_answer'],textarea#id_answer").hide();
+      $("#add-item-button").addClass('disabled').removeClass('active');
     };
 
     $("#id_unit_type").change(function(){
       if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-          $(".errors_formset").toggle();
-          $(".answer").toggle();
+        $("#add-item-button").addClass('active').removeClass('disabled');
+        $(".errors_formset,.answer").show();
       } else {
-        $(".errors_formset").hide();
-        $(".answer").hide();
+        $("#add-item-button").addClass('disabled').removeClass('active');
+        $(".errors_formset,.answer").hide();
       }
-      $('html, body').animate({
-          scrollTop: $(".errors_formset").position().top-200
-      }, 800);
+      // $('html, body').animate({
+      //    scrollTop: $(".errors_formset").position().top-200
+      // }, 800);
     });
   });
 </script>
 <script>
   $(document).ready(function() {
     $('.add-item').click(function(ev) {
-        ev.preventDefault();
-        var count = $('#items-form-container').children().length;
-        var tmplMarkup = $('#item-template').html();
-        var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
-        $('div#items-form-container').append(compiledTmpl);
+        if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+          ev.preventDefault();
+          var count = $('#items-form-container').children().length;
+          var tmplMarkup = $('#item-template').html();
+          var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+          $('div#items-form-container').append(compiledTmpl);
 
-        // update form count
-        $('#id_form-TOTAL_FORMS').attr('value', count+1);
+          // update form count
+          $('#id_form-TOTAL_FORMS').attr('value', count+1);
 
-        // some animate to scroll to view our new form
-        $('html, body').animate({
-                scrollTop: $("#add-item-button").position().top-200
-            }, 800);
+          // some animate to scroll to view our new form
+          $('html, body').animate({
+            scrollTop: $("#add-item-button").position().top-200
+          }, 800);
+        }
+      });
     });
-});
 </script>
 {% endblock %}

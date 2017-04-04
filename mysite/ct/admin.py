@@ -30,7 +30,7 @@ MODELS = (
 
 @admin.register(UnitLesson)
 class UnitLessonAdmin(admin.ModelAdmin):
-    list_display = ('unit', 'lesson', 'order', 'addedBy')
+    list_display = ('unit', 'lesson', 'order', 'addedBy', 'kind')
 
 
 class BaseAdmin(admin.ModelAdmin):
