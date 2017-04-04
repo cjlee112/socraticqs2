@@ -54,12 +54,14 @@ class ChatInitialView(LoginRequiredMixin, View):
         return chat
 
     def check_course_unit_not_published(self, courseUnit):
-        return (not courseUnit.is_published() and
+        return (
+            not courseUnit.is_published() and
             not User.objects.filter(
                 id=self.request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
-            ).exists())
+            ).exists()
+        )
 
     def get_will_learn_need_know(self, unit, courseUnit):
         """
@@ -118,12 +120,14 @@ class ChatInitialView(LoginRequiredMixin, View):
         :param courseUnit: course unit
         :return: True | False
         """
-        return (not courseUnit.is_published() and
+        return (
+            not courseUnit.is_published() and
             not User.objects.filter(
                 id=request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
-            ).exists())
+            ).exists()
+        )
 
     @staticmethod
     def user_enrolled(request, courseUnit):
