@@ -1,5 +1,6 @@
 from django import forms
 from django.forms.formsets import formset_factory
+from django.forms.widgets import ChoiceFieldRenderer, RendererMixin, Select
 from ct.models import Course, Unit, Lesson, UnitLesson
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -26,10 +27,10 @@ class CreateUnitForm(forms.ModelForm):
 
 class EditUnitForm(forms.ModelForm):
     KIND_CHOICES = (
-        (Lesson.EXPLANATION, 'long explanation'),
-        (Lesson.ORCT_QUESTION, 'Open Response Concept Test question'),
+        (Lesson.EXPLANATION, 'Introduction'),
+        (Lesson.ORCT_QUESTION, 'Question'),
     )
-    unit_type = forms.ChoiceField(choices=KIND_CHOICES)
+    unit_type = forms.ChoiceField(choices=KIND_CHOICES, widget=forms.RadioSelect)
 
     class Meta:
         model = Lesson
@@ -43,7 +44,7 @@ class EditUnitForm(forms.ModelForm):
 class AddEditUnitForm(EditUnitForm):
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'unit_type', )
+        fields = ('text', 'unit_type', )
 
 
 class AddEditUnitAnswerForm(forms.ModelForm):
@@ -70,8 +71,9 @@ class ErrorModelForm(forms.ModelForm):
         model = Lesson
         fields = ('title', 'text')
 
-    def save(self, questionUL, commit=True):
-        return self.instance.save_as_error_model(questionUL.concept, questionUL)
+    def save(self, questionUL, user, commit=True):
+        self.instance.addedBy = user
+        return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
 
 ErrorModelFormSet = formset_factory(form=ErrorModelForm)
 

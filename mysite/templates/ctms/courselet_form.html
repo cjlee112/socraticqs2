@@ -13,15 +13,14 @@
     <main class="card__content">
       <form action="" method="POST">
         {% csrf_token %}
-
-        <label for="name">Courselet Name</label>
+        {{ form.title.label_tag }}
         <p>Your students will see this, so give your courselet a descriptive name.</p>
-        <input type="text" name="name">
-
-        <!-- TODO: Replace label, description and input with real form
-          {{ form.as_p }}
-        -->
-
+          {{ form.title }}
+          {% if form.title.errors %}
+            {% for error in form.title.erros%}
+              {{ error }}
+            {% endfor %}
+          {% endif %}
         <input type="submit" value="Create Courselet">
       </form>
     </main>

@@ -5,85 +5,95 @@ Create new courslet
 {% endblock %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a></h5>
-</div>
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ courslet.unit.title }}</h1>
+  </header>
 
-{% if courslet %}
-<div class="text-center">
-  <h6>Courslet</h6>
-  <h4><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h4>
-</div>
-{% endif %}
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+      </li>
 
-<h4 class="text-center">Question</h4>
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+      </li>
 
-<form action="{% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=unit.id%}" method="post">
-  {% csrf_token %}
-  {% for field in form %}
-    {% if field.name == 'title' %}
-      <h4>Unit name</h4>
-      <p>Give our unit descriptive name. This will show up as one unit in your student's side bar.
-        <a href="">How to name a unit</a>
-      </p>
-    {% elif field.name == 'unit_type' %}
-      <h4>Unit type</h4>
-      <p>Try to create questions for students. You can also create passive introductions without answers or self-assessment</p>
-    {% elif field.name == 'text' %}
-      <h4>Question</h4>
-      <p>Write the question here</p>
-    {% endif %}
-      <p>
-        {{ field.label_tag }}
-        {{ field }}
-      </p>
-
-  {% endfor %}
-
-
-  {% for field in answer_form %}
-  <div class="{{ field.name }}">
-    {% if field.name == 'answer' %}
-        <h4>Answer</h4>
-        <p>Add your answer to the question here.
-          <a href="">How to write a good answer</a>
-        </p>
-      {% else %}
-      {% endif %}
-    {{ field.label_tag }}
-    {{ field }}
-  </div>
-  {% endfor %}
-  <br>
-  <hr>
-
-  <h4>Error Models - optional</h4>
-  <p>An error model explains a common misconception. You students will select an error model when they self-assess.
-    <a href="">How to write a good error model</a>
-  </p>
-{{ errors_formset.management_form }}
-
-{% if errors_formset %}
-<div class="errors_formset">
-  <h4>Error Models</h4>
-    {{ errors_formset.management_form }}
-    <div id="items-form-container">
-    {% for item_form in errors_formset %}
-      <div id="item-{{ forloop.counter0 }}">
-        {{ item_form.id }}
-        {{ item_form.as_p }}
-        {# <!-- or for crispy forms --> {% crispy item_form %} #}
-      </div>
-    {% endfor %}
-    </div>
-</div>
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
   {% endif %}
-  <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
-  <br>
-  <input type="submit" class="btn btn-primary" value="Save">
-</form>
 
+  <main class="card__content">
+    <form action="" method="POST">
+      <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
+      <!-- TODO: Replace with real inputs
+        {{ form.as_p }}
+      -->
+      {% if not pk %}
+      {{ form.title.label_tag }}
+      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
+      {{ form.title }}
+      {% else %}
+
+      {{ form.unit_type.label_tag }}
+      <p>You can create interactive questions or passive introductions (without answers and self-assessment).</p>
+      {{ form.unit_type }}
+
+      <!--<label for="question">Question</label>-->
+      <div class="text">
+        {{ form.text.label_tag }}
+        <p>Write your question here.</p>
+        {{ form.text }}
+      </div>
+
+      <div class="answer">
+      {{ answer_form.answer.label_tag }}
+      <p>Write your answer here.</p>
+      {{ answer_form.answer }}
+      </div>
+
+      <!-- TODO: How should we add error models here? -->
+      <label for="error-models">Error Models <span>– optional</span></label>
+      <p>An error model explains a common misconception. Your students can select error models when they self-assess. <a href="">How to write a good error model</a></p>
+
+
+      {% endif %}
+
+      {% csrf_token %}
+
+      {{ errors_formset.management_form }}
+
+      {#% comment %#}
+      {% if errors_formset %}
+      <div class="errors_formset">
+        <h4>Error Models</h4>
+          {#{ errors_formset.management_form }#}
+          <div id="items-form-container">
+          {% for item_form in errors_formset %}
+            <div id="item-{{ forloop.counter0 }}">
+              {{ item_form.id }}
+              {{ item_form.as_p }}
+              {# <!-- or for crispy forms --> {% crispy item_form %} #}
+            </div>
+          {% endfor %}
+          </div>
+      </div>
+      {% endif %}
+      {#% endcomment %#}
+
+      <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
+      <br>
+      <input type="submit" class="btn btn-primary" value="Save">
+  </form>
+</main>
+{% endblock %}
+{% block js %}
 <script type="text/html" id="item-template">
   <div id="item-__prefix__">
       {{ errors_formset.empty_form.as_p }}
@@ -96,18 +106,20 @@ Create new courslet
   $(document).ready(function(){
     $(".errors_formset").hide();
 
-    if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-      $("label[for='id_answer'],textarea#id_answer,.errors_formset").show();
+    if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+      $(".answer,.errors_formset").show();
       $("#add-item-button").addClass('active').removeClass('disabled');
     } else {
-      $(".errors_formset,label[for='id_answer'],textarea#id_answer").hide();
+      $(".errors_formset").hide();
+      $(".answer").hide();
       $("#add-item-button").addClass('disabled').removeClass('active');
     };
 
-    $("#id_unit_type").change(function(){
-      if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-        $("#add-item-button").addClass('active').removeClass('disabled');
-        $(".errors_formset,.answer").show();
+    $("input[name='unit_type']").change(function(){
+      if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+          $(".errors_formset").toggle();
+          $(".answer").toggle();
+          $("#add-item-button").addClass('active').removeClass('disabled');
       } else {
         $("#add-item-button").addClass('disabled').removeClass('active');
         $(".errors_formset,.answer").hide();
@@ -121,7 +133,7 @@ Create new courslet
 <script>
   $(document).ready(function() {
     $('.add-item').click(function(ev) {
-        if($("#id_unit_type").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
+        if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
           ev.preventDefault();
           var count = $('#items-form-container').children().length;
           var tmplMarkup = $('#item-template').html();

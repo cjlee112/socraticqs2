@@ -3,9 +3,8 @@ from django.views.generic import TemplateView
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
-    UpdateCourseView, DeleteCourseView, EditUnitView, ResponseView, UnitSettingsView, CoursletSettingsView,
-    AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
-    CoursletDeleteView, DeleteUnitView,
+    UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
+    CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, TesterJoinCourseView, ResendInviteView, DeleteInviteView)
 
 urlpatterns = patterns(
@@ -45,14 +44,10 @@ urlpatterns = patterns(
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/new/?$',
         CreateUnitView.as_view(),
         name='unit_create'),
-    # edit unit
+    # unit edit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/edit/?$',
-        EditUnitView.as_view(),
-        name='unit_edit'),
-    # new unit edit
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/new_unit_edit/?$',
         AddUnitEditView.as_view(),
-        name='add_unit_edit'),
+        name='unit_edit'),
     # delete unit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/delete/?$',
         DeleteUnitView.as_view(),

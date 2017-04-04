@@ -31,7 +31,7 @@
       <form action="{% url 'ctms:course_settings' pk=object.id %}" method="post">
         {% csrf_token %}
 
-        <label for="name">Course Name</label>
+        <label for="title">Course Name</label>
         <p>Give your course a descriptive name.</p>
 
           {{ form.title.errors }}
@@ -39,6 +39,7 @@
 
         <input type="submit" value="Save">
       </form>
+
 
       <form action="{% url 'ctms:course_delete' pk=object.id %}" class="card__delete" method="post">
         {% csrf_token %}

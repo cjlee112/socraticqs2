@@ -27,7 +27,11 @@
       <div class="dropdown">
         <div class="dropdown-toggle" id="dropdown-courses" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
           <!-- TODO: Add the name of the active course here -->
-          <span>Course Name</span><span class="sidebar__arrow"></span>
+          {% if sidebar.course %}
+          <span>{{  sidebar.course.title }}</span><span class="sidebar__arrow"></span>
+          {% else %}
+          <span>Course name</span><span class="sidebar__arrow"></span>
+          {% endif %}
         </div>
 
         <ul class="dropdown-menu" aria-labelledby="dropdown-courses">
@@ -83,14 +87,18 @@
         <div class="dropdown">
           <div class="dropdown-toggle" id="dropdown-courselets" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
             <!-- TODO: Add name of the active courselet here -->
+            {% if sidebar.courslet %}
+            <span>{{ sidebar.courslet.unit.title }}</span><span class="sidebar__arrow"></span>
+            {% else %}
             <span>Courselet Name</span><span class="sidebar__arrow"></span>
+            {% endif %}
           </div>
 
           <ul class="dropdown-menu" aria-labelledby="dropdown-courselets">
             {% for courslet in sidebar.course_courslets %}
               <li>
                 <a href="{% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %}">
-                  {{ courslet.title }}
+                  {{ courslet.unit.title }}
                 </a>
               </li>
             {% endfor %}
@@ -106,8 +114,7 @@
               </li>
 
               <li>
-                <!-- TODO: Add link to preview -->
-                <a href="#">Preview</a>
+                <a href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Preview</a>
               </li>
 
               <li>
@@ -140,10 +147,12 @@
               {% endif %}
             </li>
 
+            {% if sidebar.courslet %}
             <li>
               <!-- TODO: Add link to add units by chat -->
-              <a href="#" class="sidebar__add">Add Units by Chat</a>
+              <a href="{% url 'ctms:add_units_chat' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="sidebar__add">Add Units by Chat</a>
             </li>
+            {% endif %}
           </ul>
         </nav>
       </section>
