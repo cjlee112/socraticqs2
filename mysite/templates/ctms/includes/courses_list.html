@@ -16,12 +16,12 @@
    </nav>
 
    <main class="card__content">
-    <h2>
-      <span>My Courses</span>
-      <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
-    </h2>
-
     {% if courses %}
+      <h2>
+        <span>My Courses</span>
+        <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
+      </h2>
+
       <table>
          <thead>
            <th>Course</th>
@@ -44,7 +44,15 @@
          </tbody>
        </table>
       {% else %}
-        <p>You don't have any course yet.</p>
+        <div class="card__empty-state">
+          <h3>My courses</h3>
+
+          <p>
+            You don't have any course yet. Let's create one!
+          </p>
+
+          <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
+        </div>
       {% endif %}
    </main>
  </div>

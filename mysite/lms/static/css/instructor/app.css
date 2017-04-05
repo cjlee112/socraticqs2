@@ -1,24 +1,4 @@
 body {
-  position: relative; }
-
-body:after {
-  position: absolute;
-  width: auto;
-  height: auto;
-  z-index: 9999;
-  content: '';
-  display: block;
-  pointer-events: none;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: url(http://basehold.it/i/12/ff00ff) repeat top left; }
-
-body:active:after {
-  display: none; }
-
-body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -583,5 +563,82 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .table-answer {
   padding: 0 0 0 48px; }
+
+.auth-topbar {
+  height: 61px;
+  background: #fff;
+  border-bottom: 1px solid #DDE2E6;
+  text-align: center; }
+  .auth-topbar a {
+    display: inline-block;
+    padding: 12px; }
+    .auth-topbar a:hover, .auth-topbar a:active, .auth-topbar a:focus {
+      opacity: 0.7; }
+
+.auth-card {
+  position: relative;
+  background: #fff;
+  border-top: 1px solid #DDE2E6;
+  border-bottom: 1px solid #DDE2E6;
+  margin: 23px auto 24px auto;
+  max-width: 720px; }
+  .auth-card header {
+    text-align: center;
+    padding: 36px 36px 34px 36px;
+    border-bottom: 1px solid #DDE2E6; }
+    .auth-card header h1 {
+      margin-top: 3px; }
+    .auth-card header p {
+      margin-top: 9px;
+      color: #7F7F7F; }
+
+.auth-card__social-options {
+  position: relative;
+  text-align: left;
+  padding: 27px 24px;
+  border-bottom: 1px solid #DDE2E6; }
+  .auth-card__social-options .button {
+    margin: 6px; }
+  .auth-card__social-options p {
+    position: absolute;
+    bottom: -12px;
+    width: 100%;
+    text-align: center;
+    margin: 0; }
+    .auth-card__social-options p span {
+      display: inline-block;
+      background: #fff;
+      color: #7F7F7F;
+      padding: 0 12px; }
+
+.auth-card__content {
+  padding: 60px; }
+  .auth-card__content > *:first-child {
+    margin-top: -12px; }
+  .auth-card__content label {
+    margin-top: 36px; }
+    .auth-card__content label:first-of-type {
+      margin-top: 0; }
+
+.auth-card__actions {
+  margin-top: 48px; }
+  .auth-card__actions a {
+    float: left;
+    padding: 12px 0;
+    margin: 0 24px 0 0; }
+  .auth-card__actions input[type=submit] {
+    float: right;
+    margin: 0; }
+
+@media (min-width: 768px) {
+  .auth-card__social-options {
+    text-align: center; } }
+@media (min-width: 1024px) {
+  .auth-card {
+    margin-top: 59px;
+    margin-bottom: 60px;
+    border-radius: 4px;
+    border-left: 1px solid #DDE2E6;
+    border-right: 1px solid #DDE2E6; } }
 
 /*# sourceMappingURL=app.css.map */

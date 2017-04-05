@@ -61,15 +61,17 @@
           </tbody>
         </table>
       {% else %}
-        <h3>Units</h3>
+        <div class="card__empty-state">
+          <h3>Units</h3>
 
-        <p>
-          A courselet is a series of short “chat” messages, called units, that help students understand one or more important concepts. You can create these units by filling out a form if you click on Add Unit. If you’re new to active learning, we recommend that you create your first courselet by clicking on Add Units by Chat. You will be presented with a chat interface, just like the one your students will be using, that’ll guide you through the authoring process. Meta!
-        </p>
+          <p>
+            A courselet is a series of short “chat” messages, called units, that help students understand one or more important concepts. You can create these units by filling out a form if you click on <em>Add Unit</em>. If you’re new to active learning, we recommend that you create your first courselet by clicking on <em>Add Units by Chat</em>. You will be presented with a chat interface, just like the one your students will be using, that’ll guide you through the authoring process. Meta!
+          </p>
 
-        <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk  %}" class="button">Add Units by Chat</a>
+          <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk  %}" class="button button--small">Add Units by Chat</a>
 
-        <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary">Add Unit</a>
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--small button--primary">Add Unit</a>
+        </div>
       {% endif %}
     </main>
   </div>
