@@ -21,26 +21,30 @@
       <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
     </h2>
 
-     <table>
-       <thead>
-         <th>Course</th>
-         <th>Answers</th>
-       </thead>
+    {% if courses %}
+      <table>
+         <thead>
+           <th>Course</th>
+           <th>Answers</th>
+         </thead>
 
-       <tbody>
-         {% for course in courses %}
-           <tr>
-             <td>
-              <a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a>
-             </td>
+         <tbody>
+           {% for course in courses %}
+             <tr>
+               <td>
+                <a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a>
+               </td>
 
-             <td>
-              <!-- TODO: Display amount of answers -->
-              {{ course.response_set.count }}
-             </td>
-           </tr>
-         {% endfor %}
-       </tbody>
-     </table>
+               <td>
+                <!-- TODO: Display amount of answers -->
+                {{ course.response_set.count }}
+               </td>
+             </tr>
+           {% endfor %}
+         </tbody>
+       </table>
+      {% else %}
+        <p>You don't have any course yet.</p>
+      {% endif %}
    </main>
  </div>
