@@ -1,42 +1,69 @@
-{% extends "ctms_base.html" %}
+{% extends "psa_base.html" %}
 
 {% block content %}
+<div class="auth-card">
+  <header>
+    <h1>Sign Up</h1>
 
-<div class="buttons">
-{% include "psa/social_backends.html" %}
+    <p>For new instructors. Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+  </header>
 
-<br>
+  <section class="auth-card__social-options">
+    {% include "psa/social_backends.html" %}
 
-<div id="login">
-<h4>Signup:</h4>
-    <form class="form-horizontal" name="RegistrationForm" action="." method="post">
-    {% csrf_token %}
+    <p>
+      <span>You can also sign up using your email below</span>
+    </p>
+  </section>
 
-    {% for field in form %}
-      {% if not field.is_hidden %}
-      <div class="control-group">
-        {{ field.label_tag }}
-        <div class="controls">
-          {{ field.errors }}
+  <main class="auth-card__content">
+    <form name="RegistrationForm" action="." method="post">
+      {% csrf_token %}
+
+      <!-- TODO: Replace with real inputs
+      {% for field in form %}
+        {% if not field.is_hidden %}
+          {{ field.label_tag }}
           {{ field }}
+          {{ field.errors }}
+        {% else %}
+        {{ field }}
+        {% endif %}
+      {% endfor %}
+      -->
+
+      <label>Email</label>
+      <input type="email">
+
+      <label>Repeat Email</label>
+      <input type="email">
+
+      <label>Name</label>
+      <div class="row">
+        <div class="col-lg-6">
+          <input type="text" placeholder="First name">
+        </div>
+
+        <div class="col-lg-6">
+          <input type="text" placeholder="Last name">
         </div>
       </div>
-      {% else %}
-      {{ field }}
-      {% endif %}
-    {% endfor %}
 
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn btn-success">Register</button>
-        </div>
-    </div>
+      <label>Institution</label>
+      <p>We can help you with your integration once we know where you teach.</p>
+      <input type="text">
+
+      <label>Password</label>
+      <p>Create a password that is at least six characters long.</p>
+      <input type="password">
+
+      <div class="auth-card__actions">
+        <input type="submit" value="Sign Up">
+      </div>
     </form>
-</div>
+  </main>
 
-{% if DEBUG %}
-    {% include "psa/user_details.html" %}
-{% endif %}
-
+  {% if DEBUG %}
+      {% include "psa/user_details.html" %}
+  {% endif %}
 {% endblock %}
