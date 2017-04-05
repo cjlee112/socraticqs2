@@ -374,7 +374,6 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         self.object = unit.create_lesson(
             title=form.cleaned_data['title'], text='', author=self.request.user
         )
-        import ipdb; ipdb.set_trace()
         # create UnitLesson with blank answer for this unit
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
@@ -508,9 +507,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
                 answer = answer_form.save(self.object.unit, self.request.user, self.object)
 
             response = self.form_valid(form)
-
-            import ipdb; ipdb.set_trace()
-
 
             if not self.HANDLE_FORMSET:
                 return response
