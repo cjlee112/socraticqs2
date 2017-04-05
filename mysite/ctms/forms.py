@@ -76,7 +76,7 @@ class ErrorModelForm(forms.ModelForm):
         self.instance.addedBy = user
         return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
 
-ErrorModelFormSet = modelformset_factory(Lesson, form=ErrorModelForm)
+ErrorModelFormSet = modelformset_factory(Lesson, form=ErrorModelForm, fields=('id', 'title', 'text'))
 
 
 class CreateCourseletForm(forms.ModelForm):

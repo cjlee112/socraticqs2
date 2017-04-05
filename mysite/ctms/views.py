@@ -239,7 +239,6 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
     def get_queryset(self):
         qs = super(SharedCoursesListView, self).get_queryset()
         q = qs.shared_for_me(self.request)
-        print "Shared for me ", q
         return q
 
     def get_context_data(self, **kwargs):
@@ -370,10 +369,10 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     def form_valid(self, form):
         courslet = self.get_courslet()
         unit = courslet.unit
-
-        self.object = unit.create_lesson(
-            title=form.cleaned_data['title'], text='', author=self.request.user
-        )
+        self.object = Lesson(title=form.cleaned_data['title'], text='', addedBy=self.request.user)
+        self.object.save()
+        self.object.treeID = self.object.pk
+        self.object.save()
         # create UnitLesson with blank answer for this unit
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
@@ -497,6 +496,11 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        if not self.object:
+            return self.render(
+                'ctms/error.html',
+
+            )
         form = self.get_form()
 
         answer_form = AddEditUnitAnswerForm(**self.get_answer_form_kwargs())
@@ -525,9 +529,11 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         return self.render_to_response(context)
 
     def get_answer_form_kwargs(self):
-        ul = self.get_unit_lesson()
-        answer = ul.get_answers().last()
         kwargs = {}
+        ul = self.get_unit_lesson()
+        answer = None
+        if ul:
+            answer = ul.get_answers().last()
         kwargs['initial'] = {'answer': answer.lesson.text} if answer else {}
         kwargs['instance'] = answer.lesson if answer else None
         kwargs['prefix'] = 'answer_form'
@@ -544,9 +550,10 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         if not ul.lesson.concept:
             ul.lesson.concept = dummy_concept
             ul.lesson.addedBy = self.request.user
-            # ul.lesson.save_root(dummy_concept, Lesson.ANSWER)
+            ul.lesson.save_root(dummy_concept, Lesson.ERROR_MODEL)
         for err_form in formset:
-            error_models.append(err_form.save(ul, self.request.user))
+            if err_form.is_valid() and err_form.cleaned_data:
+                error_models.append(err_form.save(ul, self.request.user))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_or_create_dummy_concept(self, ul):
@@ -568,12 +575,13 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
     def get_initial(self):
         init = super(AddUnitEditView, self).get_initial()
         ul = self.get_unit_lesson()
-        init['unit_type'] = ul.lesson.kind
+        if ul:
+            init['unit_type'] = ul.lesson.kind
         return init
 
     def get_form_kwargs(self):
         kwargs = {
-            # 'initial': self.get_initial(),
+            'initial': self.get_initial(),
             'prefix': self.get_prefix(),
             'instance': self.get_form_initial()
         }
@@ -590,33 +598,28 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         return self.get_units_by_courselet(courselet)
 
     def get_object(self, queryset=None):
-        print "get_object id=", self.kwargs.get(self.unit_pk_name)
-        if queryset:
-            return queryset.filter(id=self.kwargs.get(self.unit_pk_name)).first()
-        else:
-            return self.get_unit_lesson()
+        obj = self.get_unit_lesson()
+        if not obj:
+            raise Http404()
+        return obj
 
     def get_form_initial(self):
         ul = self.get_unit_lesson()
-        return ul.lesson
+        if ul:
+            return ul.lesson
 
     def get_formset_initial(self):
-        lessons = [
-            {
-                'title': q.lesson.title,
-                'text': q.lesson.text,
-                'id': q.lesson.id
-            }
-            for q in self.get_formset_initial_queryset()
-        ]
-        return lessons
+        return []
 
-    def get_formset_initial_queryset(self):
-        return self.get_unit_lesson().get_errors()
+    def get_ul_errors(self):
+        ul = self.get_unit_lesson()
+        if ul:
+            return ul.get_errors()
+        else:
+            return UnitLesson.objects.none()
 
     def get_formset_queryset(self):
-        return self.get_unit_lesson().get_errors()
-
+        return Lesson.objects.filter(id__in=[i['lesson'] for i in self.get_ul_errors().values('lesson')])
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
