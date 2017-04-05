@@ -1,4 +1,24 @@
 body {
+  position: relative; }
+
+body:after {
+  position: absolute;
+  width: auto;
+  height: auto;
+  z-index: 9999;
+  content: '';
+  display: block;
+  pointer-events: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: url(http://basehold.it/i/12/ff00ff) repeat top left; }
+
+body:active:after {
+  display: none; }
+
+body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -413,6 +433,13 @@ a.sidebar__add {
   padding: 48px 24px; }
   .card__content > *:first-child {
     margin-top: -12px; }
+
+.card__empty-state h3 {
+  margin: 4px 0 0 0; }
+.card__empty-state p {
+  margin: 15px 0 0 0; }
+.card__empty-state .button {
+  margin: 27px 0 0 0; }
 
 @media (min-width: 1024px) {
   .card {

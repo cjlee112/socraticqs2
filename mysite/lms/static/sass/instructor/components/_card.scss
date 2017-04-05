@@ -69,7 +69,19 @@
   }
 }
 
+.card__empty-state {
+  h3 {
+    margin: 4px 0 0 0;
+  }
 
+  p {
+    margin: 15px 0 0 0;
+  }
+
+  .button {
+    margin: 27px 0 0 0;
+  }
+}
 
 // Larger viewports
 @media (min-width: 1024px) {
