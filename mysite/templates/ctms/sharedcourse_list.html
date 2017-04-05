@@ -19,21 +19,25 @@
     </nav>
 
     <main class="card__content">
-      <table class="table table-striped">
-        <thead >
-          <th>Course</th>
-          <th>Author</th>
-        </thead>
+      {% if shared_courses %}
+        <table>
+          <thead >
+            <th>Course</th>
+            <th>Author</th>
+          </thead>
 
-        <tbody>
-          {% for sh in shared_courses %}
-            <tr>
-              <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}">{{ sh.course.title }}</a></td>
-              <td>{{ sh.instructor }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          <tbody>
+            {% for sh in shared_courses %}
+              <tr>
+                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}">{{ sh.course.title }}</a></td>
+                <td>{{ sh.instructor }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No one has shared courses with you yet.</p>
+      {% endif %}
     </main>
   </div>
 <!-- # TODO need to discuss -->
