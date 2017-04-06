@@ -620,19 +620,35 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     .auth-card__content label:first-of-type {
       margin-top: 0; }
 
+.auth-card__content--centered {
+  text-align: center; }
+
 .auth-card__actions {
   margin-top: 48px; }
-  .auth-card__actions a {
+  .auth-card__actions:before, .auth-card__actions:after {
+    content: " ";
+    display: table; }
+  .auth-card__actions:after {
+    clear: both; }
+  .auth-card__actions a, .auth-card__actions span {
     float: left;
-    padding: 12px 0;
-    margin: 0 24px 0 0; }
+    display: inline-block;
+    padding: 24px 24px 24px 0; }
+  .auth-card__actions span {
+    color: #ccc; }
   .auth-card__actions input[type=submit] {
-    float: right;
-    margin: 0; }
+    display: block;
+    width: 100%;
+    margin: 12px 0 0 0; }
 
 @media (min-width: 768px) {
   .auth-card__social-options {
-    text-align: center; } }
+    text-align: center; }
+
+  .auth-card__actions input[type=submit] {
+    float: right;
+    display: inline-block;
+    width: auto; } }
 @media (min-width: 1024px) {
   .auth-card {
     margin-top: 59px;

@@ -64,18 +64,28 @@
   }
 }
 
+.auth-card__content--centered {
+  text-align: center; 
+}
+
 .auth-card__actions {
   margin-top: 48px;
+  @include clearfix;
 
-  a {
+  a, span {
     float: left;
-    padding: 12px 0;
-    margin: 0 24px 0 0;
+    display: inline-block;
+    padding: 24px 24px 24px 0;
+  }
+
+  span {
+    color: #ccc;
   }
 
   input[type=submit] {
-    float: right;
-    margin: 0;
+    display: block;
+    width: 100%;
+    margin: 12px 0 0 0;
   }
 }
 
@@ -83,6 +93,14 @@
 @media (min-width: 768px) {
   .auth-card__social-options {
     text-align: center;
+  }
+
+  .auth-card__actions {
+    input[type=submit] {
+      float: right;
+      display: inline-block;
+      width: auto;
+    }
   }
 }
 
