@@ -441,7 +441,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         if queryset:
             return queryset.get(pk=self.kwargs.get('pk')).unit
         else:
-            return self.get_my_or_shared_with_me_courses().get(pk=self.kwargs.get('pk')).unit
+            return self.get_my_or_shared_with_me_course_units().get(pk=self.kwargs.get('pk')).unit
 
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs=self.kwargs)

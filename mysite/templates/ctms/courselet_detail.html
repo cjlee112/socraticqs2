@@ -18,7 +18,7 @@
 
         <li>
           <!-- TODO: Add link to preview -->
-          <a href="">Preview</a>
+          <a href="{% url 'ctms:courselet_preview' course_pk=object.course.id pk=object.id %}">Preview</a>
         </li><li>
           <a href="{% url 'ctms:courslet_settings' course_pk=object.course.id pk=object.id %}">Settings</a>
         </li>
@@ -31,7 +31,7 @@
           <span>Units</span>
           <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary button--small">Add Unit</a>
           <!-- TODO: Add link to add units by chat -->
-          <a href="" class="button button--small">Add Units by Chat</a>
+          <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="button button--small">Add Units by Chat</a>
         </h2>
 
         <table>
