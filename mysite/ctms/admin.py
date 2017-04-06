@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from ctms.models import SharedCourse
+from ctms.models import Invite
 
 
-@admin.register(*[SharedCourse])
+@admin.register(*[Invite])
 class AdminModel(admin.ModelAdmin):
     pass

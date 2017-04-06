@@ -1,46 +1,54 @@
-{% extends "ctms_base.html" %}
+{% extends "psa_base.html" %}
 
-{% block base_content %}
+{% block content %}
+  {% if form.errors %}
+    <!-- TODO: Style error messages -->
+    Your email and password didn't match. Please try again.
+  {% endif %}
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
-<div class="buttons">
-{% if not user.is_authenticated %}
-{% endif %}
+  <!-- TODO: What is this? -->
+  {% if not user.is_authenticated %}
+  {% endif %}
 
-{% include "psa/social_backends.html" %}
+  <div class="auth-card">
+    <header>
+      <h1>Log In</h1>
 
-<br>
+      <p>Don't have an account yet? <a href="{% url 'signup' %}">Sign up</a></p>
+    </header>
 
-<div id="login">
-  <h4>Login</h4>
-    <form class="form-horizontal" name="LoginForm" action="." method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      {% if not field.is_hidden %}
-      <div class="control-group">
-        {{ field.label_tag }}
-          <div class="controls">
-            {{ field.errors }}
+    <section class="auth-card__social-options">
+      {% include "psa/social_backends.html" %}
+
+      <p>
+        <span>or use the form below if you signed up using your email</span>
+      </p>
+    </section>
+
+    <main class="auth-card__content">
+      <form name="LoginForm" action="." method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+          {% if not field.is_hidden %}
+            {{ field.label_tag }}
             {{ field }}
-          </div>
-      </div>
-      {% else %}
-        {{ field }}
-      {% endif %}
-    {% endfor %}
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn">Login</button>
+            {{ field.errors }}
+          {% else %}
+            {{ field }}
+          {% endif %}
+        {% endfor %}
+
+        <div class="auth-card__actions">
+          <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
+
+          <input type="submit" value="Log In">
         </div>
-    </div>
-    </form>
-</div>
+      </form>
+    </main>
+  </div>
 
-{% if DEBUG %}
+  {% if DEBUG %}
     {% include "psa/user_details.html" %}
-{% endif %}
-
+  {% endif %}
 {% endblock %}

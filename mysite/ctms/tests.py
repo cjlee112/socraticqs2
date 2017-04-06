@@ -7,7 +7,7 @@ from django.db import models
 
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
-from ctms.models import SharedCourse
+from ctms.models import Invite
 
 
 class MyTestCase(TestCase):
@@ -195,11 +195,7 @@ class MyCoursesTests(MyTestCase):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
-        shared_course = SharedCourse.objects.create(
-            from_user=self.user2,
-            to_user=self.user,
-            course=self.course
-        )
+        shared_course = Invite.create_new(True, self.course, self.user2, self.user.email, 'tester')
         response = self.client.get(self.url)
         # should return shared courses
         self.assertEqual(response.status_code, 200)
@@ -436,7 +432,7 @@ class CreateCoursletViewTests(MyTestCase):
             courslets_in_course,
             Unit.objects.filter(courseunit__course=self.course)
         )
-        self.assertTemplateUsed('ctms/unit_form.html')
+        self.assertTemplateUsed('ctms/create_unit_form.html')
         self.assertIn('form', response.context)
         self.assertIn('unit_lesson', response.context)
         self.assertIn('course', response.context)
@@ -513,7 +509,7 @@ class CreateUnitViewTests(MyTestCase):
         lessons_cnt = Lesson.objects.filter().count()
         unit_lsn_cnt = UnitLesson.objects.filter().count()
         response = self.post_valid_data(data)
-        self.assertTemplateUsed('ctms/unit_form.html')
+        self.assertTemplateUsed('ctms/create_unit_form.html')
         self.assertIn('course', response.context)
         self.assertIn('courslet', response.context)
         self.assertIn('form', response.context)
@@ -545,7 +541,7 @@ class EditUnitViewTests(MyTestCase):
         response = self.get_page()
         new_counts = self.get_model_counts()
         self.assertEqual(counts, new_counts)
-        self.assertTemplateUsed(response, 'ctms/unit_form.html')
+        self.assertTemplateUsed(response, 'ctms/create_unit_form.html')
         self.check_context_keys(response)
 
     @unpack

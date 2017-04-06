@@ -1,5 +1,9 @@
 import injections
 import logging
+
+import waffle
+
+from django.db import models
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -9,12 +13,13 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from django.contrib.staticfiles.templatetags.staticfiles import static
+
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnitFsmHandler
 from chat.utils import enroll_generator
 from ctms.views import CourseCoursletUnitMixin
 from fsm.models import FSMState
-import waffle
 
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
@@ -37,10 +42,45 @@ class ChatInitialView(LoginRequiredMixin, View):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=False)
 
+    def create_chat(self, enroll_code, courseUnit):
+        chat = Chat(
+            user=self.request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy
+        )
+        chat.save(self.request)
+        return chat
+
+    def check_course_unit_not_published(self, courseUnit):
+        return (
+            not courseUnit.is_published() and
+            not User.objects.filter(
+                id=self.request.user.id,
+                role__role=Role.INSTRUCTOR,
+                role__course=courseUnit.course
+            ).exists())
 
     def get_will_learn_need_know(self, unit, courseUnit):
+        """
+        Steps to define Concepts for Will learn and Need to know:
+
+            `/ct/teach/courses/:id/units/:id/`
+            `/ct/teach/courses/:id/units/:id/lessons/`
+            `/ct/teach/courses/:id/units/:id/lessons/:id/`
+            `/ct/teach/courses/:id/units/:id/lessons/:id/concepts/`
+
+        `Will learn`
+
+            * We want all Concepts that Defines or Tests Understanding of Lesson
+            * Choose Defines or Test for Concept
+
+        `Need to know`
+
+            * We want all Concepts that Assumes a Lesson
+            * Choose Assumes for Concept
+        """
         will_learn = set()
         need_to_know = set()
         for unit_lesson in unit.get_exercises():
@@ -69,7 +109,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                             )
                     if url:
                         contaner.add((title, url))
-            return will_learn, need_to_know
+        return will_learn, need_to_know
 
     @staticmethod
     def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
@@ -79,12 +119,14 @@ class ChatInitialView(LoginRequiredMixin, View):
         :param courseUnit: course unit
         :return: True | False
         """
-        return (not courseUnit.is_published() and
+        return (
+            not courseUnit.is_published() and
             not User.objects.filter(
                 id=request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
-            ).exists())
+            ).exists()
+        )
 
     @staticmethod
     def user_enrolled(request, courseUnit):
@@ -165,6 +207,14 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
+        try:
+            instructor_icon = (
+                courseUnit.course.addedBy.instructor.icon_url or
+                static('img/avatar-teacher.jpg')
+            )
+        except AttributeError:
+            instructor_icon = static('img/avatar-teacher.jpg')
+
         return render(
             request,
             self.template_name,
@@ -172,6 +222,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,
+                'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,
                 'small_img_url': unit.small_img_url,
@@ -196,17 +247,17 @@ class CourseletPreviewView(ChatInitialView):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
     @staticmethod
     def create_new_chat(request, enroll_code, courseUnit, **kwargs):
         return ChatInitialView.create_new_chat(
-            dict(
-                user=request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy,
-                is_preview=True
-            )
+            request=request,
+            courseUnit=courseUnit,
+            user=request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy,
+            is_preview=True
         )
 
     @staticmethod
@@ -267,7 +318,7 @@ class InitializeLiveSession(ChatInitialView):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isLive=True)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isLive=True, chat__is_preview=False)
 
     def get(self, request, **kwargs):
         '''
@@ -329,7 +380,8 @@ class InitializeLiveSession(ChatInitialView):
                 user=request.user,
                 instructor=course_unit.course.addedBy,
                 is_live=True,
-                enroll_code=enroll_code
+                enroll_code=enroll_code,
+                is_preview=False
             )
             chat.save(request)
 
@@ -345,6 +397,14 @@ class InitializeLiveSession(ChatInitialView):
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, course_unit)
 
+        try:
+            instructor_icon = (
+                course_unit.course.addedBy.instructor.icon_url or
+                static('img/avatar-teacher.jpg')
+            )
+        except AttributeError:
+            instructor_icon = static('img/avatar-teacher.jpg')
+
         return render(
             request,
             'chat/main_view.html',
@@ -352,6 +412,7 @@ class InitializeLiveSession(ChatInitialView):
                 'chat_id': chat.id,
                 'chat': chat,
                 'course': course_unit.course,
+                'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,
                 'small_img_url': unit.small_img_url,
@@ -365,3 +426,24 @@ class InitializeLiveSession(ChatInitialView):
                 'fsmstate': chat.state,
             }
         )
+
+
+class TestChatInitialView(ChatInitialView):
+    def create_chat(self, enroll_code, courseUnit):
+        chat = Chat(
+            user=self.request.user,
+            enroll_code=enroll_code,
+            instructor=courseUnit.course.addedBy,
+            is_test=True
+        )
+        chat.save(self.request)
+        return chat
+
+    def check_course_unit_not_published(self, courseUnit):
+        return not courseUnit.course.invite_set.filter(
+            models.Q(user=self.request.user) | models.Q(email=self.request.user.email),
+        ) and not User.objects.filter(
+            id=self.request.user.id,
+            role__role=Role.INSTRUCTOR,
+            role__course=courseUnit.course
+        ).exists()

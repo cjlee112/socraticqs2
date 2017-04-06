@@ -1,25 +1,28 @@
-{% extends 'ctms/ctms_base.html' %}
+{% extends "ctms_base.html" %}
 
 {% block title %}
-Create new courslet
+  Create Courselet
 {% endblock %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h5><a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a></h5>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Create Courselet</h1>
+    </header>
 
-{% if courslet %}
-<div class="text-center">
-  <h6>Courslet</h6>
-  <h4><a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courslet.id %}">{{ courslet.unit.title }}</a></h4>
-</div>
-{% endif %}
-
-<form action="" method="POST">
-  {{ form.as_p }}
-  {% csrf_token %}
-  <input type="submit" value="Save">
-</form>
+    <main class="card__content">
+      <form action="" method="POST">
+        {% csrf_token %}
+        {{ form.title.label_tag }}
+        <p>Your students will see this, so give your courselet a descriptive name.</p>
+          {{ form.title }}
+          {% if form.title.errors %}
+            {% for error in form.title.erros%}
+              {{ error }}
+            {% endfor %}
+          {% endif %}
+        <input type="submit" value="Create Courselet">
+      </form>
+    </main>
+  </div>
 {% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'ctms/ctms_base.html' %}
+
+{% block title %}
+Create new shared course
+{% endblock %}
+
+{% block content %}
+<h4>Share</h4>
+
+<div class="col-md-6">
+  <h5>Invite tester</h5>
+  <form class="form" action="." method="POST">
+    {{ invite_tester_form.as_p }}
+    {% csrf_token %}
+    <input type="submit" value="Send invite">
+  </form>
+</div>
+
+<div class="col-md-6">
+  <h5>Invite student</h5>
+  <form class="form" action="." method="POST">
+    {{ invite_student_form.as_p }}
+    {% csrf_token %}
+    <input type="submit" value="Send invite">
+  </form>
+</div>
+
+{% with 'Testers' as list_name %}
+{% with invites.testers as objects %}
+{% include 'ctms/includes/invites_list.html' %}
+{% endwith %}
+{% endwith %}
+
+
+{% with 'Students' as list_name %}
+{% with invites.students as objects %}
+{% include 'ctms/includes/invites_list.html' %}
+{% endwith %}
+{% endwith %}
+
+
+{% endblock %}

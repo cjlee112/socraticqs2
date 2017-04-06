@@ -2,9 +2,10 @@ from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
-    CreateUnitView, UnitView,
-    UpdateCourseView, DeleteCourseView, EditUnitView, ResponseView, UnitSettingsView, CoursletSettingsView,
-    CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView)
+    CreateUnitView, UnitView, EditUnitView, 
+    UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
+    CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
+    InvitesListView, TesterJoinCourseView, ResendInviteView, DeleteInviteView)
 
 urlpatterns = patterns(
     '',
@@ -43,14 +44,10 @@ urlpatterns = patterns(
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/new/?$',
         CreateUnitView.as_view(),
         name='unit_create'),
-    # edit unit
+    # unit edit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/edit/?$',
-        EditUnitView.as_view(),
-        name='unit_edit'),
-    # new unit edit
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/new_unit_edit/?$',
         AddUnitEditView.as_view(),
-        name='add_unit_edit'),
+        name='unit_edit'),
     # delete unit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/delete/?$',
         DeleteUnitView.as_view(),
@@ -70,9 +67,19 @@ urlpatterns = patterns(
         name='response_view'),
 
     # shares
-    url(r'^shared_course/$', SharedCoursesListView.as_view(),
+    url(r'^shared_courses/$', SharedCoursesListView.as_view(),
         name='shared_courses'),
+    # url(r'^share_course/$', CreateSharedCourseView.as_view(),
+    #     name='cr_share_course'),
 
+    url(r'^course/(?P<pk>\d+)/share_course/$', InvitesListView.as_view(),
+        name='share_course'),
+
+    url(r'^invites/?$', InvitesListView.as_view(), name='invites_list'),
+    url(r'^invites/(?P<code>\w+)/join/$', TesterJoinCourseView.as_view(), name='tester_join_course'),
+    url(r'^invites/(?P<code>\w+)/resend/$', ResendInviteView.as_view(), name='resend_invite'),
+    url(r'^invites/(?P<code>\w+)/delete/$', DeleteInviteView.as_view(), name='delete_invite'),
+    
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),

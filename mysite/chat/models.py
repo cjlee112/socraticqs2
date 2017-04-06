@@ -81,6 +81,7 @@ class Chat(models.Model):
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
     is_preview = models.BooleanField(default=False)
+    is_test = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
@@ -235,15 +236,17 @@ class EnrollUnitCode(models.Model):
     enrollCode = models.CharField(max_length=32, default=enroll_generator)
     courseUnit = models.ForeignKey(CourseUnit)
     isLive = models.BooleanField(default=False)
+    isPreview = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
-    def create_new(cls, course_unit, isLive):
+    def create_new(cls, course_unit, isLive, isPreview=False):
         enroll_code = EnrollUnitCode(
             courseUnit=course_unit,
             isLive=True,
+            isPreview=isPreview,
             enrollCode=uuid4().hex
         )
         enroll_code.save()
@@ -251,7 +254,7 @@ class EnrollUnitCode(models.Model):
 
     @classmethod
     def get_code(cls, course_unit, isLive=False, isPreview=False):
-        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive, chat__is_preview=isPreview)
+        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive, isPreview=isPreview)
         if cr:
             enroll_code.enrollCode = uuid4().hex
             enroll_code.isLive = isLive
@@ -261,16 +264,15 @@ class EnrollUnitCode(models.Model):
     @classmethod
     def get_code_for_user_chat(cls, course_unit, is_live, user, is_preview=False):
         # enroll = cls(course_unit=course_unit, isLive=is_live)
-        filter_kw = {}
-        if is_preview:
-            filter_kw['chat__is_preview'] = True
+        filter_kw = {'isPreview': is_preview}
+
         enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll
-        enroll = cls(courseUnit=course_unit, isLive=is_live)
+        enroll = cls(courseUnit=course_unit, isLive=is_live, isPreview=is_preview)
         enroll.save()
         if not enroll.enrollCode:
-            enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live)
+            enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live, isPreview=is_preview)
             enroll.save()
             return enroll
         return enroll
