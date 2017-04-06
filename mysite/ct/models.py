@@ -1142,6 +1142,9 @@ class CourseUnit(models.Model):
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
 
+    def __unicode__(self):
+        return "Course - {}, Unit - {}".format(self.course.title, self.unit.title)
+
 class Role(models.Model):
     'membership of a user in a course'
     INSTRUCTOR = 'prof'
