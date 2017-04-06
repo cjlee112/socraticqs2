@@ -39,7 +39,7 @@
             <tr>
               <td>
                 <div class="user-info">
-                  <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt="{{ answer.author.get_full_name }}" class="avatar">
+                  <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author.get_full_name }}" class="avatar">
                   <h3>{{ answer.author }}</h3>
                   <p>{{ answer.atime|date }}</p>
                 </div>
