@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('ct', '0020_auto_20170209_0518'),
         ('accounts', '0002_auto_20160411_1313'),
-        ('ctms', '0001_initial'),
+        ('ctms', '0002_auto_20170302_0658'),
     ]
 
     operations = [
