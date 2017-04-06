@@ -1,5 +1,6 @@
 from django import forms
 from django.forms.formsets import formset_factory
+from django.forms.models import modelformset_factory
 from django.forms.widgets import ChoiceFieldRenderer, RendererMixin, Select
 from ct.models import Course, Unit, Lesson, UnitLesson
 from django.contrib.sites.models import Site
@@ -75,7 +76,7 @@ class ErrorModelForm(forms.ModelForm):
         self.instance.addedBy = user
         return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
 
-ErrorModelFormSet = formset_factory(form=ErrorModelForm)
+ErrorModelFormSet = modelformset_factory(Lesson, form=ErrorModelForm, fields=('id', 'title', 'text'))
 
 
 class CreateCourseletForm(forms.ModelForm):

@@ -42,7 +42,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=False)
 
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(
@@ -60,8 +60,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 id=self.request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
-            ).exists()
-        )
+            ).exists())
 
     def get_will_learn_need_know(self, unit, courseUnit):
         """
@@ -248,7 +247,7 @@ class CourseletPreviewView(ChatInitialView):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
     @staticmethod
     def create_new_chat(request, enroll_code, courseUnit, **kwargs):
@@ -319,7 +318,7 @@ class InitializeLiveSession(ChatInitialView):
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
-        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isLive=True)
+        return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isLive=True, chat__is_preview=False)
 
     def get(self, request, **kwargs):
         '''
@@ -381,7 +380,8 @@ class InitializeLiveSession(ChatInitialView):
                 user=request.user,
                 instructor=course_unit.course.addedBy,
                 is_live=True,
-                enroll_code=enroll_code
+                enroll_code=enroll_code,
+                is_preview=False
             )
             chat.save(request)
 

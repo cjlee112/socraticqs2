@@ -41,7 +41,7 @@
       </form>
 
 
-      <form action="{% url 'ctms:course_delete' pk=object.id %}" class="card__delete" method="post">
+      <form action="{% url 'ctms:course_delete' pk=object.id %}" class="card__delete" method="post" onsubmit="return confirm('Are you sure want to delete course \n {{ object.title }}?')">
         {% csrf_token %}
 
         <input type="submit" value="Remove Course" class="button">
