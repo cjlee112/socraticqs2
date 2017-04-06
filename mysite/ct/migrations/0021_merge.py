@@ -8,12 +8,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('ct', '0020_auto_20170209_0518'),
+        ('ct', '0020_response_is_test'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='response',
-            name='is_test',
-            field=models.BooleanField(default=False),
-        ),
     ]

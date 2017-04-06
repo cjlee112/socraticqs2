@@ -4,7 +4,9 @@ from models import EnrollUnitCode, Chat, Message
 
 # Register your models here.
 
-admin.site.register(EnrollUnitCode)
+@admin.register(EnrollUnitCode)
+class EnrollUnitCodeAdmin(admin.ModelAdmin):
+    list_display = ('enrollCode', 'isLive', 'isPreview', 'courseUnit')
 admin.site.register(Chat)
 # admin.site.register(Message)
 
