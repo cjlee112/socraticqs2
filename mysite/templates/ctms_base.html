@@ -55,6 +55,7 @@
     {% block js %}
     {% endblock %}
 
+    <!-- TODO: Move this to an external js file -->
     <script>
       $(function(){
         // Mobile navigation
@@ -67,7 +68,14 @@
         });
       });
 
-      //
+      // Confirm on delete buttons
+      $('.button--delete').on('click', function(e) {
+        var text = $(this).data('confirm-text') || 'Are you sure?';
+
+        if(!window.confirm(text)) {
+          e.preventDefault();
+        }
+      })
     </script>
   </body>
 </html>

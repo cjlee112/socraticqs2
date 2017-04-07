@@ -40,7 +40,7 @@
       <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
         {% csrf_token %}
 
-        <input type="submit" value="Remove Courselet" class="button" onclick="return confirm('Do you really want to remove this courselet?')">
+        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
       </form>
     </main>
   </div>
