@@ -76,6 +76,7 @@ class Invite(models.Model):
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
     
     def send_mail(self, request, view):
+        from django.conf import settings
         try:
             send_mail(
                 "{} invited you in a course <{}> as {}".format(
@@ -86,7 +87,8 @@ class Invite(models.Model):
                 '<a href="{}{}">Click to open</a>'.format(Site.objects.get_current(request),
                                                           reverse('ctms:tester_join_course',
                                                                   kwargs={'code': self.code})),
-                'from@example.com',
+
+                settings.EMAIL_FROM,
                 [self.email],
                 fail_silently=True
             )

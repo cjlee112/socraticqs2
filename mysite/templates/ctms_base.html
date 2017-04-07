@@ -46,7 +46,13 @@
         </div>
       </header>
 
+      {% if messages %}
       <div class="page__messages">
+        {% for message in messages %}
+        <div class="alert alert-{%if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
         <!-- TODO: Add notifications here -->
 
         <!--
@@ -67,6 +73,7 @@
           </div>
         -->
       </div>
+      {% endif %}
 
       {% block content %}{% endblock %}
     </div>

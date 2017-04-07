@@ -8,6 +8,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
+from django.contrib import messages
 
 from chat.models import EnrollUnitCode
 
@@ -109,6 +110,9 @@ class FormSetBaseView(object):
     def formset_valid(self, formset):
         pass
 
+    def formset_invalid(self, formset):
+        pass
+
     def get_formset_prefix(self):
         """
         Returns the prefix to use for forms on this view
@@ -182,6 +186,7 @@ class CreateCourseView(NewLoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
         self.object = form.save()
+        messages.add_message(self.request, messages.SUCCESS, "Course successfully created")
         return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
 
 
@@ -205,6 +210,7 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
 
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
+        messages.add_message(self.request, messages.SUCCESS, "Course successfully updated")
         return super(UpdateCourseView, self).form_valid(form)
 
     def get_success_url(self):
@@ -228,6 +234,11 @@ class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('ctms:my_courses')
+
+    def delete(self, request, *args, **kwargs):
+        response = super(DeleteCourseView, self).delete(request, *args, **kwargs)
+        messages.add_message(self.request, messages.SUCCESS, "Course successfully deleted")
+        return response
 
 
 class SharedCoursesListView(NewLoginRequiredMixin, ListView):
@@ -316,6 +327,7 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
             addedBy=self.request.user,
             order=0,
         )
+        messages.add_message(self.request, messages.SUCCESS, "Courselet successfully created")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -343,6 +355,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
             'course': course,
             'courslet': courslet,
             'responses': self.object.response_set.all(),
+            'unit': self.get_object()
         })
         kwargs.update(self.kwargs)
         return kwargs
@@ -377,6 +390,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
         self.object.unit_lesson = unit_lesson
+        messages.add_message(self.request, messages.SUCCESS, "Unit successfully created")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -406,6 +420,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=True)
         # self.object.save()
+        messages.add_message(self.request, messages.SUCCESS, "Unit successfully updated")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -454,6 +469,11 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         })
         return kwargs
 
+    def form_valid(self, form):
+        response = super(CoursletSettingsView, self).form_valid(form)
+        messages.add_message(self.request, messages.SUCCESS, "Courselet successfully updated")
+        return response
+
 
 class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = CourseUnit
@@ -473,6 +493,11 @@ class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteV
             return reverse('ctms:course_view', kwargs={'pk': course.id})
         return reverse('ctms:my_courses')
 
+    def delete(self, request, *args, **kwargs):
+        response = super(CoursletDeleteView, self).delete(request, *args, **kwargs)
+        messages.add_message(self.request, messages.SUCCESS, "Courselet successfully deleted")
+        return response
+
 
 class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = UnitLesson
@@ -486,6 +511,11 @@ class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView)
                 'pk': courslet.id
             })
         return reverse('ctms:my_courses')
+
+    def delete(self, request, *args, **kwargs):
+        response = super(DeleteUnitView, self).delete(request, *args, **kwargs)
+        messages.add_message(self.request, messages.SUCCESS, "Unit successfully deleted")
+        return response
 
 
 class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -503,10 +533,10 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         kwargs.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
-            'courslet': self.get_courslet()
+            'courslet': self.get_courslet(),
+            'unit': self.get_object()
         })
         return kwargs
-
 
 
 class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
@@ -538,14 +568,26 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         if form.is_valid():
             if answer_form.is_valid():
                 answer = answer_form.save(self.object.unit, self.request.user, self.object)
+            else:
+                messages.add_message(request, messages.WARNING, "Please correct error in answer")
 
             response = self.form_valid(form)
 
             if not self.HANDLE_FORMSET:
+                messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
                 return response
 
-            if self.object.lesson.kind == Lesson.ORCT_QUESTION and formset.is_valid():
-                return self.formset_valid(formset)
+            if self.object.lesson.kind == Lesson.ORCT_QUESTION:
+                if formset.is_valid():
+                    messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+                    return self.formset_valid(formset)
+                else:
+                    return self.formset_invalid(formset)
+            else:
+                messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+
+        else:
+            messages.add_message(request, messages.WARNING, "Please correct errors below")
         context = {
             'course': self.get_course(),
             'courslet': self.get_courslet(),
@@ -556,6 +598,10 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         }
         context.update(self.kwargs)
         return self.render_to_response(context)
+
+    def formset_invalid(self, formset):
+        messages.add_message(self.request, messages.WARNING, "Please correct errors in Error Models section")
+        return self.render_to_response(self.get_context_data(formset=formset))
 
     def get_answer_form_kwargs(self):
         kwargs = {}
@@ -720,6 +766,17 @@ class SendInvite(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
             'course': self.get_course(),
         }
 
+    def form_valid(self, form):
+        response = super(SendInvite, self).form_valid(form)
+        messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
+        return response
+
+    def form_invalid(self, form):
+        response = super(SendInvite, self).form_invalid(form)
+        messages.add_message(self.request, messages.WARNING,
+                             "Invitation could not be sent because of errors listed below")
+        return response
+
 
 class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateView):
     model = Invite
@@ -753,8 +810,12 @@ class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View)
         invite.status = 'joined'
         invite.save()
         if invite.type == 'tester':
+            messages.add_message(self.request, messages.SUCCESS,
+                             "You just joined course as tester")
             return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
         elif invite.type == 'student':
+            messages.add_message(self.request, messages.SUCCESS,
+                             "You just joined course as student")
             return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
         else:
             raise Http404()
@@ -764,6 +825,8 @@ class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, code):
         invite = self.get_invite_by_code_request_or_404(code=code)
         response = invite.send_mail(self.request, self)
+        messages.add_message(self.request, messages.SUCCESS,
+                             "We just resent invitation to {}".format(invite.email))
         return response
 
 
@@ -781,3 +844,8 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
 
     def get_success_url(self):
         return reverse('ctms:share_course', kwargs={'pk': self.get_object().course.id})
+
+    def delete(self, request, *args, **kwargs):
+        response = super(DeleteInviteView, self).delete(request, *args, **kwargs)
+        messages.add_message(self.request, messages.SUCCESS, "Invite successfully deleted")
+        return response
