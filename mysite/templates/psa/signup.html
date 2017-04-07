@@ -20,42 +20,28 @@
     <form name="RegistrationForm" action="." method="post">
       {% csrf_token %}
 
-      <!-- TODO: Replace with real inputs
       {% for field in form %}
         {% if not field.is_hidden %}
+          {% if field.name == 'first_name' %}
+          <label>Name:</label>
+          <div class="row">
+            <div class="col-lg-6">
+              {{ field }}
+            </div>
+          {% elif field.name == 'last_name' %}
+            <div class="col-lg-6">
+              {{ field }}
+            </div>
+          </div>
+          {% else %}
           {{ field.label_tag }}
           {{ field }}
+          {% endif %}
           {{ field.errors }}
         {% else %}
         {{ field }}
         {% endif %}
       {% endfor %}
-      -->
-
-      <label>Email</label>
-      <input type="email">
-
-      <label>Repeat Email</label>
-      <input type="email">
-
-      <label>Name</label>
-      <div class="row">
-        <div class="col-lg-6">
-          <input type="text" placeholder="First name">
-        </div>
-
-        <div class="col-lg-6">
-          <input type="text" placeholder="Last name">
-        </div>
-      </div>
-
-      <label>Institution</label>
-      <p>We can help you with your integration once we know where you teach.</p>
-      <input type="text">
-
-      <label>Password</label>
-      <p>Create a password that is at least six characters long.</p>
-      <input type="password">
 
       <div class="auth-card__actions">
         <input type="submit" value="Sign Up">

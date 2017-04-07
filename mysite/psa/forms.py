@@ -19,8 +19,8 @@ class SignUpForm(forms.Form):
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
     email = forms.EmailField()
     email_confirmation = forms.EmailField()
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First name'}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     institution = forms.CharField()
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
@@ -54,6 +54,7 @@ class EmailLoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
 
     def get_user(self):
+        username = ''
         user = User.objects.filter(email=self.cleaned_data['email']).first()
         if not user:
             sec_mail = SecondaryEmail.objects.filter(
