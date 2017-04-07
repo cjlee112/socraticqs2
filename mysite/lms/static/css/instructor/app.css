@@ -371,6 +371,18 @@ a.sidebar__add {
   border-top: 1px solid #DDE2E6;
   border-bottom: 1px solid #DDE2E6;
   margin: 24px 0 0 0; }
+  .card section {
+    margin-top: 60px;
+    border-top: 1px solid #DDE2E6;
+    padding-top: 60px; }
+    .card section:first-of-type {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0; }
+    .card section h2 {
+      margin-top: 3px; }
+    .card section form {
+      margin-top: 45px; }
 
 .card__topbar {
   height: 96px;

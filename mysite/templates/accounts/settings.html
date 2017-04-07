@@ -2,154 +2,119 @@
 {% load social_tags %}
 
 {% block title %}
-Account settings page
+  Account Settings
 {% endblock %}
 
 {% block content %}
-{% if person and user.id == person.id %}
-
-<div class="buttons">
-  {% if user.is_authenticated  %}
-    <div class="user-details">
-      You are logged in as <code>{{ user.username }}</code>!
-    </div>
-  {% endif %}
-
-<div class="container-fluid UserForm" style="text-align: left">
-{% if user and not 'anonymous' in user.username %}
-  {% comment %}
-  <div class="container-fluid">
-    {% include 'psa/user_details.html' %}
-  </div>
-  {% endcomment %}
-  <form class="form-horizontal" name="" action="." method="post">
-
-    {% csrf_token %}
-    {% if user_form %}
-      {% for field in user_form %}
-        {% if not field.is_hidden %}
-        <div class="control-group">
-          {{ field.label_tag }}
-            <div class="controls">
-              {{ field.errors }}
-              {{ field }}
-            </div>
-        </div>
-        {% else %}
-          {{ field }}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
-
-
-    {% if email_form %}
-      {% for field in email_form %}
-        {% if not field.is_hidden %}
-        <div class="control-group">
-          {{ field.label_tag }}
-            <div class="controls">
-              {{ field.errors }}
-              {{ field }}
-            </div>
-        </div>
-        {% else %}
-          {{ field }}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
-    {% if instructor_form %}
-      {% for field in instructor_form %}
-        {% if not field.is_hidden %}
-        <div class="control-group">
-          {{ field.label_tag }}
-            <div class="controls">
-              {{ field.errors }}
-              {{ field }}
-            </div>
-        </div>
-        {% else %}
-          {{ field }}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn btn-primary">Update</button>
-        </div>
-    </div>
-    </form>
-  <br>
-
-  {% if password_form %}
-   <form class="form-horizontal" name="" action="." method="post">
-  {% csrf_token %}
-  {% for field in password_form %}
-    {% if not field.is_hidden %}
-    <div class="control-group">
-      {{ field.label_tag }}
-        <div class="controls">
-          {{ field.errors }}
-          {{ field }}
-        </div>
-    </div>
-    {% else %}
-      {{ field }}
-    {% endif %}
-  {% endfor %}
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn btn-primary">Update password</button>
-        </div>
-    </div>
-  </form>
-  {% endif %}
-  <br>
-  <h3>I want to delete my account</h3>
-  {% if delete_account_form %}
-  <form class="form-horizontal" name="" action="{% url 'accounts:delete' %}" method="post">
-  {% csrf_token %}
-    {% for field in delete_account_form %}
-    {% if not field.is_hidden %}
-    <div class="control-group">
-      <div class="controls">
-        {{ field.label_tag }}
-        {{ field.errors }}
-        {{ field }}
-      </div>
-    </div>
-    {% else %}
-      {{ field }}
-    {% endif %}
-  {% endfor %}
-    <br>
-    <div class="control-group">
-        <div class="controls">
-            <button type="submit" class="btn btn-danger">Delete my account</button>
-        </div>
-    </div>
-  </form>
-  {% endif %}
-
-{% endif %}
-
-
-  </div>
-
-
-
-  <div>
-    <a class="btn btn-primary" href="/new_logout/">
-      <i class="fa fa-sign-out"></i>
+  <div class="card">
+    <header class="card__topbar card__topbar--with-description">
+      <h1>Account Settings</h1>
       {% if user.is_authenticated %}
-      Logout
+        <p>
+          You are logged in as <em>{{ user.username }}</em>. <a href="/new_logout/">Log out</a>
+        </p>
       {% endif %}
-    </a>
-  </div>
-  </div>
+    </header>
 
-{% endif %}
+    <main class="card__content">
+      {% if person and user.id == person.id %}
+        {% if user and not 'anonymous' in user.username %}
+          {% comment %}
+            {% include 'psa/user_details.html' %}
+          {% endcomment %}
+
+          <section>
+            <h2>Personal Information</h2>
+
+            <form name="" action="." method="post">
+              {% csrf_token %}
+
+              {% if user_form %}
+                {% for field in user_form %}
+                  {% if not field.is_hidden %}
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% if email_form %}
+                {% for field in email_form %}
+                  {% if not field.is_hidden %}
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% if instructor_form %}
+                {% for field in instructor_form %}
+                  {% if not field.is_hidden %}
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              <input type="submit" value="Update">
+            </form>
+          </section>
+
+          <section>
+            <h2>Change Password</h2>
+
+            {% if password_form %}
+              <form name="" action="." method="post">
+                {% csrf_token %}
+
+                <!-- TODO: Add input for current password -->
+                {% for field in password_form %}
+                  {% if not field.is_hidden %}
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+
+                <input type="submit" value="Update Password">
+              </form>
+            {% endif %}
+          </section>
+
+          <section>
+            <h2>Delete Account</h2>
+            {% if delete_account_form %}
+              <form class="form-horizontal" name="" action="{% url 'accounts:delete' %}" method="post">
+                {% csrf_token %}
+
+                <!-- TODO: The confirm window onclick is enough? -->
+                <!-- {% for field in delete_account_form %}
+                  {% if not field.is_hidden %}
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %} -->
+
+                <input type="submit" value="Delete Account" class="button button--delete" data-confirm-text="Do you really want to delete your account?">
+              </form>
+            {% endif %}
+          </section>
+        {% endif %}
+      {% endif %}
+    </main>
+  </div>
 {% endblock %}
