@@ -1,0 +1,12 @@
+// Overrides the default Bootstrap styling http://getbootstrap.com/components/#alerts
+.alert {
+  padding: 12px 24px;
+  margin: 12px 0 0 0;
+}
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .alert {
+    padding: 12px 60px;
+  }
+}

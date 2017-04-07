@@ -43,6 +43,13 @@
   }
 }
 
+.page__messages {
+  .alert {
+    margin: 0;
+    border-top: 0;
+    border-radius: 0;
+  }
+}
 
 // Larger viewports
 @media (min-width: 1024px) {

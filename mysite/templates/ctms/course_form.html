@@ -33,9 +33,8 @@
 
         <label for="title">Course Name</label>
         <p>Give your course a descriptive name.</p>
-
-          {{ form.title.errors }}
-          {{ form.title }}
+        {{ form.title }}
+        {{ form.title.errors }}
 
         <input type="submit" value="Save">
       </form>

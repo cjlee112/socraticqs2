@@ -344,6 +344,11 @@ a.sidebar__add {
     float: left;
     margin-left: 18px; }
 
+.page__messages .alert {
+  margin: 0;
+  border-top: 0;
+  border-radius: 0; }
+
 @media (min-width: 1024px) {
   .page {
     padding-left: 308px;
@@ -671,5 +676,23 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .answer__answer {
   margin-top: 18px; }
+
+.alert {
+  padding: 12px 24px;
+  margin: 12px 0 0 0; }
+
+@media (min-width: 1024px) {
+  .alert {
+    padding: 12px 60px; } }
+.errorlist {
+  color: #a94442;
+  background: #f2dede;
+  border: 1px solid #ebccd1;
+  border-radius: 4px;
+  margin: 3px 0 0 0;
+  padding: 12px 18px;
+  list-style: none; }
+  .errorlist li {
+    display: block; }
 
 /*# sourceMappingURL=app.css.map */
