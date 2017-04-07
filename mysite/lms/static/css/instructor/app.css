@@ -546,7 +546,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     margin-left: 18px; } }
 .user-info {
   position: relative;
-  padding: 6px 0 0 48px; }
+  padding: 6px 0 0 48px;
+  min-height: 42px; }
   .user-info .avatar {
     position: absolute;
     top: 6px;
@@ -656,5 +657,19 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     border-radius: 4px;
     border-left: 1px solid #DDE2E6;
     border-right: 1px solid #DDE2E6; } }
+.answer .user-info {
+  margin-top: 15px; }
+
+.answer__back {
+  margin-top: 6px; }
+
+.answer__meta {
+  margin-top: 18px;
+  padding: 12px 0;
+  border-top: 1px solid #DDE2E6;
+  border-bottom: 1px solid #DDE2E6; }
+
+.answer__answer {
+  margin-top: 18px; }
 
 /*# sourceMappingURL=app.css.map */

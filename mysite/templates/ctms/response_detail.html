@@ -1,22 +1,50 @@
-{% extends "ctms_base.html" %}
+{% extends 'ctms_base.html' %}
+{% load staticfiles %}
 
 {% block content %}
-<div class="text-center">
-  <h6>Course</h6>
-  <h4><a href="{% url 'ctms:course_view' pk=object.course.id %}">{{ object.course.title }}</a></h4>
-  <hr>
-  <h5>Courslet</h5>
-  <h5><a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=courslet_pk%}">{{ object.unitLesson.unit.title }}</a></h5>
-  <h6>Added by {{ object.author}}</h6>
-</div>
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ courslet.unit.title }}</h1>
+  </header>
 
-<div class="text-center">
-  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}" class="btn btn-danger">Back to responses</a>
-</div>
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Edit</a>
+      </li>
 
-<h6>{{ object.atime|date }}</h6>
-<h5>User {{ object.author }} respond:</h5>
-<div class="userResponse">
-<span>{{ object.text }}</span>
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}" class="card__nav-active">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    <div class="answer">
+      <div class="answer__back">
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">&larr; All answers</a>
+      </div>
+
+      <div class="user-info">
+        <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author.get_full_name }}" class="avatar">
+        <!-- TODO: Answer and datetime is empty? -->
+        <h3>{{ answer.author }}</h3>
+        <p>{{ answer.atime|date }}</p>
+      </div>
+
+      <div class="answer__meta">
+        <!-- TODO: Add status here, e.g. still confused -->
+        <b>Status:</b> ?
+      </div>
+
+      <div class="answer__answer">
+        {{ object.text }}
+      </div>
+    </div>
+  </main>
 </div>
 {% endblock %}
