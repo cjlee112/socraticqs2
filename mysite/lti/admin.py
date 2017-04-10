@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.forms.models import ModelForm
 
-from lti.models import LTIUser, CourseRef, LtiConsumer, OutcomeService, GradedLaunch
+from lti.models import (
+    LTIUser, CourseRef, LtiConsumer, OutcomeService, GradedLaunch, LtiConsumer
+)
 
 
 class LtiConsumerForm(ModelForm):
@@ -50,3 +52,4 @@ admin.site.register(LTIUser, LTIUserAdmin)
 admin.site.register(CourseRef, CourseRefAdmin)
 admin.site.register(OutcomeService, OutcomeServiceAdmin)
 admin.site.register(GradedLaunch, GradedLaunchAdmin)
+admin.site.register(LtiConsumer, LtiConsumerAdmin)

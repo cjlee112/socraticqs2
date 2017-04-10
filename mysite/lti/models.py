@@ -84,14 +84,12 @@ class LTIUser(models.Model):
     """
     user_id = models.CharField(max_length=255, blank=False)
     consumer = models.CharField(max_length=64, blank=True)
-    # TODO uncomment for next release
     lti_consumer = models.ForeignKey(LtiConsumer, null=True)
     extra_data = models.TextField(max_length=1024, blank=False)
     django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
-    context_id = models.CharField(max_length=255)
 
     class Meta:  # pragma: no cover
-        unique_together = ('user_id', 'consumer', 'context_id')
+        unique_together = ('user_id', 'lti_consumer')
 
     def create_links(self):
         """
