@@ -855,3 +855,7 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
         response = super(DeleteInviteView, self).delete(request, *args, **kwargs)
         messages.add_message(self.request, messages.SUCCESS, "Invite successfully deleted")
         return response
+
+
+class EmailSentView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateView):
+    template_name = 'ctms/email_sent.html'
