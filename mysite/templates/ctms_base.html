@@ -108,6 +108,14 @@
         }
       });
 
+      // Expandable content
+      $('.expandable__toggle').on('click', function(e) {
+        e.preventDefault();
+
+        const content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
+        content.toggle();
+      });
+
       // Custom scrollbar in sidebar
       $('.sidebar__scroll-container').perfectScrollbar();
     </script>

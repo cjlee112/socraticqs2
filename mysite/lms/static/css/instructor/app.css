@@ -719,4 +719,10 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   .errorlist li {
     display: block; }
 
+.expandable__toggle {
+  cursor: pointer; }
+
+.expandable__content {
+  display: none; }
+
 /*# sourceMappingURL=app.css.map */

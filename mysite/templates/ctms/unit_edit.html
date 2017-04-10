@@ -36,32 +36,86 @@ Create new courslet
         {{ form.as_p }}
       -->
       {% if not pk %}
-      {{ form.title.label_tag }}
-      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
-      {{ form.title }}
+        {{ form.title.label_tag }}
+        <p>
+          Give your unit a descriptive name. This will show up as one unit in your students sidebar.
+        </p>
+        {{ form.title }}
       {% else %}
 
-      {{ form.unit_type.label_tag }}
-      <p>You can create interactive questions or passive introductions (without answers and self-assessment).</p>
-      {{ form.unit_type }}
+        {{ form.title.label_tag }}
+        <p>
+          Give your unit a descriptive name. This will show up as one unit in your students sidebar.
 
-      <!--<label for="question">Question</label>-->
-      <div class="text">
-        {{ form.text.label_tag }}
-        <p>Write your question here.</p>
-        {{ form.text }}
-      </div>
+          <span class="expandable">
+            <a class="expandable__toggle" href="#">How to name a unit</a>
 
-      <div class="answer">
-      {{ answer_form.answer.label_tag }}
-      <p>Write your answer here.</p>
-      {{ answer_form.answer }}
-      </div>
+            <span class="expandable__content">
+              <br>
+              Add a longer description here.
+            </span>
+          </span>
+        </p>
+        {{ form.label_tag }}
 
-      <!-- TODO: How should we add error models here? -->
-      <label for="error-models">Error Models <span>– optional</span></label>
-      <p>An error model explains a common misconception. Your students can select error models when they self-assess. <a href="">How to write a good error model</a></p>
+        {{ form.unit_type.label_tag }}
+        <p>
+          You can create interactive questions or passive introductions (without answers and self-assessment).
+        </p>
+        {{ form.unit_type }}
 
+        <div class="text">
+          {{ form.text.label_tag }}
+
+          <p>
+            Write your question here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good question</a>
+
+              <span class="expandable__content">
+                <br>
+                Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {{ form.text }}
+        </div>
+
+        <div class="answer">
+          {{ answer_form.answer.label_tag }}
+
+          <p>
+            Write your answer here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text. 
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good answer</a>
+
+              <span class="expandable__content">
+                <br>
+                Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {{ answer_form.answer }}
+        </div>
+
+        <!-- TODO: How should we add error models here? -->
+        <label for="error-models">Error Models <span>– optional</span></label>
+        <p>
+          An error model explains a common misconception. Your students can select error models when they self-assess.
+
+          <span class="expandable">
+            <a class="expandable__toggle" href="#">How to write a good error model</a>
+
+            <span class="expandable__content">
+              <br>
+              Add a longer description here.
+            </span>
+          </span>
+        </p>
 
       {% endif %}
 
@@ -70,21 +124,21 @@ Create new courslet
       {{ errors_formset.management_form }}
 
       {#% comment %#}
-      {% if errors_formset %}
-      <div class="errors_formset">
-        <h4>Error Models</h4>
-          {#{ errors_formset.management_form }#}
-          <div id="items-form-container">
-          {% for item_form in errors_formset %}
-            <div id="item-{{ forloop.counter0 }}">
-              {{ item_form.id }}
-              {{ item_form.as_p }}
-              {# <!-- or for crispy forms --> {% crispy item_form %} #}
+        {% if errors_formset %}
+        <div class="errors_formset">
+          <h4>Error Models</h4>
+            {#{ errors_formset.management_form }#}
+            <div id="items-form-container">
+            {% for item_form in errors_formset %}
+              <div id="item-{{ forloop.counter0 }}">
+                {{ item_form.id }}
+                {{ item_form.as_p }}
+                {# <!-- or for crispy forms --> {% crispy item_form %} #}
+              </div>
+            {% endfor %}
             </div>
-          {% endfor %}
-          </div>
-      </div>
-      {% endif %}
+        </div>
+        {% endif %}
       {#% endcomment %#}
 
       <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
