@@ -365,12 +365,12 @@ a.sidebar__add {
 
 @media (min-width: 1024px) {
   .page {
+    padding-top: 0;
     padding-left: 308px;
     padding-bottom: 60px; }
 
   .page__topbar {
-    left: 308px;
-    width: calc(100% - 308px); }
+    position: relative; }
 
   .page__topbar-inner {
     border-radius: 5px 0 0 0; }
