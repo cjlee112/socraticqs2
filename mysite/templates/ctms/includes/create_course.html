@@ -16,8 +16,8 @@
       <label for="name">Course Name</label>
       <p>Your students will see this, so give your course a descriptive name.</p>
 
-      {{ form.title.errors }}
       {{ form.title }}
+      {{ form.title.errors }}
 
       {% csrf_token %}
 
