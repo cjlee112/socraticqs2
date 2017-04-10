@@ -52,6 +52,11 @@ class CourseCoursletUnitMixin(object):
         kwargs.update(self.kwargs)
         return kwargs
 
+    def get_my_courses(self):
+        return Course.objects.filter(
+            models.Q(addedBy=self.request.user)
+        )
+
     def get_my_or_shared_with_me_courses(self):
         return Course.objects.filter(
             models.Q(addedBy=self.request.user) | (
@@ -152,6 +157,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
         shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
         courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         course_form = None
+        total_users = None
         if not my_courses and not shared_courses:
             course_form = CourseForm()
 
