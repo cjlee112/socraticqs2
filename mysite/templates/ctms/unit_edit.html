@@ -12,21 +12,21 @@ Create new courslet
 
   <!-- TODO: We don't need this if when new and edit are separate views -->
   {% if pk %}
-  <nav class="card__nav">
-    <ul>
-      <li>
-        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
-      </li>
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+        </li>
 
-      <li>
-        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
-      </li>
+        <li>
+          <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+        </li>
 
-      <li>
-        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
-      </li>
-    </ul>
-  </nav>
+        <li>
+          <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
   {% endif %}
 
   <main class="card__content">
@@ -35,37 +35,81 @@ Create new courslet
       <!-- TODO: Replace with real inputs
         {{ form.as_p }}
       -->
+
+      {% csrf_token %}
+
+      {{ errors_formset.management_form }}
+
       {% if not pk %}
         {{ form.title.label_tag }}
-        <p>
-          Give your unit a descriptive name. This will show up as one unit in your students sidebar.
-        </p>
+        <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
         {{ form.title }}
       {% else %}
 
-        {{ form.title.label_tag }}
-        <p>
-          Give your unit a descriptive name. This will show up as one unit in your students sidebar.
 
-          <span class="expandable">
-            <a class="expandable__toggle" href="#">How to name a unit</a>
 
-            <span class="expandable__content">
-              <br>
-              Add a longer description here.
+        <!-- TODO: Title/name label and input doesn't exist -->
+        <!-- Name -->
+        <div class="form-group">
+          {{ form.title.label_tag }}
+          <label>Name</label>
+
+          <p>
+            Give your unit a descriptive name. This will show up as one unit in your students sidebar.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to name a unit</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
             </span>
-          </span>
-        </p>
-        {{ form.label_tag }}
+          </p>
 
-        {{ form.unit_type.label_tag }}
-        <p>
-          You can create interactive questions or passive introductions (without answers and self-assessment).
-        </p>
-        {{ form.unit_type }}
+          {{ form.title }}
+          <input type="text">
+        </div>
 
-        <div class="text">
-          {{ form.text.label_tag }}
+
+
+        <!-- Unit type -->
+        <div class="form-group">
+          {{ form.unit_type.label_tag }}
+
+          <p>You can create interactive questions (with answers and self-assessment) or passive introductions.</p>
+
+          <div class="radio-list">
+            {{ form.unit_type }}
+          </div>
+        </div>
+
+
+
+        <!-- TODO: Introduction and question should be separate inputs, form.text is currently displayed twice -->
+        <!-- Introduction -->
+        <div class="form-group form-group--introduction">
+          <label>Introduction</label>
+
+          <p>
+            Write your introduction here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good introduction</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {{ form.text }}
+        </div>
+
+
+
+        <!-- Question -->
+        <div class="form-group form-group--question">
+          <label>Question</label>
 
           <p>
             Write your question here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
@@ -74,8 +118,7 @@ Create new courslet
               <a class="expandable__toggle" href="#">How to write a good question</a>
 
               <span class="expandable__content">
-                <br>
-                Add a longer description here.
+                <br> Add a longer description here.
               </span>
             </span>
           </p>
@@ -83,18 +126,20 @@ Create new courslet
           {{ form.text }}
         </div>
 
-        <div class="answer">
+
+
+        <!-- Answer -->
+        <div class="form-group form-group--answer">
           {{ answer_form.answer.label_tag }}
 
           <p>
-            Write your answer here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text. 
+            Write your answer here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
 
             <span class="expandable">
               <a class="expandable__toggle" href="#">How to write a good answer</a>
 
               <span class="expandable__content">
-                <br>
-                Add a longer description here.
+                <br> Add a longer description here.
               </span>
             </span>
           </p>
@@ -102,107 +147,114 @@ Create new courslet
           {{ answer_form.answer }}
         </div>
 
-        <!-- TODO: How should we add error models here? -->
-        <label for="error-models">Error Models <span>– optional</span></label>
-        <p>
-          An error model explains a common misconception. Your students can select error models when they self-assess.
 
-          <span class="expandable">
-            <a class="expandable__toggle" href="#">How to write a good error model</a>
 
-            <span class="expandable__content">
-              <br>
-              Add a longer description here.
+        <!-- Error models -->
+        <div class="form-group form-group--error-models">
+          <label>Error Models <span>– optional</span></label>
+
+          <p>
+            An error model explains a common misconception. Your students can select error models when they self-assess.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good error model</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
             </span>
-          </span>
-        </p>
+          </p>
 
+          {% if errors_formset %}
+            <div class="error-models-form">
+              {#{ errors_formset.management_form }#}
+
+              <div class="error-models-form__items">
+                {% for item_form in errors_formset %}
+                  <div id="item-{{ forloop.counter0 }}">
+                    {{ item_form.id }}
+                    {{ item_form.as_p }}
+                    {# <!-- or for crispy forms --> {% crispy item_form %} #}
+
+                    <!-- TODO: Add functionality for removing error models -->
+                    <a href="#" class="error-models-form__remove">Remove error model</a>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <a href="#" class="button error-models-form__add">Add Error Model</a>
+            </div>
+          {% endif %}
+        </div>
       {% endif %}
 
-      {% csrf_token %}
 
-      {{ errors_formset.management_form }}
 
-      {#% comment %#}
-        {% if errors_formset %}
-        <div class="errors_formset">
-          <h4>Error Models</h4>
-            {#{ errors_formset.management_form }#}
-            <div id="items-form-container">
-            {% for item_form in errors_formset %}
-              <div id="item-{{ forloop.counter0 }}">
-                {{ item_form.id }}
-                {{ item_form.as_p }}
-                {# <!-- or for crispy forms --> {% crispy item_form %} #}
-              </div>
-            {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-      {#% endcomment %#}
-
-      <a href="#" id="add-item-button" class="btn btn-info add-item">Add error model</a>
-      <br>
+      <!-- Submit -->
       <input type="submit" class="btn btn-primary" value="Save">
-  </form>
-</main>
+    </form>
+  </main>
+</div>
 {% endblock %}
+
 {% block js %}
-<script type="text/html" id="item-template">
-  <div id="item-__prefix__">
-      {{ errors_formset.empty_form.as_p }}
-      <!-- crispy: {#% crispy item_forms.empty_form item_forms.form.helper %#} -->
-  </div>
-</script>
+  <script>
+    // Courselets namespace
+    var Courselets = Courselets || {};
 
+    // Toggles inputs visibility based on unit type
+    Courselets.updateUnitType = function() {
+      // Get current unit type
+      var unitType = $("input[name=unit_type]:checked").val();
 
-<script>
-  $(document).ready(function(){
-    $(".errors_formset").hide();
+      // Question
+      if(unitType === "{{ unit.lesson.ORCT_QUESTION }}") {
+        $(".form-group--question, .form-group--answer, .form-group--error-models").show();
+        $(".form-group--introduction").hide();
 
-    if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-      $(".answer,.errors_formset").show();
-      $("#add-item-button").addClass('active').removeClass('disabled');
-    } else {
-      $(".errors_formset").hide();
-      $(".answer").hide();
-      $("#add-item-button").addClass('disabled').removeClass('active');
+      // Introduction
+      } else if(unitType === "{{ unit.lesson.EXPLANATION }}") {
+        $(".form-group--introduction").show();
+        $(".form-group--question, .form-group--answer, .form-group--error-models").hide();
+      }
     };
 
-    $("input[name='unit_type']").change(function(){
-      if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-          $(".errors_formset").toggle();
-          $(".answer").toggle();
-          $("#add-item-button").addClass('active').removeClass('disabled');
-      } else {
-        $("#add-item-button").addClass('disabled').removeClass('active');
-        $(".errors_formset,.answer").hide();
-      }
-      // $('html, body').animate({
-      //    scrollTop: $(".errors_formset").position().top-200
-      // }, 800);
-    });
-  });
-</script>
-<script>
-  $(document).ready(function() {
-    $('.add-item').click(function(ev) {
-        if($("input[name='unit_type']:checked").val() == "{{ unit.lesson.ORCT_QUESTION }}") {
-          ev.preventDefault();
-          var count = $('#items-form-container').children().length;
-          var tmplMarkup = $('#item-template').html();
-          var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
-          $('div#items-form-container').append(compiledTmpl);
+    // Init the form once the document is ready
+    $(function(){
+      // Update form based on the current unit type
+      Courselets.updateUnitType();
 
-          // update form count
-          $('#id_form-TOTAL_FORMS').attr('value', count+1);
+      // Listen to unit type changes
+      $("input[name='unit_type']").on('change', function(){
+        Courselets.updateUnitType();
+      });
 
-          // some animate to scroll to view our new form
-          $('html, body').animate({
-            scrollTop: $("#add-item-button").position().top-200
-          }, 800);
-        }
+      // Listen to new error model button
+      $('.error-models-form__add').on('click', function(e) {
+        e.preventDefault();
+
+        // Add new error model inputs
+        var count = $('.error-models-form__items').children().length;
+        var tmplMarkup = $('#item-template').html();
+        var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+        $('.error-models-form__items').append(compiledTmpl);
+
+        // Update form count
+        $('#id_form-TOTAL_FORMS').attr('value', count+1);
+
+        // Animate scroll to the new form
+        $('html, body').animate({
+          scrollTop: $('.error-models-form__items div:last-of-type').offset().top - 84
+        }, 800);
       });
     });
-</script>
+  </script>
+
+  <!-- Error model template -->
+  <script type="text/html" id="item-template">
+    <div id="item-__prefix__">
+      {{ errors_formset.empty_form.as_p }}
+      <!-- crispy: {#% crispy item_forms.empty_form item_forms.form.helper %#} -->
+    </div>
+  </script>
 {% endblock %}

@@ -13,9 +13,10 @@
 // Base
 @import 'base/variables';
 @import 'base/mixins';
-@import 'base/elements';
+@import 'base/elements'; // This file should only style native html elements, i.e. no classes or ids
 
 // Components
+@import 'components/bootstrap';
 @import 'components/sidebar';
 @import 'components/page';
 @import 'components/card';
@@ -30,3 +31,6 @@
 @import 'components/alert';
 @import 'components/errorlist';
 @import 'components/expandable';
+@import 'components/form-group';
+@import 'components/radio-list';
+@import 'components/error-models-form';

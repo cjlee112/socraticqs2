@@ -144,6 +144,10 @@ label {
   &:first-of-type {
     margin-top: 0;
   }
+
+  span {
+    color: #7F7F7F;
+  }
 }
 
 label + p {
@@ -168,7 +172,7 @@ input[type=text], input[type=password], input[type=email], textarea {
 }
 
 textarea {
-  height: 144px;
+  height: 300px;
   padding: 24px;
 }
 
@@ -194,13 +198,4 @@ input[type=submit] {
     opacity: 0.6;
     outline: 0;
   }
-}
-
-.checkbox, .radio, .checkbox-inline, .radio-inline {
-  margin: 12px 0 0 0;
-  color: $color-text-primary;
-}
-
-.checkbox-inline + .checkbox-inline, .radio-inline + .radio-inline {
-  margin: 12px 0 0 12px;
 }
