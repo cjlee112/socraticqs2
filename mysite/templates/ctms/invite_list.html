@@ -1,42 +1,88 @@
-{% extends 'ctms_base.html' %}
+{% extends "ctms_base.html" %}
 
 {% block title %}
-Create new shared course
+  Share {{ object.title }}
 {% endblock %}
 
 {% block content %}
-<h4>Share</h4>
 
-<div class="col-md-6">
-  <h5>Invite tester</h5>
-  <form class="form" action="." method="POST">
-    {{ invite_tester_form.as_p }}
-    {% csrf_token %}
-    <input type="submit" value="Send invite">
-  </form>
-</div>
+  <div class="card">
+    <header class="card__topbar">
+      <!-- TODO: Add course name -->
+      <h1>Course Name</h1>
+    </header>
 
-<div class="col-md-6">
-  <h5>Invite student</h5>
-  <form class="form" action="." method="POST">
-    {{ invite_student_form.as_p }}
-    {% csrf_token %}
-    <input type="submit" value="Send invite">
-  </form>
-</div>
+    <!-- TODO: Add real links -->
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="#">Courselets</a>
+        </li>
 
-{% with 'Testers' as list_name %}
-{% with invites.testers as objects %}
-{% include 'ctms/includes/invites_list.html' %}
-{% endwith %}
-{% endwith %}
+        <li>
+          <a href="#" class="card__nav-active">Share</a>
+        </li>
 
+        <li>
+          <a href="#">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="card__sub">
+      <header class="card__topbar">
+        <h2>Share</h2>
+      </header>
+
+      <!-- TODO: Add real links -->
+      <nav class="card__nav">
+        <ul>
+          <li>
+            <a href="#">Invite Students</a>
+          </li>
+
+          <li>
+            <a href="#" class="card__nav-active">Invite Testers</a>
+          </li>
+        </ul>
+      </nav>
+    </section>
+
+    <main class="card__content">
+      <p>How to invite testers... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>
+
+      <form class="form" action="." method="POST">
+        {% csrf_token %}
+
+        <div class="input-with-button">
+          <!-- {{ invite_tester_form.as_p }} -->
+          <input type="text" placeholder="Email address">
+
+          <input type="submit" value="Invite">
+        </div>
+
+      </form>
+
+      {% with 'Tester' as list_name %}
+        {% with invites.testers as objects %}
+          {% include 'ctms/includes/invites_list.html' %}
+        {% endwith %}
+      {% endwith %}
+    </main>
+  </div>
+{% endblock %}
+
+<!-- Invite Students
+<h5>Invite student</h5>
+<form class="form" action="." method="POST">
+  {{ invite_student_form.as_p }}
+  {% csrf_token %}
+  <input type="submit" value="Send invite">
+</form>
 
 {% with 'Students' as list_name %}
 {% with invites.students as objects %}
 {% include 'ctms/includes/invites_list.html' %}
 {% endwith %}
 {% endwith %}
-
-
-{% endblock %}
+-->

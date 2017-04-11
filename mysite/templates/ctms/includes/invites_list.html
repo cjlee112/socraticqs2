@@ -1,37 +1,38 @@
-<table class="table">
+<table>
   <thead>
-    <th>{{ list_name }}</th>
-    <th></th>
-    <th></th>
-    <th>Status</th>
-    <th></th>
+    <tr>
+      <th>{{ list_name }}</th>
+      <th>Status</th>
+      <th></th>
+      <th></th>
+    </tr>
   </thead>
+
   <tbody>
     {% for obj in objects %}
-    <tr>
-      <td>
-        {{ obj.email }}
-      </td>
-      <td>
-        <a href="{% url 'ctms:tester_join_course' code=obj.code %}">open course</a>
-      </td>
-      <td>
-        <form action="{% url 'ctms:resend_invite' code=obj.code %}" method="POST">
-          {% csrf_token %}
-          <input type="submit" value="Send new invite">
-        </form>
-      </td>
-      <td>
-        {{ obj.status }}
-      </td>
-      <td>
-        <form action="{% url 'ctms:delete_invite' code=obj.code %}" method="post">
-          {% csrf_token %}
-          <input type="submit" value="Remove" class="btn btn-danger">
-        </form>
-      </td>
-    </tr>
+      <tr>
+        <td>
+          {{ obj.email }}
+        </td>
 
+        <td>
+          {{ obj.status }}
+        </td>
+
+        <td>
+          <form action="{% url 'ctms:resend_invite' code=obj.code %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="Send new invite">
+          </form>
+        </td>
+
+        <td>
+          <form action="{% url 'ctms:delete_invite' code=obj.code %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Remove" class="btn btn-danger">
+          </form>
+        </td>
+      </tr>
     {% endfor %}
   </tbody>
 </table>

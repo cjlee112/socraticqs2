@@ -96,6 +96,22 @@
   }
 }
 
+.card__sub {
+  position: relative;
+
+  .card__topbar {
+    height: 60px;
+    padding: 18px 24px;
+
+    h2 {
+      @include ellipsis;
+      font-size: 16px;
+      line-height: 24px;
+      margin: 0;
+    }
+  }
+}
+
 .card__content {
   position: relative;
   padding: 48px 24px;
@@ -146,6 +162,21 @@
     a {
       padding-top: 39px;
       padding-bottom: 33px;
+    }
+  }
+
+  .card__sub {
+    .card__topbar {
+      padding: 18px 24px 18px 60px;
+    }
+
+    .card__nav {
+      height: 60px;
+
+      a {
+        padding-top: 19px;
+        padding-bottom: 17px;
+      }
     }
   }
 

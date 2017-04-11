@@ -459,6 +459,19 @@ a.sidebar__add {
         opacity: 1;
         visibility: visible; }
 
+.card__sub {
+  position: relative; }
+  .card__sub .card__topbar {
+    height: 60px;
+    padding: 18px 24px; }
+    .card__sub .card__topbar h2 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 16px;
+      line-height: 24px;
+      margin: 0; }
+
 .card__content {
   position: relative;
   padding: 48px 24px; }
@@ -493,6 +506,14 @@ a.sidebar__add {
     .card__nav a {
       padding-top: 39px;
       padding-bottom: 33px; }
+
+  .card__sub .card__topbar {
+    padding: 18px 24px 18px 60px; }
+  .card__sub .card__nav {
+    height: 60px; }
+    .card__sub .card__nav a {
+      padding-top: 19px;
+      padding-bottom: 17px; }
 
   .card__content {
     padding: 60px;
@@ -802,5 +823,18 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   transition: all 0.2s; }
   .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
     color: #43B02A; }
+
+.input-with-button {
+  position: relative;
+  margin-top: 30px; }
+  .input-with-button input[type=text], .input-with-button input[type=password], .input-with-button input[type=email] {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    height: 56px; }
+  .input-with-button .button, .input-with-button input[type=submit], .input-with-button button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    margin: 0; }
 
 /*# sourceMappingURL=app.css.map */
