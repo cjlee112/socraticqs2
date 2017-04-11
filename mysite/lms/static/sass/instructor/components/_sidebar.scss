@@ -74,7 +74,7 @@
     span:first-child {
       @include ellipsis;
       display: inline-block;
-      max-width: calc(100% - 42px);
+      max-width: calc(100% - 66px);
       vertical-align: middle;
     }
 

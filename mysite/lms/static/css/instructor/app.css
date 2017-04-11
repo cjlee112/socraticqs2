@@ -223,7 +223,7 @@ input[type=submit] {
       overflow: hidden;
       text-overflow: ellipsis;
       display: inline-block;
-      max-width: calc(100% - 42px);
+      max-width: calc(100% - 66px);
       vertical-align: middle; }
     .sidebar .dropdown-toggle .sidebar__arrow {
       display: inline-block;
@@ -440,12 +440,24 @@ a.sidebar__add {
     color: #333;
     font-size: 14px;
     line-height: 24px;
-    padding: 12px 15px 10px 15px;
-    border-bottom: 2px solid transparent;
+    padding: 12px 15px;
     transition: all 0.2s; }
+    .card__nav a:before {
+      content: '';
+      visibility: hidden;
+      opacity: 0;
+      background: #43B02A;
+      width: calc(100% - 30px);
+      height: 2px;
+      position: absolute;
+      bottom: 0;
+      left: 15px;
+      transition: all 0.2s; }
     .card__nav a.card__nav-active, .card__nav a:hover, .card__nav a:active, .card__nav a:focus {
-      color: #43B02A;
-      border-bottom: 2px solid #43B02A; }
+      color: #43B02A; }
+      .card__nav a.card__nav-active:before, .card__nav a:hover:before, .card__nav a:active:before, .card__nav a:focus:before {
+        opacity: 1;
+        visibility: visible; }
 
 .card__content {
   position: relative;
@@ -480,7 +492,7 @@ a.sidebar__add {
       overflow: auto; }
     .card__nav a {
       padding-top: 39px;
-      padding-bottom: 31px; }
+      padding-bottom: 33px; }
 
   .card__content {
     padding: 60px;

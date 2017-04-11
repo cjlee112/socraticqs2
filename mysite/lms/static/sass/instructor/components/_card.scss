@@ -69,13 +69,29 @@
     color: #333;
     font-size: 14px;
     line-height: 24px;
-    padding: 12px 15px 10px 15px;
-    border-bottom: 2px solid transparent;
+    padding: 12px 15px;
     transition: all 0.2s;
+
+    &:before {
+      content: '';
+      visibility: hidden;
+      opacity: 0;
+      background: $color-primary;
+      width: calc(100% - 30px);
+      height: 2px;
+      position: absolute;
+      bottom: 0;
+      left: 15px;
+      transition: all 0.2s;
+    }
 
     &.card__nav-active, &:hover, &:active, &:focus {
       color: $color-primary;
-      border-bottom: 2px solid $color-primary;
+
+      &:before {
+        opacity: 1;
+        visibility: visible;
+      }
     }
   }
 }
@@ -129,7 +145,7 @@
 
     a {
       padding-top: 39px;
-      padding-bottom: 31px;
+      padding-bottom: 33px;
     }
   }
 
