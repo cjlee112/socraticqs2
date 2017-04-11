@@ -180,8 +180,7 @@ input[type=submit] {
     width: 100%;
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
-    height: 61px;
-    padding-left: 50px; }
+    height: 61px; }
     .sidebar header:before, .sidebar header:after {
       content: " ";
       display: table; }
@@ -329,7 +328,6 @@ a.sidebar__add {
     display: block !important;
     width: 308px; }
     .sidebar header {
-      padding-left: 0;
       width: 308px; } }
 .page {
   padding-top: 61px;
@@ -350,11 +348,11 @@ a.sidebar__add {
 
 .page__account {
   display: block;
-  float: right;
+  float: left;
   line-height: 60px;
   height: 60px;
   color: #333;
-  padding-right: 15px; }
+  padding-left: 24px; }
   .page__account:hover, .page__account:active, .page__account:focus {
     color: #333;
     opacity: 0.6; }
@@ -384,6 +382,8 @@ a.sidebar__add {
     border-radius: 5px 0 0 0; }
 
   .page__account {
+    float: right;
+    padding-left: 0;
     padding-right: 72px; }
     .page__account span {
       display: block; } }
@@ -537,7 +537,7 @@ a.sidebar__add {
   width: 60px;
   height: 60px;
   top: 0;
-  left: 7px;
+  right: 7px;
   z-index: 102;
   cursor: pointer; }
   .hamburger:before, .hamburger:after {
@@ -545,7 +545,7 @@ a.sidebar__add {
     display: block;
     position: absolute;
     top: 25px;
-    left: 18px;
+    right: 18px;
     width: 24px;
     height: 1px;
     background: #333;

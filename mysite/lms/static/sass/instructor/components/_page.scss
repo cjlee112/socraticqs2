@@ -20,11 +20,11 @@
 
 .page__account {
   display: block;
-  float: right;
+  float: left;
   line-height: 60px;
   height: 60px;
   color: #333;
-  padding-right: 15px;
+  padding-left: 24px;
 
   &:hover, &:active, &:focus {
     color: #333;
@@ -68,6 +68,8 @@
   }
 
   .page__account {
+    float: right;
+    padding-left: 0;
     padding-right: 72px;
 
     span {
