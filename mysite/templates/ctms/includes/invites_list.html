@@ -16,7 +16,10 @@
         <a href="{% url 'ctms:tester_join_course' code=obj.code %}">open course</a>
       </td>
       <td>
-        <a href="">Send new invite</a>
+        <form action="{% url 'ctms:resend_invite' code=obj.code %}" method="POST">
+          {% csrf_token %}
+          <input type="submit" value="Send new invite">
+        </form>
       </td>
       <td>
         {{ obj.status }}

@@ -87,7 +87,7 @@ class TesterCourseView(NewLoginRequiredMixin, CourseView):
         return (
             (
                 courselet,
-                EnrollUnitCode.get_code(courselet),
+                EnrollUnitCode.get_code(courselet, isTest=True),
                 len(courselet.unit.get_exercises())
             )
             for courselet in course.get_course_units(False)
