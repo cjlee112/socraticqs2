@@ -176,7 +176,7 @@ class SideBarMiddleware(SideBarUtils):
             sidebar_context = {}
             # add request to mixin
             self.course_mixin.request = request
-            my_courses = self.course_mixin.get_my_or_shared_with_me_courses()
+            my_courses = self.course_mixin.get_my_courses()
             sidebar_context['user_courses'] = my_courses
 
             for model, name in MODEL_NAMES_MAPPING.items():

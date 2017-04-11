@@ -1,0 +1,27 @@
+{% extends "ctms_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <div class="auth-card">
+    <header>
+      <h1>Check your email</h1>
+    </header>
+
+    <main class="auth-card__content">
+      <p>{% trans "We've emailed you! You should receive it shortly." %}</p>
+
+      <p>{% trans "If you don't receive an email, please make sure you've entered the address you registered with, and check your spam folder." %}</p>
+
+      <div class="auth-card__actions">
+
+        <a href="{% url 'new_login' %}">Log in</a>
+        <span>|</span>
+        <a href="{% url 'signup' %}">Sign up</a>
+        <span>|</span>
+        <a href="{% url 'accounts:password_reset' %}">Forgot password</a>
+      </div>
+    </main>
+  </div>
+{% endblock %}
