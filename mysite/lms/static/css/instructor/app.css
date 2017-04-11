@@ -765,4 +765,22 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   display: inline-block;
   margin-top: 12px; }
 
+.dropdown-menu {
+  width: 260px;
+  border-radius: 5px;
+  padding: 12px 0;
+  margin: 6px 0; }
+
+.dropdown-menu > li > a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 6px 24px;
+  color: #333;
+  transition: all 0.2s; }
+  .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
+    color: #43B02A; }
+
 /*# sourceMappingURL=app.css.map */
