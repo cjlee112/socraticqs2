@@ -155,13 +155,19 @@
 
   a {
     @include ellipsis;
+    position: relative;
     display: block;
     color: #B1B0B9;
     line-height: 30px;
+    padding-left: 22px;
     padding-right: 48px;
+    margin-left: -24px;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
 
-    &:hover, &:active, &:focus {
-      opacity: 0.6;
+    &:hover, &:active, &:focus, &.sidebar__units__active {
+      color: #B1B0B9;
+      border-left: 2px solid $color-primary;
     }
   }
 }
@@ -171,12 +177,14 @@ a.sidebar__add {
   color: #8C8A98;
   font-size: 12px;
   line-height: 30px;
-  padding-left: 30px;
-  background: url(../../img/instructor/sidebar-add.svg) no-repeat left center;
+  padding-left: 54px;
+  background: url(../../img/instructor/sidebar-add.svg) no-repeat 24px center;
   margin-top: 6px;
   margin-bottom: -6px;
+  border-left: 0;
 
   &:hover, &:active, &:focus {
+    border-left: 0;
     color: #B1B0B9;
     opacity: 1;
   }
