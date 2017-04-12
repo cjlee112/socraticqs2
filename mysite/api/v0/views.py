@@ -50,16 +50,24 @@ class ErrorViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class GenReportView(APIView):
     """
-    Start report Celery task for course_id.
+    Start `report` Celery task for `course_id`.
     """
+    authentication_classes = (SessionAuthentication,)
+
     def get(self, request, format=None):
-        report.delay(request.GET.get('course_id'))
+        course_id = request.GET.get('course_id')
+        if not course_id:
+            return RestResponse('course_id is not provided', status=400)
+        course = get_object_or_404(Course, id=course_id)
+        if not course.addedBy == request.user:
+            return RestResponse('action is not allowed', status=403)
+        report.delay(course_id)
         return RestResponse(status=200)
 
 
 class CourseReportViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
     """
-    Django RestFramework class to return CourseReports for current Course.
+    Returns CourseReports for current Course.
     """
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsInstructor,)

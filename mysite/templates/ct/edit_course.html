@@ -66,11 +66,14 @@ $(function() {
   $('.gen-report').on('click', function (){
       $.get(
           "{% url 'api:v0:gen-report' %}",
-          data={"course_id": {{ course.id }}},
-          function() {
-              $.notify('New report is about to start and will be completed soon.', "info");
-          }
-      );
+          data={"course_id": {{ course.id }}}
+      )
+      .done(function () {
+          $.notify('New report is about to start and will be completed soon.', "info");
+      })
+      .error(function (error) {
+          $.notify('Something went wrong: ' + error.responseText, "error");
+      });
   });
 });
 </script>
