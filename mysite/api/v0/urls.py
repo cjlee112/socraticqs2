@@ -1,7 +1,7 @@
 """ API v0 URLs. """
 from django.conf.urls import url
 
-from .views import ResponseViewSet, ErrorViewSet
+from .views import ResponseViewSet, ErrorViewSet, GenReportView, CourseReportViewSet
 
 
 urlpatterns = [
@@ -15,4 +15,15 @@ urlpatterns = [
         ErrorViewSet.as_view({'get': 'list'}),
         name='errors'
     ),
+    url(
+        r'^courses/(?P<course_id>\d+)/reports/$',
+        CourseReportViewSet.as_view({'get': 'list'}),
+        name='reports'
+    ),
+    url(
+        r'^gen-report/$',
+        GenReportView.as_view(),
+        name='gen-report'
+    ),
+
 ]

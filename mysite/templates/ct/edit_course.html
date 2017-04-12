@@ -1,6 +1,6 @@
 {% extends "ct/portal.html" %}
-{% load crispy_forms_tags %}
-{% load ct_extras %} 
+{% load crispy_forms_tags static %}
+{% load ct_extras %}
 
 {% comment %}
   Show materials relevant for a given concept
@@ -36,12 +36,42 @@ Copy course URL
 
 <hr>
 <p>
-Added by: {{ course.addedBy.get_full_name }}, 
+Added by: {{ course.addedBy.get_full_name }},
           {{ course.atime|display_datetime }}
 </p>
 
 
   </div><!-- @end #EditTabDiv -->
 </div>
-{% endblock %}
 
+<div class="analytics">
+{% if reports %}
+<hr>
+<h2>Reports</h2>
+    {% for report in reports %}
+    <ul>
+        <li>
+            <a href='{% static report.response_report.url %}'>Download</a>
+            report from {{ report.date }}
+        </li>
+    </ul>
+    {% endfor %}
+{% endif %}
+<button type="button" name="button" class="btn gen-report">Generate</button>
+</div>
+<hr>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+<script type="text/javascript">
+$(function() {
+  $('.gen-report').on('click', function (){
+      $.get(
+          "{% url 'api:v0:gen-report' %}",
+          data={"course_id": {{ course.id }}},
+          function() {
+              $.notify('New report is about to start and will be completed soon.', "info");
+          }
+      );
+  });
+});
+</script>
+{% endblock %}

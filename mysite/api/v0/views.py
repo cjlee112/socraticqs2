@@ -1,10 +1,14 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response as RestResponse
 
-from ..serializers import ResponseSerializer, ErrorSerializer
+from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 from ..permissions import IsInstructor
 from ct.models import Response, StudentError, Course
+from analytics.tasks import report
+from analytics.models import CourseReport
 
 
 class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -42,3 +46,30 @@ class ErrorViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
         )
         queryset = super(ErrorViewSet, self).get_queryset()
         return queryset.filter(response__course__id=self.kwargs.get('course_id'))
+
+
+class GenReportView(APIView):
+    """
+    Start report Celery task for course_id.
+    """
+    def get(self, request, format=None):
+        report.delay(request.GET.get('course_id'))
+        return RestResponse(status=200)
+
+
+class CourseReportViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    Django RestFramework class to return CourseReports for current Course.
+    """
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsInstructor,)
+    queryset = CourseReport.objects.all()
+    serializer_class = CourseReportSerializer
+
+    def get_queryset(self):
+        course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
+        self.check_object_permissions(
+            self.request, course
+        )
+        queryset = super(CourseReportViewSet, self).get_queryset()
+        return queryset.filter(course=course)

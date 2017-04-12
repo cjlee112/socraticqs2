@@ -29,6 +29,7 @@ from fsm.models import FSM, FSMState
 from fsm.mixins import KLASS_NAME_DICT
 from chat.models import EnrollUnitCode
 from ct.exceptions import CommonDisambiguationError
+from analytics.models import CourseReport
 
 
 ###########################################################
@@ -383,9 +384,16 @@ def course_view(request, course_id):
     if showReorderForm:
         for cu in unitTable:
             cu.reorderForm = ReorderForm(cu.order, len(unitTable))
-    return pageData.render(request, 'ct/course.html',
-                  dict(course=course, courseletform=courseletform,
-                       unitTable=unitTable, showReorderForm=showReorderForm))
+    return pageData.render(
+        request,
+        'ct/course.html',
+        dict(
+            course=course,
+            courseletform=courseletform,
+            unitTable=unitTable,
+            showReorderForm=showReorderForm,
+        )
+    )
 
 @login_required
 def edit_course(request, course_id):
@@ -407,9 +415,16 @@ def edit_course(request, course_id):
     else:
         courseform = CourseTitleForm(instance=course)
     set_crispy_action(request.path, courseform)
-    return pageData.render(request, 'ct/edit_course.html',
-                  dict(course=course, courseform=courseform,
-                       domain='https://{0}'.format(Site.objects.get_current().domain)))
+    return pageData.render(
+        request,
+        'ct/edit_course.html',
+        dict(
+            course=course,
+            courseform=courseform,
+            domain='https://{0}'.format(Site.objects.get_current().domain),
+            reports = CourseReport.objects.filter(course_id=course_id).order_by('-date')
+        )
+    )
 
 
 def courses(request):

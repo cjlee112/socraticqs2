@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from ct.models import Response, StudentError, UnitLesson
+from analytics.models import CourseReport
 
 
 class ResponseSerializer(serializers.ModelSerializer):
@@ -89,3 +90,9 @@ class ErrorSerializer(serializers.ModelSerializer):
 
     def get_em_data(self, obj):
         return UnitLessonSerializer().to_representation(obj.errorModel)
+
+
+class CourseReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseReport
+        fields = ('date', 'response_report')

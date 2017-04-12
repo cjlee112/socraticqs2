@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'ct',
     'fsm',
+    'analytics',
     # LTI
     'lti',
     # API
