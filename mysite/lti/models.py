@@ -15,8 +15,8 @@ class LtiConsumer(models.Model):
     Model to manage LTI consumers.
     """
     consumer_name = models.CharField(max_length=255, unique=True)
-    consumer_key = models.CharField(max_length=32, unique=True, db_index=True, default=key_secret_generator)
-    consumer_secret = models.CharField(max_length=32, unique=True, default=key_secret_generator)
+    consumer_key = models.CharField(max_length=64, unique=True, db_index=True, default=key_secret_generator)
+    consumer_secret = models.CharField(max_length=64, unique=True, default=key_secret_generator)
     instance_guid = models.CharField(max_length=255, blank=True, null=True, unique=True)
     expiration_date = models.DateField(verbose_name='Consumer Key expiration date', null=True, blank=True)
 
