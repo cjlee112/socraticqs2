@@ -85,13 +85,6 @@ def lti_init(request, course_id=None, unit_id=None):
         consumer_key = lti_consumer.consumer_key
         secret = lti_consumer.consumer_secret
 
-        if lti_consumer.expiration_date and lti_consumer.expiration_date < date.today():
-            raise oauth2.Error('Consumer Key has expired.')
-        if lti_consumer.consumer_key != consumer_key:
-            raise oauth2.Error('Wrong Consumer Key: {}'.format(consumer_key))
-        consumer_key = lti_consumer.consumer_key
-        secret = lti_consumer.consumer_secret
-
         tool = DjangoToolProvider(consumer_key, secret, request.POST)
         is_valid = tool.is_valid_request(request)
         session['target'] = '_blank'
