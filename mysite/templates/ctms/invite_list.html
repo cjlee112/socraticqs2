@@ -51,7 +51,7 @@
     <main class="card__content">
       <p>How to invite testers... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>
 
-      <form class="form" action="." method="POST">
+      <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
         {% csrf_token %}
 
         <div class="input-with-button">

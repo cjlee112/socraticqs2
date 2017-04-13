@@ -279,7 +279,7 @@ class EnrollUnitCode(models.Model):
         enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll
-        enroll = cls(courseUnit=course_unit, isLive=is_live, isPreview=is_preview, isTest=isTest3)
+        enroll = cls(courseUnit=course_unit, isLive=is_live, isPreview=is_preview, isTest=isTest)
         enroll.save()
         if not enroll.enrollCode:
             enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live, isPreview=is_preview)

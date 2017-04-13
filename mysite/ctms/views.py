@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.http.response import Http404, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -331,6 +333,7 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
             unit=self.object,
             course=self.get_course(),
             addedBy=self.request.user,
+            releaseTime=datetime.now(),
             order=0,
         )
         messages.add_message(self.request, messages.SUCCESS, "Courselet successfully created")
@@ -794,10 +797,13 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateVi
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
         kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
         kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        kwargs['course'] = self.get_course()
         return kwargs
 
     def post(self, *args, **kwargs):
-        form = self.form_class(self.get_course(), self.request.user.instructor, data=self.request.POST)
+        form = self.form_class(
+            self.get_course(), self.request.user.instructor, data=self.request.POST
+        )
         if form.is_valid():
             invite = form.save()
             response = invite.send_mail(self.request, self)
@@ -829,7 +835,7 @@ class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View)
 
 class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, code):
-        invite = self.get_invite_by_code_request_or_404(code=code)
+        invite = Invite.objects.get(code=code)
         response = invite.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS,
                              "We just resent invitation to {}".format(invite.email))

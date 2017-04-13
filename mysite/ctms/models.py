@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from accounts.models import Instructor
 
@@ -74,9 +75,8 @@ class Invite(models.Model):
         if user:
             self.user = user
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
-    
+
     def send_mail(self, request, view):
-        from django.conf import settings
         try:
             send_mail(
                 "{} invited you in a course <{}> as {}".format(
@@ -106,6 +106,3 @@ class Invite(models.Model):
                     request.POST['email'])
                 },
             )
-
-
-

@@ -24,7 +24,7 @@ class SignUpForm(forms.Form):
     institution = forms.CharField()
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
-        validators=[password_validator]
+        # validators=[password_validator]
     )
 
     def clean(self):
@@ -78,7 +78,7 @@ class UsernameLoginForm(forms.Form):
     next = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def get_user(self):
-        return authenticate(username=self.cleaned_data['username'], 
+        return authenticate(username=self.cleaned_data['username'],
                             password=self.cleaned_data['password'])
 
 class SocialForm(forms.ModelForm):
