@@ -2,8 +2,8 @@ from functools import partial
 
 from django.contrib.auth import logout
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import render
-from django.views.generic import View
+from django.shortcuts import render, redirect
+from django.views.generic import View, CreateView
 from django.core.urlresolvers import reverse
 
 from accounts.forms import (

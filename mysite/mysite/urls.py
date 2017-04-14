@@ -30,7 +30,7 @@ urlpatterns = patterns(
         'psa.views.custom_login',
         {
             'template_name': 'psa/new_custom_login.html',
-            'next_page': 'accouts:profile_update',
+            'next_page': 'accounts:profile_update',
             'login_form_cls': EmailLoginForm
         },
         name='new_login'),
