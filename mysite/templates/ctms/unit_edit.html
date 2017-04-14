@@ -32,26 +32,14 @@ Create new courslet
   <main class="card__content">
     <form action="" method="POST">
       <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
-      <!-- TODO: Replace with real inputs
-        {{ form.as_p }}
-      -->
 
       {% csrf_token %}
 
       {{ errors_formset.management_form }}
 
-      {% if not pk %}
-        {{ form.title.label_tag }}
-        <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
-        {{ form.title }}
-      {% else %}
-
-
-
         <!-- TODO: Title/name label and input doesn't exist -->
         <!-- Name -->
         <div class="form-group">
-          {{ form.title.label_tag }}
           <label>Name</label>
 
           <p>
@@ -67,7 +55,7 @@ Create new courslet
           </p>
 
           {{ form.title }}
-          <input type="text">
+          <!-- <input type="text"> -->
         </div>
 
 
@@ -123,7 +111,6 @@ Create new courslet
             </span>
           </p>
 
-          {{ form.text }}
         </div>
 
 
@@ -186,7 +173,6 @@ Create new courslet
             </div>
           {% endif %}
         </div>
-      {% endif %}
 
 
 

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
-    CreateUnitView, UnitView, EditUnitView, 
+    CreateUnitView, UnitView, EditUnitView,
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, AddUnitEditView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, TesterJoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView)
@@ -81,7 +81,7 @@ urlpatterns = patterns(
     url(r'^invites/(?P<code>\w+)/delete/$', DeleteInviteView.as_view(), name='delete_invite'),
 
     url(r'^email_sent/', EmailSentView.as_view(), name='email_sent'),
-    
+
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),

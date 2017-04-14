@@ -35,7 +35,7 @@ class EditUnitForm(forms.ModelForm):
 
     class Meta:
         model = Lesson
-        fields = ('text', 'unit_type')
+        fields = ('title', 'text', 'unit_type')
 
     def save(self, commit=True):
         self.instance.kind = self.cleaned_data['unit_type']
@@ -45,7 +45,7 @@ class EditUnitForm(forms.ModelForm):
 class AddEditUnitForm(EditUnitForm):
     class Meta:
         model = Lesson
-        fields = ('text', 'unit_type', )
+        fields = ('title', 'text', 'unit_type')
 
 
 class AddEditUnitAnswerForm(forms.ModelForm):
@@ -110,6 +110,3 @@ class InviteForm(forms.ModelForm):
         )
         self.instance = invite
         return super(InviteForm, self).save(commit=commit)
-
-
-
