@@ -855,7 +855,7 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
         return Invite.objects.my_invites(self.request)
 
     def get_success_url(self):
-        return reverse('ctms:share_course', kwargs={'pk': self.get_object().course.id})
+        return reverse('ctms:course_invite', kwargs={'pk': self.get_object().course.id})
 
     def delete(self, request, *args, **kwargs):
         response = super(DeleteInviteView, self).delete(request, *args, **kwargs)

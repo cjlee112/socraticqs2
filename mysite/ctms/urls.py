@@ -72,10 +72,14 @@ urlpatterns = patterns(
     # url(r'^share_course/$', CreateSharedCourseView.as_view(),
     #     name='cr_share_course'),
 
-    url(r'^course/(?P<pk>\d+)/share_course/$', InvitesListView.as_view(),
-        name='share_course'),
+    # url(r'^course/(?P<pk>\d+)/share_course/$', InvitesListView.as_view(),
+    #     name='share_course'),
+    url(r'^course/(?P<pk>\d+)/share_course/tester$', InvitesListView.as_view(template_name='ctms/invite_tester_list.html'),
+        name='course_invite'),
+    url(r'^course/(?P<pk>\d+)/share_course/student', InvitesListView.as_view(template_name='ctms/invite_student_list.html'),
+        name='course_invite_student'),
 
-    url(r'^course/(?P<pk>\d+)/invite/?$', InvitesListView.as_view(), name='course_invite'),
+    # url(r'^course/(?P<pk>\d+)/invite/?$', InvitesListView.as_view(), name='course_invite'),
     url(r'^invites/(?P<code>\w+)/join/$', TesterJoinCourseView.as_view(), name='tester_join_course'),
     url(r'^invites/(?P<code>\w+)/resend/$', ResendInviteView.as_view(), name='resend_invite'),
     url(r'^invites/(?P<code>\w+)/delete/$', DeleteInviteView.as_view(), name='delete_invite'),
