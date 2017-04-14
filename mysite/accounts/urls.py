@@ -5,7 +5,7 @@ from django.contrib.auth.views import (
     password_reset_confirm, password_reset_complete)
 from accounts.forms import CustomPasswordResetForm
 
-from .views import DeleteAccountView, AccountSettingsView
+from .views import DeleteAccountView, AccountSettingsView, ProfileUpdateView
 
 
 urlpatterns = patterns(
@@ -33,6 +33,8 @@ urlpatterns = patterns(
     url(r'^reset/done/$', password_reset_complete, {
         'template_name': 'accounts/password_reset_complete.html'
     }, name='password_reset_complete'),
+
+    url(r'^profile_update/$', ProfileUpdateView.as_view(), name='profile_update'),
 
     url(r'^$', AccountSettingsView.as_view(), name='settings'),
 )

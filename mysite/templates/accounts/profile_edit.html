@@ -1,0 +1,11 @@
+{% extends 'ctms/ctms_base.html' %}
+
+{% block base_content %}
+{% if form %}
+<form class="form" action="{% url 'accounts:profile_update' %}" method="post">
+  {{ form.as_p }}
+  {% csrf_token %}
+  <input type="submit" value="Save">
+</form>
+{% endif %}
+{% endblock %}

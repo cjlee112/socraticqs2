@@ -144,3 +144,17 @@ class CustomPasswordResetForm(PasswordResetForm):
         if not User.objects.filter(email=self.cleaned_data['email']):
             raise forms.ValidationError('No registered account with such email.')
         return self.cleaned_data['email']
+
+
+class SocialForm(forms.ModelForm):
+    class Meta:
+        model = Instructor
+        fields = (
+            'user',
+            'institution',
+        )
+        widgets = {
+            'user': forms.HiddenInput(),
+            # 'id': forms.HiddenInput(),
+
+        }
