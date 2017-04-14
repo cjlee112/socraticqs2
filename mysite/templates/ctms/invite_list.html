@@ -16,15 +16,15 @@
     <nav class="card__nav">
       <ul>
         <li>
-          <a href="#">Courselets</a>
+          <a href="{% url 'ctms:course_view' pk=course.id %}">Courselets</a>
         </li>
 
         <li>
-          <a href="#" class="card__nav-active">Share</a>
+          <a href="{% url 'ctms:course_invite' pk=course.id %}" class="card__nav-active">Share</a>
         </li>
 
         <li>
-          <a href="#">Settings</a>
+          <a href="{% url 'ctms:course_settings' pk=course.id %}">Settings</a>
         </li>
       </ul>
     </nav>
@@ -38,37 +38,67 @@
       <nav class="card__nav">
         <ul>
           <li>
-            <a href="#">Invite Students</a>
+            <a href="{% url 'ctms:course_invite_student' pk=course.id %}" class="{% block invite_student_tab_cls %}{% endblock %}">
+              Invite Students
+            </a>
           </li>
 
           <li>
-            <a href="#" class="card__nav-active">Invite Testers</a>
+            <a href="{% url 'ctms:course_invite' pk=course.id %}" class="{% block invite_tester_tab_cls %}{% endblock %}">
+              Invite Testers
+            </a>
           </li>
         </ul>
       </nav>
     </section>
 
     <main class="card__content">
+      {% block how_to %}
       <p>How to invite testers... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>
-
+      {% endblock %}
       <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
         {% csrf_token %}
 
         <div class="input-with-button">
-          <!-- {{ invite_tester_form.as_p }} -->
-          <input type="text" placeholder="Email address">
-
+           {% block invite_form %}
+           {% for field in  invite_tester_form %}
+              {{ field }}
+           {% endfor %}
+          {% endblock %}
           <input type="submit" value="Invite">
         </div>
 
       </form>
 
+      {% block invites_list %}
       {% with 'Tester' as list_name %}
         {% with invites.testers as objects %}
           {% include 'ctms/includes/invites_list.html' %}
         {% endwith %}
       {% endwith %}
+      {% endblock %}
     </main>
+    <!--<main class="card__content">-->
+      <!--<p>How to invite students... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>-->
+
+      <!--<form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">-->
+        <!--{% csrf_token %}-->
+
+        <!--<div class="input-with-button">-->
+          <!--{% for field in  invite_student_form %}-->
+            <!--{{ field }}-->
+          <!--{% endfor %}-->
+          <!--<input type="submit" value="Invite">-->
+        <!--</div>-->
+
+      <!--</form>-->
+
+      <!--{% with 'Student' as list_name %}-->
+        <!--{% with invites.students as objects %}-->
+          <!--{% include 'ctms/includes/invites_list.html' %}-->
+        <!--{% endwith %}-->
+      <!--{% endwith %}-->
+    <!--</main>-->
   </div>
 {% endblock %}
 

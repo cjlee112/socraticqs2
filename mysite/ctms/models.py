@@ -106,3 +106,6 @@ class Invite(models.Model):
                     request.POST['email'])
                 },
             )
+
+    def __unicode__(self):
+        return "Code {}, User {}".format(self.code, self.email)
