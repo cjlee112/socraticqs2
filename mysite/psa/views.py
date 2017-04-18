@@ -5,10 +5,14 @@ from django.template import RequestContext
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render_to_response, render
-from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth import logout, login, authenticate, REDIRECT_FIELD_NAME
 from django.core.urlresolvers import reverse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from social.actions import do_complete
+from social.apps.django_app.utils import psa
 from social.backends.utils import load_backends
-from social.apps.django_app.views import complete
+from social.apps.django_app.views import complete, _do_login
 from accounts.models import Instructor
 
 from psa.utils import render_to
@@ -102,6 +106,15 @@ def check_username_and_create_user(username, email, password, **kwargs):
         return check_username_and_create_user(username, email, password, **kwargs)
 
 
+@never_cache
+@csrf_exempt
+@psa('ctms:email_sent')
+def custom_complete(request, backend, *args, **kwargs):
+    """Authentication complete view"""
+    return do_complete(request.backend, _do_login, request.user,
+                       redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
+
+
 def signup(request, next_page=None):
     """
     This function handles custom login to integrate social auth and default login.
@@ -127,7 +140,7 @@ def signup(request, next_page=None):
             # because python-social-auth.compolete function implies that just created user will be authenticated,
             # but we don't authenticate it, so we do this trick.
             request.user = user
-            response = complete(request, 'email')
+            response = custom_complete(request, 'email')
             # after calling complete function we don't need request.user, so we replace it with AnonymousUser
             request.user = AnonymousUser()
             return response
@@ -140,13 +153,25 @@ def signup(request, next_page=None):
     return render(request, 'psa/signup.html', kwargs)
 
 
-@login_required
-@render_to('ct/person.html')
+
 def done(request):
     """
     Login complete view, displays user data.
     """
-    return context(person=request.user)
+    @login_required
+    @render_to('ct/person.html')
+    def old_UI_wrap(request):
+        return context(person=request.user)
+
+    @login_required
+    def new_UI_wrap(request):
+        return HttpResponseRedirect(reverse('ctms:my_courses'))
+
+    # NOTE: IF USER has attached instructor instance will be redirected to /ctms/ (ctms dashboard)
+    if getattr(request.user, 'instructor', None):
+        return new_UI_wrap(request)
+
+    return old_UI_wrap(request)
 
 
 @login_required

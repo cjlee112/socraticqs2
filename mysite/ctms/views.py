@@ -861,5 +861,5 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
         return response
 
 
-class EmailSentView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateView):
+class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnitMixin ?
     template_name = 'ctms/email_sent.html'

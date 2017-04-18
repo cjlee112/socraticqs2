@@ -84,7 +84,7 @@ urlpatterns = patterns(
     url(r'^invites/(?P<code>\w+)/resend/$', ResendInviteView.as_view(), name='resend_invite'),
     url(r'^invites/(?P<code>\w+)/delete/$', DeleteInviteView.as_view(), name='delete_invite'),
 
-    url(r'^email_sent/', EmailSentView.as_view(), name='email_sent'),
+    url(r'^email_sent/(?P<backend>\w+)?', EmailSentView.as_view(), name='email_sent'),
 
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),

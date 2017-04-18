@@ -256,7 +256,7 @@ FORCE_EMAIL_VALIDATION = True
 PASSWORDLESS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
-SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/email-sent/'
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/ctms/email_sent/'
 
 SOCIAL_AUTH_STRATEGY = 'psa.custom_django_strategy.CustomDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'psa.custom_django_storage.CustomDjangoStorage'
