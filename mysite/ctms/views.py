@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from django.http.response import Http404, HttpResponseRedirect
@@ -93,12 +94,8 @@ class CourseCoursletUnitMixin(object):
         )
 
     def get_invite_by_code_request_or_404(self, code):
-        return get_object_or_404(
-            Invite,
-            models.Q(user__email=self.request.user.email) |
-            models.Q(email=self.request.user.email),
-            code=code
-        )
+        return Invite.get_by_user_or_404(self.request.user, code=code)
+
 
 class FormSetBaseView(object):
     formset_prefix = None

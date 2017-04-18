@@ -5,4 +5,4 @@ from ctms.models import Invite
 
 @admin.register(*[Invite])
 class AdminModel(admin.ModelAdmin):
-    list_display = ('code', 'email', 'course', 'status')
+    list_display = ('code', 'email', 'course', 'get_status_display', 'type')

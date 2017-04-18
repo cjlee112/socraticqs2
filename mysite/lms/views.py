@@ -78,12 +78,7 @@ class TesterCourseView(NewLoginRequiredMixin, CourseView):
     template_name = 'lms/tester_course_page.html'
 
     def get_courselets(self, request, course):
-        invite = get_object_or_404(
-            Invite,
-            models.Q(user=request.user) | models.Q(email=request.user.email),
-            course=course,
-            status='joined', type='tester'
-        )
+        Invite.get_by_user_or_404(user=self.request.user, course=course, status='joined', type='tester')
         return (
             (
                 courselet,
