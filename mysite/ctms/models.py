@@ -1,3 +1,4 @@
+import re
 from uuid import uuid4
 from django.db.utils import IntegrityError
 from django.contrib.sites.models import Site
@@ -6,6 +7,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http.response import Http404
+from django.shortcuts import get_object_or_404
 from accounts.models import Instructor
 
 from ct.models import Course
@@ -20,6 +23,11 @@ TYPE_CHOICES = (
     ('student', 'student'),
     ('tester', 'tester')
 )
+
+def clean_email_name(email):
+    email_name, domain = email.split('@', 1)
+    email_name = email_name.replace('.', '')
+    return email_name, domain
 
 class InviteQuerySet(models.QuerySet):
     def my_invites(self, request):
@@ -50,9 +58,28 @@ class Invite(models.Model):
 
     objects = InviteQuerySet.as_manager()
 
+    @staticmethod
+    def search_user_by_email(email):
+        email_name, domain = clean_email_name(email)
+        return User.objects.filter(
+            models.Q(email=email) |
+            models.Q(email__iregex="^{}@{}$".format(r"\.?".join(email_name), domain))
+        ).first()
+
     @classmethod
     def create_new(cls, commit, course, instructor, email, invite_type):
-        user = User.objects.filter(email=email).first()
+        user = Invite.search_user_by_email(email)
+        try:
+            old_invite = Invite.get_by_user_or_404(
+                user=user,
+                type=invite_type,
+                course=course,
+                instructor=instructor
+            )
+            if old_invite:
+                return old_invite
+        except Http404:
+            pass
         code = Invite(
             instructor=instructor,
             user=user,
@@ -71,7 +98,7 @@ class Invite(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        user = User.objects.filter(email=self.email).first()
+        user = Invite.search_user_by_email(self.email)
         if user:
             self.user = user
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
@@ -84,7 +111,7 @@ class Invite(models.Model):
                     self.course,
                     self.type
                 ),
-                '<a href="{}{}">Click to open</a>'.format(Site.objects.get_current(request),
+                'Click to open http://{}{}'.format(Site.objects.get_current(request),
                                                           reverse('ctms:tester_join_course',
                                                                   kwargs={'code': self.code})),
 
@@ -106,6 +133,40 @@ class Invite(models.Model):
                     request.POST['email'])
                 },
             )
+
+    @staticmethod
+    def get_by_user_or_404(user, **kwargs):
+        '''
+        Do a search for invite by passed parameters and user.
+         NOTE: this function firstly try to get invite by passed kwargs,
+         then check that Invite.email and user.email are equal,
+         if they not - trying to check Invite.email and user.email
+         !! excluding dots from email-name. !!
+        :param user: request.user
+        :param kwargs: params to search by
+        :return: invite if found
+        :raise: Http404 if not found
+        '''
+        if not user:
+            raise Http404
+        invites = Invite.objects.filter(
+            **kwargs
+        )
+        for invite in invites:
+            if invite and invite.email == user.email:
+                return invite
+            user_email_name, user_domain = clean_email_name(user.email)
+            invite_email, invite_domain = clean_email_name(invite.email)
+            if invite_domain != user_domain:
+                raise Http404
+            res = re.search(
+                "^{}@{}$".format(r"\.?".join(user_email_name), user_domain),
+                "{}@{}".format(invite_email, invite_domain)
+            )
+            if res and res.string:
+                return invite
+        else:
+            raise Http404()
 
     def __unicode__(self):
         return "Code {}, User {}".format(self.code, self.email)
