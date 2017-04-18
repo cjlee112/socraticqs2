@@ -2,11 +2,6 @@ from django.contrib import admin
 
 from models import EnrollUnitCode, Chat, Message
 
-# Register your models here.
-
-admin.site.register(EnrollUnitCode)
-admin.site.register(Chat)
-# admin.site.register(Message)
 
 def chat_id(obj):
     if obj.chat:
@@ -19,3 +14,13 @@ class AdminRole(admin.ModelAdmin):
         'id', chat_id, 'text', 'owner', 'contenttype',
         'input_type', 'type', 'kind'
     )
+
+
+class ChatAdmin(admin.ModelAdmin):
+    list_display = (
+        'next_point', 'user', 'is_open', 'is_live', 'state', 'instructor', 'timestamp'
+    )
+
+
+admin.site.register(Chat, ChatAdmin)
+admin.site.register(EnrollUnitCode)
