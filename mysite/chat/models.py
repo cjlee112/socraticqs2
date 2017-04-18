@@ -197,7 +197,15 @@ class Message(models.Model):
                 elif self.input_type == 'options' and self.text:
                     html = STATUS_OPTIONS[self.text]
                 else:
-                    html = mark_safe(md2html(self.content.lesson.text))
+                    raw = (
+                        '`Read more <{0}>`_ \n {1}'.format(
+                            self.content.lesson.url, self.content.lesson.text
+                        )
+                        if self.content.lesson.url
+                        else self.content.lesson.text
+                    )
+
+                    html = mark_safe(md2html(raw))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
 
