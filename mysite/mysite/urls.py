@@ -9,6 +9,13 @@ from pages.views import interested_form
 from django.contrib import admin
 admin.autodiscover()
 
+
+from social.utils import setting_name
+from psa.views import complete
+
+
+extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
+
 urlpatterns = patterns(
     '',
     url(r'^ct/', include('ct.urls', namespace='ct')),
@@ -29,6 +36,8 @@ urlpatterns = patterns(
 
 
     url(r'^email-sent/$', 'psa.views.validation_sent'),
+    url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra), complete,
+        name='complete'),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
     url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),

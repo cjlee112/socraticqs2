@@ -7,6 +7,11 @@ from django.shortcuts import redirect, render_to_response
 from django.contrib.auth import logout, login, authenticate
 from social.backends.utils import load_backends
 
+from social.apps.django_app.views import complete as social_complete
+from social.exceptions import AuthMissingParameter
+from ct.forms import LogoutForm
+from ct.views import ul_page_data, PageData, person_profile
+
 from psa.utils import render_to
 from psa.models import SecondaryEmail
 
@@ -116,3 +121,31 @@ def set_pass(request):
         return context(changed=True, person=user)
     else:
         return context(exception='Something goes wrong...', person=user)
+
+
+def complete(request, backend, *args, **kwargs):
+    try:
+        return social_complete(request, backend, *args, **kwargs)
+    except AuthMissingParameter:
+        person = request.user
+        pageData = PageData(request)
+        logoutForm = LogoutForm()
+        pageData.errorMessage = 'This token already verified!'
+        return pageData.render(request, 'ct/person.html',
+                           dict(person=person, logoutForm=logoutForm,
+                                next=request.path,
+                                available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
+
+        ########   ########   ########   ########   ########
+        # pageData = PageData(request)
+        # pageData.errorMessage = 'This token already verified!'
+        # return pageData.render(request, 'ct/person.html')
+        ########   ########   ########   ########   ########
+        # return render_to_response(
+        #     'lti/error.html',
+        #     {
+        #         'message': 'This token already verified! '
+        #     },
+        #     RequestContext(request)
+        # )
+        ########   ########   ########   ########   ########
