@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
 from django.template import RequestContext
@@ -127,25 +128,11 @@ def complete(request, backend, *args, **kwargs):
     try:
         return social_complete(request, backend, *args, **kwargs)
     except AuthMissingParameter:
-        person = request.user
-        pageData = PageData(request)
-        logoutForm = LogoutForm()
-        pageData.errorMessage = 'This token already verified!'
-        return pageData.render(request, 'ct/person.html',
-                           dict(person=person, logoutForm=logoutForm,
-                                next=request.path,
-                                available_backends=load_backends(settings.AUTHENTICATION_BACKENDS)))
-
-        ########   ########   ########   ########   ########
-        # pageData = PageData(request)
-        # pageData.errorMessage = 'This token already verified!'
-        # return pageData.render(request, 'ct/person.html')
-        ########   ########   ########   ########   ########
-        # return render_to_response(
-        #     'lti/error.html',
-        #     {
-        #         'message': 'This token already verified! '
-        #     },
-        #     RequestContext(request)
-        # )
-        ########   ########   ########   ########   ########
+        messages.error(
+            request,
+            "This token already verified! "
+            "You can not use it more than 1 time ever. "
+            "Please log in using form below or sign up.")
+        if request.user.is_authenticated():
+            return redirect('ct:person_profile', user_id=request.user.id)
+        return redirect('ct:home')
