@@ -80,15 +80,16 @@ class AccountSettingsTests(TestCase):
 
         # if instructor - redirect to /ctms/
         response = self.client.get(
-            "/complete/email/?verification_code={}".format(cc.code)
+            "/complete/email/?verification_code={}".format(cc.code),
+            follow=True
         )
-        user = self.get_user()
-        self.assertRedirects(response, reverse('ctms:my_courses'))
+        self.assertRedirects(response, reverse('ctms:my_courses'), target_status_code=200)
 
         # if not instructor
-        self.instructor.delete()
+        self.user.instructor.delete()
         response = self.client.get(
-            "/complete/email/?verification_code={}".format(cc.code)
+            "/complete/email/?verification_code={}".format(cc.code),
+            follow=True
         )
         user = self.get_user()
         self.assertEqual(user.email, 'mm@mail.com')
