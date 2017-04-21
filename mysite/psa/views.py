@@ -6,12 +6,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render_to_response
 from django.contrib.auth import logout, login, authenticate
-from social.backends.utils import load_backends
 
+from social.backends.utils import load_backends
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
-from ct.forms import LogoutForm
-from ct.views import ul_page_data, PageData, person_profile
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail

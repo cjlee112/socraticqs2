@@ -36,7 +36,7 @@ urlpatterns = patterns(
 
 
     url(r'^email-sent/$', 'psa.views.validation_sent'),
-    url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra), complete,
+    url(r'^complete/email{0}$'.format(extra), complete,
         name='complete'),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
