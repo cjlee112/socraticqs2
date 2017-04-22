@@ -2,12 +2,9 @@
 
 {% block content %}
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
 <div class="buttons">
 {% if not user.is_authenticated %}
-<h4>To get started on Courselets fast and keep your work secure, we suggest you sign-in with one of your existing social media accounts.  Sign in with:</h4>
+  <a href="{% url 'login' %}">Login</a>
 {% endif %}
 
 {% include "psa/social_backends.html" %}
@@ -15,29 +12,37 @@
 <br>
 <div class="container-fluid">
 {% if not user.is_authenticated %}
-<h4>Alternatively, you can try out Courselets without signing in.  If you want to access your work in the future (or from another computer), we can email you an access link.  To get started, just enter your email address (we'll keep it safe from spammers):</h4>
 {% endif %}
   {% include "psa/legacy_backends.html" %}
 </div>
 <br>
 
 <div id="login">
-<h4>Alternatively, if you already have a Courselets.org password, you can sign in here:</h4>
+<h4>Signup:</h4>
     <form class="form-horizontal" name="LoginForm" action="." method="post">
     {% csrf_token %}
+
     {% for field in form %}
       {% if not field.is_hidden %}
       <div class="control-group">
         {{ field.label_tag }}
-          <div class="controls">
-            {{ field.errors }}
-            {{ field }}
-          </div>
+        <div class="controls">
+          {{ field.errors }}
+          {{ field }}
+        </div>
       </div>
       {% else %}
-        {{ field }}
+      {{ field }}
       {% endif %}
     {% endfor %}
+      {% if form.errors %}
+      {% comment %} {{ form.errors }} {% endcomment %}
+      {% endif %}
+
+    {% comment %} {%if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    {% endcomment %}
     <br>
     <div class="control-group">
         <div class="controls">
