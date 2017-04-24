@@ -25,7 +25,7 @@ class EmailAuth(LegacyAuth):
         """
         if self.ID_KEY not in self.data:
             code = self.strategy.request.REQUEST.get('verification_code')
-            code_object = CustomCode.objects.filter(code=code).first()
+            code_object = CustomCode.objects.filter(code=code, verified=False).first()
             if code_object:
                 email = code_object.email
                 self.data.update({'email': email})

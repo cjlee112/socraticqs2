@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
 from django.template import RequestContext
@@ -5,7 +6,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render_to_response
 from django.contrib.auth import logout, login, authenticate
+
 from social.backends.utils import load_backends
+from social.apps.django_app.views import complete as social_complete
+from social.exceptions import AuthMissingParameter
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
@@ -116,3 +120,17 @@ def set_pass(request):
         return context(changed=True, person=user)
     else:
         return context(exception='Something goes wrong...', person=user)
+
+
+def complete(request, backend, *args, **kwargs):
+    try:
+        return social_complete(request, backend, *args, **kwargs)
+    except AuthMissingParameter:
+        messages.error(
+            request,
+            "This token already verified! "
+            "You can not use it more than 1 time ever. "
+            "Please log in using form below or sign up.")
+        if request.user.is_authenticated():
+            return redirect('ct:person_profile', user_id=request.user.id)
+        return redirect('ct:home')
