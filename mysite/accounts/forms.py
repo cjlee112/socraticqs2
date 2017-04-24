@@ -115,7 +115,7 @@ class DeleteAccountForm(forms.ModelForm):
     form_id = forms.CharField(max_length=255, initial='delete_account_form', widget=forms.HiddenInput())
     confirm_delete_account = forms.BooleanField(
         required=True,
-        widget=forms.CheckboxInput(),
+        widget=forms.HiddenInput(),
         initial=False
     )
 

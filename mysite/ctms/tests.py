@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils import timezone
 from django.db import models
+from accounts.models import Instructor
 
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
@@ -18,7 +19,10 @@ class MyTestCase(TestCase):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
 
+        self.instructor = Instructor.objects.create(user=self.user)
+
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
+        self.instructor2 = Instructor.objects.create(user=self.user2)
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -79,12 +83,24 @@ class MyTestCase(TestCase):
         response = self.client.post(self.url, data, follow=True)
         return response
 
-    def post_valid_data(self, data={'name': 'some test name'}):
-        response = self.client.post(self.url, data, follow=True)
+    def get_client_method(self, method='post'):
+        client_method = getattr(self.client, method)
+        if not client_method:
+            raise KeyError('self.client has no property {}'.format(method))
+        return client_method
+
+    def post_valid_data(self, data={'name': 'some test name'}, method='post'):
+        client_method = self.get_client_method(method)
+        if getattr(self, 'default_data', False):
+            data.update(self.default_data)
+        response = client_method(self.url, data, follow=True)
         return response
 
-    def post_invalid_data(self, data={'name': ''}):
-        response = self.client.post(self.url, data, follow=True)
+    def post_invalid_data(self, data={'name': ''}, method='post'):
+        client_method = self.get_client_method(method)
+        if getattr(self, 'default_data', False):
+            data.update(self.default_data)
+        response = client_method(self.url, data, follow=True)
         return response
 
     def get_my_courses(self):
@@ -138,21 +154,54 @@ class MyTestCase(TestCase):
 
         for model in all_models:
             if must_equal:
-                self.assertEqual(first_counts[model], second_counts[model])
+                self.assertEqual(
+                    first_counts[model], second_counts[model],
+                    "{} ({}) != {} ({}), with must_equal={}".format(
+                        model, first_counts[model], model, second_counts[model], must_equal
+                    )
+                )
             else:
-                self.assertNotEqual(first_counts[model], second_counts[model])
+                self.assertNotEqual(
+                    first_counts[model], second_counts[model],
+                    "{} ({}) == {} ({}), with must_equal={}".format(
+                        model, first_counts[model], model, second_counts[model], must_equal
+                    )
+                )
 
     def check_context_keys(self, response):
         for key in self.context_should_contain_keys:
             self.assertIn(key, response.context)
+
+    def am_i_instructor(self, method='GET'):
+        methods_map = {'GET', self.client.get, 'POST', self.client.post}
+        client_method = methods_map.get(method)
+        self.assertIsNotNone(client_method)
+
+        if getattr(self, 'url'):
+            if getattr(self, 'NEED_INSTRUCTOR'):
+                response = client_method(self.url)
+                if getattr(self, 'instructor'):
+                    self.assertEqual(response.status_code, 200)
+                    self.instructor.delete()
+                    response = client_method(self.url)
+                    self.assertEqual(response.status_code, 403)
+                else:
+                    self.assertEqual(response.status_code, 403)
+
+
+            else:
+                response = client_method(self.url)
+                self.assertEqual(response.status_code, 200)
 
 
 class MyCoursesTests(MyTestCase):
     def setUp(self):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
+        self.instructor = Instructor.objects.create(user=self.user)
 
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
+        self.instructor2 = Instructor.objects.create(user=self.user2)
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -180,7 +229,7 @@ class MyCoursesTests(MyTestCase):
         self.client.login(username=self.username, password=self.password)
         self.url = reverse('ctms:my_courses')
 
-    def get_my_courses_page_test(self):
+    def test_get_my_courses_page(self):
         response = self.client.get(self.url)
         # should contain 1 course
         self.assertEqual(response.status_code, 200)
@@ -191,11 +240,11 @@ class MyCoursesTests(MyTestCase):
         self.assertIn(self.course, response.context['my_courses'])
         self.assertFalse(response.context['shared_courses'])
 
-    def my_courses_show_shared_courses_test(self):
+    def test_my_courses_show_shared_courses(self):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
-        shared_course = Invite.create_new(True, self.course, self.user2, self.user.email, 'tester')
+        shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester')
         response = self.client.get(self.url)
         # should return shared courses
         self.assertEqual(response.status_code, 200)
@@ -204,7 +253,7 @@ class MyCoursesTests(MyTestCase):
         self.assertIn('shared_courses', response.context)
         self.assertIn('course_form', response.context)
         self.assertFalse(self.course in response.context['my_courses'])
-        self.assertTrue(shared_course in response.context['shared_courses'])
+        self.assertTrue(shared_course.course in response.context['shared_courses'])
 
     def my_courses_show_create_course_form(self):
         self.course.delete()
@@ -237,7 +286,7 @@ class MyCoursesTests(MyTestCase):
         courses_cnt = Course.objects.filter(addedBy=self.user).count()
         course_ids = [
             i['id'] for i in
-            Course.objects.filter(addedBy=self.user).values('id')
+            Course.obget_courslet_view_logged_out_user_testjects.filter(addedBy=self.user).values('id')
         ]
         data = {
             'name': ''
@@ -285,7 +334,7 @@ class DeleteCourseViewTest(MyTestCase):
 
     def post_success(self):
         cnt = self.get_my_courses().count()
-        response = self.client.post(self.url)
+        response = self.client.delete(self.url)
         self.assertNotEqual(cnt, self.get_my_courses().count())
         self.assertRedirects(response, reverse('ctms:my_courses'))
 
@@ -299,28 +348,39 @@ class DeleteCourseViewTest(MyTestCase):
         self.course.addedBy = self.user2
         self.course.save()
         cnt = self.get_my_courses().count()
-        response = self.client.post(self.url)
+        response = self.client.delete(self.url)
         self.assertEqual(cnt, self.get_my_courses().count())
 
-    def delete_not_exist_pk_test(self):
+    def test_delete_not_exist_pk(self):
         self.url = reverse('ctms:course_delete', kwargs={'pk': 9999999})
-        response = self.client.post(self.url)
+        response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 404)
 
 
 class SharedCoursesListViewTests(MyTestCase):
     def setUp(self):
         super(SharedCoursesListViewTests, self).setUp()
-        self.shared_course = SharedCourse.objects.create(
-            from_user=self.user2,
-            to_user=self.user,
-            course=self.course
+        self.student_shared_course = Invite.create_new(
+            invite_type='student',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course,
+        )
+        self.tester_shared_course = Invite.create_new(
+            invite_type='tester',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course,
         )
         self.url = reverse('ctms:shared_courses')
 
-    def shared_courses_list_test(self):
+    def test_shared_courses_list(self):
         response = self.client.get(self.url)
-        self.assertIn(self.shared_course, response.context['shared_courses'])
+        self.assertIn(self.student_shared_course, response.context['shared_courses'])
+        self.assertIn(self.tester_shared_course, response.context['shared_courses'])
+
 
 
 class CourseViewTests(MyTestCase):
@@ -328,7 +388,7 @@ class CourseViewTests(MyTestCase):
         super(CourseViewTests, self).setUp()
         self.url = reverse('ctms:course_view', kwargs={'pk': self.course.id})
 
-    def course_view_test(self):
+    def test_course_view(self):
         response = self.get_page()
         self.assertEqual(self.course, response.context['object'])
         self.assertEqual(
@@ -336,7 +396,7 @@ class CourseViewTests(MyTestCase):
             response.context['courslets']
         )
 
-    def get_not_mine_course_test(self):
+    def test_get_not_mine_course(self):
         self.url = reverse('ctms:course_view', kwargs={'pk': 99999})
         response = self.get_page()
         self.assertEqual(response.status_code, 404)
@@ -358,7 +418,7 @@ class CoursletViewTests(MyTestCase):
 
             })
 
-    def get_courslet_view_test(self):
+    def test_get_courslet_view(self):
         response = self.get_page()
         self.assertEqual(response.status_code, 200)
         u_ids = [i['id'] for i in response.context['u_lessons'].values('id')]
@@ -367,7 +427,7 @@ class CoursletViewTests(MyTestCase):
         self.assertIn(self.unitlesson, response.context['u_lessons'])
         self.assertEqual(self.get_test_courseunit(), response.context['object'])
 
-    def get_courslet_view_wrong_courslet_id_test(self):
+    def test_get_courslet_view_wrong_courslet_id(self):
         self.url = reverse(
             'ctms:courslet_view',
             kwargs={
@@ -378,7 +438,7 @@ class CoursletViewTests(MyTestCase):
         response = self.get_page()
         self.assertEqual(response.status_code, 404)
 
-    def get_courslet_view_wrong_course_id_test(self):
+    def test_get_courslet_view_wrong_course_id(self):
         self.url = reverse(
             'ctms:courslet_view',
             kwargs={
@@ -389,10 +449,10 @@ class CoursletViewTests(MyTestCase):
         response = self.get_page()
         self.assertEqual(response.status_code, 404)
 
-    def get_courslet_view_logged_out_user_test(self):
+    def test_get_courslet_view_logged_out_user(self):
         self.client.logout()
         response = self.get_page()
-        self.assertRedirects(response, reverse('login') + "?next=" + self.url)
+        self.assertRedirects(response, reverse('new_login') + "?next=" + self.url)
 
 
 class CreateCoursletViewTests(MyTestCase):
@@ -403,7 +463,7 @@ class CreateCoursletViewTests(MyTestCase):
                 'course_pk': self.course.id,
         })
 
-    def post_valid_data_test(self):
+    def test_post_valid_data(self):
         courslets_in_course = CourseUnit.objects.filter(
             course=self.course
         ).count()
@@ -422,7 +482,7 @@ class CreateCoursletViewTests(MyTestCase):
         ))
 
 
-    def post_invalid_data_test(self):
+    def test_post_invalid_data(self):
         courslets_in_course = Unit.objects.filter(
             courseunit__course=self.course
         )
@@ -440,7 +500,7 @@ class CreateCoursletViewTests(MyTestCase):
 
 
 class UnitViewTests(MyTestCase):
-    def get_page_test(self):
+    def test_get_page(self):
         self.url = reverse(
             'ctms:unit_view', kwargs={
                 'course_pk': self.course.id,
@@ -471,8 +531,17 @@ class CreateUnitViewTests(MyTestCase):
 
             }
         )
+        self.default_data = {
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-id': '',
+            'form-0-title': '',
+            'form-0-text': '',
+        }
 
-    def get_page_test(self):
+    def test_get_page(self):
         response = self.get_page()
         self.assertIn('course', response.context)
         self.assertIn('courslet', response.context)
@@ -481,7 +550,7 @@ class CreateUnitViewTests(MyTestCase):
         self.assertEqual(response.context['courslet'], self.courseunit)
         self.assertIsNone(response.context['unit_lesson'])
 
-    def post_valid_data_test(self):
+    def test_post_valid_data(self):
         data = {
             'title': 'Some new new one title'
         }
@@ -502,7 +571,7 @@ class CreateUnitViewTests(MyTestCase):
         self.assertNotEqual(lessons_cnt, new_lessons_cnt)
         self.assertNotEqual(unit_lsn_cnt, new_unit_lsn_cnt)
 
-    def post_invalid_data_test(self):
+    def test_post_invalid_data(self):
         data = {
             'title': ''
         }
@@ -522,10 +591,14 @@ class CreateUnitViewTests(MyTestCase):
 class EditUnitViewTests(MyTestCase):
     
     models_to_check = (UnitLesson, Lesson)
-    context_should_contain_keys = ('unit_lesson', 'course', 'courslet')
+    context_should_contain_keys = ('unit', 'course', 'courslet')
 
     def setUp(self):
         super(EditUnitViewTests, self).setUp()
+        # need to create user with username 'admin'
+        User.objects.create_user(
+            username='admin'
+        )
         self.pk = self.get_test_unitlessons()[0].id
         self.url = reverse(
             'ctms:unit_edit',
@@ -535,55 +608,64 @@ class EditUnitViewTests(MyTestCase):
                 'pk': self.get_test_unitlessons()[0].id,
             }
         )
+        self.default_data = {
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 0,
+            'form-MIN_NUM_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1000,
+            'form-0-id': '',
+            'form-0-title': '',
+            'form-0-text': '',
+        }
 
-    def get_page_test(self):
+    def test_get_page(self):
         counts = self.get_model_counts()
         response = self.get_page()
         new_counts = self.get_model_counts()
         self.assertEqual(counts, new_counts)
-        self.assertTemplateUsed(response, 'ctms/create_unit_form.html')
+        self.assertTemplateUsed(response, 'ctms/unit_edit.html')
         self.check_context_keys(response)
 
     @unpack
     @data(
-        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title'),
     )
-    def post_valid_data_test(self, kind, text):
+    def test_post_valid_data(self, kind, text, title):
         counts = self.get_model_counts()
         data = {
             'unit_type': kind,
-            'text': text
+            'text': text,
+            'title': title,
         }
         response = self.post_valid_data(data)
         new_counts = self.get_model_counts()
 
-        self.validate_model_counts(counts, new_counts, must_equal=True)
-        ul = UnitLesson.objects.filter().order_by('id').last()
-        url = reverse(
-            'ctms:unit_view',
-            kwargs={
-                'course_pk': self.get_test_course().id,
-                'courslet_pk': self.get_test_courseunit().id,
-                'pk': ul.id
+        self.validate_model_counts(counts, new_counts, must_equal=False) #  must not be equal because we added Answer
+        ul = self.get_test_unitlesson()
+        url = reverse('ctms:unit_edit', kwargs={
+            'course_pk': self.get_test_course().id,
+            'courslet_pk': self.get_test_courseunit().id,
+            'pk': ul.id
         })
         self.assertEqual(self.get_test_unitlesson().lesson.text, text)
         self.assertEqual(self.get_test_unitlesson().lesson.kind, kind)
+        self.assertEqual(self.get_test_unitlesson().lesson.title, title)
         self.assertRedirects(response, url)
-
-        self.context_should_contain_keys = ('course', 'courslet', 'responses')
         self.check_context_keys(response)
 
     @unpack
     @data(
         # (EditUnitForm.KIND_CHOICES[0][0], ''),  # valid kind, empty text
-        ('', 'Some New ORCT text is here...'),  # not valid kind, valid text
+        ('', 'Some New ORCT text is here...', 'Some titile'),  # not valid kind, valid text
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', ''),  # valid kind, not valid title
     )
-    def post_invalid_data_test(self, kind, text):
+    def test_post_invalid_data(self, kind, text, title):
         counts = self.get_model_counts()
         data = {
             'unit_type': kind,
-            'text': text
+            'text': text,
+            'title': title
         }
         response = self.post_valid_data(data)
         new_counts = self.get_model_counts()
@@ -609,7 +691,7 @@ class ResponseViewTests(MyTestCase):
             }
         )
 
-    def get_page_test(self):
+    def test_get_page(self):
         response = self.get_page()
         self.check_context_keys(response)
 
@@ -629,7 +711,7 @@ class CoursletSettingsViewTests(MyTestCase):
             kwargs=self.kwargs
         )
 
-    def get_page_test(self):
+    def test_get_page(self):
         response = self.get_page()
         self.check_context_keys(response)
 
@@ -638,7 +720,7 @@ class CoursletSettingsViewTests(MyTestCase):
         (True, {'title': 'SOme 111 titlee'}),
         (False, {'title': ''})
     )
-    def post_data_test(self, is_valid, post_data):
+    def test_post_data(self, is_valid, post_data):
         # import ipdb; ipdb.set_trace()
         counts = self.get_model_counts()
         response = self.post_valid_data(post_data)
@@ -654,7 +736,7 @@ class CoursletSettingsViewTests(MyTestCase):
 
 
 class CoursletDeleteViewTests(MyTestCase):
-    context_should_contain_keys = ('object',)
+    context_should_contain_keys = ('course', 'courslet')
     models_to_check = CourseUnit
 
     def setUp(self):
@@ -665,17 +747,17 @@ class CoursletDeleteViewTests(MyTestCase):
         }
         self.url = reverse('ctms:courslet_delete', kwargs=self.kwargs)
 
-    def get_page_test(self):
+    def test_get_page(self):
         # should return delete confirmation page
         counts = self.get_model_counts()
         response = self.get_page()
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts, must_equal=True)
-        self.assertTemplateUsed(response, 'ctms/courselet_confirm_delete.html')
+        # self.assertTemplateUsed(response, 'ctms/courselet_confirm_delete.html')
 
-    def post_page_test(self):
+    def test_post_page(self):
         counts = self.get_model_counts()
-        response = self.post_valid_data(data=None)
+        response = self.post_valid_data(data=None, method='delete')
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts)
         self.assertEqual(counts[self.models_to_check], new_counts[self.models_to_check] + 1)
@@ -698,9 +780,9 @@ class DeleteUnitViewTests(MyTestCase):
         }
         self.url = reverse('ctms:unit_delete', kwargs=self.kwargs)
 
-    def delete_unit_test(self):
+    def test_delete_unit(self):
         counts = self.get_model_counts()
-        response = self.post_valid_data()
+        response = self.post_valid_data(method='delete')
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts)
         url = reverse('ctms:courslet_view', kwargs={
@@ -724,7 +806,7 @@ class UnitSettingsViewTests(MyTestCase):
         }
         self.url = reverse('ctms:unit_settings', kwargs=self.kwargs)
 
-    def get_page_test(self):
+    def test_get_page(self):
         response = self.get_page()
         self.check_context_keys(response)
 
@@ -734,7 +816,7 @@ class UnitSettingsViewTests(MyTestCase):
     #     (True, {'title': "Some neeewww titleeeeee"}),
     #     (False, {'title': ""})
     # )
-    # def post_data_test(self, is_valid, post_data):
+    # def test_post_data(self, is_valid, post_data):
     #     counts = self.get_model_counts()
     #     ul = UnitLesson.objects.get(id=self.kwargs['pk'])
     #     response = self.post_data(post_data)
