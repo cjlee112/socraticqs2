@@ -632,7 +632,6 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         if not ul.lesson.concept:
             ul.lesson.concept = dummy_concept
             ul.lesson.addedBy = self.request.user
-            ul.lesson.save_root(dummy_concept, Lesson.ERROR_MODEL)
         for err_form in formset:
             if err_form.is_valid() and err_form.cleaned_data:
                 error_models.append(err_form.save(ul, self.request.user))
