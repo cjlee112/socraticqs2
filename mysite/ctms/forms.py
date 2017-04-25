@@ -39,7 +39,8 @@ class EditUnitForm(forms.ModelForm):
 
     def save(self, commit=True):
         self.instance.kind = self.cleaned_data['unit_type']
-        return super(EditUnitForm, self).save(commit)
+        ret = super(EditUnitForm, self).save(commit)
+        return ret
 
 
 class AddEditUnitForm(EditUnitForm):

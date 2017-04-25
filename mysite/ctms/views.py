@@ -12,6 +12,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
+from accounts.models import Instructor
 
 from chat.models import EnrollUnitCode
 
@@ -29,10 +30,11 @@ from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
 
 
-class CourseCoursletUnitMixin(object):
+class CourseCoursletUnitMixin(View):
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
     unit_pk_name = 'unit_pk'
+    NEED_INSTRUCTOR = True
     response_class = TemplateResponse
 
     def render(self, template_name, context):
@@ -41,6 +43,22 @@ class CourseCoursletUnitMixin(object):
             template=template_name,
             context=context,
         )
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.NEED_INSTRUCTOR and not self.am_i_instructor():
+            return Http404()
+        return super(CourseCoursletUnitMixin, self).dispatch(request, *args, **kwargs)
+
+    def am_i_course_owner(self):
+        course = self.get_course()
+        return course and course.addedBy != self.request.user or False
+
+    def am_i_instructor(self):
+        try:
+            instructor = self.request.user.instructor
+            return True
+        except Instructor.DoesNotExist:
+            return False
 
     def get_course(self):
         return Course.objects.filter(id=self.kwargs.get(self.course_pk_name)).first()
@@ -62,19 +80,13 @@ class CourseCoursletUnitMixin(object):
 
     def get_my_or_shared_with_me_courses(self):
         return Course.objects.filter(
-            models.Q(addedBy=self.request.user) | (
-             models.Q(invite__user=self.request.user) |
-             models.Q(invite__email=self.request.user.email)
-            ) |
+            models.Q(addedBy=self.request.user) |
             models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
         ).distinct()
 
     def get_my_or_shared_with_me_course_units(self):
         return CourseUnit.objects.filter(
-            models.Q(addedBy=self.request.user) | (
-             models.Q(course__invite__user=self.request.user) |
-             models.Q(course__invite__email=self.request.user.email)
-            ) |
+            models.Q(addedBy=self.request.user) |
             models.Q(course__role__role=Role.INSTRUCTOR, course__role__user=self.request.user) |
             models.Q(course__addedBy=self.request.user)
         ).distinct()
@@ -151,8 +163,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get_context_data(self, **kwargs):
         my_courses = Course.objects.filter(
-            models.Q(addedBy=self.request.user)  # |
-            # models.Q(shared_courses__to_user=self.request.user)
+            models.Q(addedBy=self.request.user)
         )
         shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
         courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
@@ -189,6 +200,16 @@ class CreateCourseView(NewLoginRequiredMixin, CreateView):
     fields = ['title']
     # form_class = CourseForm
 
+    def get(self, request, *args, **kwargs):
+        if not self.am_i_instructor():
+            raise Http404()
+        return super(CreateCourseView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not self.am_i_instructor():
+            raise Http404()
+        return super(CreateCourseView, self).post(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
         self.object = form.save()
@@ -203,16 +224,16 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
 
     def get_object(self, queryset=None):
         if 'pk' in self.kwargs:
-            return Course.objects.filter(
+            course = Course.objects.filter(
                 models.Q(id=self.kwargs.get('pk')) &
                 (
-                    models.Q(addedBy=self.request.user) | (
-                        models.Q(invite__user=self.request.user) |
-                        models.Q(invite__email=self.request.user.email)
-                    ) |
+                    models.Q(addedBy=self.request.user) |
                     models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
                 )
             ).distinct().first()
+            if not course:
+                raise Http404()
+            return course
 
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
@@ -321,6 +342,7 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
     def get_queryset(self):
         return Unit.objects.filter(
             courseunit__course=self.kwargs.get('course_pk'),
+            courseunit__course__addedBy=self.request.user
         )
 
     def form_valid(self, form):
@@ -354,6 +376,9 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
 
+    def get_queryset(self):
+        return self.model.objects.filter(addedBy=self.request.user)
+
     def get_context_data(self, **kwargs):
         super(UnitView, self).get_context_data(**kwargs)
         course = self.get_course()
@@ -375,6 +400,21 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
     unit_pk_name = 'pk'
+
+    def post(self, request, *args, **kwargs):
+        """
+        Post handler for creating Unit
+        Unit can create only course owner (Course.addedBy field)
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        course = self.get_course()
+        if course.addedBy != self.request.user:
+            raise Http404()
+        return super(CreateUnitView, self).post(request, *args, **kwargs)
+
 
     def get_success_url(self):
         return reverse(
@@ -419,7 +459,16 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     form_class = EditUnitForm
 
     def get_object(self, queryset=None):
-        return self.get_unit_lesson().lesson
+        """
+        Only course owner can edit Units in this course.
+        :param queryset:
+        :return:
+        """
+        course, ul = self.get_course(), self.get_unit_lesson()
+        if not course.addedBy == self.request.user:
+            raise Http404()
+        self.object = self.get_unit_lesson().lesson
+        return self.object
 
     def get_success_url(self):
         return reverse('ctms:unit_view', kwargs=self.kwargs)
@@ -447,6 +496,12 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     unit_pk_name = 'unit_pk'
     template_name = 'ctms/response_detail.html'
 
+    def get_queryset(self):
+        course = self.get_course()
+        if not course.addedBy == self.request.user:
+            raise Http404()
+        return super(ResponseView, self).get_queryset()
+
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
         return kwargs
@@ -463,7 +518,11 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         if queryset:
             return queryset.get(pk=self.kwargs.get('pk')).unit
         else:
-            return self.get_my_or_shared_with_me_course_units().get(pk=self.kwargs.get('pk')).unit
+            course_unit = self.get_my_or_shared_with_me_course_units().filter(pk=self.kwargs.get('pk')).first()
+            if not course_unit:
+                raise Http404()
+            return course_unit.unit
+
 
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs=self.kwargs)
@@ -485,6 +544,17 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
 class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = CourseUnit
     template_name = 'ctms/courselet_confirm_delete.html'
+    courslet_pk_name = 'pk'
+
+    def get_object(self, queryset=None):
+        if queryset:
+            return super(CoursletDeleteView, self).get_object(
+                queryset=queryset.filter(addedBy=self.request.user)
+            )
+        courselet = self.get_courslet()
+        if courselet and courselet.addedBy == self.request.user:
+            return courselet
+        raise Http404()
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
@@ -508,6 +578,17 @@ class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteV
 
 class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
     model = UnitLesson
+    unit_pk_name = 'pk'
+
+    def get_object(self, queryset=None):
+        if queryset:
+            return super(DeleteUnitView, self).get_queryset(
+                queryset=queryset.filter(addedBy=self.request.user)
+            )
+        ul = self.get_unit_lesson()
+        if ul and ul.addedBy == self.request.user:
+            return ul
+        raise Http404()
 
     def get_success_url(self):
         course = self.get_course()
@@ -533,7 +614,10 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
     template_name = 'ctms/unit_settings.html'
 
     def get_object(self, queryset=None):
-        return self.get_unit_lesson().lesson
+        ul = self.get_unit_lesson()
+        if ul and ul.addedBy == self.request.user:
+            return ul.lesson
+        raise Http404()
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
@@ -555,9 +639,10 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
     HANDLE_FORMSET = True
 
     def get_success_url(self):
-        return reverse('ctms:courslet_view', kwargs={
+        return reverse('ctms:unit_edit', kwargs={
             'course_pk': self.kwargs['course_pk'],
-            'pk': self.kwargs['courslet_pk'],
+            'courslet_pk': self.kwargs['courslet_pk'],
+            'pk': self.object.id
         })
 
     def post(self, request, *args, **kwargs):
@@ -592,7 +677,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
                     return self.formset_invalid(formset)
             else:
                 messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
-
+                return response
         else:
             messages.add_message(request, messages.WARNING, "Please correct errors below")
         context = {
@@ -680,7 +765,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
 
     def get_object(self, queryset=None):
         obj = self.get_unit_lesson()
-        if not obj:
+        if not obj or (obj and obj.addedBy != self.request.user):
             raise Http404()
         return obj
 
@@ -756,6 +841,17 @@ class SendInvite(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     form_class = InviteForm
     course_pk_name = 'pk'
     template_name = 'ctms/invite_list.html'
+
+    def post(self, request, *args, **kwargs):
+        if not self.am_i_course_owner():
+            raise Http404()
+        return super(SendInvite, self).post(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if not self.am_i_course_owner():
+            raise Http404()
+        return super(SendInvite, self).get(request, *args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         kwargs['tester_invites'] = Invite.testers.my_invites(self.request)
@@ -833,6 +929,8 @@ class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View)
 class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, code):
         invite = Invite.objects.get(code=code)
+        if invite.course.addedBy != self.request.user:
+            raise Http404()
         response = invite.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS,
                              "We just resent invitation to {}".format(invite.email))

@@ -99,17 +99,17 @@
                 {% csrf_token %}
 
                 <!-- TODO: The confirm window onclick is enough? -->
-                <!-- {% for field in delete_account_form %}
+                {% for field in delete_account_form %}
                   {% if not field.is_hidden %}
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {{ field.errors }}
+                    <!--{{ field.label_tag }}-->
+                    <!--{{ field }}-->
+                    <!--{{ field.errors }}-->
                   {% else %}
                     {{ field }}
                   {% endif %}
-                {% endfor %} -->
+                {% endfor %}
 
-                <input type="submit" value="Delete Account" class="button button--delete" data-confirm-text="Do you really want to delete your account?">
+                <input type="submit" value="Delete Account" class="button button--custom-delete" data-confirm-text="Do you really want to delete your account?">
               </form>
             {% endif %}
           </section>
@@ -117,4 +117,22 @@
       {% endif %}
     </main>
   </div>
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script>
+  // Confirm on delete buttons
+  $('.button--custom-delete').on('click', function(e) {
+    console.log(11111);
+    var text = $(this).data('confirm-text') || 'Are you sure?';
+
+    if(!window.confirm(text)) {
+      $('#id_confirm_delete_account').val(false);
+      e.preventDefault();
+    } else {
+      $('#id_confirm_delete_account').val(true);
+    }
+  });
+</script>
 {% endblock %}
