@@ -5,6 +5,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.generic import View, CreateView
 from django.core.urlresolvers import reverse
+from django.views.generic.base import TemplateView
 
 from accounts.forms import (
     UserForm, InstructorForm, ChangePasswordForm,
@@ -15,7 +16,9 @@ from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
 from .forms import SocialForm
 
 
-class AccountSettingsView(NotAnonymousRequiredMixin, View):
+class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
+    template_name = 'accounts/settings.html'
+
     def get_instructor(self):
         try:
             return self.request.user.instructor
@@ -24,9 +27,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, View):
 
     def get(self, request):
         instructor = self.get_instructor()
-        return render(
-            request,
-            'accounts/settings.html',
+        return self.render_to_response(
             dict(
                 user_form=UserForm(instance=request.user),
                 instructor_form=InstructorForm(instance=instructor),
@@ -66,22 +67,19 @@ class AccountSettingsView(NotAnonymousRequiredMixin, View):
         kwargs['person'] = request.user
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
-        return render(
-            request,
-            'accounts/settings.html',
+        return self.render_to_response(
             kwargs
         )
 
-class DeleteAccountView(NotAnonymousRequiredMixin, View):
+class DeleteAccountView(NotAnonymousRequiredMixin, TemplateView):
+    template_name = 'accounts/settings.html'
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
         if form.is_valid():
             new_user = form.save()
             logout(request)
             return HttpResponseRedirect(reverse('accounts:deleted'))
-        return render(
-            request,
-            'accounts/settings.html',
+        return self.render_to_response(
             dict(
                 user_form=UserForm(instance=request.user),
                 instructor_form=InstructorForm(instance=request.user.instructor),
@@ -136,8 +134,7 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
             return redirect(self.get_success_url())
         else:
             form = self.get_form()
-            return render(
-                request,
+            return self.render_to_response(
                 'accounts/profile_edit.html',
                 {'form': form}
             )

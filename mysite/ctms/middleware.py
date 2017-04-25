@@ -19,8 +19,12 @@ MODEL_NAMES_MAPPING = {
     Response: 'response'
 }
 
-NAME_MODEL_MAPPING = {v: k for k, v in MODELS_ORDERED_DICT.items()}
-
+NAME_MODEL_MAPPING = {
+    'Course': Course,
+    'Response': Response,
+    'Unit': UnitLesson,
+    'CourseUnit': CourseUnit
+}
 
 
 class SideBarUtils(object):
@@ -163,37 +167,50 @@ class SideBarUtils(object):
 
 class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if 'ctms' in request.path:
+        urls = self._get_urls(request)
+        if 'ctms' in request.path and request.path != urls['all_urls']['my_courses']:
             model_ids = self._get_model_ids(view_kwargs)
             objects = self._get_objects(model_ids)
             # attach recieved objects to request object
             for name, obj in objects:
                 setattr(request, name, obj)
+
+            # attach object id's to session
+            obj_ids = {}
+            for cls, o_id in model_ids.items():
+                obj_ids[cls.__name__] = o_id
+            request.session['sidebar_object_ids'] = obj_ids
         return None
 
     def process_template_response(self, request, response):
-        if 'ctms' in request.path:
-            sidebar_context = {}
-            # add request to mixin
-            self.course_mixin.request = request
-            my_courses = self.course_mixin.get_my_courses() if request.user.is_authenticated() else Course.objects.none()
-            sidebar_context['user_courses'] = my_courses
-
+        # add request to mixin
+        self.course_mixin.request = request
+        sidebar_context = {}
+        my_courses = self.course_mixin.get_my_courses() if request.user.is_authenticated() else Course.objects.none()
+        sidebar_context['user_courses'] = my_courses
+        if 'ctms' in request.path and not request.session.get('sidebar_object_ids', {}):
             for model, name in MODEL_NAMES_MAPPING.items():
                 sidebar_context[name] = getattr(request, name, None)
+            # urls = self._get_urls(request)
+            # sidebar_context['urls'] = urls
+        elif request.session.get('sidebar_object_ids'):
+            objects = dict(self._get_objects({
+                model: request.session.get('sidebar_object_ids', {}).get(name)
+                for name, model in NAME_MODEL_MAPPING.items()
+            }))
+            sidebar_context.update(objects)
 
-            urls = self._get_urls(request)
-            sidebar_context['urls'] = urls
+        if sidebar_context.get('course'):
+            courslets = self.course_mixin.get_courselets_by_course(sidebar_context['course'])
+            sidebar_context['course_courslets'] = courslets
 
-            if sidebar_context.get('course'):
-                courslets = self.course_mixin.get_courselets_by_course(sidebar_context['course'])
-                sidebar_context['course_courslets'] = courslets
+        if sidebar_context.get('courslet'):
+            sidebar_context['courslet_units'] = self.course_mixin.get_units_by_courselet(
+                sidebar_context['courslet']
+            )
 
-            if sidebar_context['courslet']:
-                sidebar_context['courslet_units'] = self.course_mixin.get_units_by_courselet(
-                    sidebar_context['courslet']
-                )
-            if response.context_data:
-                response.context_data['sidebar'] = sidebar_context
-                response.render()
+        if response.context_data:
+            response.context_data['sidebar'] = sidebar_context
+            response.render()
+
         return response

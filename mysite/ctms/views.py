@@ -187,8 +187,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
             course.addedBy = request.user
             course.save()
             return redirect(reverse('ctms:course_view', kwargs={'course_id': course.id}))
-        return render(
-            request,
+        return self.render(
             'ctms/my_courses.html',
             {'course_form': form}
         )
@@ -901,9 +900,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateVi
             invite = form.save()
             response = invite.send_mail(self.request, self)
             return response
-        return render(
-            self.request,
-            self.template_name,
+        return self.render_to_response(
             self.get_context_data()
         )
 
