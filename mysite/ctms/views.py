@@ -193,7 +193,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
         )
 
 
-class CreateCourseView(NewLoginRequiredMixin, CreateView):
+class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     template_name = 'ctms/my_courses.html'
     model = Course
     fields = ['title']

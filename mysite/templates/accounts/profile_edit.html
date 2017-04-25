@@ -1,6 +1,6 @@
-{% extends 'ctms/ctms_base.html' %}
+{% extends "ctms_base.html" %}
 
-{% block base_content %}
+{% block content %}
 {% if form %}
 <form class="form" action="{% url 'accounts:profile_update' %}" method="post">
   {{ form.as_p }}

@@ -134,7 +134,4 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
             return redirect(self.get_success_url())
         else:
             form = self.get_form()
-            return self.render_to_response(
-                'accounts/profile_edit.html',
-                {'form': form}
-            )
+            return self.render_to_response({'form': form})
