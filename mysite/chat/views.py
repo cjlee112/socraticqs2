@@ -182,11 +182,17 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat = self.get_chat(request, enroll_code, **{'state__fsmNode__fsm__name': self.next_handler.FMS_name})
+        chat = self.get_chat(
+            request,
+            enroll_code,
+            **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
+        )
         if not chat and enroll_key:
             chat = self.create_new_chat(request, enroll_code, courseUnit)
         if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
+            next_point = self.next_handler.start_point(
+                unit=unit, chat=chat, request=request
+            )
         elif not chat.state:
             next_point = None
             chat.next_point = next_point
