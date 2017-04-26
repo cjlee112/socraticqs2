@@ -197,12 +197,21 @@ class Message(models.Model):
                 elif self.input_type == 'options' and self.text:
                     html = STATUS_OPTIONS[self.text]
                 else:
+                    author_name = (
+                        self.content.lesson.addedBy.get_full_name() or
+                        self.content.lesson.addedBy.username
+                    )
                     raw = (
-                        '`Read more <{0}>`_ \n {1}'.format(
-                            self.content.lesson.url, self.content.lesson.text
+                        '`Read more <{0}>`_ \n `Author: {1}` \n {2}'.format(
+                            self.content.lesson.url,
+                            author_name,
+                            self.content.lesson.text
                         )
                         if self.content.lesson.url
-                        else self.content.lesson.text
+                    else '`Author: {0}` \n {1}'.format(
+                            author_name,
+                            self.content.lesson.text
+                        )
                     )
 
                     html = mark_safe(md2html(raw))
