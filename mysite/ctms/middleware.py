@@ -79,21 +79,24 @@ class SideBarUtils(object):
         """
         retur: dict with urls like
         {
+        'all_urls': {
+            'url_name': '/some/url'
+            },
         'course_urls':{
             '1':{
                 'url.name': '/some/url'
                 }
-            }
+            },
         'courslet_urls':
             '1':{
                 'url.name': '/some/url'
                 }
-            }
+            },
         'unit_urls':
             '1':{
                 'url.name': '/some/url'
                 }
-            }
+            },
         'response_urls':
             '1':{
                 'url.name': '/some/url'
@@ -108,17 +111,6 @@ class SideBarUtils(object):
             ).setdefault(
                 obj_id, {}
             )[url_name] = url
-
-        def parse_url_name(url_name):
-            instances = ('course', 'courslet', 'unit',
-                         'response', 'shared')
-            instance, action = url_name.split('_', 1)
-            if instance not in instances:
-                for inst in instances:
-                    if inst in url_name:
-                        action = url_name.replace(inst, '').replace('_', '')
-                        instance = inst
-            return instance, action
 
         for url in ctms_urls:
             url_kw = self._get_url_kwargs(url)
@@ -176,9 +168,20 @@ class SideBarMiddleware(SideBarUtils):
                 setattr(request, name, obj)
 
             # attach object id's to session
+            old_obj_ids = request.session.get('sidebar_object_ids', {})
             obj_ids = {}
-            for cls, o_id in model_ids.items():
-                obj_ids[cls.__name__] = o_id
+            for name, cls in NAME_MODEL_MAPPING.items():
+                old_id = old_obj_ids.get(cls.__name__)
+                new_id = model_ids.get(cls)
+                if old_id and new_id:
+                    if new_id != old_id:
+                        obj_ids[cls.__name__] = new_id
+                    else:
+                        obj_ids[cls.__name__] = new_id
+                elif old_id and not new_id:
+                    obj_ids[cls.__name__] = old_id
+                elif not old_id and new_id:
+                    obj_ids[cls.__name__] = new_id
             request.session['sidebar_object_ids'] = obj_ids
         return None
 
