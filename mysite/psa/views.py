@@ -122,9 +122,9 @@ def set_pass(request):
         return context(exception='Something goes wrong...', person=user)
 
 
-def complete(request, backend, *args, **kwargs):
+def complete(request, *args, **kwargs):
     try:
-        return social_complete(request, backend, *args, **kwargs)
+        return social_complete(request, 'email', *args, **kwargs)
     except AuthMissingParameter:
         messages.error(
             request,
