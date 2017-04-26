@@ -135,7 +135,7 @@
                 {% for unit in sidebar.courslet_units %}
                   <!-- TODO: add <a class="sidebar__units__active" ... for the active unit -->
                   <li>
-                    <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}">
+                    <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}" class="{% if sidebar.unit == unit %}sidebar__units__active{% endif %}">
                       {{ unit.lesson.title }}
                     </a>
                   </li>

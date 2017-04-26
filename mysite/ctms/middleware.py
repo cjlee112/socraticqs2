@@ -22,7 +22,7 @@ MODEL_NAMES_MAPPING = {
 NAME_MODEL_MAPPING = {
     'Course': Course,
     'Response': Response,
-    'Unit': UnitLesson,
+    'UnitLesson': UnitLesson,
     'CourseUnit': CourseUnit
 }
 
@@ -211,7 +211,6 @@ class SideBarMiddleware(SideBarUtils):
             sidebar_context['courslet_units'] = self.course_mixin.get_units_by_courselet(
                 sidebar_context['courslet']
             )
-
         if response.context_data:
             response.context_data['sidebar'] = sidebar_context
             response.render()
