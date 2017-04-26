@@ -94,7 +94,7 @@ class AccountSettingsTests(TestCase):
     def test_post_valid_email_change(self):
         data = {'email': 'mm@mail.com', 'form_id': 'email_form'}
         response = self.client.post(self.url, data, follow=True)
-        self.assertRedirects(response, self.url)
+        self.assertRedirects(response, reverse('ctms:email_sent'))
         cc = CustomCode.objects.all().last()
         self.assertEqual(cc.email, data['email'])
         self.assertEqual(cc.user_id, self.user.id)

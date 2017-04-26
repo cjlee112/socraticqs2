@@ -57,9 +57,7 @@ class ChangeEmailForm(forms.Form):
         :return:
         '''
         if self.initial['email'] != self.cleaned_data['email']:
-            complete(request, 'email', force_update=True)
-            return True
-        return False
+            return complete(request, 'email', force_update=True)
 
 
 class InstructorForm(forms.ModelForm):

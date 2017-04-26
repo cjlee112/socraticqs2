@@ -67,7 +67,9 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                 form = form_cls(data=request.POST)
                 if form.is_valid():
                     save = form_save_part[form_id](form)
-                    save()
+                    rsp = save()
+                    if form_id == 'email_form':
+                        return rsp
                 else:
                     has_errors = True
                 kwargs[form_id] = form
