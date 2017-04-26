@@ -1,4 +1,5 @@
 from functools import partial
+from django.contrib import messages
 
 from django.contrib.auth import logout
 from django.http.response import HttpResponseRedirect
@@ -9,8 +10,8 @@ from django.views.generic.base import TemplateView
 
 from accounts.forms import (
     UserForm, InstructorForm, ChangePasswordForm,
-    DeleteAccountForm, ChangeEmailForm
-)
+    DeleteAccountForm, ChangeEmailForm,
+    CreatePasswordForm)
 from accounts.models import Instructor
 from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
 from .forms import SocialForm
@@ -25,13 +26,16 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         except Instructor.DoesNotExist:
             return
 
+    def get_password_form_cls(self):
+        return ChangePasswordForm if self.request.user.has_usable_password() else CreatePasswordForm
+
     def get(self, request):
         instructor = self.get_instructor()
         return self.render_to_response(
             dict(
                 user_form=UserForm(instance=request.user),
                 instructor_form=InstructorForm(instance=instructor),
-                password_form=ChangePasswordForm(),
+                password_form=self.get_password_form_cls()(instance=request.user),
                 delete_account_form=DeleteAccountForm(instance=request.user),
                 email_form=ChangeEmailForm(initial={'email': request.user.email}),
                 person=request.user
@@ -44,8 +48,16 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
             'user_form': partial(UserForm, instance=request.user),
             'instructor_form': partial(InstructorForm, instance=instructor),
             'email_form': partial(ChangeEmailForm, initial={'email': request.user.email}),
-            'password_form': partial(ChangePasswordForm, instance=request.user),
+            'password_form': partial(self.get_password_form_cls(), instance=request.user),
             'delete_account_form': partial(DeleteAccountForm, instance=request.user),
+        }
+
+        form_save_part = {
+            'user_form': lambda form_obj: partial(form_obj.save),
+            'instructor_form': lambda form_obj: partial(form_obj.save),
+            'email_form': lambda form_obj: partial(form_obj.save, request, commit=False),
+            'password_form': lambda form_obj: partial(form_obj.save),
+            'delete_account_form': lambda form_obj: partial(form_obj.save),
         }
         kwargs = {}
         has_errors = False
@@ -54,10 +66,8 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
             if form_id in request.POST.getlist('form_id'):
                 form = form_cls(data=request.POST)
                 if form.is_valid():
-                    if form_id == 'email_form':
-                        resp = form.save(request, commit=False)
-                    else:
-                        form.save()
+                    save = form_save_part[form_id](form)
+                    save()
                 else:
                     has_errors = True
                 kwargs[form_id] = form
@@ -67,6 +77,8 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         kwargs['person'] = request.user
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
+        else:
+            messages.add_message(request, messages.WARNING, "Please correct errors below")
         return self.render_to_response(
             kwargs
         )

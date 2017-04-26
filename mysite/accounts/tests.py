@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
+from accounts.forms import CreatePasswordForm, ChangePasswordForm
 
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
@@ -59,8 +60,32 @@ class AccountSettingsTests(TestCase):
         self.assertRedirects(response, self.url)
         self.assertEqual(instructor.institution, 'SomeInstitute')
 
-    def test_post_valid_password_change(self):
+    def test_post_valid_password_create(self):
+        # make user password UNUSABLE
+        self.user.password = '!' + self.user.password
+        self.user.save()
+        response = self.client.get(self.url)
+        self.assertEqual(type(response.context['password_form']), CreatePasswordForm)
+
         data = {'confirm_password': '1234', 'password': '1234', 'form_id': 'password_form'}
+        response = self.client.post(self.url, data, follow=True)
+        self.assertRedirects(response, self.url)
+        can_login = self.client.login(username='username', password='1234')
+        self.assertTrue(can_login)
+
+    def test_post_valid_password_change(self):
+        response = self.client.get(self.url)
+        self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
+
+        can_login = self.client.login(username='username', password='123')
+        self.assertTrue(can_login)
+
+        data = {
+            'current_password': '123',
+            'confirm_password': '1234',
+            'password': '1234',
+            'form_id': 'password_form'
+        }
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, self.url)
         can_login = self.client.login(username='username', password='1234')
