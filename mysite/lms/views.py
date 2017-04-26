@@ -8,6 +8,7 @@ from django.db import models
 from ct.models import Course
 from fsm.models import FSMState
 from chat.models import EnrollUnitCode, Chat, Message
+from chat.serializers import ChatProgressSerializer
 
 
 class CourseView(View):
@@ -33,7 +34,12 @@ class CourseView(View):
             (
                 courselet,
                 EnrollUnitCode.get_code(courselet),
-                len(courselet.unit.get_exercises())
+                len(courselet.unit.get_exercises()),
+                ChatProgressSerializer(
+                    Chat.objects.filter(
+                        enroll_code__courseUnit=courselet
+                    ).first()
+                ).data['progress']*100
             )
             for courselet in course.get_course_units(True)
         )
