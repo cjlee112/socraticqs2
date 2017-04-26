@@ -39,7 +39,7 @@ class CourseView(View):
                     Chat.objects.filter(
                         enroll_code__courseUnit=courselet
                     ).first()
-                ).data['progress']*100
+                ).data.get('progress', 0)*100
             )
             for courselet in course.get_course_units(True)
         )
