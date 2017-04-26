@@ -128,9 +128,8 @@ def complete(request, *args, **kwargs):
     except AuthMissingParameter:
         messages.error(
             request,
-            "This token already verified! "
-            "You can not use it more than 1 time ever. "
-            "Please log in using form below or sign up.")
+            "Email already verified. Please log in using form below or sign up."
+        )
         if request.user.is_authenticated():
             return redirect('ct:person_profile', user_id=request.user.id)
         return redirect('ct:home')
