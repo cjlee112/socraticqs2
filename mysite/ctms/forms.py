@@ -20,12 +20,6 @@ class CourseForm(forms.ModelForm):
         }
 
 
-class CreateUnitForm(forms.ModelForm):
-    class Meta:
-        model = Lesson
-        fields = ('title',)
-
-
 class EditUnitForm(forms.ModelForm):
     KIND_CHOICES = (
         (Lesson.EXPLANATION, 'Introduction'),
@@ -43,13 +37,13 @@ class EditUnitForm(forms.ModelForm):
         return ret
 
 
-class AddEditUnitForm(EditUnitForm):
+class CreateEditUnitForm(EditUnitForm):
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'unit_type')
 
 
-class AddEditUnitAnswerForm(forms.ModelForm):
+class CreateEditUnitAnswerForm(forms.ModelForm):
     answer = forms.CharField(required=False, widget=forms.Textarea)
 
     class Meta:
@@ -64,7 +58,7 @@ class AddEditUnitAnswerForm(forms.ModelForm):
         self.instance.kind = Lesson.ANSWER
         self.instance.save_root()
         ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
-        lesson = super(AddEditUnitAnswerForm, self).save(commit)
+        lesson = super(CreateEditUnitAnswerForm, self).save(commit)
         return lesson
 
 

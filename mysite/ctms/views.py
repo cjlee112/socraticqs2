@@ -20,9 +20,9 @@ from ctms.forms import (
     CourseForm,
     CreateCourseletForm,
     EditUnitForm,
-    AddEditUnitForm,
+    CreateEditUnitForm,
     ErrorModelFormSet,
-    AddEditUnitAnswerForm
+    CreateEditUnitAnswerForm
 )
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
@@ -629,9 +629,9 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         return kwargs
 
 
-class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
+class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
     model = Lesson
-    form_class = AddEditUnitForm
+    form_class = CreateEditUnitForm
     formset_class = ErrorModelFormSet
     unit_pk_name = 'pk'
     template_name = 'ctms/unit_edit.html'
@@ -653,7 +653,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
             )
         form = self.get_form()
 
-        answer_form = AddEditUnitAnswerForm(**self.get_answer_form_kwargs())
+        answer_form = CreateEditUnitAnswerForm(**self.get_answer_form_kwargs())
 
         formset = self.get_formset()
         if form.is_valid():
@@ -738,7 +738,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
         return HttpResponseRedirect(self.get_success_url())
 
     def get_initial(self):
-        init = super(AddUnitEditView, self).get_initial()
+        init = super(CreateEditUnitView, self).get_initial()
         ul = self.get_unit_lesson()
         if ul:
             init['unit_type'] = ul.lesson.kind
@@ -793,7 +793,7 @@ class AddUnitEditView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBas
             'courslet': self.get_courslet(),
             'unit': self.object,
             'errors_formset': ErrorModelFormSet(**self.get_formset_kwargs()),
-            'answer_form': AddEditUnitAnswerForm(**self.get_answer_form_kwargs()),
+            'answer_form': CreateEditUnitAnswerForm(**self.get_answer_form_kwargs()),
         })
         return kwargs
 
