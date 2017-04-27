@@ -176,14 +176,17 @@ class SideBarMiddleware(SideBarUtils):
                 old_id = old_obj_ids.get(cls.__name__)
                 new_id = model_ids.get(cls)
                 if old_id and new_id:
-                    if new_id != old_id:
-                        obj_ids[cls.__name__] = new_id
-                    else:
-                        obj_ids[cls.__name__] = new_id
+                    # replace old_id with new
+                    obj_ids[cls.__name__] = new_id
                 elif old_id and not new_id:
+                    # remember old id
                     obj_ids[cls.__name__] = old_id
                 elif not old_id and new_id:
+                    # remember new id
                     obj_ids[cls.__name__] = new_id
+                else:
+                    # safely remove this id from dict
+                    obj_ids.pop(cls.__name__, None)
             request.session['sidebar_object_ids'] = obj_ids
         return None
 
