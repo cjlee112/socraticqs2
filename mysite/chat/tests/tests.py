@@ -26,10 +26,7 @@ from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
 
 
-class SetUpMixin(object):
-    """
-    Mixin to provide setUp method.
-    """
+class CustomTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
@@ -68,8 +65,29 @@ class SetUpMixin(object):
         )
         self.resource_unitlesson.save()
 
+    @staticmethod
+    def compile_html(resource):
+        author_name = (
+            resource.lesson.addedBy.get_full_name() or
+            resource.lesson.addedBy.username
+        )
+        raw = (
+            '`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
+                resource.lesson.url,
+                author_name,
+                self.resource_unitlesson.lesson.text
+            )
+            if resource.lesson.url
+            else '`Author: {0}` \n {1}'.format(
+                author_name,
+                resource.lesson.text
+            )
+        )
 
-class MainChatViewTests(SetUpMixin, TestCase):
+        return md2html(raw)
+
+
+class MainChatViewTests(CustomTestCase):
     """
     Tests for main view.
 
@@ -163,7 +181,7 @@ class MainChatViewTests(SetUpMixin, TestCase):
         self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
 
 
-class MessagesViewTests(SetUpMixin, TestCase):
+class MessagesViewTests(CustomTestCase):
     """
     Test for MessagesView API.
     """
@@ -503,7 +521,7 @@ class MessagesViewTests(SetUpMixin, TestCase):
         self.assertEquals(json_content['addMessages'][0]['html'], status_msg)
 
 
-class HistoryAPIViewTests(SetUpMixin, TestCase):
+class HistoryAPIViewTests(CustomTestCase):
     """
     Tests /history API.
     """
@@ -551,14 +569,15 @@ class HistoryAPIViewTests(SetUpMixin, TestCase):
         self.assertEquals(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
         self.assertEquals(json_content['addMessages'][1]['type'], 'message')
         self.assertEquals(
-            json_content['addMessages'][1]['html'], md2html(self.unitlesson.lesson.text)
+            json_content['addMessages'][1]['html'],
+            self.compile_html(self.unitlesson)
         )
         self.assertEquals(json_content['addMessages'][2]['type'], 'message')
         # TODO need to figure out how to find action help for Node
         # self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.get_help())
 
 
-class ProgressAPIViewTests(SetUpMixin, TestCase):
+class ProgressAPIViewTests(CustomTestCase):
     """
     Tests for /progress API.
     """
@@ -608,7 +627,7 @@ class ProgressAPIViewTests(SetUpMixin, TestCase):
         self.assertEquals(json_content['breakpoints'][0]['isUnlocked'], True)
 
 
-class ResourcesViewTests(SetUpMixin, TestCase):
+class ResourcesViewTests(CustomTestCase):
     """
     Tests for /resources API call.
     """
@@ -696,7 +715,8 @@ class ResourcesViewTests(SetUpMixin, TestCase):
         self.assertEquals(json_content['addMessages'][0]['html'], self.resource_unitlesson.lesson.title)
         self.assertEquals(json_content['addMessages'][1]['type'], 'message')
         self.assertEquals(
-            json_content['addMessages'][1]['html'], md2html(self.resource_unitlesson.lesson.text)
+            json_content['addMessages'][1]['html'],
+            self.compile_html(self.resource_unitlesson)
         )
         self.assertEquals(json_content['addMessages'][2]['type'], 'message')
         self.assertEquals(json_content['addMessages'][2]['html'], END.help)
@@ -708,7 +728,7 @@ class ResourcesViewTests(SetUpMixin, TestCase):
         self.assertIn('options', json_content['input'])
 
 
-class InternalMessageSerializerTests(SetUpMixin, TestCase):
+class InternalMessageSerializerTests(CustomTestCase):
     """
     Tests for InternalMessageSerializer.
     """
@@ -731,7 +751,7 @@ class InternalMessageSerializerTests(SetUpMixin, TestCase):
             self.assertIn(attr, result)
 
 
-class InputSerializerTests(SetUpMixin, TestCase):
+class InputSerializerTests(CustomTestCase):
     """
     Tests for InputSerializer.
     """
@@ -753,7 +773,7 @@ class InputSerializerTests(SetUpMixin, TestCase):
             self.assertIn(attr, result)
 
 
-class MesasageSerializerTests(SetUpMixin, TestCase):
+class MesasageSerializerTests(CustomTestCase):
     """
     Tests for MessageSerializer.
     """
@@ -784,7 +804,7 @@ class MesasageSerializerTests(SetUpMixin, TestCase):
             self.assertIn(attr, result)
 
 
-class ChatProgressSerializerTests(SetUpMixin, TestCase):
+class ChatProgressSerializerTests(CustomTestCase):
     """
     Tests for ChatProgressSerializer.
     """
@@ -805,7 +825,7 @@ class ChatProgressSerializerTests(SetUpMixin, TestCase):
             self.assertIn(attr, result)
 
 
-class ChatHistorySerializerTests(SetUpMixin, TestCase):
+class ChatHistorySerializerTests(CustomTestCase):
     """
     Tests for ChatHistorySerializer.
     """
@@ -826,7 +846,7 @@ class ChatHistorySerializerTests(SetUpMixin, TestCase):
             self.assertIn(attr, result)
 
 
-class LessonSerializerTests(SetUpMixin, TestCase):
+class LessonSerializerTests(CustomTestCase):
     """
     Tests for LessonSerializer.
     """

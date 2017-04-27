@@ -11,11 +11,12 @@ class TestCourseView(TestCase):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
 
+    @patch('lms.views.ChatProgressSerializer')
     @patch('lms.views.get_object_or_404')
     @patch('lms.views.EnrollUnitCode.get_code')
     @patch('fsm.models.FSMState.find_live_sessions')
     @patch('chat.models.Chat.objects.filter')
-    def test_course_view(self, chatFilterMock, find_live_sessions, get_code, get_obj_or_404):
+    def test_course_view(self, chatFilterMock, find_live_sessions, get_code, get_obj_or_404, ChatProgressSerializer):
         """
         This test tests that:
          - query FSMState.find_live_sessions(request.user).filter(activity__course=course).first()
@@ -42,6 +43,8 @@ class TestCourseView(TestCase):
 
         chatFilterMock = Mock()
         chatFilterMock.return_value = [Mock()]
+
+        ChatProgressSerializer.data.get.return_value = 0
 
         response = self.client.get(reverse('lms:course_view', kwargs={'course_id': 1}))
 
