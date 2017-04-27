@@ -130,6 +130,10 @@ class Message(models.Model):
     class Meta:
         ordering = ['timestamp']
 
+    def __unicode__(self):
+        return "<Message>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
+            self.chat.id if self.chat else None, self.owner.username, self.get_kind_display(), self.text)
+
     @property
     def content(self):
         if self.contenttype == 'NoneType':
