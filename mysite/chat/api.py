@@ -73,7 +73,18 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated, IsOwner)
 
-    def retrieve(self, request, *args, **kwargs):
+    def roll_fsm_forward(self, chat, message):
+        chat.next_point = self.next_handler.next_point(
+            current=message.content, chat=chat, message=message, request=self.request
+        )
+        chat.save()
+        message.chat = chat
+        print " ROLL_FSM_FORWARD " * 10
+        # import ipdb; ipdb.set_trace()
+        serializer = self.get_serializer(message)
+        return Response(serializer.data)
+
+    def retrieve(self, *args, **kwargs):
         message = self.get_object()
         chat_id = self.request.GET.get('chat_id')
         try:
@@ -83,17 +94,20 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
+
+        # import ipdb; ipdb.set_trace()
+
+        if is_chat_add_lesson(message) and message.content_id and next_point == message:
+            print " RETRIEVE " * 10
+            # import ipdb; ipdb.set_trace()
+            return self.roll_fsm_forward(chat, message)
+
         if (
-            (message.contenttype in ['response', 'uniterror'] or is_chat_add_lesson(message)) and
+            message.contenttype in ['response', 'uniterror'] and
             message.content_id and
             next_point == message
         ):
-            chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=request
-            )
-            chat.save()
-            serializer = self.get_serializer(message)
-            return Response(serializer.data)
+            return self.roll_fsm_forward(chat, message)
 
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
@@ -105,7 +119,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.timestamp = timezone.now()
                 message.save()
             chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=request
+                current=message.content, chat=chat, message=message, request=self.request
             )
             chat.save()
             message.chat = chat
@@ -134,39 +148,86 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
         is_in_node = lambda node: message.chat.state.fsmNode.name == node
 
+        # import ipdb; ipdb.set_trace()
+
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
-        if message.input_type == 'text' and is_chat_add_lesson(message):
+
+        # Chat add unit lesson
+        if is_chat_add_lesson(message):
             message.chat = chat
             text = self.request.data.get('text')
+            option = self.request.data.get('option')
             course_unit = message.chat.enroll_code.courseUnit
             unit = course_unit.unit
 
+            if message.input_type == 'options' and is_in_node('HAS_UNIT_ANSWER'):
+                print " HAS_UNIT_ANSWER " * 10
+                # import ipdb; ipdb.set_trace()
+                # if not message.timestamp:
+                    # message.content_id = resp.id
+                    #     chat.next_point = message
+                    #     chat.save()
+                    #     serializer.save(timestamp=timezone.now(), chat=chat)
+                    # else:
+                    #     serializer.save()
+                message = self.next_handler.next_point(
+                    current=message.content,
+                    chat=chat,
+                    message=message,
+                    request=self.request
+                )
+                chat.next_point = message
+                chat.save()
+                # import ipdb; ipdb.set_trace()
+                serializer.save(chat=chat, timestamp=timezone.now())
+                # else:
+                #     serializer.save()
+
+
+            # if message.input_type == 'text':
             if is_in_node('GET_UNIT_NAME_TITLE'):
+                print " GET_UNIT_NAME_TITLE " * 10
+                # import ipdb; ipdb.set_trace()
                 if course_unit and unit:
                     if not message.content_id:
                         lesson = Lesson.objects.create(title=text, addedBy=self.request.user,
                                                        kind=Lesson.ORCT_QUESTION, text='')
                         lesson.treeID = lesson.id
                         lesson.save()
-                        ul = lesson.unitlesson_set.create(unit=unit, lesson=lesson,
-                                                          treeID=lesson.treeID, addedBy=self.request.user)
+                        ul = UnitLesson.create_from_lesson(
+                            lesson=lesson, unit=unit, kind=UnitLesson.COMPONENT, order='APPEND',
+                            )
                     else:
                         ul = message.content
-                    chat.next_point = message
-                    chat.save()
-                    serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat, text=text,
-                                    contenttype='unitlesson')
+                    if not message.timestamp:
+                        serializer.save(
+                            content_id=ul.id,
+                            timestamp=timezone.now(),
+                            chat=chat,
+                            text=text,
+                            contenttype='unitlesson'
+                        )
+                    else:
+                        serializer.save()
 
             if is_in_node('GET_UNIT_QUESTION'):
+                print " GET_UNIT_QUESTION " * 10
+                # import ipdb; ipdb.set_trace()
                 ul = message.content
                 ul.lesson.text = text
                 ul.lesson.save()
-                chat.next_point = message
-                chat.save()
-                serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat,
-                            contenttype='unitlesson', text=text)
+                if not message.timestamp:
+                    serializer.save(
+                        content_id=ul.id,
+                        timestamp=timezone.now(),
+                        chat=chat,
+                        contenttype='unitlesson',
+                        text=text
+                    )
+                else:
+                    serializer.save()
 
             if is_in_node('GET_UNIT_ANSWER'):
                 #  create answer
@@ -176,22 +237,33 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     unit_lesson_answer = UnitLesson.create_from_lesson(
                         unit=ul.unit, lesson=self.lesson, parent=ul, kind=UnitLesson.ANSWERS
                     )
-                    chat.next_point = message
+                    # chat.next_point = message
                     chat.save()
                     serializer.save(content_id=ul.id, timestamp=timezone.now(), chat=chat,
                                     contenttype='unitlesson', text=text)
                 else:
                     serializer.save()
 
-            # if is_in_node('GET_UNIT_QUESTION'):
-            #     ul = message.content
-            #
-            #     if not message.timestamp:
+            # if is_in_node('HAS_UNIT_ANSWER'):
+            #     # message =
+            #     import ipdb; ipdb.set_trace()
 
-            if is_in_node('GET_UNIT_ANSWER'):
-                chat.next_point = None
-                chat.save()
-                serializer.save(chat=chat)
+            if is_in_node('GET_HAS_UNIT_ANSWER'):
+                print " GET_HAS_UNIT_ANSWER " * 10
+                # import ipdb; ipdb.set_trace()
+                yes_no_map = {
+                    'yes': True,
+                    'no': False
+                }
+                ul = message.content
+                has_answer = yes_no_map.get(self.request.data.get('option'))
+                if has_answer is None:
+                    raise ValueError("Recieved not valid response from user")
+
+                ul.lesson.kind = Lesson.ORCT_QUESTION if has_answer else Lesson.BASE_EXPLANATION
+                ul.lesson.save()
+                message.text = self.request.data.get('option')
+                message.save()
 
         if message.input_type == 'text' and not is_chat_add_lesson(message):
             message.chat = chat

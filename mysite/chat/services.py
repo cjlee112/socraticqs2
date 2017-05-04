@@ -161,7 +161,6 @@ class LiveChatFsmHandler(FsmHandler):
 
     def start_point(self, unit, chat, request, **kwargs):
         self.push_state(chat, request, self.FMS_name, **kwargs)
-        # import ipdb; ipdb.set_trace()
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()

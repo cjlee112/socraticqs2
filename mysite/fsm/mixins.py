@@ -387,7 +387,8 @@ class ChatMixin(object):
                 owner=chat.user,
             )[0]
 
-        if self.name in ('GET_UNIT_NAME_TITLE', 'GET_UNIT_QUESTION', 'GET_UNIT_ANSWER'):
+
+        if self.name in ('GET_UNIT_NAME_TITLE', 'GET_UNIT_QUESTION', 'GET_UNIT_ANSWER', 'GET_HAS_UNIT_ANSWER'):
             _data = dict(
                 chat=chat,
                 owner=chat.user,
@@ -398,16 +399,17 @@ class ChatMixin(object):
             )
             if isinstance(current, UnitLesson):
                 _data['content_id'] = current.id
-                _data['text'] = current.lesson.title
+                # _data['text'] = current.lesson.title
                 _data['contenttype'] = 'unitlesson'
             elif message and message.content:
+                # _data['text'] = "current.lesson"
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = message.contenttype
 
             # content_id = current.id if current else None
             message = Message.objects.create(**_data)
 
-        if self.name in ('START', 'UNIT_QUESTION', 'WELL_DONE') and self.is_chat_add_lesson():
+        if self.name in ('START', 'WELL_DONE') and self.is_chat_add_lesson():
             text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
@@ -417,24 +419,65 @@ class ChatMixin(object):
                 is_additional=is_additional,
                 owner=chat.user,
             )
+            message = Message.objects.create(**_data)
+        if self.name in ('UNIT_QUESTION',) and self.is_chat_add_lesson():
+            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=is_additional,
+                owner=chat.user,
+            )
+            # import ipdb; ipdb.set_trace()
             if message and message.content_id:
                 _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            elif isinstance(current, UnitLesson):
+                _data['content_id'] = current.id
                 _data['contenttype'] = 'unitlesson'
             message = Message.objects.get_or_create(**_data)[0]
 
         if self.name in ('HAS_UNIT_ANSWER',):
             _data = dict(
                 chat=chat,
-                # text=text,
-                input_type='custom',
-                # kind='button',
+                text=self.title,
+                input_type='options',
+                kind='message',
                 owner=chat.user,
+                userMessage=False,
                 is_additional=is_additional
             )
             if message and message.content_id:
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'
             message = Message.objects.get_or_create(**_data)[0]
+
+        # if self.name == 'GET_HAS_UNIT_ANSWER':
+        #     _data = dict(
+        #         chat=chat,
+        #         text='',
+        #         input_type='text',
+        #         kind='response',
+        #         owner=chat.user,
+        #         userMessage=True,
+        #         is_additional=is_additional
+        #     )
+        #     # _data = dict(
+        #     #     contenttype='unitlesson',
+        #     #     response_to_check=response_to_chk,
+        #     #     input_type='custom',
+        #     #     content_id=answer.id,
+        #     #     chat=chat,
+        #     #     owner=chat.user,
+        #     #     kind=answer.kind,
+        #     #     is_additional=is_additional)
+        #     if message and message.content_id:
+        #         _data['content_id'] = message.content_id
+        #         _data['contenttype'] = 'unitlesson'
+        #     message = Message.objects.get_or_create(**_data)[0]
+
 
         # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS
         if is_wait_node(self.name):

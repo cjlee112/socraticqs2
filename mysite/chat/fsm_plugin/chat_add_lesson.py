@@ -82,19 +82,28 @@ class GET_UNIT_QUESTION(object):
 
 class HAS_UNIT_ANSWER(object):
     path = 'fsm:fsm_node'
-    title = 'Is this unit answer?'
+    title = 'Does this unit has an answer?'
     edges = (
-        dict(name='next', toNode='GET_UNIT_ANSWER_RESPONSE', title='get unit answer'),
+        dict(name='next', toNode='GET_HAS_UNIT_ANSWER', title='get unit answer'),
     )
 
+
+class GET_HAS_UNIT_ANSWER(object):
+    path = 'fsm:fsm_node'
+    title = 'get answer'
+    # next_edge = get_next_edge
+    edges = (
+        dict(name='next', toNode='WELL_DONE', title='Well done!'),
+        # dict(name='not_a_question', toNode='NOT_A_QUESTION', title='unit is not a question')
+    )
 
 class GET_UNIT_ANSWER_RESPONSE(object):
     path = 'fsm:fsm_node'
     title = ''
-    next_edge = get_next_edge
+    # next_edge = get_next_edge
     edges = (
-        dict(name='done', toNode='WELL_DONE', title='got unit answer'),
-        dict(name='not_a_question', toNode='NOT_A_QUESTION', title='unit is not a question')
+        dict(name='next', toNode='WELL_DONE', title='got unit answer'),
+        # dict(name='not_a_question', toNode='NOT_A_QUESTION', title='unit is not a question')
     )
 
 class GET_UNIT_ANSWER(object):
@@ -117,7 +126,7 @@ class NOT_A_QUESTION(object):
 class WELL_DONE(object):
     path = 'fsm:fsm_node'
     title = 'Well done!'
-    help = '''You have created  nw unit in this courselet. Another important concept on Courselets is error models.
+    help = '''You have created  new unit in this courselet. Another important concept on Courselets is error models.
     They are lessons based on common misconceptions that your students can select when they self-assess.
     We won't cover error models in this interactive tutorial, but check them out as you start using this courselet with
     students.
@@ -126,7 +135,7 @@ class WELL_DONE(object):
     '''
     edges = (
         dict(name='next', toNode='START', title='unit saved'),
-        dict(name='next', toNode='END', title='finish')
+        # dict(name='next', toNode='END', title='finish'),
     )
 
 
@@ -149,7 +158,7 @@ def get_specs():
         title='Add a New Lesson',
         description='''Guides you through the steps of adding a new
                     lesson to this courselet''',
-        pluginNodes=[START, GET_UNIT_NAME_TITLE, UNIT_QUESTION, GET_UNIT_QUESTION, HAS_UNIT_ANSWER,
+        pluginNodes=[START, GET_UNIT_NAME_TITLE, UNIT_QUESTION, GET_UNIT_QUESTION, HAS_UNIT_ANSWER, GET_HAS_UNIT_ANSWER,
                      GET_UNIT_ANSWER_RESPONSE, GET_UNIT_ANSWER, NOT_A_QUESTION, WELL_DONE, END],
         fsmGroups=('teach/unit_tasks',),
     )

@@ -67,8 +67,8 @@ STATUS_OPTIONS = {
 }
 
 YES_NO_OPTIONS = (
-    (1, 'Yes!'),
-    (0, 'No!')
+    ('yes', 'Yes!'),
+    ('no', 'No!')
 )
 
 
@@ -131,8 +131,11 @@ class Message(models.Model):
         ordering = ['timestamp']
 
     def __unicode__(self):
-        return "<Message>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
-            self.chat.id if self.chat else None, self.owner.username, self.get_kind_display(), self.text)
+        return "<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
+            self.id,
+            '', #self.chat.id if self.chat else None,
+            self.owner.username, self.get_kind_display(), self.text
+        )
 
     @property
     def content(self):
@@ -194,6 +197,9 @@ class Message(models.Model):
 
         return options
 
+    def is_in_fsm_node(self, node_name):
+        return self.chat.state and self.chat.state.fsmNode.fsm.name == node_name
+
     def get_html(self):
         html = None
         if self.content_id: # self.chat.state.fsmNode.fsm.name != 'chat_add_lesson':
@@ -204,13 +210,16 @@ class Message(models.Model):
                     html = self.content.text
                 else:
                     html = EVAL_OPTIONS.get(self.content.selfeval, '')
-            elif self.contenttype == 'unitlesson':
-                if self.content.kind == UnitLesson.MISUNDERSTANDS:
-                    html = mark_safe(md2html('**%s** \n %s' % (self.content.lesson.title, self.content.lesson.text)))
-                elif self.input_type == 'options' and self.text:
-                    html = STATUS_OPTIONS[self.text]
+            elif self.contenttype == 'unitlesson': # check FSM here
+                if self.is_in_fsm_node('chat_add_lesson'):
+                    html = mark_safe(md2html(self.text or ''))
                 else:
-                    html = mark_safe(md2html(self.content.lesson.text))
+                    if self.content.kind == UnitLesson.MISUNDERSTANDS:
+                        html = mark_safe(md2html('**%s** \n %s' % (self.content.lesson.title, self.content.lesson.text)))
+                    elif self.input_type == 'options' and self.text:
+                        html = STATUS_OPTIONS[self.text]
+                    else:
+                        html = mark_safe(md2html(self.content.lesson.text))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
 
