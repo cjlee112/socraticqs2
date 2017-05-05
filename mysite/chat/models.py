@@ -229,7 +229,7 @@ class Message(models.Model):
 
     def get_name(self):
         name = "Kris Lee"
-        if self.content_id:
+        if self.content_id and self.content:
             if self.contenttype == 'response':
                 name = self.content.author.get_full_name() or self.content.author.username
             elif self.contenttype == 'unitlesson':

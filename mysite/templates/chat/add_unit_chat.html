@@ -34,7 +34,7 @@
     <!-- Introduction -->
     <section class="chat-introduction">
       <div class="chat-introduction-title">
-        <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
+        <a href="{{ back_url }}">Return</a>
         {% if chat.is_live %}
         <h2>Live Session - {{ chat.timestamp|date:"F j, Y P" }} </h2>
         {% else %}

@@ -420,6 +420,7 @@ class ChatMixin(object):
                 owner=chat.user,
             )
             message = Message.objects.create(**_data)
+
         if self.name in ('UNIT_QUESTION',) and self.is_chat_add_lesson():
             text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
@@ -437,7 +438,7 @@ class ChatMixin(object):
             elif isinstance(current, UnitLesson):
                 _data['content_id'] = current.id
                 _data['contenttype'] = 'unitlesson'
-            message = Message.objects.get_or_create(**_data)[0]
+            message = Message.objects.create(**_data)
 
         if self.name in ('HAS_UNIT_ANSWER',):
             _data = dict(
@@ -452,7 +453,7 @@ class ChatMixin(object):
             if message and message.content_id:
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'
-            message = Message.objects.get_or_create(**_data)[0]
+            message = Message.objects.create(**_data)
 
         # if self.name == 'GET_HAS_UNIT_ANSWER':
         #     _data = dict(
