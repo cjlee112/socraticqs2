@@ -1,16 +1,28 @@
+from ct.models import UnitLesson, Lesson
 
-def get_next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+
+def has_answer_next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
-    Edge method that moves us to right state for next lesson (or END).
+    Edge method that moves us to right state for next (or END).
     """
     fsm = edge.fromNode.fsm
-    unitStatus = fsmStack.state.get_data_attr('unitStatus')
-    nextUL = unitStatus.get_lesson()
-    if nextUL.is_question():
-        return fsm.get_node(name='ASK')
+    ul = fsmStack.state.unitLesson
+    if ul.is_question():
+        return fsm.get_node(name='UNIT_ANSWER')
     else:  # just a lesson to read
-        return edge.toNode
+        return fsm.get_node(name='WELL_DONE')
 
+
+def want_to_continue(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    fsm = edge.fromNode.fsm
+    # ul = fsmStack.state.unitLesson
+    if isinstance(request, dict):
+        return fsm.get_node('START')
+    nodes_map = {
+        'yes': 'START',
+        'no': 'END'
+    }
+    return fsm.get_node(nodes_map.get(request.data.get('option'), 'END'))
 
 class START_(object):
     """
@@ -91,18 +103,18 @@ class HAS_UNIT_ANSWER(object):
 class GET_HAS_UNIT_ANSWER(object):
     path = 'fsm:fsm_node'
     title = 'get answer'
-    # next_edge = get_next_edge
+    next_edge = has_answer_next_edge
     edges = (
-        dict(name='next', toNode='WELL_DONE', title='Well done!'),
-        # dict(name='not_a_question', toNode='NOT_A_QUESTION', title='unit is not a question')
+        dict(name='next', toNode='UNIT_ANSWER', title='Well done!'),
+        dict(name='not_a_question', toNode='WELL_DONE', title='unit is not a question')
     )
 
-class GET_UNIT_ANSWER_RESPONSE(object):
+class UNIT_ANSWER(object):
     path = 'fsm:fsm_node'
-    title = ''
-    # next_edge = get_next_edge
+    title = 'Phrase your answer for question of this unit'
+    # next_edge = has_answer_next_edge
     edges = (
-        dict(name='next', toNode='WELL_DONE', title='got unit answer'),
+        dict(name='next', toNode='GET_UNIT_ANSWER', title='got unit answer'),
         # dict(name='not_a_question', toNode='NOT_A_QUESTION', title='unit is not a question')
     )
 
@@ -115,13 +127,6 @@ class GET_UNIT_ANSWER(object):
 
 
 
-class NOT_A_QUESTION(object):
-    path = 'fsm:fsm_node'
-    title = 'This unit is not a question'
-    edges = (
-        dict(name='next', toNode='WELL_DONE', title='is not a question'), # TODO: toNode
-    )
-
 
 class WELL_DONE(object):
     path = 'fsm:fsm_node'
@@ -133,9 +138,10 @@ class WELL_DONE(object):
 
     Want to add another unit to this courselet?
     '''
+    next_edge = want_to_continue
     edges = (
         dict(name='next', toNode='START', title='unit saved'),
-        # dict(name='next', toNode='END', title='finish'),
+        dict(name='end', toNode='END', title='finish'),
     )
 
 
@@ -159,7 +165,7 @@ def get_specs():
         description='''Guides you through the steps of adding a new
                     lesson to this courselet''',
         pluginNodes=[START, GET_UNIT_NAME_TITLE, UNIT_QUESTION, GET_UNIT_QUESTION, HAS_UNIT_ANSWER, GET_HAS_UNIT_ANSWER,
-                     GET_UNIT_ANSWER_RESPONSE, GET_UNIT_ANSWER, NOT_A_QUESTION, WELL_DONE, END],
+                    GET_UNIT_ANSWER, UNIT_ANSWER, WELL_DONE, END],
         fsmGroups=('teach/unit_tasks',),
     )
     return (spec,)

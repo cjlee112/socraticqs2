@@ -165,13 +165,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             if message.input_type == 'options' and is_in_node('HAS_UNIT_ANSWER'):
                 print " HAS_UNIT_ANSWER " * 10
                 # import ipdb; ipdb.set_trace()
-                # if not message.timestamp:
-                    # message.content_id = resp.id
-                    #     chat.next_point = message
-                    #     chat.save()
-                    #     serializer.save(timestamp=timezone.now(), chat=chat)
-                    # else:
-                    #     serializer.save()
                 message = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,
@@ -180,13 +173,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 )
                 chat.next_point = message
                 chat.save()
-                # import ipdb; ipdb.set_trace()
                 serializer.save(chat=chat, timestamp=timezone.now())
-                # else:
-                #     serializer.save()
 
-
-            # if message.input_type == 'text':
             if is_in_node('GET_UNIT_NAME_TITLE'):
                 print " GET_UNIT_NAME_TITLE " * 10
                 # import ipdb; ipdb.set_trace()
@@ -198,7 +186,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                         lesson.save()
                         ul = UnitLesson.create_from_lesson(
                             lesson=lesson, unit=unit, kind=UnitLesson.COMPONENT, order='APPEND',
-                            )
+                        )
+                        chat.state.unitLesson = ul
+                        chat.state.save()
                     else:
                         ul = message.content
                     if not message.timestamp:
@@ -234,8 +224,15 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 ul = message.content
 
                 if not message.timestamp:
+                    answer = Lesson.objects.create(
+                        title='Answer',
+                        text=text,
+                        addedBy=self.request.user,
+                        kind=Lesson.ANSWER,
+                    )
+                    answer.save_root()
                     unit_lesson_answer = UnitLesson.create_from_lesson(
-                        unit=ul.unit, lesson=self.lesson, parent=ul, kind=UnitLesson.ANSWERS
+                        unit=ul.unit, lesson=answer, parent=ul, kind=UnitLesson.ANSWERS
                     )
                     # chat.next_point = message
                     chat.save()
@@ -243,10 +240,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                                     contenttype='unitlesson', text=text)
                 else:
                     serializer.save()
-
-            # if is_in_node('HAS_UNIT_ANSWER'):
-            #     # message =
-            #     import ipdb; ipdb.set_trace()
 
             if is_in_node('GET_HAS_UNIT_ANSWER'):
                 print " GET_HAS_UNIT_ANSWER " * 10

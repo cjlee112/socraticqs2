@@ -111,7 +111,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             next_point = chat.state.fsmNode.get_message(chat)
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
-            chat.state.fsmNode = edge.transition(chat, {})
+            chat.state.fsmNode = edge.transition(chat, request)
             chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         else:
