@@ -131,9 +131,9 @@ class Message(models.Model):
         ordering = ['timestamp']
 
     def __unicode__(self):
-        return "<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
+        return u"<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
             self.id,
-            '', #self.chat.id if self.chat else None,
+            self.chat.id if self.chat else None,
             self.owner.username, self.get_kind_display(), self.text
         )
 

@@ -79,8 +79,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         )
         chat.save()
         message.chat = chat
-        print " ROLL_FSM_FORWARD " * 10
-        # import ipdb; ipdb.set_trace()
         serializer = self.get_serializer(message)
         return Response(serializer.data)
 
@@ -94,12 +92,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
-
-        # import ipdb; ipdb.set_trace()
-
         if is_chat_add_lesson(message) and message.content_id and next_point == message:
-            print " RETRIEVE " * 10
-            # import ipdb; ipdb.set_trace()
             return self.roll_fsm_forward(chat, message)
 
         if (
@@ -148,8 +141,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
         is_in_node = lambda node: message.chat.state.fsmNode.name == node
 
-        # import ipdb; ipdb.set_trace()
-
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
@@ -163,8 +154,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             unit = course_unit.unit
 
             if message.input_type == 'options' and is_in_node('HAS_UNIT_ANSWER'):
-                print " HAS_UNIT_ANSWER " * 10
-                # import ipdb; ipdb.set_trace()
                 message = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,
@@ -176,8 +165,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(chat=chat, timestamp=timezone.now())
 
             if is_in_node('GET_UNIT_NAME_TITLE'):
-                print " GET_UNIT_NAME_TITLE " * 10
-                # import ipdb; ipdb.set_trace()
                 if course_unit and unit:
                     if not message.content_id:
                         lesson = Lesson.objects.create(title=text, addedBy=self.request.user,
@@ -203,8 +190,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                         serializer.save()
 
             if is_in_node('GET_UNIT_QUESTION'):
-                print " GET_UNIT_QUESTION " * 10
-                # import ipdb; ipdb.set_trace()
                 ul = message.content
                 ul.lesson.text = text
                 ul.lesson.save()
@@ -242,8 +227,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     serializer.save()
 
             if is_in_node('GET_HAS_UNIT_ANSWER'):
-                print " GET_HAS_UNIT_ANSWER " * 10
-                # import ipdb; ipdb.set_trace()
                 yes_no_map = {
                     'yes': True,
                     'no': False
