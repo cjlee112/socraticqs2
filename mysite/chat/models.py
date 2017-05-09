@@ -202,13 +202,13 @@ class Message(models.Model):
                         self.content.lesson.addedBy.username
                     )
                     raw = (
-                        '`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
+                        u'`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
                             self.content.lesson.url,
                             author_name,
                             self.content.lesson.text
                         )
                         if self.content.lesson.url
-                    else '`Author: {0}` \n {1}'.format(
+                    else u'`Author: {0}` \n {1}'.format(
                             author_name,
                             self.content.lesson.text
                         )
