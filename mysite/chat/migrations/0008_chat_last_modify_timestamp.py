@@ -9,14 +9,14 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0006_auto_20170117_0513'),
+        ('chat', '0007_auto_20170314_1422'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='chat',
             name='last_modify_timestamp',
-            field=models.DateTimeField(default=datetime.datetime(2017, 1, 27, 18, 2, 3, 769600, tzinfo=utc), auto_now=True),
+            field=models.DateTimeField(default=datetime.datetime(2017, 5, 10, 13, 4, 3, 722796, tzinfo=utc), auto_now=True),
             preserve_default=False,
         ),
     ]
