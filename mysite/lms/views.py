@@ -30,7 +30,7 @@ class CourseView(View):
                 )
             except AttributeError:
                 liveSession.live_instructor_icon = static('img/avatar-teacher.jpg')
-        courselets = (
+        courselets = [
             (
                 courselet,
                 EnrollUnitCode.get_code(courselet),
@@ -42,7 +42,7 @@ class CourseView(View):
                 ).data.get('progress', 0)*100
             )
             for courselet in course.get_course_units(True)
-        )
+        ]
         live_sessions_history = Chat.objects.filter(
             user=request.user,
             is_live=True,

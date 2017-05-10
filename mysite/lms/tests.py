@@ -162,7 +162,7 @@ class TestCourseletViewHistoryTab(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['courslet_history']), 0)
-        self.assertTrue(len(list(response.context['courslets'])) > 0)
+        self.assertTrue(len(response.context['courslets']) > 0)
 
         # now we call chat:chat_enroll view to init chat
         response = self.client.get(
@@ -231,7 +231,7 @@ class TestCourseletViewHistoryTab(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Chat.objects.count(), chats_count_2)
-        self.assertEqual(len(response.context['courslets']), 1)
+        self.assertEqual(len(list(response.context['courslets'])), 1)
         self.assertEqual(len(response.context['courslet_history']), 1)
 
     def test_courslet_history(self):

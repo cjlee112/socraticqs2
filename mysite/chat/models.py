@@ -211,7 +211,7 @@ class Message(models.Model):
                             self.content.lesson.text
                         )
                         if self.content.lesson.url
-                    else '`Author: {0}` \n {1}'.format(
+                        else '`Author: {0}` \n {1}'.format(
                             author_name,
                             self.content.lesson.text
                         )
