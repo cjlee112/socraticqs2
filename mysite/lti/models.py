@@ -157,11 +157,14 @@ class LTIUser(models.Model):
         course = Course.objects.filter(id=course_id).first()
         if course:
             for role in roles:
-                Role.objects.get_or_create(
+                kwargs = dict(
                     role=role,
                     course=course,
                     user=self.django_user
                 )
+                role = Role.objects.filter(**kwargs).first()
+                if not role:
+                    Role.objects.create(**kwargs)
 
     def is_enrolled(self, roles, course_id):
         """Check enroll status
