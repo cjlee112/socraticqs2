@@ -77,6 +77,20 @@ class LTITestCase(TestCase):
         self.course_ref.save()
         self.course_ref.instructors.add(self.user)
 
+        self.role1 = Role(
+            role=Role.ENROLLED,
+            user=self.user,
+            course=self.course,
+        )
+        self.role1.save()
+
+        self.role2 = Role(
+            role=Role.ENROLLED,
+            user=self.user,
+            course=self.course,
+        )
+        self.role2.save()
+
         self.courseunit = CourseUnit(
             unit=self.unit, course=self.course,
             order=0, addedBy=self.user, releaseTime=timezone.now()
@@ -251,6 +265,19 @@ class ModelTest(LTITestCase):
     """
     Test model LTIUser.
     """
+    def test_lti_user_not_enrolled(self):
+        """Test that user not enrolled yet"""
+        lti_user = LTIUser(user_id=self.user.id,
+                           lti_consumer=self.lti_consumer,
+                           extra_data=json.dumps(self.headers),
+                           django_user=self.user)
+        lti_user.save()
+
+        self.role1.delete()
+        self.role2.delete()
+
+        self.assertFalse(lti_user.is_enrolled('student', self.course.id))
+
     def test_lti_user(self):
         """Test enrollment process"""
         lti_user = LTIUser(user_id=self.user.id,
@@ -258,9 +285,6 @@ class ModelTest(LTITestCase):
                            extra_data=json.dumps(self.headers),
                            django_user=self.user)
         lti_user.save()
-
-        self.assertFalse(lti_user.is_enrolled('student', self.course.id))
-
         lti_user.enroll('student', self.course.id)
         self.assertTrue(lti_user.is_enrolled('student', self.course.id))
 
