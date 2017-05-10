@@ -205,7 +205,7 @@ class Message(models.Model):
                         self.content.lesson.addedBy.username
                     )
                     raw = (
-                        '`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
+                        u'`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
                             self.content.lesson.url,
                             author_name,
                             self.content.lesson.text

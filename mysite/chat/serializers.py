@@ -244,18 +244,24 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                     ).order_by('order')
                 )
                 for each in messages:
-                    if each.content.unitlesson in lessons:
-                        lessons[lessons.index(each.content.unitlesson)].message = each.id
-                    elif each.content.unitlesson and each.content.unitlesson.kind != 'answers':
-                        lesson = each.content.unitlesson
-                        lesson.message = each.id
-                        lessons.append(lesson)
+                    try:
+                        if each.content.unitlesson in lessons:
+                            lessons[lessons.index(each.content.unitlesson)].message = each.id
+                        elif each.content.unitlesson and each.content.unitlesson.kind != 'answers':
+                            lesson = each.content.unitlesson
+                            lesson.message = each.id
+                            lessons.append(lesson)
+                    except:
+                        pass
             self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)
         return self.lessons_dict
 
     def get_progress(self, obj):
         if not self.lessons_dict:
-            self.get_breakpoints(obj)
+            try:
+                self.get_breakpoints(obj)
+            except:
+                pass
         if self.lessons_dict:
             done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
             progress = round(float(done)/len(self.lessons_dict), 2)

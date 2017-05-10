@@ -76,6 +76,7 @@ CUI.ChatMessagePresenter.prototype.update = function(model){
 CUI.ChatMessagePresenter.prototype._render = function(){
   this.el = CUI.views.chatMessage(this._model);
   this.$el = $(this.el);
+  this.$el.find('a').attr('target', '_blank');
 };
 
 /**
