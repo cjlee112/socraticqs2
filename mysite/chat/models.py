@@ -78,7 +78,7 @@ class Chat(models.Model):
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
-    last_modify_timestamp = models.DateTimeField(auto_now=True)
+    last_modify_timestamp = models.DateTimeField(auto_now=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -105,6 +105,13 @@ class Chat(models.Model):
         It's actual time spent for live session.
         :return: datetime.timedelta
         '''
+        if not self.last_modify_timestamp:
+            last_msg = self.message_set.all().order_by('-timestamp').first()
+            if last_msg:
+                self.last_modify_timestamp = last_msg.timestamp
+                self.save()
+            else:
+                return datetime.timedelta(0)
         return self.last_modify_timestamp - self.timestamp
 
     def get_formatted_time_spent(self):
