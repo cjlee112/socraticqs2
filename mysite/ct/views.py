@@ -975,20 +975,16 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
     exercises = unit.get_exercises()
-    enrolled_students = User.objects.filter(role__role=Role.ENROLLED)
+    enrolled_students = User.objects.filter(role__role=Role.ENROLLED).distinct()
     table_head = [i.lesson.title for i in exercises]
     table_body = defaultdict(list)
-    for i in enrolled_students:
-        for j in exercises:
-            table_body[i].append(
+    for user in enrolled_students:
+        for orct in exercises:
+            table_body[user].append(
                 Response.objects.filter(
-                    lesson=j.lesson, author=i
+                    lesson=orct.lesson, author=user
                 ).order_by('-atime').first()
             )
-    answers_map = {
-        i.lesson.title: Response.objects.filter(lesson=i.lesson)
-        for i in exercises
-    }
     return pageData.render(
         request,
         'ct/unit_answers.html',
