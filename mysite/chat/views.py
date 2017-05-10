@@ -77,7 +77,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                         contaner.add((title, concept_link.lesson.url))
         return will_learn, need_to_know
 
-    def get(self, request, enroll_key):
+    def get(self, request, enroll_key, chat_id=None):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
         unit = courseUnit.unit
@@ -109,14 +109,26 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat = Chat.objects.filter(enroll_code=enroll_code, user=request.user).first()
+        if chat_id:
+            chat = get_object_or_404(
+                Chat,
+                enroll_code=enroll_code,
+                user=request.user,
+                id=chat_id
+            )
+        else:
+            chat = Chat.objects.filter(
+                enroll_code=enroll_code,
+                user=request.user,
+                state__isnull=False
+            ).first()
         if not chat and enroll_key:
             chat = Chat(
                 user=request.user,
                 enroll_code=enroll_code,
                 instructor=courseUnit.course.addedBy
             )
-            chat.save(request)
+            chat.save()
         if chat.message_set.count() == 0:
             next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
         elif not chat.state:
