@@ -1,0 +1,51 @@
+{% extends "ct/portal.html" %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+  {% for tabLabel,tabURL in pageData.navTabs %}
+  {% if "/" in tabURL %}
+  <li><a href="{{ tabURL }}">{{ tabLabel }}</a></li>
+  {% else %}
+  <li class="active"><a href="{{ tabURL }}" id="{{ tabLabel }}TabA" data-toggle="tab">{{ tabLabel }}</a></li>
+  {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="EditTabDiv">
+
+<div class="container-fluid" id="editform">
+
+<h2>Answers for Courselet</h2>
+
+<table class="table table-hover table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Student Name</th>
+      {% for i in table_head %}
+      <th>{{ i }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+      {% for k, v in table_body.items %}
+      <tr>
+        <td>{{ k }}</td>
+        {% for j in v %}
+        <td>
+        {% if j %}
+          Eval:
+          <a href="{% url 'ct:response_details' resp_id=j.id %}">{{ j.selfeval }}</a>
+          <br>
+          {% if j.status %}Status: {{ j.status }}{% else %}No status{% endif %}
+          {% else %}
+        {% endif %}
+        </td>
+        {% endfor %}
+      {% endfor %}
+  </tbody>
+</table>
+
+</div>
+
+{% endblock %}

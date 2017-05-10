@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import AnonymousUser
@@ -14,6 +14,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from social.backends.utils import load_backends
+from collections import defaultdict
 
 from ct.forms import *
 from ct.models import *
@@ -133,7 +134,7 @@ def auto_tabs(path, current, unitLesson, **kwargs):
 
 
 def unit_tabs(path, current,
-              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit'), **kwargs):
+              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
 
 def unit_tabs_student(path, current,
@@ -962,6 +963,54 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
             Thank you!''', ignorePOST=True, showReorderForm=showReorderForm,
             unit=unit, lessonTable=lessonTable, **kwargs)
     return r
+
+
+@login_required
+def unit_answers(request, course_id, unit_id, **kwargs):
+    """
+    Collect answers from enrolled students into table.
+    """
+    unit = get_object_or_404(Unit, pk=unit_id)
+    pageData = PageData(
+        request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
+    )
+    exercises = unit.get_exercises()
+    enrolled_students = User.objects.filter(role__role=Role.ENROLLED)
+    table_head = [i.lesson.title for i in exercises]
+    table_body = defaultdict(list)
+    for i in enrolled_students:
+        for j in exercises:
+            table_body[i].append(
+                Response.objects.filter(
+                    lesson=j.lesson, author=i
+                ).order_by('-atime').first()
+            )
+    answers_map = {
+        i.lesson.title: Response.objects.filter(lesson=i.lesson)
+        for i in exercises
+    }
+    return pageData.render(
+        request,
+        'ct/unit_answers.html',
+        templateArgs=dict(
+            table_head=table_head,
+            table_body=dict(table_body)
+        )
+    )
+
+
+def response_details(request, resp_id):
+    """
+    Detail Response page.
+    """
+    response = get_object_or_404(Response, pk=resp_id)
+    errors = response.studenterror_set.all()
+    return render(
+        request,
+        'ct/response_details.html',
+        {'response': response, 'errors': errors}
+    )
+
 
 @login_required
 def unit_resources(request, course_id, unit_id):

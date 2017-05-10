@@ -23,6 +23,8 @@ urlpatterns = patterns('',
         unit_resources, name='unit_resources'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/edit/$',
         edit_unit, name='edit_unit'),
+    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/answers/$',
+        unit_answers, name='unit_answers'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/wikipedia/(?P<source_id>[^/]+)/$',
         wikipedia_concept, name='wikipedia_concept'),
     # lesson tabs
@@ -73,6 +75,8 @@ urlpatterns = patterns('',
     # responses
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/assess/$',
         assess, name='assess_teach'),
+    url(r'^teach/responses/(?P<resp_id>\d+)/details/$',
+        response_details, name='response_details'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/responses/(?P<resp_id>\d+)/errors/$',
         assess_errors, name='assess_errors_teach'),
 

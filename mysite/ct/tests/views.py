@@ -205,7 +205,12 @@ class MiscTests(TestCase):
     def test_unit_tabs(self, make_tabs):
         path = current = Mock()
         unit_tabs(path, current)
-        make_tabs.assert_called_once_with(path, current, ('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit'), tail=2)
+        make_tabs.assert_called_once_with(
+            path,
+            current,
+            ('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'),
+            tail=2
+        )
 
     @patch('ct.views.make_tabs')
     def test_unit_tabs_student(self, make_tabs):

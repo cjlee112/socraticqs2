@@ -1,0 +1,30 @@
+{% extends "ct/portal.html" %}
+
+{% block content %}
+
+<h3>Response detail page</h3>
+
+<table>
+<tbody>
+<tr><td><b>Text: </b>{{ response.text }}</td></tr>
+<tr><td><b>Confidence: </b>{{ response.confidence }}</td></tr>
+<tr><td><b>Timestamp: </b>{{ response.atime }}</td></tr>
+<tr><td><b>Selfeval: </b>{{ response.selfeval }}</td></tr>
+<tr><td><b>Status: </b>{{ response.status }}</td></tr>
+</tbody>
+</table>
+
+{% if errors %}
+<h3>Errors</h3>
+<table>
+<tbody>
+{% for i in errors %}
+<tr><td>{{ i.errorModel.lesson.title }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+
+
+{% endblock %}
