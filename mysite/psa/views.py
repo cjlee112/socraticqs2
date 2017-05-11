@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
 from django.http.response import HttpResponseRedirect
@@ -144,6 +145,10 @@ def signup(request, next_page=None):
             # after calling complete function we don't need request.user, so we replace it with AnonymousUser
             request.user = AnonymousUser()
             return response
+        else:
+            messages.error(
+                request, "We could not create the account. Please review the errors below."
+            )
     else:
         params = request.GET
     if 'next' in params:  # must pass through for both GET or POST
@@ -165,6 +170,9 @@ def done(request):
 
     @login_required
     def new_UI_wrap(request):
+        if not request.user.course_set.count():
+            # if newly created user - show create_course page
+            return HttpResponseRedirect(reverse('ctms:create_course'))
         return HttpResponseRedirect(reverse('ctms:my_courses'))
 
     # NOTE: IF USER has attached instructor instance will be redirected to /ctms/ (ctms dashboard)

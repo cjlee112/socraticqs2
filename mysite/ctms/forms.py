@@ -20,12 +20,23 @@ class CourseForm(forms.ModelForm):
         }
 
 
+class CreateUnitForm(forms.ModelForm):
+    class Meta:
+        model = Lesson
+        fields = ('title', )
+
+
 class EditUnitForm(forms.ModelForm):
     KIND_CHOICES = (
         (Lesson.EXPLANATION, 'Introduction'),
         (Lesson.ORCT_QUESTION, 'Question'),
     )
-    unit_type = forms.ChoiceField(choices=KIND_CHOICES, widget=forms.RadioSelect)
+    DEFAULT_UNIT_TYPE =Lesson.EXPLANATION
+
+    unit_type = forms.ChoiceField(
+        choices=KIND_CHOICES, widget=forms.RadioSelect, initial=Lesson.EXPLANATION,
+        help_text='You can create interactive questions (with answers and self-assessment) or passive introductions.'
+    )
 
     class Meta:
         model = Lesson

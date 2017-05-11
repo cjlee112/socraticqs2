@@ -40,7 +40,7 @@ Create new courslet
         <!-- TODO: Title/name label and input doesn't exist -->
         <!-- Name -->
         <div class="form-group">
-          <label>Name</label>
+          <label for="{{ form.title.auto_id }}">Unit Name</label>
 
           <p>
             Give your unit a descriptive name. This will show up as one unit in your students sidebar.
@@ -62,9 +62,9 @@ Create new courslet
 
         <!-- Unit type -->
         <div class="form-group">
-          {{ form.unit_type.label_tag }}
+          <label for="{{ form.unit_type.auto_id }}">{{ form.unit_type.label }}</label>
 
-          <p>You can create interactive questions (with answers and self-assessment) or passive introductions.</p>
+          <p>{{ form.unit_type.help_text }}</p>
 
           <div class="radio-list">
             {{ form.unit_type }}
@@ -76,7 +76,7 @@ Create new courslet
         <!-- TODO: Introduction and question should be separate inputs, form.text is currently displayed twice -->
         <!-- Introduction -->
         <div class="form-group form-group--introduction">
-          <label>Introduction</label>
+          <label for="{{ form.text.auto_id }}">Introduction</label>
 
           <p>
             Write your introduction here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
@@ -96,7 +96,7 @@ Create new courslet
 
         <!-- Question -->
         <div class="form-group form-group--question">
-          <label>Question</label>
+          <label for="{{ form.text.auto_id }}">Question</label>
 
           <p>
             Write your question here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
@@ -117,7 +117,7 @@ Create new courslet
 
         <!-- Answer -->
         <div class="form-group form-group--answer">
-          {{ answer_form.answer.label_tag }}
+          <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
 
           <p>
             Write your answer here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
@@ -154,13 +154,20 @@ Create new courslet
 
           {% if errors_formset %}
             <div class="error-models-form">
-              {#{ errors_formset.management_form }#}
 
               <div class="error-models-form__items">
                 {% for item_form in errors_formset %}
                   <div id="item-{{ forloop.counter0 }}">
                     {{ item_form.id }}
-                    {{ item_form.as_p }}
+                    <!--{#{ item_form.as_p }#}-->
+                    {% for field in item_form %}
+                      {% if field.is_hidden %}
+                        {{ field }}
+                      {% else %}
+                        <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                        {{ field }}
+                      {% endif %}
+                    {% endfor %}
                     {# <!-- or for crispy forms --> {% crispy item_form %} #}
 
                     <!-- TODO: Add functionality for removing error models -->
@@ -239,7 +246,16 @@ Create new courslet
   <!-- Error model template -->
   <script type="text/html" id="item-template">
     <div id="item-__prefix__">
-      {{ errors_formset.empty_form.as_p }}
+      <!--{#{ errors_formset.empty_form.as_p }#}-->
+
+      {% for field in errors_formset.empty_form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <label for="{{ field.auto_id }}">{{ field.label }}</label>
+          {{ field }}
+        {% endif %}
+      {% endfor %}
       <!-- crispy: {#% crispy item_forms.empty_form item_forms.form.helper %#} -->
     </div>
   </script>

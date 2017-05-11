@@ -3,7 +3,7 @@
 {% block content %}
 <div class="card">
   <header class="card__topbar">
-    <h1>{{ courslet.unit.title }}</h1>
+    <h1>Add Unit</h1>
   </header>
 
   <!-- TODO: We don't need this if when new and edit are separate views -->
@@ -26,39 +26,12 @@
   {% endif %}
 
   <main class="card__content">
-    <form action="" method="POST">
-      <!-- TODO: Replace with real inputs
-        {{ form.as_p }}
-      -->
-    {% if not pk %}
-      {{ form.title.label_tag }}
+    <form action="." method="POST">
+
+      <label for="{{ form.title.auto_id }}">Unit Name</label>
       <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
       {{ form.title }}
-      {% else %}
 
-      {{ form.unit_type.label_tag }}
-      <p>You can create interactive questions or passive introductions (without answers and self-assessment).</p>
-      {{ form.unit_type }}
-
-      <!--<label for="question">Question</label>-->
-      <div class="text">
-        {{ form.text.label_tag }}
-        <p>Write your question here.</p>
-        {{ form.text }}
-      </div>
-
-      <div class="answer">
-      {{ answer_form.answer.label_tag }}
-      <p>Write your answer here.</p>
-      {{ answer_form.answer }}
-      </div>
-
-      <!-- TODO: How should we add error models here? -->
-      <label for="error-models">Error Models <span>– optional</span></label>
-      <p>An error model explains a common misconception. Your students can select error models when they self-assess. <a href="">How to write a good error model</a></p>
-
-
-    {% endif %}
       {% csrf_token %}
 
       <input type="submit" value="Save">

@@ -23,23 +23,38 @@
       {% for field in form %}
         {% if not field.is_hidden %}
           {% if field.name == 'first_name' %}
-          <label>Name:</label>
-          <div class="row">
-            <div class="col-lg-6">
-              {{ field }}
+            <label for="{{ field.auto_id }}">Name</label>
+            <div class="row">
+              <div class="col-lg-6">
+                {{ field }}
+              </div>
+            {% elif field.name == 'last_name' %}
+              <div class="col-lg-6">
+                {{ field }}
+              </div>
             </div>
-          {% elif field.name == 'last_name' %}
-            <div class="col-lg-6">
-              {{ field }}
+            {% if form.first_name.errors or form.last_name.errors %}
+            <div class="row">
+              <div class="col-lg-6">
+                {{ form.first_name.errors }}
+              </div>
+              <div class="col-lg-6">
+                {{ form.last_name.errors }}
+              </div>
             </div>
-          </div>
+            {% endif %}
           {% else %}
-          {{ field.label_tag }}
-          {{ field }}
+        {# ALL FIELDS EXCL. first_name, last_name #}
+            <label for="{{ field.auto_id }}">{{ field.label }}</label>
+            {% if field.help_text %}
+              <p><span>{{ field.help_text }}</span></p>
+            {% endif %}
+            {{ field }}
+            {{ field.errors }}
           {% endif %}
-          {{ field.errors }}
         {% else %}
-        {{ field }}
+        {# HIDDEN FIELDS #}
+          {{ field }}
         {% endif %}
       {% endfor %}
 

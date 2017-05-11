@@ -26,6 +26,35 @@
       </a>
     </header>
 
+    {% if messages %}
+      <div class="page__messages">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags %}{{ message.tags }} {% if 'error' in message.tags %} alert-danger{% endif %}{% else %}info{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+        <!-- TODO: Add notifications here -->
+
+        <!--
+          <div class="alert alert-success">
+            Succcess
+          </div>
+
+          <div class="alert alert-info">
+            Info
+          </div>
+
+          <div class="alert alert-warning">
+            Warning
+          </div>
+
+          <div class="alert alert-danger">
+            Danger
+          </div>
+        -->
+      </div>
+    {% endif %}
+
     {% block content %}{% endblock %}
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>

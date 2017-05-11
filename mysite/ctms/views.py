@@ -22,8 +22,8 @@ from ctms.forms import (
     EditUnitForm,
     CreateEditUnitForm,
     ErrorModelFormSet,
-    CreateEditUnitAnswerForm
-)
+    CreateEditUnitAnswerForm,
+    CreateUnitForm)
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
@@ -212,7 +212,6 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
         self.object = form.save()
-        messages.add_message(self.request, messages.SUCCESS, "Course successfully created")
         return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
 
 
@@ -355,7 +354,6 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
             releaseTime=datetime.now(),
             order=0,
         )
-        messages.add_message(self.request, messages.SUCCESS, "Courselet successfully created")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -394,7 +392,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Lesson
-    fields = ('title',)
+    form_class = CreateUnitForm
     template_name = 'ctms/create_unit_form.html'
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
@@ -436,7 +434,6 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
         self.object.unit_lesson = unit_lesson
-        messages.add_message(self.request, messages.SUCCESS, "Unit successfully created")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -740,8 +737,13 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
     def get_initial(self):
         init = super(CreateEditUnitView, self).get_initial()
         ul = self.get_unit_lesson()
+        print "GET_INITIAL"
+        print ul.lesson.kind, [choice[0] for choice in self.form_class.KIND_CHOICES]
         if ul:
-            init['unit_type'] = ul.lesson.kind
+            if ul.lesson.kind not in [choice[0] for choice in self.form_class.KIND_CHOICES]:
+                init['unit_type'] = self.form_class.DEFAULT_UNIT_TYPE
+            else:
+                init['unit_type'] = ul.lesson.kind
         return init
 
     def get_form_kwargs(self):

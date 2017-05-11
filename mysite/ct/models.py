@@ -707,7 +707,7 @@ class Unit(models.Model):
         (LIVE_SESSION, 'Live session'),
         (RESOLUTION, 'Resolutions for an error model'),
     )
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, help_text='Your students will see this, so give your courselet a descriptive name.')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.forms.utils import ErrorList
 
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
@@ -21,24 +22,25 @@ class SignUpForm(forms.Form):
     email_confirmation = forms.EmailField()
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
-    institution = forms.CharField()
+    institution = forms.CharField(help_text='We can help you with integration once we know where you teach.')
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
+        help_text='Create a password that at least six chars length.'
         # validators=[password_validator]
     )
 
     def clean(self):
         confirm_email = self.cleaned_data.get('email_confirmation')
         email = self.cleaned_data.get('email')
-        if confirm_email and email and email == confirm_email:
+        if email and confirm_email and email == confirm_email:
             return self.cleaned_data
         else:
-            self._errors['email_confirmation'] = 'Should be the same as email'
-            raise forms.ValidationError(
-                "Fields {} and {} should have the same values".format(
-                    'email',
-                    'email confirmation')
-            )
+            err_field = 'email_confirmation'
+            if confirm_email and not email:
+                err_field = 'email'
+            elif confirm_email and email and email != confirm_email:
+                self.add_error('email', 'Confirmation e-mail and e-mail should be the same.')
+            self.add_error(err_field, 'Confirmation e-mail should be the same as e-mail.')
 
     def clean_email(self):
         email = self.cleaned_data['email']
