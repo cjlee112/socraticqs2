@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chat',
             name='last_modify_timestamp',
-            field=models.DateTimeField(auto_now=True, null=True),
+            field=models.DateTimeField(null=True),
         ),
     ]
