@@ -291,7 +291,7 @@ p + p {
     line-height: 24px;
     margin-top: 18px; }
 
-.course-content #live-sessions {
+.course-content #live-sessions, #courslet-history {
   display: none; }
 
 .course-content-tabs {
