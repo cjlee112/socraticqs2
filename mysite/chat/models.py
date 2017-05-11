@@ -78,7 +78,7 @@ class Chat(models.Model):
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
-    last_modify_timestamp = models.DateTimeField(auto_now=True, null=True)
+    last_modify_timestamp = models.DateTimeField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
