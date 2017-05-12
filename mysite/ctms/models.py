@@ -119,20 +119,18 @@ class Invite(models.Model):
                 [self.email],
                 fail_silently=True
             )
-            return view.render(
-                    'ctms/invite_link_sent.html',
-                    {
-                        'course': self.course,
-                        'with_user': self.email
-                    }
-                )
+            return {
+                'success': True,
+                'message': 'Invitation successfully sent.',
+                'invite': {
+                    'status': self.status,
+                }
+            }
         except IntegrityError:
-            return view.render(
-                'ctms/error.html',
-                context={'message': 'You already have sent invite to user with {} email'.format(
-                    request.POST['email'])
-                },
-            )
+            return {
+                'success': False,
+                'message': 'You already have sent invite to user with {} email'.format(request.POST['email'])
+            }
 
     @staticmethod
     def get_by_user_or_404(user, **kwargs):

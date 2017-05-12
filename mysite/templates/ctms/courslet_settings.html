@@ -3,7 +3,7 @@
 {% block content %}
   <div class="card">
     <header class="card__topbar">
-      <h1>Settings</h1>
+      <h1>{{ courslet.unit.title }}</h1>
     </header>
 
     <nav class="card__nav">
@@ -14,7 +14,7 @@
 
         <li>
           <!-- TODO: Add link to preview -->
-          <a href="">Preview</a>
+          <a href="{% url 'ctms:courselet_preview' course_pk=course_pk pk=pk %}">Preview</a>
         </li>
 
         <li>

@@ -36,6 +36,9 @@
           </div>
 
           <ul class="dropdown-menu" aria-labelledby="dropdown-courses">
+            <li>
+              <a href="{% url 'ctms:create_course' %}">Create course</a>
+            </li>
             {% for course in sidebar.user_courses %}
               <li>
                 <a href="{% url 'ctms:course_view' pk=course.id %}">
@@ -55,7 +58,6 @@
               </li>
 
               <li>
-                <!-- TODO: Add link to share -->
                 <a href="{% url 'ctms:course_invite' pk=sidebar.course.id %}">Share</a>
               </li>
 
@@ -96,6 +98,9 @@
             </div>
 
             <ul class="dropdown-menu" aria-labelledby="dropdown-courselets">
+              <li>
+                <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create courselet</a>
+              </li>
               {% for courslet in sidebar.course_courslets %}
                 <li>
                   <a href="{% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %}">
@@ -115,7 +120,7 @@
                 </li>
 
                 <li>
-                  <a href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Preview</a>
+                  <a target="_tab" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Preview</a>
                 </li>
 
                 <li>

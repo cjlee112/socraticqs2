@@ -158,7 +158,7 @@
         e.preventDefault();
       });
 
-      $('.submit__form').on('click', function(e) {
+      $('.invite__submit__form').on('click', function(e) {
         var linkData = $(this).data();
         var scs_callback = linkData.onSuccessCallback;
         var fl_callback = linkData.onFailCallback;
@@ -169,11 +169,14 @@
             action_url,
             my_form.serialize(),
             function(data) {
-              if(scs_callback){
-                $.globalEval(scs_callback);
+              if(data.success) {
+                if(scs_callback){
+                  $.globalEval(scs_callback);
+                }
               }
               alert(linkData['successMsg'] || "Succeeded!");
-            }).fail(function(){
+            },
+            'json').fail(function(){
               if(fl_callback){
                 $.globalEval(fl_callback);
               }

@@ -10,7 +10,7 @@
 
   <tbody>
     {% for obj in objects %}
-      <tr id="invite_id__{{ obj.id }}">
+      <tr id="invite_id__{{ obj.code }}">
         <td>
           {{ obj.email }}
         </td>
@@ -33,7 +33,7 @@
              data-href="{% url 'ctms:delete_invite' code=obj.code %}"
              data-success-msg="We just deleted invite for user {{ obj.email }}" href="#"
              data-fail-msg="Current operation: deleting invite for user {{ obj.email }} was failed."
-             data-on-success-callback="$('tr#invite_id__{{ obj.id }}').remove()">
+             data-on-success-callback="$('tr#invite_id__{{ obj.code }}').remove()">
             Remove
           </a>
         </td>

@@ -1,7 +1,8 @@
 import re
+import json
 from datetime import datetime
 
-from django.http.response import Http404, HttpResponseRedirect
+from django.http.response import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -29,6 +30,10 @@ from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
 
+
+def json_response(x):
+    return HttpResponse(json.dumps(x, sort_keys=True, indent=2),
+                        content_type='application/json; charset=UTF-8')
 
 class CourseCoursletUnitMixin(View):
     course_pk_name = 'course_pk'
@@ -835,55 +840,14 @@ class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Vie
                         **{'enroll_key': enroll.enrollCode, 'course_id': course.id, 'courselet_id': course_unit.id})
 
 
-class SendInvite(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
+class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Invite
     form_class = InviteForm
     course_pk_name = 'pk'
     template_name = 'ctms/invite_list.html'
 
-    def post(self, request, *args, **kwargs):
-        if not self.am_i_course_owner():
-            raise Http404()
-        return super(SendInvite, self).post(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        if not self.am_i_course_owner():
-            raise Http404()
-        return super(SendInvite, self).get(request, *args, **kwargs)
-
-
-    def get_context_data(self, **kwargs):
-        kwargs['tester_invites'] = Invite.testers.my_invites(self.request)
-        kwargs['student_invites'] = Invite.students.my_invites(self.request)
-        return kwargs
-
-    def get_form_kwargs(self):
-        kwargs = super(SendInvite, self).get_form_kwargs()
-        # kwargs['']
-        return kwargs
-
-    def get_initial(self):
-        return {
-            'course': self.get_course(),
-        }
-
-    def form_valid(self, form):
-        response = super(SendInvite, self).form_valid(form)
-        messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
-        return response
-
-    def form_invalid(self, form):
-        response = super(SendInvite, self).form_invalid(form)
-        messages.add_message(self.request, messages.WARNING,
-                             "Invitation could not be sent because of errors listed below")
-        return response
-
-
-class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateView):
-    model = Invite
-    form_class = InviteForm
-    course_pk_name = 'pk'
-    template_name = 'ctms/invite_list.html'
+    def get_success_url(self):
+        return self.request.path
 
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
@@ -892,17 +856,28 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, TemplateVi
         kwargs['course'] = self.get_course()
         return kwargs
 
-    def post(self, *args, **kwargs):
-        form = self.form_class(
-            self.get_course(), self.request.user.instructor, data=self.request.POST
-        )
-        if form.is_valid():
-            invite = form.save()
-            response = invite.send_mail(self.request, self)
-            return response
-        return self.render_to_response(
-            self.get_context_data()
-        )
+    def get_form_kwargs(self):
+        kwargs = super(InvitesListView, self).get_form_kwargs()
+        kwargs['course'] = self.get_course()
+        kwargs['instructor'] = self.request.user.instructor
+        return kwargs
+
+    def get_initial(self):
+        return {
+            'course': self.get_course(),
+        }
+
+    def form_valid(self, form):
+        response = super(InvitesListView, self).form_valid(form)
+        self.object.send_mail(self.request, self)
+        messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
+        return response
+
+    def form_invalid(self, form):
+        response = super(InvitesListView, self).form_invalid(form)
+        messages.add_message(self.request, messages.WARNING,
+                             "Invitation could not be sent because of errors listed below")
+        return response
 
 
 class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
@@ -925,13 +900,13 @@ class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View)
 
 class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, code):
-        invite = Invite.objects.get(code=code)
+        invite = get_object_or_404(Invite, code=code)
         if invite.course.addedBy != self.request.user:
             raise Http404()
         response = invite.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS,
                              "We just resent invitation to {}".format(invite.email))
-        return response
+        return json_response(response)
 
 
 class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):

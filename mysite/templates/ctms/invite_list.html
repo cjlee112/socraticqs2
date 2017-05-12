@@ -9,7 +9,7 @@
   <div class="card">
     <header class="card__topbar">
       <!-- TODO: Add course name -->
-      <h1>Course Name</h1>
+      <h1>{{ course.title }}</h1>
     </header>
 
     <!-- TODO: Add real links -->
@@ -65,7 +65,10 @@
                {{ field }}
              {% endfor %}
            {% endblock %}
-          <input type="submit" value="Invite" class="submit__form" data-success-msg="Invitation sent successfully. " data-fail-msg="Invitation could not be sent now. Try again later.">
+          <input type="submit" value="Invite"
+                 class="invite__submit__form__"
+                 data-success-msg="Invitation sent successfully. "
+                 data-fail-msg="Invitation could not be sent now. Try again later.">
         </div>
 
       </form>
