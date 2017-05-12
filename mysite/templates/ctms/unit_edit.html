@@ -30,7 +30,7 @@ Create new courslet
   {% endif %}
 
   <main class="card__content">
-    <form action="" method="POST">
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" method="POST">
       <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
 
       {% csrf_token %}

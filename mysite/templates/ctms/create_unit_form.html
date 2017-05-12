@@ -26,7 +26,7 @@
   {% endif %}
 
   <main class="card__content">
-    <form action="." method="POST">
+    <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
 
       <label for="{{ form.title.auto_id }}">Unit Name</label>
       <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>

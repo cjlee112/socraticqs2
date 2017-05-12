@@ -737,8 +737,6 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
     def get_initial(self):
         init = super(CreateEditUnitView, self).get_initial()
         ul = self.get_unit_lesson()
-        print "GET_INITIAL"
-        print ul.lesson.kind, [choice[0] for choice in self.form_class.KIND_CHOICES]
         if ul:
             if ul.lesson.kind not in [choice[0] for choice in self.form_class.KIND_CHOICES]:
                 init['unit_type'] = self.form_class.DEFAULT_UNIT_TYPE
