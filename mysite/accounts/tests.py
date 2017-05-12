@@ -108,7 +108,10 @@ class AccountSettingsTests(TestCase):
             "/complete/email/?verification_code={}".format(cc.code),
             follow=True
         )
-        self.assertRedirects(response, reverse('ctms:my_courses'), target_status_code=200)
+        if self.user.course_set.count():
+            self.assertRedirects(response, reverse('ctms:my_courses'), target_status_code=200)
+        else:
+            self.assertRedirects(response, reverse('ctms:create_course'), target_status_code=200)
 
         # if not instructor
         self.user.instructor.delete()
