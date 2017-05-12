@@ -1,15 +1,6 @@
 {% extends "psa_base.html" %}
 
 {% block content %}
-  {% if form.errors %}
-    <!-- TODO: Style error messages -->
-    Your email and password didn't match. Please try again.
-  {% endif %}
-
-  <!-- TODO: What is this? -->
-  {% if not user.is_authenticated %}
-  {% endif %}
-
   <div class="auth-card">
     <header>
       <h1>Log In</h1>
@@ -31,7 +22,7 @@
 
         {% for field in form %}
           {% if not field.is_hidden %}
-            {{ field.label_tag }}
+            <label for="{{ field.auto_id }}">{{ field.label }}</label>
             {{ field }}
             {{ field.errors }}
           {% else %}

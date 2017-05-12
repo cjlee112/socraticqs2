@@ -32,7 +32,7 @@
               {% if user_form %}
                 {% for field in user_form %}
                   {% if not field.is_hidden %}
-                    {{ field.label_tag }}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
                     {{ field }}
                     {{ field.errors }}
                   {% else %}
@@ -44,7 +44,7 @@
               {% if email_form %}
                 {% for field in email_form %}
                   {% if not field.is_hidden %}
-                    {{ field.label_tag }}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
                     {{ field }}
                     {{ field.errors }}
                   {% else %}
@@ -56,7 +56,7 @@
               {% if instructor_form %}
                 {% for field in instructor_form %}
                   {% if not field.is_hidden %}
-                    {{ field.label_tag }}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
                     {{ field }}
                     {{ field.errors }}
                   {% else %}
@@ -79,7 +79,7 @@
                 <!-- TODO: Add input for current password -->
                 {% for field in password_form %}
                   {% if not field.is_hidden %}
-                    {{ field.label_tag }}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
                     {{ field }}
                     {{ field.errors }}
                   {% else %}

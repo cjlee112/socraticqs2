@@ -79,6 +79,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
                 if user.is_active:
                     login(request, user)
                     return redirect(request.POST.get('next', next_page))
+        messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial={'next': next_page})
     kwargs['form'] = form
