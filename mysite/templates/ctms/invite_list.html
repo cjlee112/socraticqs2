@@ -61,11 +61,11 @@
 
         <div class="input-with-button">
            {% block invite_form %}
-           {% for field in  invite_tester_form %}
-              {{ field }}
-           {% endfor %}
-          {% endblock %}
-          <input type="submit" value="Invite">
+             {% for field in  invite_tester_form %}
+               {{ field }}
+             {% endfor %}
+           {% endblock %}
+          <input type="submit" value="Invite" class="submit__form" data-success-msg="Invitation sent successfully. " data-fail-msg="Invitation could not be sent now. Try again later.">
         </div>
 
       </form>

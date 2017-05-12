@@ -108,6 +108,24 @@
         }
       });
 
+      // Cookies
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+
       // Expandable content
       $('.expandable__toggle').on('click', function(e) {
         e.preventDefault();
@@ -115,6 +133,55 @@
         const content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
         content.toggle();
       });
+
+      $('.link__post__data').on('click', function(e) {
+        var csrftoken = getCookie('csrftoken');
+        var linkData = $(this).data();
+        var scs_callback = linkData.onSuccessCallback;
+        var fl_callback = linkData.onFailCallback;
+        if(linkData['href']){
+          $.post(
+            linkData['href'],
+            {"csrfmiddlewaretoken": csrftoken},
+            function(data) {
+              if(scs_callback){
+                $.globalEval(scs_callback);
+              }
+              alert(linkData['successMsg'] || "Succeeded!");
+            }).fail(function() {
+              if(fl_callback){
+                $.globalEval(fl_callback);
+              }
+              alert(linkData['failMsg'] || "Failed!");
+            });
+        }
+        e.preventDefault();
+      });
+
+      $('.submit__form').on('click', function(e) {
+        var linkData = $(this).data();
+        var scs_callback = linkData.onSuccessCallback;
+        var fl_callback = linkData.onFailCallback;
+        var my_form = $(this).closest('form');
+        var action_url = my_form.attr('action');
+        if(action_url) {
+          $.post(
+            action_url,
+            my_form.serialize(),
+            function(data) {
+              if(scs_callback){
+                $.globalEval(scs_callback);
+              }
+              alert(linkData['successMsg'] || "Succeeded!");
+            }).fail(function(){
+              if(fl_callback){
+                $.globalEval(fl_callback);
+              }
+              alert(linkData['failMsg'] || "Failed!");
+            })
+        }
+        e.preventDefault();
+      })
 
       // Custom scrollbar in sidebar
       $('.sidebar__scroll-container').perfectScrollbar();

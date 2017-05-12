@@ -10,7 +10,7 @@
 
   <tbody>
     {% for obj in objects %}
-      <tr>
+      <tr id="invite_id__{{ obj.id }}">
         <td>
           {{ obj.email }}
         </td>
@@ -20,17 +20,22 @@
         </td>
 
         <td>
-          <form action="{% url 'ctms:resend_invite' code=obj.code %}" method="POST">
-            {% csrf_token %}
-            <input type="submit" value="Send new invite">
-          </form>
+          <a class="link__post__data"
+              data-href="{% url 'ctms:resend_invite' code=obj.code %}" href="#"
+              data-success-msg="We just re-sent invitation email to {{ obj.email }}"
+              data-fail-msg="Current operation: sending invitation email to {{ obj.email }} was failed.">
+            Send new invite
+          </a>
         </td>
 
         <td>
-          <form action="{% url 'ctms:delete_invite' code=obj.code %}" method="post">
-            {% csrf_token %}
-            <input type="submit" value="Remove" class="btn btn-danger">
-          </form>
+          <a class="link__post__data"
+             data-href="{% url 'ctms:delete_invite' code=obj.code %}"
+             data-success-msg="We just deleted invite for user {{ obj.email }}" href="#"
+             data-fail-msg="Current operation: deleting invite for user {{ obj.email }} was failed."
+             data-on-success-callback="$('tr#invite_id__{{ obj.id }}').remove()">
+            Remove
+          </a>
         </td>
       </tr>
     {% endfor %}
