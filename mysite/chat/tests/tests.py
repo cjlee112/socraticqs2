@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import json
 
 from django.test import TestCase, Client
@@ -50,7 +52,7 @@ class CustomTestCase(TestCase):
         )
         self.courseunit.save()
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
-        lesson = Lesson(title='title', text='text', addedBy=self.user)
+        lesson = Lesson(title='title', text=u'きつね', addedBy=self.user, url='/test/url/')
         lesson.save()
         self.unitlesson = UnitLesson(
             unit=self.unit, order=0, lesson=lesson, addedBy=self.user, treeID=lesson.id
@@ -67,24 +69,15 @@ class CustomTestCase(TestCase):
 
     @staticmethod
     def compile_html(resource):
-        author_name = (
-            resource.lesson.addedBy.get_full_name() or
-            resource.lesson.addedBy.username
-        )
-        raw = (
-            '`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
+        if resource.lesson.url:
+            raw_html = u'`Read more <{0}>`_ \n {1}'.format(
                 resource.lesson.url,
-                author_name,
-                self.resource_unitlesson.lesson.text
-            )
-            if resource.lesson.url
-            else '`Author: {0}` \n {1}'.format(
-                author_name,
                 resource.lesson.text
             )
-        )
+        else:
+            raw_html = resource.lesson.text
 
-        return md2html(raw)
+        return md2html(raw_html)
 
 
 class MainChatViewTests(CustomTestCase):
@@ -556,6 +549,9 @@ class HistoryAPIViewTests(CustomTestCase):
         Check that history content fits API documentation.
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        lesson = self.unitlesson.lesson
+        lesson.text = u'🦊'
+        lesson.save()
         self.client.login(username='test', password='test')
         chat_id = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code,)), follow=True

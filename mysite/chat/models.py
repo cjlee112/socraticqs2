@@ -205,7 +205,7 @@ class Message(models.Model):
         return options
 
     def get_html(self):
-        html = None
+        html = self.text
         if self.content_id:
             if self.contenttype == 'chatdivider':
                 html = self.content.text
@@ -216,33 +216,26 @@ class Message(models.Model):
                     html = EVAL_OPTIONS.get(self.content.selfeval, '')
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
-                    html = mark_safe(md2html('**%s** \n %s' % (self.content.lesson.title, self.content.lesson.text)))
+                    html = mark_safe(
+                        md2html(
+                            '**%s** \n %s' %
+                            (self.content.lesson.title, self.content.lesson.text)
+                        )
+                    )
                 elif self.input_type == 'options' and self.text:
                     html = STATUS_OPTIONS[self.text]
                 else:
-                    author_name = (
-                        self.content.lesson.addedBy.get_full_name() or
-                        self.content.lesson.addedBy.username
-                    )
-                    raw = (
-                        u'`Read more <{0}>`_ \n **Author: {1}** \n\n {2}'.format(
+                    if self.content.lesson.url:
+                        raw_html = u'`Read more <{0}>`_ \n {1}'.format(
                             self.content.lesson.url,
-                            author_name,
                             self.content.lesson.text
                         )
-                        if self.content.lesson.url
-                        else '`Author: {0}` \n {1}'.format(
-                            author_name,
-                            self.content.lesson.text
-                        )
-                    )
+                    else:
+                        raw_html = self.content.lesson.text
 
-                    html = mark_safe(md2html(raw))
+                    html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
-
-        else:
-            html = self.text
         return html
 
     def get_name(self):
