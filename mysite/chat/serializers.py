@@ -271,9 +271,13 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         assignment = GradedLaunch.objects.filter(
             course_id=obj.enroll_code.courseUnit.course.id
         ).first()
-        if assignment:
-            # this is very simplt implementation and should be changed
-            send_outcome.delay(progress, assignment.id)
+        if not obj.progress == (progress * 100):
+            obj.progress = progress * 100
+            obj.save()
+            if assignment:
+                # this is very simplt implementation and should be changed
+                # we are sendign grade only for updated progress
+                send_outcome.delay(progress, assignment.id)
         return progress
 
 

@@ -56,15 +56,15 @@
             <div class="col-lg-8 col-lg-offset-2">
               <ul>
                 {% if courslets %}
-                  {% for cu in courslets %}
+                  {% for obj in courslets %}
                     <li>
-                      <a href="{{ domain }}/chat/enrollcode/{{ cu.1 }}/">
-                        <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
+                      <a href="{{ domain }}/chat/enrollcode/{{ obj.enroll_code }}/">
+                        <h3>{{ obj.courselet.unit.title }} {% if not obj.courselet.is_published %} (not yet published) {% endif %}</h3>
 
-                          <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
+                          <p>{{ obj.execrices }} lessons, ~{% widthratio obj.2 1 3 %} minutes</p>
 
                         <div class="course-content-unit-progress">
-                          <span style="width: {{ cu.3 }}%;"></span>
+                          <span style="width: {% if obj.chat %}{{ obj.chat.progress }}{% else %}0{% endif %}%;"></span>
                         </div>
                       </a>
                     </li>
@@ -95,7 +95,7 @@
                           <p>{{ chat.get_course_unit.unit.get_exercises|length }} lessons</p>
                           {% endcomment %}
                         <div class="course-content-unit-progress">
-                          <span style="width: 10%;"></span>
+                          <span style="width: {{ chat.progress }}%;"></span>
                         </div>
 
                       </a>

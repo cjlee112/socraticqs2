@@ -31,16 +31,14 @@ class CourseView(View):
             except AttributeError:
                 liveSession.live_instructor_icon = static('img/avatar-teacher.jpg')
         courselets = [
-            (
-                courselet,
-                EnrollUnitCode.get_code(courselet),
-                len(courselet.unit.get_exercises()),
-                ChatProgressSerializer(
-                    Chat.objects.filter(
-                        enroll_code__courseUnit=courselet
-                    ).first()
-                ).data.get('progress', 0)*100
-            )
+            {
+                'courselet': courselet,
+                'enroll_code': EnrollUnitCode.get_code(courselet),
+                'execrices': len(courselet.unit.get_exercises()),
+                'chat': Chat.objects.filter(
+                    enroll_code__courseUnit=courselet
+                ).first()
+            }
             for courselet in course.get_course_units(True)
         ]
         live_sessions_history = Chat.objects.filter(
