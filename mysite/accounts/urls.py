@@ -1,9 +1,8 @@
 from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
-from django.contrib.auth.views import (
-    password_reset, password_reset_done,
-    password_reset_confirm, password_reset_complete)
+from django.contrib.auth.views import password_reset_confirm, password_reset_complete
 from accounts.forms import CustomPasswordResetForm
+from accounts.views import custom_password_reset, custom_password_reset_done, resend_email_confirmation_link
 
 from .views import DeleteAccountView, AccountSettingsView, ProfileUpdateView
 
@@ -12,13 +11,15 @@ urlpatterns = patterns(
     '',
     url(r'^delete/$', DeleteAccountView.as_view(), name='delete'),
     url(r'^account_deleted/$', TemplateView.as_view(template_name='accounts/account_deleted.html'), name='deleted'),
-    url(r'^password_reset/$', password_reset, {
+    url(r'^password_reset/$', custom_password_reset, {
         'template_name': 'accounts/password_reset_form.html',
         'post_reset_redirect': 'accounts:password_reset_done',
         'password_reset_form': CustomPasswordResetForm
     }, name='password_reset'),
 
-    url(r'^password_reset/done/$', password_reset_done,
+    url(r'^resend_email_confirmation_link/$', resend_email_confirmation_link, name='resend_email_confirmation_link'),
+
+    url(r'^password_reset/done/$', custom_password_reset_done,
         {'template_name': 'accounts/password_reset_done.html'},
         name='password_reset_done'),
 

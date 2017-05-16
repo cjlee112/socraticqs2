@@ -113,6 +113,7 @@ def check_username_and_create_user(username, email, password, **kwargs):
 @psa('ctms:email_sent')
 def custom_complete(request, backend, *args, **kwargs):
     """Authentication complete view"""
+    request.session['resend_user_email'] = request.POST.get('email')
     return do_complete(request.backend, _do_login, request.user,
                        redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
 

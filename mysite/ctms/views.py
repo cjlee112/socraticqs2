@@ -932,3 +932,8 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
 
 class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnitMixin ?
     template_name = 'ctms/email_sent.html'
+
+    def get_context_data(self, **kwargs):
+        kw = super(EmailSentView, self).get_context_data(**kwargs)
+        kw.update({'resend_user_email': self.request.session.get('resend_user_email')})
+        return kw

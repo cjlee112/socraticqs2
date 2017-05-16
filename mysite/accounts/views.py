@@ -2,8 +2,12 @@ from functools import partial
 from django.contrib import messages
 
 from django.contrib.auth import logout
-from django.http.response import HttpResponseRedirect
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import password_reset, password_reset_done
+from django.http.response import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import View, CreateView
 from django.core.urlresolvers import reverse
 from django.views.generic.base import TemplateView
@@ -13,8 +17,12 @@ from accounts.forms import (
     DeleteAccountForm, ChangeEmailForm,
     CreatePasswordForm)
 from accounts.models import Instructor
+from ctms.views import json_response
 from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
 from .forms import SocialForm
+from psa.custom_backends import EmailAuth
+from psa.custom_django_storage import CustomDjangoStorage, CustomCode
+from psa.custom_django_strategy import CustomDjangoStrategy
 
 
 class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
@@ -141,7 +149,6 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
             instructor = None
         return instructor
 
-
     def get(self, request):
         instructor = self.get_instance()
         if instructor is not None and instructor.institution:
@@ -149,3 +156,70 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
         else:
             form = self.get_form()
             return self.render_to_response({'form': form})
+
+
+@csrf_protect
+def custom_password_reset(request, is_admin_site=False,
+                   template_name='registration/password_reset_form.html',
+                   email_template_name='registration/password_reset_email.html',
+                   subject_template_name='registration/password_reset_subject.txt',
+                   password_reset_form=PasswordResetForm,
+                   token_generator=default_token_generator,
+                   post_reset_redirect=None,
+                   from_email=None,
+                   current_app=None,
+                   extra_context=None,
+                   html_email_template_name=None):
+    response = password_reset(
+        request, is_admin_site=is_admin_site,
+        template_name=template_name,
+        email_template_name=email_template_name,
+        subject_template_name=subject_template_name,
+        password_reset_form=password_reset_form,
+        token_generator=token_generator,
+        post_reset_redirect=post_reset_redirect,
+        from_email=from_email,
+        current_app=current_app,
+        extra_context=extra_context,
+        html_email_template_name=html_email_template_name)
+    if request.method == 'POST' and isinstance(response, HttpResponseRedirect):
+        request.session['anonym_user_email'] = request.POST.get('email')
+    return response
+
+
+def custom_password_reset_done(
+        request,
+        template_name='registration/password_reset_done.html',
+        current_app=None, extra_context=None):
+    if extra_context:
+        extra_context.update({'anonym_user_email': request.session.get('anonym_user_email')})
+    else:
+        extra_context = {'anonym_user_email': request.session.get('anonym_user_email')}
+    return password_reset_done(
+        request,
+        template_name=template_name,
+        current_app=current_app, extra_context=extra_context)
+
+
+def resend_email_confirmation_link(request):
+    email = request.POST.get('email')
+    session_email = request.session.get('resend_user_email')
+
+    if session_email != email:
+        raise Http404()
+
+    if request.user.is_authenticated():
+        logout(request)
+        request.session['resend_user_email'] = session_email
+
+    def resend(request):
+        if CustomCode.objects.filter(email=email, verified=True).count():
+            return {'ok': 0, 'error': 'Email {} already verified!'.format(email)}
+        try:
+            strategy = CustomDjangoStrategy(CustomDjangoStorage, request=request)
+            strategy.send_email_validation(EmailAuth, email)
+            return {'ok': 1}
+        except Exception as e:
+            return {'ok': 0, 'error': e.message}
+
+    return json_response(resend(request))
