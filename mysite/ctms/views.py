@@ -65,6 +65,9 @@ class CourseCoursletUnitMixin(View):
         except Instructor.DoesNotExist:
             return False
 
+    def get_courses_where_im_instructor(self):
+        return Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+
     def get_course(self):
         return Course.objects.filter(id=self.kwargs.get(self.course_pk_name)).first()
 
@@ -167,13 +170,10 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     model = Course
 
     def get_context_data(self, **kwargs):
-        my_courses = Course.objects.filter(
-            models.Q(addedBy=self.request.user)
-        )
+        my_courses = self.get_my_courses()
         shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
-        courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+        courses_shared_by_role = self.get_courses_where_im_instructor()
         course_form = None
-        total_users = None
         if not my_courses and not shared_courses:
             course_form = CourseForm()
 
@@ -184,6 +184,16 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
             'instructor_role_courses': courses_shared_by_role
 
         }
+
+    def get(self, request, *args, **kwargs):
+        my_courses = self.get_my_courses()
+        if not my_courses and not self.request.user.invite_set.all():
+            # no my_courses and no shared courses
+            return redirect('ctms:create_course')
+        if not my_courses and self.request.user.invite_set.all():
+            # no my_courses and present more that zero shared course
+            return redirect('ctms:shared_courses')
+        return super(MyCoursesView, self).get(request, *args, **kwargs)
 
     def post(self, request):
         form = CourseForm(request.POST)

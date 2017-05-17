@@ -19,6 +19,9 @@
     </nav>
 
     <main class="card__content">
+      <h2>
+        <span>Shared Courses</span>
+      </h2>
       {% if shared_courses %}
         <table>
           <thead >
@@ -40,6 +43,7 @@
       {% endif %}
     </main>
   </div>
+{% comment %}
 <!-- # TODO need to discuss -->
 <!-- {% if instructor_role_courses %}
 <h4>Has instructor role in these courses:</h4>
@@ -73,4 +77,5 @@
     </tbody>
   </table>
 {% endif %} -->
+{% endcomment %}
 {% endblock %}
