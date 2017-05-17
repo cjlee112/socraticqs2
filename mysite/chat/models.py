@@ -227,7 +227,7 @@ class Message(models.Model):
                     html = STATUS_OPTIONS[self.text]
                 else:
                     if self.content.lesson.url:
-                        raw_html = u'`Read more <{0}>`_ \n {1}'.format(
+                        raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
                             self.content.lesson.url,
                             self.content.lesson.text
                         )
