@@ -971,18 +971,21 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     Collect answers from enrolled students into table.
     """
     unit = get_object_or_404(Unit, pk=unit_id)
+    course = get_object_or_404(Course, pk=course_id)
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
     exercises = unit.get_exercises()
-    enrolled_students = User.objects.filter(role__role=Role.ENROLLED).distinct()
+    roles = Role.objects.filter(
+        role=Role.ENROLLED, course=course
+    ).distinct('user')
     table_head = [i.lesson.title for i in exercises]
     table_body = defaultdict(list)
-    for user in enrolled_students:
+    for role in roles:
         for orct in exercises:
-            table_body[user].append(
+            table_body[role.user].append(
                 Response.objects.filter(
-                    lesson=orct.lesson, author=user
+                    lesson=orct.lesson, author=role.user
                 ).order_by('-atime').first()
             )
     return pageData.render(
