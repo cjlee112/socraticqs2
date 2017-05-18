@@ -70,7 +70,7 @@ class CustomTestCase(TestCase):
     @staticmethod
     def compile_html(resource):
         if resource.lesson.url:
-            raw_html = u'`Read more <{0}>`_ \n {1}'.format(
+            raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
                 resource.lesson.url,
                 resource.lesson.text
             )
