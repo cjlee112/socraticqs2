@@ -1,0 +1,43 @@
+<table>
+  <thead>
+    <tr>
+      <th>{{ list_name }}</th>
+      <th>Status</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for obj in objects %}
+      <tr id="invite_id__{{ obj.code }}">
+        <td>
+          {{ obj.email }}
+        </td>
+
+        <td>
+          {{ obj.status }}
+        </td>
+
+        <td>
+          <a class="link__post__data"
+              data-href="{% url 'ctms:resend_invite' code=obj.code %}" href="#"
+              data-success-msg="We just re-sent invitation email to {{ obj.email }}"
+              data-fail-msg="Current operation: sending invitation email to {{ obj.email }} was failed.">
+            Send new invite
+          </a>
+        </td>
+
+        <td>
+          <a class="link__post__data"
+             data-href="{% url 'ctms:delete_invite' code=obj.code %}"
+             data-success-msg="We just deleted invite for user {{ obj.email }}" href="#"
+             data-fail-msg="Current operation: deleting invite for user {{ obj.email }} was failed."
+             data-on-success-callback="$('tr#invite_id__{{ obj.code }}').remove()">
+            Remove
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

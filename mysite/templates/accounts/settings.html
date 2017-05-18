@@ -1,0 +1,138 @@
+{% extends "ctms_base.html" %}
+{% load social_tags %}
+
+{% block title %}
+  Account Settings
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar card__topbar--with-description">
+      <h1>Account Settings</h1>
+      {% if user.is_authenticated %}
+        <p>
+          You are logged in as <em>{{ user.username }}</em>. <a href="/new_logout/">Log out</a>
+        </p>
+      {% endif %}
+    </header>
+
+    <main class="card__content">
+      {% if person and user.id == person.id %}
+        {% if user and not 'anonymous' in user.username %}
+          {% comment %}
+            {% include 'psa/user_details.html' %}
+          {% endcomment %}
+
+          <section>
+            <h2>Personal Information</h2>
+
+            <form name="" action="." method="post">
+              {% csrf_token %}
+
+              {% if user_form %}
+                {% for field in user_form %}
+                  {% if not field.is_hidden %}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% if email_form %}
+                {% for field in email_form %}
+                  {% if not field.is_hidden %}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% if instructor_form %}
+                {% for field in instructor_form %}
+                  {% if not field.is_hidden %}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              <input type="submit" value="Update">
+            </form>
+          </section>
+
+          <section>
+            <h2>Change Password</h2>
+
+            {% if password_form %}
+              <form name="" action="." method="post">
+                {% csrf_token %}
+
+                <!-- TODO: Add input for current password -->
+                {% for field in password_form %}
+                  {% if not field.is_hidden %}
+                    <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+
+                <input type="submit" value="Update Password">
+              </form>
+            {% endif %}
+          </section>
+
+          <section>
+            <h2>Delete Account</h2>
+            {% if delete_account_form %}
+              <form class="form-horizontal" name="" action="{% url 'accounts:delete' %}" method="post">
+                {% csrf_token %}
+
+                <!-- TODO: The confirm window onclick is enough? -->
+                {% for field in delete_account_form %}
+                  {% if not field.is_hidden %}
+                    <!--{{ field.label_tag }}-->
+                    <!--{{ field }}-->
+                    <!--{{ field.errors }}-->
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                {% endfor %}
+
+                <input type="submit" value="Delete Account" class="button button--custom-delete" data-confirm-text="Do you really want to delete your account?">
+              </form>
+            {% endif %}
+          </section>
+        {% endif %}
+      {% endif %}
+    </main>
+  </div>
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script>
+  // Confirm on delete buttons
+  $('.button--custom-delete').on('click', function(e) {
+    console.log(11111);
+    var text = $(this).data('confirm-text') || 'Are you sure?';
+
+    if(!window.confirm(text)) {
+      $('#id_confirm_delete_account').val(false);
+      e.preventDefault();
+    } else {
+      $('#id_confirm_delete_account').val(true);
+    }
+  });
+</script>
+{% endblock %}

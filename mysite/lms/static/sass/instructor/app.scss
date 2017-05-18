@@ -1,0 +1,38 @@
+// Uncomment this @import to display the baseline grid during development
+// @import 'dev/baseline';
+
+// # Guidelines
+// - Use existing components when possible
+// - Break down your code into small reusable components
+// - Never pollute the global namespace with anything but components
+
+// # Recommended reading
+// - BEM: http://getbem.com/introduction/ https://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/
+// - Single margin declarations: https://csswizardry.com/2012/06/single-direction-margin-declarations/ (we use top-margin instead)
+
+// Base
+@import 'base/variables';
+@import 'base/mixins';
+@import 'base/elements'; // This file should only style native html elements, i.e. no classes or ids
+
+// Components
+@import 'components/bootstrap';
+@import 'components/sidebar';
+@import 'components/page';
+@import 'components/card';
+@import 'components/avatar';
+@import 'components/hamburger';
+@import 'components/button';
+@import 'components/user-info';
+@import 'components/table-answer';
+@import 'components/auth-topbar';
+@import 'components/auth-card';
+@import 'components/answer';
+@import 'components/alert';
+@import 'components/errorlist';
+@import 'components/expandable';
+@import 'components/form-group';
+@import 'components/radio-list';
+@import 'components/error-models-form';
+@import 'components/dropdown';
+@import 'components/input-with-button';

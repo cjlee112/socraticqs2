@@ -1,0 +1,15 @@
+.auth-topbar {
+  height: 61px;
+  background: #fff;
+  border-bottom: 1px solid #DDE2E6;
+  text-align: center;
+
+  a {
+    display: inline-block;
+    padding: 12px;
+
+    &:hover, &:active, &:focus {
+      opacity: 0.7;
+    }
+  }
+}

@@ -155,6 +155,8 @@ class ChatMixin(object):
     """
     Allow to create message based on current FSM node type.
     """
+    is_chat_add_lesson = lambda self: self.fsm.name in ('chat_add_lesson',)
+
     def get_message(self, chat, current=None, message=None):
         is_additional = chat.state.fsmNode.fsm.name in ['additional', 'resource']
         next_lesson = chat.state.unitLesson
@@ -376,14 +378,104 @@ class ChatMixin(object):
                             kind='message',
                             is_additional=is_additional)[0]
 
-        if self.name == 'START' and self.fsm.name == 'live_chat':
+        if self.name == 'START' and self.fsm.name in('live_chat',):
             message = Message.objects.get_or_create(
                 chat=chat,
                 text=self.title,
                 kind='button',
-                is_additional=True,
+                is_additional=is_additional,
                 owner=chat.user,
             )[0]
+
+
+        if self.name in (
+                'GET_UNIT_NAME_TITLE',
+                'GET_UNIT_QUESTION',
+                'GET_UNIT_ANSWER',
+                'GET_HAS_UNIT_ANSWER',
+        ):
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                input_type='text',
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional
+            )
+            if isinstance(current, UnitLesson):
+                _data['content_id'] = current.id
+                # _data['text'] = current.lesson.title
+                _data['contenttype'] = 'unitlesson'
+            elif message and message.content:
+                # _data['text'] = "current.lesson"
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = message.contenttype
+
+            # content_id = current.id if current else None
+            message = Message.objects.create(**_data)
+
+        if self.name in ('START', 'NOT_A_QUESTION') and self.is_chat_add_lesson():
+            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=is_additional,
+                owner=chat.user,
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.is_chat_add_lesson():
+            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=is_additional,
+                owner=chat.user,
+            )
+            # import ipdb; ipdb.set_trace()
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            elif isinstance(current, UnitLesson):
+                _data['content_id'] = current.id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
+
+        if self.name in ('HAS_UNIT_ANSWER', 'WELL_DONE'):
+            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='options',
+                kind='message',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional
+            )
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
+
+        if self.name in ('WELL_DONE',):
+            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='options',
+                kind='button',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional
+            )
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
 
         # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS
         if is_wait_node(self.name):

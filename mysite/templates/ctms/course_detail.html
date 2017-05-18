@@ -1,0 +1,72 @@
+{% extends "ctms_base.html" %}
+
+{% block title %}
+  {{ object.title }}
+{% endblock %}
+
+{% block content %}
+
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.title }}</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:course_view' pk=object.id %}" class="card__nav-active">Courselets</a>
+        </li>
+
+        <li>
+          <!-- TODO: Add link to share -->
+          <a href="{% url 'ctms:course_invite' pk=object.pk %}">Share</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:course_settings' pk=object.id %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      {% if courslets %}
+        <h2>
+          <span>Courselets</span>
+          <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary button--small">Create Courselet</a>
+        </h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Courselet</th>
+
+              <th>Answers</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for clt in courslets %}
+              <tr>
+                <td>
+                  <a href="{% url 'ctms:courslet_view' course_pk=clt.course.id pk=clt.id %}">{{ clt.unit.title }}</a>
+                </td>
+
+                <td>
+                  {{ clt.course.response_set.count }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="card__empty-state">
+          <h3>Courselets</h3>
+
+          <p>A courselet is a series of short “chat” messages that help students understand one or more important concepts. A course generally contains multiple courselets, and the messages within them are called units. Let’s create your first courselet!</p>
+
+          <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary button--small">Create Courselet</a>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+{% endblock %}

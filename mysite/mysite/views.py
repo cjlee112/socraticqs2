@@ -5,11 +5,6 @@ from django.shortcuts import render
 from django.template import loader, RequestContext
 
 
-cache_page(60*15)
-def home_page(request):
-    return render(request, 'index.html')
-
-
 def logout_page(request, next_page):
     """
     Log users out and re-direct them to the main page.

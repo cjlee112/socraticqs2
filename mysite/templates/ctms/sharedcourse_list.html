@@ -1,0 +1,76 @@
+{% extends "ctms_base.html" %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Courses</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:my_courses' %}">My Courses</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:shared_courses' %}" class="card__nav-active">Shared with Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      {% if shared_courses %}
+        <table>
+          <thead >
+            <th>Course</th>
+            <th>Author</th>
+          </thead>
+
+          <tbody>
+            {% for sh in shared_courses %}
+              <tr>
+                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}">{{ sh.course.title }}</a></td>
+                <td>{{ sh.instructor }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No one has shared courses with you yet.</p>
+      {% endif %}
+    </main>
+  </div>
+<!-- # TODO need to discuss -->
+<!-- {% if instructor_role_courses %}
+<h4>Has instructor role in these courses:</h4>
+  <table class="table table-striped">
+    <thead >
+      <th>
+        User who shared
+      </th>
+      <th>
+        Course name
+      </th>
+      <th>
+        link
+      </th>
+
+    </thead>
+    <tbody>
+    {% for course in instructor_role_courses %}
+    <tr>
+      <td>
+        {{ course.addedBy }}
+      </td>
+      <td>
+        {{ course.title }}
+      </td>
+      <td>
+        <a href="{% url 'lms:course_view' course_id=course.id %}">open</a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %} -->
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "ctms_base.html" %}
+
+{% block title %}
+  Create Courselet
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Create Courselet</h1>
+    </header>
+
+    <main class="card__content">
+      <form action="" method="POST">
+        {% csrf_token %}
+        <label for="{{ form.title.auto_id }}">Courselet Name</label>
+        <p><span>{{ form.title.help_text }}</span>  </p>
+          {{ form.title }}
+          {% if form.title.errors %}
+            {{ form.title.errors }}
+          {% endif %}
+        <input type="submit" value="Create Courselet">
+      </form>
+    </main>
+  </div>
+{% endblock %}

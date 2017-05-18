@@ -1,0 +1,78 @@
+{% extends "ctms_base.html" %}
+
+{% block title %}
+  {{ object.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.unit.title }}</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=object.id %}" class="card__nav-active">Units</a>
+        </li>
+
+        <li>
+          <!-- TODO: Add link to preview -->
+          <a href="{% url 'ctms:courselet_preview' course_pk=object.course.id pk=object.id %}">Preview</a>
+        </li><li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=object.course.id pk=object.id %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      {% if u_lessons %}
+        <h2>
+          <span>Units</span>
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary button--small">Add Unit</a>
+          <!-- TODO: Add link to add units by chat -->
+          <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="button button--small">Add Units by Chat</a>
+        </h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Unit Name</th>
+              <th>Answers</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for u_lesson in u_lessons %}
+              <tr>
+                <td>
+                  <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.lesson.title }}
+                  </a>
+                </td>
+
+                <td>
+                  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.responses_count }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="card__empty-state">
+          <h3>Units</h3>
+
+          <p>
+            A courselet is a series of short “chat” messages, called units, that help students understand one or more important concepts. You can create these units by filling out a form if you click on <em>Add Unit</em>. If you’re new to active learning, we recommend that you create your first courselet by clicking on <em>Add Units by Chat</em>. You will be presented with a chat interface, just like the one your students will be using, that’ll guide you through the authoring process. Meta!
+          </p>
+
+          <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk  %}" class="button button--small">Add Units by Chat</a>
+
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--small button--primary">Add Unit</a>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+{% endblock %}

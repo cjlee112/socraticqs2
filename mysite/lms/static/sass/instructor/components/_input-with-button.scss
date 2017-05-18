@@ -1,0 +1,17 @@
+.input-with-button {
+  position: relative;
+  margin-top: 30px;
+
+  input[type=text], input[type=password], input[type=email] {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    height: 56px;
+  }
+
+  .button, input[type=submit], button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    margin: 0;
+  }
+}
