@@ -1,6 +1,7 @@
-import injections
 import logging
+
 import waffle
+import injections
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -17,7 +18,6 @@ from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnit
 from chat.utils import enroll_generator
 from ctms.views import CourseCoursletUnitMixin
 from fsm.models import FSMState
-
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from ct.models import Unit, Role, UnitLesson, ConceptLink, CourseUnit
@@ -64,14 +64,15 @@ class ChatInitialView(LoginRequiredMixin, View):
         :return: EnrollUnitCode instance
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=False)
-
+    
+    @staticmethod
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(
             user=self.request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy
         )
-        chat.save(self.request)
+        chat.save()
         return chat
 
     def check_course_unit_not_published(self, courseUnit):
@@ -83,7 +84,8 @@ class ChatInitialView(LoginRequiredMixin, View):
                 role__course=courseUnit.course
             ).exists())
 
-    def get_will_learn_need_know(self, unit, courseUnit):
+    @staticmethod
+    def get_will_learn_need_know(unit, courseUnit):
         """
         Steps to define Concepts for Will learn and Need to know:
 
@@ -180,7 +182,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         kw.update(kwargs)
         return Chat.objects.filter(**kw).first()
 
-    def get(self, request, enroll_key, *args, **kwargs):
+    def get(self, request, enroll_key, chat_id=None):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
         unit = courseUnit.unit
@@ -203,11 +205,18 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat = self.get_chat(
-            request,
-            enroll_code,
-            **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
-        )
+        if chat_id:
+            chat = self.get_chat(
+                request,
+                enroll_code=enroll_code,
+                id=chat_id
+            )
+        else:
+            chat = self.get_chat(
+                request,
+                enroll_code,
+                **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
+            )
         if not chat and enroll_key:
             chat = self.create_new_chat(request, enroll_code, courseUnit)
         if chat.message_set.count() == 0:
@@ -485,6 +494,7 @@ class InitializeLiveSession(ChatInitialView):
 
 
 class TestChatInitialView(ChatInitialView):
+    @staticmethod
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(
             user=self.request.user,
@@ -492,7 +502,7 @@ class TestChatInitialView(ChatInitialView):
             instructor=courseUnit.course.addedBy,
             is_test=True
         )
-        chat.save(self.request)
+        chat.save()
         return chat
 
     @staticmethod
@@ -521,7 +531,7 @@ class TestChatInitialView(ChatInitialView):
 
     def check_course_unit_not_published(self, courseUnit):
         return not courseUnit.course.invite_set.filter(
-            models.Q(user=self.request.user) | models.Q(email=self.request.user.email),
+            Q(user=self.request.user) | Q(email=self.request.user.email),
         ) and not User.objects.filter(
             id=self.request.user.id,
             role__role=Role.INSTRUCTOR,
