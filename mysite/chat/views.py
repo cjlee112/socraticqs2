@@ -64,7 +64,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         :return: EnrollUnitCode instance
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=False)
-    
+
     @staticmethod
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(

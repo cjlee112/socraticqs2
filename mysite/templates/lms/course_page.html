@@ -64,7 +64,7 @@
                           <p>{{ obj.execrices }} lessons, ~{% widthratio obj.execrices 1 3 %} minutes</p>
 
                         <div class="course-content-unit-progress">
-                          <span style="width: {% if obj.chat %}{{ obj.chat.progress }}{% else %}0{% endif %}%;"></span>
+                          <span style="width: {% if obj.chat and obj.chat.progress %}{{ obj.chat.progress }}{% else %}0{% endif %}%;"></span>
                         </div>
                       </a>
                     </li>

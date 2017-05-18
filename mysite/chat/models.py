@@ -87,7 +87,7 @@ class Chat(models.Model):
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
     last_modify_timestamp = models.DateTimeField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    progress = models.IntegerField(default=0, blank=False, null=False)
+    progress = models.IntegerField(default=0, blank=True, null=True)
 
     class Meta:
         ordering = ['-timestamp']
