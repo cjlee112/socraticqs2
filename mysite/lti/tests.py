@@ -187,6 +187,55 @@ class ParamsTest(LTITestCase):
             uid=self.headers[u'lis_person_contact_email_primary']
         ).user)
 
+    def test_lti_users_same_full_name(self, mocked):
+        """
+        Test user creation w/ the same `lis_person_name_full`.
+        """
+        mocked.return_value.is_valid_request.return_value = True
+
+        # Link LtiUser to Django user by email
+        self.client.post('/lti/', data=self.headers, follow=True)
+        self.assertEqual(self.user, UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user)
+
+        # Create new Django user w/ username 'Test Username UID 2'
+        self.headers[u'user_id'] = 2
+        self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
+        self.client.post('/lti/', data=self.headers, follow=True)
+        self.assertNotEqual(self.user, UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user)
+        first_user = UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user
+
+        # Create new Django user w/ username 'Test Username UID 3'
+        self.headers[u'user_id'] = 3
+        self.headers[u'lis_person_contact_email_primary'] = 'new_email_2@mail.com'
+        self.client.post('/lti/', data=self.headers, follow=True)
+        self.assertNotEqual(first_user, UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user)
+
+    def test_lti_user_unicode_username(self, mocked):
+        """
+        Test unicode full name from LTI.
+        """
+        mocked.return_value.is_valid_request.return_value = True
+
+        self.headers[u'user_id'] = 2
+        self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
+        self.headers[u'lis_person_name_full'] = u'きつね'
+        self.client.post('/lti/', data=self.headers, follow=True)
+        new_user = UserSocialAuth.objects.get(
+            uid=self.headers[u'lis_person_contact_email_primary']
+        ).user
+        self.assertNotEqual(self.user, new_user)
+        self.assertEqual(
+            new_user.username, u'きつね UID {}'.format(self.headers[u'user_id'])
+        )
+
     def test_lti_user_no_email(self, mocked):
         del self.headers[u'lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
