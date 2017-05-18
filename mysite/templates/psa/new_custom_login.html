@@ -1,0 +1,45 @@
+{% extends "psa_base.html" %}
+
+{% block content %}
+  <div class="auth-card">
+    <header>
+      <h1>Log In</h1>
+
+      <p>Don't have an account yet? <a href="{% url 'signup' %}">Sign up</a></p>
+    </header>
+
+    <section class="auth-card__social-options">
+      {% include "psa/social_backends.html" %}
+
+      <p>
+        <span>or use the form below if you signed up using your email</span>
+      </p>
+    </section>
+
+    <main class="auth-card__content">
+      <form name="LoginForm" action="." method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+          {% if not field.is_hidden %}
+            <label for="{{ field.auto_id }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          {% else %}
+            {{ field }}
+          {% endif %}
+        {% endfor %}
+
+        <div class="auth-card__actions">
+          <a href="{% url 'accounts:password_reset' %}">Forgot your password?</a>
+
+          <input type="submit" value="Log In">
+        </div>
+      </form>
+    </main>
+  </div>
+
+  {% if DEBUG %}
+    {% include "psa/user_details.html" %}
+  {% endif %}
+{% endblock %}

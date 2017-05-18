@@ -1,0 +1,50 @@
+{% extends 'ctms_base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ object.unitLesson.lesson.title }}</h1>
+  </header>
+
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}" class="card__nav-active">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    <div class="answer">
+      <div class="answer__back">
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">&larr; All answers</a>
+      </div>
+
+      <div class="user-info">
+        <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author.get_full_name }}" class="avatar">
+        <!-- TODO: Answer and datetime is empty? -->
+        <h3>{{ answer.author }}</h3>
+        <p>{{ answer.atime|date }}</p>
+      </div>
+
+      <div class="answer__meta">
+        <!-- TODO: Add status here, e.g. still confused -->
+        <b>Status:</b> ?
+      </div>
+
+      <div class="answer__answer">
+        {{ object.text }}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

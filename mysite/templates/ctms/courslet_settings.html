@@ -1,0 +1,47 @@
+{% extends "ctms_base.html" %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ courslet.unit.title }}</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=pk %}">Units</a>
+        </li>
+
+        <li>
+          <!-- TODO: Add link to preview -->
+          <a href="{% url 'ctms:courselet_preview' course_pk=course_pk pk=pk %}">Preview</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
+        {% csrf_token %}
+
+        <label for="name">Courselet Name</label>
+        <p>Give your courselet a descriptive name.</p>
+        {{ form.title }}
+        <!-- TODO: Replace label, description and input with real form
+          {{ form.as_p }}
+        -->
+
+        <input type="submit" value="Save">
+      </form>
+
+      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+      </form>
+    </main>
+  </div>
+{% endblock %}

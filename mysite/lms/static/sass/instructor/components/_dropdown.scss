@@ -1,0 +1,23 @@
+.dropdown {
+
+}
+
+.dropdown-menu {
+  width: 260px;
+  border-radius: 5px;
+  padding: 12px 0;
+  margin: 6px 0;
+}
+
+.dropdown-menu > li > a {
+  @include ellipsis;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 6px 24px;
+  color: $color-text-primary;
+  transition: all 0.2s;
+
+  &:focus, &:hover {
+    color: $color-primary;
+  }
+}

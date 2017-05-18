@@ -15,8 +15,22 @@ INSTALLED_APPS_LOCAL = (
     'django_nose',
     'behave_django',
 )
+MIDDLEWARE_LOCAL = tuple()
+
+try:
+    import debug_toolbar
+    INSTALLED_APPS_LOCAL += ('debug_toolbar',)
+    MIDDLEWARE_LOCAL = (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+except ImportError:
+    pass
 
 INSTALLED_APPS += INSTALLED_APPS_LOCAL
+MIDDLEWARE_CLASSES = MIDDLEWARE_LOCAL + MIDDLEWARE_CLASSES
+INTERNAL_IPS = (
+    '127.0.0.1',
+)
 
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

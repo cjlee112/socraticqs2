@@ -66,6 +66,11 @@ STATUS_OPTIONS = {
     'done': 'Solidly',
 }
 
+YES_NO_OPTIONS = (
+    ('yes', 'Yes!'),
+    ('no', 'No!')
+)
+
 
 class Chat(models.Model):
     """
@@ -75,6 +80,8 @@ class Chat(models.Model):
     user = models.ForeignKey(User)
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
+    is_preview = models.BooleanField(default=False)
+    is_test = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
     instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
@@ -147,6 +154,13 @@ class Message(models.Model):
     class Meta:
         ordering = ['timestamp']
 
+    def __unicode__(self):
+        return u"<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
+            self.id,
+            self.chat.id if self.chat else None,
+            self.owner.username, self.get_kind_display(), self.text
+        )
+
     @property
     def content(self):
         if self.contenttype == 'NoneType':
@@ -194,6 +208,8 @@ class Message(models.Model):
             self.chat and self.chat.next_point and
             self.chat.next_point.input_type == 'options'
         ):
+            if self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
+                return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             if self.chat.next_point.kind == 'button':
                 options = [{"value": 1, "text": "Continue"}]
             elif self.chat.next_point.contenttype == 'unitlesson':
@@ -204,6 +220,9 @@ class Message(models.Model):
                 options = [{"value": 1, "text": "Continue"}]
 
         return options
+
+    def is_in_fsm_node(self, node_name):
+        return self.chat.state and self.chat.state.fsmNode.fsm.name == node_name
 
     def get_html(self):
         html = self.text
@@ -241,7 +260,7 @@ class Message(models.Model):
 
     def get_name(self):
         name = "Kris Lee"
-        if self.content_id:
+        if self.content_id and self.content:
             if self.contenttype == 'response':
                 name = self.content.author.get_full_name() or self.content.author.username
             elif self.contenttype == 'unitlesson':
@@ -261,23 +280,32 @@ class EnrollUnitCode(models.Model):
     enrollCode = models.CharField(max_length=32, default=enroll_generator)
     courseUnit = models.ForeignKey(CourseUnit)
     isLive = models.BooleanField(default=False)
+    isPreview = models.BooleanField(default=False)
+    isTest = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
-    def create_new(cls, course_unit, isLive):
+    def create_new(cls, course_unit, isLive, isPreview=False, isTest=False):
         enroll_code = EnrollUnitCode(
             courseUnit=course_unit,
             isLive=True,
+            isPreview=isPreview,
+            isTest=isTest,
             enrollCode=uuid4().hex
         )
         enroll_code.save()
         return enroll_code
 
     @classmethod
-    def get_code(cls, course_unit, isLive=False):
-        enroll_code, cr = cls.objects.get_or_create(courseUnit=course_unit, isLive=isLive)
+    def get_code(cls, course_unit, isLive=False, isPreview=False, isTest=False):
+        enroll_code, cr = cls.objects.get_or_create(
+            courseUnit=course_unit,
+            isLive=isLive,
+            isPreview=isPreview,
+            isTest=isTest
+        )
         if cr:
             enroll_code.enrollCode = uuid4().hex
             enroll_code.isLive = isLive
@@ -285,15 +313,20 @@ class EnrollUnitCode(models.Model):
         return enroll_code.enrollCode
 
     @classmethod
-    def get_code_for_user_chat(cls, course_unit, is_live, user):
+    def get_code_for_user_chat(cls, course_unit, is_live, user, is_preview=False, isTest=False):
         # enroll = cls(course_unit=course_unit, isLive=is_live)
-        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user).first()
+        filter_kw = {
+            'isPreview': is_preview,
+            'isTest': isTest
+        }
+
+        enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll
-        enroll = cls(courseUnit=course_unit, isLive=is_live)
+        enroll = cls(courseUnit=course_unit, isLive=is_live, isPreview=is_preview, isTest=isTest)
         enroll.save()
         if not enroll.enrollCode:
-            enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live)
+            enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live, isPreview=is_preview)
             enroll.save()
             return enroll
         return enroll

@@ -19,3 +19,6 @@ class Instructor(models.Model):
     job = models.CharField(max_length=100, blank=True)
     icon_url = models.URLField(blank=True)
     page_url = models.URLField(blank=True)
+
+    def __unicode__(self):
+        return self.user.username if not (self.user.last_name or self.user.first_name) else self.user.get_full_name()

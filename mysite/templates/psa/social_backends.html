@@ -1,7 +1,6 @@
 {% load social_tags %}
 
 {% for sublist in available_backends|social_backends %}
-<div class="row">
   {% for name, backend in sublist %}
     {% associated backend %}
     {% if association %}
@@ -14,11 +13,9 @@
       </form>
     {% endif %}
     {% else %}
-      <a class="col-md-2 btn btn-default" name="{{ backend|backend_class }}" href="{% url "social:begin" backend=name %}?next={{ next }}">
-        <i class="fa fa-{{ name|icon_name }}"></i>
+      <a class="button button--small" href="{% url "social:begin" backend=name %}?next={{ next }}">
         {{ backend|backend_name }}
       </a>
     {% endif %}
   {% endfor %}
-</div>
 {% endfor %}
