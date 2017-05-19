@@ -97,7 +97,7 @@ class LTIUser(models.Model):
         """
         extra_data = json.loads(self.extra_data)
         username = u'{0} UID {1}'.format(
-            extra_data.get('lis_person_name_full', None),
+            extra_data.get('lis_person_name_full'),
             self.user_id
         )
         first_name = extra_data.get('lis_person_name_given', '')
