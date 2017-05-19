@@ -97,13 +97,14 @@ class GET_UNIT_ANSWER(object):
 class WELL_DONE(object):
     path = 'fsm:fsm_node'
     title = 'Well done!'
-    help = '''You have created  new unit in this courselet. Another important concept on Courselets is error models.
-    They are lessons based on common misconceptions that your students can select when they self-assess.
-    We won't cover error models in this interactive tutorial, but check them out as you start using this courselet with
-    students.
-
-    Want to add another unit to this courselet?
-    '''
+    help = (
+        "You have created  new unit in this courselet. Another important concept on Courselets is error models."
+        "They are lessons based on common misconceptions that your students can select when they self-assess."
+        "We won't cover error models in this interactive tutorial, but check them out as you start using this courselet with"
+        "students."
+        "\n\n"
+        "Want to add another unit to this courselet?"
+    )
     next_edge = want_to_continue
     edges = (
         dict(name='next', toNode='START', title='unit saved'),
@@ -116,9 +117,10 @@ class END(object):
     # node specification data goes here
     # path = 'ct:ul_tasks'
     title = 'Done writing new lesson'
-    help = '''Thanks for writing this new Lesson!
-    See below for suggested next steps on concepts you can study in
-    this courselet.'''
+    help = (
+        'Thanks for writing this new Lesson!\n\n'
+        'See below for suggested next steps on concepts you can study in this courselet.'
+    )
 
 
 def get_specs():

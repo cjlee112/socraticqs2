@@ -415,7 +415,7 @@ class ChatMixin(object):
             message = Message.objects.create(**_data)
 
         if self.name in ('START', 'NOT_A_QUESTION') and self.is_chat_add_lesson():
-            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
                 text=text,
@@ -427,7 +427,7 @@ class ChatMixin(object):
             message = Message.objects.create(**_data)
 
         if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.is_chat_add_lesson():
-            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
                 text=text,
@@ -446,7 +446,7 @@ class ChatMixin(object):
             message = Message.objects.create(**_data)
 
         if self.name in ('HAS_UNIT_ANSWER', 'WELL_DONE'):
-            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
                 text=text,
@@ -462,7 +462,7 @@ class ChatMixin(object):
             message = Message.objects.create(**_data)
 
         if self.name in ('WELL_DONE',):
-            text = "<b>{}</b><br>{}".format(self.title, getattr(self, 'help', '') or '')
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
                 text=text,

@@ -235,25 +235,28 @@ class Message(models.Model):
                 else:
                     html = EVAL_OPTIONS.get(self.content.selfeval, '')
             elif self.contenttype == 'unitlesson':
-                if self.content.kind == UnitLesson.MISUNDERSTANDS:
-                    html = mark_safe(
-                        md2html(
-                            '**%s** \n %s' %
-                            (self.content.lesson.title, self.content.lesson.text)
-                        )
-                    )
-                elif self.input_type == 'options' and self.text:
-                    html = STATUS_OPTIONS[self.text]
+                if self.is_in_fsm_node('chat_add_lesson'):
+                    html = mark_safe(md2html(self.text or ''))
                 else:
-                    if self.content.lesson.url:
-                        raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
-                            self.content.lesson.url,
-                            self.content.lesson.text
+                    if self.content.kind == UnitLesson.MISUNDERSTANDS:
+                        html = mark_safe(
+                            md2html(
+                                '**%s** \n %s' %
+                                (self.content.lesson.title, self.content.lesson.text)
+                            )
                         )
+                    elif self.input_type == 'options' and self.text:
+                        html = STATUS_OPTIONS[self.text]
                     else:
-                        raw_html = self.content.lesson.text
+                        if self.content.lesson.url:
+                            raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
+                                self.content.lesson.url,
+                                self.content.lesson.text
+                            )
+                        else:
+                            raw_html = self.content.lesson.text
 
-                    html = mark_safe(md2html(raw_html))
+                        html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         return html
