@@ -178,15 +178,25 @@ class Message(models.Model):
         ) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
+        errors = None
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
-        checked_errors = UnitError.objects.get(id=self.content_id).response.studenterror_set.all()\
-                                                                  .values_list('errorModel', flat=True)
-        error_str = '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="errorModel" ' \
-                    'data-selectable-value="%d"></div><h3>%s</h3></li>'
-        errors = reduce(lambda x, y: x+y, map(lambda x: error_str %
-                                              ('chat-selectable-selected' if x.id in checked_errors else '',
-                                               x.id, x.lesson.title), error_list))
-        return '<ul class="chat-select-list">'+errors+'</ul>'
+        if error_list:
+            checked_errors = UnitError.objects.get(
+                id=self.content_id
+            ).response.studenterror_set.all().values_list('errorModel', flat=True)
+            error_str = '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="errorModel" ' \
+                        'data-selectable-value="%d"></div><h3>%s</h3></li>'
+            errors = reduce(
+                lambda x, y: x+y, map(
+                    lambda x: error_str % (
+                        'chat-selectable-selected' if x.id in checked_errors
+                        else '', x.id, x.lesson.title)
+                    , error_list
+                )
+            )
+        return u'<ul class="chat-select-list">{}</ul>'.format(
+            errors or '<li><h3>There are no Misunderstands to display.</h3></li>'
+        )
 
     def get_options(self):
         options = None
@@ -307,7 +317,12 @@ class UnitError(models.Model):
     response = models.ForeignKey(Response)
 
     def get_errors(self):
-        return list(self.response.unitLesson.get_errors()) + self.unit.get_aborts()
+        unit_lesson = self.response.unitLesson
+        error_list = list(unit_lesson.get_errors())
+        # Change this to real check
+        if unit_lesson.lesson.add_unit_aborts or not error_list:
+            error_list += self.unit.get_aborts()
+        return error_list
 
     def save_response(self, user, response_list):
         if user == self.response.author:

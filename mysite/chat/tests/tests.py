@@ -381,6 +381,24 @@ class MessagesViewTests(CustomTestCase):
         )
 
         json_content = json.loads(response.content)
+        self.assertNotIn(
+            'data-selectable-value="80"', json_content['addMessages'][-1]['html']
+        )
+
+        # Lesson from fixtures
+        lesson = Lesson.objects.get(id=78)
+        lesson.add_unit_aborts = True
+        lesson.save()
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        self.assertIn(
+            'data-selectable-value="80"', json_content['addMessages'][-1]['html']
+        )
+
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
