@@ -64,11 +64,12 @@
              {% for field in  invite_tester_form %}
                {{ field }}
              {% endfor %}
-           {% endblock %}
+
           <input type="submit" value="Invite"
                  class="invite__submit__form__"
                  data-success-msg="Invitation sent successfully. "
                  data-fail-msg="Invitation could not be sent now. Try again later.">
+          {% endblock %}
         </div>
 
       </form>

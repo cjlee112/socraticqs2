@@ -13,13 +13,6 @@
 
 {% block invite_student_tab_cls %}{% endblock %}
 
-
-{% block invite_form %}
- {% for field in  invite_tester_form %}
-    {{ field }}
- {% endfor %}
-{% endblock %}
-
 {% block invites_list %}
   {% with 'Tester' as list_name %}
     {% with invites.testers as objects %}

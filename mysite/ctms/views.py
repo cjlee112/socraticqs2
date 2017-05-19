@@ -13,6 +13,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
+import waffle
 from accounts.models import Instructor
 
 from chat.models import EnrollUnitCode
@@ -862,7 +863,8 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
         kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
-        kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        if waffle.switch_is_active('ctms_invite_students'):
+            kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
         kwargs['course'] = self.get_course()
         return kwargs
 
