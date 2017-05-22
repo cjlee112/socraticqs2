@@ -16,18 +16,10 @@
   {% if form %}
     {% include 'ctms/includes/create_course.html' %}
   {% else %}
-    {% if my_courses %}
-      {% with 'My courses' as list_name %}
-        {% with my_courses as courses %}
-          {% include 'ctms/includes/courses_list.html' %}
-        {% endwith %}
+    {% with 'My courses' as list_name %}
+      {% with my_courses as courses %}
+        {% include 'ctms/includes/courses_list.html' %}
       {% endwith %}
-    {% elif shared_courses %}
-      {% with 'Shared courses' as list_name %}
-        {% with shared_courses as courses %}
-          {% include 'ctms/includes/courses_list.html' %}
-        {% endwith %}
-      {% endwith %}
-    {% endif %}
-  {% endif %}
+    {% endwith %}
+{% endif %}
 {% endblock %}

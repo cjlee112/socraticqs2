@@ -13,6 +13,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
+import waffle
 from accounts.models import Instructor
 
 from chat.models import EnrollUnitCode
@@ -64,6 +65,9 @@ class CourseCoursletUnitMixin(View):
             return True
         except Instructor.DoesNotExist:
             return False
+
+    def get_courses_where_im_instructor(self):
+        return Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
 
     def get_course(self):
         return Course.objects.filter(id=self.kwargs.get(self.course_pk_name)).first()
@@ -167,23 +171,24 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
     model = Course
 
     def get_context_data(self, **kwargs):
-        my_courses = Course.objects.filter(
-            models.Q(addedBy=self.request.user)
-        )
-        shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
-        courses_shared_by_role = Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=self.request.user)
-        course_form = None
-        total_users = None
-        if not my_courses and not shared_courses:
-            course_form = CourseForm()
+        my_courses = self.get_my_courses()
+        courses_shared_by_role = self.get_courses_where_im_instructor()
 
         return {
             'my_courses': my_courses,
-            'shared_courses': shared_courses,
-            'course_form': course_form,
             'instructor_role_courses': courses_shared_by_role
 
         }
+
+    def get(self, request, *args, **kwargs):
+        my_courses = self.get_my_courses()
+        if not my_courses and not self.request.user.invite_set.all():
+            # no my_courses and no shared courses
+            return redirect('ctms:create_course')
+        if not my_courses and self.request.user.invite_set.all():
+            # no my_courses and present more that zero shared course
+            return redirect('ctms:shared_courses')
+        return super(MyCoursesView, self).get(request, *args, **kwargs)
 
     def post(self, request):
         form = CourseForm(request.POST)
@@ -851,8 +856,9 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
-        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
-        kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        if waffle.switch_is_active('ctms_invite_students'):
+            kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
         kwargs['course'] = self.get_course()
         return kwargs
 
@@ -868,6 +874,12 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         }
 
     def form_valid(self, form):
+        if form.cleaned_data['type'] == 'student' and not waffle.switch_is_active('ctms_invite_students'):
+            # if type - student and ctms_invite_students is disabled
+            messages.add_message(
+                self.request, messages.WARNING, "You can not send invitations to students yet"
+            )
+            return self.form_invalid(form)
         response = super(InvitesListView, self).form_valid(form)
         self.object.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")

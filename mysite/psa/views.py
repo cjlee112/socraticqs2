@@ -72,6 +72,8 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     logout(request)
     if not next_page.startswith('/'):
         next_page = reverse(next_page)
+    if request.method == 'GET' and 'next' in request.GET:
+        next_page = request.GET['next']
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
         form = login_form_cls(request.POST)
@@ -126,11 +128,14 @@ def signup(request, next_page=None):
     """
     username = password = ''
     logout(request)
+
+    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+
     form = SignUpForm(initial={'next': next_page})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
         form = SignUpForm(request.POST)
-        params = request.POST
+        # params = request.POST
         if form.is_valid():
             username = form.cleaned_data['email'].split('@', 2)[0]
             user = check_username_and_create_user(
@@ -153,10 +158,11 @@ def signup(request, next_page=None):
             messages.error(
                 request, "We could not create the account. Please review the errors below."
             )
-    else:
-        params = request.GET
-    if 'next' in params:  # must pass through for both GET or POST
-        kwargs['next'] = params['next']
+    # else:
+        # params = request.GET
+    # if 'next' in params:  # must pass through for both GET or POST
+    #     kwargs['next'] = params['next']
+
     kwargs['form'] = form
     kwargs['next'] = next_page
     return render(request, 'psa/signup.html', kwargs)

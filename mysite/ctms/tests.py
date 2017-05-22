@@ -235,25 +235,18 @@ class MyCoursesTests(MyTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ctms/my_courses.html')
         self.assertIn('my_courses', response.context)
-        self.assertIn('shared_courses', response.context)
-        self.assertIn('course_form', response.context)
         self.assertIn(self.course, response.context['my_courses'])
-        self.assertFalse(response.context['shared_courses'])
 
     def test_my_courses_show_shared_courses(self):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
         shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester')
-        response = self.client.get(self.url)
+        response = self.client.get(self.url, follow=True)
         # should return shared courses
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ctms/my_courses.html')
-        self.assertIn('my_courses', response.context)
+        self.assertRedirects(response, reverse('ctms:shared_courses'))
         self.assertIn('shared_courses', response.context)
-        self.assertIn('course_form', response.context)
-        self.assertFalse(self.course in response.context['my_courses'])
-        self.assertTrue(shared_course.course in response.context['shared_courses'])
+        self.assertTrue(shared_course in response.context['shared_courses'])
 
     def my_courses_show_create_course_form(self):
         self.course.delete()
