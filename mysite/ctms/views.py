@@ -172,16 +172,10 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get_context_data(self, **kwargs):
         my_courses = self.get_my_courses()
-        shared_courses = [invite.course for invite in self.request.user.invite_set.all()]
         courses_shared_by_role = self.get_courses_where_im_instructor()
-        course_form = None
-        if not my_courses and not shared_courses:
-            course_form = CourseForm()
 
         return {
             'my_courses': my_courses,
-            'shared_courses': shared_courses,
-            'course_form': course_form,
             'instructor_role_courses': courses_shared_by_role
 
         }
