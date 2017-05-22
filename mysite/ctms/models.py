@@ -150,19 +150,26 @@ class Invite(models.Model):
         invites = Invite.objects.filter(
             **kwargs
         )
+        my_invite = None
+
         for invite in invites:
             if invite and invite.email == user.email:
-                return invite
+                my_invite = invite
+                break
             user_email_name, user_domain = clean_email_name(user.email)
             invite_email, invite_domain = clean_email_name(invite.email)
             if invite_domain != user_domain:
-                raise Http404
+                continue
             res = re.search(
                 "^{}@{}$".format(r"\.?".join(user_email_name), user_domain),
                 "{}@{}".format(invite_email, invite_domain)
             )
             if res and res.string:
-                return invite
+                my_invite = invite
+        else:
+            raise Http404()
+        if my_invite:
+            return my_invite
         else:
             raise Http404()
 
