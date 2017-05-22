@@ -73,6 +73,10 @@ class CourseView(View):
             request, 'lms/course_page.html',
             dict(
                 course=course,
+                course_author=(
+                    course.addedBy.get_full_name() or
+                    course.addedBy.username
+                ),
                 liveSession=liveSession,
                 courslets=courselets,
                 courslet_history=courslet_history,
