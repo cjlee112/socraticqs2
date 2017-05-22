@@ -96,9 +96,9 @@ class LTIUser(models.Model):
         Create all needed links to Django and/or UserSocialAuth.
         """
         extra_data = json.loads(self.extra_data)
-        username = extra_data.get(
-            'lis_person_name_full',
-            extra_data.get('lis_person_sourcedid', self.user_id)
+        username = u'{0} UID {1}'.format(
+            extra_data.get('lis_person_name_full'),
+            self.user_id
         )
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
@@ -119,6 +119,8 @@ class LTIUser(models.Model):
             else:
                 django_user = User.objects.filter(email=email).first()
                 if not django_user:
+                    # Should be changed to `username=email` on latest
+                    # Django version
                     django_user, created = User.objects.get_or_create(
                         username=username, defaults=defaults
                     )
