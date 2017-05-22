@@ -107,12 +107,19 @@ class InviteForm(forms.ModelForm):
         }
 
     def save(self, commit=True):
-        invite = Invite.create_new(
+        # existed_invite = Invite.objects.filter(
+        #     instructor=self.instructor,
+        #     course=self.course,
+        #     email=self.cleaned_data['email'],
+        #     type=self.cleaned_data['type'],
+        # ).first()
+        # if existed_invite:
+        #     return existed_invite
+        self.instance = Invite.create_new(
             commit=False,
             instructor=self.instructor,
             course=self.course,
             email=self.cleaned_data['email'],
             invite_type=self.cleaned_data['type'],
         )
-        self.instance = invite
         return super(InviteForm, self).save(commit=commit)

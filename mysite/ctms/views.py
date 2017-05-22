@@ -856,7 +856,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
-        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
         if waffle.switch_is_active('ctms_invite_students'):
             kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
         kwargs['course'] = self.get_course()
