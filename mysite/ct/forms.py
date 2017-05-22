@@ -236,7 +236,7 @@ class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
     class Meta:
         model = Lesson
-        fields = ['title', 'kind', 'text', 'medium', 'url', 'changeLog']
+        fields = ['title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog']
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
 class AnswerLessonForm(LessonForm):

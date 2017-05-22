@@ -234,6 +234,7 @@ class Lesson(models.Model):
                                     related_name='mergeChildren')
     changeLog = models.TextField(null=True, blank=True)
     commitTime = models.DateTimeField('time committed', null=True, blank=True)
+    add_unit_aborts = models.NullBooleanField(default=False, null=True)
 
     _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
                    'sourceDB', 'sourceID', 'concept', 'treeID')
