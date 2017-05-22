@@ -862,7 +862,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
-        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
+        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
         if waffle.switch_is_active('ctms_invite_students'):
             kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
         kwargs['course'] = self.get_course()
@@ -880,6 +880,12 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         }
 
     def form_valid(self, form):
+        if form.cleaned_data['type'] == 'student' and not waffle.switch_is_active('ctms_invite_students'):
+            # if type - student and ctms_invite_students is disabled
+            messages.add_message(
+                self.request, messages.WARNING, "You can not send invitations to students yet"
+            )
+            return self.form_invalid(form)
         response = super(InvitesListView, self).form_valid(form)
         self.object.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
