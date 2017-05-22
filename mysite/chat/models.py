@@ -184,14 +184,18 @@ class Message(models.Model):
             checked_errors = UnitError.objects.get(
                 id=self.content_id
             ).response.studenterror_set.all().values_list('errorModel', flat=True)
-            error_str = '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="errorModel" ' \
-                        'data-selectable-value="%d"></div><h3>%s</h3></li>'
+            error_str = (
+                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+            )
             errors = reduce(
                 lambda x, y: x+y, map(
-                    lambda x: error_str % (
-                        'chat-selectable-selected' if x.id in checked_errors
-                        else '', x.id, x.lesson.title)
-                    , error_list
+                    lambda x: error_str.format(
+                        'chat-selectable-selected' if x.id in checked_errors else '',
+                        x.id,
+                        x.lesson.title
+                    ),
+                    error_list
                 )
             )
         return u'<ul class="chat-select-list">{}</ul>'.format(
