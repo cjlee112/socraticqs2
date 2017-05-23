@@ -1,5 +1,6 @@
 from django import forms
-from django.forms.formsets import formset_factory
+from django.forms import BaseModelFormSet
+from django.forms.formsets import formset_factory, DELETION_FIELD_NAME
 from django.forms.models import modelformset_factory
 from django.forms.widgets import ChoiceFieldRenderer, RendererMixin, Select
 from ct.models import Course, Unit, Lesson, UnitLesson
@@ -76,13 +77,22 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 class ErrorModelForm(forms.ModelForm):
     class Meta:
         model = Lesson
-        fields = ('title', 'text')
+        fields = ('title', 'text', 'id')
 
     def save(self, questionUL, user, commit=True):
         self.instance.addedBy = user
         return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
 
-ErrorModelFormSet = modelformset_factory(Lesson, form=ErrorModelForm, fields=('id', 'title', 'text'), extra=0)
+
+class BaseErrorModelFormSet(BaseModelFormSet):
+    def add_fields(self, form, index):
+        super(BaseErrorModelFormSet, self).add_fields(form, index)
+        form.fields[DELETION_FIELD_NAME].widget = forms.HiddenInput()
+
+
+ErrorModelFormSet = modelformset_factory(
+    Lesson, form=ErrorModelForm, fields=('id', 'title', 'text'), extra=0, can_delete=True, formset=BaseErrorModelFormSet
+)
 
 
 class CreateCourseletForm(forms.ModelForm):

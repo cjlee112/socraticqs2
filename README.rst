@@ -104,3 +104,14 @@ Quality check
 
 We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.
+
+
+Feature Switches
+----------------
+
+We can switch on and switch off different features.
+By default all features are switched off.
+Here's a list of switches:
+
+ * ctms_invite_students - to invite user as a student
+ *

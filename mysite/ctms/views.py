@@ -741,6 +741,12 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         for err_form in formset:
             if err_form.is_valid() and err_form.cleaned_data:
                 error_models.append(err_form.save(ul, self.request.user))
+
+        if formset.deleted_forms:
+            formset.save(commit=False)
+            for del_obj in formset.deleted_objects:
+                del_obj.delete()
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_or_create_dummy_concept(self, ul):
