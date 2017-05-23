@@ -55,6 +55,9 @@ Create new courslet
           </p>
 
           {{ form.title }}
+          {% if form.title.errors %}
+            {{ form.title.errors }}
+          {% endif %}
           <!-- <input type="text"> -->
         </div>
 
@@ -69,6 +72,9 @@ Create new courslet
           <div class="radio-list">
             {{ form.unit_type }}
           </div>
+          {% if form.unit_type.errors %}
+            {{ form.unit_type.errors }}
+          {% endif %}
         </div>
 
 
@@ -114,6 +120,9 @@ Create new courslet
         </div>
 
         {{ form.text }}
+        {% if form.text.errors %}
+          {{ form.text.errors }}
+        {% endif %}
 
         <!-- Answer -->
         <div class="form-group form-group--answer">
@@ -132,6 +141,9 @@ Create new courslet
           </p>
 
           {{ answer_form.answer }}
+          {% if answer_form.answer.errors %}
+            {{ answer_form.answer.errors }}
+          {% endif %}
         </div>
 
 
@@ -166,6 +178,9 @@ Create new courslet
                       {% else %}
                         <label for="{{ field.auto_id }}">{{ field.label }}</label>
                         {{ field }}
+                        {% if field.errors %}
+                          {{ field.errors }}
+                        {% endif %}
                       {% endif %}
                     {% endfor %}
                     {# <!-- or for crispy forms --> {% crispy item_form %} #}
