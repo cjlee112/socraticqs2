@@ -166,10 +166,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,
-                'course_author': (
-                    courseUnit.course.addedBy.get_full_name() or
-                    courseUnit.course.addedBy.username
-                ),
                 'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,
@@ -291,10 +287,6 @@ class InitializeLiveSession(ChatInitialView):
                 'chat_id': chat.id,
                 'chat': chat,
                 'course': course_unit.course,
-                'course_author': (
-                    course.addedBy.get_full_name() or
-                    course.addedBy.username
-                ),
                 'instructor_icon': instructor_icon,
                 'unit': unit,
                 'img_url': unit.img_url,

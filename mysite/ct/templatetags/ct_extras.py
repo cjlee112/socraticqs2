@@ -5,6 +5,7 @@ import re
 import pypandoc
 from django.contrib.staticfiles.templatetags import staticfiles
 from django.utils import timezone
+from django.contrib.auth.models import User
 from datetime import timedelta
 
 register = template.Library()
@@ -64,7 +65,7 @@ def audio_html(filename):
         filename = filename[:i]
     return '<audio controls><source src="%s.ogg" type="audio/ogg"><source src="%s.mp3" type="audio/mpeg">no support for audio!</audio>' \
       % (filename,filename)
-    
+
 def video_html(filename):
     try:
         sourceDB, sourceID = filename.split(':')
@@ -152,7 +153,7 @@ def get_object_url(actionTarget, o, forceDefault=False, subpath=None):
     else:
         return urlFunc(basePath, forceDefault, subpath,
                        is_teacher_url(basePath))
-    
+
 @register.filter(name='get_home_url')
 def get_home_url(actionTarget, o):
     return get_object_url(actionTarget, o, subpath='')
@@ -182,7 +183,7 @@ def get_dummy_navbar(actionTarget, baseToken='courses'):
             m.append('<li><a href="%s/">%s</a></li>'
                      % ('/'.join(l[:j]), label))
     return mark_safe('\n'.join(m))
-        
+
 
 
 ##############################################################
@@ -220,3 +221,11 @@ def filter_input(edge, obj):
     :return:
     """
     return edge.filter_input(obj)
+
+
+@register.filter
+def display_full_username(user=None):
+    if user and isinstance(user, User):
+        return user.get_full_name() or user.username
+    else:
+        return ''
