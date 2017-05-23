@@ -26,7 +26,7 @@
         <h1>{{ course.title }}</h1>
 
         <p>
-          by {{ course.addedBy.get_full_name }}
+          by {{ course.addedBy|display_full_username }}
         </p>
       </div>
     </header>
