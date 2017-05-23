@@ -230,6 +230,17 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
     model = Course
     fields = ['title']
 
+    def get(self, request, *args, **kwargs):
+        if not self.am_i_instructor():
+            raise Http404()
+        return super(CreateCourseView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not self.am_i_instructor():
+            raise Http404()
+        return super(CreateCourseView, self).post(request, *args, **kwargs)
+
+
     def get_object(self, queryset=None):
         if 'pk' in self.kwargs:
             course = Course.objects.filter(

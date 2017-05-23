@@ -34,7 +34,9 @@
         <label for="title">Course Name</label>
         <p>Give your course a descriptive name.</p>
         {{ form.title }}
-        {{ form.title.errors }}
+        {% if form.title.errors %}
+          {{ form.title.errors }}
+        {% endif %}
 
         <input type="submit" value="Save">
       </form>

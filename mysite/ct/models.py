@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -5,6 +6,13 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
+
+
+not_only_spaces_validator = RegexValidator(
+    regex=r'^\s+?$',
+    inverse_match=True,
+    message='This field can not consist of only spaces'
+)
 
 ########################################################
 # Concept ID and graph -- not version controlled
@@ -212,7 +220,7 @@ class Lesson(models.Model):
         (SOFTWARE, SOFTWARE),
     )
     _sourceDBdict = {}
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, validators=[not_only_spaces_validator])
     text = models.TextField(null=True, blank=True)
     data = models.TextField(null=True, blank=True)  # JSON DATA
     url = models.CharField(max_length=256, null=True, blank=True)
@@ -712,7 +720,11 @@ class Unit(models.Model):
         (LIVE_SESSION, 'Live session'),
         (RESOLUTION, 'Resolutions for an error model'),
     )
-    title = models.CharField(max_length=200, help_text='Your students will see this, so give your courselet a descriptive name.')
+    title = models.CharField(
+        max_length=200,
+        help_text='Your students will see this, so give your courselet a descriptive name.',
+        validators=[not_only_spaces_validator]
+    )
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)
@@ -1084,7 +1096,10 @@ class Course(models.Model):
         (INSTRUCTOR_ENROLLED, 'By instructors only'),
         (PRIVATE_ACCESS, 'By author only'),
     )
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        validators=[not_only_spaces_validator]
+    )
     description = models.TextField()
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
                               default=PUBLIC_ACCESS)
