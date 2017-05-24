@@ -9,7 +9,7 @@ from chat.models import TYPE_CHOICES, MESSAGE_TYPES
 from fsm.fsm_base import FSMStack
 from fsm.models import FSMNode
 from ct.models import Unit, Lesson, UnitLesson, Response, CourseUnit
-from .models import Message, UnitError, ChatDivider, MODEL_CHOISES, Message
+from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
 
 
 class ProgressHandler(object):
