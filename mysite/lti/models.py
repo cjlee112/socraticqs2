@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from social.apps.django_app.default.models import UserSocialAuth
 
 from ct.models import Role, Course
-from .utils import create_courselets_user, key_secret_generator
+from .utils import (
+    create_courselets_user, key_secret_generator, hash_lti_user_data
+)
 
 
 class LtiConsumer(models.Model):
@@ -96,34 +98,39 @@ class LTIUser(models.Model):
         Create all needed links to Django and/or UserSocialAuth.
         """
         extra_data = json.loads(self.extra_data)
-        username = u'{0} UID {1}'.format(
-            extra_data.get('lis_person_name_full'),
-            self.user_id
-        )
+
         first_name = extra_data.get('lis_person_name_given', '')
         last_name = extra_data.get('lis_person_name_family', '')
         email = extra_data.get('lis_person_contact_email_primary', '').lower()
 
+        django_user = None
+
         defaults = {
             'first_name': first_name,
             'last_name': last_name,
+            'email': email
         }
 
         if email:
-            defaults['email'] = email
             social = UserSocialAuth.objects.filter(
                 provider='email', uid=email
             ).first()
+
             if social:
                 django_user = social.user
             else:
                 django_user = User.objects.filter(email=email).first()
-                if not django_user:
-                    # Should be changed to `username=email` on latest
-                    # Django version
-                    django_user, created = User.objects.get_or_create(
-                        username=username, defaults=defaults
-                    )
+
+        if not django_user:
+            username = hash_lti_user_data(
+                self.user_id,
+                extra_data.get('tool_consumer_instance_guid', ''),
+                extra_data.get('lis_person_sourcedid', '')
+            )
+            django_user, _ = User.objects.get_or_create(
+                username=username, defaults=defaults
+            )
+            if email:
                 social = UserSocialAuth(
                     user=django_user,
                     provider='email',
@@ -131,8 +138,7 @@ class LTIUser(models.Model):
                     extra_data=extra_data
                 )
                 social.save()
-        else:
-            django_user = create_courselets_user()
+
         self.django_user = django_user
         self.save()
 

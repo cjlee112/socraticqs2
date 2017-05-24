@@ -180,12 +180,7 @@ class ParamsTest(LTITestCase):
         self.assertTrue(LTIUser.objects.filter(lti_consumer=self.lti_consumer).exists())
         self.assertTrue(Role.objects.filter(role=Role.ENROLLED).exists())
         self.assertEqual(LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user,
-                         UserSocialAuth.objects.get(
-                             uid=self.headers[u'lis_person_contact_email_primary']
-                         ).user)
-        self.assertEqual(self.user, UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
-        ).user)
+                         self.user)
 
     def test_lti_users_same_full_name(self, mocked):
         """
@@ -195,11 +190,11 @@ class ParamsTest(LTITestCase):
 
         # Link LtiUser to Django user by email
         self.client.post('/lti/', data=self.headers, follow=True)
-        self.assertEqual(self.user, UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
-        ).user)
+        self.assertEqual(
+            self.user, LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user
+        )
 
-        # Create new Django user w/ username 'Test Username UID 2'
+        # Create new Django user
         self.headers[u'user_id'] = 2
         self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
         self.client.post('/lti/', data=self.headers, follow=True)
@@ -210,7 +205,7 @@ class ParamsTest(LTITestCase):
             uid=self.headers[u'lis_person_contact_email_primary']
         ).user
 
-        # Create new Django user w/ username 'Test Username UID 3'
+        # Create another Django user
         self.headers[u'user_id'] = 3
         self.headers[u'lis_person_contact_email_primary'] = 'new_email_2@mail.com'
         self.client.post('/lti/', data=self.headers, follow=True)
@@ -218,12 +213,14 @@ class ParamsTest(LTITestCase):
             uid=self.headers[u'lis_person_contact_email_primary']
         ).user)
 
-    def test_lti_user_unicode_username(self, mocked):
+    @patch('lti.models.hash_lti_user_data')
+    def test_lti_user_unicode_username(self, hash_lti_user_data, mocked):
         """
         Test unicode full name from LTI.
         """
         mocked.return_value.is_valid_request.return_value = True
-
+        hashvalue = 'somehashvalue'
+        hash_lti_user_data.return_value = hashvalue
         self.headers[u'user_id'] = 2
         self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
         self.headers[u'lis_person_name_full'] = u'きつね'
@@ -232,9 +229,7 @@ class ParamsTest(LTITestCase):
             uid=self.headers[u'lis_person_contact_email_primary']
         ).user
         self.assertNotEqual(self.user, new_user)
-        self.assertEqual(
-            new_user.username, u'きつね UID {}'.format(self.headers[u'user_id'])
-        )
+        self.assertEqual(new_user.username, hashvalue)
 
     def test_lti_user_no_email(self, mocked):
         del self.headers[u'lis_person_contact_email_primary']
@@ -247,8 +242,8 @@ class ParamsTest(LTITestCase):
         self.assertNotEqual(LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user,
                             User.objects.get(id=self.user.id))
 
-    @patch('lti.utils.uuid4')
-    def test_lti_user_no_username_no_email(self, mocked_uuid4, mocked):
+    @patch('lti.models.hash_lti_user_data')
+    def test_lti_user_no_username_no_email(self, hash_lti_user_data, mocked):
         """Test for non-existent username field
 
         If there is no username in POST
@@ -259,7 +254,7 @@ class ParamsTest(LTITestCase):
         del self.headers[u'lis_person_name_full']
         del self.headers[u'lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
-        mocked_uuid4().hex = test_random_username[:30]
+        hash_lti_user_data.return_value = test_random_username[:30]
 
         self.client.post('/lti/', data=self.headers, follow=True)
         self.assertTrue(LTIUser.objects.filter(lti_consumer=self.lti_consumer).exists())
