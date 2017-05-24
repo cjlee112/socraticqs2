@@ -57,3 +57,16 @@ def key_secret_generator():
     hash = hashlib.sha1(uuid4().hex)
     hash.update(settings.SECRET_KEY)
     return hash.hexdigest()[::2]
+
+
+def hash_lti_user_data(user_id, tool_consumer_instance_guid, lis_person_sourcedid):
+    """
+    Create unique ID for Django user based on TC user.
+    """
+    h = hashlib.new('ripemd160')
+    h.update(user_id)
+    h.update(tool_consumer_instance_guid)
+    h.update(lis_person_sourcedid)
+
+    # Return 30 chars Django 1.8
+    return h.hexdigest()[:30]
