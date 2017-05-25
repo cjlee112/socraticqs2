@@ -206,7 +206,7 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
         params['lis_result_sourcedid'] = request.POST.get('lis_result_sourcedid')
         params['lis_outcome_service_url'] = request.POST.get('lis_outcome_service_url')
 
-        store_outcome_parameters(params, request.user)
+        store_outcome_parameters(params, request.user, lti_consumer)
         if waffle.switch_is_active('chat_ui'):
             if not unit_id:
                 return redirect(reverse('lms:course_view', kwargs={'course_id': course_id}))
