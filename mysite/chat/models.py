@@ -223,25 +223,29 @@ class Message(models.Model):
         return options
 
     def get_html(self):
-        html = self.text
+        raw_html = self.text
+        html = ''
         if self.content_id:
             if self.contenttype == 'chatdivider':
-                html = self.content.text
+                raw_html = self.content.text
             elif self.contenttype == 'response':
                 if self.input_type == 'text':
-                    html = mark_safe(md2html(self.content.text))
+                    raw_html = self.content.text
                 else:
-                    html = EVAL_OPTIONS.get(self.content.selfeval, '111')
+                    if self.chat and self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat' and not self.text:
+                        if self.content.selfeval:  # confidence is before selfeval
+                            raw_html = EVAL_OPTIONS.get(
+                                self.content.selfeval, 'Self evaluation not completed yet'
+                            )
+                        elif self.content.confidence:
+                            raw_html = dict(Response.CONF_CHOICES).get(
+                                self.content.confidence, 'Confidence not settled yet'
+                            )
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
-                    html = mark_safe(
-                        md2html(
-                            '**%s** \n %s' %
-                            (self.content.lesson.title, self.content.lesson.text)
-                        )
-                    )
+                    raw_html = '**%s** \n\n%s' % (self.content.lesson.title, self.content.lesson.text)
                 elif self.input_type == 'options' and self.text:
-                    html = STATUS_OPTIONS[self.text]
+                    raw_html = STATUS_OPTIONS[self.text]
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
@@ -250,10 +254,10 @@ class Message(models.Model):
                         )
                     else:
                         raw_html = self.content.lesson.text
-
-                    html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
+        if not html and raw_html:
+            html = mark_safe(md2html(raw_html))
         return html
 
     def get_name(self):

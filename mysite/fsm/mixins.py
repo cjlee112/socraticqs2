@@ -240,7 +240,7 @@ class ChatMixin(object):
                 owner=chat.user,
                 kind='response',
                 userMessage=True,
-                is_additional=is_additional
+                is_additional=is_additional,
             )
             if not self.fsm.name == 'live_chat':
                 message = Message.objects.get_or_create(**_data)[0]
@@ -292,11 +292,11 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional
             )
-            if not self.fsm.name == 'live_chat':
-                message = Message.objects.get_or_create(**_data)[0]
-            else:
-                message = Message(**_data)
-                message.save()
+            # if not self.fsm.name == 'live_chat':
+            #     message = Message.objects.get_or_create(**_data)[0]
+            # else:
+            message = Message(**_data)
+            message.save()
         if self.name == 'STUDENTERROR':
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',

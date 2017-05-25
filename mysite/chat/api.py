@@ -80,6 +80,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
+
         if (
             message.contenttype in ['response', 'uniterror'] and
             message.content_id and
@@ -89,6 +90,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 current=message.content, chat=chat, message=message, request=request
             )
             chat.save()
+            message.chat = chat
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
@@ -184,12 +186,14 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp = message.content
                 if chat.state.fsmNode.name == 'GET_CONFIDENCE':
                     resp.confidence = opt_data
+                    text = resp.get_confidence_display()
                 else:
                     resp.selfeval = opt_data
+                    text = resp.get_selfeval_display()
                 resp.save()
                 chat.next_point = message
                 chat.save()
-                serializer.save(content_id=resp.id, chat=chat)
+                serializer.save(content_id=resp.id, chat=chat, text=text)
             else:
                 message.chat = chat
                 selfeval = self.request.data.get('option')
