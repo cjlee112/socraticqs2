@@ -235,7 +235,7 @@ class CourseRef(models.Model):  # pragma: no cover
 
 class OutcomeService(models.Model):
     lis_outcome_service_url = models.CharField(max_length=255, unique=True)
-    # lti_consumer = models.ForeignKey(LtiConsumer)
+    lti_consumer = models.ForeignKey(LtiConsumer)
 
     def __unicode__(self):
         return self.lis_outcome_service_url
@@ -248,7 +248,9 @@ class GradedLaunch(models.Model):
     lis_result_sourcedid = models.CharField(max_length=255, db_index=True)
 
     class Meta(object):
-        unique_together = ('outcome_service', 'lis_result_sourcedid')
+        unique_together = (
+            'outcome_service', 'lis_result_sourcedid', 'user', 'course_id'
+        )
 
     def __unicode__(self):
         return self.lis_result_sourcedid
