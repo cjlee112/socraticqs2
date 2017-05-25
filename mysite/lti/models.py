@@ -51,6 +51,9 @@ class LtiConsumer(models.Model):
             consumer.save()
         return consumer
 
+    def __unicode__(self):
+        return self.consumer_name
+
 
 class LTIUser(models.Model):
     """Model for LTI user
@@ -234,8 +237,13 @@ class CourseRef(models.Model):  # pragma: no cover
 
 
 class OutcomeService(models.Model):
-    lis_outcome_service_url = models.CharField(max_length=255, unique=True)
+    lis_outcome_service_url = models.CharField(max_length=255)
     lti_consumer = models.ForeignKey(LtiConsumer)
+
+    class Meta:
+        unique_together = (
+            'lis_outcome_service_url', 'lti_consumer'
+        )
 
     def __unicode__(self):
         return self.lis_outcome_service_url
