@@ -36,7 +36,9 @@ class CourseView(View):
                 'enroll_code': EnrollUnitCode.get_code(courselet),
                 'execrices': len(courselet.unit.get_exercises()),
                 'chat': Chat.objects.filter(
-                    enroll_code__courseUnit=courselet
+                    enroll_code__courseUnit=courselet,
+                    user=request.user,
+                    state__isnull=False
                 ).first()
             }
             for courselet in course.get_course_units(True)
