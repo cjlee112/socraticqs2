@@ -89,6 +89,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 current=message.content, chat=chat, message=message, request=request
             )
             chat.save()
+            message.chat = chat
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
@@ -142,8 +143,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
                 resp.activity = activity
-                # NOTE: next line is a temporary solution.
-                resp.confidence = StudentResponse.SURE
             else:
                 resp = message.content
                 resp.text = text
@@ -160,6 +159,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
             ):
+                # user selected error model
                 message.chat = chat
                 try:
                     selected = self.request.data.get(
@@ -181,23 +181,31 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 chat.save()
                 serializer.save(chat=chat)
             elif message.content_id and not message.student_error:
+                # confidence and selfeval
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                opt_data = self.request.data.get('option')
                 resp = message.content
-                resp.selfeval = selfeval
+                if chat.state.fsmNode.name == 'GET_CONFIDENCE':
+                    resp.confidence = opt_data
+                    text = resp.get_confidence_display()
+                else:
+                    resp.selfeval = opt_data
+                    text = resp.get_selfeval_display()
+                message.text = text
                 resp.save()
                 chat.next_point = message
                 chat.save()
-                serializer.save(content_id=resp.id, chat=chat)
+                serializer.save(content_id=resp.id, chat=chat, text=text)
             else:
+                #
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                option = self.request.data.get('option')
                 resp = message.student_error
-                resp.status = selfeval
+                resp.status = option
                 resp.save()
                 chat.next_point = message
                 chat.save()
-                message.text = selfeval
+                message.text = option
                 message.save()
         if message.kind == 'button':
             chat.next_point = self.next_handler.next_point(

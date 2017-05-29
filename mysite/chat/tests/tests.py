@@ -294,6 +294,8 @@ class MessagesViewTests(CustomTestCase):
         chat_id = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
         ).context['chat_id']
+
+        # get history
         response = self.client.get(
             reverse('chat:history'), {'chat_id': chat_id}, follow=True
         )
@@ -301,6 +303,7 @@ class MessagesViewTests(CustomTestCase):
 
         next_url = json_content['input']['url']
 
+        # post answer
         answer = 'My Answer'
         response = self.client.put(
             next_url,
@@ -312,6 +315,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # get next message (confidence)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -322,8 +326,35 @@ class MessagesViewTests(CustomTestCase):
         self.assertIsNotNone(json_content['input']['options'])
         self.assertEquals(len(json_content['addMessages']), 2)
 
+        # confidence answer
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
+        # self eval answer
         self_eval = json_content['input']['options'][2]['value']
         self_eval_text = json_content['input']['options'][2]['text']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
 
         response = self.client.put(
             next_url,
@@ -337,6 +368,7 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
 
+        # get next question (2)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -347,6 +379,7 @@ class MessagesViewTests(CustomTestCase):
         self.assertEquals(len(json_content['addMessages']), 3)
         self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
 
+        # post answer (2)
         response = self.client.put(
             next_url,
             data=json.dumps({"text": answer, "chat_id": chat_id}),
@@ -357,6 +390,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # get next message (confidence) (2)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -364,8 +398,33 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # confidence answer
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next message - self eval (2)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
         self_eval = json_content['input']['options'][0]['value']
 
+        # self eval answer (2)
         response = self.client.put(
             next_url,
             data=json.dumps({"option": self_eval, "chat_id": chat_id}),
@@ -376,6 +435,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # get next message - error models
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -390,6 +450,7 @@ class MessagesViewTests(CustomTestCase):
         lesson.add_unit_aborts = True
         lesson.save()
 
+        # get the same message - error models
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -402,6 +463,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
+        # post error model answer
         response = self.client.put(
             next_url,
             data=json.dumps({"selected": {msg_id: {"errorModel": ["80"]}}, "chat_id": chat_id}),
@@ -412,6 +474,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # get next message - question (3)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -422,6 +485,7 @@ class MessagesViewTests(CustomTestCase):
         self.assertEquals(json_content['input']['type'], 'text')
         self.assertEquals(len(json_content['addMessages']), 4)
 
+        # post answer (3)
         response = self.client.put(
             next_url,
             data=json.dumps({"text": answer, "chat_id": chat_id}),
@@ -429,9 +493,30 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
 
+        # get next message - confidence (3)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # post confidence answer (3)
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+        json_content = json.loads(response.content)
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
+        next_url = json_content['input']['url']
+
+        # get next message - self eval (3)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -441,6 +526,7 @@ class MessagesViewTests(CustomTestCase):
 
         self_eval = json_content['input']['options'][1]['value']
 
+        # post self eval answer (3
         response = self.client.put(
             next_url,
             data=json.dumps({"option": self_eval, "chat_id": chat_id}),
@@ -451,6 +537,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # get next message - error models (3)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
@@ -459,6 +546,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
+        # post error model (3)
         response = self.client.put(
             next_url,
             data=json.dumps({"selected": {msg_id: {"errorModel": ["104"]}}, "chat_id": chat_id}),
@@ -469,6 +557,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # TODO: what's going on after this line? WRITE COMMENTS!!!
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )

@@ -211,6 +211,42 @@ class ChatMixin(object):
             else:
                 message = Message(**_data)
                 message.save()
+        if self.name == 'CONFIDENCE':
+            # current here is Response instance
+            if isinstance(current, Response):
+                response_to_chk = current
+                answer = current.unitLesson.get_answers().first()
+            else:
+                response_to_chk = message.response_to_check
+                if not message.lesson_to_answer:
+                    answer = message.response_to_check.unitLesson.get_answers().first()
+                else:
+                    answer = message.lesson_to_answer.get_answers().first()
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            response_to_check=response_to_chk,
+                            input_type='custom',
+                            text=self.title,
+                            chat=chat,
+                            owner=chat.user,
+                            kind=answer.kind,
+                            is_additional=is_additional)[0]
+        if self.name == 'GET_CONFIDENCE':
+            _data = dict(
+                contenttype='response',
+                content_id=message.response_to_check.id,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional,
+            )
+            if not self.fsm.name == 'live_chat':
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
         if self.name == "WAIT_ASSESS":
             if isinstance(current, Response):
                 resp_to_chk = current
@@ -256,11 +292,11 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional
             )
-            if not self.fsm.name == 'live_chat':
-                message = Message.objects.get_or_create(**_data)[0]
-            else:
-                message = Message(**_data)
-                message.save()
+            # if not self.fsm.name == 'live_chat':
+            #     message = Message.objects.get_or_create(**_data)[0]
+            # else:
+            message = Message(**_data)
+            message.save()
         if self.name == 'STUDENTERROR':
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',
