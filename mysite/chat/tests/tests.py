@@ -669,7 +669,7 @@ class HistoryAPIViewTests(CustomTestCase):
         self.assertIsInstance(json_content['addMessages'], list)
         self.assertEquals(len(json_content['addMessages']), 4)
         self.assertEquals(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
-        self.assertEquals(json_content['addMessages'][0]['html'], md2html(self.unitlesson.lesson.title))
+        self.assertEquals(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
         self.assertEquals(json_content['addMessages'][1]['type'], 'message')
         self.assertEquals(
             json_content['addMessages'][1]['html'],
@@ -815,14 +815,14 @@ class ResourcesViewTests(CustomTestCase):
 
         self.assertEquals(json_content['addMessages'][0]['name'], self.resource_unitlesson.addedBy.username)
         self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
-        self.assertEquals(json_content['addMessages'][0]['html'], md2html(self.resource_unitlesson.lesson.title))
+        self.assertEquals(json_content['addMessages'][0]['html'], self.resource_unitlesson.lesson.title)
         self.assertEquals(json_content['addMessages'][1]['type'], 'message')
         self.assertEquals(
             json_content['addMessages'][1]['html'],
             self.compile_html(self.resource_unitlesson)
         )
         self.assertEquals(json_content['addMessages'][2]['type'], 'message')
-        self.assertEquals(json_content['addMessages'][2]['html'], md2html(END.help))
+        self.assertEquals(json_content['addMessages'][2]['html'], END.help)
 
         self.assertIn('url', json_content['input'])
         self.assertIn('includeSelectedValuesFromMessages', json_content['input'])
