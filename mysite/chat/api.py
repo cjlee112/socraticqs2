@@ -80,7 +80,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
-
         if (
             message.contenttype in ['response', 'uniterror'] and
             message.content_id and
@@ -160,6 +159,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
             ):
+                # user selected error model
                 message.chat = chat
                 try:
                     selected = self.request.data.get(
@@ -181,6 +181,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 chat.save()
                 serializer.save(chat=chat)
             elif message.content_id and not message.student_error:
+                # confidence and selfeval
                 message.chat = chat
                 opt_data = self.request.data.get('option')
                 resp = message.content
@@ -190,19 +191,21 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 else:
                     resp.selfeval = opt_data
                     text = resp.get_selfeval_display()
+                message.text = text
                 resp.save()
                 chat.next_point = message
                 chat.save()
                 serializer.save(content_id=resp.id, chat=chat, text=text)
             else:
+                #
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                option = self.request.data.get('option')
                 resp = message.student_error
-                resp.status = selfeval
+                resp.status = option
                 resp.save()
                 chat.next_point = message
                 chat.save()
-                message.text = selfeval
+                message.text = option
                 message.save()
         if message.kind == 'button':
             chat.next_point = self.next_handler.next_point(
