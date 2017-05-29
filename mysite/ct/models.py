@@ -1148,6 +1148,9 @@ class Role(models.Model):
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+    class Meta:
+        unique_together = ('role', 'course', 'user')
+
 class UnitStatus(models.Model):
     'records what user has completed in a unit lesson sequence'
     unit = models.ForeignKey(Unit)
