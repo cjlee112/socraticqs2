@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.paginator import Page
 from django.utils import timezone
 
 from mock import Mock, patch
@@ -2033,7 +2034,7 @@ class AssessTest(TestCase):
         self.assertTrue(Liked.objects.filter(unitLesson=self.response.unitLesson, addedBy=self.user).exists())
 
 
-class AssessErrorsTest(TestCase):
+class SetUpMixin(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
@@ -2064,6 +2065,8 @@ class AssessErrorsTest(TestCase):
         self.student_error = StudentError(response=self.response, errorModel=self.unit_lesson, author=self.user)
         self.student_error.save()
 
+
+class AssessErrorsTest(SetUpMixin):
     def test_assess_errors(self):
         response = self.client.get(
             reverse(
@@ -2105,3 +2108,50 @@ class AssessErrorsTest(TestCase):
         self.assertTemplateUsed(response, 'ct/unit_tasks_student.html')
         self.assertTrue(StudentError.objects.filter(author=self.user).exists())
         self.assertEqual(StudentError.objects.filter(author=self.user).count(), 2)
+
+
+class AnswersTest(SetUpMixin):
+    def test_answers_tab(self):
+        Role(course=self.course, user=self.user, role=Role.ENROLLED).save()
+        response = self.client.get(
+            reverse(
+                "ct:unit_answers",
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unit.id
+                }
+            )
+        )
+        self.assertTemplateUsed(template_name='ct/unit_answers.html')
+        page = response.context['roles']
+        self.assertIsInstance(page, Page)
+        self.assertFalse(page.has_other_pages())
+        self.assertNotContains(response, '<ul class="pagination">')
+
+        for i in range(50):
+            user = User.objects.create_user(username='test_%s'%i, password='test')
+            Role(course=self.course, user=user, role=Role.ENROLLED).save()
+            Response(
+                unitLesson=self.unit_lesson,
+                lesson=self.lesson,
+                course=self.course,
+                text='test text',
+                author=user,
+                kind=Response.STUDENT_QUESTION
+            ).save()
+
+
+        response = self.client.get(
+            reverse(
+                "ct:unit_answers",
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unit.id
+                }
+            )
+        )
+        self.assertTemplateUsed(template_name='ct/unit_answers.html')
+        page = response.context['roles']
+        self.assertIsInstance(page, Page)
+        self.assertTrue(page.has_other_pages())
+        self.assertContains(response, '<ul class="pagination">')

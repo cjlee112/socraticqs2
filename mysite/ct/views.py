@@ -13,6 +13,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from social.backends.utils import load_backends
 from collections import defaultdict
 
@@ -976,9 +977,19 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
     exercises = unit.get_exercises()
-    roles = Role.objects.filter(
+
+    page = request.GET.get('page', 1)
+    roles_list = Role.objects.filter(
         role=Role.ENROLLED, course=course
-    ).distinct('user')
+    ).order_by('user__first_name')
+    paginator = Paginator(roles_list, 50)
+    try:
+        roles = paginator.page(page)
+    except PageNotAnInteger:
+        roles = paginator.page(1)
+    except EmptyPage:
+        roles = paginator.page(paginator.num_pages)
+
     table_head = [i.lesson.title for i in exercises]
     table_body = defaultdict(list)
     for role in roles:
@@ -992,6 +1003,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request,
         'ct/unit_answers.html',
         templateArgs=dict(
+            roles=roles,
             table_head=table_head,
             table_body=dict(table_body)
         )

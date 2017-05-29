@@ -1,5 +1,7 @@
 {% extends "ct/portal.html" %}
 
+{% load ct_extras %}
+
 {% block content %}
 <ul class="nav nav-tabs">
   {% for tabLabel,tabURL in pageData.navTabs %}
@@ -30,7 +32,7 @@
   <tbody>
       {% for k, v in table_body.items %}
       <tr>
-        <td>{{ k }}</td>
+        <td>{{ k|display_full_username }}</td>
         {% for j in v %}
         <td>
         {% if j %}
@@ -45,6 +47,28 @@
       {% endfor %}
   </tbody>
 </table>
+
+{% if roles.has_other_pages %}
+  <ul class="pagination">
+    {% if roles.has_previous %}
+      <li><a href="?page={{ roles.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in roles.paginator.page_range %}
+      {% if roles.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if roles.has_next %}
+      <li><a href="?page={{ roles.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
 
 </div>
 

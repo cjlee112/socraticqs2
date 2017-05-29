@@ -84,13 +84,6 @@ class LTITestCase(TestCase):
         )
         self.role1.save()
 
-        self.role2 = Role(
-            role=Role.ENROLLED,
-            user=self.user,
-            course=self.course,
-        )
-        self.role2.save()
-
         self.courseunit = CourseUnit(
             unit=self.unit, course=self.course,
             order=0, addedBy=self.user, releaseTime=timezone.now()
@@ -318,7 +311,6 @@ class ModelTest(LTITestCase):
         lti_user.save()
 
         self.role1.delete()
-        self.role2.delete()
 
         self.assertFalse(lti_user.is_enrolled('student', self.course.id))
 

@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
+from django.db import IntegrityError
 from mock import Mock, patch
 
 from ct.models import *
@@ -1470,3 +1471,13 @@ class UnitStatusTest(TestCase):
         self.unit_status.order = 0
         result = self.unit_status.start_next_lesson()
         self.assertEqual(result, get_lesson())
+
+
+class RolesTests(TestCase):
+    def test_roles_unique(self):
+        user = User.objects.create(username='test')
+        course = Course(title='test_title', addedBy=user)
+        course.save()
+        Role(role=Role.ENROLLED, user=user, course=course).save()
+        with self.assertRaises(IntegrityError):
+            Role(role=Role.ENROLLED, user=user, course=course).save()
