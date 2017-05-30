@@ -104,17 +104,21 @@ class Invite(models.Model):
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
 
     def send_mail(self, request, view):
+        from django.template import loader, Context
         try:
-            send_mail(
-                "{} invited you in a course <{}> as {}".format(
-                    self.instructor.user.get_full_name() or self.instructor.user.username,
-                    self.course,
-                    self.type
-                ),
-                'Click to open http://{}{}'.format(Site.objects.get_current(request),
-                                                          reverse('ctms:tester_join_course',
-                                                                  kwargs={'code': self.code})),
+            context = Context({
+                'invite': self,
+                'current_site': Site.objects.get_current(request)
+            })
+            subj_template = loader.get_template('ctms/email/invite_subject.txt')
+            rendered_subj = subj_template.render(context)
 
+            text_template = loader.get_template('ctms/email/invite_text.txt')
+            rendered_text = text_template.render(context)
+
+            send_mail(
+                rendered_subj,
+                rendered_text,
                 settings.EMAIL_FROM,
                 [self.email],
                 fail_silently=True
@@ -166,6 +170,7 @@ class Invite(models.Model):
             )
             if res and res.string:
                 my_invite = invite
+                break
         else:
             raise Http404()
         if my_invite:

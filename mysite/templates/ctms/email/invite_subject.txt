@@ -1,0 +1,1 @@
+{{ invite.user.first_name }} {{ invite.user.last_name }} has invited you to test a course on Courselets
