@@ -1,11 +1,35 @@
-{% extends "ctms_base.html" %}
+{% extends "psa_base.html" %}
 
 {% block content %}
 {% if form %}
-<form class="form" action="{% url 'accounts:profile_update' %}" method="post">
-  {{ form.as_p }}
-  {% csrf_token %}
-  <input type="submit" value="Save">
-</form>
+<div class="auth-card">
+    <header>
+      <h1>Almost Done</h1>
+      <p>Please fill in the form below to create your account.</p>
+    </header>
+
+    <main class="auth-card__content" style="text-align: left; margin: 0 auto;">
+      <form class="form" action="{% url 'accounts:profile_update' %}" method="post">
+        {% for field in form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          {% if field.name == 'institution' %}
+            <label for="{{ form.instituation.auto_id }}">Institution</label>
+              <p>
+                We can help you with your integration once we know where you teach.
+              </p>
+            {{ form.institution }}
+          {% else %}
+            {{ field }}
+          {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% csrf_token %}
+        <input type="submit" value="Sign Up" class=" ">
+      </form>
+    </main>
+  </div>
+
 {% endif %}
 {% endblock %}
