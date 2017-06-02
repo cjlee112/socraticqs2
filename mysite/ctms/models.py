@@ -99,8 +99,7 @@ class Invite(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         user = Invite.search_user_by_email(self.email)
-        if user:
-            self.user = user
+        self.user = user
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
 
     def send_mail(self, request, view):
@@ -135,6 +134,9 @@ class Invite(models.Model):
                 'success': False,
                 'message': 'You already have sent invite to user with {} email'.format(request.POST['email'])
             }
+
+    def get_absolute_url(self):
+        return reverse('ctms:tester_join_course', kwargs={'code': self.code})
 
     @staticmethod
     def get_by_user_or_404(user, **kwargs):

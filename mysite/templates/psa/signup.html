@@ -17,7 +17,7 @@
   </section>
 
   <main class="auth-card__content">
-    <form name="RegistrationForm" action="." method="post">
+    <form name="RegistrationForm" action="{% url 'signup' %}" method="post">
       {% csrf_token %}
 
       {% for field in form %}

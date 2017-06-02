@@ -9,6 +9,7 @@ from accounts.models import Instructor
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
 from ctms.models import Invite
+from psa.forms import EmailLoginForm, SignUpForm
 
 
 class MyTestCase(TestCase):
@@ -369,12 +370,71 @@ class SharedCoursesListViewTests(MyTestCase):
         )
         self.url = reverse('ctms:shared_courses')
 
+    def get_invite_by_id(self, id):
+        return Invite.objects.get(id=id)
+
     def test_shared_courses_list(self):
         response = self.client.get(self.url)
         self.assertIn(self.student_shared_course, response.context['shared_courses'])
         self.assertIn(self.tester_shared_course, response.context['shared_courses'])
 
 
+    def test_join_course(self):
+        url = reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course.code})
+        response = self.client.get(url)
+        self.assertRedirects(
+            response,
+            reverse('lms:tester_course_view', kwargs={'course_id': self.tester_shared_course.course.pk})
+        )
+        invite = self.get_invite_by_id(self.tester_shared_course.id)
+        self.assertEqual(invite.status, 'joined')
+        self.join_course_cases(url, self.tester_shared_course)
+
+    def join_course_cases(self, url, invite):
+        # if invited user is already registered but not logged in - login form must be shown
+        self.client.logout()
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+        self.assertTrue(isinstance(response.context['form'], EmailLoginForm))
+        self.assertEqual(response.context['form'].initial['email'], invite.email)
+        self.assertIn('u_hash', response.context['form'].initial)
+
+        # if no such user
+        invite.email = 'asdasd@aac.cc'
+        invite.save()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+        self.assertTrue(isinstance(response.context['form'], SignUpForm))
+        self.assertEqual(response.context['form'].initial['email'], invite.email)
+        self.assertIn('u_hash', response.context['form'].initial)
+
+        # if user registered after sending invitation - login form must be shown
+        User.objects.create_user('asdasd', 'asdasd@aac.cc', '123')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+        self.assertTrue(isinstance(response.context['form'], EmailLoginForm))
+        self.assertEqual(response.context['form'].initial['email'], invite.email)
+        self.assertIn('u_hash', response.context['form'].initial)
+
+
+    def student_join_course(self):
+        url = reverse('ctms:tester_join_course', kwargs={'code': self.student_shared_course.code})
+
+        response = self.client.get(url)
+        self.assertRedirects(
+            response,
+            reverse('lms:course_view', kwargs={'course_id': self.student_shared_course.course.id})
+        )
+
+        invite = self.get_invite_by_id(self.tester_shared_course.id)
+        self.assertEqual(invite.status, 'joined')
+
+        self.join_course_cases(url, self.student_shared_course)
+        
 
 class CourseViewTests(MyTestCase):
     def setUp(self):

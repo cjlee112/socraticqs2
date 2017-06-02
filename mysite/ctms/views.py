@@ -1,5 +1,6 @@
-import re
+import waffle
 import json
+from uuid import uuid4
 from datetime import datetime
 
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
@@ -13,7 +14,9 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
-import waffle
+from django.conf import settings
+from social.backends.utils import load_backends
+
 from accounts.models import Instructor
 
 from chat.models import EnrollUnitCode
@@ -30,6 +33,7 @@ from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Ro
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
+from psa.forms import SignUpForm, EmailLoginForm
 
 
 def json_response(x):
@@ -903,22 +907,55 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return response
 
 
-class TesterJoinCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+class JoinCourseView(CourseCoursletUnitMixin, View): # NewLoginRequiredMixin
+    NEED_INSTRUCTOR = False
 
     def get(self, *args, **kwargs):
-        invite = self.get_invite_by_code_request_or_404(code=self.kwargs['code'])
-        invite.status = 'joined'
-        invite.save()
-        if invite.type == 'tester':
-            messages.add_message(self.request, messages.SUCCESS,
-                             "You just joined course as tester")
-            return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
-        elif invite.type == 'student':
-            messages.add_message(self.request, messages.SUCCESS,
-                             "You just joined course as student")
-            return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+        invite = get_object_or_404(Invite, code=self.kwargs['code'])
+        if self.request.user.is_authenticated():
+            if invite.user == self.request.user:
+                # if user is a person for whom this invite
+                if invite.type == 'tester':
+                    messages.add_message(self.request, messages.SUCCESS,
+                                         "You just joined course as tester")
+                    invite.status = 'joined'
+                    invite.save()
+                    return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
+                elif invite.type == 'student':
+                    messages.add_message(self.request, messages.SUCCESS,
+                                         "You just joined course as student")
+                    invite.status = 'joined'
+                    invite.save()
+                    return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+            # if user is not owned this invite
+            return HttpResponseRedirect("{}?next={}".format(reverse('new_login'), self.request.path))
         else:
-            raise Http404()
+            u_hash = uuid4().hex
+            self.request.session['u_hash'] = u_hash
+            kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
+            kwargs['u_hash'] = u_hash
+            kwargs['next'] = self.request.path
+            invite = get_object_or_404(Invite, code=self.kwargs['code'])
+            init_data = {'next': kwargs['next'], 'email': invite.email, 'u_hash': kwargs['u_hash']}
+            if invite.user:
+                # user already registered
+                # show login page
+                kwargs['form'] = EmailLoginForm(initial=init_data)
+                template_name = 'psa/new_custom_login.html'
+            else:
+                # user not yet registered
+                # show signup page
+                # try to find user with email
+                user = invite.search_user_by_email(invite.email)
+                if user:
+                    invite.user = user
+                    invite.save()
+                    kwargs['form'] = EmailLoginForm(initial=init_data)
+                    template_name = 'psa/new_custom_login.html'
+                else:
+                    kwargs['form'] = SignUpForm(initial=init_data)
+                    template_name = 'psa/signup.html'
+            return self.render(template_name, kwargs)
 
 
 class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):

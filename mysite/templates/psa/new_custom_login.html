@@ -18,7 +18,7 @@
     </section>
 
     <main class="auth-card__content">
-      <form name="LoginForm" action="." method="post">
+      <form name="LoginForm" action="{% url 'new_login' %}" method="post">
         {% csrf_token %}
 
         {% for field in form %}
