@@ -54,10 +54,20 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
 
     Verify email or send email with validation link.
     """
-    requires_validation = backend.REQUIRES_EMAIL_VALIDATION or \
-        backend.setting('FORCE_EMAIL_VALIDATION', False)
-    send_validation = (details.get('email') and
-                       (is_new or backend.setting('PASSWORDLESS', False)))
+    requires_validation = (
+        backend.REQUIRES_EMAIL_VALIDATION or backend.setting('FORCE_EMAIL_VALIDATION', False)
+    )
+
+    u_hash = backend.strategy.request.POST.get('u_hash')
+    u_hash_sess = backend.strategy.session_get('u_hash')
+
+    not_tester_join_course = True
+    if u_hash or u_hash_sess:
+        not_tester_join_course = u_hash != u_hash_sess
+
+    send_validation = (
+        details.get('email') and (is_new or backend.setting('PASSWORDLESS', False)) and not_tester_join_course
+    )
 
     if requires_validation and send_validation and backend.name == 'email':
         data = backend.strategy.request_data()
@@ -88,7 +98,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
                     email=details.get('email'),
                     defaults={'date': datetime.now()}
                 )
-            backend.strategy.send_email_validation(backend, details.get('email'), force_update=force_update)
+            code = backend.strategy.send_email_validation(backend, details.get('email'), force_update=force_update)
             backend.strategy.session_set('email_validation_address', details.get('email'))
             backend.strategy.session_set('next', data.get('next'))
             return backend.strategy.redirect(

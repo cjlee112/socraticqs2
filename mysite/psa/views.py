@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from django.conf import settings
 from django.http.response import HttpResponseRedirect
@@ -69,23 +70,31 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     Custom login to integrate social auth and default login.
     """
     username = password = ''
+    u_hash_sess = request.session.get('u_hash')
     logout(request)
+    if u_hash_sess:
+        request.session['u_hash'] = u_hash_sess
+
     if not next_page.startswith('/'):
         next_page = reverse(next_page)
     if request.method == 'GET' and 'next' in request.GET:
         next_page = request.GET['next']
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
+    form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
     if request.POST:
-        form = login_form_cls(request.POST)
+        form = login_form_cls(request.POST, initial=form_initial)
         if form.is_valid():
             user = form.get_user()
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
+                        del request.session['u_hash']
+                        return redirect('ctms:shared_courses')
                     return redirect(request.POST.get('next', next_page))
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
-        form = login_form_cls(initial={'next': next_page})
+        form = login_form_cls(initial=form_initial)
     kwargs['form'] = form
     kwargs['next'] = next_page
     return render(
@@ -95,31 +104,34 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     )
 
 
-def check_username_and_create_user(username, email, password, **kwargs):
-    already_exists = User.objects.filter(
-        username=username
-    )
-    if not already_exists:
-        return User.objects.create_user(
-            username=username,
-            password=password,
-            first_name=kwargs['first_name'],
-            last_name=kwargs['last_name'],
-
-        )
-    else:
-        username += '_'
-        return check_username_and_create_user(username, email, password, **kwargs)
-
-
 @never_cache
 @csrf_exempt
 @psa('ctms:email_sent')
-def custom_complete(request, backend, *args, **kwargs):
+def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     """Authentication complete view"""
     request.session['resend_user_email'] = request.POST.get('email')
-    return do_complete(request.backend, _do_login, request.user,
-                       redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
+
+    if u_hash and u_hash == u_hash_sess:
+        # if invited tester join course - create user immediately without confirmation email.
+        data = request.POST.dict().copy()
+        pw = make_password(request.POST.get('password'))
+        data['password'] = pw
+        user = request.backend.strategy.create_user(**data)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        request.session['u_hash'] = u_hash
+
+    response = do_complete(
+        request.backend, _do_login, request.user,
+        redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
+
+    if not u_hash or u_hash != u_hash_sess:
+        # if not invited tester join course - logout user
+        logout(request)
+
+    # remove u_hash from session
+    request.session.pop('u_hash', None)
+    return response
 
 
 def signup(request, next_page=None):
@@ -127,46 +139,36 @@ def signup(request, next_page=None):
     This function handles custom login to integrate social auth and default login.
     """
     username = password = ''
+    u_hash = request.POST.get('u_hash')
+    u_hash_sess = request.session.get('u_hash')
+
     logout(request)
+    if u_hash and u_hash == u_hash_sess:
+        # if we have u_hash and it's equal with u_hash from session
+        # replace next url with shared_courses page url
+        next_page = reverse('ctms:shared_courses')
+        request.session['next'] = next_page
+        post = request.POST.copy()
+        post['next'] = next_page
+        request.POST = post
+    else:
+        next_page = request.POST.get('next') or request.GET.get('next') or next_page
 
-    next_page = request.POST.get('next') or request.GET.get('next') or next_page
-
-    form = SignUpForm(initial={'next': next_page})
+    form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
         form = SignUpForm(request.POST)
         # params = request.POST
         if form.is_valid():
-            username = form.cleaned_data['email'].split('@', 2)[0]
-            user = check_username_and_create_user(
-                username=username,
-                **form.cleaned_data
-            )
-            instructor = Instructor.objects.create(
-                user=user,
-                institution=form.cleaned_data['institution'],
-            )
-            # here we put just created user into request.user
-            # because python-social-auth.compolete function implies that just created user will be authenticated,
-            # but we don't authenticate it, so we do this trick.
-            request.user = user
-            response = custom_complete(request, 'email')
-            # after calling complete function we don't need request.user, so we replace it with AnonymousUser
-            request.user = AnonymousUser()
+            response = custom_complete(request, 'email', u_hash=u_hash, u_hash_sess=u_hash_sess)
             return response
         else:
             messages.error(
                 request, "We could not create the account. Please review the errors below."
             )
-    # else:
-        # params = request.GET
-    # if 'next' in params:  # must pass through for both GET or POST
-    #     kwargs['next'] = params['next']
-
     kwargs['form'] = form
     kwargs['next'] = next_page
     return render(request, 'psa/signup.html', kwargs)
-
 
 
 def done(request):

@@ -8,6 +8,7 @@ from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 from psa.models import SecondaryEmail
 
+
 PASSWORD_MIN_CHARS = 6
 password_validator = RegexValidator(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{%s,}$' % (PASSWORD_MIN_CHARS,),
@@ -18,6 +19,8 @@ class SignUpForm(forms.Form):
     This form handles and validate data for signup process.
     """
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
+    u_hash = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     email = forms.EmailField()
     email_confirmation = forms.EmailField()
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First name'}))
@@ -52,8 +55,16 @@ class SignUpForm(forms.Form):
 
 class EmailLoginForm(forms.Form):
     next = forms.CharField(required=False, widget=forms.HiddenInput())
+    u_hash = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput())
+
+    def clean(self):
+        user = self.get_user()
+        if user:
+            return self.cleaned_data
+        self.add_error('email', 'Provided credentials are not correct for this user.')
 
     def get_user(self):
         username = ''
