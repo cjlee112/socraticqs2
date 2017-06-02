@@ -109,8 +109,6 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
 @psa('ctms:email_sent')
 def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     """Authentication complete view"""
-    request.session['resend_user_email'] = request.POST.get('email')
-
     if u_hash and u_hash == u_hash_sess:
         # if invited tester join course - create user immediately without confirmation email.
         data = request.POST.dict().copy()
@@ -129,6 +127,7 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
         # if not invited tester join course - logout user
         logout(request)
 
+    request.session['resend_user_email'] = request.POST.get('email')
     # remove u_hash from session
     request.session.pop('u_hash', None)
     return response
@@ -141,7 +140,7 @@ def signup(request, next_page=None):
     username = password = ''
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-
+    print "SIGNUP ", u_hash, " ", u_hash_sess
     logout(request)
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
