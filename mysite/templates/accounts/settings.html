@@ -26,7 +26,7 @@
           <section>
             <h2>Personal Information</h2>
 
-            <form name="" action="." method="post">
+            <form name="" action="{% url 'accounts:settings' %}" method="post">
               {% csrf_token %}
 
               {% if user_form %}
