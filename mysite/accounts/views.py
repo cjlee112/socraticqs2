@@ -76,7 +76,6 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                 data.pop(data.index('form_id'))
             return data
 
-        import ipdb; ipdb.set_trace()
         for form_id, form_cls in form_name.items():
             if form_id in request.POST.getlist('form_id'):
                 form = form_cls(data=request.POST)
