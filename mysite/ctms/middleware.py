@@ -3,6 +3,7 @@ from django.db import models
 from collections import OrderedDict
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
+from django.core.urlresolvers import resolve
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
 from ctms.urls import urlpatterns as ctms_urls
@@ -159,8 +160,9 @@ class SideBarUtils(object):
 
 class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
-        urls = self._get_urls(request)
-        if 'ctms' in request.path and request.path != urls['all_urls']['my_courses']:
+        # urls = self._get_urls(request)
+        current_url = resolve(request.path_info).url_name
+        if 'ctms' in request.path and current_url != 'my_courses':
             model_ids = self._get_model_ids(view_kwargs)
             objects = self._get_objects(model_ids)
             # attach recieved objects to request object
@@ -187,6 +189,7 @@ class SideBarMiddleware(SideBarUtils):
 
     def process_template_response(self, request, response):
         # add request to mixin
+        current_url = resolve(request.path_info).url_name
         self.course_mixin.request = request
         sidebar_context = {}
         my_courses = self.course_mixin.get_my_courses() if request.user.is_authenticated() else Course.objects.none()
@@ -211,6 +214,17 @@ class SideBarMiddleware(SideBarUtils):
             sidebar_context['courslet_units'] = self.course_mixin.get_units_by_courselet(
                 sidebar_context['courslet']
             )
+        sidebar_context['current_page_name'] = current_url
+
+        sidebar_context['courselets_link_active'] = False
+        sidebar_context['units_link_active'] = False
+
+        if current_url == 'course_view':
+            sidebar_context['courselets_link_active'] = True
+        elif current_url == 'courslet_view':
+            sidebar_context['courselets_link_active'] = True
+            sidebar_context['units_link_active'] = True
+
         if response.context_data:
             response.context_data['sidebar'] = sidebar_context
             response.render()
