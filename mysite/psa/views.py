@@ -140,7 +140,7 @@ def signup(request, next_page=None):
     username = password = ''
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-    print "SIGNUP ", u_hash, " ", u_hash_sess
+
     logout(request)
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
