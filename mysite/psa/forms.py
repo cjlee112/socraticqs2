@@ -68,17 +68,17 @@ class EmailLoginForm(forms.Form):
 
     def get_user(self):
         username = ''
-        user = User.objects.filter(email=self.cleaned_data['email']).first()
+        user = User.objects.filter(email=self.cleaned_data.get('email')).first()
         if not user:
             sec_mail = SecondaryEmail.objects.filter(
-                email=self.cleaned_data['email']
+                email=self.cleaned_data.get('email')
             ).first()
             if sec_mail:
                 user = sec_mail.user
         if user:
             username = user.username
 
-        user = authenticate(username=username, password=self.cleaned_data['password'])
+        user = authenticate(username=username, password=self.cleaned_data.get('password'))
         if user and user.is_active:
             # create instructor if not exist
             Instructor.objects.get_or_create(user=user)
@@ -91,8 +91,8 @@ class UsernameLoginForm(forms.Form):
     next = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def get_user(self):
-        return authenticate(username=self.cleaned_data['username'],
-                            password=self.cleaned_data['password'])
+        return authenticate(username=self.cleaned_data.get('username'),
+                            password=self.cleaned_data.get('password'))
 
 class SocialForm(forms.ModelForm):
     class Meta:
