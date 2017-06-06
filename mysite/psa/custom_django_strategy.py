@@ -33,7 +33,10 @@ class CustomDjangoStrategy(DjangoStrategy):
                 last_name=kwargs.get('last_name', ''),
             )
             data.update(kwargs)
-            return self.storage.user.create_user(**data)
+            user = self.storage.user.create_user(**data)
+            user.password = data['password']
+            user.save()
+            return user
         else:
             username += '_'
             return self.check_username_and_create_user(username, **kwargs)

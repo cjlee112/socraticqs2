@@ -1,1 +1,1 @@
-{{ invite.user.first_name }} {{ invite.user.last_name }} has invited you to test a course on Courselets
+{% if invite.instructor.user.get_full_name %}{{ invite.instructor.user.get_full_name }} {% else %} {{ invite.instructor.user.username }}{% endif %} has invited you to test a course on Courselets

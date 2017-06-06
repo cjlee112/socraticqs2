@@ -1,5 +1,6 @@
 import re
 from uuid import uuid4
+from django.template import loader, Context
 from django.db.utils import IntegrityError
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -93,6 +94,9 @@ class Invite(models.Model):
             code.save()
         return code
 
+    def get_invited_user_username(self):
+        return self.email.split("@")[0] if self.email else ''
+
     class Meta:
         unique_together = ('instructor', 'email', 'type', 'course')
 
@@ -103,7 +107,6 @@ class Invite(models.Model):
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
 
     def send_mail(self, request, view):
-        from django.template import loader, Context
         try:
             context = Context({
                 'invite': self,
