@@ -913,7 +913,7 @@ class JoinCourseView(CourseCoursletUnitMixin, View): # NewLoginRequiredMixin
     def get(self, *args, **kwargs):
         invite = get_object_or_404(Invite, code=self.kwargs['code'])
         if self.request.user.is_authenticated():
-            if invite.user == self.request.user:
+            if invite.user and invite.user == self.request.user or invite.email == self.request.user.email:
                 # if user is a person for whom this invite
                 if invite.type == 'tester':
                     messages.add_message(self.request, messages.SUCCESS,
