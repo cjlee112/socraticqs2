@@ -16,6 +16,7 @@ class CustomDjangoStrategy(DjangoStrategy):
         'email',
         'first_name',
         'last_name',
+        'password'
     )
 
     data_from_code_fields = user_needed_fields + ('institution',)
