@@ -1,3 +1,3 @@
-Hi {{ code.first_name }},
+Hi {{ user_data.first_name }},
 Click on the link below to confirm that you own this email. You can ignore this email If you haven’t signed up for Courselets
 Confirm email {{ url }}

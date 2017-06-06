@@ -18,6 +18,7 @@ from social.apps.django_app.views import _do_login
 from accounts.models import Instructor
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
+from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail, AnonymEmail
@@ -127,7 +128,12 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
         # if not invited tester join course - logout user
         logout(request)
 
-    request.session['resend_user_email'] = request.POST.get('email')
+        # add resend_user_email to the session to be able to resend link
+        request.session['resend_user_email'] = request.POST.get('email')
+        # getting just created CustomCode
+        cc = CustomCode.objects.filter(email=request.POST.get('email')).order_by('-id').first()
+        if cc:
+            request.session['cc_id'] = cc.id
     # remove u_hash from session
     request.session.pop('u_hash', None)
     return response

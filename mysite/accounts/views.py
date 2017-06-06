@@ -211,6 +211,7 @@ def custom_password_reset_done(
 def resend_email_confirmation_link(request):
     email = request.POST.get('email')
     session_email = request.session.get('resend_user_email')
+    cc_id = request.session.get('cc_id')
 
     if session_email != email:
         raise Http404()
@@ -218,11 +219,20 @@ def resend_email_confirmation_link(request):
     if request.user.is_authenticated():
         logout(request)
         request.session['resend_user_email'] = session_email
+        request.session['cc_id'] = cc_id
 
     def resend(request):
         if CustomCode.objects.filter(email=email, verified=True).count():
             return {'ok': 0, 'error': 'Email {} already verified!'.format(email)}
         try:
+            post = request.POST.dict()
+            cc = CustomCode.objects.filter(pk=request.session.get('cc_id')).first()
+            fields = ['first_name', 'last_name', 'institution']
+            if cc:
+                for field in fields:
+                    post[field] = getattr(cc, field, '')
+            request.POST = post
+
             strategy = CustomDjangoStrategy(CustomDjangoStorage, request=request)
             strategy.send_email_validation(EmailAuth, email)
             return {'ok': 1}
