@@ -179,10 +179,10 @@ class LessonSerializer(serializers.ModelSerializer):
             lesson_order = msg.content.unitlesson.order
             chat = msg.chat
 
-            def fsm_in_nodes(nodes):
-                return chat.state and chat.state.fsmNode.fsm.name in nodes
+            def check_fsm_name(*nodes):
+                return chat.state and chat.state.fsmNode.fsm.fsm_name_is_one_of(nodes)
 
-            if chat.is_live and fsm_in_nodes(['live_chat']):
+            if chat.is_live and check_fsm_name('live_chat'):
                 # here we assume that user can not get next question without answering for current one.
                 questions = chat.message_set.filter(
                     kind='orct',
@@ -202,7 +202,7 @@ class LessonSerializer(serializers.ModelSerializer):
                     return True
                 else:
                     return False
-            if fsm_in_nodes(['chat', 'additional']):
+            if check_fsm_name('chat', 'additional'):
                 current_unitlesson_order = chat.state.unitLesson.order
                 return lesson_order < current_unitlesson_order
             else:

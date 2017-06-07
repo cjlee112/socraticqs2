@@ -231,7 +231,7 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                 else:
-                    if self.chat and self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat' and not self.text:
+                    if self.chat and self.chat.state and self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat') and not self.text:
                         if self.content.selfeval:  # confidence is before selfeval
                             html = EVAL_OPTIONS.get(
                                 self.content.selfeval, 'Self evaluation not completed yet'

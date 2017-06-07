@@ -100,9 +100,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
 
-        if chat.state and chat.state.fsmNode.name == 'END':
+        if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
             self.pop_state(chat)
-        if additionals and chat.state.fsmNode.fsm.name != 'additional':
+        if additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
             unitlesson = additionals.first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
