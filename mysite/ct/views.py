@@ -1,6 +1,7 @@
 import time
 import urllib
 from datetime import datetime
+from collections import OrderedDict
 
 from django.db.models import Q
 from django.conf import settings
@@ -979,9 +980,11 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     exercises = unit.get_exercises()
 
     page = request.GET.get('page', 1)
-    roles_list = Role.objects.filter(
+    roles_list = Role.objects.order_by(
+        'user__first_name', 'user__username'
+    ).filter(
         role=Role.ENROLLED, course=course
-    ).order_by('user__first_name')
+    )
     paginator = Paginator(roles_list, 50)
     try:
         roles = paginator.page(page)
@@ -991,9 +994,11 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         roles = paginator.page(paginator.num_pages)
 
     table_head = [i.lesson.title for i in exercises]
-    table_body = defaultdict(list)
+    table_body = OrderedDict()
     for role in roles:
         for orct in exercises:
+            if not table_body.get(role.user):
+                table_body[role.user] = []
             table_body[role.user].append(
                 Response.objects.filter(
                     lesson=orct.lesson, author=role.user
@@ -1005,7 +1010,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         templateArgs=dict(
             roles=roles,
             table_head=table_head,
-            table_body=dict(table_body)
+            table_body=table_body
         )
     )
 
