@@ -213,10 +213,10 @@ class Message(models.Model):
             elif self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif self.chat.next_point.contenttype == 'response':
-                if not self.chat.next_point.content.confidence:
-                    options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
-                else:
+                if self.chat.state.fsmNode.node_name_is_one_of('GET_ASSESS'):
                     options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+                elif self.chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
+                    options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
             else:
                 options = [{"value": 1, "text": "Continue"}]
 
