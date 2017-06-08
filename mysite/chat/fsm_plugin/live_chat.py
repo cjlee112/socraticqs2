@@ -55,7 +55,7 @@ def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
         def wrapper(self, edge, fsmStack, request, **kwargs):
             if not fsmStack.state or fsmStack.state and not fsmStack.state.linkState:
                 return edge.fromNode.fsm.get_node('END')
-            if not fsmStack.state.linkState.fsmNode.node_name_is_one_of(nodes):
+            if not fsmStack.state.linkState.fsmNode.node_name_is_one_of(*nodes):
                 # print "-------> Student in node {} and \n TEACHER in node {}, allowed nodes for teacher {}".format(
                 #     fsmStack.state.fsmNode.name,
                 #     fsmStack.state.linkState.fsmNode.name,
