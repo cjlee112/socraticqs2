@@ -298,7 +298,7 @@ def main_page(request):
         return pageData.fsm_push(request, 'livestudent', linkState=linkState)
     if (
         pageData.fsmStack.state and
-        pageData.fsmStack.state.fsmNode.fsm.name == 'livestudent'
+        pageData.fsmStack.state.fsmNode.fsm.fsm_name_is_one_of('livestudent')
     ):
         liveSessions = None  # already in live session, so hide launch buttons!
     else:

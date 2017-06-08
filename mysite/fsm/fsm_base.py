@@ -46,7 +46,7 @@ class FSMStack(object):
         )
         if self.state and self.state != state:  # pushed or popped
             path = self.state.path  # use path of new FSM
-        if self.state.fsmNode.name == 'END':  # reached terminal state
+        if self.state.fsmNode.node_name_is_one_of('END'):  # reached terminal state
             pageData.set_refresh_timer(request, False)  # reset timer if on
             if self.state.fsmNode.help:  # save its help message
                 request.session['statusMessage'] = self.state.fsmNode.help

@@ -27,6 +27,9 @@ class FSM(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
     addedBy = models.ForeignKey(User)
 
+    def fsm_name_is_one_of(self, *args):
+        return self.name in args + tuple(i + "OLD" for i in args)
+
     @classmethod
     def save_graph(cls, fsmData, nodeData, edgeData, username, fsmGroups=(), oldLabel='OLD'):
         """Store FSM specification from node

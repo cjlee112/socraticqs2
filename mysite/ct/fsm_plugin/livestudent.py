@@ -5,7 +5,7 @@ def ask_edge(self, edge, fsmStack, request, **kwargs):
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
-    elif fsmStack.state.linkState.fsmNode.name == 'QUESTION':  # in progress
+    elif fsmStack.state.linkState.fsmNode.node_name_is_one_of('QUESTION'):  # in progress
         fsmStack.state.unitLesson = fsmStack.state.linkState.unitLesson
         fsmStack.state.save()
         return edge.toNode  # so go straight to asking question
@@ -20,7 +20,7 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
-    elif fsmStack.state.linkState.fsmNode.name == 'QUESTION':
+    elif fsmStack.state.linkState.fsmNode.node_name_is_one_of('QUESTION'):
         if fsmStack.state.unitLesson == fsmStack.state.linkState.unitLesson:
             return fsm.get_node('WAIT_ASSESS')
         else:  # jump to the new question
