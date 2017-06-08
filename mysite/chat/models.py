@@ -231,20 +231,31 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                 else:
-                    if (
+                    CONF_CHOICES = dict(Response.CONF_CHOICES)
+                    is_chat_fsm = (
                         self.chat and
                         self.chat.state and
-                        self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat') and not
-                        self.text
-                    ):
+                        self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat')
+                    )
+                    values = CONF_CHOICES.values() + EVAL_OPTIONS.values()
+                    text_in_values = self.text in values
+                    if is_chat_fsm and not self.text:
                         if self.content.selfeval:  # confidence is before selfeval
                             html = EVAL_OPTIONS.get(
                                 self.content.selfeval, 'Self evaluation not completed yet'
                             )
                         elif self.content.confidence:
-                            html = dict(Response.CONF_CHOICES).get(
+                            html = CONF_CHOICES.get(
                                 self.content.confidence, 'Confidence not settled yet'
                             )
+                    elif is_chat_fsm and self.text and not text_in_values:
+                        html = EVAL_OPTIONS.get(
+                            self.text,
+                            dict(Response.CONF_CHOICES).get(
+                                self.text,
+                                'No confidence or selfeval yet'
+                            )
+                        )
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
