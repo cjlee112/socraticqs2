@@ -120,7 +120,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
 
         message = self.get_object()
-        if message.input_type == 'text' and not self.request.data.get('text'):
+        if (
+            message.input_type == 'text' and not
+            self.request.data.get('text').strip()
+        ):
             return Response({'error': 'Empty response. Enter something!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
 
