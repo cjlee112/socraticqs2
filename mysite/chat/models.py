@@ -202,6 +202,12 @@ class Message(models.Model):
             errors or '<li><h3>There are no Misunderstands to display.</h3></li>'
         )
 
+    def should_ask_confidence(self):
+        return 'CONFIDENCE' in [
+            i['name']
+            for i in self.chat.state.fsmNode.fsm.fsmnode_set.all().values('name')
+        ]
+
     def get_options(self):
         options = None
         if (
@@ -213,10 +219,13 @@ class Message(models.Model):
             elif self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif self.chat.next_point.contenttype == 'response':
-                if self.chat.state.fsmNode.node_name_is_one_of('GET_ASSESS'):
+                if self.should_ask_confidence():
+                    if not self.chat.next_point.content.confidence:
+                        options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
+                    else:
+                        options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+                else:
                     options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
-                elif self.chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
-                    options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
             else:
                 options = [{"value": 1, "text": "Continue"}]
 
@@ -248,7 +257,7 @@ class Message(models.Model):
                             html = CONF_CHOICES.get(
                                 self.content.confidence, 'Confidence not settled yet'
                             )
-                    elif is_chat_fsm and self.text and not text_in_values:
+                    elif is_chat_fsm and self.text and self.text and not text_in_values:
                         html = EVAL_OPTIONS.get(
                             self.text,
                             dict(Response.CONF_CHOICES).get(
