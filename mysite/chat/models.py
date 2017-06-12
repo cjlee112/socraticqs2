@@ -83,7 +83,7 @@ class Chat(models.Model):
     progress = models.IntegerField(default=0, blank=False, null=False)
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ['-last_modify_timestamp']
 
     def get_options(self):
         options = None
