@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.conf import settings
 from django.template import RequestContext
@@ -10,6 +11,7 @@ from django.contrib.auth import logout, login, authenticate
 from social.backends.utils import load_backends
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
+from psa.forms import CompleteEmailForm
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
@@ -123,13 +125,30 @@ def set_pass(request):
 
 
 def complete(request, *args, **kwargs):
-    try:
-        return social_complete(request, 'email', *args, **kwargs)
-    except AuthMissingParameter:
+    form = CompleteEmailForm(request.POST or request.GET)
+    if form.is_valid():
+        try:
+            return social_complete(request, 'email', *args, **kwargs)
+        except AuthMissingParameter:
+            messages.error(
+                request,
+                "Email already verified. Please log in using form below or sign up."
+            )
+            if request.user.is_authenticated():
+                return redirect('ct:person_profile', user_id=request.user.id)
+            return redirect('ct:home')
+    else:
+        # add message with transformed form errors
+        err_msg = "\n".join([
+            "{} - {}".format(
+                k.capitalize(), ", ".join(i.lower() for i in v)
+            )
+            for k, v in form.errors.items()
+        ])
         messages.error(
             request,
-            "Email already verified. Please log in using form below or sign up."
+            "You passed not correct data. {}".format(err_msg)
         )
-        if request.user.is_authenticated():
-            return redirect('ct:person_profile', user_id=request.user.id)
-        return redirect('ct:home')
+        # if form is not valid redirect user to page where he came from
+        return redirect(reverse("login"))
+
