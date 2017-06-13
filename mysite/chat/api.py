@@ -153,6 +153,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
@@ -181,6 +182,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     message=message,
                     request=self.request
                 )
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 serializer.save(chat=chat)
             elif message.content_id and not message.student_error:
@@ -197,6 +199,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.text = text
                 resp.save()
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 serializer.save(content_id=resp.id, chat=chat, text=text)
             else:
@@ -207,15 +210,17 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.status = option
                 resp.save()
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 message.text = option
                 message.save()
         if message.kind == 'button':
+            chat.last_modify_timestamp = timezone.now()
             chat.next_point = self.next_handler.next_point(
                 current=message.content,
                 chat=chat,
                 message=message,
-                request=self.request
+                request=self.request,
             )
             chat.save()
 
