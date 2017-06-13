@@ -2,6 +2,7 @@ import logging
 
 import waffle
 import injections
+from django.db import models
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -159,10 +160,46 @@ class ChatInitialView(LoginRequiredMixin, View):
         except AttributeError:
             instructor_icon = static('img/avatar-teacher.jpg')
 
+        chat_sessions = Chat.objects.filter(
+            enroll_code=enroll_code,
+            user=request.user,
+            instructor=courseUnit.course.addedBy,
+            state__isnull=False,
+        ).annotate(
+            lessons_done=models.Sum(
+                models.Case(
+                    models.When(
+                        message__contenttype='unitlesson',
+                        message__kind='orct',
+                        message__type='message',
+                        message__owner=request.user,
+                        then=1
+                    ),
+                    default=0,
+                    output_field=models.IntegerField()
+                )
+            ),
+        )
+        # TODO: This should work correctly byt doesn't, because of NOT distinct result of query,
+        # TODO: We should find a way how to make it distinct to make only one query
+        # ).annotate(
+        #     total_lessons=models.Sum(
+        #         models.Case(
+        #             models.When(
+        #                 enroll_code__courseUnit__unit__unitlesson__order__isnull=False, then=1
+        #             ),
+        #             default=0,
+        #             output_field=models.IntegerField()
+        #         ))
+        # )
+        for chat_ss in chat_sessions:
+            chat_ss.total_lessons = chat_ss.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).count()
+
         return render(
             request,
             'chat/main_view.html',
             {
+                'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'chat': chat,
                 'chat_id': chat.id,
                 'course': courseUnit.course,

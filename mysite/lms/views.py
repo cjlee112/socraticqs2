@@ -48,22 +48,39 @@ class CourseView(View):
             is_live=True,
             enroll_code__courseUnit__course=course,
             state__isnull=True
+        ).annotate(
+            lessons_done=models.Sum(
+                models.Case(
+                    models.When(
+                        message__contenttype='unitlesson',
+                        message__kind='orct',
+                        message__type='message',
+                        message__owner=request.user,
+                        then=1
+                    ),
+                    default=0,
+                    output_field=models.IntegerField()
+                )
+            )
         )
+
         # TODO: once django updated to version >=1.8 change next lines to
         # TODO: .annotate(lessons_count=models.Case()).
         # TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
+        #
+        # for chat in live_sessions_history:
+        #     chat.lessons_done = Message.objects.filter(
+        #         chat=chat,
+        #         contenttype='unitlesson',
+        #         kind='orct',
+        #         type='message',
+        #         owner=request.user,
+        #     ).count()
+        #     if not chat.lessons_done:
+        #         chat.delete()
 
-        for chat in live_sessions_history:
-            # NOTE: chat deletes here if it's finished and has no messages
-            chat.lessons_done = Message.objects.filter(
-                chat=chat,
-                contenttype='unitlesson',
-                kind='orct',
-                type='message',
-                owner=request.user,
-            ).count()
-            if not chat.lessons_done:
-                chat.delete()
+
+        live_sessions_history.filter(lessons_done=0).delete()
 
         courslet_history = Chat.objects.filter(
             user=request.user,
