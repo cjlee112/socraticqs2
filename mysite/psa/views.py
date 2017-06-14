@@ -126,7 +126,7 @@ def set_pass(request):
 
 def complete(request, *args, **kwargs):
     form = CompleteEmailForm(request.POST or request.GET)
-    if form.is_valid():
+    if form.is_valid() or 'verification_code' in request.GET:
         try:
             return social_complete(request, 'email', *args, **kwargs)
         except AuthMissingParameter:
@@ -151,4 +151,3 @@ def complete(request, *args, **kwargs):
         )
         # if form is not valid redirect user to page where he came from
         return redirect(reverse("login"))
-

@@ -89,7 +89,7 @@
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/{{ chat.id }}">
                         <h3>{{ chat.get_course_unit.unit.title }}</h3>
-                        <h3>{{ chat.timestamp|date:"F j, Y P" }}</h3>
+                        <h3>{{ chat.last_modify_timestamp|date:"F j, Y P" }}</h3>
 
                           {% comment %}
                           <p>{{ chat.get_course_unit.unit.get_exercises|length }} lessons</p>
