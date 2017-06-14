@@ -257,12 +257,12 @@ class Message(models.Model):
                             html = CONF_CHOICES.get(
                                 self.content.confidence, 'Confidence not settled yet'
                             )
-                    elif is_chat_fsm and self.text and self.text and not text_in_values:
+                    elif is_chat_fsm and self.text and not text_in_values:
                         html = EVAL_OPTIONS.get(
                             self.text,
                             dict(Response.CONF_CHOICES).get(
                                 self.text,
-                                'No confidence or selfeval yet'
+                                self.text
                             )
                         )
             elif self.contenttype == 'unitlesson':
