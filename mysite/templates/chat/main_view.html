@@ -117,7 +117,7 @@
                     {% if chat_sessions %}
                       {% for chat_sess in chat_sessions %}
                         <li>
-                          <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/">
+                          <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/" data-chat-id="{{ chat_sess.id }}" class="chat-start">
                             <h4>{{ chat_sess.timestamp|date:"F j, Y P" }}</h4>
                             <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons done</p>
                             <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
@@ -129,7 +129,7 @@
                       {% endfor %}
                     {% endif %}
                     <li>
-                      <a class="start-new-session" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/new/">
+                      <a class="start-new-session chat-start" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" data-chat-id="0">
                         <h4>New Chat Session</h4>
                       </a>
                     </li>
@@ -139,11 +139,13 @@
             </div>
           </section>
 
-
+          {% comment %}
           <div class="container">
             <button class="chat-start">
               {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
           </div>
+          {% endcomment %}
+
         </div>
       </div>
 
@@ -229,6 +231,7 @@
     var CUI = CUI || {};
     CUI.config = CUI.config || {};
 
+    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
     CUI.config.chatID = {{ chat_id }};
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';

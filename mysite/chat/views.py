@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from chat.models import Message
+from chat.serializers import ChatProgressSerializer
 from chat.services import LiveChatFsmHandler
 from chat.utils import enroll_generator
 from fsm.models import FSMState
@@ -78,6 +79,55 @@ class ChatInitialView(LoginRequiredMixin, View):
                         contaner.add((title, concept_link.lesson.url))
         return will_learn, need_to_know
 
+    def get_or_init_chat(self, enroll_code, chat_id):
+        courseUnit = enroll_code.courseUnit
+        try:
+            # try to convert chat_id to int
+            i_chat_id = int(chat_id)
+        except ValueError:
+            # if error - set i_chat_id to zero - it means create new chat
+            i_chat_id = 0
+        except TypeError:
+            i_chat_id = None
+
+        if i_chat_id:  # chat_id is passed - restore chat by id
+            chat = get_object_or_404(
+                Chat,
+                enroll_code=enroll_code,
+                user=self.request.user,
+                id=i_chat_id
+            )
+        elif i_chat_id is None:  # chat_id not passed - restore last session
+            chat = Chat.objects.filter(
+                enroll_code=enroll_code,
+                user=self.request.user,
+                state__isnull=False
+            ).first()
+            if not chat and enroll_code:  # no last session - create new one
+                chat = Chat(
+                    user=self.request.user,
+                    enroll_code=enroll_code,
+                    instructor=courseUnit.course.addedBy
+                )
+                chat.save()
+        elif i_chat_id == 0 and enroll_code:  # create new session
+            chat = Chat(
+                user=self.request.user,
+                enroll_code=enroll_code,
+                instructor=courseUnit.course.addedBy
+            )
+            chat.save()
+
+        if chat.message_set.count() == 0:
+            next_point = self.next_handler.start_point(unit=courseUnit.unit, chat=chat, request=self.request)
+        elif not chat.state:
+            next_point = None
+            chat.next_point = next_point
+            chat.save()
+        else:
+            next_point = chat.next_point
+        return chat, next_point
+
     def get(self, request, enroll_key, chat_id=None):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
@@ -110,34 +160,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        if chat_id:
-            chat = get_object_or_404(
-                Chat,
-                enroll_code=enroll_code,
-                user=request.user,
-                id=chat_id
-            )
-        else:
-            chat = Chat.objects.filter(
-                enroll_code=enroll_code,
-                user=request.user,
-                state__isnull=False
-            ).first()
-        if not chat and enroll_key:
-            chat = Chat(
-                user=request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy
-            )
-            chat.save()
-        if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(unit=unit, chat=chat, request=request)
-        elif not chat.state:
-            next_point = None
-            chat.next_point = next_point
-            chat.save()
-        else:
-            next_point = chat.next_point
+        chat, next_point = self.get_or_init_chat(enroll_code, chat_id)
 
         if chat.is_live:
             lessons = Message.objects.filter(
@@ -164,22 +187,24 @@ class ChatInitialView(LoginRequiredMixin, View):
             enroll_code=enroll_code,
             user=request.user,
             instructor=courseUnit.course.addedBy,
-            state__isnull=False,
-        ).annotate(
-            lessons_done=models.Sum(
-                models.Case(
-                    models.When(
-                        message__contenttype='unitlesson',
-                        message__kind='orct',
-                        message__type='message',
-                        message__owner=request.user,
-                        then=1
-                    ),
-                    default=0,
-                    output_field=models.IntegerField()
-                )
-            ),
+            state__isnull=False
         )
+        # ).annotate(
+        #     lessons_done=models.Sum(
+        #         models.Case(
+        #             models.When(
+        #                 message__contenttype='unitlesson',
+        #                 message__kind='base',
+        #                 message__type='message',
+        #                 message__owner=request.user,
+        #                 message__timestamp__isnull=False,
+        #                 then=1
+        #             ),
+        #             default=0,
+        #             output_field=models.IntegerField()
+        #         )
+        #     ),
+        # )
         # TODO: This should work correctly byt doesn't, because of NOT distinct result of query,
         # TODO: We should find a way how to make it distinct to make only one query
         # ).annotate(
@@ -193,7 +218,10 @@ class ChatInitialView(LoginRequiredMixin, View):
         #         ))
         # )
         for chat_ss in chat_sessions:
-            chat_ss.total_lessons = chat_ss.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).count()
+            chat_prog_ser = ChatProgressSerializer()
+            lessons = chat_prog_ser.get_breakpoints(chat_ss)
+            chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
+            chat_ss.total_lessons = len(lessons)
 
         return render(
             request,
@@ -214,6 +242,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'duration': len(lessons) * 3,
                 'next_point': next_point,
                 'fsmstate': chat.state,
+                'enroll_code': enroll_key,
             }
         )
 
