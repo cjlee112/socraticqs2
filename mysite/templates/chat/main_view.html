@@ -231,7 +231,7 @@
     var CUI = CUI || {};
     CUI.config = CUI.config || {};
 
-    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
+    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code %}';
     CUI.config.chatID = {{ chat_id }};
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';
