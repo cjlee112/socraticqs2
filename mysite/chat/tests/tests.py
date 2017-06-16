@@ -158,6 +158,7 @@ class MainChatViewTests(CustomTestCase):
         self.assertIn('will_learn', response.context)
         self.assertIn('need_to_know', response.context)
         self.assertIn('chat', response.context)
+        self.assertIn('chat_sessions', response.context)
 
     @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
     def test_next_handler_start_point_called_once(self, mocked_start_point):
@@ -186,9 +187,10 @@ class MessagesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
+        response = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        )
+        chat_id = response.context['chat_id']
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][1]['id']

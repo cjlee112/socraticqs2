@@ -7,13 +7,16 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from chat.models import EnrollUnitCode
 
 from .models import Message, Chat, ChatDivider
+from .views import ChatInitialView
 from .serializers import (
     MessageSerializer,
     ChatHistorySerializer,
     ChatProgressSerializer,
-    ChatResourcesSerializer
+    ChatResourcesSerializer,
+    ChatSerializer,
 )
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
@@ -223,6 +226,21 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 request=self.request,
             )
             chat.save()
+
+
+class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
+    """
+    Initialize new chat session if request.GET['chat_id'] is zero and returns serialized chat object
+    """
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request, enroll_key, chat_id, *args, **kwargs):
+        enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        if request.is_ajax():
+            view = ChatInitialView()
+            view.request = self.request
+            chat, _ = view.get_or_init_chat(enroll_code, chat_id)
+            return Response(ChatSerializer(chat).data)
 
 
 class HistoryView(ValidateMixin, generics.RetrieveAPIView):
