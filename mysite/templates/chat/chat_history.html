@@ -99,53 +99,10 @@
         </div>
 
         <div class="cta">
-
-          <section id="chat-sessions" class="chat-sessions-list">
-            <div class="container">
-              <div class="row">
-                <div class="col-lg-8 col-lg-offset-2">
-                  <h3>
-                    My History
-                  </h3>
-                  <p class="history-description">
-                    Click on a chat session to continue working on it or to review your previous answers.
-                    You can start over if you want work on the lessons in this courselet again by clicking on
-                    <i>New Chat Session</i> below.
-                  </p>
-
-                  <ul>
-                    {% if chat_sessions %}
-                      {% for chat_sess in chat_sessions %}
-                        <li>
-                          <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/" data-chat-id="{{ chat_sess.id }}" class="chat-start">
-                            <h4>{{ chat_sess.timestamp|date:"F j, Y P" }}</h4>
-                            <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons done</p>
-                            <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
-                            <div class="course-content-unit-progress">
-                              <span style="width: {% if chat_sess %}{{ chat_sess.progress }}{% else %}0{% endif %}%;;"></span>
-                            </div>
-                          </a>
-                        </li>
-                      {% endfor %}
-                    {% endif %}
-                    <li>
-                      <a class="start-new-session chat-start" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" data-chat-id="0">
-                        <h4>New Chat Session</h4>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {% comment %}
           <div class="container">
             <button class="chat-start">
               {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
           </div>
-          {% endcomment %}
-
         </div>
       </div>
 
@@ -231,7 +188,6 @@
     var CUI = CUI || {};
     CUI.config = CUI.config || {};
 
-    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
     CUI.config.chatID = {{ chat_id }};
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';

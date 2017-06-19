@@ -87,7 +87,7 @@
                 {% if courslet_history %}
                   {% for chat in courslet_history %}
                     <li>
-                      <a href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/{{ chat.id }}">
+                      <a href="{{ domain }}{% url 'chat:courselet_history' enroll_key=chat.enroll_code.enrollCode chat_id=chat.id %}">
                         <h3>{{ chat.get_course_unit.unit.title }}</h3>
                         <h3>{{ chat.last_modify_timestamp|date:"F j, Y P" }}</h3>
 
