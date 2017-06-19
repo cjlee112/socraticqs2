@@ -21,9 +21,15 @@ urlpatterns = patterns(
     '',
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(
-        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/0/?$',
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>0)/?$',
         InitNewChat.as_view(),
         name='init_chat_api'
+    ),
+
+    url(
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)/history/?$',
+        ChatInitialViewFSM.as_view(template_name='chat/chat_history.html'),
+        name='courselet_history'
     ),
     url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',

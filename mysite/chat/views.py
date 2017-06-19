@@ -31,6 +31,7 @@ class ChatInitialView(LoginRequiredMixin, View):
     Entry point for Chat UI.
     """
     next_handler = injections.depends(ProgressHandler)
+    template_name = 'chat/main_view.html'
 
     def get_enroll_code_object(self, enroll_key):
         """
@@ -225,7 +226,7 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         return render(
             request,
-            'chat/main_view.html',
+            self.template_name,
             {
                 'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'chat': chat,
