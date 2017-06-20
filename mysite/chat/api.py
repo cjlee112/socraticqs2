@@ -1,3 +1,4 @@
+from django.http.response import Http404
 import injections
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -241,6 +242,8 @@ class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
             view.request = self.request
             chat, _ = view.get_or_init_chat(enroll_code, chat_id)
             return Response(ChatSerializer(chat).data)
+        else:
+            raise Http404() 
 
 
 class HistoryView(ValidateMixin, generics.RetrieveAPIView):
