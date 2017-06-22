@@ -189,7 +189,7 @@
 
     CUI.config.chatID = {{ chat_id }};
     CUI.config.historyUrl = '/chat/history/';
-    CUI.config.progressUrl = '/chat/progress/';
+    CUI.config.progressUrl = '{% url 'chat:add_unit_progress' %}';
     CUI.config.resourcesUrl = '/chat/resources/';
     CUI.config.courseUnit = '{{ unit.id }}';
     CUI.config.course = '{{ course.id }}';

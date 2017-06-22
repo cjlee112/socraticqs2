@@ -2,6 +2,7 @@ import injections
 from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
+from chat.api import AddUnitByChatProgressView
 
 from chat.views import CourseletPreviewView, ChatAddLessonView, TestChatInitialView
 from .views import ChatInitialView, InitializeLiveSession
@@ -46,6 +47,8 @@ urlpatterns = patterns(
     ),
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),
+    url(r'^progress/add_unit/$', AddUnitByChatProgressView.as_view(), name='add_unit_progress'),
+
 
     url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),

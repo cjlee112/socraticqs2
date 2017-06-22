@@ -365,7 +365,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='button',
                             is_additional=is_additional)
-        if self.name == 'DIVIDER':
+        if self.name == 'DIVIDER' or (self.name == 'START' and self.is_chat_add_lesson()):
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(
@@ -414,7 +414,7 @@ class ChatMixin(object):
             # content_id = current.id if current else None
             message = Message.objects.create(**_data)
 
-        if self.name in ('START', 'NOT_A_QUESTION') and self.is_chat_add_lesson():
+        if self.name in ('UNIT_NAME_TITLE', 'NOT_A_QUESTION') and self.is_chat_add_lesson():
             text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,

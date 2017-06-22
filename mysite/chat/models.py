@@ -1,3 +1,4 @@
+import re
 from uuid import uuid4
 import datetime
 
@@ -224,10 +225,31 @@ class Message(models.Model):
     def is_in_fsm_node(self, node_name):
         return self.chat.state and self.chat.state.fsmNode.fsm.name == node_name
 
+    def get_sidebar_html(self):
+        '''
+        :return: Return stripped html text (ho html tags)
+        '''
+        # html = self.get_html()
+        # return html.split("\n")[0]
+        p = re.compile(r'<.*?>')
+
+        if not self.text:
+            raw_html = self.content.text
+        else:
+            raw_html = self.text
+
+        raw_html = raw_html.split("\n")[0]
+        html = mark_safe(md2html(raw_html))
+        stripped_text = p.sub('', html)
+        return stripped_text
+
     def get_html(self):
         html = self.text
         if self.is_in_fsm_node('chat_add_lesson'):
-            return mark_safe(md2html(self.text or ''))
+            if self.contenttype == 'chatdivider':
+                html = self.content.text
+            else:
+                return mark_safe(md2html(self.text or ''))
         if self.content_id:
             if self.contenttype == 'chatdivider':
                 html = self.content.text

@@ -281,6 +281,58 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         return progress
 
 
+class AddUnitByChatStepSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Message, used when user in "Add unit by chat" chat to serialize messages for Progress
+    """
+    html = serializers.CharField(source='get_sidebar_html', read_only=True)
+    isDone = serializers.SerializerMethodField()
+    isUnlocked = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return obj.id
+
+    def get_isUnlocked(self, obj):
+        return bool(obj.timestamp)
+
+    def get_isDone(self, obj):
+        return bool(obj.timestamp and obj.chat.message_set.filter(
+            userMessage=True,
+            timestamp__isnull=False,
+            id__gt=obj.id
+        ).count())
+
+    class Meta:
+        model = Message
+        fields = (
+            'id',
+            'html',
+            'isUnlocked',
+            'isDone'
+        )
+
+class AddUnitByChatSerializer(ChatProgressSerializer):
+    """
+    Serializer for progress in "Add unit by chat"
+    """
+    breakpoints = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Chat
+        fields = (
+            'progress',
+            'breakpoints',
+            'is_live',
+        )
+
+    def get_breakpoints(self, obj):
+        steps = obj.message_set.filter(is_additional=False, userMessage=False, timestamp__isnull=False)
+        self.lessons_dict = AddUnitByChatStepSerializer(many=True).to_representation(steps)
+        return self.lessons_dict
+
+
 class ResourcesSerializer(serializers.ModelSerializer):
     """
     Serializer for Resource Lesson.

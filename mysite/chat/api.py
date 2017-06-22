@@ -8,12 +8,13 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Message, Chat, ChatDivider
+from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .serializers import (
     MessageSerializer,
     ChatHistorySerializer,
     ChatProgressSerializer,
-    ChatResourcesSerializer
+    ChatResourcesSerializer,
+    AddUnitByChatSerializer
 )
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
@@ -349,7 +350,29 @@ class ProgressView(ValidateMixin, generics.RetrieveAPIView):
         except ValidationError as e:
             return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
-        serializer = ChatProgressSerializer(chat)
+
+        if chat.state and chat.state.fsmNode.fsm.name in ['chat_add_lesson']:
+            serializer = AddUnitByChatSerializer(chat)
+        else:
+            serializer = ChatProgressSerializer(chat)
+        return Response(serializer.data)
+
+
+class AddUnitByChatProgressView(ValidateMixin, generics.RetrieveAPIView):
+    """
+    Return progress for chat.
+    """
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request, *args, **kwargs):
+        chat_id = self.request.GET.get('chat_id')
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
+        self.check_object_permissions(self.request, chat)
+
+        serializer = AddUnitByChatSerializer(chat)
         return Response(serializer.data)
 
 
