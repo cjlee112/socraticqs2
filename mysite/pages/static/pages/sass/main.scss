@@ -142,6 +142,17 @@ ul {
   }
 }
 
+ul.nav.navbar-nav {
+  li.child {
+    background: none;
+
+    &.selected {
+      font-weight: bold;
+    }
+  }
+}
+
+
 dl {
   margin: 0;
 }

@@ -606,6 +606,14 @@ section {
     background-image: url(../img/list-icon@2x.png);
     background-size: 12px 12px; }
 
+  ul.nav.navbar-nav li.child {
+	background: none;
+  }
+
+  ul.nav.navbar-nav li.child.selected {
+	font-weight: bold;
+  }
+
   .faq dt {
     background-image: url(../img/faq-expand@2x.png);
     background-size: 19px 19px; } }
