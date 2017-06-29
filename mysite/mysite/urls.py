@@ -62,3 +62,10 @@ if settings.DEBUG:
             {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
         url(r'', include('django.contrib.staticfiles.urls')),
     ]
+    try:
+        import debug_toolbar
+        urlpatterns = [
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ] + urlpatterns
+    except ImportError:
+        print "No django-debug-toolbar installed. Running without it..."

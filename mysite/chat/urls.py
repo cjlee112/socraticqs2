@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 
 from .views import ChatInitialView, InitializeLiveSession
-from .api import MessagesView, HistoryView, ProgressView, ResourcesView
+from .api import MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat
 from .services import FsmHandler, LiveChatFsmHandler
 
 
@@ -20,6 +20,17 @@ router.register(r'resources', ResourcesView, base_name='resources')
 urlpatterns = patterns(
     '',
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
+    url(
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>0)/?$',
+        InitNewChat.as_view(),
+        name='init_chat_api'
+    ),
+
+    url(
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)/history/?$',
+        ChatInitialViewFSM.as_view(template_name='chat/chat_history.html'),
+        name='courselet_history'
+    ),
     url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',
         ChatInitialViewFSM.as_view(),

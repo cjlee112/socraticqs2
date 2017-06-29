@@ -16,6 +16,21 @@ $(function(){
   $('.chat-start').on('click', function(e){
     e.preventDefault();
 
+    var data = $(this).data();
+    if(data.chatId != undefined) {
+      CUI.config.chatID = data.chatId;
+      if(data.chatId == 0) {
+        // NOT async call to create new chat session
+        $.ajax({
+          url: CUI.config.initNewChatUrl,
+          async: false,
+          dataType: 'json',
+          success: function(result) {
+            CUI.config.chatID = Number(result.id);
+          }
+        })
+      }
+    }
     // Disable multiple clicks
     if(chatHasStarted) return;
     else chatHasStarted = true;

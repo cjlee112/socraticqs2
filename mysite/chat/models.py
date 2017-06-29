@@ -110,7 +110,7 @@ class Chat(models.Model):
         :return: datetime.timedelta
         '''
         if not self.last_modify_timestamp:
-            last_msg = self.message_set.all().order_by('-timestamp').first()
+            last_msg = self.message_set.filter(timestamp__isnull=False).order_by('-timestamp').first()
             if last_msg:
                 self.last_modify_timestamp = last_msg.timestamp
                 self.save()

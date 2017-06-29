@@ -386,3 +386,12 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
             each.chat = obj
 
         return ResourcesSerializer(many=True).to_representation(lessons)
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    session = serializers.CharField(source='state.id', read_only=True)
+
+    class Meta:
+        model = Chat
+        fields = ('id', 'session',)
