@@ -38,10 +38,6 @@
                 </li>
 
                 <li>
-                  <a href="#courslet-history">Courslet History</a>
-                </li>
-
-                <li>
                   <a href="#live-sessions">Live Sessions</a>
                 </li>
               </ul>
@@ -75,39 +71,6 @@
           </div>
         </div>
       </section>
-
-      <section id="courslet-history" class="course-content-units">
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-8 col-lg-offset-2">
-              <p class="course-content-units-description">
-                This is your courslet sessions history. You can go back and view your previous sessions.
-              </p>
-              <ul>
-                {% if courslet_history %}
-                  {% for chat in courslet_history %}
-                    <li>
-                      <a href="{{ domain }}{% url 'chat:courselet_history' enroll_key=chat.enroll_code.enrollCode chat_id=chat.id %}">
-                        <h3>{{ chat.get_course_unit.unit.title }}</h3>
-                        <h3>{{ chat.last_modify_timestamp|date:"F j, Y P" }}</h3>
-
-                          {% comment %}
-                          <p>{{ chat.get_course_unit.unit.get_exercises|length }} lessons</p>
-                          {% endcomment %}
-                        <div class="course-content-unit-progress">
-                          <span style="width: {{ chat.progress }}%;"></span>
-                        </div>
-
-                      </a>
-                    </li>
-                  {% endfor %}
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="live-sessions" class="course-content-units">
         <div class="container">
           <div class="row">
