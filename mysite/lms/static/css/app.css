@@ -308,7 +308,7 @@ p + p {
     padding: 0; }
   .course-content-tabs li {
     display: block;
-    width: 33%;
+    width: 50%;
     float: left; }
     .course-content-tabs li:first-child a {
       border-right: 1px solid #E8E8EB; }
