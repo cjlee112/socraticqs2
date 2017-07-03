@@ -233,10 +233,7 @@ class Message(models.Model):
         # return html.split("\n")[0]
         p = re.compile(r'<.*?>')
 
-        if not self.text:
-            raw_html = self.content.text
-        else:
-            raw_html = self.text
+        raw_html = self.text or self.content.text
 
         raw_html = raw_html.split("\n")[0]
         html = mark_safe(md2html(raw_html))

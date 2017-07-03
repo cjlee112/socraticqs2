@@ -283,7 +283,8 @@ class ChatProgressSerializer(serializers.ModelSerializer):
 
 class AddUnitByChatStepSerializer(serializers.ModelSerializer):
     """
-    Serializer for Message, used when user in "Add unit by chat" chat to serialize messages for Progress
+    Serializer for Message, used when user in "Add unit by chat"
+    chat to serialize messages for Progress
     """
     html = serializers.CharField(source='get_sidebar_html', read_only=True)
     isDone = serializers.SerializerMethodField()
