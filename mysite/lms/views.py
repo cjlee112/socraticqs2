@@ -38,7 +38,8 @@ class CourseView(View):
                 'chat': Chat.objects.filter(
                     enroll_code__courseUnit=courselet,
                     user=request.user,
-                    state__isnull=False
+                    state__isnull=False,
+                    is_live=False
                 ).first()
             }
             for courselet in course.get_course_units(True)
