@@ -26,6 +26,17 @@ def want_to_continue(self, edge, fsmStack, request, useCurrent=False, **kwargs):
 
 class START(object):
     path = 'fsm:fsm_node'
+    title = 'Start creating new unit in the courselet'
+    help = ''
+    edges = (
+        dict(name='next', toNode='UNIT_NAME_TITLE', title='next',
+             description='',
+             showOption=True),
+    )
+
+
+class UNIT_NAME_TITLE(object):
+    path = 'fsm:fsm_node'
     title = 'Name your unit'
     help = 'Input unit title'
     edges = (
@@ -33,7 +44,6 @@ class START(object):
              description='',
              showOption=True),
     )
-
 
 class GET_UNIT_NAME_TITLE(object):
     path = 'fsm:fsm_node'
@@ -133,7 +143,7 @@ def get_specs():
         description='''Guides you through the steps of adding a new
                     lesson to this courselet''',
         pluginNodes=[
-            START, GET_UNIT_NAME_TITLE, UNIT_QUESTION, GET_UNIT_QUESTION, HAS_UNIT_ANSWER, GET_HAS_UNIT_ANSWER,
+            START, UNIT_NAME_TITLE, GET_UNIT_NAME_TITLE, UNIT_QUESTION, GET_UNIT_QUESTION, HAS_UNIT_ANSWER, GET_HAS_UNIT_ANSWER,
             GET_UNIT_ANSWER, UNIT_ANSWER, WELL_DONE, END
         ],
         fsmGroups=('teach/unit_tasks',),
