@@ -818,7 +818,8 @@ class RedirectToCourseletPreviewView(NewLoginRequiredMixin, CourseCoursletUnitMi
                 is_preview=True
             )
 
-        return redirect('chat:preview_courselet', **{'enroll_key': enroll.enrollCode})
+            return redirect('chat:preview_courselet', **{'enroll_key': enroll.enrollCode})
+        raise Http404()
 
 
 class RedirectToAddUnitsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
