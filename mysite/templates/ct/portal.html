@@ -2,6 +2,8 @@
 
 {% load crispy_forms_tags menu_tags staticfiles %}
 {% load ct_extras %}
+{% load waffle_tags %}
+
 
 {% comment %}
   This is the main template for all portal pages.
@@ -59,7 +61,9 @@
           {% if fsmStack.state %}
           <li><a href='/fsm/nodes/'>{{ fsmStack.state.title }}</a></li>
           {% elif user.is_authenticated %}
-          <li><a href='/fsm/nodes/'>Activity Center</a></li>
+            {% switch "activity_center_enabled" %}
+              <li><a href='/fsm/nodes/'>Activity Center</a></li>
+            {% endswitch %}
           {% endif %}
           {% block navbar %}{% endblock %}
         </ul>
@@ -113,6 +117,10 @@
 
     {% block content %}{% endblock %}
   </div>
+
+  <footer class="footer-main"><div class="container">
+    © 2017 ConceptInventory.org. The free hackathon is supported by UCLA and the National Institute of
+  </div></footer>
 
   {% include 'psa/modal.html' %}
   {% include 'psa/auth.js.html' %}
