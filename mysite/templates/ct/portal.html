@@ -58,26 +58,31 @@
           </ul>
           </li>
           {% endif %}
+          {% switch "menu_activity_center_link_enabled" %}
           {% if fsmStack.state %}
           <li><a href='/fsm/nodes/'>{{ fsmStack.state.title }}</a></li>
           {% elif user.is_authenticated %}
-            {% switch "activity_center_enabled" %}
+
               <li><a href='/fsm/nodes/'>Activity Center</a></li>
-            {% endswitch %}
           {% endif %}
+          {% endswitch %}
           {% block navbar %}{% endblock %}
         </ul>
         <ul class="nav navbar-nav">
             {% show_menu 0 1 100 100 "menu.html" %}
         </ul>
-        <ul class="nav navbar-right">
+        <ul class="nav navbar-nav">
           {% if user and user.is_authenticated %}
             <li><a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
-            {% if user.get_full_name %}
+            {% comment %}
+              {% if user.get_full_name %}
                 {{ user.get_full_name }}
             {% else %}
                 {{ user.username }}
-            {% endif %}</a></li>
+            {% endif %}
+              {% endcomment %}
+              Profile
+            </a></li>
           {% else %}
             <li><a href="/login/?next=/ct/">Sign in</a></li>
           {% endif %}
