@@ -1,0 +1,14 @@
+{% load cms_tags %}
+
+<div class="row">
+  <div class="col-md-1"></div>
+{% for plugin in instance.child_plugin_instances %}
+   <div class="col-md-5">
+        {% render_plugin plugin %}
+   </div>
+  {% if forloop.counter|divisibleby:"2" %}
+  <div class="col-md-1"></div>
+  {% endif %}
+
+{% endfor %}
+</div>

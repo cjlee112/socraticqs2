@@ -184,7 +184,7 @@ class DetailsVideoPagePlugin(CMSPluginBase):
     model = DetailsVideoPlugin
     render_template = 'pages/details_video_plugin.html'
     require_parent = True
-    parent_classes = ['DetailsPagePlugin', 'SlideSharePagePlugin']
+    parent_classes = ['DetailsPagePlugin', 'SlideSharePagePlugin', 'InlineSlideSharePagePlugin']
 
 
 class DetailsQuotePagePlugin(CMSPluginBase):
@@ -207,6 +207,24 @@ class SlideSharePagePlugin(CMSPluginBase):
     render_template = 'pages/slideshare_plugin.html'
     allow_children = True
     child_classes = ['SlideShareItemPagePlugin', 'DetailsVideoPagePlugin']
+
+
+class InlineSlideSharePagePlugin(CMSPluginBase):
+    """docstring for SlideSharePagePlugin"""
+    model = SlideSharePlugin
+    render_template = 'pages/inline_slideshare_plugin.html'
+    allow_children = True
+    child_classes = ['SlideShareItemPagePlugin', 'DetailsVideoPagePlugin']
+
+
+class SplitTwoColumns(CMSPluginBase):
+    render_template = 'pages/split_two_cols.html'
+    allow_children = True
+
+
+class SplitThreeColumns(CMSPluginBase):
+    render_template = 'pages/split_three_cols.html'
+    allow_children = True
 
 
 plugin_pool.register_plugin(BannerPagePlugin)
@@ -232,3 +250,6 @@ plugin_pool.register_plugin(DetailsVideoPagePlugin)
 plugin_pool.register_plugin(DetailsQuotePagePlugin)
 plugin_pool.register_plugin(SlideShareItemPagePlugin)
 plugin_pool.register_plugin(SlideSharePagePlugin)
+plugin_pool.register_plugin(InlineSlideSharePagePlugin)
+plugin_pool.register_plugin(SplitTwoColumns)
+plugin_pool.register_plugin(SplitThreeColumns)
