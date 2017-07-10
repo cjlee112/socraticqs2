@@ -234,13 +234,27 @@ class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
     Initialize new chat session if request.GET['chat_id'] is zero and returns serialized chat object
     """
     permission_classes = (IsAuthenticated, IsOwner)
+    view = ChatInitialView()
 
     def get(self, request, enroll_key, chat_id, *args, **kwargs):
         enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
         if request.is_ajax():
-            view = ChatInitialView()
-            view.request = self.request
-            chat, _ = view.get_or_init_chat(enroll_code, chat_id)
+            self.view.request = self.request
+            chat, i_chat_id = self.view.get_or_init_chat(enroll_code, chat_id)
+
+            if chat.message_set.count() == 0:
+                # if it's newly created chat
+                self.view.next_handler.start_point(
+                    unit=enroll_code.courseUnit.unit,
+                    chat=chat,
+                    request=self.request
+                )
+            elif not chat.state:
+                # if chat is already finished
+                chat.next_point = None
+                chat.save()
+
+            chat = get_object_or_404(Chat, id=chat.id)
             return Response(ChatSerializer(chat).data)
         else:
             raise Http404() 
