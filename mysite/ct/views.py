@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import AnonymousUser
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -1748,3 +1748,57 @@ def assess_errors(request, course_id, unit_id, ul_id, resp_id):
     return pageData.render(request, 'ct/assess.html',
                 dict(response=r, answer=answer, errorModels=allErrors,
                      showAnswer=False))
+
+
+def copy_model_instance(inst, **kwargs):
+    from copy import copy
+    n_inst = copy(inst)
+    n_inst.id = None
+    if kwargs:
+        for k, v in kwargs.items():
+            setattr(n_inst, k, v)
+    n_inst.save()
+    return n_inst
+
+
+def deep_copy_course(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    notInstructor = check_instructor_auth(course, request)
+    if notInstructor: # redirect students to live session or student page
+        return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
+
+    if request.method == 'POST': # copy course/courseletS/unitS
+
+        new_course = copy_model_instance(course, atime=timezone.now())
+        for cu in course.courseunit_set.all():
+            # deal w ith unit
+            n_unit = copy_model_instance(cu.unit, atime=timezone.now())
+            # deal with CourseUnit
+            n_cu = copy_model_instance(cu, course=new_course, unit=n_unit, atime=timezone.now())
+
+            uls = list(cu.unit.unitlesson_set.filter(parent__isnull=True)) # uls without parent
+
+            # deal with unit lessons which has parent
+            nuls_ids = {}  # old_id : (new_id, instance)
+            for ul in uls:
+                n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
+                n_ul.treeID = n_ul.id
+                n_ul.save()
+                nuls_ids[ul.id] = (n_ul.id, n_ul)
+
+
+            # deal with unit lessons which has NO parent
+            uls = list(cu.unit.unitlesson_set.filter(parent__isnull=False)) # uls with parent
+            for ul in uls:
+                n_parent = nuls_ids[ul.parent.id][1]
+                n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
+                n_ul.treeID = n_ul.id
+                n_ul.parent = n_parent
+                n_ul.save()
+
+        # copy Role objects
+        for role in course.role_set.all():
+            n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
+
+        return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
+    return redirect(request.META.HTTP_REFERER)
