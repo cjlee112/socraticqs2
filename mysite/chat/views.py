@@ -186,8 +186,8 @@ class ChatInitialView(LoginRequiredMixin, View):
             enroll_code=enroll_code,
             user=request.user,
             instructor=courseUnit.course.addedBy,
-            state__isnull=False
-        )
+            is_live=False
+        ).order_by('-state')
         # ).annotate(
         #     lessons_done=models.Sum(
         #         models.Case(
