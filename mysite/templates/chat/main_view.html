@@ -100,7 +100,7 @@
 
         <div class="cta">
 
-          {% if not fsmstate.isLiveSession %}
+          {% if not chat_id %}
           <section id="chat-sessions" class="chat-sessions-list">
             <div class="container">
               <div class="row">
@@ -140,7 +140,7 @@
             </div>
           </section>
 
-          {% elif fsmstate.isLiveSession %}
+          {% elif chat_id %}
           <div class="container">
             <button class="chat-start">
               {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
