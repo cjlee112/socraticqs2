@@ -1787,12 +1787,13 @@ def deep_copy_course(request, course_id):
                 nuls_ids[ul.id] = (n_ul.id, n_ul)
 
             DEEP_LVLS = 3
-            for lvl in range(DEEP_LVLS + 1)[1:]:
+            for lvl in range(1, DEEP_LVLS + 1):
+                parent_q = '__parent' * lvl
                 uls = list(cu.unit.unitlesson_set.filter(
                     parent__isnull=False,
-                    **{'parent' + '__parent' * lvl + '__isnull': True}
+                    **{'parent' + parent_q + '__isnull': True}
                 ).order_by(
-                    '-parent' + '__parent' * lvl
+                    '-parent' + parent_q
                 ))
                 for ul in uls:
                     n_parent = nuls_ids.get(ul.parent.id, [None, None])[1]
