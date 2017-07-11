@@ -1001,6 +1001,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
                 table_body[role.user] = []
             table_body[role.user].append(
                 Response.objects.filter(
+                    unitLesson=orct,
                     lesson=orct.lesson, author=role.user
                 ).order_by('-atime').first()
             )
