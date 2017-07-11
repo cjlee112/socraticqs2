@@ -87,27 +87,61 @@ class MainChatViewTests(CustomTestCase):
     Should enroll user if not enrolled.
     Should render main_view.html template.
     """
+    fixtures = ['chat/tests/fixtures/initial_data_enchanced.json']
+
+    def get_course_unit(self):
+        return CourseUnit.objects.get(id=1)
+
     def test_main_view_enroll(self):
         """
         MainView should enroll Student that comes w/ enrollCode.
         """
-        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        course_unit = self.get_course_unit()
+        enroll_code = EnrollUnitCode.get_code(course_unit)
         self.client.login(username='test', password='test')
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content.get('id')
+
+        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
         self.assertTemplateUsed(response, 'chat/main_view.html')
         self.assertTrue(
-            Role.objects.filter(role=Role.ENROLLED, user=self.user, course=self.course).exists()
+            Role.objects.filter(role=Role.ENROLLED, user=self.user, course=course_unit.course).exists()
         )
 
     def test_not_enroll_second_time(self):
         """
         Should not enroll second time if already enrolled.
         """
-        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        enroll_code = EnrollUnitCode.get_code(self.get_course_unit())
         self.client.login(username='test', password='test')
         role = Role(role=Role.ENROLLED, course=self.course, user=self.user)
         role.save()
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        # import ipdb; ipdb.set_trace()
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
         self.assertEquals(
             Role.objects.filter(role=Role.ENROLLED, user=self.user, course=self.course).count(),
             1
@@ -117,7 +151,22 @@ class MainChatViewTests(CustomTestCase):
         """
         Only logged in users can access chat ui.
         """
-        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        enroll_code = EnrollUnitCode.get_code(self.get_course_unit())
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content.get('id')
+        self.assertIsNone(chat_id)
+        self.assertFalse(response.status_code == 404)
+
         response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
         self.assertTemplateUsed(response, 'psa/custom_login.html')
 
@@ -127,7 +176,22 @@ class MainChatViewTests(CustomTestCase):
         """
         self.client.login(username='test', password='test')
         response = self.client.get(
-            reverse('chat:chat_enroll', args=('nonexistentenrollcode',)), follow=True
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': 'nonexistentenrollcode',
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertTrue(response.status_code == 404)
+
+        json_content = json.loads(response.content)
+        chat_id = json_content.get('id')
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=('nonexistentenrollcode', )), follow=True
         )
         self.assertIsInstance(response, HttpResponseNotFound)
 
@@ -137,7 +201,21 @@ class MainChatViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
         variables = (
             ('course', self.course),
             ('unit', self.unit),
@@ -152,7 +230,6 @@ class MainChatViewTests(CustomTestCase):
             self.assertEquals(val_check, pair[1])
 
         self.assertIn('fsmstate', response.context)
-        self.assertIn('next_point', response.context)
         self.assertIn('lessons', response.context)
         self.assertIn('chat_id', response.context)
         self.assertIn('will_learn', response.context)
@@ -160,19 +237,76 @@ class MainChatViewTests(CustomTestCase):
         self.assertIn('chat', response.context)
         self.assertIn('chat_sessions', response.context)
 
-    @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
-    def test_next_handler_start_point_called_once(self, mocked_start_point):
+    def test_chat_init_api(self):
+        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+
+        lesson1 = Lesson(title='title1', text=u'きつね', kind='orct', addedBy=self.user, url='/test/url/')
+        lesson1.save()
+
+        lesson2 = Lesson(title='title2', text=u'きつね', kind='orct', addedBy=self.user, url='/test/url/')
+        lesson2.save()
+
+        self.unitlesson1 = UnitLesson(
+            unit=self.unit, order=1, lesson=lesson1, addedBy=self.user, treeID=lesson1.id
+        )
+        self.unitlesson1.save()
+
+        self.unitlesson2 = UnitLesson(
+            unit=self.unit, order=2, lesson=lesson2, addedBy=self.user, treeID=lesson2.id
+        )
+        self.unitlesson2.save()
+        self.client.login(username='test', password='test')
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(bool(json_content['id']))
+        self.assertTrue(bool(json_content['session']))
+
+
+    # @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
+    @patch('chat.api.InitNewChat.view.next_handler.start_point', return_value=Mock())
+    def test_next_handler_start_point_called_once(self, start_point_mock):
         """
         Check that ChatInitialView.next_handler.start_point called once.
         """
-        enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        course_unit = self.get_course_unit()
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+
         self.client.login(username='test', password='test')
-        self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
         response = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        mocked_start_point.assert_called_once()
-        self.assertEquals(response.context['next_point'], mocked_start_point.return_value)
+        json_content = json.loads(response.content)
+        start_point_mock.assert_called_once()
+
+        chat_id = json_content.get('id')
+
+        self.assertTrue(response.status_code == 200)
+
+        start_point_mock.assert_called_once()
+
+        self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
+        start_point_mock.assert_called_once()
 
 
 class MessagesViewTests(CustomTestCase):
@@ -188,9 +322,22 @@ class MessagesViewTests(CustomTestCase):
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
         response = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        chat_id = response.context['chat_id']
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][1]['id']
@@ -210,9 +357,23 @@ class MessagesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][1]['id']
@@ -233,9 +394,23 @@ class MessagesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][1]['id']
@@ -262,9 +437,23 @@ class MessagesViewTests(CustomTestCase):
         enroll_code = EnrollUnitCode.get_code(course_unit)
 
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(
             reverse('chat:history'), {'chat_id': chat_id}, follow=True
         )
@@ -293,9 +482,37 @@ class MessagesViewTests(CustomTestCase):
         enroll_code = EnrollUnitCode.get_code(course_unit)
 
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
 
         # get history
         response = self.client.get(
@@ -633,8 +850,22 @@ class HistoryAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
         chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         ).context['chat_id']
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         self.assertEquals(response.status_code, 200)
@@ -645,8 +876,21 @@ class HistoryAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
         chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         ).context['chat_id']
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
@@ -662,8 +906,21 @@ class HistoryAPIViewTests(CustomTestCase):
         lesson.text = u'🦊'
         lesson.save()
         self.client.login(username='test', password='test')
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
         chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         ).context['chat_id']
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
@@ -692,9 +949,22 @@ class ProgressAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
         self.assertEquals(response.status_code, 200)
 
@@ -704,9 +974,22 @@ class ProgressAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response  = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
@@ -718,9 +1001,22 @@ class ProgressAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['progress'], float)
@@ -742,9 +1038,22 @@ class ResourcesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         self.assertEquals(response.status_code, 200)
 
@@ -754,9 +1063,22 @@ class ResourcesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
@@ -768,9 +1090,22 @@ class ResourcesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['breakpoints'], list)
@@ -791,9 +1126,22 @@ class ResourcesViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         resource_response = self.client.get(
@@ -843,9 +1191,22 @@ class InternalMessageSerializerTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        # no chat session yet, so we need to init it
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][0]['id']
@@ -894,9 +1255,22 @@ class MesasageSerializerTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][0]['id']
@@ -919,9 +1293,22 @@ class ChatProgressSerializerTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        # no chat session yet, so we need to init it
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
 
         result = ChatProgressSerializer().to_representation(Chat.objects.get(id=chat_id))
 
@@ -940,9 +1327,22 @@ class ChatHistorySerializerTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+        # no chat session yet, so we need to init it
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        response  = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
 
         result = ChatHistorySerializer().to_representation(Chat.objects.get(id=chat_id))
 
@@ -961,9 +1361,24 @@ class LessonSerializerTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         self.client.login(username='test', password='test')
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+
+        # no chat session yet, so we need to init it
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         msg_id = json_content['addMessages'][1]['id']

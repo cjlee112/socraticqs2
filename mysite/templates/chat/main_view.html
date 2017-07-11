@@ -100,7 +100,7 @@
 
         <div class="cta">
 
-          {% if not fsmstate.isLiveSession %}
+          {% if not chat_id %}
           <section id="chat-sessions" class="chat-sessions-list">
             <div class="container">
               <div class="row">
@@ -140,7 +140,7 @@
             </div>
           </section>
 
-          {% elif fsmstate.isLiveSession %}
+          {% elif chat_id %}
           <div class="container">
             <button class="chat-start">
               {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
@@ -233,10 +233,10 @@
     CUI.config = CUI.config || {};
 
     {% if not fsmstate.isLiveSession %}
-    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=chat.enroll_code.enrollCode chat_id=0 %}';
+    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
     {% endif %}
 
-    CUI.config.chatID = {{ chat_id }};
+    CUI.config.chatID = {% if chat_id %}{{ chat_id }}{% else %}0{% endif %};
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';
     CUI.config.resourcesUrl = '/chat/resources/';

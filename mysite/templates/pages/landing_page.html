@@ -10,6 +10,7 @@
 
         <link rel="stylesheet" href="{% static "pages/css/bootstrap.min.css" %}">
         <link rel="stylesheet" href="{% static "pages/css/main.css" %}">
+        <link rel="stylesheet" href="{% static "pages/css/main_page.css" %}">
         {% render_block "css" %}
 
         <script src="{% static "pages/js/vendor/modernizr-2.8.3-respond-1.4.2.min.js" %}"></script>
@@ -24,7 +25,7 @@
 
         {% cms_toolbar %}
 
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar-default navbar-static-top" role="navigation">
           <div class="container">
 
               <div class="navbar-header">
@@ -61,6 +62,8 @@
 
           {% placeholder "landing_page_active_learning_placeholder" %}
           {% placeholder "landing_page_slideshare_placeholder" %}
+          {% placeholder "landing_page_main_2" %}
+          {% placeholder "landing_page_main_3" %}
           {% placeholder "landing_page_benefits_placeholder" %}
           {% placeholder "landing_page_list_placeholder" %}
           {% placeholder "landing_workshop_description_placeholder" %}

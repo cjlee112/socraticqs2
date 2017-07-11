@@ -84,7 +84,7 @@ class START(object):
 class START_MESSAGE(object):
     get_path = get_lesson_url
     # node specification data goes here
-    title = 'Additional lessons for your errors'
+    title = 'Click continue to get additional materials'
     edges = (
         dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
     )
@@ -110,7 +110,7 @@ class RESOLVE(object):
 class MESSAGE_NODE(object):
         get_path = get_lesson_url
         # node specification data goes here
-        title = 'Choose grade of your understanding'
+        title = 'Choose the degree of your understanding'
         edges = (
             dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
         )
