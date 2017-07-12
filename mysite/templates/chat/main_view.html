@@ -36,7 +36,7 @@
       <div class="chat-introduction-title">
         <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
         {% if chat.is_live %}
-        <h2>Live Session - {{ chat.timestamp|date:"F j, Y P" }} </h2>
+        <h2>Live Session - {% if chat.last_modify_timestamp%}{{ chat.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat.timestamp }}{% endif %}</h2>
         {% else %}
         <h2>{{ unit.title }}</h2>
         {% endif %}
@@ -79,7 +79,7 @@
                 </div>
               </div>
               {% else %}
-              <p>This is your history from your live session with {{ course.addedBy.get_full_name }} on {{ chat.timestamp|date:"F j, Y" }}.
+              <p>This is your history from your live session with {{ course.addedBy.get_full_name }} on {% if chat.last_modify_timestamp%}{{ chat.last_modify_timestamp|date:"F j, Y" }}{% else %}{{ chat.timestamp }}{% endif %}.
                 You can view your previous answers, but you can't submit new ones.
               </p>
               {% endif %}
@@ -117,12 +117,12 @@
                   <ul>
                     {% if chat_sessions %}
                       {% for chat_sess in chat_sessions %}
-                        <li>
+                        <li class="{% if not chat_sess.state %} finished {% endif %}">
                           <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/" data-chat-id="{{ chat_sess.id }}" class="chat-start">
-                            <h4>{{ chat_sess.timestamp|date:"F j, Y P" }}</h4>
+                            <h4>{% if chat_sess.last_modify_timestamp%}{{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat_sess.timestamp }}{% endif %}</h4>
                             <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons done</p>
                             <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
-                            <div class="course-content-unit-progress">
+                            <div class="course-content-unit-progress {% if not chat_sess.state %} finished {% endif %}">
                               <span style="width: {% if chat_sess %}{{ chat_sess.progress }}{% else %}0{% endif %}%;;"></span>
                             </div>
                           </a>

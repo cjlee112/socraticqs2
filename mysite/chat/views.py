@@ -1,4 +1,7 @@
 import logging
+from django.db.models.aggregates import Count
+from django.db.models.expressions import When, Case
+from django.db.models.fields import BooleanField, IntegerField
 
 import waffle
 import injections
@@ -187,7 +190,14 @@ class ChatInitialView(LoginRequiredMixin, View):
             user=request.user,
             instructor=courseUnit.course.addedBy,
             is_live=False
-        ).order_by('-state')
+        ).annotate(
+            not_finished=Case(
+            When(state_id__isnull=True, then=1),
+            When(state_id__isnull=False, then=0),
+            default=0,
+            output_field=IntegerField())
+        ).order_by('-not_finished', '-last_modify_timestamp')
+
         # ).annotate(
         #     lessons_done=models.Sum(
         #         models.Case(
