@@ -192,8 +192,8 @@ class ChatInitialView(LoginRequiredMixin, View):
             is_live=False
         ).annotate(
             not_finished=Case(
-            When(state_id__isnull=True, then=1),
-            When(state_id__isnull=False, then=0),
+            When(state_id__isnull=True, then=0),
+            When(state_id__isnull=False, then=1),
             default=0,
             output_field=IntegerField())
         ).order_by('-not_finished', '-last_modify_timestamp')
