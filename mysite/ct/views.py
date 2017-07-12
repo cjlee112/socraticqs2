@@ -1798,12 +1798,13 @@ def deep_copy_course(request, course_id):
                 ))
                 for ul in uls:
                     n_parent = nuls_ids.get(ul.parent.id, [None, None])[1]
-                    n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
-                    n_ul.treeID = n_ul.id
-                    n_ul.parent = n_parent
-                    n_ul.save()
-                    # add new ul to parents dict
-                    nuls_ids[ul.id] = (n_ul.id, n_ul)
+                    if n_parent:
+                        n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
+                        n_ul.treeID = n_ul.id
+                        n_ul.parent = n_parent
+                        n_ul.save()
+                        # add new ul to parents dict
+                        nuls_ids[ul.id] = (n_ul.id, n_ul)
 
         # copy Role objects
         for role in course.role_set.all():
