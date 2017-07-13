@@ -1018,11 +1018,12 @@ class ProgressAPIViewTests(CustomTestCase):
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
+
         json_content = json.loads(response.content)
-        self.assertIsInstance(json_content['progress'], float)
+        self.assertIsInstance(json_content['progress'], int)
         self.assertIsInstance(json_content['breakpoints'], list)
         self.assertEquals(len(json_content['breakpoints']), 1)
-        self.assertEquals(json_content['progress'], 1.0)
+        self.assertEquals(json_content['progress'], 1)
         self.assertEquals(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
         self.assertEquals(json_content['breakpoints'][0]['isDone'], True)
         self.assertEquals(json_content['breakpoints'][0]['isUnlocked'], True)
