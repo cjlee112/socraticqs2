@@ -61,15 +61,6 @@ Added by: {{ course.addedBy.get_full_name }},
 </div>
 
 <hr>
-<form action="{% url 'ct:deep_copy_course' course_id=course.id %}" method="post">
-  <div class="col-md-6">
-    To copy this course for a new quarter/semester click this button.
-  </div>
-  {% csrf_token %}
-  <input type="submit" value="Copy course" class="btn btn-danger">
-</form>
-
-<hr>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
 <script type="text/javascript">
 $(function() {

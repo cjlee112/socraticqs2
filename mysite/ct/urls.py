@@ -12,8 +12,6 @@ urlpatterns = patterns('',
     url(r'^teach/courses/(?P<course_id>\d+)/$', course_view, name='course'),
     url(r'^teach/courses/(?P<course_id>\d+)/edit/$',
         edit_course, name='edit_course'),
-    url(r'^teach/courses/(?P<course_id>\d+)/edit/deep_copy_course/?$',
-        deep_copy_course, name='deep_copy_course'),
     # courselet tabs
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/$',
         unit_tasks, name='unit_tasks'),
