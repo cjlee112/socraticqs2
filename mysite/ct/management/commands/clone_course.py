@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 
@@ -5,7 +7,6 @@ from ct.models import Course, Role
 
 
 def copy_model_instance(inst, **kwargs):
-    from copy import copy
     n_inst = copy(inst)
     n_inst.id = None
     if kwargs:
@@ -59,17 +60,12 @@ class Command(BaseCommand):
                     if left_to_copy:
                         deep_cp_ul(left_to_copy)
 
-                DEEP_LVLS = 3
-
-                for lvl in range(1, DEEP_LVLS + 1):
-                    parent_q = '__parent' * lvl
-                    uls = list(cu.unit.unitlesson_set.filter(
-                        parent__isnull=False,
-                        **{'parent' + parent_q + '__isnull': True}
-                    ).order_by(
-                        '-parent' + parent_q
-                    ))
-                    deep_cp_ul(uls)
+                uls = list(cu.unit.unitlesson_set.filter(
+                    parent__isnull=False,
+                ).order_by(
+                    '-parent'
+                ))
+                deep_cp_ul(uls)
 
             for role in course.role_set.filter(role=Role.INSTRUCTOR):
                 n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
