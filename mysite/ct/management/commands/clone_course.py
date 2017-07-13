@@ -31,6 +31,53 @@ class Command(BaseCommand):
 
         if course:
             new_course = copy_model_instance(course, atime=timezone.now())
+
+            for cu in course.courseunit_set.all():
+                n_unit = copy_model_instance(cu.unit, atime=timezone.now())
+                n_cu = copy_model_instance(cu, course=new_course, unit=n_unit, atime=timezone.now())
+
+                uls = list(cu.unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT))
+
+                for ul in uls:
+                    errors = list(ul.get_errors())
+                    unit = copy_model_instance(ul.unit)
+                    q_lesson = copy_model_instance(ul.lesson)
+                    q_u = copy_model_instance(ul, unit=unit, lesson=q_lesson)
+
+                    n_ul = copy_model_instance(
+                        ul,
+                        lesson=q_lesson,
+                        unit=q_u,
+                        atime=timezone.now()
+                    )
+                    n_ul.treeID = n_ul.id
+                    n_ul.save()
+
+                    for error in errors:
+                        # n_concept = copy_model_instance(error.lesson.concept)
+                        concept = error.lesson.concept
+                        n_lesson = copy_model_instance(error.lesson)
+                        n_lesson.save_root(concept)
+                        err_ul = UnitLesson.create_from_lesson(n_lesson, unit)
+                        emUL1 = create_error_ul(
+                            n_lesson,
+                            concept,
+                            ul.unit,
+                            ul
+                        )
+
+            for role in course.role_set.filter(role=Role.INSTRUCTOR):
+                n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
+
+
+
+            print('Done')
+            print('New Course id is {0}'.format(new_course.id))
+        else:
+            print('There is no Course w/ such id')
+
+
+'''
             for cu in course.courseunit_set.all():
                 # deal w ith unit
                 n_unit = copy_model_instance(cu.unit, atime=timezone.now())
@@ -75,7 +122,7 @@ class Command(BaseCommand):
                                     n_ul.unit,
                                     n_ul
                                 )
-                                n_l.save_as_error_model(ul.concept, )
+                                n_l.save_as_error_model(ul.concept, n_parent, em)
                             else:
                                 n_ul = copy_model_instance(
                                     ul,
@@ -101,8 +148,4 @@ class Command(BaseCommand):
 
             for role in course.role_set.filter(role=Role.INSTRUCTOR):
                 n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
-
-            print('Done')
-            print('New Course id is {0}'.format(new_course.id))
-        else:
-            print('There is no Course w/ such id')
+'''
