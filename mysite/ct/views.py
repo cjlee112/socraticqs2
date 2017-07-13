@@ -1787,7 +1787,24 @@ def deep_copy_course(request, course_id):
                 n_ul.save()
                 nuls_ids[ul.id] = (n_ul.id, n_ul)
 
+
+            def deep_cp_ul(left_to_copy):
+                for ul in left_to_copy:
+                    n_parent = nuls_ids.get(ul.parent.id, [None, None])[1]
+                    if n_parent:
+                        if ul in left_to_copy:
+                            left_to_copy.remove(ul)
+                        n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
+                        n_ul.treeID = n_ul.id
+                        n_ul.parent = n_parent
+                        n_ul.save()
+                        # add new ul to parents dict
+                        nuls_ids[ul.id] = (n_ul.id, n_ul)
+                if left_to_copy:
+                    deep_cp_ul(left_to_copy)
+
             DEEP_LVLS = 3
+
             for lvl in range(1, DEEP_LVLS + 1):
                 parent_q = '__parent' * lvl
                 uls = list(cu.unit.unitlesson_set.filter(
@@ -1796,14 +1813,7 @@ def deep_copy_course(request, course_id):
                 ).order_by(
                     '-parent' + parent_q
                 ))
-                for ul in uls:
-                    n_parent = nuls_ids.get(ul.parent.id, [None, None])[1]
-                    n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
-                    n_ul.treeID = n_ul.id
-                    n_ul.parent = n_parent
-                    n_ul.save()
-                    # add new ul to parents dict
-                    nuls_ids[ul.id] = (n_ul.id, n_ul)
+                deep_cp_ul(uls)
 
         # copy Role objects
         for role in course.role_set.all():
