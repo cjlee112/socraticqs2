@@ -3,16 +3,18 @@ from copy import copy
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 
-from ct.models import Course, Role
+from ct.models import Course, Role, UnitLesson
+from ct.views import create_error_ul
 
 
-def copy_model_instance(inst, **kwargs):
+def copy_model_instance(inst, commit=True, **kwargs):
     n_inst = copy(inst)
     n_inst.id = None
     if kwargs:
         for k, v in kwargs.items():
             setattr(n_inst, k, v)
-    n_inst.save()
+    if commit:
+        n_inst.save()
     return n_inst
 
 
@@ -36,7 +38,14 @@ class Command(BaseCommand):
                 n_cu = copy_model_instance(cu, course=new_course, unit=n_unit, atime=timezone.now())
 
                 uls = list(cu.unit.unitlesson_set.filter(parent__isnull=True))  # uls without parent
-
+                # UnitLesson KIND_CHOICES = (
+                #     (COMPONENT, 'Included in this courselet'),
+                #     (ANSWERS, 'Answer for a question'),
+                #     (MISUNDERSTANDS, 'Common error for a question'),
+                #     (RESOLVES, 'Resolution for an error'),
+                #     (PRETEST_POSTTEST, 'Pre-test/Post-test for this courselet'),
+                #     (SUBUNIT, 'Container for this courselet'),
+                # )
                 # deal with unit lessons which has parent
                 nuls_ids = {}  # old_id : (new_id, instance)
                 for ul in uls:
@@ -52,12 +61,33 @@ class Command(BaseCommand):
                         if ul.parent.unit.id not in unit_ids or n_parent:  # if ul was copied from other unit
                             if ul in left_to_copy:
                                 left_to_copy.remove(ul)
-                            n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
-                            n_ul.treeID = n_ul.id
-                            n_ul.parent = n_parent
-                            n_ul.save()
-                            # add new ul to parents dict
-                            nuls_ids[ul.id] = (n_ul.id, n_ul)
+
+                            n_l = copy_model_instance(ul.lesson)
+                            n_l.save()
+
+                            if ul.kind == UnitLesson.MISUNDERSTANDS:
+                                concept = n_l.concept
+                                n_l.save_root(concept)
+                                n_ul = UnitLesson.create_from_lesson(n_l, n_ul.unit)
+                                em = create_error_ul(
+                                    n_l,
+                                    concept,
+                                    n_ul.unit,
+                                    n_ul
+                                )
+                                n_l.save_as_error_model(ul.concept, )
+                            else:
+                                n_ul = copy_model_instance(
+                                    ul,
+                                    lesson=n_l,
+                                    unit=n_unit,
+                                    atime=timezone.now()
+                                )
+                                n_ul.treeID = n_ul.id
+                                n_ul.parent = n_parent
+                                n_ul.save()
+                                # add new ul to parents dict
+                                nuls_ids[ul.id] = (n_ul.id, n_ul)
                     if left_to_copy:
                         deep_cp_ul(course, left_to_copy)
 
