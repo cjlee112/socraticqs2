@@ -262,7 +262,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                 self.get_breakpoints(obj)
             except:
                 pass
-        if self.lessons_dict:
+        if self.lessons_dict and obj.state:
             done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
             progress = round(float(done)/len(self.lessons_dict), 2)
         else:
