@@ -1815,9 +1815,5 @@ def deep_copy_course(request, course_id):
                 ))
                 deep_cp_ul(uls)
 
-        # copy Role objects
-        for role in course.role_set.all():
-            n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
-
         return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
     return redirect(request.META.get('HTTP_REFERER', reverse('ct:home')))
