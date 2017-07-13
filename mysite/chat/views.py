@@ -97,6 +97,7 @@ class ChatInitialView(LoginRequiredMixin, View):
            * create new chat
         :return i_chat_id and chat
         '''
+        chat = None
         courseUnit = enroll_code.courseUnit
         try:
             # try to convert chat_id to int
@@ -126,6 +127,10 @@ class ChatInitialView(LoginRequiredMixin, View):
                 enroll_code=enroll_code,
                 instructor=courseUnit.course.addedBy
             )
+            chat.save()
+
+        if chat and not chat.state:
+            chat.next_point = None
             chat.save()
 
         return chat, i_chat_id
