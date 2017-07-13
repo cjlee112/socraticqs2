@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import AnonymousUser
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -1001,6 +1001,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
                 table_body[role.user] = []
             table_body[role.user].append(
                 Response.objects.filter(
+                    unitLesson=orct,
                     lesson=orct.lesson, author=role.user
                 ).order_by('-atime').first()
             )

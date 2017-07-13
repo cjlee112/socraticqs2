@@ -203,15 +203,17 @@ class Message(models.Model):
         )
 
     def should_ask_confidence(self):
-        return 'CONFIDENCE' in [
-            i['name']
-            for i in self.chat.state.fsmNode.fsm.fsmnode_set.all().values('name')
-        ]
+        if self.chat.state:
+            return 'CONFIDENCE' in [
+                i['name']
+                for i in self.chat.state.fsmNode.fsm.fsmnode_set.all().values('name')
+            ]
+        return False
 
     def get_options(self):
         options = None
         if (
-            self.chat and self.chat.next_point and
+            self.chat and self.chat.state and self.chat.next_point and
             self.chat.next_point.input_type == 'options'
         ):
             if self.chat.next_point.kind == 'button':

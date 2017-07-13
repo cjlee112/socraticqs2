@@ -28,7 +28,7 @@ class Command(BaseCommand):
                     pass
             lessons_dict = LessonSerializer(many=True).to_representation(lessons)
 
-            if lessons_dict:
+            if lessons_dict and chat.state:
                 done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], lessons_dict))
                 progress = round(float(done)/len(lessons_dict), 2)
             else:

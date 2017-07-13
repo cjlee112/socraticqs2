@@ -181,54 +181,34 @@ class TestCourseletViewHistoryTab(TestCase):
 
         call_command('fsm_deploy')
 
-    def test_courslet_history_tab(self):
-        '''
-        tests that if we have a chat with state == None this chat will be shown in history tab.
-        :return:
-        '''
-        # test that there's no history yet
-        response = self.client.get(
-            reverse('lms:course_view', kwargs={'course_id': self.course.id})
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['courslet_history']), 0)
-        self.assertTrue(len(response.context['courslets']) > 0)
-
-        # now we call chat:chat_enroll view to init chat
-        response = self.client.get(
-            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Chat.objects.all().count(), 1)
-
-        chat = Chat.objects.all().first()
-        self.assertIsNotNone(chat)
-        chat.state = None
-        chat.save()
-
-        response = self.client.get(
-            reverse('lms:course_view', kwargs={'course_id': self.course.id})
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['courslet_history']), 1)
-        self.assertTrue(len(list(response.context['courslets'])) > 0)
-
     def test_click_on_courslet_creates_new_chat(self):
         # test that there's no history yet
         response = self.client.get(
             reverse('lms:course_view', kwargs={'course_id': self.course.id})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['courslet_history']), 0)
         self.assertIsNotNone(list(response.context['courslets']))
 
         self.assertEqual(response.status_code, 200)
 
         chats_count_1 = Chat.objects.all().count()
 
+        # firstly call to chat:init_chat_api function with enroll_key and chat_id=0
         response = self.client.get(
-            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': self.enroll.enrollCode,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode, 'chat_id': chat_id})
         )
         self.assertEqual(response.context['chat'].id, Chat.objects.all().first().id)
         self.assertEqual(response.status_code, 200)
@@ -237,12 +217,12 @@ class TestCourseletViewHistoryTab(TestCase):
         self.assertNotEqual(chats_count_2, chats_count_1)
 
         response = self.client.get(
-            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode, 'chat_id': chat_id})
         )
         chats_count_3 = Chat.objects.count()
 
         response = self.client.get(
-            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode})
+            reverse('chat:chat_enroll', kwargs={'enroll_key': self.enroll.enrollCode, 'chat_id': chat_id})
         )
         chats_count_4 = Chat.objects.count()
         self.assertEqual(response.status_code, 200)
@@ -262,13 +242,26 @@ class TestCourseletViewHistoryTab(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Chat.objects.count(), chats_count_2)
         self.assertEqual(len(list(response.context['courslets'])), 1)
-        self.assertEqual(len(response.context['courslet_history']), 1)
 
     def test_courslet_history(self):
         enroll_code = EnrollUnitCode.get_code(self.course_unit)
-        chat_id = self.client.get(
-            reverse('chat:chat_enroll', args=(enroll_code,)), follow=True
-        ).context['chat_id']
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': self.enroll.enrollCode,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
 
         response = self.client.get(
             reverse('chat:history'), {'chat_id': chat_id}, follow=True

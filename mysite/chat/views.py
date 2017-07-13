@@ -1,4 +1,7 @@
 import logging
+from django.db.models.aggregates import Count
+from django.db.models.expressions import When, Case
+from django.db.models.fields import BooleanField, IntegerField
 
 import waffle
 import injections
@@ -81,6 +84,20 @@ class ChatInitialView(LoginRequiredMixin, View):
         return will_learn, need_to_know
 
     def get_or_init_chat(self, enroll_code, chat_id):
+        '''Gets chat by id following these steps:
+         * try to cast recieved ID to int
+         * if gets an error while casting:
+           * set i_chat_id = 0 if ValueError
+           * set i_chat_id = None if TypeError
+         * if i_chat_id:
+           * try to get chat by id
+         * if i_chat_id is None:
+           * restore last session
+         * if i_chat_id == 0:
+           * create new chat
+        :return i_chat_id and chat
+        '''
+        chat = None
         courseUnit = enroll_code.courseUnit
         try:
             # try to convert chat_id to int
@@ -104,13 +121,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 user=self.request.user,
                 state__isnull=False
             ).first()
-            if not chat and enroll_code:  # no last session - create new one
-                chat = Chat(
-                    user=self.request.user,
-                    enroll_code=enroll_code,
-                    instructor=courseUnit.course.addedBy
-                )
-                chat.save()
         elif i_chat_id == 0 and enroll_code:  # create new session
             chat = Chat(
                 user=self.request.user,
@@ -119,15 +129,11 @@ class ChatInitialView(LoginRequiredMixin, View):
             )
             chat.save()
 
-        if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(unit=courseUnit.unit, chat=chat, request=self.request)
-        elif not chat.state:
-            next_point = None
-            chat.next_point = next_point
+        if chat and not chat.state:
+            chat.next_point = None
             chat.save()
-        else:
-            next_point = chat.next_point
-        return chat, next_point
+
+        return chat, i_chat_id
 
     def get(self, request, enroll_key, chat_id=None):
         enroll_code = self.get_enroll_code_object(enroll_key)
@@ -161,9 +167,11 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat, next_point = self.get_or_init_chat(enroll_code, chat_id)
+        # new chat will be created only if chat_id is 0
+        chat, i_chat_id = self.get_or_init_chat(enroll_code, chat_id)
+        lessons = unit.get_exercises()
 
-        if chat.is_live:
+        if chat and chat.is_live:
             lessons = Message.objects.filter(
                 chat=chat,
                 contenttype='unitlesson',
@@ -171,8 +179,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 type='message',
                 owner=request.user,
             )
-        else:
-            lessons = unit.get_exercises()
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
@@ -188,8 +194,15 @@ class ChatInitialView(LoginRequiredMixin, View):
             enroll_code=enroll_code,
             user=request.user,
             instructor=courseUnit.course.addedBy,
-            state__isnull=False
-        )
+            is_live=False
+        ).annotate(
+            not_finished=Case(
+            When(state_id__isnull=True, then=0),
+            When(state_id__isnull=False, then=1),
+            default=0,
+            output_field=IntegerField())
+        ).order_by('-not_finished', '-last_modify_timestamp')
+
         # ).annotate(
         #     lessons_done=models.Sum(
         #         models.Case(
@@ -230,7 +243,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             {
                 'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'chat': chat,
-                'chat_id': chat.id,
+                'chat_id': i_chat_id,
                 'course': courseUnit.course,
                 'instructor_icon': instructor_icon,
                 'unit': unit,
@@ -241,8 +254,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
-                'next_point': next_point,
-                'fsmstate': chat.state,
+                'fsmstate': chat.state if chat else None,
                 'enroll_code': enroll_key,
             }
         )

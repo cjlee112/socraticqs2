@@ -38,7 +38,8 @@ class CourseView(View):
                 'chat': Chat.objects.filter(
                     enroll_code__courseUnit=courselet,
                     user=request.user,
-                    state__isnull=False
+                    state__isnull=False,
+                    is_live=False
                 ).first()
             }
             for courselet in course.get_course_units(True)
@@ -86,20 +87,12 @@ class CourseView(View):
             if not chat.lessons_done:
                 chat.delete()
 
-        courslet_history = Chat.objects.filter(
-            user=request.user,
-            is_live=False,
-            enroll_code__courseUnit__course=course,
-            state__isnull=True
-        )
-
         return render(
             request, 'lms/course_page.html',
             dict(
                 course=course,
                 liveSession=liveSession,
                 courslets=courselets,
-                courslet_history=courslet_history,
                 livesessions=live_sessions_history,
             )
         )
