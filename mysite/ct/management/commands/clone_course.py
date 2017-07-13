@@ -45,10 +45,11 @@ class Command(BaseCommand):
                     n_ul.save()
                     nuls_ids[ul.id] = (n_ul.id, n_ul)
 
-                def deep_cp_ul(left_to_copy):
+                def deep_cp_ul(course, left_to_copy):
+                    unit_ids = [i['unit__id'] for i in course.courseunit_set.all().values('unit__id')]
                     for ul in left_to_copy:
                         n_parent = nuls_ids.get(ul.parent.id, [None, None])[1]
-                        if n_parent:
+                        if ul.parent.unit.id not in unit_ids or n_parent:  # if ul was copied from other unit
                             if ul in left_to_copy:
                                 left_to_copy.remove(ul)
                             n_ul = copy_model_instance(ul, unit=n_unit, atime=timezone.now())
@@ -58,14 +59,15 @@ class Command(BaseCommand):
                             # add new ul to parents dict
                             nuls_ids[ul.id] = (n_ul.id, n_ul)
                     if left_to_copy:
-                        deep_cp_ul(left_to_copy)
+                        deep_cp_ul(course, left_to_copy)
+
 
                 uls = list(cu.unit.unitlesson_set.filter(
                     parent__isnull=False,
                 ).order_by(
                     '-parent'
                 ))
-                deep_cp_ul(uls)
+                deep_cp_ul(course, uls)
 
             for role in course.role_set.filter(role=Role.INSTRUCTOR):
                 n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
