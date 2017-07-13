@@ -42,16 +42,18 @@ class Command(BaseCommand):
                     errors = list(ul.get_errors())
                     unit = copy_model_instance(ul.unit)
                     q_lesson = copy_model_instance(ul.lesson)
-                    q_ul = copy_model_instance(ul, unit=unit, lesson=q_lesson)
 
                     n_ul = copy_model_instance(
                         ul,
                         lesson=q_lesson,
-                        unit=q_ul.unit,
+                        unit=unit,
                         atime=timezone.now()
                     )
                     n_ul.treeID = n_ul.id
                     n_ul.save()
+
+                    for exer in ul.unit.get_exercises():
+                        ex_ul = copy_model_instance(exer, unit=unit)
 
                     for error in errors:
                         # n_concept = copy_model_instance(error.lesson.concept)
