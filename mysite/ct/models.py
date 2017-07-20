@@ -619,8 +619,12 @@ class UnitLesson(models.Model):
                 name = addedBy.get_username()
             self.lesson.changeLog = 'snapshot for fork by %s' % name
             self.lesson.checkin(commit=True)
+
         if order == 'APPEND':
             order = unit.next_order()
+        elif order is None:
+            order = self.order
+
         if kind == UnitLesson.RESOLVES:
             self.lesson.add_concept_link(parent.lesson.concept,
                                          ConceptLink.RESOLVES, addedBy)
