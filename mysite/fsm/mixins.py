@@ -184,14 +184,21 @@ class ChatMixin(object):
                             input_type=input_type,
                             kind=kind,
                             is_additional=is_additional)[0]
-        if self.node_name_is_one_of('ASK'):
+        if self.name == 'ASK':
+            SUB_KIND_TO_KIND_MAP = {
+                'choices': 'button',
+            }
+            SUBKIND_TO_INPUT_TYPE_MAP = {
+                'choices': 'options',
+            }
+            sub_kind = next_lesson.lesson.sub_kind
             _data = {
                 'contenttype': 'unitlesson',
                 'content_id': next_lesson.id,
                 'chat': chat,
                 'owner': chat.user,
-                'input_type': 'custom',
-                'kind': next_lesson.lesson.kind,
+                'input_type': 'custom', # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+                'kind': next_lesson.lesson.kind,  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
                 'is_additional': is_additional
             }
             if not self.fsm.fsm_name_is_one_of('live_chat'):
@@ -211,6 +218,12 @@ class ChatMixin(object):
                 'userMessage': True,
                 'is_additional': is_additional
             }
+            if current.lesson.sub_kind == 'choices':
+                _data.update(dict(
+                    input_type='options',
+
+                ))
+
             if not self.fsm.fsm_name_is_one_of('live_chat'):
                 message = Message.objects.get_or_create(**_data)[0]
             else:

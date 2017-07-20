@@ -1,4 +1,5 @@
 from uuid import uuid4
+from itertools import starmap
 import datetime
 
 from django.db import models
@@ -202,6 +203,48 @@ class Message(models.Model):
             errors or '<li><h3>There are no Misunderstands to display.</h3></li>'
         )
 
+    def render_choices(self, choices, checked_choices):
+        choices_template = (
+            '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="choices" '
+            'data-selectable-value="%d"></div><h3>%s</h3></li>'
+        )
+        return '<ul class="chat-select-list">' + reduce(
+            lambda x, y: x+y,
+            starmap(lambda i, x: choices_template % (
+                'chat-selectable-selected' if i in checked_choices else '',
+                i,
+                x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
+                choices
+            )
+        ) + '</ul>'
+
+    def render_my_choices(self):
+        if '[selected_choices]' in self.content.text:
+            selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
+            my_choices = []
+            for i, c in self.content.lesson.get_choices():
+                if i in selected:
+                    my_choices.append((i, c))
+            return self.render_choices(my_choices, selected)
+        else:
+            return self.render_choices([], [])
+
+    def get_choices(self):
+        '''
+        Use this method to return QUESTION (ASK node of FSM)
+        :return:
+        '''
+        checked_choices = []
+        return self.render_choices(self.content.lesson.get_choices(), checked_choices)
+
+    def get_correct_choices(self):
+        '''
+        Use this method to return ANSWER
+        :return:
+        '''
+        checked_choices = []
+        return self.render_choices(self.lesson_to_answer.lesson.get_correct_choices(), checked_choices)
+
     def should_ask_confidence(self):
         if self.chat.state:
             return 'CONFIDENCE' in [
@@ -212,14 +255,23 @@ class Message(models.Model):
 
     def get_options(self):
         options = None
+        next_point = self.chat.next_point
+        CONTINUE_BTN = {"value": 1, "text": "Continue"}
         if (
-            self.chat and self.chat.state and self.chat.next_point and
-            self.chat.next_point.input_type == 'options'
+            self.chat and next_point and
+            next_point.input_type == 'options'
         ):
-            if self.chat.next_point.kind == 'button':
-                options = [{"value": 1, "text": "Continue"}]
-            elif self.chat.next_point.contenttype == 'unitlesson':
+            if next_point.kind == 'button':
+                options = [CONTINUE_BTN]
+            elif (next_point.contenttype == 'unitlesson' and
+                  self.chat.next_point.content.lesson.sub_kind != 'choices'):
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
+            elif (next_point.contenttype == 'response'
+                  and next_point.lesson_to_answer
+                  and next_point.lesson_to_answer.sub_kind == 'choices'
+                  and not self.response_to_check
+            ):
+                options = [CONTINUE_BTN]
             elif self.chat.next_point.contenttype == 'response':
                 if self.should_ask_confidence():
                     if not self.chat.next_point.content.confidence:
@@ -229,8 +281,7 @@ class Message(models.Model):
                 else:
                     options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
             else:
-                options = [{"value": 1, "text": "Continue"}]
-
+                options = [CONTINUE_BTN]
         return options
 
     def get_html(self):
@@ -239,6 +290,12 @@ class Message(models.Model):
             if self.contenttype == 'chatdivider':
                 html = self.content.text
             elif self.contenttype == 'response':
+                sub_kind = self.content.sub_kind
+                if sub_kind and not self.content.selfeval:
+                    if sub_kind == 'choices':
+                        html = self.render_my_choices()
+                        return html
+
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                 else:
@@ -275,8 +332,23 @@ class Message(models.Model):
                             (self.content.lesson.title, self.content.lesson.text)
                         )
                     )
-                elif self.input_type == 'options' and self.text:
+                elif self.input_type == 'options' and self.text: # and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
+                elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
+                    # render unitlesson (question)
+                    if self.content.kind == 'part':
+                        html = mark_safe(
+                            md2html(
+                                self.content.lesson.get_choices_wrap_text()
+                            )
+                        )
+                        html += self.get_choices()
+                elif (self.content.kind == 'answers' and
+                      self.content.parent.lesson.sub_kind and not self.response_to_check.selfeval and
+                      self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES):
+                    # render answer
+                    correct = self.content.parent.lesson.get_correct_choices()
+                    html = self.render_choices(correct, [])
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
