@@ -244,6 +244,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text' and not is_chat_add_lesson(message):
             message.chat = chat
             text = self.request.data.get('text')
+            import ipdb; ipdb.set_trace()
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
@@ -265,6 +266,46 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
+        import ipdb; ipdb.set_trace()
+
+        if (message.input_type == 'options' and
+                    message.kind == 'button' and
+                    message.content and
+                    message.content.lesson.sub_kind):
+            import ipdb; ipdb.set_trace()
+            resp_text = ''
+            if message.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
+                try:
+                    selected = self.request.data.get(
+                        'selected'
+                    )[str(message.id)]['choices']
+                except KeyError:
+                    selected = []
+                resp_text = '[selected_choices] ' + ', '.join(str(i) for i in selected)
+            # if not message.content_id:
+            resp = StudentResponse(text=resp_text)
+            resp.kind = message.content.lesson.kind
+            resp.sub_kind = message.content.lesson.sub_kind
+            resp.lesson = message.content.lesson
+            resp.unitLesson = message.content
+            resp.course = message.chat.enroll_code.courseUnit.course
+            resp.author = self.request.user
+            resp.activity = activity
+            resp.is_test = chat.is_test
+            # NOTE: next line is a temporary solution.
+            resp.confidence = StudentResponse.SURE
+            # else:
+            #     resp = message.content
+            #     resp.text = resp_text
+            resp.save()
+            if not message.timestamp:
+                message.content_id = resp.id
+                chat.next_point = message
+                chat.save()
+                serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
+            else:
+                serializer.save()
+
         if message.input_type == 'options' and message.kind != 'button':
             if (
                 message.contenttype == 'uniterror' and

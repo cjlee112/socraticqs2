@@ -1,4 +1,5 @@
 from uuid import uuid4
+from itertools import starmap
 import datetime
 
 from django.db import models
@@ -202,6 +203,26 @@ class Message(models.Model):
                                                x.id, x.lesson.title), error_list))
         return '<ul class="chat-select-list">'+errors+'</ul>'
 
+
+    def get_choices(self):
+        choices_list = None
+        checked_choices = []
+        choices_list = []
+        choices_template = (
+            '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="choices" '
+            'data-selectable-value="%d"></div><h3>%s</h3></li>'
+        )
+        rendered_choices = reduce(
+            lambda x, y: x+y,
+            starmap(lambda i, x: choices_template % (
+                'chat-selectable-selected' if i in checked_choices else '',
+                i,
+                x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
+                enumerate(self.content.lesson.get_choices())
+            )
+        )
+        return '<ul class="chat-select-list">' + rendered_choices + '</ul>'
+
     def get_options(self):
         options = None
         if (
@@ -237,6 +258,7 @@ class Message(models.Model):
                 else:
                     html = EVAL_OPTIONS.get(self.content.selfeval, '')
             elif self.contenttype == 'unitlesson':
+                import ipdb; ipdb.set_trace()
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
                         md2html(
@@ -244,8 +266,11 @@ class Message(models.Model):
                             (self.content.lesson.title, self.content.lesson.text)
                         )
                     )
-                elif self.input_type == 'options' and self.text:
+                elif self.input_type == 'options' and self.text and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
+                elif self.content.lesson.sub_kind is not None and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
+                    # import ipdb; ipdb.set_trace()
+                    html = self.get_choices()
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
