@@ -102,6 +102,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         ):
             return self.roll_fsm_forward(chat, message)
 
+        if (
+            message.contenttype == 'unitlesson' and message.content.lesson.sub_kind == 'choices' and
+            message.content_id and
+            next_point == message
+        ):
+            return self.roll_fsm_forward(chat, message)
+
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
             return Response(serializer.data)
@@ -298,6 +305,17 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             #     resp = message.content
             #     resp.text = resp_text
             resp.save()
+
+            # go to assess node
+            # chat.next_point = self.next_handler.next_point(
+            #     current=message.content,
+            #     chat=chat,
+            #     message=message,
+            #     request=self.request
+            # )
+            # chat.save()
+            # serializer.save(chat=chat)
+            # message = chat.next_point
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message
@@ -305,6 +323,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
+            return
 
         if message.input_type == 'options' and message.kind != 'button':
             if (

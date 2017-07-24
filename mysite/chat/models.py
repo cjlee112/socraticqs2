@@ -270,6 +270,7 @@ class Message(models.Model):
                     html = STATUS_OPTIONS[self.text]
                 elif self.content.lesson.sub_kind is not None and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
                     # import ipdb; ipdb.set_trace()
+
                     html = self.get_choices()
                 else:
                     if self.content.lesson.url:

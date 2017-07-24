@@ -247,6 +247,9 @@ class ChatMixin(object):
 
         if self.name == 'ASSESS':
             # current here is Response instance
+
+            print "ASSESS NODE!!!! STOP!!!"
+
             import ipdb; ipdb.set_trace()
             if isinstance(current, Response):
                 response_to_chk = current
