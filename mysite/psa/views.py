@@ -1,11 +1,13 @@
 from django.contrib import messages
+from django.contrib.messages.api import add_message
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.conf import settings
+from django.http.response import Http404
 from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render_to_response, get_object_or_404
 from django.contrib.auth import logout, login, authenticate
 
 from social.backends.utils import load_backends
@@ -151,3 +153,20 @@ def complete(request, *args, **kwargs):
         )
         # if form is not valid redirect user to page where he came from
         return redirect(reverse("login"))
+
+
+def login_as_user(request, user_id):
+    if (request.user.is_authenticated and
+            request.user.is_staff and
+            request.user.groups.filter(name='CAN_LOGIN_AS_OTHER_USER').first()
+    ):
+        user = get_object_or_404(User, id=user_id)
+        logout(request)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        add_message(request, messages.SUCCESS, "You just switched to user {} with email {}".format(
+            user.username, user.email
+        ))
+        return redirect('ct:home')
+    else:
+        raise Http404("This action is not allowed")

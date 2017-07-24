@@ -2,6 +2,7 @@ import re
 
 from django import template
 from django.conf import settings
+from django.contrib.auth.models import Group
 from collections import defaultdict
 
 from social.backends.utils import load_backends
@@ -144,3 +145,8 @@ def similar_backends(context):
     similar_users = dict(similar_users)
     context['similar_users'] = similar_users
     return ''
+
+@register.filter(name='has_group')
+def has_group(user, group_name):
+    group =  Group.objects.get(name=group_name)
+    return group in user.groups.all()
