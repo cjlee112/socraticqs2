@@ -626,14 +626,25 @@ class UnitLesson(models.Model):
             order = self.order
 
         if kind == UnitLesson.RESOLVES:
+            # import ipdb; ipdb.set_trace()
             self.lesson.add_concept_link(parent.lesson.concept,
                                          ConceptLink.RESOLVES, addedBy)
         elif kind is None:
             kind = self.kind
-        ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
-                            kind=kind, treeID=self.treeID, parent=parent,
-                            order=order, branch=self.branch, **kwargs)
+        import copy
+        ul = copy.copy(self)
+        ul.lesson = self.lesson
+        ul.addedBy = addedBy
+        ul.unit = unit
+        ul.parent = parent
+        ul.branch = self.branch
+        ul.id = None
         ul.save()
+
+        # ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
+        #                     kind=kind, treeID=self.treeID, parent=parent,
+        #                     order=order, branch=self.branch, **kwargs)
+        # ul.save()
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
