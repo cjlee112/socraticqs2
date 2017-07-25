@@ -1,0 +1,17 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls  social_tags %}
+{% block object-tools-items %}
+    <li>
+        <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
+    </li>
+    {% if request.user.is_staff and request.user|has_group:"CAN_LOGIN_AS_OTHER_USER" %}
+    <li>
+        <a href="{% url 'admin_login_as_user' user_id=original.pk %}" class="admin_login_as_user">Login As User</a>
+    </li>
+    {% endif %}
+    {% if has_absolute_url %}
+        <li>
+            <a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a>
+        </li>
+    {% endif %}
+{% endblock %}
