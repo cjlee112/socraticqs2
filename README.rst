@@ -7,6 +7,9 @@ Socraticqs2
 .. image:: https://coveralls.io/repos/github/cjlee112/socraticqs2/badge.svg?branch=master
     :target: https://coveralls.io/github/cjlee112/socraticqs2?branch=master
 
+.. image:: https://codecov.io/gh/cjlee112/socraticqs2/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/cjlee112/socraticqs2
+
 
 
 Socraticqs2 is the web engine for courselets.org.
@@ -75,5 +78,3 @@ Quality check
 
 We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.
-
-

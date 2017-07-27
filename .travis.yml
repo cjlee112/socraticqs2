@@ -17,4 +17,5 @@ script:
   - pytest
 after_success:
   - coveralls
+  - codecov
 sudo: false

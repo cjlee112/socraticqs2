@@ -1,3 +1,4 @@
+from copy import copy
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -5,6 +6,15 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
+
+def copy_model_instance(inst, **kwargs):
+        n_inst = copy(inst)
+        n_inst.id = None
+        if kwargs:
+            for k, v in kwargs.items():
+                setattr(n_inst, k, v)
+        n_inst.save()
+        return n_inst
 
 ########################################################
 # Concept ID and graph -- not version controlled
@@ -611,6 +621,7 @@ class UnitLesson(models.Model):
         if newLesson:
             self.lesson = lesson
             self.save()
+
     def copy(self, unit, addedBy, parent=None, order=None, kind=None, **kwargs):
         'copy self and children to new unit'
         if not self.lesson.is_committed(): # to fork it, must commit it!
@@ -619,14 +630,19 @@ class UnitLesson(models.Model):
                 name = addedBy.get_username()
             self.lesson.changeLog = 'snapshot for fork by %s' % name
             self.lesson.checkin(commit=True)
+
         if order == 'APPEND':
             order = unit.next_order()
+        elif order is None:
+            order = self.order
+
         if kind == UnitLesson.RESOLVES:
             self.lesson.add_concept_link(parent.lesson.concept,
                                          ConceptLink.RESOLVES, addedBy)
         elif kind is None:
             kind = self.kind
-        ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
+
+        ul = copy_model_instance(self, lesson=self.lesson, addedBy=addedBy, unit=unit,
                             kind=kind, treeID=self.treeID, parent=parent,
                             order=order, branch=self.branch, **kwargs)
         ul.save()

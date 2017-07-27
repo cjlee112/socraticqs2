@@ -2,7 +2,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -28,7 +28,7 @@
     {% block head %}{% endblock %}
     {% include "google-analytics.html" %}
   </head>
-  <body>
+  <body style=" min-height: 100%; position: relative;">
     {% cms_toolbar %}
     {% block base_content %}{% endblock %}
     {% block body %}{% endblock %}
