@@ -92,7 +92,7 @@
 
   </nav>
 
-  <div class="container">
+  <div class="container" style="padding-bottom: 100px;">
     {% if pageData.errorMessage %}
       <p><b>{{ pageData.errorMessage }}</b></p>
     {% elif pageData.statusMessage %}
@@ -123,9 +123,11 @@
     {% block content %}{% endblock %}
   </div>
 
-  <footer class="footer-main"><div class="container">
-    © 2017 Courselets.org
-  </div></footer>
+  <footer class="footer-main" style="position: absolute; left: 0; bottom: 0; width: 100%; padding-bottom: 50px;">
+     <div class="container">
+      © 2017 Courselets.org
+    </div>
+  </footer>
 
   {% include 'psa/modal.html' %}
   {% include 'psa/auth.js.html' %}
