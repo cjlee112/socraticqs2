@@ -18,6 +18,16 @@ ul:not(.nav) {
     ul:not(.nav) li:last-child {
       margin: 0; }
 
+a.navbar-brand {
+    padding: 13px 15px 15px 0px !important;
+}
+
+ul li.child {
+    margin-bottom: 0px;
+    padding: 0;
+    background: none;
+}
+
 h1, h2, h3, h4, h5, h6 {
   // color: #307FE2;
   color: #777;
