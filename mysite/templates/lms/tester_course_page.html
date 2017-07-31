@@ -50,23 +50,25 @@
         <div class="container">
           <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
-              <ul>
-                {% if courslets %}
+              <div class="unit-links">
+                <ul>
+                  {% if courslets %}
                   {% for cu in courslets %}
-                    <li>
-                      <a href="{{ domain }}{% url 'chat:tester_chat_enroll' enroll_key=cu.1 %}">
-                        <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
+                  <li>
+                    <a href="{{ domain }}{% url 'chat:tester_chat_enroll' enroll_key=cu.1 %}">
+                      <h3>{{ cu.0.unit.title }} {% if not cu.0.is_published %} (not yet published) {% endif %}</h3>
 
-                          <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
+                      <p>{{ cu.2 }} lessons, ~{% widthratio cu.2 1 3 %} minutes</p>
 
-                        <div class="course-content-unit-progress">
-                          <span style="width: 10%;"></span>
-                        </div>
-                      </a>
-                    </li>
+                      <div class="unit-links__progress">
+                        <span style="width: 10%;"></span>
+                      </div>
+                    </a>
+                  </li>
                   {% endfor %}
-                {% endif %}
-              </ul>
+                  {% endif %}
+                </ul>
+              </div>
             </div>
           </div>
         </div>

@@ -102,12 +102,64 @@
           </div>
         </div>
 
-        <div class="cta">
-          <div class="container">
-            <button class="chat-start">
-              {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
+        {% if fsmstate %}
+          <div class="chat__history">
+            <div class="container">
+              <div class="col-lg-6 col-lg-offset-3">
+                <h2>My History</h2>
+                <p>
+                  Click on a chat session to continue working on it or to review your previous answers.
+                  You can start over if you want work on the lessons in this courselet again by clicking
+                  on <em>New Chat Session</em> below.
+                </p>
+
+                <div class="unit-links unit-links--small">
+                  <ul>
+                    <!-- TODO Loop through courselet history -->
+                    <li>
+                      <a href="#" class="chat-start-session" data-chat-id="1">
+                        <h3>3 days ago</h3>
+
+                        <p>2 of 5 lessons completed</p>
+
+                        <div class="unit-links__progress">
+                          <span style="width: 40%"></span>
+                        </div>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#" class="chat-start-session" data-chat-id="2">
+                        <h3>2 weeks ago</h3>
+
+                        <p>5 of 5 lessons completed</p>
+
+                        <div class="unit-links__progress">
+                          <span style="width: 100%"></span>
+                        </div>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#" class="chat-start-session unit-links__new" data-chat-id="3">
+                        <h3>New Chat Session</h3>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+
+        {% else %}
+          <div class="chat__start">
+            <div class="container">
+              <button class="chat-start-session" data-chat-id="{{ chat_id }}">
+                Let's Get Started!
+              </button>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </section>
 
