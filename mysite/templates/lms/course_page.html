@@ -38,10 +38,6 @@
                 </li>
 
                 <li>
-                  <a href="#courslet-history">Courslet History</a>
-                </li>
-
-                <li>
                   <a href="#live-sessions">Live Sessions</a>
                 </li>
               </ul>
@@ -54,55 +50,25 @@
         <div class="container">
           <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
-              <ul>
-                {% if courslets %}
+              <div class="unit-links">
+                <ul>
+                  {% if courslets %}
                   {% for obj in courslets %}
-                    <li>
-                      <a href="{{ domain }}/chat/enrollcode/{{ obj.enroll_code }}/">
-                        <h3>{{ obj.courselet.unit.title }} {% if not obj.courselet.is_published %} (not yet published) {% endif %}</h3>
+                  <li>
+                    <a href="{{ domain }}/chat/enrollcode/{{ obj.enroll_code }}/">
+                      <h3>{{ obj.courselet.unit.title }} {% if not obj.courselet.is_published %} (not yet published) {% endif %}</h3>
 
-                          <p>{{ obj.execrices }} lessons, ~{% widthratio obj.execrices 1 3 %} minutes</p>
+                      <p>{{ obj.execrices }} lessons, ~{% widthratio obj.execrices 1 3 %} minutes</p>
 
-                        <div class="course-content-unit-progress">
-                          <span style="width: {% if obj.chat and obj.chat.progress %}{{ obj.chat.progress }}{% else %}0{% endif %}%;"></span>
-                        </div>
-                      </a>
-                    </li>
+                      <div class="unit-links__progress">
+                        <span style="width: {% if obj.chat and obj.chat.progress %}{{ obj.chat.progress }}{% else %}0{% endif %}%;"></span>
+                      </div>
+                    </a>
+                  </li>
                   {% endfor %}
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="courslet-history" class="course-content-units">
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-8 col-lg-offset-2">
-              <p class="course-content-units-description">
-                This is your courslet sessions history. You can go back and view your previous sessions.
-              </p>
-              <ul>
-                {% if courslet_history %}
-                  {% for chat in courslet_history %}
-                    <li>
-                      <a href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/{{ chat.id }}">
-                        <h3>{{ chat.get_course_unit.unit.title }}</h3>
-                        <h3>{{ chat.timestamp|date:"F j, Y P" }}</h3>
-
-                          {% comment %}
-                          <p>{{ chat.get_course_unit.unit.get_exercises|length }} lessons</p>
-                          {% endcomment %}
-                        <div class="course-content-unit-progress">
-                          <span style="width: {{ chat.progress }}%;"></span>
-                        </div>
-
-                      </a>
-                    </li>
-                  {% endfor %}
-                {% endif %}
-              </ul>
+                  {% endif %}
+                </ul>
+              </div>
             </div>
           </div>
         </div>

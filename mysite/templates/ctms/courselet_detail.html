@@ -17,8 +17,7 @@
         </li>
 
         <li>
-          <!-- TODO: Add link to preview -->
-          <a href="{% url 'ctms:courselet_preview' course_pk=object.course.id pk=object.id %}">Preview</a>
+          <a href="{% url 'ctms:courselet_preview' course_pk=object.course.id pk=object.id %}" target="_blank">Preview</a>
         </li><li>
           <a href="{% url 'ctms:courslet_settings' course_pk=object.course.id pk=object.id %}">Settings</a>
         </li>

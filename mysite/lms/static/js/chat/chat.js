@@ -13,18 +13,21 @@ $(function(){
   CUI.animation.pagePreloaderTimeline.staggerTo($preloaderDots, 0.6, {y: -10, yoyo: true, repeat: -1, repeatDelay: 0.3, ease: Back.easeInOut,  force3D: true, clearProps: 'transform'}, 0.1);
 
   // Create and initialize the chat when the start button is clicked
-  $('.chat-start').on('click', function(e){
+  $('.chat-start-session').on('click', function(e){
     e.preventDefault();
 
     // Disable multiple clicks
     if(chatHasStarted) return;
     else chatHasStarted = true;
 
-    // Hide call to action
-    $('.chat-introduction .cta').hide();
+    // Hide start buttons
+    $('.chat__start, .chat__history').hide();
+
+    // Get the chat id from the link
+    var chatID = $(e.currentTarget).data('chat-id');
 
     // Create the chat
-    var chat = new CUI.ChatPresenter(CUI.config.chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl);
+    var chat = new CUI.ChatPresenter(chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl);
   });
 });
 
