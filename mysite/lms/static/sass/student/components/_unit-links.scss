@@ -1,0 +1,116 @@
+.unit-links {
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    display: block;
+    margin: 15px 0 0 0;
+  }
+
+  a {
+    position: relative;
+    display: block;
+    padding: 50px 50px 50px 160px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 1px rgba(0,0,0,0.3);
+    // IE8 SVG fallback https://css-tricks.com/using-svg/
+    background: #fff url(../../img/student/course-open-unit.png) no-repeat 50px 50px;
+    background-image: url(../../img/student/course-open-unit.svg), none;
+    background-size: 60px 60px;
+    transition: all 0.3s;
+
+    &:hover, &:active, &:focus {
+      text-decoration: none;
+      opacity: 0.5;
+    }
+
+    &.unit-links__new {
+      padding: 30px 30px 30px 110px;
+      border-radius: 5px;
+      box-shadow: none;
+      // IE8 SVG fallback https://css-tricks.com/using-svg/
+      background: #fff url(../../img/student/course-new-unit.png) no-repeat 30px 30px;
+      background-image: url(../../img/student/course-new-unit.svg), none;
+      background-size: 50px 50px;
+      border: 1px dashed #CFCFD1;
+
+      h3 {
+        font-size: 15px;
+        font-weight: normal;
+        line-height: 50px;
+        color: #7F7F7F;
+        margin: 0;
+      }
+    }
+
+    h3 {
+      font-size: 19px;
+      font-weight: normal;
+      line-height: 25px;
+      color: #333;
+      margin: 5px 0 0 0;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 20px;
+      color: #808080;
+      margin: 5px 0;
+    }
+  }
+}
+
+.unit-links--small {
+  a {
+    padding: 30px 30px 40px 110px;
+    // IE8 SVG fallback https://css-tricks.com/using-svg/
+    background: #fff url(../../img/student/course-open-unit-small.png) no-repeat 30px 30px;
+    background-image: url(../../img/student/course-open-unit-small.svg), none;
+    background-size: 50px 50px;
+
+    h3 {
+      font-size: 15px;
+      line-height: 22px;
+      margin: 4px 0 0 0;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 22px;
+      margin: 0 0 0 0;
+    }
+  }
+}
+
+.unit-links__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 8px;
+  z-index: 1003;
+  background: #F6FBF5;
+  border-top: 1px solid #AEDDA4;
+  border-radius: 0 0 4px 4px;
+
+  span {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2px;
+    height: 8px;
+    border-radius: 0 4px 4px 4px;
+    border: 1px solid #43B02A;
+    background: $brand-green;
+    background: repeating-linear-gradient(
+      45deg,
+      #43B02A,
+      #43B02A 6px,
+      #61BD4D 6px,
+      #61BD4D 12px
+    );
+  }
+}

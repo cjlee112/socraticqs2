@@ -291,7 +291,10 @@ p + p {
     line-height: 24px;
     margin-top: 18px; }
 
-.course-content #live-sessions, #courslet-history {
+.course-content #live-sessions {
+  display: none; }
+
+.course-content #courslet-history {
   display: none; }
 
 .course-content-tabs {
@@ -303,7 +306,7 @@ p + p {
     padding: 0; }
   .course-content-tabs li {
     display: block;
-    width: 33%;
+    width: 50%;
     float: left; }
     .course-content-tabs li:first-child a {
       border-right: 1px solid #E8E8EB; }
@@ -326,39 +329,76 @@ p + p {
 .course-content-units {
   padding: 35px 0 50px 0;
   min-height: 500px; }
-  .course-content-units ul {
-    list-style: none;
-    margin: 0;
-    padding: 0; }
-  .course-content-units li {
-    display: block;
-    margin: 15px 0 0 0; }
-  .course-content-units a {
-    position: relative;
-    display: block;
-    padding: 50px 50px 50px 160px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
-    background: #fff url(../../img/student/course-open-unit.png) no-repeat 50px 50px;
-    background-image: url(../../img/student/course-open-unit.svg), none;
-    background-size: 60px 60px;
-    transition: all 0.3s; }
-    .course-content-units a:hover, .course-content-units a:active, .course-content-units a:focus {
-      text-decoration: none;
-      opacity: 0.5; }
-    .course-content-units a h3 {
-      font-size: 19px;
-      font-weight: normal;
-      line-height: 25px;
-      color: #333;
-      margin: 5px 0 0 0; }
-    .course-content-units a p {
-      font-size: 15px;
-      line-height: 20px;
-      color: #808080;
-      margin: 5px 0; }
 
-.course-content-unit-progress {
+.course-content-units-description {
+  max-width: 500px;
+  margin: 10px auto 45px auto;
+  font-size: 15px;
+  line-height: 22px;
+  color: #808080;
+  text-align: center; }
+
+.unit-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0; }
+.unit-links li {
+  display: block;
+  margin: 15px 0 0 0; }
+.unit-links a {
+  position: relative;
+  display: block;
+  padding: 50px 50px 50px 160px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
+  background: #fff url(../../img/student/course-open-unit.png) no-repeat 50px 50px;
+  background-image: url(../../img/student/course-open-unit.svg), none;
+  background-size: 60px 60px;
+  transition: all 0.3s; }
+  .unit-links a:hover, .unit-links a:active, .unit-links a:focus {
+    text-decoration: none;
+    opacity: 0.5; }
+  .unit-links a.unit-links__new {
+    padding: 30px 30px 30px 110px;
+    border-radius: 5px;
+    box-shadow: none;
+    background: #fff url(../../img/student/course-new-unit.png) no-repeat 30px 30px;
+    background-image: url(../../img/student/course-new-unit.svg), none;
+    background-size: 50px 50px;
+    border: 1px dashed #CFCFD1; }
+    .unit-links a.unit-links__new h3 {
+      font-size: 15px;
+      font-weight: normal;
+      line-height: 50px;
+      color: #7F7F7F;
+      margin: 0; }
+  .unit-links a h3 {
+    font-size: 19px;
+    font-weight: normal;
+    line-height: 25px;
+    color: #333;
+    margin: 5px 0 0 0; }
+  .unit-links a p {
+    font-size: 15px;
+    line-height: 20px;
+    color: #808080;
+    margin: 5px 0; }
+
+.unit-links--small a {
+  padding: 30px 30px 40px 110px;
+  background: #fff url(../../img/student/course-open-unit-small.png) no-repeat 30px 30px;
+  background-image: url(../../img/student/course-open-unit-small.svg), none;
+  background-size: 50px 50px; }
+  .unit-links--small a h3 {
+    font-size: 15px;
+    line-height: 22px;
+    margin: 4px 0 0 0; }
+  .unit-links--small a p {
+    font-size: 13px;
+    line-height: 22px;
+    margin: 0 0 0 0; }
+
+.unit-links__progress {
   position: absolute;
   left: 0;
   bottom: 0;
@@ -368,7 +408,7 @@ p + p {
   background: #F6FBF5;
   border-top: 1px solid #AEDDA4;
   border-radius: 0 0 4px 4px; }
-  .course-content-unit-progress span {
+  .unit-links__progress span {
     position: absolute;
     top: -1px;
     left: 0;
@@ -378,14 +418,6 @@ p + p {
     border: 1px solid #43B02A;
     background: #43B02A;
     background: repeating-linear-gradient(45deg, #43B02A, #43B02A 6px, #61BD4D 6px, #61BD4D 12px); }
-
-.course-content-units-description {
-  max-width: 500px;
-  margin: 10px auto 45px auto;
-  font-size: 15px;
-  line-height: 22px;
-  color: #808080;
-  text-align: center; }
 
 .live-session-notification {
   position: fixed;
@@ -504,6 +536,22 @@ p + p {
         opacity: 0.5; }
   .chat-introduction .description {
     margin-top: 50px; }
+    .chat-introduction .description h3 {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 12px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 53px 0 4px 0; }
+    .chat-introduction .description ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #999; }
+    .chat-introduction .description li {
+      padding: 16px 0;
+      border-bottom: 1px solid #EDEDEF; }
     .chat-introduction .description p:first-child {
       margin-top: 4px; }
   .chat-introduction .cover {
@@ -515,22 +563,6 @@ p + p {
     background-size: cover;
     border-radius: 4px;
     box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.12); }
-  .chat-introduction h3 {
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 12px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 53px 0 4px 0; }
-  .chat-introduction ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    color: #999; }
-  .chat-introduction li {
-    padding: 16px 0;
-    border-bottom: 1px solid #EDEDEF; }
   .chat-introduction .meta {
     margin-top: 56px;
     padding-bottom: 27px;
@@ -548,10 +580,30 @@ p + p {
       .chat-introduction .meta span.duration {
         background: url(../../img/student/chat-meta-duration.png) no-repeat left center;
         background-image: url(../../img/student/chat-meta-duration.svg), none; }
-  .chat-introduction .cta {
-    background: #F0F4F7;
-    padding: 30px 0;
-    text-align: center; }
+
+/* --- Start chat --- */
+.chat__start {
+  background: #F0F4F7;
+  padding: 30px 0;
+  text-align: center; }
+
+/* --- Chat history --- */
+.chat__history {
+  background: #F0F4F7;
+  padding: 46px 0 50px 0; }
+  .chat__history h2 {
+    color: #333;
+    font-size: 17px;
+    font-weight: normal;
+    line-height: 22px;
+    margin: 0; }
+  .chat__history p {
+    font-size: 15px;
+    line-height: 22px;
+    color: #666;
+    margin: 12px 0 0 0; }
+  .chat__history .unit-links {
+    margin-top: 25px; }
 
 /* --- Chat messages container --- */
 .chat-messages {
