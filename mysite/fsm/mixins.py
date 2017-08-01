@@ -182,7 +182,6 @@ class ChatMixin(object):
                             kind=kind,
                             is_additional=is_additional)[0]
         if self.name == 'ASK':
-            import ipdb; ipdb.set_trace()
             SUB_KIND_TO_KIND_MAP = {
                 'choices': 'button',
             }
@@ -196,7 +195,7 @@ class ChatMixin(object):
                 'chat': chat,
                 'owner': chat.user,
                 'input_type': SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
-                'kind': SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
+                'kind': SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind), # next_lesson.lesson.kind,  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
                 'is_additional': is_additional
             }
             if not self.fsm.name == 'live_chat':
@@ -205,7 +204,6 @@ class ChatMixin(object):
                 message = Message(**_data)
                 message.save()
         if self.name == 'GET_ANSWER':
-            import ipdb; ipdb.set_trace()
             # answer = current.get_answers().first()
             _data = {
                 'contenttype': 'response',
@@ -220,9 +218,6 @@ class ChatMixin(object):
             if current.lesson.sub_kind == 'choices':
                 _data.update(dict(
                     input_type='options',
-                    chat=chat,
-                    userMessage=False,
-                    is_additional=is_additional
                 ))
 
             if not self.fsm.name == 'live_chat':
@@ -231,7 +226,6 @@ class ChatMixin(object):
                 message = Message(**_data)
                 message.save()
         if self.name == "WAIT_ASSESS":
-            import ipdb; ipdb.set_trace()
             if isinstance(current, Response):
                 resp_to_chk = current
             else:
@@ -247,10 +241,6 @@ class ChatMixin(object):
 
         if self.name == 'ASSESS':
             # current here is Response instance
-
-            print "ASSESS NODE!!!! STOP!!!"
-
-            import ipdb; ipdb.set_trace()
             if isinstance(current, Response):
                 response_to_chk = current
                 answer = current.unitLesson.get_answers().first()
@@ -270,7 +260,6 @@ class ChatMixin(object):
                             kind=answer.kind,
                             is_additional=is_additional)[0]
         if self.name == 'GET_ASSESS':
-            import ipdb; ipdb.set_trace()
             _data = dict(
                 contenttype='response',
                 content_id=message.response_to_check.id,
@@ -459,7 +448,6 @@ class ChatMixin(object):
                 is_additional=is_additional,
                 owner=chat.user,
             )
-            # import ipdb; ipdb.set_trace()
             if message and message.content_id:
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'

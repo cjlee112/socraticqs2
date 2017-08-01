@@ -94,7 +94,7 @@ class MessageSerializer(serializers.ModelSerializer):
         for i in self.qs:
             if i.contenttype == 'uniterror':
                 incl_msg.append(i.id)
-            if i.contenttype == 'unitlesson' and i.content.lesson.sub_kind == 'choices':
+            if i.contenttype == 'unitlesson' and i.content and i.content.lesson.sub_kind == 'choices':
                 incl_msg.append(i.id)
         input_data = {
             'type': obj.get_next_input_type(),
@@ -130,11 +130,11 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         """
         Getting description for next message.
         """
-        # incl_msg = []
-        # if obj.state is not None:
-        #     msg = obj.message_set.filter(timestamp__isnull=False).last()
-        #     if msg.contenttype == 'unitlesson' and msg.content.lesson.sub_kind == 'choices':
-        #         incl_msg.append(msg.id)
+        incl_msg = []
+        if obj.state is not None:
+            msg = obj.message_set.filter(timestamp__isnull=False).last()
+            if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
+                incl_msg.append(msg.id)
 
         input_data = {
             'type': obj.next_point.input_type if obj.next_point else 'custom',
@@ -142,7 +142,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'options': obj.get_options() if obj.next_point else None,
             'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
             # for test purpose only
-            'includeSelectedValuesFromMessages': [] # incl_msg,
+            'includeSelectedValuesFromMessages': incl_msg,
         }
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'

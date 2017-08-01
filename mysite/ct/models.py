@@ -262,20 +262,23 @@ class Lesson(models.Model):
         :return: list of choices
         '''
         choices = []
-        # if self.kind == self.MULTIPLE_CHOICES:
         if '[choices]' in self.text:
             listed = self.text.split('\r\n')
             for i in range(listed.index('[choices]'), len(listed)):
                 if listed[i].startswith(self.CORRECT_CHOICE) or listed[i].startswith(self.NOT_CORRECT_CHOICE):
                     choices.append(listed[i])
-        return choices
+        return enumerate(choices)
+
+    def get_choices_wrap_text(self):
+        return self.text.split('[choices]')[0]
+
 
     def get_correct_choices(self):
         '''
         Return only correct choices from list of choices
         :return: correct choices.
         '''
-        return [i for i in self.get_choices() if i.startswith(self.CORRECT_CHOICE)]
+        return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
 
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):

@@ -102,13 +102,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         ):
             return self.roll_fsm_forward(chat, message)
 
-        if (
-            message.contenttype == 'unitlesson' and message.content.lesson.sub_kind == 'choices' and
-            message.content_id and
-            next_point == message
-        ):
-            return self.roll_fsm_forward(chat, message)
-
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
             return Response(serializer.data)
@@ -251,7 +244,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text' and not is_chat_add_lesson(message):
             message.chat = chat
             text = self.request.data.get('text')
-            import ipdb; ipdb.set_trace()
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
@@ -273,13 +265,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
-        import ipdb; ipdb.set_trace()
 
         if (message.input_type == 'options' and
-                    message.kind == 'button' and
-                    message.content and
-                    message.content.lesson.sub_kind):
-            import ipdb; ipdb.set_trace()
+            message.kind == 'button' and
+            message.content and
+            message.content.lesson.sub_kind and
+            not message.is_additional
+        ):
             resp_text = ''
             if message.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
                 try:
@@ -288,7 +280,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     )[str(message.id)]['choices']
                 except KeyError:
                     selected = []
-                resp_text = '[selected_choices] ' + ', '.join(str(i) for i in selected)
+                resp_text = '[selected_choices] ' + ' '.join(str(i) for i in selected)
             # if not message.content_id:
             resp = StudentResponse(text=resp_text)
             resp.kind = message.content.lesson.kind
@@ -306,24 +298,30 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             #     resp.text = resp_text
             resp.save()
 
-            # go to assess node
-            # chat.next_point = self.next_handler.next_point(
-            #     current=message.content,
-            #     chat=chat,
-            #     message=message,
-            #     request=self.request
-            # )
-            # chat.save()
-            # serializer.save(chat=chat)
-            # message = chat.next_point
+            if not message.timestamp:
+                serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
+            else:
+                serializer.save()
+
+            message = self.next_handler.next_point(
+                current=message.content,
+                chat=chat,
+                message=message,
+                request=self.request
+            )
+            serializer_data = self.get_serializer(message).data
+            serializer = self.get_serializer(message, data=serializer_data)
+            serializer.is_valid()
             if not message.timestamp:
                 message.content_id = resp.id
+                message.save()
                 chat.next_point = message
                 chat.save()
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
                 serializer.save()
             return
+
 
         if message.input_type == 'options' and message.kind != 'button':
             if (
