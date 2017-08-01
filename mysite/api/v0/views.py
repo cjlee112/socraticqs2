@@ -6,7 +6,7 @@ from rest_framework.response import Response as RestResponse
 
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 from ..permissions import IsInstructor
-from ct.models import Response, StudentError, Course
+from ct.models import Response, StudentError, Course, Role
 from analytics.tasks import report
 from analytics.models import CourseReport
 
@@ -55,13 +55,15 @@ class GenReportView(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def get(self, request, format=None):
+        print request.user
         course_id = request.GET.get('course_id')
         if not course_id:
             return RestResponse('course_id is not provided', status=400)
         course = get_object_or_404(Course, id=course_id)
-        if not course.addedBy == request.user:
+        course_instructors = course.role_set.filter(role=Role.INSTRUCTOR).values_list('user_id', flat=True)
+        if not course.addedBy == request.user or request.user.id not in course_instructors:
             return RestResponse('action is not allowed', status=403)
-        report.delay(course_id)
+        report.delay(course_id, request.user.id)
         return RestResponse(status=200)
 
 
