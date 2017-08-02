@@ -14,6 +14,8 @@
 </script>
 <script type="text/javascript" src='{% static "js/ct.js" %}'>
 </script>
+<script src="https://use.typekit.net/aof4bxp.js"></script>
+<script>try{Typekit.load({ async: true });}catch(e){}</script>
 
 {% block refresher %}{% endblock %}
 
@@ -28,68 +30,67 @@
 {% endblock %}
 
 {% block body %}
-  <nav class="navbar navbar-default navbar-static-top" role="navigation">
+
+  <nav class="navbar-default navbar-static-top" role="navigation">
     <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">Courselets.org</a>
-      </div>
-      <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-          <li><a href="{% url 'ct:home' %}">Courses</a></li>
-        </ul>
-        <ul class="nav navbar-nav">
-          {% if not fsmStack.state or not fsmStack.state.hideNav %}
-            {{ actionTarget|get_dummy_navbar }}
-          {% endif %}
-          {% if pageData.fsmLauncher %}
-          <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Start Activity <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-{% for launchForm,fsm in pageData.fsmLauncher.values %}
-  <li>
-     {% crispy launchForm %}
-  </li>
-{% endfor %}
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Courselets.org</a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="child sibling">
+              <a href="/ct/">Courses Dashboard</a>
+            </li>
           </ul>
-          </li>
-          {% endif %}
-          {% switch "menu_activity_center_link_enabled" %}
-          {% if fsmStack.state %}
-          <li><a href='/fsm/nodes/'>{{ fsmStack.state.title }}</a></li>
-          {% elif user.is_authenticated %}
 
-              <li><a href='/fsm/nodes/'>Activity Center</a></li>
-          {% endif %}
-          {% endswitch %}
-          {% block navbar %}{% endblock %}
-        </ul>
-        <ul class="nav navbar-nav">
-            {% show_menu 0 1 100 100 "menu.html" %}
-        </ul>
-        <ul class="nav navbar-nav">
-          {% if user and user.is_authenticated %}
-            <li><a href="/ct/people/{{ user.pk }}/" target="{{ target }}">
-            {% comment %}
-              {% if user.get_full_name %}
-                {{ user.get_full_name }}
-            {% else %}
-                {{ user.username }}
+          <ul class="nav navbar-nav">
+            {% if not fsmStack.state or not fsmStack.state.hideNav %}
+              {{ actionTarget|get_dummy_navbar }}
             {% endif %}
-              {% endcomment %}
-              Profile
-            </a></li>
-          {% else %}
-            <li><a href="/login/?next=/ct/">Sign in</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
+            {% if pageData.fsmLauncher %}
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Start Activity <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              {% for launchForm,fsm in pageData.fsmLauncher.values %}
+                <li>
+                   {% crispy launchForm %}
+                </li>
+              {% endfor %}
+            </ul>
+            </li>
+            {% endif %}
 
+            {% switch "menu_activity_center_link_enabled" %}
+            {% if fsmStack.state %}
+            <li><a href='/fsm/nodes/'>{{ fsmStack.state.title }}</a></li>
+            {% elif user.is_authenticated %}
+
+                <li><a href='/fsm/nodes/'>Activity Center</a></li>
+            {% endif %}
+            {% endswitch %}
+          </ul>
+
+          <ul class="nav navbar-nav">
+            {% show_menu  0 1 100 100 %}
+
+            <li class="child sibling">
+              {% if request.user.is_authenticated %}
+              <a href="{% url 'ct:person_profile' user_id=request.user.id %}">Profile</a>
+              {% else %}
+              <a href="{% url 'login' %}">Login</a>
+              {% endif %}
+            </li>
+
+          </ul>
+        </div>
+    </div>
   </nav>
 
   <div class="container" style="padding-bottom: 100px;">
