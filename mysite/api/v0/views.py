@@ -55,7 +55,6 @@ class GenReportView(APIView):
     authentication_classes = (SessionAuthentication,)
 
     def get(self, request, format=None):
-        print request.user
         course_id = request.GET.get('course_id')
         if not course_id:
             return RestResponse('course_id is not provided', status=400)
