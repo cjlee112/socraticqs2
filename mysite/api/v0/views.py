@@ -60,7 +60,7 @@ class GenReportView(APIView):
             return RestResponse('course_id is not provided', status=400)
         course = get_object_or_404(Course, id=course_id)
         course_instructors = course.role_set.filter(role=Role.INSTRUCTOR).values_list('user_id', flat=True)
-        if not course.addedBy == request.user or request.user.id not in course_instructors:
+        if request.user.id not in course_instructors and not course.addedBy == request.user:
             return RestResponse('action is not allowed', status=403)
         report.delay(course_id, request.user.id)
         return RestResponse(status=200)

@@ -15,7 +15,7 @@ def get_upload_function(folder=''):
     :return: full path
     '''
     def user_dir_path(instance, filename):
-        user_id = instance.addedBy.id if instance.addedBy else ''
+        user_id = str(instance.addedBy.id) if instance.addedBy else ''
         return os.path.join(folder, user_id, filename)
     return user_dir_path
 
