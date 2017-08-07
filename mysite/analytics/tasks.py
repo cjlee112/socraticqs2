@@ -21,10 +21,7 @@ from .models import CourseReport
 @app.task
 def report(course_id, user_id):
     report = []
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        user = None
+    user = User.objects.filter(id=user_id).first()
 
     for obj in Response.objects.filter(
         kind='orct', unitLesson__order__isnull=False, course__id=course_id
