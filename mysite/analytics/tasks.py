@@ -13,13 +13,16 @@ import unicodecsv as csv
 from pandas import DataFrame
 from django.conf import settings
 from django.core.files import File
+from django.contrib.auth.models import User
 
 from ct.models import Response
 from .models import CourseReport
 
 @app.task
-def report(course_id):
+def report(course_id, user_id):
     report = []
+    user = User.objects.filter(id=user_id).first()
+
     for obj in Response.objects.filter(
         kind='orct', unitLesson__order__isnull=False, course__id=course_id
     ):
@@ -59,11 +62,12 @@ def report(course_id):
         try:
             file_instance = File(
               file=output,
-              name=uuid.uuid4().hex+'.json'
+              name="{}.json".format(uuid.uuid4().hex)
             )
             course_report = CourseReport(
                 course_id=course_id,
-                response_report=file_instance
+                response_report=file_instance,
+                addedBy=user
             )
             course_report.save()
         finally:
