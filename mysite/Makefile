@@ -1,3 +1,5 @@
+test:
+	pytest
 
 # make debug dumpdata for devs
 debugdump:
