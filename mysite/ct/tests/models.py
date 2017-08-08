@@ -140,6 +140,17 @@ class ConceptTest(TestCase):
         self.assertEqual(result[0].kind, UnitLesson.MISUNDERSTANDS)
         self.assertEqual(result[0].parent, self.unit_lesson)
 
+    def test_get_url_no_ul_error(self):
+        # if no UnitLesson associated with Concept it should return '#'
+        UnitLesson.objects.filter(lesson__concept=self.concept).delete()
+        self.concept.isError = True
+        base_path = reverse('ct:study_unit', args=(self.course.id, self.unit.id))
+        result = self.concept.get_url(base_path)
+        self.assertEqual(
+            result,
+            '#'
+        )
+
     def test_get_url(self):
         base_path = reverse('ct:study_unit', args=(self.course.id, self.unit.id))
         result = self.concept.get_url(base_path)
