@@ -18,14 +18,30 @@ from django.contrib.auth.models import User
 from ct.models import Response
 from .models import CourseReport
 
+
 @app.task
 def report(course_id, user_id):
     report = []
     user = User.objects.filter(id=user_id).first()
 
-    for obj in Response.objects.filter(
+    lesson_responses = {}
+    last_resps = []
+
+    q = Response.objects.filter(
         kind='orct', unitLesson__order__isnull=False, course__id=course_id
-    ):
+    )
+
+    for obj in q:
+        ul_resps = lesson_responses.setdefault(obj.unitLesson, {})
+        user_resps = ul_resps.setdefault(obj.author, [])
+        user_resps.append(obj)
+
+    for ul, user_resps in lesson_responses.items():
+        for user, respss in user_resps.items():
+            needed_resp = sorted(respss, key=lambda o: o.atime)[-1]
+            last_resps.append(needed_resp)
+
+    for obj in last_resps:
         _id = obj.id
         author_id = obj.author.id
         author_name = obj.author.get_full_name() or obj.author.username
