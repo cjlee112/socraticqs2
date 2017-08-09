@@ -36,10 +36,10 @@ def report(course_id, user_id):
         user_resps = ul_resps.setdefault(obj.author, [])
         user_resps.append(obj)
 
-    for ul, user_resps in lesson_responses.items():
-        for user, respss in user_resps.items():
-            needed_resp = sorted(respss, key=lambda o: o.atime)[-1]
-            last_resps.append(needed_resp)
+    for _, user_resps in lesson_responses.items():
+        for _, respss in user_resps.items():
+            if respss:
+                last_resps.append(sorted(respss, key=lambda o: o.atime)[0])
 
     for obj in last_resps:
         _id = obj.id
