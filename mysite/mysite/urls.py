@@ -50,6 +50,7 @@ urlpatterns = patterns(
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
+    url(r'^admin/login_as_user/(?P<user_id>\d+)/?$', 'psa.views.login_as_user', name='admin_login_as_user'),
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^email-sent/$', 'psa.views.validation_sent'),

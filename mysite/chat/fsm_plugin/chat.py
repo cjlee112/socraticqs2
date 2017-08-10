@@ -126,12 +126,24 @@ class ASK(object):
 
 
 class GET_ANSWER(object):
-    get_path = get_lesson_url
-    # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
+            dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
         )
+
+
+class CONFIDENCE(object):
+    title = 'Select the level of your confidence?'
+    edges = (
+        dict(name='next', toNode='GET_CONFIDENCE', title='Go to choosing your confidence'),
+    )
+
+
+class GET_CONFIDENCE(object):
+    title = 'Choose confidence'
+    edges = (
+        dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
+    )
 
 
 class ASSESS(object):
@@ -209,8 +221,21 @@ def get_specs():
         name='chat',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER, ASSESS,
-                     GET_ASSESS, ERRORS, GET_ERRORS, IF_RESOURCES, END],
+        pluginNodes=[
+            START,
+            TITLE,
+            LESSON,
+            ASK,
+            GET_ANSWER,
+            CONFIDENCE,
+            GET_CONFIDENCE,
+            ASSESS,
+            GET_ASSESS,
+            ERRORS,
+            GET_ERRORS,
+            IF_RESOURCES,
+            END
+        ],
 
     )
     return (spec,)

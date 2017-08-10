@@ -1,3 +1,4 @@
+from copy import copy
 from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.contrib.auth.models import User
@@ -13,6 +14,15 @@ not_only_spaces_validator = RegexValidator(
     inverse_match=True,
     message='This field can not consist of only spaces'
 )
+
+def copy_model_instance(inst, **kwargs):
+        n_inst = copy(inst)
+        n_inst.id = None
+        if kwargs:
+            for k, v in kwargs.items():
+                setattr(n_inst, k, v)
+        n_inst.save()
+        return n_inst
 
 ########################################################
 # Concept ID and graph -- not version controlled
@@ -242,6 +252,7 @@ class Lesson(models.Model):
                                     related_name='mergeChildren')
     changeLog = models.TextField(null=True, blank=True)
     commitTime = models.DateTimeField('time committed', null=True, blank=True)
+    add_unit_aborts = models.NullBooleanField(default=False, null=True)
 
     _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
                    'sourceDB', 'sourceID', 'concept', 'treeID')
@@ -618,6 +629,7 @@ class UnitLesson(models.Model):
         if newLesson:
             self.lesson = lesson
             self.save()
+
     def copy(self, unit, addedBy, parent=None, order=None, kind=None, **kwargs):
         'copy self and children to new unit'
         if not self.lesson.is_committed(): # to fork it, must commit it!
@@ -626,14 +638,19 @@ class UnitLesson(models.Model):
                 name = addedBy.get_username()
             self.lesson.changeLog = 'snapshot for fork by %s' % name
             self.lesson.checkin(commit=True)
+
         if order == 'APPEND':
             order = unit.next_order()
+        elif order is None:
+            order = self.order
+
         if kind == UnitLesson.RESOLVES:
             self.lesson.add_concept_link(parent.lesson.concept,
                                          ConceptLink.RESOLVES, addedBy)
         elif kind is None:
             kind = self.kind
-        ul = self.__class__(lesson=self.lesson, addedBy=addedBy, unit=unit,
+
+        ul = copy_model_instance(self, lesson=self.lesson, addedBy=addedBy, unit=unit,
                             kind=kind, treeID=self.treeID, parent=parent,
                             order=order, branch=self.branch, **kwargs)
         ul.save()
@@ -1184,6 +1201,9 @@ class Role(models.Model):
     course = models.ForeignKey(Course)
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+
+    class Meta:
+        unique_together = ('role', 'course', 'user')
 
 class UnitStatus(models.Model):
     'records what user has completed in a unit lesson sequence'

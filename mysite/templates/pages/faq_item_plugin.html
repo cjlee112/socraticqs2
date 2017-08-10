@@ -1,8 +1,10 @@
+{% load ct_extras %}
+
 {% if not instance.hidden %}
 <div>
-<dt>Q: {{ instance.question }}</dt>
+<dt>Q: {{ instance.question|md2html }}</dt>
 <br>
-<dd>A: {{ instance.answer }}</dd>
+<dd>A: {{ instance.answer|md2html }}</dd>
 <hr>
 </div>
 {% endif %}

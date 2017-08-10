@@ -5,7 +5,7 @@ def ask_edge(self, edge, fsmStack, request, **kwargs):
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
-    elif fsmStack.state.linkState.fsmNode.name == 'QUESTION':  # in progress
+    elif fsmStack.state.linkState.fsmNode.node_name_is_one_of('QUESTION'):  # in progress
         fsmStack.state.unitLesson = fsmStack.state.linkState.unitLesson
         fsmStack.state.save()
         return edge.toNode  # so go straight to asking question
@@ -20,7 +20,7 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
     fsm = edge.fromNode.fsm
     if not fsmStack.state.linkState:  # instructor detached
         return fsm.get_node('END')
-    elif fsmStack.state.linkState.fsmNode.name == 'QUESTION':
+    elif fsmStack.state.linkState.fsmNode.node_name_is_one_of('QUESTION'):
         if fsmStack.state.unitLesson == fsmStack.state.linkState.unitLesson:
             return fsm.get_node('WAIT_ASSESS')
         else:  # jump to the new question
@@ -55,12 +55,12 @@ def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
         def wrapper(self, edge, fsmStack, request, **kwargs):
             if not fsmStack.state or fsmStack.state and not fsmStack.state.linkState:
                 return edge.fromNode.fsm.get_node('END')
-            if fsmStack.state.linkState.fsmNode.name not in nodes:
-                print "-------> Student in node {} and \n TEACHER in node {}, allowed nodes for teacher {}".format(
-                    fsmStack.state.fsmNode.name,
-                    fsmStack.state.linkState.fsmNode.name,
-                    nodes
-                    )
+            if not fsmStack.state.linkState.fsmNode.node_name_is_one_of(*nodes):
+                # print "-------> Student in node {} and \n TEACHER in node {}, allowed nodes for teacher {}".format(
+                #     fsmStack.state.fsmNode.name,
+                #     fsmStack.state.linkState.fsmNode.name,
+                #     nodes
+                #     )
                 return edge.fromNode.fsm.get_node('WAIT_ASK')
             return func(self, edge, fsmStack, request,  **kwargs)
         return wrapper

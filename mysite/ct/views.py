@@ -1,6 +1,7 @@
 import time
 import urllib
 from datetime import datetime
+from collections import OrderedDict
 
 from django.db.models import Q
 from django.conf import settings
@@ -10,9 +11,10 @@ from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import AnonymousUser
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from social.backends.utils import load_backends
 from collections import defaultdict
 
@@ -296,7 +298,7 @@ def main_page(request):
         return pageData.fsm_push(request, 'livestudent', linkState=linkState)
     if (
         pageData.fsmStack.state and
-        pageData.fsmStack.state.fsmNode.fsm.name == 'livestudent'
+        pageData.fsmStack.state.fsmNode.fsm.fsm_name_is_one_of('livestudent')
     ):
         liveSessions = None  # already in live session, so hide launch buttons!
     else:
@@ -976,15 +978,30 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
     exercises = unit.get_exercises()
-    roles = Role.objects.filter(
+
+    page = request.GET.get('page', 1)
+    roles_list = Role.objects.order_by(
+        'user__first_name', 'user__username'
+    ).filter(
         role=Role.ENROLLED, course=course
-    ).distinct('user')
+    )
+    paginator = Paginator(roles_list, 50)
+    try:
+        roles = paginator.page(page)
+    except PageNotAnInteger:
+        roles = paginator.page(1)
+    except EmptyPage:
+        roles = paginator.page(paginator.num_pages)
+
     table_head = [i.lesson.title for i in exercises]
-    table_body = defaultdict(list)
+    table_body = OrderedDict()
     for role in roles:
         for orct in exercises:
+            if not table_body.get(role.user):
+                table_body[role.user] = []
             table_body[role.user].append(
                 Response.objects.filter(
+                    unitLesson=orct,
                     lesson=orct.lesson, author=role.user
                 ).order_by('-atime').first()
             )
@@ -992,8 +1009,9 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request,
         'ct/unit_answers.html',
         templateArgs=dict(
+            roles=roles,
             table_head=table_head,
-            table_body=dict(table_body)
+            table_body=table_body
         )
     )
 

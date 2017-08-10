@@ -70,6 +70,82 @@
 .chat-introduction {
   background: #fff;
 
+  .chat-sessions-list {
+
+    li {
+
+      .new-session {
+
+      }
+      display: block;
+      padding: 20px 0;
+      border-bottom: 0px;
+      margin: 15px 0 0 0;
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 12px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 53px 0 4px 0;
+      text-align: left;
+    }
+
+    p.history-description {
+        text-align: left;
+        margin-top: 15px;
+    }
+
+    a {
+      position: relative;
+      display: block;
+      padding: 25px 25px 25px 150px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.3);
+      background: #fff url(../img/course-open-unit.png) no-repeat 50px 35px;
+      background-image: url(../img/course-open-unit.svg), none;
+      background-size: 60px 60px;
+      transition: all 0.3s;
+      text-align: left;
+
+      &:hover, :active, &:focus {
+        color: $brand-green;
+        text-decoration: none;
+        opacity: 0.5;
+      }
+
+      &.start-new-session {
+        padding: 50px 25px 45px 150px;
+      }
+
+      h3 {
+        font-size: 19px;
+        font-weight: normal;
+        line-height: 25px;
+        color: #333;
+        margin: 5px 0 0 0;
+      }
+
+      h4 {
+        font-size: 17px;
+        font-weight: normal;
+        line-height: 25px;
+        color: #333;
+        margin: 5px 0 0 0;
+      }
+
+      p {
+        font-size: 15px;
+        line-height: 20px;
+        color: #808080;
+        margin: 5px 0;
+      }
+    }
+  }
+
   .container {
     max-width: 100%;
   }

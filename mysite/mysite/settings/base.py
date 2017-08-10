@@ -413,7 +413,7 @@ CMS_PLACEHOLDER_CONF = {
         },
     },
     'landing_page_slideshare_placeholder': {
-        'plugins': ['SlideSharePagePlugin'],
+        'plugins': ['SlideSharePagePlugin', 'InlineSlideSharePagePlugin'],
     },
     'landing_personal_guides': {
         'plugins': ['ParentPersonalGuidesPagePlugin']

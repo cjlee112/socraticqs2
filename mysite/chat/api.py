@@ -1,3 +1,4 @@
+from django.http.response import Http404
 import injections
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -7,14 +8,17 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from chat.models import EnrollUnitCode
 
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
+from .views import ChatInitialView
 from .serializers import (
     MessageSerializer,
     ChatHistorySerializer,
     ChatProgressSerializer,
     ChatResourcesSerializer,
-    AddUnitByChatSerializer
+    AddUnitByChatSerializer,
+    ChatSerializer,
 )
 from .services import ProgressHandler, FsmHandler
 from .permissions import IsOwner
@@ -83,7 +87,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         serializer = self.get_serializer(message)
         return Response(serializer.data)
 
-    def retrieve(self, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
         chat_id = self.request.GET.get('chat_id')
         try:
@@ -130,7 +134,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
 
         message = self.get_object()
-        if message.input_type == 'text' and not self.request.data.get('text'):
+        if (
+            message.input_type == 'text' and not
+            self.request.data.get('text').strip()
+        ):
             return Response({'error': 'Empty response. Enter something!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
 
@@ -262,6 +269,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 serializer.save(content_id=resp.id, timestamp=timezone.now(), chat=chat)
             else:
@@ -271,6 +279,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.contenttype == 'uniterror' and
                 'selected' in self.request.data
             ):
+                # user selected error model
                 message.chat = chat
                 try:
                     selected = self.request.data.get(
@@ -289,35 +298,78 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     message=message,
                     request=self.request
                 )
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
                 serializer.save(chat=chat)
             elif message.content_id and not message.student_error:
+                # confidence and selfeval
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                opt_data = self.request.data.get('option')
                 resp = message.content
-                resp.selfeval = selfeval
+                if chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
+                    resp.confidence = opt_data
+                    text = resp.get_confidence_display()
+                else:
+                    resp.selfeval = opt_data
+                    text = resp.get_selfeval_display()
+                message.text = text
                 resp.save()
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
-                serializer.save(content_id=resp.id, chat=chat)
+                serializer.save(content_id=resp.id, chat=chat, text=text)
             else:
+                #
                 message.chat = chat
-                selfeval = self.request.data.get('option')
+                option = self.request.data.get('option')
                 resp = message.student_error
-                resp.status = selfeval
+                resp.status = option
                 resp.save()
                 chat.next_point = message
+                chat.last_modify_timestamp = timezone.now()
                 chat.save()
-                message.text = selfeval
+                message.text = option
                 message.save()
         if message.kind == 'button':
+            chat.last_modify_timestamp = timezone.now()
             chat.next_point = self.next_handler.next_point(
                 current=message.content,
                 chat=chat,
                 message=message,
-                request=self.request
+                request=self.request,
             )
             chat.save()
+
+
+class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
+    """
+    Initialize new chat session if request.GET['chat_id'] is zero and returns serialized chat object
+    """
+    permission_classes = (IsAuthenticated, IsOwner)
+    view = ChatInitialView()
+
+    def get(self, request, enroll_key, chat_id, *args, **kwargs):
+        enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        if request.is_ajax():
+            self.view.request = self.request
+            chat, i_chat_id = self.view.get_or_init_chat(enroll_code, chat_id)
+
+            if chat.message_set.count() == 0:
+                # if it's newly created chat
+                self.view.next_handler.start_point(
+                    unit=enroll_code.courseUnit.unit,
+                    chat=chat,
+                    request=self.request
+                )
+            elif not chat.state:
+                # if chat is already finished
+                chat.next_point = None
+                chat.save()
+
+            chat = get_object_or_404(Chat, id=chat.id)
+            return Response(ChatSerializer(chat).data)
+        else:
+            raise Http404() 
 
 
 class HistoryView(ValidateMixin, generics.RetrieveAPIView):

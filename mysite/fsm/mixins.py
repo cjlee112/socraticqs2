@@ -155,12 +155,13 @@ class ChatMixin(object):
     """
     Allow to create message based on current FSM node type.
     """
-    is_chat_add_lesson = lambda self: self.fsm.name in ('chat_add_lesson',)
+    def node_name_is_one_of(self, *args):
+        return self.name in args
 
     def get_message(self, chat, current=None, message=None):
-        is_additional = chat.state.fsmNode.fsm.name in ['additional', 'resource']
+        is_additional = chat.state.fsmNode.fsm.fsm_name_is_one_of('additional', 'resource')
         next_lesson = chat.state.unitLesson
-        if self.name == 'LESSON':
+        if self.node_name_is_one_of('LESSON'):
             input_type = 'custom'
             kind = next_lesson.lesson.kind
             try:
@@ -181,7 +182,7 @@ class ChatMixin(object):
                             input_type=input_type,
                             kind=kind,
                             is_additional=is_additional)[0]
-        if self.name == 'ASK':
+        if self.node_name_is_one_of('ASK'):
             _data = {
                 'contenttype': 'unitlesson',
                 'content_id': next_lesson.id,
@@ -191,12 +192,12 @@ class ChatMixin(object):
                 'kind': next_lesson.lesson.kind,
                 'is_additional': is_additional
             }
-            if not self.fsm.name == 'live_chat':
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
                 message = Message.objects.get_or_create(**_data)[0]
             else:
                 message = Message(**_data)
                 message.save()
-        if self.name == 'GET_ANSWER':
+        if self.node_name_is_one_of('GET_ANSWER'):
             answer = current.get_answers().first()
             _data = {
                 'contenttype': 'response',
@@ -208,12 +209,48 @@ class ChatMixin(object):
                 'userMessage': True,
                 'is_additional': is_additional
             }
-            if not self.fsm.name == 'live_chat':
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
                 message = Message.objects.get_or_create(**_data)[0]
             else:
                 message = Message(**_data)
                 message.save()
-        if self.name == "WAIT_ASSESS":
+        if self.node_name_is_one_of('CONFIDENCE'):
+            # current here is Response instance
+            if isinstance(current, Response):
+                response_to_chk = current
+                answer = current.unitLesson.get_answers().first()
+            else:
+                response_to_chk = message.response_to_check
+                if not message.lesson_to_answer:
+                    answer = message.response_to_check.unitLesson.get_answers().first()
+                else:
+                    answer = message.lesson_to_answer.get_answers().first()
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            response_to_check=response_to_chk,
+                            input_type='custom',
+                            text=self.title,
+                            chat=chat,
+                            owner=chat.user,
+                            kind=answer.kind,
+                            is_additional=is_additional)[0]
+        if self.node_name_is_one_of('GET_CONFIDENCE'):
+            _data = dict(
+                contenttype='response',
+                content_id=message.response_to_check.id,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional,
+            )
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
+        if self.node_name_is_one_of("WAIT_ASSESS"):
             if isinstance(current, Response):
                 resp_to_chk = current
             else:
@@ -227,7 +264,7 @@ class ChatMixin(object):
                 owner=chat.user,
             )[0]
 
-        if self.name == 'ASSESS':
+        if self.node_name_is_one_of('ASSESS'):
             # current here is Response instance
             if isinstance(current, Response):
                 response_to_chk = current
@@ -247,7 +284,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind=answer.kind,
                             is_additional=is_additional)[0]
-        if self.name == 'GET_ASSESS':
+        if self.node_name_is_one_of('GET_ASSESS'):
             _data = dict(
                 contenttype='response',
                 content_id=message.response_to_check.id,
@@ -258,12 +295,12 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional
             )
-            if not self.fsm.name == 'live_chat':
-                message = Message.objects.get_or_create(**_data)[0]
-            else:
-                message = Message(**_data)
-                message.save()
-        if self.name == 'STUDENTERROR':
+            # if not self.fsm.name == 'live_chat':
+            #     message = Message.objects.get_or_create(**_data)[0]
+            # else:
+            message = Message(**_data)
+            message.save()
+        if self.node_name_is_one_of('STUDENTERROR'):
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
@@ -282,7 +319,7 @@ class ChatMixin(object):
                             input_type='options',
                             kind='button',
                             is_additional=True)[0]
-        if self.name == 'RESOLVE':
+        if self.node_name_is_one_of('RESOLVE'):
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
@@ -292,7 +329,7 @@ class ChatMixin(object):
                             kind='message',
                             timestamp__isnull=True,
                             is_additional=True)[0]
-        if self.name == 'MESSAGE_NODE':
+        if self.node_name_is_one_of('MESSAGE_NODE'):
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
@@ -301,7 +338,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
-        if self.name in ['END', 'IF_RESOURCES']:
+        if self.node_name_is_one_of('END', 'IF_RESOURCES'):
             if not self.help:
                 text = self.get_help(chat.state, request=None)
             else:
@@ -313,7 +350,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
-        if self.name == 'GET_RESOLVE':
+        if self.node_name_is_one_of('GET_RESOLVE'):
                 message = Message.objects.create(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
@@ -324,7 +361,7 @@ class ChatMixin(object):
                             kind='response',
                             userMessage=True,
                             is_additional=is_additional)
-        if self.name == 'ERRORS':
+        if self.node_name_is_one_of('ERRORS'):
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
@@ -333,7 +370,7 @@ class ChatMixin(object):
                             kind='message',
                             input_type='custom',
                             is_additional=is_additional)[0]
-        if self.name == 'GET_ERRORS':
+        if self.node_name_is_one_of('GET_ERRORS'):
             uniterror = UnitError.get_by_message(message)
             message = Message.objects.get_or_create(
                             contenttype='uniterror',
@@ -344,7 +381,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             userMessage=False,
                             is_additional=is_additional)[0]
-        if self.name == 'TITLE':
+        if self.node_name_is_one_of('TITLE'):
             divider = ChatDivider(text=next_lesson.lesson.title,
                                   unitlesson=next_lesson)
             divider.save()
@@ -357,7 +394,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='message',
                             is_additional=is_additional)[0]
-        if self.name == 'START_MESSAGE':
+        if self.node_name_is_one_of('START_MESSAGE'):
             message = Message.objects.create(
                             input_type='options',
                             text=self.title,
@@ -365,7 +402,7 @@ class ChatMixin(object):
                             owner=chat.user,
                             kind='button',
                             is_additional=is_additional)
-        if self.name == 'DIVIDER' or (self.name == 'START' and self.is_chat_add_lesson()):
+        if self.node_name_is_one_of('DIVIDER'):
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(
@@ -378,7 +415,7 @@ class ChatMixin(object):
                             kind='message',
                             is_additional=is_additional)[0]
 
-        if self.name == 'START' and self.fsm.name in('live_chat',):
+        if self.node_name_is_one_of('START') and self.fsm.fsm_name_is_one_of('live_chat'):
             message = Message.objects.get_or_create(
                 chat=chat,
                 text=self.title,

@@ -1,7 +1,8 @@
 {% load cms_tags sekizai_tags %}
+{% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,6 +11,9 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="{% static 'pages/css/main_page.css' %}">
+
     {% render_block "css" %}
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -24,7 +28,7 @@
     {% block head %}{% endblock %}
     {% include "google-analytics.html" %}
   </head>
-  <body>
+  <body style=" min-height: 100%; position: relative;">
     {% cms_toolbar %}
     {% block base_content %}{% endblock %}
     {% block body %}{% endblock %}

@@ -179,10 +179,10 @@ class LessonSerializer(serializers.ModelSerializer):
             lesson_order = msg.content.unitlesson.order
             chat = msg.chat
 
-            def fsm_in_nodes(nodes):
-                return chat.state and chat.state.fsmNode.fsm.name in nodes
+            def check_fsm_name(*nodes):
+                return chat.state and chat.state.fsmNode.fsm.fsm_name_is_one_of(*nodes)
 
-            if chat.is_live and fsm_in_nodes(['live_chat']):
+            if chat.is_live and check_fsm_name('live_chat'):
                 # here we assume that user can not get next question without answering for current one.
                 questions = chat.message_set.filter(
                     kind='orct',
@@ -202,7 +202,7 @@ class LessonSerializer(serializers.ModelSerializer):
                     return True
                 else:
                     return False
-            if fsm_in_nodes(['chat', 'additional']):
+            if check_fsm_name('chat', 'additional'):
                 current_unitlesson_order = chat.state.unitLesson.order
                 return lesson_order < current_unitlesson_order
             else:
@@ -262,22 +262,22 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                 self.get_breakpoints(obj)
             except:
                 pass
-        if self.lessons_dict:
+        if self.lessons_dict and obj.state:
             done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
             progress = round(float(done)/len(self.lessons_dict), 2)
         else:
             # if no lessons passed yet - return 1
             progress = 1
-        assignment = GradedLaunch.objects.filter(
-            course_id=obj.enroll_code.courseUnit.course.id
-        ).first()
+        # assignment = GradedLaunch.objects.filter(
+        #     course_id=obj.enroll_code.courseUnit.course.id
+        # ).first()
         if not obj.progress == (progress * 100):
             obj.progress = progress * 100
             obj.save()
-            if assignment:
+            # if assignment:
                 # this is very simplt implementation and should be changed
                 # we are sendign grade only for updated progress
-                send_outcome.delay(progress, assignment.id)
+                # send_outcome.delay(progress, assignment.id)
         return progress
 
 
@@ -439,3 +439,12 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
             each.chat = obj
 
         return ResourcesSerializer(many=True).to_representation(lessons)
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    session = serializers.CharField(source='state.id', read_only=True)
+
+    class Meta:
+        model = Chat
+        fields = ('id', 'session',)

@@ -9,7 +9,7 @@ from chat.models import TYPE_CHOICES, MESSAGE_TYPES
 from fsm.fsm_base import FSMStack
 from fsm.models import FSMNode
 from ct.models import Unit, Lesson, UnitLesson, Response, CourseUnit
-from .models import Message, UnitError, ChatDivider, MODEL_CHOISES, Message
+from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
 
 
 class ProgressHandler(object):
@@ -100,9 +100,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
 
-        if chat.state and chat.state.fsmNode.name == 'END':
+        if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
             self.pop_state(chat)
-        if additionals and chat.state.fsmNode.fsm.name != 'additional':
+        if additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
             unitlesson = additionals.first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)

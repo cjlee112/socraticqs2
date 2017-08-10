@@ -33,7 +33,7 @@ class BodyHashClient(Client):
         return params
 
 
-def store_outcome_parameters(request_params, user):
+def store_outcome_parameters(request_params, user, lti_consumer):
     """
     Determine whether a set of LTI launch parameters contains information about
     an expected score, and if so create a GradedAssignment record. Create a new
@@ -63,7 +63,7 @@ def store_outcome_parameters(request_params, user):
         # Create a record of the outcome service if necessary
         outcomes, __ = OutcomeService.objects.get_or_create(
             lis_outcome_service_url=result_service,
-            # lti_consumer=lti_consumer
+            lti_consumer=lti_consumer
         )
         GradedLaunch.objects.get_or_create(
             lis_result_sourcedid=result_id,

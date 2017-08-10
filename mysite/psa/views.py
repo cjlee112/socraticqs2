@@ -1,27 +1,28 @@
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
+from django.contrib.messages.api import add_message
 from django.db.models import Q
 from django.conf import settings
 from django.http.response import HttpResponseRedirect
-from django.template import RequestContext
-from django.contrib.auth.models import User, AnonymousUser
+from django.http.response import Http404
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render_to_response, render
-from django.contrib.auth import logout, login, authenticate, REDIRECT_FIELD_NAME
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social.actions import do_complete
 from social.apps.django_app.utils import psa
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME
+
 from social.backends.utils import load_backends
 from social.apps.django_app.views import _do_login
-from accounts.models import Instructor
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
-from psa.models import SecondaryEmail, AnonymEmail
+from psa.models import SecondaryEmail
 from psa.forms import SignUpForm, EmailLoginForm, UsernameLoginForm, SocialForm
 
 
@@ -231,13 +232,46 @@ def set_pass(request):
 
 
 def complete(request, *args, **kwargs):
-    try:
-        return social_complete(request, 'email', *args, **kwargs)
-    except AuthMissingParameter:
+    form = CompleteEmailForm(request.POST or request.GET)
+    if form.is_valid() or 'verification_code' in request.GET:
+        try:
+            return social_complete(request, 'email', *args, **kwargs)
+        except AuthMissingParameter:
+            messages.error(
+                request,
+                "Email already verified. Please log in using form below or sign up."
+            )
+            if request.user.is_authenticated():
+                return redirect('ct:person_profile', user_id=request.user.id)
+            return redirect('ct:home')
+    else:
+        # add message with transformed form errors
+        err_msg = "\n".join([
+            "{} - {}".format(
+                k.capitalize(), ", ".join(i.lower() for i in v)
+            )
+            for k, v in form.errors.items()
+        ])
         messages.error(
             request,
-            "Email already verified. Please log in using form below or sign up."
+            "You passed not correct data. {}".format(err_msg)
         )
-        if request.user.is_authenticated():
-            return redirect('ct:person_profile', user_id=request.user.id)
+        # if form is not valid redirect user to page where he came from
+        return redirect(reverse("login"))
+
+
+def login_as_user(request, user_id):
+    if (request.user.is_authenticated and
+            request.user.is_staff and
+            request.user.groups.filter(name='CAN_LOGIN_AS_OTHER_USER').first()
+    ):
+        user = get_object_or_404(User, id=user_id)
+        logout(request)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        add_message(request, messages.SUCCESS, "You just switched to user {} with email {}".format(
+            user.username, user.email
+        ))
         return redirect('ct:home')
+    else:
+        raise Http404("This action is not allowed")

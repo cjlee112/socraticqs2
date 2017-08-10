@@ -1,0 +1,40 @@
+body {
+  background: #fff;
+  font: normal 14px/24px "proxima-nova", sans-serif;
+  color: #4d4d4d;
+  -webkit-font-smoothing: antialiased;
+}
+
+ul:not(.nav) {
+  list-style: none;
+  margin: 26px 0 0 0;
+  padding: 0; }
+
+  ul:not(.nav) li {
+    padding: 0 0 0 32px;
+    background: url(../img/list-icon.png) no-repeat 0 6px;
+    margin: 0 0 12px 0; }
+
+    ul:not(.nav) li:last-child {
+      margin: 0; }
+
+a.navbar-brand {
+    padding: 13px 15px 15px 0px !important;
+}
+
+ul li.child {
+    margin-bottom: 0px;
+    padding: 0;
+    background: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  // color: #307FE2;
+  color: #777;
+}
+
+.footer-main {
+  background: #FAFAFC;
+  padding: 40px 0;
+  color: #999;
+  text-align: center; }

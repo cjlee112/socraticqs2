@@ -1,7 +1,11 @@
 import logging
+from django.db.models.aggregates import Count
+from django.db.models.expressions import When, Case
+from django.db.models.fields import BooleanField, IntegerField
 
 import waffle
 import injections
+from django.db import models
 from django.db.models import Q
 from django.views.generic import View
 from django.http import Http404
@@ -15,6 +19,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnitFsmHandler
+from chat.serializers import ChatProgressSerializer
 from chat.utils import enroll_generator
 from ctms.views import CourseCoursletUnitMixin
 from fsm.models import FSMState
@@ -134,6 +139,58 @@ class ChatInitialView(LoginRequiredMixin, View):
                         contaner.add((title, url))
         return will_learn, need_to_know
 
+    def get_or_init_chat(self, enroll_code, chat_id):
+        '''Gets chat by id following these steps:
+         * try to cast recieved ID to int
+         * if gets an error while casting:
+           * set i_chat_id = 0 if ValueError
+           * set i_chat_id = None if TypeError
+         * if i_chat_id:
+           * try to get chat by id
+         * if i_chat_id is None:
+           * restore last session
+         * if i_chat_id == 0:
+           * create new chat
+        :return i_chat_id and chat
+        '''
+        chat = None
+        courseUnit = enroll_code.courseUnit
+        try:
+            # try to convert chat_id to int
+            i_chat_id = int(chat_id)
+        except ValueError:
+            # if error - set i_chat_id to zero - it means create new chat
+            i_chat_id = 0
+        except TypeError:
+            i_chat_id = None
+
+        if i_chat_id:  # chat_id is passed - restore chat by id
+            chat = get_object_or_404(
+                Chat,
+                enroll_code=enroll_code,
+                user=self.request.user,
+                id=i_chat_id
+            )
+        elif i_chat_id is None:  # chat_id not passed - restore last session
+            chat = Chat.objects.filter(
+                enroll_code=enroll_code,
+                user=self.request.user,
+                state__isnull=False
+            ).first()
+        elif i_chat_id == 0 and enroll_code:  # create new session
+            chat = Chat(
+                user=self.request.user,
+                enroll_code=enroll_code,
+                instructor=courseUnit.course.addedBy
+            )
+            chat.save()
+
+        if chat and not chat.state:
+            chat.next_point = None
+            chat.save()
+
+        return chat, i_chat_id
+
     @staticmethod
     def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         """
@@ -205,32 +262,11 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        if chat_id:
-            chat = self.get_chat(
-                request,
-                enroll_code=enroll_code,
-                id=chat_id
-            )
-        else:
-            chat = self.get_chat(
-                request,
-                enroll_code,
-                **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
-            )
-        if not chat and enroll_key:
-            chat = self.create_new_chat(request, enroll_code, courseUnit)
-        if chat.message_set.count() == 0:
-            next_point = self.next_handler.start_point(
-                unit=unit, chat=chat, request=request
-            )
-        elif not chat.state:
-            next_point = None
-            chat.next_point = next_point
-            chat.save()
-        else:
-            next_point = chat.next_point
+        # new chat will be created only if chat_id is 0
+        chat, i_chat_id = self.get_or_init_chat(enroll_code, chat_id)
+        lessons = unit.get_exercises()
 
-        if chat.is_live:
+        if chat and chat.is_live:
             lessons = Message.objects.filter(
                 chat=chat,
                 contenttype='unitlesson',
@@ -238,8 +274,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 type='message',
                 owner=request.user,
             )
-        else:
-            lessons = unit.get_exercises()
 
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
@@ -251,12 +285,60 @@ class ChatInitialView(LoginRequiredMixin, View):
         except AttributeError:
             instructor_icon = static('img/avatar-teacher.jpg')
 
+        chat_sessions = Chat.objects.filter(
+            enroll_code=enroll_code,
+            user=request.user,
+            instructor=courseUnit.course.addedBy,
+            is_live=False
+        ).annotate(
+            not_finished=Case(
+            When(state_id__isnull=True, then=0),
+            When(state_id__isnull=False, then=1),
+            default=0,
+            output_field=IntegerField())
+        ).order_by('-not_finished', '-last_modify_timestamp')
+
+        # ).annotate(
+        #     lessons_done=models.Sum(
+        #         models.Case(
+        #             models.When(
+        #                 message__contenttype='unitlesson',
+        #                 message__kind='base',
+        #                 message__type='message',
+        #                 message__owner=request.user,
+        #                 message__timestamp__isnull=False,
+        #                 then=1
+        #             ),
+        #             default=0,
+        #             output_field=models.IntegerField()
+        #         )
+        #     ),
+        # )
+        # TODO: This should work correctly byt doesn't, because of NOT distinct result of query,
+        # TODO: We should find a way how to make it distinct to make only one query
+        # ).annotate(
+        #     total_lessons=models.Sum(
+        #         models.Case(
+        #             models.When(
+        #                 enroll_code__courseUnit__unit__unitlesson__order__isnull=False, then=1
+        #             ),
+        #             default=0,
+        #             output_field=models.IntegerField()
+        #         ))
+        # )
+        for chat_ss in chat_sessions:
+            chat_prog_ser = ChatProgressSerializer()
+            lessons = chat_prog_ser.get_breakpoints(chat_ss)
+            chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
+            chat_ss.total_lessons = len(lessons)
+
         return render(
             request,
             self.template_name,
             {
+                'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'chat': chat,
-                'chat_id': chat.id,
+                'chat_id': i_chat_id,
                 'course': courseUnit.course,
                 'instructor_icon': instructor_icon,
                 'unit': unit,
@@ -267,8 +349,9 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
-                'next_point': next_point,
-                'fsmstate': chat.state,
+                'fsmstate': chat.state if chat else None,
+                'enroll_code': enroll_key,
+                # 'next_point': next_point,
                 'back_url': self.get_back_url(**locals())
             }
         )

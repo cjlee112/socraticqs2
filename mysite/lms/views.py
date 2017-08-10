@@ -23,7 +23,10 @@ class CourseView(View):
                 'enroll_code': EnrollUnitCode.get_code(courselet),
                 'execrices': len(courselet.unit.get_exercises()),
                 'chat': Chat.objects.filter(
-                    enroll_code__courseUnit=courselet
+                    enroll_code__courseUnit=courselet,
+                    user=request.user,
+                    state__isnull=False,
+                    is_live=False
                 ).first()
             }
             for courselet in course.get_course_units(True)
@@ -53,27 +56,42 @@ class CourseView(View):
             enroll_code__courseUnit__course=course,
             state__isnull=True
         )
+        #     .annotate(
+        #     lessons_done=models.Sum(
+        #         models.Case(
+        #             models.When(
+        #                 message__contenttype='unitlesson',
+        #                 message__kind='orct',
+        #                 message__type='message',
+        #                 message__owner=request.user,
+        #                 then=1
+        #             ),
+        #             default=0,
+        #             output_field=models.IntegerField()
+        #         )
+        #     )
+        # )
+        # live_sessions_history.filter(lessons_done=0).delete()
+
         # TODO: once django updated to version >=1.8 change next lines to
         # TODO: .annotate(lessons_count=models.Case()).
         # TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
-
+        #
         for chat in live_sessions_history:
             chat.lessons_done = Message.objects.filter(
                 chat=chat,
-                contenttype='unitlesson',
-                kind='orct',
+                # contenttype='unitlesson',
+                # kind='orct',
+                # type='message',
+                # owner=request.user,
+                contenttype='response',
+                kind='response',
                 type='message',
                 owner=request.user,
+                timestamp__isnull=False,
             ).count()
             if not chat.lessons_done:
                 chat.delete()
-
-        courslet_history = Chat.objects.filter(
-            user=request.user,
-            is_live=False,
-            enroll_code__courseUnit__course=course,
-            state__isnull=True
-        )
 
         return render(
             request,
@@ -82,7 +100,6 @@ class CourseView(View):
                 course=course,
                 liveSession=liveSession,
                 courslets=courselets,
-                courslet_history=courslet_history,
                 livesessions=live_sessions_history,
             )
         )

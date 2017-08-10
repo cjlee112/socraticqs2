@@ -91,7 +91,7 @@ class Chat(models.Model):
     progress = models.IntegerField(default=0, blank=True, null=True)
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ['-last_modify_timestamp']
 
     def get_options(self):
         options = None
@@ -118,7 +118,7 @@ class Chat(models.Model):
         :return: datetime.timedelta
         '''
         if not self.last_modify_timestamp:
-            last_msg = self.message_set.all().order_by('-timestamp').first()
+            last_msg = self.message_set.filter(timestamp__isnull=False).order_by('-timestamp').first()
             if last_msg:
                 self.last_modify_timestamp = last_msg.timestamp
                 self.save()
@@ -193,20 +193,42 @@ class Message(models.Model):
         ) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
+        errors = None
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
-        checked_errors = UnitError.objects.get(id=self.content_id).response.studenterror_set.all()\
-                                                                  .values_list('errorModel', flat=True)
-        error_str = '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="errorModel" ' \
-                    'data-selectable-value="%d"></div><h3>%s</h3></li>'
-        errors = reduce(lambda x, y: x+y, map(lambda x: error_str %
-                                              ('chat-selectable-selected' if x.id in checked_errors else '',
-                                               x.id, x.lesson.title), error_list))
-        return '<ul class="chat-select-list">'+errors+'</ul>'
+        if error_list:
+            checked_errors = UnitError.objects.get(
+                id=self.content_id
+            ).response.studenterror_set.all().values_list('errorModel', flat=True)
+            error_str = (
+                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+            )
+            errors = reduce(
+                lambda x, y: x+y, map(
+                    lambda x: error_str.format(
+                        'chat-selectable-selected' if x.id in checked_errors else '',
+                        x.id,
+                        x.lesson.title
+                    ),
+                    error_list
+                )
+            )
+        return u'<ul class="chat-select-list">{}</ul>'.format(
+            errors or '<li><h3>There are no Misunderstands to display.</h3></li>'
+        )
+
+    def should_ask_confidence(self):
+        if self.chat.state:
+            return 'CONFIDENCE' in [
+                i['name']
+                for i in self.chat.state.fsmNode.fsm.fsmnode_set.all().values('name')
+            ]
+        return False
 
     def get_options(self):
         options = None
         if (
-            self.chat and self.chat.next_point and
+            self.chat and self.chat.state and self.chat.next_point and
             self.chat.next_point.input_type == 'options'
         ):
             if self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
@@ -216,7 +238,13 @@ class Message(models.Model):
             elif self.chat.next_point.contenttype == 'unitlesson':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif self.chat.next_point.contenttype == 'response':
-                options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+                if self.should_ask_confidence():
+                    if not self.chat.next_point.content.confidence:
+                        options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
+                    else:
+                        options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
+                else:
+                    options = [dict(value=i[0], text=i[1]) for i in Response.EVAL_CHOICES]
             else:
                 options = [{"value": 1, "text": "Continue"}]
 
@@ -254,7 +282,31 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                 else:
-                    html = EVAL_OPTIONS.get(self.content.selfeval, '')
+                    CONF_CHOICES = dict(Response.CONF_CHOICES)
+                    is_chat_fsm = (
+                        self.chat and
+                        self.chat.state and
+                        self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat')
+                    )
+                    values = CONF_CHOICES.values() + EVAL_OPTIONS.values()
+                    text_in_values = self.text in values
+                    if is_chat_fsm and not self.text:
+                        if self.content.selfeval:  # confidence is before selfeval
+                            html = EVAL_OPTIONS.get(
+                                self.content.selfeval, 'Self evaluation not completed yet'
+                            )
+                        elif self.content.confidence:
+                            html = CONF_CHOICES.get(
+                                self.content.confidence, 'Confidence not settled yet'
+                            )
+                    elif is_chat_fsm and self.text and not text_in_values:
+                        html = EVAL_OPTIONS.get(
+                            self.text,
+                            dict(Response.CONF_CHOICES).get(
+                                self.text,
+                                self.text
+                            )
+                        )
             elif self.contenttype == 'unitlesson':
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
@@ -277,6 +329,13 @@ class Message(models.Model):
                     html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
+        if html is None:
+            html = (
+                self.content.selfeval
+                if self.content.selfeval else
+                str(self.content)
+            )
+
         return html
 
     def get_name(self):
@@ -361,7 +420,12 @@ class UnitError(models.Model):
     response = models.ForeignKey(Response)
 
     def get_errors(self):
-        return list(self.response.unitLesson.get_errors()) + self.unit.get_aborts()
+        unit_lesson = self.response.unitLesson
+        error_list = list(unit_lesson.get_errors())
+        # Change this to real check
+        if unit_lesson.lesson.add_unit_aborts or not error_list:
+            error_list += self.unit.get_aborts()
+        return error_list
 
     def save_response(self, user, response_list):
         if user == self.response.author:

@@ -41,7 +41,7 @@ class LtiConsumerAdmin(admin.ModelAdmin):
 
 
 class OutcomeServiceAdmin(admin.ModelAdmin):
-    list_display = ('lis_outcome_service_url',)
+    list_display = ('lis_outcome_service_url', 'lti_consumer')
 
 
 class GradedLaunchAdmin(admin.ModelAdmin):
