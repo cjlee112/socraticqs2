@@ -9,11 +9,16 @@
     },
 
     initAffix: function(){
-      $('.cta-bar').affix({
-        offset: {
-            top: $('.cta-bar').offset().top
-        }
-      });
+      var block = $('.cta-bar');
+      if (block.length) {
+          $('.cta-bar').affix({
+            offset: {
+                top: $('.cta-bar').offset().top
+            }
+          });
+      } else {
+        console.log('No block to apply affix plugin.')
+      }
     },
 
     initButtons: function(){

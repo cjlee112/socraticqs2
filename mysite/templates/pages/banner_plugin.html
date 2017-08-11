@@ -5,31 +5,9 @@
 <header class="hero" role="banner">
   <div class="inner">
     <div class="container">
-      <a href="http://courselets.org" class="brand"><img src="{% static "pages/img/courselets-logo@2x.png" %}" alt="Courselets Logo"></a>
-
       <h1>{{ instance.title }}</h1>
-
       {{ instance.description|safe }}
-
       <a href="{{ instance.link_button }}" class="btn im-interested">{{ instance.text_button }}</a>
-    </div>
-  </div>
-
-  <div class="cta-bar">
-    <div class="container clearfix">
-      <p class="info">{{ instance.sponsors_text }}</p>
-
-      <div class="extra">
-        <p class="scroll">
-          Scroll to learn more
-          <span class="mouse">
-            <span class="mouse-wheel">
-            </span>
-          </span>
-        </p>
-
-        <a href="{{ instance.link_button }}" class="btn im-interested">{{ instance.text_button }}</a>
-      </div>
     </div>
   </div>
 </header>
