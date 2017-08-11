@@ -1,5 +1,5 @@
 from behave import given, when, then
-from test.factories.user import UserFactory
+from tests.factories.user import UserFactory
 
 
 @given('an anonymous user')

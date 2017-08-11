@@ -51,8 +51,15 @@ Added by: {{ course.addedBy.get_full_name }},
     {% for report in reports %}
     <ul>
         <li>
-            <a href='{% static report.response_report.url %}'>Download</a>
+            <a href='{% static report.response_report.url %}' target="_blank">Download</a>
             report from {{ report.date }}
+            {% if report.addedBy %} created by
+              {% if report.addedBy.get_full_name %}
+                {{ report.addedBy.get_full_name }}
+              {% else %}
+                {{ report.addedBy.username }}
+              {% endif %}
+          {% endif %}
         </li>
     </ul>
     {% endfor %}

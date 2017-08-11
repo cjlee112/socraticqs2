@@ -1,4 +1,6 @@
+import logging
 from copy import copy
+
 from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.contrib.auth.models import User
@@ -88,12 +90,13 @@ class Concept(models.Model):
                 l.append(UnitLesson.create_from_lesson(lesson, parent.unit,
                             kind=UnitLesson.MISUNDERSTANDS, parent=parent))
         return l
+
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         objID = unit_id = None
         try:
             unit_id = int(basePath.split('/')[-2])
-        except (IndexError,TypeError):
+        except (IndexError, TypeError):
             pass
         for ul in UnitLesson.objects.filter(lesson__concept=self):
             if objID is None or ul.unit_id == unit_id: # in this unit!
@@ -108,7 +111,15 @@ class Concept(models.Model):
             tail = subpath + '/'
         elif subpath == '':
             tail = ''
-        return '%s%s/%d/%s' % (basePath, head, objID, tail)
+        try:
+            return '%s%s/%d/%s' % (basePath, head, objID, tail)
+        except TypeError:
+            logging.error(
+                "Concept.get_url method were not able to build path correctly. "
+                "Will return '#' instead. Concept id {}".format(self.id)
+            )
+            return "#"
+
     def get_error_tests(self, **kwargs):
         'get questions that test this error model'
         return distinct_subset(UnitLesson.objects

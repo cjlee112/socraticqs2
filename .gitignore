@@ -77,3 +77,4 @@ bower_components/
 node_modules/
 .vscode/
 mysite/media/
+.coverage.*
