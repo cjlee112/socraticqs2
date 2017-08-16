@@ -451,7 +451,7 @@ class ChatMixin(object):
             # content_id = current.id if current else None
             message = Message.objects.create(**_data)
 
-        if self.name in ('UNIT_NAME_TITLE', 'NOT_A_QUESTION') and self.is_chat_add_lesson():
+        if self.name in ('START', 'UNIT_NAME_TITLE', 'NOT_A_QUESTION') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
             text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
@@ -463,7 +463,7 @@ class ChatMixin(object):
             )
             message = Message.objects.create(**_data)
 
-        if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.is_chat_add_lesson():
+        if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
             text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,

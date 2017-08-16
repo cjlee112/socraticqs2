@@ -521,6 +521,10 @@ class UnitLesson(models.Model):
     ##     lesson = Lesson.create_from_concept(concept, **kwargs)
     ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
 
+    @property
+    def text(self):
+        return self.lesson.text
+
     def __unicode__(self):
         return self.lesson.title
 

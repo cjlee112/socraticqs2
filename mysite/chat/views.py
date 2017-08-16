@@ -357,6 +357,33 @@ class ChatInitialView(LoginRequiredMixin, View):
         )
 
 
+class ChatNoJSInit(object):
+    def get_or_init_chat(self, enroll_code, chat_id):
+        if chat_id:
+            chat = self.get_chat(
+                self.request,
+                enroll_code=enroll_code,
+                id=chat_id
+            )
+        else:
+            chat = self.get_chat(
+                self.request,
+                enroll_code,
+                **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
+            )
+        if not chat and enroll_code:
+            chat = self.create_new_chat(self.request, enroll_code, enroll_code.courseUnit)
+        if chat.message_set.count() == 0:
+            self.next_handler.start_point(
+                unit=enroll_code.courseUnit.unit, chat=chat, request=self.request
+            )
+        elif not chat.state:
+            next_point = None
+            chat.next_point = next_point
+            chat.save()
+        return chat, chat_id
+
+
 class CourseletPreviewView(ChatInitialView):
     next_handler = ChatPreviewFsmHandler()
 
@@ -422,7 +449,7 @@ class CourseletPreviewView(ChatInitialView):
         return super(CourseletPreviewView, self).get(request, enroll_key)
 
 
-class ChatAddLessonView(ChatInitialView):
+class ChatAddLessonView(ChatNoJSInit, ChatInitialView):
     next_handler = ChatAddUnitFsmHandler()
     template_name = 'chat/add_unit_chat.html'
 
