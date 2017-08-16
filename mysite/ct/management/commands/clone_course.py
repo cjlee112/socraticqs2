@@ -17,14 +17,34 @@ def copy_model_instance(inst, **kwargs):
 
 
 class Command(BaseCommand):
-    help = 'Get report'
+    help = 'Clone course'
 
     def add_arguments(self, parser):
         # Positional arguments
         parser.add_argument('course_id', type=int)
+        # Publish\UnPublish courseUnit
+        parser.add_argument(
+            '--publish',
+            action='store_true',
+            dest='publish',
+            default=False,
+            help='Publish cloned course and course units right now? (Default is False - course units will not be published)',
+        )
+        # Copy student roles
+        parser.add_argument(
+            '--with-students',
+            action='store_true',
+            dest='with_students',
+            default=False,
+            help='Do I need to copy student\'s roles assigned to source course?',
+        )
+
 
     def handle(self, *args, **options):
         course_id = options['course_id']
+        publish = options['publish']
+        with_students = options['with_students']
+
         course = Course.objects.filter(id=course_id).first()
 
         if course:
@@ -38,7 +58,14 @@ class Command(BaseCommand):
                 # deal with Unit
                 n_unit = copy_model_instance(cu.unit, atime=timezone.now())
                 # deal with CourseUnit
-                n_cu = copy_model_instance(cu, course=new_course, unit=n_unit, atime=timezone.now())
+                n_cu_kw = dict(
+                    course=new_course,
+                    unit=n_unit,
+                    atime=timezone.now(),
+                )
+                if not publish:
+                    n_cu_kw['releaseTime'] = None
+                n_cu = copy_model_instance(cu, **n_cu_kw)
 
                 uls = list(cu.unit.get_exercises())
                 # copy exercises and error models
@@ -50,9 +77,9 @@ class Command(BaseCommand):
                     n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
                     n_unit.reorder_exercise()
 
-            for role in course.role_set.filter(role=Role.INSTRUCTOR):
+            roles_to_copy = [Role.INSTRUCTOR] + ([Role.ENROLLED] if with_students else [])
+            for role in course.role_set.filter(role__in=roles_to_copy):
                 n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
-
             print('Done')
             print('New Course id is {0}'.format(new_course.id))
         else:
