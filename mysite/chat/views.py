@@ -358,7 +358,25 @@ class ChatInitialView(LoginRequiredMixin, View):
 
 
 class ChatNoJSInit(object):
+    '''
+    This class implements basic chat initialization process (no JS required).
+    '''
     def get_or_init_chat(self, enroll_code, chat_id):
+        '''
+        Logic of creating new chat is:
+        * check chat_id
+            * if chat_it is present:
+                * get_chat by id, enroll_code, user
+            * if no chat_id
+                * get chat by fsmName, enroll_code, user
+         * if chat waws found
+            * if exist - return it
+            * if not exist - create new one
+        * check messages count in this Chat
+            * if 0 - call to self.next_handler.start_point(
+        * check chat.state
+            * if chat.state is None - set chat.next_point to None and save chat.
+        '''
         if chat_id:
             chat = self.get_chat(
                 self.request,
@@ -372,13 +390,18 @@ class ChatNoJSInit(object):
                 **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
             )
         if not chat and enroll_code:
-            chat = self.create_new_chat(self.request, enroll_code, enroll_code.courseUnit)
+            chat = self.create_new_chat(
+                self.request,
+                enroll_code,
+                enroll_code.courseUnit
+            )
         if chat.message_set.count() == 0:
             self.next_handler.start_point(
-                unit=enroll_code.courseUnit.unit, chat=chat, request=self.request
+                unit=enroll_code.courseUnit.unit,
+                chat=chat,
+                request=self.request
             )
         elif not chat.state:
-            next_point = None
             chat.next_point = next_point
             chat.save()
         return chat, chat_id
