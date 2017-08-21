@@ -76,8 +76,10 @@ class Command(BaseCommand):
                 for ul in list(cu.unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)):
                     n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
                     n_unit.reorder_exercise()
-
-            roles_to_copy = [Role.INSTRUCTOR] + ([Role.ENROLLED] if with_students else [])
+            roles_to_copy = [
+                r[0] for r in Role.ROLE_CHOICES
+                if r[0] != Role.ENROLLED
+            ] + ([Role.ENROLLED] if with_students else [])
             for role in course.role_set.filter(role__in=roles_to_copy):
                 n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
             print('Done')
