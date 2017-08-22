@@ -42,46 +42,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         course_id = options['course_id']
-        publish = options['publish']
-        with_students = options['with_students']
-
         course = Course.objects.filter(id=course_id).first()
 
         if course:
-            title = course.title + " copied {}".format(timezone.now())
-            new_course = copy_model_instance(
-                course,
-                atime=timezone.now(),
-                title=title
-            )
-            for cu in course.courseunit_set.all():
-                # deal with Unit
-                n_unit = copy_model_instance(cu.unit, atime=timezone.now())
-                # deal with CourseUnit
-                n_cu_kw = dict(
-                    course=new_course,
-                    unit=n_unit,
-                    atime=timezone.now(),
-                )
-                if not publish:
-                    n_cu_kw['releaseTime'] = None
-                n_cu = copy_model_instance(cu, **n_cu_kw)
-
-                uls = list(cu.unit.get_exercises())
-                # copy exercises and error models
-                for ul in uls:
-                    n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
-
-                # copy resources
-                for ul in list(cu.unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)):
-                    n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
-                    n_unit.reorder_exercise()
-            roles_to_copy = [
-                r[0] for r in Role.ROLE_CHOICES
-                if r[0] != Role.ENROLLED
-            ] + ([Role.ENROLLED] if with_students else [])
-            for role in course.role_set.filter(role__in=roles_to_copy):
-                n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
+            new_course = course.deep_clone(**options)
             print('Done')
             print('New Course id is {0}'.format(new_course.id))
         else:

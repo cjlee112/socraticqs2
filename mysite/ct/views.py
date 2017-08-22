@@ -2,6 +2,7 @@ import time
 import urllib
 from datetime import datetime
 from collections import OrderedDict
+from django.contrib import messages
 
 from django.db.models import Q
 from django.conf import settings
@@ -428,6 +429,25 @@ def edit_course(request, course_id):
             reports = CourseReport.objects.filter(course_id=course_id).order_by('-date')
         )
     )
+
+
+@login_required
+def clone_course(request, course_id):
+    if request.POST and course_id:
+        course = get_object_or_404(Course, id=course_id)
+        form = CloneCourseForm(request.POST)
+        if form.is_valid():
+            default_opts = {
+                'publish': False,
+                'with_students': False
+            }
+            default_opts.update(form.cleaned_data)
+            new_course = course.deep_clone(**default_opts)
+            messages.add_message(request, messages.INFO, 'You just cloned course and now you are editing new course.')
+            return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
+        messages.add_message(request, messages.ERROR, 'Not valid request data!')
+    return redirect(request.META.get('HTTP_REFERER', reverse('ct:home')))
+
 
 
 def courses(request):
