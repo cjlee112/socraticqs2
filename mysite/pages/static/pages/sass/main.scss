@@ -358,31 +358,33 @@ form small {
 
 .hero {
   position: relative;
- 	padding: 0;
- 	background: #ccc url(../img/hero-bg.jpg) no-repeat center center;
- 	background-size: cover;
-
- 	h1 {
-    margin: 0;
- 	}
+  padding: 0;
+  background: #ccc url(../img/hero-bg.jpg) no-repeat center center;
+  background-size: cover;
 
   .inner {
     padding: 170px 0 180px 0;
     font-size: 16px;
     line-height: 28px;
+    text-align: center;
+  }
 
-    h1, p {
-   		color: #fff;
-      max-width: 652px;
-   	}
+  h1, p {
+    color: #fff;
+    max-width: 712px;
+  }
 
-    p {
-   		margin: 13px 0 35px 0;
-   	}
 
-    .btn {
-      margin: 0;
-   	}
+  h1 {
+    margin: 0 auto;
+  }
+
+  p {
+    margin: 13px auto 35px auto;
+  }
+
+  .btn {
+    margin: 0;
   }
 
   .cta-bar {

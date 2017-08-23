@@ -78,3 +78,6 @@ node_modules/
 .vscode/
 mysite/media/
 .coverage.*
+
+# SASS
+.sass-cache
