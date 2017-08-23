@@ -166,13 +166,9 @@ class InterestedPlugin(AbstractPlugin):
     email_error_msg = models.CharField(max_length=200, default="Please enter your email")
     role_error_msg = models.CharField(max_length=200, default="Please enter your Title/Role")
 
-    email_to = models.EmailField(default='cmathews@elancecloud.com')
+    email_to = models.EmailField(default='dummy@mail.com')
 
-    btn_text = models.CharField(max_length=70, default='Keep Me Informed')
-    description_field = fields.HTMLField(
-        default="Your Availability: Please provide several day/times that you are available in January for a"
-                "2-hour kick-off meeting (video conference)."
-    )
+    btn_text = models.CharField(max_length=70, default='Schedule to demo')
     bg_image = FilerImageField(null=True, blank=True)
 
 
@@ -184,7 +180,6 @@ class InterestedForm(models.Model):
     organization = models.CharField(max_length=200, blank=True)
     role = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
-    when_join = models.TextField(blank=True)
 
 
 class DetailsChildPlugin(AbstractPlugin):
