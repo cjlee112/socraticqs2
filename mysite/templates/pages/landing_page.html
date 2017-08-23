@@ -27,7 +27,6 @@
 
         <nav class="navbar-default navbar-static-top" role="navigation">
           <div class="container">
-
               <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                   <span class="icon-bar"></span>
@@ -36,7 +35,7 @@
                 </button>
                 <a class="navbar-brand" href="/">Courselets.org</a>
               </div>
-
+              {% if request.user.is_authenticated %}
               <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                   <li class="child sibling">
@@ -45,15 +44,22 @@
                   {% show_menu  0 1 100 100 %}
 
                   <li class="child sibling">
-                    {% if request.user.is_authenticated %}
+
                     <a href="{% url 'ct:person_profile' user_id=request.user.id %}">Profile</a>
-                    {% else %}
-                    <a href="{% url 'login' %}">Login</a>
-                    {% endif %}
+
                   </li>
 
                 </ul>
               </div>
+              {% else %}
+              <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav" style="float: right;">
+                  <li class="child sibling">
+                    <a href="{% url 'login' %}">Login</a>
+                  </li>
+                </ul>
+              </div>
+              {% endif %}
           </div>
         </nav>
 

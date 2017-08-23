@@ -42,11 +42,6 @@
           <label>{{ instance.email_field }}</label>
           <input type="text" name="email" placeholder="Email" data-validation="email" data-validation-error-msg="{{ instance.email_error_msg }}">
         </div>
-        <div>
-          <label>{{ instance.description_field|safe }}</label>
-          <textarea name="when_join"></textarea>
-        </div>
-
         <input type="submit" value="{{ instance.btn_text }}">
       </div>
     </div>
