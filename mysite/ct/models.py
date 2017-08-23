@@ -1118,6 +1118,7 @@ class Course(models.Model):
                 course=new_course,
                 unit=n_unit,
                 atime=timezone.now(),
+                releaseTime=timezone.now()
             )
             if not publish:
                 n_cu_kw['releaseTime'] = None

@@ -53,7 +53,7 @@ class CloneCourseCommandTest(TestCase):
 
     def test_publish(self):
         '''
-        If we pass --publish - courseUnit will be copied as is
+        If we pass --publish - courseUnit will be copied published
         :return:
         '''
         c = Course.objects.get(id=1)
@@ -85,6 +85,6 @@ class CloneCourseCommandTest(TestCase):
         ncu = nc.courseunit_set.all()
 
         self.assertEqual(ncu.count(), cu.count())
-        self.assertTrue(publ_cu == n_publ_cu)
-        self.assertTrue(np_cu == n_np_cu)
-
+        self.assertFalse(publ_cu == n_publ_cu)
+        self.assertFalse(np_cu == n_np_cu)
+        self.assertTrue(publ_cu+np_cu == n_publ_cu)
