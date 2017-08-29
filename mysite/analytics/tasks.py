@@ -1,3 +1,4 @@
+import pytz
 from mysite.celery import app
 
 import re
@@ -57,6 +58,11 @@ def report(course_id, user_id):
         unitLesson_id = obj.unitLesson.id
         courselet_id = obj.unitLesson.unit.id
         submit_time = obj.atime
+
+        localized_ts = submit_time.astimezone(
+            pytz.timezone(obj.author.profile.timezone) if obj.author.profile.timezone else settings.TIME_ZONE
+        ).strftime("%d-%m-%Y-%H:%M:%SZ%z")
+
         r = dict(
           id=_id,
           author_id=author_id,
@@ -68,7 +74,7 @@ def report(course_id, user_id):
           status=status,
           unitLesson_id=unitLesson_id,
           courselet_id=courselet_id,
-          submitted_time=str(submit_time.strftime("%d-%m-%Y-%H:%M:%S"))
+          submitted_time=localized_ts
         )
         report.append(r)
     if report:

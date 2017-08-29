@@ -56,6 +56,18 @@ For a developer / test version to access social-auth, you will need to add the f
        'django.contrib.auth.backends.ModelBackend',
     )
 
+To install requirements:
+::
+
+    pip install -r requirements/dev.txt
+
+
+Download GeoIp database (run commands in the root of the project):
+::
+
+    wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+    gunzip GeoLiteCity.dat.gz
+
 To run project in Docker:
 -------------------------
 Go to the root of the project and run this command:
