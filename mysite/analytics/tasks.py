@@ -1,4 +1,5 @@
 import pytz
+from accounts.models import Profile
 from mysite.celery import app
 
 import re
@@ -40,8 +41,13 @@ def report(course_id):
         courselet_id = obj.unitLesson.unit.id
         submit_time = obj.atime
 
+        try:
+            u_tz = obj.author.profile.timezone
+        except Profile.DoesNotExist:
+            u_tz = settings.TIME_ZONE
+
         localized_ts = submit_time.astimezone(
-            pytz.timezone(obj.author.profile.timezone) if obj.author.profile.timezone else settings.TIME_ZONE
+            pytz.timezone(u_tz)
         ).strftime("%d-%m-%Y-%H:%M:%SZ%z")
 
         r = dict(
