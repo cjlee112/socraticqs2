@@ -1104,7 +1104,17 @@ class Course(models.Model):
     def deep_clone(self, **options):
         publish = options.get('publish', False)
         with_students = options.get('with_students', False)
-        title = self.title + " copied {}".format(timezone.now())
+        title = self.title + " copied {}".format(
+            timezone.now().astimezone(
+                timezone.get_default_timezone()
+            ).strftime("%Y-%m-%d %H:%M Z%z")
+        )
+
+        if len(title) > self._meta.get_field_by_name('title')[0].max_length:
+            # remove copied copied copied from title, only last will be here
+            l_t = title.split('copied')
+            title = ''.join([l_t[0], 'copied', l_t[-1]])
+
         new_course = copy_model_instance(
             self,
             atime=timezone.now(),
