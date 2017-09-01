@@ -1106,7 +1106,7 @@ class Course(models.Model):
     def deep_clone(self, **options):
         publish = options.get('publish', False)
         with_students = options.get('with_students', False)
-        title = self.title + " copied {}".format(timezone.now())
+        title = self.title.split('copied')[0] + " copied {}".format(timezone.now())
         new_course = copy_model_instance(
             self,
             atime=timezone.now(),
