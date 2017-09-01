@@ -78,7 +78,8 @@ Added by: {% if course.addedBy.get_full_name %}{{ course.addedBy.get_full_name }
     <div class="col-md-6 row">
       <div class="col-md-6">
         <select name="copy_options">
-          <option value="publish" checked="1">Publish courselets in copied course</option>
+          <option value="unpublish" checked="true">Unpublish all courselets in copied course</option>
+          <option value="publish">Publish all courselets in copied course</option>
           <option value="asis">Copy this course as it is</option>
         </select>
       </div>

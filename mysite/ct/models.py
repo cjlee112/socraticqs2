@@ -1105,6 +1105,7 @@ class Course(models.Model):
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)
+        unpublish = options.get('unpublish', False)
         with_students = options.get('with_students', False)
 <<<<<<< HEAD
         title = self.title.split('copied')[0] + " copied {}".format(timezone.now())
@@ -1126,12 +1127,16 @@ class Course(models.Model):
                 course=new_course,
                 unit=n_unit,
                 atime=timezone.now(),
-                releaseTime=timezone.now()
+                releaseTime=None
             )
-            if not publish:
+            if publish:
+                # if publish - set release time
+                n_cu_kw['releaseTime'] = timezone.now()
+            elif unpublish:
+                # if unpublish - set release time to None
                 n_cu_kw['releaseTime'] = None
-            if asis:
-                # if copy as is - remove release time from kw. it will be the same as in source obj.
+            elif asis:
+                # if copy as is - remove releaseTime from kw. it will be the same as in source obj.
                 del n_cu_kw['releaseTime']
 
             n_cu = copy_model_instance(cu, **n_cu_kw)
