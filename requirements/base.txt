@@ -42,3 +42,6 @@ pandas==0.19.2
 unicodecsv==0.14.1
 
 pygeoip==0.3.2
+
+# Raven
+raven==6.1.0
