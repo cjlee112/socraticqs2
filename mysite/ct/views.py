@@ -439,6 +439,7 @@ def clone_course(request, course_id):
         if form.is_valid():
             default_opts = {
                 'publish': False,
+                'unpublish': False,
                 'with_students': False,
                 'asis': False,
             }
