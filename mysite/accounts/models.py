@@ -43,7 +43,7 @@ class Profile(models.Model):
         except cls.DoesNotExist:
             profile = cls.objects.create(user=request.user)
 
-        if profile.timezone is None:
+        if not profile.timezone:
             gi = pygeoip.GeoIP(settings.GEO_IP_DB_PATH)
             loc_data = gi.record_by_addr(cls.get_user_ip(request)) or {}
             timezone = loc_data.get('time_zone', settings.TIME_ZONE)
