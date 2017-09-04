@@ -172,6 +172,9 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     # CMS pages
     'pages',
+
+    # Raven
+    'raven.contrib.django.raven_compat',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
