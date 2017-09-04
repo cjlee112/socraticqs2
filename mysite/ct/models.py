@@ -1101,24 +1101,17 @@ class Course(models.Model):
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+    copied_from = models.ForeignKey('Course', blank=True, null=True)
+
     def deep_clone(self, **options):
         publish = options.get('publish', False)
         with_students = options.get('with_students', False)
-        title = self.title + " copied {}".format(
-            timezone.now().astimezone(
-                timezone.get_default_timezone()
-            ).strftime("%Y-%m-%d %H:%M Z%z")
-        )
-
-        if len(title) > self._meta.get_field_by_name('title')[0].max_length:
-            # remove copied copied copied from title, only last will be here
-            l_t = title.split('copied')
-            title = ''.join([l_t[0], 'copied', l_t[-1]])
-
+        title = self.title.split('copied')[0] + " copied {}".format(timezone.now())
         new_course = copy_model_instance(
             self,
             atime=timezone.now(),
-            title=title
+            title=title,
+            copied_from=self
         )
         for cu in self.courseunit_set.all():
             # deal with Unit
@@ -1150,7 +1143,6 @@ class Course(models.Model):
         for role in self.role_set.filter(role__in=roles_to_copy):
             n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
         return new_course
-
 
     def create_unit(self, title, description=None, img_url=None, small_img_url=None, author=None):
         if author is None:
