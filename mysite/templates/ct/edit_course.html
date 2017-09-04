@@ -11,6 +11,11 @@
 {% endblock %}
 
 {% block content %}
+
+{% if course.copied_from %}
+<b>Copied from:</b> <a href="{% url 'ct:course' course_id=course.copied_from.id %}">{{ course.copied_from.title }}</a><br>
+{% endif %}
+
 <ul class="nav nav-tabs">
   {% for tabLabel,tabURL in pageData.navTabs %}
   {% if "/" in tabURL %}

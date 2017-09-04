@@ -1107,7 +1107,9 @@ class Course(models.Model):
         publish = options.get('publish', False)
         with_students = options.get('with_students', False)
         asis = options.get('asis', False)
-        title = self.title + " copied {}".format(timezone.now())
+        title = self.title.split('copied')[0] + " copied {}".format(
+            timezone.now().astimezone(timezone.get_default_timezone())
+        )
 
         new_course = copy_model_instance(
             self,
