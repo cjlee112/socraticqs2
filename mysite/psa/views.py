@@ -134,8 +134,10 @@ def complete(request, *args, **kwargs):
     form = CompleteEmailForm(request.POST or request.GET)
     if form.is_valid() or 'verification_code' in request.GET:
         try:
-            Profile.check_tz(request)
-            return social_complete(request, 'email', *args, **kwargs)
+            resp = social_complete(request, 'email', *args, **kwargs)
+            if request.user.is_authenticated():
+                Profile.check_tz(request)
+            return resp
         except AuthMissingParameter:
             messages.error(
                 request,
