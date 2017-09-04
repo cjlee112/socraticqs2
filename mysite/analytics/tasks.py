@@ -61,7 +61,7 @@ def report(course_id, user_id):
         submit_time = obj.atime
 
         try:
-            u_tz = obj.author.profile.timezone
+            u_tz = obj.author.profile.timezone or settings.TIME_ZONE
         except Profile.DoesNotExist:
             u_tz = settings.TIME_ZONE
 
