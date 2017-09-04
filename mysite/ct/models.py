@@ -1125,6 +1125,10 @@ class Course(models.Model):
             )
             if not publish:
                 n_cu_kw['releaseTime'] = None
+            if asis:
+                # if copy as is - remove release time from kw. it will be the same as in source obj.
+                del n_cu_kw['releaseTime']
+
             n_cu = copy_model_instance(cu, **n_cu_kw)
 
             uls = list(cu.unit.get_exercises())
