@@ -1105,14 +1105,8 @@ class Course(models.Model):
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)
-        unpublish = options.get('unpublish', False)
         with_students = options.get('with_students', False)
-<<<<<<< HEAD
         title = self.title.split('copied')[0] + " copied {}".format(timezone.now())
-=======
-        asis = options.get('asis', False)
-        title = self.title + " copied {}".format(timezone.now())
->>>>>>> fix(issue#666): Changes in edit course - addded checkbox for cloning course with all student roles, added option to copy course as it is (select, not checkbox)
         new_course = copy_model_instance(
             self,
             atime=timezone.now(),
@@ -1127,16 +1121,12 @@ class Course(models.Model):
                 course=new_course,
                 unit=n_unit,
                 atime=timezone.now(),
-                releaseTime=None
+                releaseTime=timezone.now()
             )
-            if publish:
-                # if publish - set release time
-                n_cu_kw['releaseTime'] = timezone.now()
-            elif unpublish:
-                # if unpublish - set release time to None
+            if not publish:
                 n_cu_kw['releaseTime'] = None
-            elif asis:
-                # if copy as is - remove releaseTime from kw. it will be the same as in source obj.
+            if asis:
+                # if copy as is - remove release time from kw. it will be the same as in source obj.
                 del n_cu_kw['releaseTime']
 
             n_cu = copy_model_instance(cu, **n_cu_kw)
