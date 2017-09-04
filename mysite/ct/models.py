@@ -1125,9 +1125,6 @@ class Course(models.Model):
             if publish:
                 # if publish - set release time
                 n_cu_kw['releaseTime'] = timezone.now()
-            elif unpublish:
-                # if unpublish - set release time to None
-                n_cu_kw['releaseTime'] = None
             elif asis:
                 # if copy as is - remove releaseTime from kw. it will be the same as in source obj.
                 del n_cu_kw['releaseTime']
