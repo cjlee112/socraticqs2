@@ -327,11 +327,4 @@ class BaseForm(forms.ModelForm):
 
 class CloneCourseForm(forms.Form):
     '''Clone course form'''
-    OPTS_CHOICES = [
-        ('asis', 'Copy course as it is'),
-        ('publish', 'Publish all courselets in this course'),
-        ('unpublish', 'Unpublish all courselets in this course'),
-    ]
-    copy_options = forms.ChoiceField(choices=OPTS_CHOICES)
-    with_students = forms.BooleanField(required=False)
-
+    publish = forms.BooleanField(required=False, widget=widgets.CheckboxInput)
