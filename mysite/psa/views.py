@@ -130,6 +130,13 @@ def set_pass(request):
         return context(exception='Something goes wrong...', person=user)
 
 
+def social_auth_complete(request, *args, **kwargs):
+    response = social_complete(request, *args, **kwargs)
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
+    return response
+
+
 def complete(request, *args, **kwargs):
     form = CompleteEmailForm(request.POST or request.GET)
     if form.is_valid() or 'verification_code' in request.GET:
