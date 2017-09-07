@@ -1,3 +1,5 @@
+import pygeoip
+
 from django.contrib import messages
 from django.contrib.messages.api import add_message
 from django.core.urlresolvers import reverse
@@ -13,6 +15,7 @@ from django.contrib.auth import logout, login, authenticate
 from social.backends.utils import load_backends
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
+from accounts.models import Profile
 from psa.forms import CompleteEmailForm
 
 from psa.utils import render_to
@@ -76,6 +79,7 @@ def custom_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                Profile.check_tz(request)
                 return redirect(request.POST.get('next', '/ct/'))
     else:
         params = request.GET
@@ -126,17 +130,28 @@ def set_pass(request):
         return context(exception='Something goes wrong...', person=user)
 
 
+def social_auth_complete(request, *args, **kwargs):
+    response = social_complete(request, *args, **kwargs)
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
+    return response
+
+
 def complete(request, *args, **kwargs):
     form = CompleteEmailForm(request.POST or request.GET)
     if form.is_valid() or 'verification_code' in request.GET:
         try:
-            return social_complete(request, 'email', *args, **kwargs)
+            resp = social_complete(request, 'email', *args, **kwargs)
+            if request.user.is_authenticated():
+                Profile.check_tz(request)
+            return resp
         except AuthMissingParameter:
             messages.error(
                 request,
                 "Email already verified. Please log in using form below or sign up."
             )
             if request.user.is_authenticated():
+                Profile.check_tz(request)
                 return redirect('ct:person_profile', user_id=request.user.id)
             return redirect('ct:home')
     else:

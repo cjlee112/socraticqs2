@@ -81,3 +81,5 @@ mysite/media/
 
 # SASS
 .sass-cache
+
+*.dat

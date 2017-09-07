@@ -172,6 +172,9 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     # CMS pages
     'pages',
+
+    # Raven
+    'raven.contrib.django.raven_compat',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -302,6 +305,9 @@ CACHES = {
     }
 }
 
+
+# Path to GeoIp database to convert users IP to location
+GEO_IP_DB_PATH = os.path.join(BASE_DIR, 'GeoLiteCity.dat')
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

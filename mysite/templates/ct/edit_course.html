@@ -11,6 +11,11 @@
 {% endblock %}
 
 {% block content %}
+
+{% if course.copied_from %}
+<b>Copied from:</b> <a href="{% url 'ct:course' course_id=course.copied_from.id %}">{{ course.copied_from.title }}</a><br>
+{% endif %}
+
 <ul class="nav nav-tabs">
   {% for tabLabel,tabURL in pageData.navTabs %}
   {% if "/" in tabURL %}
@@ -70,16 +75,20 @@ Added by: {% if course.addedBy.get_full_name %}{{ course.addedBy.get_full_name }
 <hr>
 <form action="{% url 'ct:deep_copy_course' course_id=course.id %}" method="post">
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
       To copy this course for a new quarter/semester click this button.
     </div>
 
     {% csrf_token %}
-    <div class="col-md-4">
-      Publish courselets in copied course?
-      <input type="checkbox" name="publish">
+    <div class="col-md-6 row">
+      <div class="col-md-6">
+        <select name="copy_options">
+          <option value="unpublish" checked="true">Unpublish all courselets in copied course</option>
+          <option value="publish">Publish all courselets in copied course</option>
+          <option value="asis">Copy this course as it is</option>
+        </select>
+      </div>
     </div>
-
     <div class="col-md-2 text-right">
       <input type="submit" value="Copy course" class="btn btn-danger">
     </div>

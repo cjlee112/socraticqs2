@@ -439,13 +439,18 @@ def clone_course(request, course_id):
         if form.is_valid():
             default_opts = {
                 'publish': False,
-                'with_students': False
+                'unpublish': False,
+                'with_students': False,
+                'asis': False,
             }
+            for f, v in default_opts.items():
+                if f == form.cleaned_data['copy_options']:
+                    default_opts[f] = True
             default_opts.update(form.cleaned_data)
             new_course = course.deep_clone(**default_opts)
             messages.add_message(request, messages.INFO, 'You just cloned course and now you are editing new course.')
             return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
-        messages.add_message(request, messages.ERROR, 'Not valid request data!')
+        messages.add_message(request, messages.ERROR, 'Not valid request data! {}'.format(form.errors))
     return redirect(request.META.get('HTTP_REFERER', reverse('ct:home')))
 
 
