@@ -153,8 +153,22 @@ class GET_ANSWER(object):
     )
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
+            dict(name='next', toNode='CONFIDENCE', title='Go to self-assessment'),
         )
+
+
+class CONFIDENCE(object):
+    title = 'Select the level of your confidence?'
+    edges = (
+        dict(name='next', toNode='GET_CONFIDENCE', title='Go to choosing your confidence'),
+    )
+
+
+class GET_CONFIDENCE(object):
+    title = 'Choose confidence'
+    edges = (
+        dict(name='next', toNode='WAIT_ASSESS', title='Go to self-assessment'),
+    )
 
 
 class WAIT_ASSESS(object):
@@ -256,6 +270,8 @@ def get_specs():
             TITLE,
             ASK,
             GET_ANSWER,
+            CONFIDENCE,
+            GET_CONFIDENCE,
             WAIT_ASSESS,
             ASSESS,
             GET_ASSESS,
