@@ -2,6 +2,8 @@ import json
 import re
 from functools import partial
 
+from django.utils import timezone
+
 from ct.models import (
     Role,
     Unit,
@@ -343,13 +345,13 @@ class ChatMixin(object):
                 text = self.get_help(chat.state, request=None)
             else:
                 text = self.help
-            message = Message.objects.get_or_create(
+            message = Message.objects.create(
                             chat=chat,
                             owner=chat.user,
                             text=text,
                             input_type='custom',
                             kind='message',
-                            is_additional=True)[0]
+                            is_additional=True)
         if self.node_name_is_one_of('GET_RESOLVE'):
                 message = Message.objects.create(
                             contenttype='unitlesson',
