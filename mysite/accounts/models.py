@@ -4,6 +4,11 @@ import pygeoip
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+import pytz
+
+ALL_TIMEZONES_CHOICES = [
+    (i, i) for i in pytz.all_timezones
+]
 
 
 class Profile(models.Model):
@@ -14,7 +19,7 @@ class Profile(models.Model):
      - `timezone` - offset from UTC-0
     """
     user = models.OneToOneField(User)
-    timezone = models.CharField(max_length=255, blank=True, null=True)
+    timezone = models.CharField(max_length=255, blank=True, null=True, choices=ALL_TIMEZONES_CHOICES)
 
     @staticmethod
     def get_user_ip(request):
