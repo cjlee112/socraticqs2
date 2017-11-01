@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 import pygeoip
+import pytz
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -48,7 +49,7 @@ class Profile(models.Model):
         except cls.DoesNotExist:
             profile = cls.objects.create(user=request.user)
 
-        if not profile.timezone:
+        if profile.timezone not in pytz.all_timezones:
             gi = pygeoip.GeoIP(settings.GEO_IP_DB_PATH)
             loc_data = gi.record_by_addr(cls.get_user_ip(request)) or {}
             timezone = loc_data.get('time_zone', settings.TIME_ZONE)

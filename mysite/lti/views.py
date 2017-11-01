@@ -21,6 +21,7 @@ from lti.models import LTIUser, CourseRef, LtiConsumer
 from .outcomes import store_outcome_parameters
 from ct.models import Course, Role, CourseUnit, Unit
 from chat.models import EnrollUnitCode
+from accounts.models import Profile
 
 
 ROLES_MAP = {
@@ -153,6 +154,9 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
     if not user.is_linked:
         user.create_links()
     user.login(request)
+
+    # check user timezone and save it if not yet set or set incorrect timezone
+    Profile.check_tz(request)
 
     if not course_id or not Course.objects.filter(id=course_id).exists():
         if course_ref:
