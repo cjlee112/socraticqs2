@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from accounts.models import Profile
 
 from psa.models import UserSocialAuth
 from ct.models import Course, Role, Unit, CourseUnit, UnitLesson, Lesson
@@ -284,6 +285,36 @@ class ParamsTest(LTITestCase):
         self.assertEqual(LTIUser.objects.get(lti_consumer=self.lti_consumer).django_user,
                          social.user)
 
+
+    def test_lti_user_timezone_positive(self, mocked):
+        self.user.profile.delete()
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/', data=self.headers, follow=True, REMOTE_ADDR='194.242.96.17')
+        # update user, get it again with newly created profile
+        user = User.objects.get(id=self.user.id)
+        # profile should be created
+        self.assertIsNotNone(user.profile)
+        profile = Profile.objects.get(user=user)
+        self.assertEqual(profile.id, user.profile.id)
+        self.assertIsNotNone(profile.timezone)
+        # IP 194.242.96.17 should be associated with Europe/Zaporozhye TZ
+        self.assertEqual(profile.timezone, 'Europe/Zaporozhye')
+
+
+    def test_lti_user_timezone_default_value(self, mocked):
+        self.user.profile.delete()
+        mocked.return_value.is_valid_request.return_value = True
+        self.client.post('/lti/', data=self.headers, follow=True, REMOTE_ADDR='172.16.0.1')
+        # update user, get it again with newly created profile
+        user = User.objects.get(id=self.user.id)
+        # profile should be created
+        self.assertIsNotNone(user.profile)
+        profile = Profile.objects.get(user=user)
+        self.assertEqual(profile.id, user.profile.id)
+        self.assertIsNotNone(profile.timezone)
+        # IP 194.242.96.17 should be associated with Europe/Zaporozhye TZ
+        from django.conf import settings
+        self.assertEqual(profile.timezone, settings.TIME_ZONE)
 
 @ddt
 @patch('lti.views.DjangoToolProvider')
