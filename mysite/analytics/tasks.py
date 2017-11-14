@@ -1,4 +1,5 @@
 import pytz
+from pytz.exceptions import UnknownTimeZoneError
 from accounts.models import Profile
 from mysite.celery import app
 
@@ -65,9 +66,13 @@ def report(course_id, user_id):
         except Profile.DoesNotExist:
             u_tz = settings.TIME_ZONE
 
-        localized_ts = submit_time.astimezone(
-            pytz.timezone(u_tz)
-        ).strftime("%d-%m-%Y-%H:%M:%SZ%z")
+        try:
+            user_tz = pytz.timezone(u_tz)
+        except UnknownTimeZoneError as e:
+            user_tz = pytz.timezone(settings.TIME_ZONE)
+            print("User has incorrect time zone in Profile. Will use default TZ.")
+
+        localized_ts = submit_time.astimezone(user_tz).strftime("%d-%m-%Y-%H:%M:%SZ%z")
 
         r = dict(
           id=_id,
