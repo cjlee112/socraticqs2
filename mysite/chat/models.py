@@ -291,8 +291,14 @@ class Message(models.Model):
                 html = self.content.text
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
-                if sub_kind and not self.content.selfeval:
+                if sub_kind and not self.content.selfeval and not self.content.confidence:
                     if sub_kind == 'choices':
+                        html = self.render_my_choices()
+                        return html
+
+                if sub_kind and self.content.confidence and self.content.selfeval and not self.text:
+                    # if look history - we already have confidence and selfeval so just return msg text
+                    if self.input_type == 'options':
                         html = self.render_my_choices()
                         return html
 
@@ -303,7 +309,7 @@ class Message(models.Model):
                     is_chat_fsm = (
                         self.chat and
                         self.chat.state and
-                        self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat')
+                        self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat')  # TODO: add livechat here
                     )
                     values = CONF_CHOICES.values() + EVAL_OPTIONS.values()
                     text_in_values = self.text in values
@@ -344,11 +350,15 @@ class Message(models.Model):
                         )
                         html += self.get_choices()
                 elif (self.content.kind == 'answers' and
-                      self.content.parent.lesson.sub_kind and not self.response_to_check.selfeval and
-                      self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES):
-                    # render answer
-                    correct = self.content.parent.lesson.get_correct_choices()
-                    html = self.render_choices(correct, [])
+                      self.content.parent.lesson.sub_kind and
+                      self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
+                    ):
+                    if not self.response_to_check.selfeval:
+                        correct = self.content.parent.lesson.get_correct_choices()
+                        html = self.render_choices(correct, [])
+                    elif self.response_to_check.selfeval and self.response_to_check.confidence:
+                        correct = self.content.parent.lesson.get_correct_choices()
+                        html = self.render_choices(correct, [])
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(

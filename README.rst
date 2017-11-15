@@ -85,6 +85,19 @@ There are a couple of files related to docker. They are:
  - docker-commands.sh - clear *.pyc files and starts web server
 
 
+Multiple Choices Feature:
+-------------------------
+
+How to test this functionality:
+* setup project
+* load fixtures from dumpdata/debug-wo-fsm.json
+* load fixtures from dumpdata/ct_mult_choices.json
+* open admin UI and create roles for your user and course named `test MultChoices`
+* observe Courses Dashboard and you will see `test MultChoices` course with a couple of cocurselets inside of it.
+* .....
+* Profit!
+
+
 Quality check
 -------------
 

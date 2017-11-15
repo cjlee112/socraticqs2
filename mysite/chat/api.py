@@ -101,7 +101,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             message.content_id and
             next_point == message
         ):
-            self.roll_fsm_forward(chat, message)
+            chat.next_point = self.next_handler.next_point(
+                current=message.content, chat=chat, message=message, request=self.request
+            )
+            chat.save()
+            message.chat = chat
+            # should be replaced with next line:
+            # self.roll_fsm_forward(chat, message)
 
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
@@ -202,8 +208,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             resp.course = message.chat.enroll_code.courseUnit.course
             resp.author = self.request.user
             resp.activity = activity
-            # NOTE: next line is a temporary solution.
-            resp.confidence = StudentResponse.SURE
             resp.save()
 
             if not message.timestamp:
