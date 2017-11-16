@@ -1071,6 +1071,21 @@ class Response(models.Model):
             if self.studenterror_set.count() == 0:
                 return self.CLASSIFY_STEP, 'classify your error(s)'
 
+    def show_my_choices(self):
+        if self.sub_kind != 'choices':
+            raise ValueError('Response.sub_kind should be choices to call this function')
+
+        avial_choices_d = dict(self.lesson.get_choices())
+        split_selected_choices = self.text.split('[selected_choices] ')
+        if len(split_selected_choices) > 1:
+            selected_choices = split_selected_choices[1]
+            return "\r\n".join([
+                avial_choices_d.get(int(i), "")
+                for i in selected_choices
+                if unicode.isdigit(i)
+            ])
+        return ""
+
 
 
 class StudentError(models.Model):

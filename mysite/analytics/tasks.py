@@ -17,6 +17,7 @@ from pandas import DataFrame
 from django.conf import settings
 from django.core.files import File
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from ct.models import Response
 from .models import CourseReport
@@ -31,7 +32,7 @@ def report(course_id, user_id):
     last_resps = []
 
     q = Response.objects.filter(
-        kind='orct', unitLesson__order__isnull=False, course__id=course_id
+        Q(kind='orct') | Q(sub_kind='choices'), unitLesson__order__isnull=False, course__id=course_id
     )
 
     for obj in q:
@@ -53,7 +54,10 @@ def report(course_id, user_id):
             lti_identity = lti_user.user_id
         else:
             lti_identity = None
-        text = obj.text
+        if obj.sub_kind == 'choices':
+            text = obj.show_my_choices()
+        else:
+            text = obj.text
         confidence = obj.confidence
         selfeval = obj.selfeval
         status = obj.status
