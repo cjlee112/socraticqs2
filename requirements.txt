@@ -1,2 +1,2 @@
 # Inherits requirements/test.txt for TravisCI
--r requirements/test.txt
+-r requirements/dev.txt
