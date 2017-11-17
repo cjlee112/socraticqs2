@@ -1,5 +1,6 @@
 # Packages required for local development
--r base.txt
+-r test.txt
+-r prod.txt
 
 ipython
 ipdb

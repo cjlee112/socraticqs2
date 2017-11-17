@@ -1,13 +1,25 @@
-db:
- image: postgres
+version: '2'
+services:
+  courselets:
+    container_name: courselets
+    env_file: ./envs/local.env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh /courselets/docker-commands.sh
+    volumes:
+      - .:/courselets
+    ports:
+      - "8000:8000"
+    links:
+      - postgres
 
-web:
- image: maxsocl/courselets:latest
- command: sh /code/docker-commands.sh
- volumes:
-   - .:/code
- ports:
-   - "8000:8000"
- links:
-   - db
- env_file: web.env
+  postgres:
+    container_name: cr_postgres
+    image: postgres:9.6
+    env_file: ./envs/local.env
+    volumes:
+      - cr_db:/var/lib/postgresql/data/
+
+volumes:
+  cr_db:
