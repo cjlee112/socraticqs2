@@ -1,7 +1,7 @@
-from django.http.response import Http404
 import injections
 from itertools import chain
 
+from django.http.response import Http404
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
@@ -10,8 +10,8 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from chat.models import EnrollUnitCode
 
+from chat.models import EnrollUnitCode
 from .models import Message, Chat, ChatDivider
 from .views import ChatInitialView
 from .serializers import (
@@ -77,6 +77,11 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
     permission_classes = (IsAuthenticated, IsOwner)
 
     def roll_fsm_forward(self, chat, message):
+        """ This method should be used when we want to roll fsm forward to the next node,serialize message and return it
+        :param chat: Chat instance
+        :param message: Message
+        :return: Response with serialized message
+        """
         chat.next_point = self.next_handler.next_point(
             current=message.content, chat=chat, message=message, request=self.request
         )
@@ -101,13 +106,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             message.content_id and
             next_point == message
         ):
-            chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=self.request
-            )
-            chat.save()
-            message.chat = chat
-            # should be replaced with next line:
-            # self.roll_fsm_forward(chat, message)
+            # chat.next_point = self.next_handler.next_point(
+            #     current=message.content, chat=chat, message=message, request=self.request
+            # )
+            # chat.save()
+            # message.chat = chat
+            # # should be replaced with next line:
+            self.roll_fsm_forward(chat, message)
 
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
@@ -175,6 +180,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 serializer.save()
 
+        # TODO: Refactor next lines - split them in variables to make if conditions simpler.
         if (
             message.contenttype == 'response' and
             message.lesson_to_answer and
@@ -188,18 +194,21 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 try:
                     selected = selected_items[str(message.id)]['choices']
                 except KeyError:
+                    # here request.data is like {"option":1,"chat_id":9,"selected":{"116":{"choices":[0]}}}
                     selected_msg_ids = self.request.data.get(
                         'selected'
                     ).keys()
+                    # selected_messages == tuple with keys of this dict {"116":{"choices":[0]}} - it will be ("116",)
                     msg_ids = Message.objects.filter(id__in=selected_msg_ids, chat=chat).values_list('id', flat=True)
-                    correct_ids = set(msg_ids).intersection(set(int(i) for i in selected_items.keys()))
+                    correct_ids = set(msg_ids).intersection(
+                        set(int(i) for i in selected_items.keys())
+                    )
                     selected_choices = []
                     for i in correct_ids:
                         selected_choices.append(selected_items[str(i)]['choices'])
                     selected = chain(*selected_choices)
 
                 resp_text = '[selected_choices] ' + ' '.join(str(i) for i in selected)
-            # if not message.content_id:
             resp = StudentResponse(text=resp_text)
             resp.kind = message.lesson_to_answer.kind
             resp.sub_kind = message.lesson_to_answer.sub_kind

@@ -204,6 +204,10 @@ class Message(models.Model):
         )
 
     def render_choices(self, choices, checked_choices):
+        """ This method renders choices as like ErrorModels.
+        :param choices: choices to render
+        :param checked_choices: choices to mark as checked
+        """
         choices_template = (
             '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="choices" '
             'data-selectable-value="%d"></div><h3>%s</h3></li>'
@@ -219,6 +223,8 @@ class Message(models.Model):
         ) + '</ul>'
 
     def render_my_choices(self):
+        """ Render user's answer choices.
+        """
         if '[selected_choices]' in self.content.text:
             selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
             my_choices = []

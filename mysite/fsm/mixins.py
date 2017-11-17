@@ -260,7 +260,7 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional,
             )
-            # here was Message.objects.create for all fsm's except love_chat. for live_chat fsm here was get_or_create
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
         if self.node_name_is_one_of("WAIT_ASSESS"):
@@ -308,7 +308,7 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional
             )
-            # here was Message.objects.create for all fsm's except love_chat. for live_chat fsm here was get_or_create
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
         if self.node_name_is_one_of('STUDENTERROR'):
