@@ -1,6 +1,3 @@
-# Packages required for tests
--r base.txt
-
 pytest
 pytest-mock
 pytest-django

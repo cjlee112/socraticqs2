@@ -20,8 +20,12 @@ def md2html(txt, stripP=False):
     txt, markers = add_temporary_markers(txt, find_audio)
     txt, videoMarkers = add_temporary_markers(txt, find_video, len(markers))
     try:
-        txt = pypandoc.convert(txt, 'html', format='rst',
-                               extra_args=('--mathjax',))
+        txt = pypandoc.convert(
+            txt,
+            'html',
+            format='rst',
+            extra_args=('--mathjax', '--email-obfuscation=none')
+        )
     except StandardError:
         pass
     txt = replace_temporary_markers(txt, audio_html, markers)
