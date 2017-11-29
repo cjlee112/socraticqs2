@@ -48,7 +48,7 @@ class CourseView(View):
             user=request.user,
             is_live=True,
             enroll_code__courseUnit__course=course,
-            state__isnull=True
+            # state__isnull=True
         )
         #     .annotate(
         #     lessons_done=models.Sum(
