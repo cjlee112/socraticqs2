@@ -13,6 +13,13 @@ class CustomCode(Code):
     Custom Code object to track user_id through different sessions.
     """
     user_id = models.IntegerField(null=True)
+    force_update = models.BooleanField(default=False)
+
+    institution = models.CharField(max_length=255, null=True)
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+
+    password = models.CharField(max_length=255, null=True)
 
 
 class CustomDjangoStorage(DjangoStorage):

@@ -17,7 +17,7 @@
   <!-- Chat -->
   <main>
     <!-- Header -->
-    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/hero.jpg" %}');" {% endif %}>
+    <header class="course-header" {% if img_url %} style="background-image:url('{{ img_url }}');" {% else %} style="background-image:url('{% static "img/student/hero.jpg" %}');" {% endif %}>
       <div class="overlay"></div>
 
       <div class="container">
@@ -34,7 +34,11 @@
     <!-- Introduction -->
     <section class="chat-introduction">
       <div class="chat-introduction-title">
-        <a href="{{ domain }}/lms/courses/{{ course.id }}">Course</a>
+        {% if chat.is_preview %}
+        <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
+        {% else %}
+        <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
+        {% endif %}
         {% if chat.is_live %}
         <h2>Live Session - {% if chat.last_modify_timestamp%}{{ chat.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat.timestamp }}{% endif %}</h2>
         {% else %}
@@ -98,56 +102,62 @@
           </div>
         </div>
 
-        <div class="cta">
-
-          {% if not chat_id %}
-          <section id="chat-sessions" class="chat-sessions-list">
+        {% if not chat_id %}
+          <div class="chat__history">
             <div class="container">
-              <div class="row">
-                <div class="col-lg-8 col-lg-offset-2">
-                  <h3>
-                    My History
-                  </h3>
-                  <p class="history-description">
-                    Click on a chat session to continue working on it or to review your previous answers.
-                    You can start over if you want work on the lessons in this courselet again by clicking on
-                    <i>New Chat Session</i> below.
-                  </p>
+              <div class="col-lg-6 col-lg-offset-3">
+                <h2>My History</h2>
+                <p>
+                  Click on a chat session to continue working on it or to review your previous answers.
+                  You can start over if you want work on the lessons in this courselet again by clicking
+                  on <em>New Chat Session</em> below.
+                </p>
 
+                <div class="unit-links unit-links--small">
                   <ul>
-                    {% if chat_sessions %}
-                      {% for chat_sess in chat_sessions %}
-                        <li class="{% if not chat_sess.state %} finished {% endif %}">
-                          <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/" data-chat-id="{{ chat_sess.id }}" class="chat-start">
-                            <h4>{% if chat_sess.last_modify_timestamp%}{{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat_sess.timestamp }}{% endif %}</h4>
-                            <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons done</p>
-                            <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
-                            <div class="course-content-unit-progress {% if not chat_sess.state %} finished {% endif %}">
-                              <span style="width: {% if chat_sess %}{{ chat_sess.progress }}{% else %}0{% endif %}%;;"></span>
-                            </div>
-                          </a>
-                        </li>
-                      {% endfor %}
-                    {% endif %}
+                    <!-- TODO Loop through courselet history -->
+                  {% if chat_sessions %}
+                    {% for chat_sess in chat_sessions %}
+                    <!--TODO: remove comments after success runing code-->
                     <li>
-                      <a class="start-new-session chat-start" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" data-chat-id="0">
-                        <h4>New Chat Session</h4>
+                      <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/"
+                         class="chat-start-session" data-chat-id="{{ chat_sess.id }}">
+                        <!-- <h3>3 days ago</h3>-->
+                        <!--TODO: replace with correct values -->
+                        <h3>{% if chat_sess.last_modify_timestamp%}{{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat_sess.timestamp }}{% endif %}</h3>
+
+                        <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons completed</p>
+                        <!--<p>2 of 5 lessons completed</p>-->
+
+                        <div class="unit-links__progress">
+                          <span style="width: {% if chat_sess %}{{ chat_sess.progress }}{% else %}0{% endif %}%;"></span>
+                          <span style="width: 40%"></span>
+                        </div>
+                      </a>
+                    </li>
+                    {% endfor %}
+                  {% endif %}
+
+                    <li>
+                      <a class="chat-start-session unit-links__new" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" data-chat-id="0">
+                        <h3>New Chat Session</h3>
                       </a>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
-          </section>
-
-          {% elif chat_id %}
-          <div class="container">
-            <button class="chat-start">
-              {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
           </div>
-          {% endif %}
 
-        </div>
+        {% elif chat_id %}
+          <div class="chat__start">
+            <div class="container">
+              <button class="chat-start-session" data-chat-id="{{ chat_id }}">
+                {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
+              </button>
+            </div>
+          </div>
+        {% endif %}
       </div>
 
     </section>
@@ -164,7 +174,7 @@
           {% if small_img_url %}
           <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>
           {% else %}
-          <div class="cover" style="background-image:url('{% static "img/hero.jpg" %}');"></div>
+          <div class="cover" style="background-image:url('{% static "img/student/hero.jpg" %}');"></div>
           {% endif %}
 
           <div class="description">
@@ -203,7 +213,7 @@
       </div>
 
       <div class="chat-container">
-        <img src="{% static "img/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
+        <img src="{% static "img/student/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
 
         <div class="chat-input">
           <div class="chat-input-text">
@@ -240,7 +250,7 @@
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';
     CUI.config.resourcesUrl = '/chat/resources/';
-    CUI.config.defaultStudentAvatar = '{% static "img/avatar-student.jpg" %}';
+    CUI.config.defaultStudentAvatar = '{% static "img/student/avatar-student.jpg" %}';
     CUI.config.defaultTeacherAvatar = '{{ instructor_icon }}';
   </script>
 
@@ -254,19 +264,19 @@
   <script src="{% static "js/plugins/jquery.expanding-textarea.js" %}"></script>
   <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
   <script src="{% static "js/cui.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-breakpoint-model.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-media-model.js" %}"></script>
-  <script src="{% static "js/models/cui.chat-message-model.js" %}"></script>
-  <script src="{% static "js/models/cui.sidebar-breakpoint-model.js" %}"></script>
-  <script src="{% static "js/models/cui.input-option-model.js" %}"></script>
-  <script src="{% static "js/models/cui.sidebar-resource-model.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-message-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-media-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.input-option-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.sidebar-resource-presenter.js" %}"></script>
-  <script src="{% static "js/presenters/cui.chat-presenter.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-media-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.chat-message-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.sidebar-breakpoint-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.input-option-model.js" %}"></script>
+  <script src="{% static "js/chat/models/cui.sidebar-resource-model.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-message-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-media-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.input-option-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.sidebar-breakpoint-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.sidebar-resource-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/cui.chat-presenter.js" %}"></script>
   <script src="{% static "js/helpers.js" %}"></script>
-  <script src="{% static "js/chat.js" %}"></script>
+  <script src="{% static "js/chat/chat.js" %}"></script>
 {% endblock %}

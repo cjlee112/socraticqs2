@@ -1,0 +1,277 @@
+{% extends 'ctms_base.html' %}
+
+{% block title %}
+Create new courslet
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ unit.lesson.title }}</h1>
+  </header>
+
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
+
+  <main class="card__content">
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" method="POST">
+      <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
+
+      {% csrf_token %}
+
+      {{ errors_formset.management_form }}
+
+        <!-- TODO: Title/name label and input doesn't exist -->
+        <!-- Name -->
+        <div class="form-group">
+          <label for="{{ form.title.auto_id }}">Unit Name</label>
+
+          <p>
+            Give your unit a descriptive name. This will show up as one unit in your students sidebar.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to name a unit</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {{ form.title }}
+          {% if form.title.errors %}
+            {{ form.title.errors }}
+          {% endif %}
+          <!-- <input type="text"> -->
+        </div>
+
+
+
+        <!-- Unit type -->
+        <div class="form-group">
+          <label for="{{ form.unit_type.auto_id }}">{{ form.unit_type.label }}</label>
+
+          <p>{{ form.unit_type.help_text }}</p>
+
+          <div class="radio-list">
+            {{ form.unit_type }}
+          </div>
+          {% if form.unit_type.errors %}
+            {{ form.unit_type.errors }}
+          {% endif %}
+        </div>
+
+
+
+        <!-- TODO: Introduction and question should be separate inputs, form.text is currently displayed twice -->
+        <!-- Introduction -->
+        <div class="form-group form-group--introduction">
+          <label for="{{ form.text.auto_id }}">Introduction</label>
+
+          <p>
+            Write your introduction here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good introduction</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+        </div>
+
+
+
+        <!-- Question -->
+        <div class="form-group form-group--question">
+          <label for="{{ form.text.auto_id }}">Question</label>
+
+          <p>
+            Write your question here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good question</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+
+        </div>
+
+        {{ form.text }}
+        {% if form.text.errors %}
+          {{ form.text.errors }}
+        {% endif %}
+
+        <!-- Answer -->
+        <div class="form-group form-group--answer">
+          <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
+
+          <p>
+            Write your answer here. You can use <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown</a> to format your text.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good answer</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {{ answer_form.answer }}
+          {% if answer_form.answer.errors %}
+            {{ answer_form.answer.errors }}
+          {% endif %}
+        </div>
+
+
+
+        <!-- Error models -->
+        <div class="form-group form-group--error-models">
+          <label>Error Models <span>– optional</span></label>
+
+          <p>
+            An error model explains a common misconception. Your students can select error models when they self-assess.
+
+            <span class="expandable">
+              <a class="expandable__toggle" href="#">How to write a good error model</a>
+
+              <span class="expandable__content">
+                <br> Add a longer description here.
+              </span>
+            </span>
+          </p>
+
+          {% if errors_formset %}
+            <div class="error-models-form">
+
+              <div class="error-models-form__items">
+                {% for item_form in errors_formset %}
+                  <div id="item-{{ forloop.counter0 }}">
+                    {{ item_form.id }}
+                    <!--{#{ item_form.as_p }#}-->
+                    {% for field in item_form %}
+                      {% if field.is_hidden %}
+                        {{ field }}
+                      {% else %}
+                        <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                          {{ field.errors }}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                    {# <!-- or for crispy forms --> {% crispy item_form %} #}
+
+                    <!-- TODO: Add functionality for removing error models -->
+                    <a href="#" class="error-models-form__remove">Remove error model</a>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <a href="#" class="button error-models-form__add">Add Error Model</a>
+            </div>
+          {% endif %}
+        </div>
+
+
+
+      <!-- Submit -->
+      <input type="submit" value="Save">
+    </form>
+  </main>
+</div>
+{% endblock %}
+
+{% block js %}
+  <script>
+    // Courselets namespace
+    var Courselets = Courselets || {};
+
+    // Toggles inputs visibility based on unit type
+    Courselets.updateUnitType = function() {
+      // Get current unit type
+      var unitType = $("input[name=unit_type]:checked").val();
+
+      // Question
+      if(unitType === "{{ unit.lesson.ORCT_QUESTION }}") {
+        $(".form-group--question, .form-group--answer, .form-group--error-models").show();
+        $(".form-group--introduction").hide();
+
+      // Introduction
+      } else if(unitType === "{{ unit.lesson.EXPLANATION }}") {
+        $(".form-group--introduction").show();
+        $(".form-group--question, .form-group--answer, .form-group--error-models").hide();
+      }
+    };
+
+    // Init the form once the document is ready
+    $(function(){
+      // Update form based on the current unit type
+      Courselets.updateUnitType();
+
+      // Listen to unit type changes
+      $("input[name='unit_type']").on('change', function(){
+        Courselets.updateUnitType();
+      });
+
+      // Listen to new error model button
+      $('.error-models-form__add').on('click', function(e) {
+        e.preventDefault();
+
+        // Add new error model inputs
+        var count = $('.error-models-form__items').children().length;
+        var tmplMarkup = $('#item-template').html();
+        var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+        $('.error-models-form__items').append(compiledTmpl);
+
+        // Update form count
+        $('#id_form-TOTAL_FORMS').attr('value', count+1);
+
+        // Animate scroll to the new form
+        $('html, body').animate({
+          scrollTop: $('.error-models-form__items div:last-of-type').offset().top - 84
+        }, 800);
+      });
+    });
+  </script>
+
+  <!-- Error model template -->
+  <script type="text/html" id="item-template">
+    <div id="item-__prefix__">
+      <!--{#{ errors_formset.empty_form.as_p }#}-->
+
+      {% for field in errors_formset.empty_form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <label for="{{ field.auto_id }}">{{ field.label }}</label>
+          {{ field }}
+        {% endif %}
+      {% endfor %}
+      <!-- crispy: {#% crispy item_forms.empty_form item_forms.form.helper %#} -->
+    </div>
+  </script>
+{% endblock %}

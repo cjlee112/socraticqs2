@@ -1,0 +1,79 @@
+.page {
+  padding-top: 61px;
+  padding-bottom: 24px;
+}
+
+.page__topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+  background: $color-dark;
+}
+
+.page__topbar-inner {
+  height: 61px;
+  background: #fff;
+  border-bottom: 1px solid #DDE2E6;
+}
+
+.page__account {
+  display: block;
+  float: left;
+  line-height: 60px;
+  height: 60px;
+  color: #333;
+  padding-left: 24px;
+
+  &:hover, &:active, &:focus {
+    color: #333;
+    opacity: 0.6;
+  }
+
+  .avatar {
+    float: left;
+    margin-top: 15px;
+  }
+
+  span {
+    display: none;
+    float: left;
+    margin-left: 18px;
+  }
+}
+
+.page__messages {
+  .alert {
+    margin: 0;
+    border-top: 0;
+    border-radius: 0;
+  }
+}
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .page {
+    padding-top: 0;
+    padding-left: 308px;
+    padding-bottom: 60px;
+  }
+
+  .page__topbar {
+    position: relative;
+  }
+
+  .page__topbar-inner {
+    border-radius: 5px 0 0 0;
+  }
+
+  .page__account {
+    float: right;
+    padding-left: 0;
+    padding-right: 72px;
+
+    span {
+      display: block;
+    }
+  }
+}

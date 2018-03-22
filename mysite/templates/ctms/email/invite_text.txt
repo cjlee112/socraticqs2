@@ -1,0 +1,4 @@
+Hi {% if invite.user %}{% if invite.user.first_name %}{{ invite.user.first_name }}{% else %}{{ invite.user.username }}{% endif %}{% else %}{{ invite.get_invited_user_username }}{% endif %},
+{% if invite.instructor.user.get_full_name %}{{ invite.instructor.user.get_full_name }}{% else %}{{ invite.instructor.user.username }}{% endif %} has invited you to test his course {{ invite.course.title }} on Courselets.
+Click on the link below to test the course.
+Test {{ invite.course.title }} http://{{ current_site }}{% url 'ctms:tester_join_course' code=invite.code %}

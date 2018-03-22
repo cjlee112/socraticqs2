@@ -15,7 +15,7 @@ INSTALLED_APPS_LOCAL = (
     'django_nose',
     'behave_django',
 )
-MIDDLEWARE_LOCAL = ()
+MIDDLEWARE_LOCAL = tuple()
 
 try:
     import debug_toolbar
