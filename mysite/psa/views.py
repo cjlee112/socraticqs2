@@ -85,7 +85,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
     if request.POST:
-        form = login_form_cls( request.POST, initial=form_initial)
+        form = login_form_cls(request.POST, initial=form_initial)
         if form.is_valid():
             user = form.get_user()
             if user is not None:
@@ -94,7 +94,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
                     if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
                         del request.session['u_hash']
                         return redirect('ctms:shared_courses')
-                    return redirect( request.POST.get('next', next_page))
+                    return redirect(request.POST.get('next', next_page))
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial=form_initial)
@@ -115,7 +115,7 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     if u_hash and u_hash == u_hash_sess:
         # if invited tester join course - create user immediately without confirmation email.
         data = request.POST.dict().copy()
-        pw = make_password(request.POST.get(' password'))
+        pw = make_password(request.POST.get('password'))
         data['password'] = pw
         user = request.backend.strategy.create_user(**data)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -138,7 +138,9 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
             request.session['cc_id'] = cc.id
     # remove u_hash from session
     request.session.pop('u_hash', None)
-                Profile.check_tz(request)return response
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
+    return response
 
 
 def signup(request, next_page=None):
@@ -240,7 +242,7 @@ def social_auth_complete(request, *args, **kwargs):
 
 
 def complete(request, *args, **kwargs):
-    form = CompleteEmailForm(request.POST or request.GET)
+    form = SignUpForm(request.POST or request.GET)
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)

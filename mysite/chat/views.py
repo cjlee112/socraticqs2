@@ -616,7 +616,6 @@ class InitializeLiveSession(ChatInitialView):
                 'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
-                'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
@@ -626,7 +625,7 @@ class InitializeLiveSession(ChatInitialView):
         )
 
 
-class TestChatInitialView(ChatInitialView):
+class CheckChatInitialView(ChatInitialView):
     @staticmethod
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(

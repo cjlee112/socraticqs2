@@ -54,7 +54,7 @@ class CourseView(View):
             user=request.user,
             is_live=True,
             enroll_code__courseUnit__course=course,
-            state__isnull=True
+            # state__isnull=True
         )
         #     .annotate(
         #     lessons_done=models.Sum(
@@ -104,7 +104,8 @@ class CourseView(View):
             )
         )
 
-class TesterCourseView(NewLoginRequiredMixin, CourseView):
+
+class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
 
     template_name = 'lms/tester_course_page.html'
 
@@ -118,4 +119,3 @@ class TesterCourseView(NewLoginRequiredMixin, CourseView):
             )
             for courselet in course.get_course_units(False)
         )
-
