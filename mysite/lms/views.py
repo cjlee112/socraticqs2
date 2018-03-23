@@ -45,10 +45,10 @@ class CourseView(View):
             )
             try:
                 liveSession.live_instructor_icon = (
-                    liveSession.user.instructor.icon_url or static('img/avatar-teacher.jpg')
+                    liveSession.user.instructor.icon_url or static('img/student/avatar-teacher.jpg')
                 )
             except AttributeError:
-                liveSession.live_instructor_icon = static('img/avatar-teacher.jpg')
+                liveSession.live_instructor_icon = static('img/student/avatar-teacher.jpg')
         courselets = self.get_courselets(request, course)
         live_sessions_history = Chat.objects.filter(
             user=request.user,

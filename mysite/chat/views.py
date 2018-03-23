@@ -280,10 +280,10 @@ class ChatInitialView(LoginRequiredMixin, View):
         try:
             instructor_icon = (
                 courseUnit.course.addedBy.instructor.icon_url or
-                static('img/avatar-teacher.jpg')
+                static('img/student/avatar-teacher.jpg')
             )
         except AttributeError:
-            instructor_icon = static('img/avatar-teacher.jpg')
+            instructor_icon = static('img/student/avatar-teacher.jpg')
 
         chat_sessions = Chat.objects.filter(
             enroll_code=enroll_code,
@@ -598,10 +598,10 @@ class InitializeLiveSession(ChatInitialView):
         try:
             instructor_icon = (
                 course_unit.course.addedBy.instructor.icon_url or
-                static('img/avatar-teacher.jpg')
+                static('img/student/avatar-teacher.jpg')
             )
         except AttributeError:
-            instructor_icon = static('img/avatar-teacher.jpg')
+            instructor_icon = static('img/student/avatar-teacher.jpg')
 
         return render(
             request,
