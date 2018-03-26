@@ -307,7 +307,7 @@ CACHES = {
 
 
 # Path to GeoIp database to convert users IP to location
-GEO_IP_DB_PATH = os.path.join(BASE_DIR, 'GeoLiteCity.dat')
+GEO_IP_DB_PATH = os.path.join(BASE_DIR, 'GeoLiteCityLocal.dat')
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
