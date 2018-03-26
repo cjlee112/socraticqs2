@@ -282,7 +282,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.text = selfeval
                 message.save()
                 serializer.save(text=selfeval, chat=chat)
-        if message.kind == 'button' and not (message.content and message.content.sub_kind):
+        if message.kind == 'button' and not (message.content_id and message.content and message.content.sub_kind):
             chat.last_modify_timestamp = timezone.now()
             chat.next_point = self.next_handler.next_point(
                 current=message.content,
