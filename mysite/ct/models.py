@@ -207,6 +207,7 @@ class Lesson(models.Model):
     DATABASE = 'db'
     SOFTWARE = 'software'
     MULTIPLE_CHOICES = 'choices'
+    NUMBERS = 'numbers'
     NOT_CORRECT_CHOICE = '()'
     CORRECT_CHOICE = '(*)'
 
@@ -228,6 +229,8 @@ class Lesson(models.Model):
     )
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices Question'),
+        (NUMBERS, 'Numbers'),
+
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -967,15 +970,21 @@ class Response(models.Model):
     ORCT_RESPONSE = 'orct'
     STUDENT_QUESTION = 'sq'
     COMMENT = 'comment'
-    MULTIPLE_CHOICES = 'choices'
+
     KIND_CHOICES = (
         (ORCT_RESPONSE, 'ORCT response'),
         (STUDENT_QUESTION, 'Question about a lesson'),
         (COMMENT, 'Reply comment'),
     )
+
+    # new interactions
+    MULTIPLE_CHOICES = 'choices'
+    NUMBERS = 'numbers'
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices response'),
+        (NUMBERS, 'Numbers response'),
     )
+
     CORRECT = 'correct'
     CLOSE = 'close'
     DIFFERENT = 'different'
