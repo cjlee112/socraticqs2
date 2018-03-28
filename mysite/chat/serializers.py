@@ -42,6 +42,7 @@ class InputSerializer(serializers.Serializer):
     Serializer for input description for next message.
     """
     type = serializers.CharField(max_length=16, read_only=True)
+    subType = serializers.CharField(max_length=16, read_only=True)
     url = serializers.CharField(max_length=64, read_only=True)
     options = serializers.ListField()
     includeSelectedValuesFromMessages = serializers.ListField(
@@ -91,13 +92,16 @@ class MessageSerializer(serializers.ModelSerializer):
         """
         self.set_group(obj)
         incl_msg = []
+        sub_kind = None
         for i in self.qs:
             if i.contenttype == 'uniterror':
                 incl_msg.append(i.id)
             if i.contenttype == 'unitlesson' and i.content and i.content.lesson.sub_kind == 'choices':
+                sub_kind = 'choices'
                 incl_msg.append(i.id)
         input_data = {
             'type': obj.get_next_input_type(),
+            'subType': sub_kind,
             'url': obj.get_next_url(),
             'options': obj.get_options(),
             'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
@@ -131,13 +135,16 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         Getting description for next message.
         """
         incl_msg = []
+        sub_kind = None
         if obj.state is not None:
             msg = obj.message_set.filter(timestamp__isnull=False).last()
             if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
+                sub_kind = 'choices'
                 incl_msg.append(msg.id)
 
         input_data = {
             'type': obj.next_point.input_type if obj.next_point else 'custom',
+            'subType': sub_kind,
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
             'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
