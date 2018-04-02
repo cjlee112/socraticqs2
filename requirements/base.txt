@@ -23,7 +23,7 @@ kombu==4.0.1
 lxml==3.4.4
 
 oauth2==1.9.0.post1
-pypandoc==0.9.7
+pypandoc==1.4
 
 # social authentication/registration mechanizm
 python-social-auth==0.2.21

@@ -1,7 +1,6 @@
 # Packages required for local development
 -r base.txt
 -r test.txt
--r prod.txt
 
 ipython==5.5.0
 ipdb
