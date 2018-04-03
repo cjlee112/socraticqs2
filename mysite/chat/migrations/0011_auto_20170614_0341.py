@@ -21,5 +21,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(update_last_modify_timestamp),
+        migrations.RunPython(update_last_modify_timestamp, lambda apps, se: None),
     ]

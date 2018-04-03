@@ -250,6 +250,12 @@ class Lesson(models.Model):
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
     sub_kind = models.CharField(max_length=50, choices=SUB_KIND_CHOICES,blank=True, null=True)
+    # lessons with sub kind numbers
+    number_max_value = models.FloatField(default=0)
+    number_min_value = models.FloatField(default=0)
+    number_precision = models.FloatField(default=0)
+    # end numbers
+
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
