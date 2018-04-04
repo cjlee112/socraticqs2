@@ -207,6 +207,7 @@ class Lesson(models.Model):
     DATABASE = 'db'
     SOFTWARE = 'software'
     MULTIPLE_CHOICES = 'choices'
+    NUMBERS = 'numbers'
     NOT_CORRECT_CHOICE = '()'
     CORRECT_CHOICE = '(*)'
 
@@ -228,6 +229,8 @@ class Lesson(models.Model):
     )
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices Question'),
+        (NUMBERS, 'Numbers'),
+
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -247,6 +250,12 @@ class Lesson(models.Model):
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
     sub_kind = models.CharField(max_length=50, choices=SUB_KIND_CHOICES,blank=True, null=True)
+    # lessons with sub kind numbers
+    number_max_value = models.FloatField(default=0)
+    number_min_value = models.FloatField(default=0)
+    number_precision = models.FloatField(default=0)
+    # end numbers
+
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
@@ -967,15 +976,21 @@ class Response(models.Model):
     ORCT_RESPONSE = 'orct'
     STUDENT_QUESTION = 'sq'
     COMMENT = 'comment'
-    MULTIPLE_CHOICES = 'choices'
+
     KIND_CHOICES = (
         (ORCT_RESPONSE, 'ORCT response'),
         (STUDENT_QUESTION, 'Question about a lesson'),
         (COMMENT, 'Reply comment'),
     )
+
+    # new interactions
+    MULTIPLE_CHOICES = 'choices'
+    NUMBERS = 'numbers'
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices response'),
+        (NUMBERS, 'Numbers response'),
     )
+
     CORRECT = 'correct'
     CLOSE = 'close'
     DIFFERENT = 'different'

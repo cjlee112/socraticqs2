@@ -12,19 +12,16 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from chat.models import EnrollUnitCode
-from .models import Message, Chat, ChatDivider
-from .views import ChatInitialView
-from .serializers import (
-    MessageSerializer,
-    ChatHistorySerializer,
-    ChatProgressSerializer,
-    ChatResourcesSerializer,
-    ChatSerializer,
+from chat.models import Message, Chat, ChatDivider
+from chat.views import ChatInitialView
+from chat.serializers import (
+    MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer, ChatSerializer,
 )
-from .services import ProgressHandler, FsmHandler
-from .permissions import IsOwner
+from chat.services import ProgressHandler, FsmHandler
+from chat.permissions import IsOwner
 from ct.models import Response as StudentResponse, Lesson, CourseUnit
 from ct.models import UnitLesson
+
 
 inj_alternative = injections.Container()
 inj_alternative['next_handler'] = FsmHandler()
@@ -77,7 +74,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
     permission_classes = (IsAuthenticated, IsOwner)
 
     def roll_fsm_forward(self, chat, message):
-        """ This method should be used when we want to roll fsm forward to the next node,serialize message and return it
+        """ This method should be used when we want to roll fsm forward to the next serialized message and return it.
+
         :param chat: Chat instance
         :param message: Message
         :return: Response with serialized message
@@ -90,7 +88,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         serializer = self.get_serializer(message)
         return Response(serializer.data)
 
-
     def retrieve(self, request, *args, **kwargs):
         message = self.get_object()
         chat_id = self.request.GET.get('chat_id')
@@ -101,17 +98,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
 
-        if (
-            message.contenttype in ['response', 'uniterror'] and
-            message.content_id and
-            next_point == message
-        ):
-            # chat.next_point = self.next_handler.next_point(
-            #     current=message.content, chat=chat, message=message, request=self.request
-            # )
-            # chat.save()
-            # message.chat = chat
-            # # should be replaced with next line:
+        if message.contenttype in ['response', 'uniterror'] and message.content_id and next_point == message:
             self.roll_fsm_forward(chat, message)
 
         if not message.chat or message.chat != chat or message.timestamp:
@@ -143,7 +130,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         message = self.get_object()
         if (
             message.input_type == 'text' and not
-            self.request.data.get('text').strip()
+            self.request.data.get('text', '').strip()
         ):
             return Response({'error': 'Empty response. Enter something!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
@@ -160,6 +147,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
+            # run validation for numbers
+            if message.lesson_to_answer.lesson.sub_kind == 'numbers':
+                print "VALIDATE NUMBERS here"
+
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
@@ -167,6 +158,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
                 resp.activity = activity
+                resp.sub_kind = resp.lesson.sub_kind
             else:
                 resp = message.content
                 resp.text = text
@@ -180,14 +172,11 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 serializer.save()
 
-        # TODO: Refactor next lines - split them in variables to make if conditions simpler.
-        if (
-            message.contenttype == 'response' and
-            message.lesson_to_answer and
-            message.lesson_to_answer.sub_kind and
-            not message.content and
-            not message.is_additional
-        ):
+        message_is_response = message.contenttype == 'response'
+        lesson_has_sub_kind = message.lesson_to_answer and message.lesson_to_answer.sub_kind
+        content_is_not_additional = not message.content and not message.is_additional
+
+        if message_is_response and lesson_has_sub_kind and content_is_not_additional:
             resp_text = ''
             if message.lesson_to_answer.sub_kind == Lesson.MULTIPLE_CHOICES:
                 selected_items = self.request.data.get('selected')
