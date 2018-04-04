@@ -99,12 +99,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         next_point = chat.next_point
 
         if message.contenttype in ['response', 'uniterror'] and message.content_id and next_point == message:
-            # chat.next_point = self.next_handler.next_point(
-            #     current=message.content, chat=chat, message=message, request=self.request
-            # )
-            # chat.save()
-            # message.chat = chat
-            # # should be replaced with next line:
             self.roll_fsm_forward(chat, message)
 
         if not message.chat or message.chat != chat or message.timestamp:
@@ -136,7 +130,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         message = self.get_object()
         if (
             message.input_type == 'text' and not
-            self.request.data.get('text').strip()
+            self.request.data.get('text', '').strip()
         ):
             return Response({'error': 'Empty response. Enter something!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
@@ -153,6 +147,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
+            # run validation for numbers
+            if message.lesson_to_answer.lesson.sub_kind == 'numbers':
+                print "VALIDATE NUMBERS here"
+
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
@@ -160,6 +158,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.course = message.chat.enroll_code.courseUnit.course
                 resp.author = self.request.user
                 resp.activity = activity
+                resp.sub_kind = resp.lesson.sub_kind
             else:
                 resp = message.content
                 resp.text = text

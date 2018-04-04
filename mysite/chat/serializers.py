@@ -96,9 +96,13 @@ class MessageSerializer(serializers.ModelSerializer):
         for i in self.qs:
             if i.contenttype == 'uniterror':
                 incl_msg.append(i.id)
-            if i.contenttype == 'unitlesson' and i.content and i.content.lesson.sub_kind == 'choices':
-                sub_kind = 'choices'
-                incl_msg.append(i.id)
+            if i.contenttype == 'unitlesson' and i.content:
+                if i.content.lesson.sub_kind == 'choices':
+                    sub_kind = 'choices'
+                    incl_msg.append(i.id)
+                if i.content.lesson.sub_kind == 'numbers':
+                    sub_kind = 'numbers'
+
         input_data = {
             'type': obj.get_next_input_type(),
             'subType': sub_kind,
@@ -107,6 +111,14 @@ class MessageSerializer(serializers.ModelSerializer):
             'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
             'includeSelectedValuesFromMessages': incl_msg,
         }
+        if sub_kind == 'numbers':
+            input_data['html'] = '<input type="number" name="{}" max="{}" min="{}" step="{}" value="{}">'.format(
+                "text",
+                i.content.lesson.number_max_value,
+                i.content.lesson.number_min_value,
+                i.content.lesson.number_precision,
+                0,
+            )
         if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
@@ -138,19 +150,32 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         sub_kind = None
         if obj.state is not None:
             msg = obj.message_set.filter(timestamp__isnull=False).last()
-            if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
-                sub_kind = 'choices'
-                incl_msg.append(msg.id)
+            # only last msg will be in available as obj after exiting from the loop.
+            if msg.contenttype == 'unitlesson' and msg.content:
+                if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
+                    sub_kind = 'choices'
+                    incl_msg.append(msg.id)
+                if msg.content.lesson.sub_kind == 'numbers':
+                    sub_kind = 'numbers'
 
         input_data = {
+            # obj - is the last item from loop
             'type': obj.next_point.input_type if obj.next_point else 'custom',
             'subType': sub_kind,
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
             'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
-            # for test purpose only
             'includeSelectedValuesFromMessages': incl_msg,
         }
+
+        if sub_kind == 'numbers':
+            input_data['html'] = '<input name="{}" type="number" max="{}" min="{}" step="{}" value="{}">'.format(
+                "text",
+                msg.content.lesson.number_max_value,
+                msg.content.lesson.number_min_value,
+                msg.content.lesson.number_precision,
+                0,
+            )
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
