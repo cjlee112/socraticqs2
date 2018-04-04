@@ -222,11 +222,9 @@ class LessonSerializer(serializers.ModelSerializer):
                 else:
                     return False
             if check_fsm_name('chat'):
-                current_unitlesson_order = chat.state.unitLesson.order
-                return lesson_order < current_unitlesson_order
+                return lesson_order < chat.state.unitLesson.order
             if check_fsm_name('additional'):
-                current_unitlesson_order = chat.state.parentState.unitLesson.order
-                return lesson_order < current_unitlesson_order
+                return lesson_order < chat.state.parentState.unitLesson.order
             else:
                 return True
         else:

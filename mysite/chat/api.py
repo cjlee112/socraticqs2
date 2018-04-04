@@ -11,8 +11,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from chat.models import EnrollUnitCode
-from .models import Message, Chat, ChatDivider
+from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
 from .serializers import (
     MessageSerializer,
