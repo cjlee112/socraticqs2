@@ -1,0 +1,21 @@
+image: docker:latest
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+services:
+- docker:dind
+
+before_script:
+- docker info
+
+build:
+  stage: build
+  script:
+  - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
+  - mv fab_settings.py.example fab_settings.py
+  - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+  - gunzip GeoLiteCity.dat.gz
+  - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
+  - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
+  - docker run gitlab-courselets-ci pytest

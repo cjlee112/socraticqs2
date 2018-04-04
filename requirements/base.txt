@@ -45,3 +45,5 @@ pygeoip==0.3.2
 
 # Raven
 raven==6.1.0
+
+six==1.11.0
