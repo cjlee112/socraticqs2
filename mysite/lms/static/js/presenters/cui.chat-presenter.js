@@ -81,6 +81,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
    */
   this._inputType = null;
 
+  /** Input sub type: {multipleChioce,}
+   *
+   * @type {null}
+   * @private
+   */
+  this._inputSubType = null;
+
   /**
    * The url for loading the next set of messages and input type.
    * @type {string}
@@ -306,9 +313,21 @@ CUI.ChatPresenter.prototype._postInput = function(input){
   // Disable input while validating and sending input
   this._inputIsEnabled = false;
 
-  // Add selected elements to input
   input.selected = this._findSelectedValues();
   input.chat_id = this._chatID;
+
+  // Add selected elements to input
+  if (this._inputType == 'options' &&
+      this._includeSelectedValuesFromMessages.length &&
+      this._inputSubType == 'choices' &&
+      !Object.keys(input.selected).length
+  ) {
+      this._inputIsEnabled = true;
+      this._showNotification("Choose a correct answer!");
+      return;
+  }
+
+
 
   // Show loading
   this._showLoading();
@@ -957,6 +976,8 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
   // Reset textarea size
   $text.find('textarea').val('').attr('rows', 1);
+
+  this._inputSubType = input.subType;
 
   // Create new input based on type
   if(input.doWait === true) {
