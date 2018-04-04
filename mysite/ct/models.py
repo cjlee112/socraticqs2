@@ -1220,11 +1220,10 @@ class Course(models.Model):
     def get_course_units(self, publishedOnly=True):
         'ordered list of cunits for this course'
         if publishedOnly: # only those already released
-            return  list(self.courseunit_set
-                .filter(releaseTime__isnull=False,
-                        releaseTime__lt=timezone.now()).order_by('order'))
+            return list(
+                self.courseunit_set.filter(releaseTime__isnull=False, releaseTime__lt=timezone.now()).order_by('order'))
         else:
-            return  list(self.courseunit_set.all().order_by('order'))
+            return list(self.courseunit_set.all().order_by('order'))
 
     reorder_course_unit = reorder_exercise
 
@@ -1249,6 +1248,14 @@ class CourseUnit(models.Model):
 
     def __unicode__(self):
         return "Course - {}, Unit - {}".format(self.course.title, self.unit.title)
+
+    def get_responses(self):
+        return Response.objects.filter(
+            unitLesson__unit=self.unit,
+            kind=Response.ORCT_RESPONSE,
+            course=self.course,
+        )
+
 
 class Role(models.Model):
     'membership of a user in a course'
