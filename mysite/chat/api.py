@@ -149,8 +149,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             text = self.request.data.get('text')
             # run validation for numbers
             if message.lesson_to_answer.lesson.sub_kind == 'numbers':
-                print "VALIDATE NUMBERS here"
-
+                try:
+                    text = float(text)
+                except ValueError:
+                    return Response({'error': 'Not correct value!'})
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
