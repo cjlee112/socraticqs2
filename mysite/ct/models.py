@@ -1075,12 +1075,12 @@ class Response(models.Model):
         if self.sub_kind != 'choices':
             raise ValueError('Response.sub_kind should be choices to call this function')
 
-        avial_choices = dict(self.lesson.get_choices())
+        available_choices = dict(self.lesson.get_choices())
         split_selected_choices = self.text.split('[selected_choices] ')
         if len(split_selected_choices) > 1:
             selected_choices = split_selected_choices[1]
             return "\r\n".join([
-                avial_choices.get(int(i), "")
+                available_choices.get(int(i), "")
                 for i in selected_choices
                 if unicode.isdigit(i)
             ])
