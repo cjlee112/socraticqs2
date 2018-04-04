@@ -133,6 +133,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             self.request.data.get('text', '').strip()
         ):
             return Response({'error': 'Empty response. Enter something!'})
+
+        # run validation for numbers
+        if message.lesson_to_answer and message.lesson_to_answer.lesson.sub_kind == 'numbers':
+            try:
+                float(self.request.data.get('text'))
+            except ValueError as e:
+                return Response({'error': 'Not correct value!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
@@ -147,12 +154,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
-            # run validation for numbers
-            if message.lesson_to_answer.lesson.sub_kind == 'numbers':
-                try:
-                    text = float(text)
-                except ValueError:
-                    return Response({'error': 'Not correct value!'})
+
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
