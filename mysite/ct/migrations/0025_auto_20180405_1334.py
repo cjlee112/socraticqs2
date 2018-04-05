@@ -8,10 +8,15 @@ import django.core.validators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ct', '0022_auto_20170601_0440'),
+        ('ct', '0024_auto_20170719_0551'),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='response',
+            name='is_test',
+            field=models.BooleanField(default=False),
+        ),
         migrations.AlterField(
             model_name='course',
             name='title',
