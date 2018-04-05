@@ -255,7 +255,10 @@ class NewLessonForm(NewErrorForm):
     url = forms.CharField(required=False)
     class Meta:
         model = Lesson
-        fields = ['title', 'kind', 'text', 'medium', 'url']
+        fields = [
+            'title', 'kind', 'text', 'medium', 'url',
+            'sub_kind', 'number_max_value', 'number_min_value', 'number_precision',
+        ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
 class ResponseFilterForm(forms.Form):

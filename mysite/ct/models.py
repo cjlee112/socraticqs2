@@ -278,12 +278,12 @@ class Lesson(models.Model):
                    'sourceDB', 'sourceID', 'concept', 'treeID')
 
     def get_choices(self):
-        '''
-        Parse self.text and try to find
-         - () - empty parenthes - for not correct answer
-         - (*) - for correct answer
+        """Parse self.text and try to find choices.
+
+        () - empty parenthes - for not correct answer
+        (*) - for correct answer
         :return: list of choices
-        '''
+        """
         choices = []
         if '[choices]' in self.text:
             listed = self.text.split('\r\n')
@@ -297,10 +297,10 @@ class Lesson(models.Model):
 
 
     def get_correct_choices(self):
-        '''
-        Return only correct choices from list of choices
+        """Return only correct choices from list of choices
+
         :return: correct choices.
-        '''
+        """
         return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
 
     @classmethod
@@ -1090,12 +1090,12 @@ class Response(models.Model):
         if self.sub_kind != 'choices':
             raise ValueError('Response.sub_kind should be choices to call this function')
 
-        avial_choices_d = dict(self.lesson.get_choices())
+        available_choices = dict(self.lesson.get_choices())
         split_selected_choices = self.text.split('[selected_choices] ')
         if len(split_selected_choices) > 1:
             selected_choices = split_selected_choices[1]
             return "\r\n".join([
-                avial_choices_d.get(int(i), "")
+                available_choices.get(int(i), "")
                 for i in selected_choices
                 if unicode.isdigit(i)
             ])

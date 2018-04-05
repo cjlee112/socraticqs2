@@ -249,16 +249,16 @@ class MiscTests(TestCase):
         self.assertIsInstance(result[3], PageData)
 
     def test_ul_responses_need_help_table(self):
-        '''
+        """
         Tests that the table with responses which still need help is hidden by default on the page.
         :return:
-        '''
+        """
         def find_table(content):
-            '''
+            """
             Recieves HTML and returns re.search result or None when search was not able to find table.
             :param content: page html.
             :return:
-            '''
+            """
             return re.search(
                 r"^\s*<(?P<table>table .* id=\"needHelpResponses\").*style=\"(?P<style>.*display: none.*)\">$",
                 content,
@@ -951,9 +951,9 @@ class EditLessonTest(TestCase):
         self.assertIsInstance(response.context['titleform'], LessonForm)
 
     def test_edit_lesson_no_role(self):
-        '''
+        """
         Tests thath if user has no assigneg role for this lesson he will see error page with error message.
-        '''
+        """
         self.role.role = Role.ENROLLED
         self.role.delete()
         response = self.client.get(
@@ -976,10 +976,15 @@ class EditLessonTest(TestCase):
             ),
             {'title': 'new lesson title',
              'kind': 'base',
+             'sub_kind': '',
+             'number_max_value': '0',
+             'number_min_value': '0',
+             'number_precision': '0',
              'text': 'new test text',
              'medium': 'reading',
              'url': '/test/url/',
-             'changeLog': 'test changelog'},
+             'changeLog': 'test changelog'
+             },
             follow=True
         )
         self.assertEqual(response.status_code, 200)
@@ -1073,6 +1078,10 @@ class ResolutionsTests(TestCase):
             ),
             {'title': 'new lesson title',
              'kind': 'errmod',
+             'sub_kind': '',
+             'number_max_value': '0',
+             'number_min_value': '0',
+             'number_precision': '0',
              'text': 'new test text',
              'medium': 'reading',
              'url': '/test/url/',
@@ -1652,6 +1661,10 @@ class ConceptLessonsTeacherTest(TestCase):
             'title': 'SomeTitle',
             'text': 'text',
             'kind': 'orct',
+            'sub_kind': '',
+            'number_max_value': '0',
+            'number_min_value': '0',
+            'number_precision': '0',
             'medium': 'reading',
             'url': '/test/url/',
             }

@@ -11,11 +11,14 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from chat.models import EnrollUnitCode
-from chat.models import Message, Chat, ChatDivider
-from chat.views import ChatInitialView
-from chat.serializers import (
-    MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer, ChatSerializer,
+from .models import Message, Chat, ChatDivider, EnrollUnitCode
+from .views import ChatInitialView
+from .serializers import (
+    MessageSerializer,
+    ChatHistorySerializer,
+    ChatProgressSerializer,
+    ChatResourcesSerializer,
+    ChatSerializer,
 )
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
@@ -133,6 +136,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             self.request.data.get('text', '').strip()
         ):
             return Response({'error': 'Empty response. Enter something!'})
+
+        # run validation for numbers
+        if message.lesson_to_answer and message.lesson_to_answer.lesson.sub_kind == 'numbers':
+            try:
+                float(self.request.data.get('text'))
+            except ValueError as e:
+                return Response({'error': 'Not correct value!'})
         return super(MessagesView, self).update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
@@ -147,12 +157,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         if message.input_type == 'text':
             message.chat = chat
             text = self.request.data.get('text')
-            # run validation for numbers
-            if message.lesson_to_answer.lesson.sub_kind == 'numbers':
-                try:
-                    text = float(text)
-                except ValueError:
-                    return Response({'error': 'Not correct value!'})
+
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
@@ -312,7 +317,7 @@ class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
             chat = get_object_or_404(Chat, id=chat.id)
             return Response(ChatSerializer(chat).data)
         else:
-            raise Http404() 
+            raise Http404()
 
 
 class HistoryView(ValidateMixin, generics.RetrieveAPIView):
