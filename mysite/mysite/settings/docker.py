@@ -50,7 +50,5 @@ EMAIL_FROM = ''
 
 GOOGLE_ANALYTICS_CODE = ""
 
-from .local import *
-
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
