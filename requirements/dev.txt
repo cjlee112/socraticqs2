@@ -3,7 +3,7 @@
 -r test.txt
 
 ipython==5.5.0
-ipdb
+ipdb<=0.11
 
 pep8
 pylint

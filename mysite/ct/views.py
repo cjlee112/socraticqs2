@@ -1069,13 +1069,11 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
     opt = None
     unit = get_object_or_404(Unit, pk=unit_id)
-
     try:
         sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     except UnicodeEncodeError:
         # TODO refactor this part - need to separate search and add actions
         sourceID = urllib.unquote(source_id).encode('utf-8').decode('utf-8')
-
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     addForm = push_button(request, 'add', 'Add to this courselet')
