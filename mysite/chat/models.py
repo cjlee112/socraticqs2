@@ -236,22 +236,17 @@ class Message(models.Model):
             return self.render_choices([], [])
 
     def get_choices(self):
-        '''
-        Use this method to return QUESTION (ASK node of FSM)
-        :return:
-        '''
+        """Use this method to return QUESTION."""
         checked_choices = []
         return self.render_choices(self.content.lesson.get_choices(), checked_choices)
 
     def get_correct_choices(self):
-        '''
-        Use this method to return ANSWER
-        :return:
-        '''
+        """Use this method to return ANSWER."""
         checked_choices = []
         return self.render_choices(self.lesson_to_answer.lesson.get_correct_choices(), checked_choices)
 
     def should_ask_confidence(self):
+        """Use this method to check whether this FSM should ask for CONFIDENCE."""
         if self.chat.state:
             return 'CONFIDENCE' in [
                 i['name']

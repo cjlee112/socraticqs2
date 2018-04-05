@@ -11,11 +11,14 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from chat.models import EnrollUnitCode
-from chat.models import Message, Chat, ChatDivider
-from chat.views import ChatInitialView
-from chat.serializers import (
-    MessageSerializer, ChatHistorySerializer, ChatProgressSerializer, ChatResourcesSerializer, ChatSerializer,
+from .models import Message, Chat, ChatDivider, EnrollUnitCode
+from .views import ChatInitialView
+from .serializers import (
+    MessageSerializer,
+    ChatHistorySerializer,
+    ChatProgressSerializer,
+    ChatResourcesSerializer,
+    ChatSerializer,
 )
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
@@ -314,7 +317,7 @@ class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
             chat = get_object_or_404(Chat, id=chat.id)
             return Response(ChatSerializer(chat).data)
         else:
-            raise Http404() 
+            raise Http404()
 
 
 class HistoryView(ValidateMixin, generics.RetrieveAPIView):
