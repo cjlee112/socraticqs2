@@ -12,7 +12,8 @@ admin.autodiscover()
 
 
 from social.utils import setting_name
-from psa.views import complete
+from psa.views import complete, social_auth_complete
+
 
 
 extra = getattr(settings, setting_name('TRAILING_SLASH'), True) and '/' or ''
@@ -56,6 +57,9 @@ urlpatterns = patterns(
     url(r'^email-sent/$', 'psa.views.validation_sent'),
     url(r'^complete/email{0}$'.format(extra), complete,
         name='complete'),
+    url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra), social_auth_complete,
+        name='soc_complete'),
+
     url('', include('social.apps.django_app.urls', namespace='social')),
 
     url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),

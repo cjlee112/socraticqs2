@@ -2,6 +2,7 @@ import time
 import urllib
 from datetime import datetime
 from collections import OrderedDict
+from django.contrib import messages
 
 from django.db.models import Q
 from django.conf import settings
@@ -428,6 +429,30 @@ def edit_course(request, course_id):
             reports = CourseReport.objects.filter(course_id=course_id).order_by('-date')
         )
     )
+
+
+@login_required
+def clone_course(request, course_id):
+    if request.POST and course_id:
+        course = get_object_or_404(Course, id=course_id)
+        form = CloneCourseForm(request.POST)
+        if form.is_valid():
+            default_opts = {
+                'publish': False,
+                'unpublish': False,
+                'with_students': False,
+                'asis': False,
+            }
+            for f, v in default_opts.items():
+                if f == form.cleaned_data['copy_options']:
+                    default_opts[f] = True
+            default_opts.update(form.cleaned_data)
+            new_course = course.deep_clone(**default_opts)
+            messages.add_message(request, messages.INFO, 'You just cloned course and now you are editing new course.')
+            return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
+        messages.add_message(request, messages.ERROR, 'Not valid request data! {}'.format(form.errors))
+    return redirect(request.META.get('HTTP_REFERER', reverse('ct:home')))
+
 
 
 def courses(request):
@@ -1044,7 +1069,11 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
     opt = None
     unit = get_object_or_404(Unit, pk=unit_id)
-    sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
+    try:
+        sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
+    except UnicodeEncodeError:
+        # TODO refactor this part - need to separate search and add actions
+        sourceID = urllib.unquote(source_id).encode('utf-8').decode('utf-8')
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     addForm = push_button(request, 'add', 'Add to this courselet')

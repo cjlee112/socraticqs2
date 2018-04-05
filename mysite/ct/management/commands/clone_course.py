@@ -17,42 +17,35 @@ def copy_model_instance(inst, **kwargs):
 
 
 class Command(BaseCommand):
-    help = 'Get report'
+    help = 'Clone course'
 
     def add_arguments(self, parser):
         # Positional arguments
         parser.add_argument('course_id', type=int)
+        # Publish\UnPublish courseUnit
+        parser.add_argument(
+            '--publish',
+            action='store_true',
+            dest='publish',
+            default=False,
+            help='Publish cloned course and course units right now? (Default is False - course units will not be published)',
+        )
+        # Copy student roles
+        parser.add_argument(
+            '--with-students',
+            action='store_true',
+            dest='with_students',
+            default=False,
+            help='Do I need to copy student\'s roles assigned to source course?',
+        )
+
 
     def handle(self, *args, **options):
         course_id = options['course_id']
         course = Course.objects.filter(id=course_id).first()
 
         if course:
-            title = course.title + " copied {}".format(timezone.now())
-            new_course = copy_model_instance(
-                course,
-                atime=timezone.now(),
-                title=title
-            )
-            for cu in course.courseunit_set.all():
-                # deal with Unit
-                n_unit = copy_model_instance(cu.unit, atime=timezone.now())
-                # deal with CourseUnit
-                n_cu = copy_model_instance(cu, course=new_course, unit=n_unit, atime=timezone.now())
-
-                uls = list(cu.unit.get_exercises())
-                # copy exercises and error models
-                for ul in uls:
-                    n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
-
-                # copy resources
-                for ul in list(cu.unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)):
-                    n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
-                    n_unit.reorder_exercise()
-
-            for role in course.role_set.filter(role=Role.INSTRUCTOR):
-                n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
-
+            new_course = course.deep_clone(**options)
             print('Done')
             print('New Course id is {0}'.format(new_course.id))
         else:

@@ -39,13 +39,13 @@ class ChatInitialView(LoginRequiredMixin, View):
 
     @staticmethod
     def get_back_url(*args, **kwargs):
-        '''
+        """
         {% if chat.is_preview %}
         <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
         {% else %}
         <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
         {% endif %}
-        '''
+        """
         chat = kwargs.get('chat')
         if not chat:
             # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???
@@ -64,7 +64,8 @@ class ChatInitialView(LoginRequiredMixin, View):
     @staticmethod
     def get_enroll_code_object(enroll_key):
         """
-        Return EnrollUnitCode object
+        Return EnrollUnitCode object.
+
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
@@ -140,7 +141,9 @@ class ChatInitialView(LoginRequiredMixin, View):
         return will_learn, need_to_know
 
     def get_or_init_chat(self, enroll_code, chat_id):
-        '''Gets chat by id following these steps:
+        """Get chat by id.
+
+        Logic of this method is:
          * try to cast recieved ID to int
          * if gets an error while casting:
            * set i_chat_id = 0 if ValueError
@@ -152,7 +155,7 @@ class ChatInitialView(LoginRequiredMixin, View):
          * if i_chat_id == 0:
            * create new chat
         :return i_chat_id and chat
-        '''
+        """
         chat = None
         courseUnit = enroll_code.courseUnit
         try:
@@ -195,6 +198,7 @@ class ChatInitialView(LoginRequiredMixin, View):
     def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         """
         This method checks that course is not published and user is not instructor.
+
         :param request: request
         :param courseUnit: course unit
         :return: True | False
@@ -280,10 +284,10 @@ class ChatInitialView(LoginRequiredMixin, View):
         try:
             instructor_icon = (
                 courseUnit.course.addedBy.instructor.icon_url or
-                static('img/avatar-teacher.jpg')
+                static('img/student/avatar-teacher.jpg')
             )
         except AttributeError:
-            instructor_icon = static('img/avatar-teacher.jpg')
+            instructor_icon = static('img/student/avatar-teacher.jpg')
 
         chat_sessions = Chat.objects.filter(
             enroll_code=enroll_code,
@@ -357,18 +361,72 @@ class ChatInitialView(LoginRequiredMixin, View):
         )
 
 
+class ChatNoJSInit(object):
+    """
+    Implement basic chat initialization process (no JS required).
+    """
+
+    def get_or_init_chat(self, enroll_code, chat_id):
+        """
+        Logic of creating new chat is:
+
+        * check chat_id
+            * if chat_it is present:
+                * get_chat by id, enroll_code, user
+            * if no chat_id
+                * get chat by fsmName, enroll_code, user
+         * if chat waws found
+            * if exist - return it
+            * if not exist - create new one
+        * check messages count in this Chat
+            * if 0 - call to self.next_handler.start_point(
+        * check chat.state
+            * if chat.state is None - set chat.next_point to None and save chat.
+        """
+        if chat_id:
+            chat = self.get_chat(
+                self.request,
+                enroll_code=enroll_code,
+                id=chat_id
+            )
+        else:
+            chat = self.get_chat(
+                self.request,
+                enroll_code,
+                **{'state__fsmNode__fsm__name': self.next_handler.FMS_name}
+            )
+        if not chat and enroll_code:
+            chat = self.create_new_chat(
+                self.request,
+                enroll_code,
+                enroll_code.courseUnit
+            )
+        if chat.message_set.count() == 0:
+            self.next_handler.start_point(
+                unit=enroll_code.courseUnit.unit,
+                chat=chat,
+                request=self.request
+            )
+        elif not chat.state:
+            chat.next_point = next_point
+            chat.save()
+        return chat, chat_id
+
+
 class CourseletPreviewView(ChatInitialView):
     next_handler = ChatPreviewFsmHandler()
 
     @staticmethod
     def get_back_url(*args, **kwargs):
-        '''
+        """
+        Return back url.
+
         {% if chat.is_preview %}
         <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
         {% else %}
         <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
         {% endif %}
-        '''
+        """
         chat = kwargs.get('courseUnit')
         if not chat:
             # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???
@@ -384,7 +442,8 @@ class CourseletPreviewView(ChatInitialView):
     @staticmethod
     def get_enroll_code_object(enroll_key):
         """
-        Return EnrollUnitCode object
+        Return EnrollUnitCode object.
+
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
@@ -404,8 +463,8 @@ class CourseletPreviewView(ChatInitialView):
     @staticmethod
     def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         """
-        This method checks that course is not published and user is not instructor.
-        In this class we don't need to check it.
+        Check that course is not published and user is not instructor.
+
         :param request: request
         :param courseUnit: course unit
         :return: True | False
@@ -422,7 +481,7 @@ class CourseletPreviewView(ChatInitialView):
         return super(CourseletPreviewView, self).get(request, enroll_key)
 
 
-class ChatAddLessonView(ChatInitialView):
+class ChatAddLessonView(ChatNoJSInit, ChatInitialView):
     next_handler = ChatAddUnitFsmHandler()
     template_name = 'chat/add_unit_chat.html'
 
@@ -453,16 +512,18 @@ class ChatAddLessonView(ChatInitialView):
 
 
 class InitializeLiveSession(ChatInitialView):
-    '''
+    """
     Entry point for live session chat.
-    Checks that user is authenticated and creates a chat for him.
-    '''
+
+    Check that user is authenticated and create a chat for him.
+    """
     next_handler = LiveChatFsmHandler()
 
     @staticmethod
     def get_enroll_code_object(enroll_key):
         """
         Return EnrollUnitCode object
+
         :param enroll_key: enroll code
         :return: EnrollUnitCode instance
         """
@@ -470,7 +531,8 @@ class InitializeLiveSession(ChatInitialView):
 
     def get(self, request, **kwargs):
         '''
-        This method do init of live_chat FSM and return context needed to build chat on front end.
+        Do init of live_chat FSM and return context needed to build chat on front end.
+
         :param request: django request.
         :param chat_id: chat id
         :return: rendered template with proper context.
@@ -548,10 +610,10 @@ class InitializeLiveSession(ChatInitialView):
         try:
             instructor_icon = (
                 course_unit.course.addedBy.instructor.icon_url or
-                static('img/avatar-teacher.jpg')
+                static('img/student/avatar-teacher.jpg')
             )
         except AttributeError:
-            instructor_icon = static('img/avatar-teacher.jpg')
+            instructor_icon = static('img/student/avatar-teacher.jpg')
 
         return render(
             request,
@@ -566,7 +628,6 @@ class InitializeLiveSession(ChatInitialView):
                 'small_img_url': unit.small_img_url,
                 'will_learn': will_learn,
                 'need_to_know': need_to_know,
-                'chat_id': chat.id,
                 'lessons': lessons,
                 'lesson_cnt': len(lessons),
                 'duration': len(lessons) * 3,
@@ -576,7 +637,7 @@ class InitializeLiveSession(ChatInitialView):
         )
 
 
-class TestChatInitialView(ChatInitialView):
+class CheckChatInitialView(ChatInitialView):
     @staticmethod
     def create_chat(self, enroll_code, courseUnit):
         chat = Chat(
@@ -590,13 +651,14 @@ class TestChatInitialView(ChatInitialView):
 
     @staticmethod
     def get_back_url(*args, **kwargs):
-        '''
+        """
+        Return back_url.
         {% if chat.is_preview %}
         <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
         {% else %}
         <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
         {% endif %}
-        '''
+        """
         chat = kwargs.get('chat')
         if not chat:
             # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???

@@ -19,6 +19,7 @@ from social.backends.utils import load_backends
 from social.apps.django_app.views import _do_login
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
+from accounts.models import Profile
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
@@ -137,6 +138,8 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
             request.session['cc_id'] = cc.id
     # remove u_hash from session
     request.session.pop('u_hash', None)
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
     return response
 
 
@@ -145,13 +148,13 @@ def signup(request, next_page=None):
     This function handles custom login to integrate social auth and default login.
     """
     username = password = ''
-    u_hash = request.POST.get('u_hash')
+    u_hash =request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
 
     logout(request)
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
-        # replace next url with shared_courses page url
+        # replacenexturl with shared_courses page url
         next_page = reverse('ctms:shared_courses')
         request.session['next'] = next_page
         post = request.POST.copy()
@@ -231,17 +234,28 @@ def set_pass(request):
         return context(exception='Something goes wrong...', person=user)
 
 
+def social_auth_complete(request, *args, **kwargs):
+    response = social_complete(request, *args, **kwargs)
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
+    return response
+
+
 def complete(request, *args, **kwargs):
-    form = CompleteEmailForm(request.POST or request.GET)
+    form = SignUpForm(request.POST or request.GET)
     if form.is_valid() or 'verification_code' in request.GET:
         try:
-            return social_complete(request, 'email', *args, **kwargs)
+            resp = social_complete(request, 'email', *args, **kwargs)
+            if request.user.is_authenticated():
+                Profile.check_tz(request)
+            return resp
         except AuthMissingParameter:
             messages.error(
                 request,
                 "Email already verified. Please log in using form below or sign up."
             )
             if request.user.is_authenticated():
+                Profile.check_tz(request)
                 return redirect('ct:person_profile', user_id=request.user.id)
             return redirect('ct:home')
     else:

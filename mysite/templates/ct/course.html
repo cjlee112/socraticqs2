@@ -10,6 +10,9 @@
 {% endblock %}
 
 {% block content %}
+{% if course.copied_from %}
+<b>Copied from:</b> <a href="{% url 'ct:course' course_id=course.copied_from.id %}">{{ course.copied_from.title }}</a><br>
+{% endif %}
 
 <b>Instructor</b>:
 {% for u in course.get_users %}

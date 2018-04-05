@@ -10,7 +10,8 @@ Socraticqs2
 .. image:: https://codecov.io/gh/cjlee112/socraticqs2/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/cjlee112/socraticqs2
 
-
+.. image:: https://circleci.com/gh/raccoongang/socraticqs2/tree/development.svg?style=svg
+  :target: https://circleci.com/gh/raccoongang/socraticqs2/tree/development
 
 Socraticqs2 is the web engine for courselets.org.
 
@@ -56,13 +57,25 @@ For a developer / test version to access social-auth, you will need to add the f
        'django.contrib.auth.backends.ModelBackend',
     )
 
+To install requirements:
+::
+
+    pip install -r requirements/dev.txt
+
+
+Download GeoIp database (run commands in the root of the project):
+::
+
+    wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+    gunzip GeoLiteCity.dat.gz
+
 To run project in Docker:
 -------------------------
 Go to the root of the project and run this command:
- ::
-    # coding: utf-8
+::
 
-    docker-compose up web
+    docker-compose up courselets
+
 
 Here we have 2 docker config files:
  - Dockerfile - runs docker-commands.sh file
@@ -71,6 +84,19 @@ Here we have 2 docker config files:
 There are a couple of files related to docker. They are:
  - docker-compose.yml - config file
  - docker-commands.sh - clear *.pyc files and starts web server
+
+
+Multiple Choices Feature:
+-------------------------
+
+How to test this functionality:
+* setup project
+* load fixtures from dumpdata/debug-wo-fsm.json
+* load fixtures from dumpdata/ct_mult_choices.json
+* open admin UI and create roles for your user and course named `test MultChoices`
+* observe Courses Dashboard and you will see `test MultChoices` course with a couple of cocurselets inside of it.
+* .....
+* Profit!
 
 
 Quality check

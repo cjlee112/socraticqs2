@@ -214,6 +214,10 @@ class Lesson(models.Model):
     IMAGE = 'image'
     DATABASE = 'db'
     SOFTWARE = 'software'
+    MULTIPLE_CHOICES = 'choices'
+    NOT_CORRECT_CHOICE = '()'
+    CORRECT_CHOICE = '(*)'
+
     KIND_CHOICES = (
         (BASE_EXPLANATION, 'brief definition and explanation'),
         (EXPLANATION, 'long explanation'),
@@ -229,6 +233,9 @@ class Lesson(models.Model):
         (ENCYCLOPEDIA, 'Encyclopedia'),
         (FAQ_QUESTION, 'frequently asked question'),
         (FORUM, FORUM),
+    )
+    SUB_KIND_CHOICES = (
+        (MULTIPLE_CHOICES, 'Multiple Choices Question'),
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -247,6 +254,7 @@ class Lesson(models.Model):
     url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
+    sub_kind = models.CharField(max_length=50, choices=SUB_KIND_CHOICES,blank=True, null=True)
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
@@ -267,6 +275,32 @@ class Lesson(models.Model):
 
     _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
                    'sourceDB', 'sourceID', 'concept', 'treeID')
+
+    def get_choices(self):
+        """Parse self.text and try to find choices.
+
+        () - empty parenthes - for not correct answer
+        (*) - for correct answer
+        :return: list of choices
+        """
+        choices = []
+        if '[choices]' in self.text:
+            listed = self.text.split('\r\n')
+            for i in range(listed.index('[choices]'), len(listed)):
+                if listed[i].startswith(self.CORRECT_CHOICE) or listed[i].startswith(self.NOT_CORRECT_CHOICE):
+                    choices.append(listed[i])
+        return enumerate(choices)
+
+    def get_choices_wrap_text(self):
+        return self.text.split('[choices]')[0]
+
+
+    def get_correct_choices(self):
+        """Return only correct choices from list of choices
+
+        :return: correct choices.
+        """
+        return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
 
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):
@@ -521,6 +555,22 @@ class UnitLesson(models.Model):
     ##     lesson = Lesson.create_from_concept(concept, **kwargs)
     ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
 
+    @property
+    def text(self):
+        return self.lesson.text
+
+    @property
+    def sub_kind(self):
+        if self.kind == UnitLesson.ANSWERS and not self.lesson.sub_kind and self.parent:
+            return self.parent.sub_kind
+        return self.lesson.sub_kind
+
+    @sub_kind.setter
+    def sub_kind(self, val):
+        l = self.lesson
+        l.sub_kind = val
+        l.save()
+
     def __unicode__(self):
         return self.lesson.title
 
@@ -698,6 +748,7 @@ class UnitLesson(models.Model):
         elif subpath == '':
             tail = ''
         return '%s%s/%d/%s' % (basePath, head, self.pk, tail)
+
     def get_type(self):
         'return classification as error model, concept, or regular lesson'
         if self.lesson.concept:
@@ -706,6 +757,7 @@ class UnitLesson(models.Model):
             else:
                 return IS_CONCEPT
         return IS_LESSON
+
     def get_study_url(self, course_id):
         'return URL for student to read lesson or answer question'
         if self.lesson.kind == Lesson.ORCT_QUESTION:
@@ -713,9 +765,10 @@ class UnitLesson(models.Model):
         else:
             path = 'ct:lesson'
         return reverse(path, args=(course_id, self.unit.pk, self.pk))
+
     def is_question(self):
         'is this a question?'
-        return self.lesson.kind == Lesson.ORCT_QUESTION
+        return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
 
 
 def reorder_exercise(self, old=0, new=0, l=()):
@@ -946,10 +999,14 @@ class Response(models.Model):
     ORCT_RESPONSE = 'orct'
     STUDENT_QUESTION = 'sq'
     COMMENT = 'comment'
+    MULTIPLE_CHOICES = 'choices'
     KIND_CHOICES = (
         (ORCT_RESPONSE, 'ORCT response'),
         (STUDENT_QUESTION, 'Question about a lesson'),
         (COMMENT, 'Reply comment'),
+    )
+    SUB_KIND_CHOICES = (
+        (MULTIPLE_CHOICES, 'Multiple Choices response'),
     )
     CORRECT = 'correct'
     CLOSE = 'close'
@@ -975,6 +1032,7 @@ class Response(models.Model):
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
     is_test = models.BooleanField(default=False)
+    sub_kind = models.CharField(max_length=10, choices=SUB_KIND_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES,
@@ -1047,6 +1105,21 @@ class Response(models.Model):
         if self.selfeval == self.DIFFERENT or self.status == NEED_HELP_STATUS:
             if self.studenterror_set.count() == 0:
                 return self.CLASSIFY_STEP, 'classify your error(s)'
+
+    def show_my_choices(self):
+        if self.sub_kind != 'choices':
+            raise ValueError('Response.sub_kind should be choices to call this function')
+
+        available_choices = dict(self.lesson.get_choices())
+        split_selected_choices = self.text.split('[selected_choices] ')
+        if len(split_selected_choices) > 1:
+            selected_choices = split_selected_choices[1]
+            return "\r\n".join([
+                available_choices.get(int(i), "")
+                for i in selected_choices
+                if unicode.isdigit(i)
+            ])
+        return ""
 
 
 
@@ -1136,6 +1209,57 @@ class Course(models.Model):
     addedBy = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
+    copied_from = models.ForeignKey('Course', blank=True, null=True)
+
+    def deep_clone(self, **options):
+        publish = options.get('publish', False)
+        with_students = options.get('with_students', False)
+        asis = options.get('asis', False)
+        title = self.title.split('copied')[0] + " copied {}".format(
+            timezone.now().astimezone(timezone.get_default_timezone())
+        )
+
+        new_course = copy_model_instance(
+            self,
+            atime=timezone.now(),
+            title=title,
+            copied_from=self
+        )
+        for cu in self.courseunit_set.all():
+            # deal with Unit
+            n_unit = copy_model_instance(cu.unit, atime=timezone.now())
+            # deal with CourseUnit
+            n_cu_kw = dict(
+                course=new_course,
+                unit=n_unit,
+                atime=timezone.now(),
+                releaseTime=timezone.now()
+            )
+            if not publish:
+                n_cu_kw['releaseTime'] = None
+            if asis:
+                # if copy as is - remove release time from kw. it will be the same as in source obj.
+                del n_cu_kw['releaseTime']
+
+            n_cu = copy_model_instance(cu, **n_cu_kw)
+
+            uls = list(cu.unit.get_exercises())
+            # copy exercises and error models
+            for ul in uls:
+                n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
+
+            # copy resources
+            for ul in list(cu.unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)):
+                n_ul = ul.copy(unit=n_unit, addedBy=ul.addedBy)
+                n_unit.reorder_exercise()
+        roles_to_copy = [
+            r[0] for r in Role.ROLE_CHOICES
+            if r[0] != Role.ENROLLED
+        ] + ([Role.ENROLLED] if with_students else [])
+        for role in self.role_set.filter(role__in=roles_to_copy):
+            n_role = copy_model_instance(role, course=new_course, atime=timezone.now())
+        return new_course
+
     def create_unit(self, title, description=None, img_url=None, small_img_url=None, author=None):
         if author is None:
             author = self.addedBy
@@ -1165,11 +1289,10 @@ class Course(models.Model):
     def get_course_units(self, publishedOnly=True):
         'ordered list of cunits for this course'
         if publishedOnly: # only those already released
-            return  list(self.courseunit_set
-                .filter(releaseTime__isnull=False,
-                        releaseTime__lt=timezone.now()).order_by('order'))
+            return list(
+                self.courseunit_set.filter(releaseTime__isnull=False, releaseTime__lt=timezone.now()).order_by('order'))
         else:
-            return  list(self.courseunit_set.all().order_by('order'))
+            return list(self.courseunit_set.all().order_by('order'))
 
     reorder_course_unit = reorder_exercise
 
@@ -1194,6 +1317,14 @@ class CourseUnit(models.Model):
 
     def __unicode__(self):
         return "Course - {}, Unit - {}".format(self.course.title, self.unit.title)
+
+    def get_responses(self):
+        return Response.objects.filter(
+            unitLesson__unit=self.unit,
+            kind=Response.ORCT_RESPONSE,
+            course=self.course,
+        )
+
 
 class Role(models.Model):
     'membership of a user in a course'

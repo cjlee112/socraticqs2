@@ -56,7 +56,7 @@ class CourseCoursletUnitMixin(View):
 
     def dispatch(self, request, *args, **kwargs):
         if self.NEED_INSTRUCTOR and not self.am_i_instructor():
-            return Http404()
+            raise Http404()
         return super(CourseCoursletUnitMixin, self).dispatch(request, *args, **kwargs)
 
     def am_i_course_owner(self):

@@ -175,6 +175,9 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     # CMS pages
     'pages',
+
+    # Raven
+    'raven.contrib.django.raven_compat',
     # bower requirements
     'djangobower',
 )
@@ -211,7 +214,6 @@ TEMPLATES = [
                 'mysite.context_processors.google_analytics',
                 'sekizai.context_processors.sekizai',
                 'cms.context_processors.cms_settings',
-                # 'ctms.context_processors.sidebar_context_processor',
             )
         }
     },
@@ -308,6 +310,9 @@ CACHES = {
     }
 }
 
+
+# Path to GeoIp database to convert users IP to location
+GEO_IP_DB_PATH = os.path.join(BASE_DIR, 'GeoLiteCityLocal.dat')
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

@@ -1,4 +1,3 @@
-# Packages required for tests
 -r base.txt
 
 pytest

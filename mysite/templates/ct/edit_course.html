@@ -11,6 +11,11 @@
 {% endblock %}
 
 {% block content %}
+
+{% if course.copied_from %}
+<b>Copied from:</b> <a href="{% url 'ct:course' course_id=course.copied_from.id %}">{{ course.copied_from.title }}</a><br>
+{% endif %}
+
 <ul class="nav nav-tabs">
   {% for tabLabel,tabURL in pageData.navTabs %}
   {% if "/" in tabURL %}
@@ -36,7 +41,7 @@ Copy course URL
 
 <hr>
 <p>
-Added by: {{ course.addedBy.get_full_name }},
+Added by: {% if course.addedBy.get_full_name %}{{ course.addedBy.get_full_name }}{% else %}{{ course.addedBy.username }}{% endif %},
           {{ course.atime|display_datetime }}
 </p>
 
@@ -68,6 +73,30 @@ Added by: {{ course.addedBy.get_full_name }},
 </div>
 
 <hr>
+<form action="{% url 'ct:deep_copy_course' course_id=course.id %}" method="post">
+  <div class="row">
+    <div class="col-md-4">
+      To copy this course for a new quarter/semester click this button.
+    </div>
+
+    {% csrf_token %}
+    <div class="col-md-6 row">
+      <div class="col-md-6">
+        <select name="copy_options">
+          <option value="unpublish" checked="true">Unpublish all courselets in copied course</option>
+          <option value="publish">Publish all courselets in copied course</option>
+          <option value="asis">Copy this course as it is</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-2 text-right">
+      <input type="submit" value="Copy course" class="btn btn-danger">
+    </div>
+  </div>
+</form>
+
+<hr>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
 <script type="text/javascript">
 $(function() {

@@ -3,18 +3,12 @@ Unit tests for core app views.py.
 """
 import re
 
-from django.test import TestCase
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.core.paginator import Page
-from django.utils import timezone
-
-from mock import Mock, patch
 from ddt import ddt, data, unpack
+from django.core.paginator import Page
+from django.test import TestCase
+from mock import Mock, patch
 
 from ct.views import *
-from ct.models import UnitLesson, Lesson, Unit
 from fsm.fsm_base import FSMStack
 
 
@@ -249,16 +243,16 @@ class MiscTests(TestCase):
         self.assertIsInstance(result[3], PageData)
 
     def test_ul_responses_need_help_table(self):
-        '''
+        """
         Tests that the table with responses which still need help is hidden by default on the page.
         :return:
-        '''
+        """
         def find_table(content):
-            '''
+            """
             Recieves HTML and returns re.search result or None when search was not able to find table.
             :param content: page html.
             :return:
-            '''
+            """
             return re.search(
                 r"^\s*<(?P<table>table .* id=\"needHelpResponses\").*style=\"(?P<style>.*display: none.*)\">$",
                 content,
@@ -951,9 +945,9 @@ class EditLessonTest(TestCase):
         self.assertIsInstance(response.context['titleform'], LessonForm)
 
     def test_edit_lesson_no_role(self):
-        '''
+        """
         Tests thath if user has no assigneg role for this lesson he will see error page with error message.
-        '''
+        """
         self.role.role = Role.ENROLLED
         self.role.delete()
         response = self.client.get(

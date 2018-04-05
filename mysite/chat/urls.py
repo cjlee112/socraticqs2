@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 from chat.api import AddUnitByChatProgressView
 
-from chat.views import CourseletPreviewView, ChatAddLessonView, TestChatInitialView
+from chat.views import CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
 from .views import ChatInitialView, InitializeLiveSession
 from .api import MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat
 from .services import FsmHandler, LiveChatFsmHandler
@@ -40,7 +40,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^tester/enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
-        TestChatInitialView.as_view(),
+        CheckChatInitialView.as_view(),
         name='tester_chat_enroll'
     ),
     # preview

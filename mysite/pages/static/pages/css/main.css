@@ -111,6 +111,11 @@ ul {
     ul li:last-child {
       margin: 0; }
 
+ul.nav.navbar-nav li.child {
+  background: none; }
+  ul.nav.navbar-nav li.child.selected {
+    font-weight: bold; }
+
 dl {
   margin: 0; }
 
@@ -281,19 +286,20 @@ form small {
   padding: 0;
   background: #ccc url(../img/hero-bg.jpg) no-repeat center center;
   background-size: cover; }
-  .hero h1 {
-    margin: 0; }
   .hero .inner {
     padding: 170px 0 180px 0;
     font-size: 16px;
-    line-height: 28px; }
-    .hero .inner h1, .hero .inner p {
-      color: #fff;
-      max-width: 652px; }
-    .hero .inner p {
-      margin: 13px 0 35px 0; }
-    .hero .inner .btn {
-      margin: 0; }
+    line-height: 28px;
+    text-align: center; }
+  .hero h1, .hero p {
+    color: #fff;
+    max-width: 712px; }
+  .hero h1 {
+    margin: 0 auto; }
+  .hero p {
+    margin: 13px auto 35px auto; }
+  .hero .btn {
+    margin: 0; }
   .hero .cta-bar {
     position: absolute;
     bottom: 0;
@@ -605,14 +611,6 @@ section {
   ul li {
     background-image: url(../img/list-icon@2x.png);
     background-size: 12px 12px; }
-
-  ul.nav.navbar-nav li.child {
-	background: none;
-  }
-
-  ul.nav.navbar-nav li.child.selected {
-	font-weight: bold;
-  }
 
   .faq dt {
     background-image: url(../img/faq-expand@2x.png);

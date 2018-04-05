@@ -159,7 +159,7 @@
       </div>
 
       <div class="chat-container">
-        <img src="{% static "img/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
+        <img src="{% static "img/student/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
 
         <div class="chat-input">
           <div class="chat-input-text">
@@ -188,11 +188,15 @@
     var CUI = CUI || {};
     CUI.config = CUI.config || {};
 
-    CUI.config.chatID = {{ chat_id }};
+    {% if not fsmstate.isLiveSession %}
+    CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
+    {% endif %}
+
+    CUI.config.chatID = {% if chat_id %}{{ chat_id }}{% else %}0{% endif %};
     CUI.config.historyUrl = '/chat/history/';
     CUI.config.progressUrl = '/chat/progress/';
     CUI.config.resourcesUrl = '/chat/resources/';
-    CUI.config.defaultStudentAvatar = '{% static "img/avatar-student.jpg" %}';
+    CUI.config.defaultStudentAvatar = '{% static "img/student/avatar-student.jpg" %}';
     CUI.config.defaultTeacherAvatar = '{{ instructor_icon }}';
   </script>
 

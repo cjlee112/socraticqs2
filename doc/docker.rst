@@ -47,7 +47,7 @@ Docker gives conviniet and simple way to install projest on the local machine.
 When you get your Docker installation done. You have to go to **socraticqs2**
 folder and run:
 ::
-    docker-compouse up web
+    docker-compose up courselets
 
 After that you'll get two Docker containers: one for the project and one for
 the Postgres database. While making containers, file
@@ -83,13 +83,20 @@ One more thing you have to do before start to use Socraticqs2 is migrations.
 
 To do migrations you have to shut down containers and run command
 ::
-    docker-compose run web python manage.py migrate
+    docker-compose run courselets python manage.py migrate
 
 In such a way you can run any command related to the project inside the Docker
 container
 ::
 
-    docker-compose run web python manage.py loaddata dumpdata/debug-wo-fsm.json
-    docker-compose run web python manage.py fsm_deploy
+    docker-compose run courselets python manage.py loaddata dumpdata/debug-wo-fsm.json
+    docker-compose run courselets python manage.py fsm_deploy
 
 Fabric deployment tool is not tuned yet for using with docker.
+
+
+static dependencies
+::
+
+    # takes long time
+    docker exec -it courselets "cd lms/static && bower install --allow-root"

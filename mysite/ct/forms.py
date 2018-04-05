@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import widgets
 from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError, UnitLesson
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
@@ -322,3 +323,15 @@ class BaseForm(forms.ModelForm):
         for field_name in ('addedBy', 'author'):
             if field_name in self.fields and not self.initial.get(field_name):
                 self.initial[field_name] = self.current_user
+
+
+class CloneCourseForm(forms.Form):
+    '''Clone course form'''
+    OPTS_CHOICES = [
+        ('asis', 'Copy course as it is'),
+        ('publish', 'Publish all courselets in this course'),
+        ('unpublish', 'Unpublish all courselets in this course'),
+    ]
+    copy_options = forms.ChoiceField(choices=OPTS_CHOICES)
+    with_students = forms.BooleanField(required=False)
+

@@ -14,6 +14,7 @@ password_validator = RegexValidator(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{%s,}$' % (PASSWORD_MIN_CHARS,),
     message="Password should contain minimum 6 chars with 1 capital char and 1 digit char.")
 
+
 class SignUpForm(forms.Form):
     """
     This form handles and validate data for signup process.
@@ -93,6 +94,7 @@ class UsernameLoginForm(forms.Form):
     def get_user(self):
         return authenticate(username=self.cleaned_data.get('username'),
                             password=self.cleaned_data.get('password'))
+
 
 class SocialForm(forms.ModelForm):
     class Meta:
