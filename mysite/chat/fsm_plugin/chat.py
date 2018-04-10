@@ -43,8 +43,12 @@ def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **k
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
 
+    if fsmStack.state.unitLesson.lesson.enaable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
+        return fsm.get_node('GRADING')
+
     if not fsmStack.next_point.content.selfeval == 'correct':
         return fsm.get_node('ERRORS')
+
 
     return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
@@ -165,6 +169,15 @@ class GET_ASSESS(object):
         )
 
 
+class GRADING(object):
+    get_path = get_lesson_url
+    next_edge = check_selfassess_and_next_lesson
+    # node specification data goes here
+    title = 'Grading for student answer'
+    edges = (
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
+
 class ERRORS(object):
     get_path = get_lesson_url
     # node specification data goes here
@@ -231,6 +244,7 @@ def get_specs():
             GET_CONFIDENCE,
             ASSESS,
             GET_ASSESS,
+            GRADING,
             ERRORS,
             GET_ERRORS,
             IF_RESOURCES,
