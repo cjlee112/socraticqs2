@@ -95,8 +95,10 @@ container
 Fabric deployment tool is not tuned yet for using with docker.
 
 
-static dependencies
-::
+**Static dependencies**
 
-    # takes long time
-    docker exec -it courselets "cd lms/static && bower install --allow-root"
+1. install nodejs
+2. install bower:
+    2.1. ``npm install -g bower``
+3. install bower deps:
+    3.1. ``cd mysite/lms/static && bower install``
