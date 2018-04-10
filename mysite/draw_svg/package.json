@@ -2,6 +2,7 @@
   "name": "draw_svg",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8000/",
   "dependencies": {
     "d3": "^5.0.0",
     "d3-color": "^1.0.3",

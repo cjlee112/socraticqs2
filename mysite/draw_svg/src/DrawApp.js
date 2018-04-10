@@ -3,6 +3,7 @@ import './DrawApp.css';
 
 import * as d3 from "d3";
 import {CompactPicker} from 'react-color';
+import svgson from 'svgson';
 
 
 class DrawApp extends Component {
@@ -13,9 +14,12 @@ class DrawApp extends Component {
             'brush': 'pencil',
             'color': '#000000',
             'width': 4,
+
             'showColorPicker': false,
             'showShapes': false,
             'showWidths': false,
+            'isUploading': false,
+
             'figures': [],
             'redoFigures': [],
         };
@@ -63,7 +67,7 @@ class DrawApp extends Component {
     changeWidth(event) {
         this.setState({
             'width': parseInt(event.currentTarget.getAttribute('data-width'), 10),
-        })
+        });
     }
 
     createFigure(type) {
@@ -277,6 +281,29 @@ class DrawApp extends Component {
         }
     }
 
+    save() {
+        this.setState({
+            'isUploading': true,
+        });
+        svgson(this.node.outerHTML, {}, (result) => {
+            fetch('/api/v0/echo/data/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(result),
+            }).then(function (response) {
+                this.setState({
+                    'isUploading': false,
+                });
+                console.log(response);
+            }.bind(this)).catch(function (error) {
+                console.log(error);
+            });
+        });
+    }
+
     render() {
         return (
             <div className="text-center">
@@ -286,6 +313,9 @@ class DrawApp extends Component {
                     </button>
                     <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
                         <span className="oi oi-action-redo"/>
+                    </button>
+                    <button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>
+                        <span className="oi oi-cloud-upload"/>
                     </button>
 
                     <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
