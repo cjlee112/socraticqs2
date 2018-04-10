@@ -62,7 +62,7 @@ class DrawApp extends Component {
 
     changeWidth(event) {
         this.setState({
-            'width': parseInt(event.currentTarget.getAttribute('data-width')),
+            'width': parseInt(event.currentTarget.getAttribute('data-width'), 10),
         })
     }
 
