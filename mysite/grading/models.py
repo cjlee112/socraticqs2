@@ -8,7 +8,7 @@ from ct.models import Response
 class CorrectnessMeter(models.Model):
     """User answers correctness meter."""
     PARTIALLY_CORRECT_ANSWER_POINT_REDUCTION = 0.9
-    CORRECT_ANSER_POINTS = 1
+    CORRECT_ANSWER_POINTS = 1
     NOT_CORRECT_ANSWER_POINTS = 0
     NOT_CORRECT = 'not_correct'
     CORRECT = 'correct'

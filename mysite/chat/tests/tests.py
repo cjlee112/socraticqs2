@@ -1079,8 +1079,13 @@ class NumbersTest(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertEquals(json_content['input']['subType'], 'numbers')
-        self.assertEquals(len(json_content['addMessages']), 3)
+
+        self.assertEquals(len(json_content['addMessages']), 4)  # + 1 message for grading
+
         self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+
+        grading_msg = u'Your answer was Correct! You get 1 points for this question.'
+        self.assertEquals(json_content['addMessages'][1]['html'], grading_msg)
 
         # post answer (2)
         response = self.client.put(
@@ -1160,7 +1165,7 @@ class NumbersTest(CustomTestCase):
 
         json_content = json.loads(response.content)
         self.assertIn(
-            'data-selectable-value="126"', json_content['addMessages'][-1]['html']
+            'data-selectable-value="128"', json_content['addMessages'][-1]['html']
         )
 
         next_url = json_content['input']['url']

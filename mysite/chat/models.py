@@ -293,7 +293,8 @@ class Message(models.Model):
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
                 if sub_kind and not self.content.selfeval and not self.content.confidence:
-                    if sub_kind == 'choices':
+                    # no confidence and no selfeval
+                    if sub_kind == Lesson.MULTIPLE_CHOICES:
                         html = self.render_my_choices()
                         return html
 
@@ -342,7 +343,7 @@ class Message(models.Model):
                 elif self.input_type == 'options' and self.text: # and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
                 elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
-                    # render unitlesson (question)
+                    # render unitlesson (question) - answer
                     if self.content.kind == 'part':
                         html = mark_safe(
                             md2html(
@@ -360,6 +361,19 @@ class Message(models.Model):
                     elif self.response_to_check.selfeval and self.response_to_check.confidence:
                         correct = self.content.parent.lesson.get_correct_choices()
                         html = self.render_choices(correct, [])
+                elif self.content.kind == 'answers' and self.content.parent.lesson.sub_kind == Lesson.NUMBERS:
+                    max_val = self.content.parent.lesson.number_max_value
+                    min_val = self.content.parent.lesson.number_min_value
+                    precision = self.content.parent.lesson.number_precision
+                    html = mark_safe(
+                        md2html("Expected value {value}{precision}{max}{min}.".format(
+                            value=self.content.lesson.text,
+                            precision=" with precision {}".format(precision) if precision else "",
+                            max=", maximum {}".format(max_val) if max_val else "",
+                            min=", minimum {}".format(min_val) if min_val else "",
+
+                        ))
+                    )
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
@@ -368,7 +382,6 @@ class Message(models.Model):
                         )
                     else:
                         raw_html = self.content.lesson.text
-
                     html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()

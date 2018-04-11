@@ -44,7 +44,7 @@ def get_lesson_url(self, node, state, request, **kwargs):
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
 
-    if fsmStack.state.unitLesson.lesson.enaable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
+    if fsmStack.state.unitLesson.lesson.enable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
         return fsm.get_node('GRADING')
 
     if not fsmStack.next_point.content.selfeval == 'correct':

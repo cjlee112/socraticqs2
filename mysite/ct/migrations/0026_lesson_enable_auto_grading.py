@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='lesson',
-            name='enaable_auto_grading',
+            name='enable_auto_grading',
             field=models.BooleanField(default=False),
         ),
     ]

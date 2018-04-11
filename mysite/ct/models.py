@@ -256,7 +256,7 @@ class Lesson(models.Model):
     number_precision = models.FloatField(default=0)
     # end numbers
 
-    enaable_auto_grading = models.BooleanField(default=False)
+    enable_auto_grading = models.BooleanField(default=False)
 
     medium = models.CharField(max_length=10, choices=MEDIA_CHOICES,
                               default=READING)

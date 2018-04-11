@@ -33,11 +33,11 @@ class NumberGrader(BaseGrader):
         if self.is_correct:
             if self.min_val <= value <= self.max_val:
                 correctness = CorrectnessMeter.CORRECT
-                points = CorrectnessMeter.CORRECT_ANSER_POINTS
+                points = CorrectnessMeter.CORRECT_ANSWER_POINTS
             else:
                 correctness = CorrectnessMeter.PARTIALLY_CORRECT
                 points = (
-                    CorrectnessMeter.CORRECT_ANSER_POINTS * CorrectnessMeter.PARTIALLY_CORRECT_ANSWER_POINT_REDUCTION
+                        CorrectnessMeter.CORRECT_ANSWER_POINTS * CorrectnessMeter.PARTIALLY_CORRECT_ANSWER_POINT_REDUCTION
                 )
         else:
             correctness = CorrectnessMeter.NOT_CORRECT
