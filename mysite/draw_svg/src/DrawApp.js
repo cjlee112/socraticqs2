@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
-import './DrawApp.css';
 
 import * as d3 from "d3";
 import {CompactPicker} from 'react-color';
-import svgson from 'svgson';
 
 
 class DrawApp extends Component {
@@ -285,23 +283,25 @@ class DrawApp extends Component {
         this.setState({
             'isUploading': true,
         });
-        svgson(this.node.outerHTML, {}, (result) => {
-            fetch('/api/v0/echo/data/', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(result),
-            }).then(function (response) {
-                this.setState({
-                    'isUploading': false,
-                });
-                console.log(response);
-            }.bind(this)).catch(function (error) {
-                console.log(error);
-            });
-        });
+        // svgson(this.node.outerHTML).then(function (data) {
+        //     return JSON.stringify(data[0]);
+        // }).then(function (json_data) {
+        //     fetch('/api/v0/echo/data/', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Accept': 'application/json',
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: json_data,
+        //     }).then(function (response) {
+        //         this.setState({
+        //             'isUploading': false,
+        //         });
+        //         console.log(response);
+        //     }.bind(this)).catch(function (error) {
+        //         console.log(error);
+        //     });
+        // }.bind(this));
     }
 
     render() {

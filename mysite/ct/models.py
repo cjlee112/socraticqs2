@@ -208,6 +208,7 @@ class Lesson(models.Model):
     SOFTWARE = 'software'
     MULTIPLE_CHOICES = 'choices'
     NUMBERS = 'numbers'
+    CANVAS = 'canvas'
     NOT_CORRECT_CHOICE = '()'
     CORRECT_CHOICE = '(*)'
 
@@ -230,7 +231,7 @@ class Lesson(models.Model):
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices Question'),
         (NUMBERS, 'Numbers'),
-
+        (CANVAS, 'Canvas'),
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -295,13 +296,34 @@ class Lesson(models.Model):
     def get_choices_wrap_text(self):
         return self.text.split('[choices]')[0]
 
-
     def get_correct_choices(self):
         """Return only correct choices from list of choices
 
         :return: correct choices.
         """
         return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
+
+    def get_canvas(self, *args, **kwargs):
+        """
+
+        :return:
+        """
+        return """
+            <div id="draw-svg--{0}" class="draw-svg-container"></div>
+            <script type="text/javascript">
+                document.drawToElement([document.getElementById('draw-svg--{0}')]);
+            </script>
+        """.format(self.pk)
+
+    def get_html(self, *args, **kwargs):
+        """
+
+        :return:
+        """
+        if self.sub_kind == Lesson.CANVAS:
+            return self.get_canvas()
+        else:
+            return None
 
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):
@@ -314,6 +336,7 @@ class Lesson(models.Model):
             dataClass = mod.LessonDoc
             klass._sourceDBdict[sourceDB] = dataClass
             return dataClass
+
     @classmethod
     def get_from_sourceDB(klass, sourceID, user, sourceDB='wikipedia',
                           doSave=True):
@@ -591,6 +614,7 @@ class UnitLesson(models.Model):
             ul._answer = klass.create_from_lesson(answer, unit,
                         kind=klass.ANSWERS, parent=ul)
         return ul
+
     @classmethod
     def search_text(klass, s, searchType=IS_LESSON, dedupe=True,
                     excludeArgs={}, **kwargs):
@@ -618,6 +642,7 @@ class UnitLesson(models.Model):
         if dedupe:
             out = distinct_subset(out)
         return out
+
     @classmethod
     def search_sourceDB(klass, query, sourceDB='wikipedia', unit=None,
                         **kwargs):
@@ -638,19 +663,24 @@ class UnitLesson(models.Model):
                 except IndexError: # no UL so just return tuple
                     results.append(t)
         return resultsUL, results
+
     def get_answers(self):
         'get query set with answer(s) if any'
         return self.unitlesson_set.filter(kind=self.ANSWERS)
+
     def get_errors(self):
         'get query set with errors if any'
         return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS)
+
     def get_linked_concepts(self):
         'get all concept links (including errors) to this lesson'
         return self.lesson.conceptlink_set.all()
+
     def get_concepts(self):
         'get all concepts (not errors) linked to this lesson'
         return Concept.objects.filter(conceptlink__lesson=self.lesson,
                                       isError=False)
+
     def get_em_resolutions(self):
         'get list of resolution UL for this error UL'
         em = self.lesson.concept
@@ -659,18 +689,22 @@ class UnitLesson(models.Model):
         ##           lesson__conceptlink__relationship=ConceptLink.RESOLVES,
         ##           lesson__conceptlink__concept=em)
         ## return em, distinct_subset(UnitLesson.objects.filter(query))
+
     def get_new_inquiries(self):
         return self.response_set.filter(kind=Response.STUDENT_QUESTION,
                                         needsEval=True)
+
     def get_alternative_defs(self, **kwargs):
         return distinct_subset(self.__class__.objects
             .filter(lesson__concept=self.lesson.concept)
             .exclude(treeID=self.treeID))
+
     def get_next_lesson(self):
         if self.order is not None:
             return self.unit.unitlesson_set.get(order=self.order + 1)
         else:
             raise self.__class__.DoesNotExist
+
     def checkout(self, addedBy):
         'get lesson object we can update (which may be a new object)'
         lesson = self.lesson.checkout(addedBy)
@@ -678,6 +712,7 @@ class UnitLesson(models.Model):
             return lesson
         else:
             return self.lesson
+
     def checkin(self, lesson, commit=None, doSave=True):
         '''finalize update of checked-out lesson, committing if requested.
         If lesson != self.lesson, save it as self.lesson.'''
@@ -716,6 +751,7 @@ class UnitLesson(models.Model):
         for child in self.unitlesson_set.all(): # copy children
             child.copy(unit, addedBy, parent=ul, **kwargs)
         return ul
+
     def save_resolution(self, lesson):
         'save new lesson as resolution for this error model UL'
         if not self.lesson.concept or self.kind != self.MISUNDERSTANDS:
@@ -724,6 +760,7 @@ class UnitLesson(models.Model):
                          ConceptLink.RESOLVES) # link as resolution
         return self.__class__.create_from_lesson(lesson, self.unit,
                                 kind=UnitLesson.RESOLVES, parent=self)
+
     def copy_resolution(self, ul, addedBy):
         'copy existing UL as resolution for this error model UL'
         try: # already added?
@@ -731,6 +768,7 @@ class UnitLesson(models.Model):
                                            kind=UnitLesson.RESOLVES)
         except UnitLesson.DoesNotExist:
             return ul.copy(self.unit, addedBy, self, kind=UnitLesson.RESOLVES)
+
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'get URL path for this UL'

@@ -1,5 +1,91 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-}
+@import "https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.css";
+.draw-svg-container {
+  background-color: white; }
+  .draw-svg-container .btn {
+    color: black;
+    background-color: #fff;
+    outline: none; }
+    .draw-svg-container .btn:disabled {
+      color: lightgray; }
+    .draw-svg-container .btn:active, .draw-svg-container .btn:focus, .draw-svg-container .btn.active {
+      color: #4890c4;
+      box-shadow: none;
+      background-color: #fff;
+      outline: none; }
+  .draw-svg-container svg {
+    cursor: url("https://cdn2.iconfinder.com/data/icons/snipicons/500/pencil-128.png") 20 109, auto; }
+  .draw-svg-container .actions {
+    display: flex;
+    font-size: 12px;
+    line-height: 28px; }
+  .draw-svg-container .figure {
+    fill: none;
+    stroke: black;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    stroke-linecap: round; }
+  .draw-svg-container .btn.color-picker-handler {
+    padding: 12px;
+    margin: 0 12px;
+    border: solid 1px #f1f1f1; }
+  .draw-svg-container .color-picker {
+    display: inline-block;
+    position: absolute;
+    top: 40px; }
+  .draw-svg-container .color-picker.hidden {
+    display: none; }
+  .draw-svg-container .actions {
+    padding: 3px 0;
+    justify-content: center; }
+  .draw-svg-container .actions label {
+    margin-bottom: 0;
+    cursor: pointer;
+    line-height: 35px; }
+  .draw-svg-container .shapes-wrapper {
+    position: relative;
+    display: flex;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 20px;
+    margin-right: 10px; }
+  .draw-svg-container .shapes-wrapper label {
+    margin-right: 50px; }
+  .draw-svg-container .shapes {
+    position: absolute;
+    display: flex;
+    width: 50px;
+    margin-left: 35px;
+    flex-direction: column; }
+  .draw-svg-container .shapes-wrapper.active .btn {
+    display: inline-block; }
+  .draw-svg-container .shapes-wrapper.active .shapes {
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px; }
+  .draw-svg-container .shapes-wrapper .btn {
+    display: none;
+    width: 50px; }
+  .draw-svg-container .shapes-wrapper .btn.active {
+    display: inline-block; }
+  .draw-svg-container .widths-wrapper {
+    position: relative;
+    display: flex;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 20px; }
+  .draw-svg-container .widths-wrapper label {
+    margin-right: 50px; }
+  .draw-svg-container .widths {
+    position: absolute;
+    display: flex;
+    width: 35px;
+    margin-left: 35px;
+    flex-direction: column; }
+  .draw-svg-container .widths-wrapper.active .btn {
+    display: inline-block; }
+  .draw-svg-container .widths-wrapper.active .widths {
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px; }
+  .draw-svg-container .widths-wrapper .btn {
+    display: none;
+    width: 35px;
+    font-size: 14px; }
+  .draw-svg-container .widths-wrapper .btn.active {
+    display: inline-block; }

@@ -341,7 +341,7 @@ class Message(models.Model):
                     )
                 elif self.input_type == 'options' and self.text: # and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
-                elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
+                elif self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
                     # render unitlesson (question)
                     if self.content.kind == 'part':
                         html = mark_safe(
@@ -350,6 +350,9 @@ class Message(models.Model):
                             )
                         )
                         html += self.get_choices()
+                elif self.content.lesson.sub_kind == Lesson.CANVAS:
+                    # adds canvas to draw svg image
+                    html = self.content.lesson.get_html()
                 elif (self.content.kind == 'answers' and
                       self.content.parent.lesson.sub_kind and
                       self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
