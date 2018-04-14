@@ -21,7 +21,6 @@ from .models import (
 MODELS = (
     Concept,
     ConceptGraph,
-    Lesson,
     ConceptLink,
     UnitLesson,
     Unit,
@@ -40,6 +39,11 @@ class BaseAdmin(admin.ModelAdmin):
         return form
 
     form = BaseForm
+
+
+@admin.register(Lesson)
+class AdminLesson(admin.ModelAdmin):
+    list_display = ('title', 'text', 'kind', 'sub_kind', 'enable_auto_grading', 'parent')
 
 
 @admin.register(*MODELS)

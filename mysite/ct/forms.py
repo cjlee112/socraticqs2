@@ -240,7 +240,7 @@ class LessonForm(ErrorForm):
         fields = [
             'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
             'sub_kind',
-            'number_max_value', 'number_min_value', 'number_precision',
+            'number_max_value', 'number_min_value', 'number_precision', 'enable_auto_grading'
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
@@ -341,4 +341,3 @@ class CloneCourseForm(forms.Form):
     ]
     copy_options = forms.ChoiceField(choices=OPTS_CHOICES)
     with_students = forms.BooleanField(required=False)
-

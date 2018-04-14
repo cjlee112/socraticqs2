@@ -112,12 +112,9 @@ class MessageSerializer(serializers.ModelSerializer):
             'includeSelectedValuesFromMessages': incl_msg,
         }
         if sub_kind == 'numbers':
-            input_data['html'] = '<input type="number" name="{}" max="{}" min="{}" step="{}" value="{}">'.format(
-                "text",
-                i.content.lesson.number_max_value,
-                i.content.lesson.number_min_value,
-                i.content.lesson.number_precision,
-                0,
+            precision = i.content.lesson.number_precision
+            input_data['html'] = '<input type="number" name="{}" step="{}" value="{}">'.format(
+                "text", precision, 0,
             )
         if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
@@ -169,12 +166,10 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         }
 
         if sub_kind == 'numbers':
-            input_data['html'] = '<input name="{}" type="number" max="{}" min="{}" step="{}" value="{}">'.format(
-                "text",
-                msg.content.lesson.number_max_value,
-                msg.content.lesson.number_min_value,
-                msg.content.lesson.number_precision,
-                0,
+            precision = msg.content.lesson.number_precision
+
+            input_data['html'] = '<input name="{}" type="number" step="{}" value="{}">'.format(
+                "text", precision, 0,
             )
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'

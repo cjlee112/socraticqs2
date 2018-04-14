@@ -43,7 +43,7 @@
         "is_active": true,
         "is_superuser": true,
         "is_staff": true,
-        "last_login": "2018-04-04T16:44:19.037Z",
+        "last_login": "2018-04-05T15:21:06.391Z",
         "groups": [],
         "user_permissions": [],
         "password": "pbkdf2_sha256$20000$xbemd4oHqpFz$xRNo9eVjn8N1M0BvisF7l52cDtOnP/EoryCn+Oug598=",
@@ -52,14 +52,6 @@
     },
     "model": "auth.user",
     "pk": 258
-},
-{
-    "fields": {
-        "domain": "example.com",
-        "name": "example.com"
-    },
-    "model": "sites.site",
-    "pk": 1
 },
 {
     "fields": {
@@ -588,6 +580,21 @@
 },
 {
     "fields": {
+        "isPuzzled": false,
+        "isFail": false,
+        "approvedBy": null,
+        "title": "some error",
+        "alwaysAsk": false,
+        "addedBy": 258,
+        "isAbort": false,
+        "atime": "2018-04-11T15:37:13.605Z",
+        "isError": true
+    },
+    "model": "ct.concept",
+    "pk": 45
+},
+{
+    "fields": {
         "approvedBy": null,
         "relationship": "errmod",
         "addedBy": 257,
@@ -804,10 +811,23 @@
 },
 {
     "fields": {
+        "approvedBy": null,
+        "relationship": "errmod",
+        "addedBy": 258,
+        "fromConcept": 45,
+        "atime": "2018-04-11T15:37:13.614Z",
+        "toConcept": 44
+    },
+    "model": "ct.conceptgraph",
+    "pk": 22
+},
+{
+    "fields": {
         "number_max_value": 0.0,
         "concept": null,
         "text": "* Let :math:`S` be the set of all possible events, :math:`H` and :math:`O` subsets of it, and :math:`|S|` the \"size\" (probability measure) of event set :math:`S`.  Then we define an *unconditional probability* as:\r\n\r\n  .. math:: p(H) = \\frac{|H \\cap S|}{|S|}\r\n\r\n* Define a *joint probability* as\r\n\r\n  .. math:: p(H \\cap O) = \\frac{|H \\cap O \\cap S|}{|S|}\r\n\r\n* Define a *conditional probability* as\r\n\r\n  .. math:: p(H|O) = \\frac{|H \\cap O \\cap S|}{|O \\cap S|}\r\n  \r\n* *Statistical independence* is defined as a relationship between\r\n  two random variables :math:`X,Y` in which the conditional probability of\r\n  one random variable is *always* equal to its unconditional\r\n  probability:\r\n  \r\n  .. math:: p(X|Y) = p(X)\r\n  \r\n  (i.e. this holds true for all possible values of \r\n  the random variables :math:`X,Y`).  Thus, knowing the value of :math:`Y`\r\n  tells you *nothing* about the likely value of :math:`X`; \r\n  its probabilities are totally unchanged.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Basic Probability Definitions Review",
@@ -836,6 +856,7 @@
         "concept": 9,
         "text": "Let's define a **concept** as a concise statement of a principle that is always true, and that furnishes a reliable tool for solving a wide variety of problems.\r\n\r\nWe can define **conceptual understanding** operationally, as the ability to use a concept correctly on a wide variety of problems.  Concretely, given a concept statement, there are many different ways we could try to apply that statement even to a single problem -- some of which are right, and some which are invalid.  To my mind, \"conceptual understanding\" means *both* knowing which ways are right vs. which ways are wrong, and also being able to explain *why* the right ways are right, and the wrong ways are wrong, from first principles.\r\n\r\nWithout the latter component, students' knowledge is fragile: even slight errors (which are inevitable) will knock them off the track to a correct solution.  By contrast, when they can reason from first principles, they will constantly catch their own errors and get back on track.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "A Brief Definition of Conceptual Understanding",
@@ -864,6 +885,7 @@
         "concept": null,
         "text": "It is self-evident that \"thinking about concepts\" is not the only possible strategy to use in a class, let alone the real world.  Let's contrast two basic strategies:\r\n\r\n* using **procedures that we've trained by repetition**.  Concretely, our operational focus is on following the steps (applying them to the current problem).  We will sometimes refer to this as \"mechanics\", both to reflect that it can perform complicated operations (such as solving an equation), and that it's \"mechanical\" in the sense of following a previously recorded procedure.\r\n* we can characterize **thinking about concepts** as original thinking, in that we think for ourselves about a newly encountered problem using basic concepts.  Concretely, our operational focus is on what conceptual questions to ask about this problem, and then answering them.  In other words, what do you do when you don't **already know** what to do?  You think about it.\r\n\r\nObviously, a good problem-solver uses both of these strategies, and mixes them as needed.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Different Strategies for Problem Solving",
@@ -892,6 +914,7 @@
         "concept": null,
         "text": "Say you are teaching a bioinformatics theory class for Computer Science students (equal mix of graduate students and advanced undergrads) who have **completed** a statistics course on Probability.  You give them some `basic probability review definitions </ct/courses/2/units/2/lessons/1/>`_, lecture on them, solicit student questions and answer them.\r\n\r\n**What fraction of the students do you expect will have a basic misconception about these simple definitions?  The more accurate your prediction, the better.**",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Basic Misconception Rates?",
@@ -920,6 +943,7 @@
         "concept": null,
         "text": "Say you wanted to quickly teach this class of CS students, to use these basic probability concepts correctly.  Let's consider the possible mixes of four distinct strategies:\r\n\r\n#. \"telling them the *right way*\" to use them: present correct usages in more or less detail.\r\n#. \"warning them about *wrong ways*\": lecture about mistakes they must avoid.\r\n#. open response concept testing: ungraded, \"in class\" teaching method, challenges a single concept, exposes all student misconceptions, empirically and immediately.\r\n#. problems to solve: exercises for them to use everything they learned, typically graded based on getting the right answer.\r\n\r\n**State briefly in one sentence what teaching strategy you would choose. Then explain briefly why that strategy would be fastest.**\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Fastest Teaching Strategy?",
@@ -948,6 +972,7 @@
         "concept": null,
         "text": "Assume that a random variable :math:`B` has disjoint possible values\n:math:`\\{b_1, \\ldots, b_n\\}`.\nWhich of the following expressions if any are equal?\n\n1. :math:`\\sum_{i=1}^n p(A|B=b_i)`.\n\n2. :math:`\\sum_{i=1}^n p(A, B=b_i)`.\n\n3. :math:`\\sum_{i=1}^n p(A|B=b_i)p(B=b_i)`.\n\n4. :math:`\\sum_{i=1}^n \\frac{p(A)}{p(B=b_i)}`.\n\n5. :math:`\\sum_{i=1}^n p(A)p(B=b_i)`.\n\n6. :math:`p(A)`\n\n7. :math:`p(B)`\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Summation Equalities",
@@ -976,6 +1001,7 @@
         "concept": null,
         "text": "Consider the following Venn diagram of a probability space (outer rectangle) containing two event subsets A, B:\r\n\r\n.. image:: STATICIMAGE/no_intersection.png\r\n   :width: 80%\r\n\r\nAre events A, B statistically independent?\r\nJustify your answer mathematically.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Event Independence?",
@@ -1004,6 +1030,7 @@
         "concept": null,
         "text": "What are the distinct ways that an ORCT exercise can **fail** to be useful for a student?  Briefly state the cases that you think are most likely, and how we can minimize them.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Types of ORCT Failure?",
@@ -1032,6 +1059,7 @@
         "concept": null,
         "text": "Say you've decided to teach a concept with\r\na combination of a lecture introduction followed by an ORCT.\r\nAssume there are several aspects\r\nyou want students to learn about that concept.\r\nPropose a rule for how to decide what kinds\r\nof aspects should be covered in lecture, and briefly\r\njustify why your rule will best improve student learning.\r\n\r\nExample: say we're teaching the importance of distinguishing\r\nobservable (O) vs hidden (H) variables, and\r\nwe *already know* that students often forget to distinguish\r\nthem, e.g. p(O|H) vs. p(H|O) (a simple case of this is the False\r\nPositive Rate vs. False Discovery Rate).\r\nWe could warn them of that error in lecture, or via\r\nan ORCT, or by some combination of the two.  Briefly state\r\nwhat you think would be best, and why.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "What to Cover in Lecture Prior to ORCT?",
@@ -1060,6 +1088,7 @@
         "concept": null,
         "text": "Say we want to use our teaching time as efficiently as possible.  What principles should we follow for deciding whether to include an ORCT for a given topic or not, and if so how much time to give to lecturing on that topic vs. the ORCT.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Efficiency Concerns: When to Include an ORCT?",
@@ -1088,6 +1117,7 @@
         "concept": null,
         "text": "Say we want to train students to use a concept\r\ncorrectly for solving real-world problems, by\r\nexposing and identifying the specific ways they misunderstand\r\nand mis-apply it.  To do this, we want to give them a learning exercise in class or online.\r\nWhat guidelines would you propose for effective design of such an exercise?  Briefly state your proposed guidelines, and why each is needed.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Identify Student Misconceptions via an Active Learning Exercise?",
@@ -1116,6 +1146,7 @@
         "concept": null,
         "text": "Does the average student use *thinking about concepts* as their main strategy?  Putting yourself \"in their shoes\", when *should* they do this, vs. when *shouldn't* they?  Briefly justify your answer.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Conceptual Thinking as a Student Strategy?",
@@ -1144,6 +1175,7 @@
         "concept": null,
         "text": "Say we've identified a concept we want our students to understand and use correctly, and someone proposes a specific measurement (e.g. an exam question and grading method).  By what criteria could we evaluate whether it genuinely measures conceptual understanding?  Briefly explain your reasoning, and suggest some common examples that would vs. wouldn't be good measures of conceptual understanding.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Measure Conceptual Understanding?",
@@ -1172,6 +1204,7 @@
         "concept": null,
         "text": "* 73% failed to consider one of the most basic properties of\r\n  conditional probability (converses are not equal) on a\r\n  multiple choice question.\r\n* `77% made a basic error </ct/teach/courses/2/units/2/lessons/6/>`_ on fundamental `aspects of the definition\r\n  of probability </ct/teach/courses/2/units/2/lessons/6/errors/>`_, such as *normalization* (\"probabilities must sum to 1\").\r\n* `56% fundamentally misunderstood </ct/teach/courses/2/units/2/lessons/7/errors/>`_ the meaning of\r\n  *statistical independence* when applied to a `simple Venn diagram </ct/teach/courses/2/units/2/lessons/7/>`_.\r\n\r\nComments:\r\n\r\n* the only instructors who say \"this wouldn't happen in *my* class\"\r\n  are ones who have *not* performed systematic concept inventory\r\n  testing on their students.\r\n* seeing what *every* student in your class actually thinks,\r\n  on each concept you teach, is *eye-opening*,\r\n  and the necessary first step towards *correcting* their errors.\r\n  You cannot fix what you cannot see.\r\n\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Basic Misconception Rates? Answer",
@@ -1200,6 +1233,7 @@
         "concept": null,
         "text": "To make a long story short, I find a mixed strategy necessary:\r\nsome lecture (#1) to introduce a concept; \r\nopen response concept testing (ORCT, #3)\r\nto get the students to actually understand it correctly;\r\nand lastly problems to solve (#4) to start using the concept in\r\ncombination with other concepts.\r\nA 10 minute ORCT exercise can empirically capture, categorize\r\nand measure all of the misconceptions that students make on\r\na given concept.  Then it can follow up with each student to\r\nfix their error with appropriate exercises.\r\n\r\nI find this mixed approach fastest for three reasons:\r\n\r\n* it quickly identifies students' specific misconceptions, whereas\r\n  without ORCT I would probably never identify most of them.\r\n* trying to lecture about all these misconceptions (to \"innoculate\"\r\n  students against them) would take a *long* time;\r\n* ORCT fixes students' misconceptions efficiently,\r\n  by giving each student follow-up exercises (outside of class)\r\n  tailored to fix just the mistake(s) that individual made.\r\n\r\nIn-depth:\r\n\r\nStrategy #1 is necessary but not sufficient.  If you keep it\r\nconcise, you leave many implications about correct usage unstated,\r\nand students will miss these implications, and use the concepts wrong.\r\nOn the other hand, trying to cover all possible usage cases\r\nand make every implication explicit is not only a mirage\r\n(impractical) but counter-productive.  The work of realizing\r\nwhat implications flow from the basic concepts is only \r\nuseful if the *student does it*, because *that* is conceptual\r\nunderstanding: using the concept correctly in all circumstances.  \r\nBlindly following a laundry\r\nlist of someone else's rules is the opposite of\r\nsuch understanding.\r\n\r\nMore to the point, our ability to transfer our knowledge to\r\nstudents is fundamentally limited by two things: \r\n\r\n* the \"noisy channel\": about half of what you say will get lost or\r\n  misinterpreted by each student;\r\n* the \"black hole\": we often don't\r\n  know precisely what misconceptions students will fall into\r\n  for a given concept.  This limits the value of strategy #2.\r\n\r\nIn general, *lecturing more* does not solve either of these\r\nproblems.  Open Response Concept Testing fills this gap.\r\n\r\nStrategy #4 is again necessary but not sufficient.  Ideally\r\nthese exercises function as a \"bridge\" to real-world problem\r\nsolving skills, by making students struggle with the important\r\nchallenges of figuring out *which* concept to use *when*, and \r\nhow to *combine multiple concepts* to solve a problem (synthesis).\r\nHowever, this requires *already* having a good grasp of the \r\nbasic concepts.  Students with basic misconceptions will often\r\nget stuck either in \"I can't figure out how to solve this problem\",\r\nor \"I can't figure out what I did wrong\".\r\n\r\nFundamentally, strategies 1, 2 and 4 are *one-way* (from the instructor\r\nto the student, e.g. \"here's how to do X\", or \"you got question Y wrong\").\r\nThey do not reveal the inner thinking of the student to the\r\ninstructor, a necessary precondition for identifying student\r\nerrors and fixing them.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Fastest Teaching Strategy? Answer",
@@ -1228,6 +1262,7 @@
         "concept": null,
         "text": "2. :math:`\\sum_{i=1}^n p(A, B=b_i)`.\n\n3. :math:`\\sum_{i=1}^n p(A|B=b_i)p(B=b_i)`.\n\n5. :math:`\\sum_{i=1}^n p(A)p(B=b_i)`.\n\n6. :math:`p(A)`\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Summation Equalities Answer",
@@ -1256,6 +1291,7 @@
         "concept": null,
         "text": "We define random variables based on each event A, B: specifically, we define two binary variables :math:`X \\in \\{A,\\neg A\\}`, and :math:`Y \\in \\{B,\\neg B\\}`.  Now we can ask whether their joint probability mass function obeys independence, i.e.\r\n\r\n.. math:: p(X,Y) = p(X)p(Y)\r\n\r\nThe Venn diagram clearly fails this, e.g. \r\n\r\n.. math:: p(X=A,Y=B) \\ne p(X=A)p(Y=B)\r\n\r\nNote: it's important to understand that independence is only definable with respect to a pair of *variables*, not individual *events* or *states*.  In other words, independence is a statement about the complete joint probability *function*: the independence equality must hold for *all* possible values of *X,Y*.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Event Independence? Answer",
@@ -1284,6 +1320,7 @@
         "concept": null,
         "text": "In the worst case, an ORCT exercise may yield no useful information\r\nfor a student because s/he in effect never \"got to the starting line.\"\r\nI find it useful to distinguish whether the fault lies in the\r\nORCT question (FAIL) or the student (ABORT).\r\n\r\n* if the **wording of the ORCT is imprecise** (an important detail\r\n  is not nailed down, so students think you mean X when you actually\r\n  meant Y), **incorrect** (inconsistent with your own definitions\r\n  or with itself), or **obscure** (students don't understand what\r\n  specifically you're asking), it will FAIL.  \r\n\r\n  We can minimize this problem in two ways.  First, when we present\r\n  an ORCT question, it's a good idea to ask \"is there anything\r\n  you're wondering about what you're being asked, or that seems unclear?\"\r\n  Answering students' questions can both highlight potential wording\r\n  problems, and \"rescue\" some students from them.\r\n  Second, we need to detect and fix real wording problems.\r\n  Courselets.org tracks this case by asking\r\n  every student whether they think \"The question is mis-phrased:\r\n  its literal meaning doesn't really ask what you claimed\".\r\n  The instructor should carefully scrutinize such cases\r\n  and fix any wording errors.\r\n\r\n* if a student is **unfamiliar with a basic definition or concept**\r\n  needed for this question, s/he can't begin to think about it (ABORT).\r\n\r\n  Three steps can help minimize this.  First, lecture on the required\r\n  definitions and concept immediately before asking the ORCT.  This\r\n  works better than (for example) assigning reading on this material,\r\n  which the students may not bother to read.  Make sure to provide\r\n  necessary background, which may be different for different students\r\n  in your class.\r\n  Again, simply asking the students \"is there anything you're\r\n  wondering about?\" can help a lot (before starting the exercise).\r\n  Second, minimize the problem by simplifying your ORCT as much\r\n  as possible: the less jargon and assumptions it uses, the better.\r\n  Third, the Courselets.org system tracks every student's\r\n  ABORT frequencies, and should follow up with students who make\r\n  this error, on how to avoid it (i.e. provide recommended\r\n  *resolutions*, same as for any specific error model).\r\n\r\n* a student may \"get stuck\", and **fail to think** about how to\r\n  apply a concept that they actually know (ABORT).\r\n\r\n  This is a very common error, especially for students new to ORCT,\r\n  and actually a whole subject unto itself.  For the moment,\r\n  suffice it to say that Courselets.org tracks every occurence\r\n  of such an ABORT error, and directs the student to recommended\r\n  exercises (resolutions) for fixing this tendency.\r\n\r\n* a student may **misread the question**, and fail to answer part of\r\n  it, or address a rather different question (ABORT).\r\n\r\n  Same basic remedies as above.  In general, I present an ORCT\r\n  in two ways at the same time: as *text* (a highly tuned and concise\r\n  wording); and \"interactively\" (in a more informal and intuitive way,\r\n  dwelling at length on key points, and inviting questions).\r\n\r\n* a student's answer may **not explain his thinking**, making it impossible\r\n  to diagnose his error.  For example, just answering \"Yes\" gives us\r\n  no insight into the student's misconceptions.\r\n\r\n  Again, Courselets.org tracks this as a specific type of ABORT\r\n  error, and gives the student advice on how to avoid this error\r\n  in the future.  Of course, ORCT should be written to emphasize\r\n  \"explain your reasoning\" and when presenting them in class the\r\n  instructor should stress the importance of this.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Types of ORCT Failure? Answer",
@@ -1312,6 +1349,7 @@
         "concept": null,
         "text": "I favor lecturing just enough to state the concept clearly\r\nso the students can try using it.  That typically means\r\ngiving a simple, intuitive statement of its logic,\r\na formal statement they can rigorously apply to any problem,\r\nand probably a very simple example that shows that statement\r\nin action.  However, I do not try to feed them the many\r\nlogical implications of this concept in lecture.  Instead\r\nI proceed immediately to an ORCT that asks them to try\r\nusing the concept, on a very simple case that will bring\r\nan important implication into play.\r\n\r\nFor example, to teach the concept of observable vs. hidden\r\nvariables, I would\r\n\r\n* give a concise formal definition;\r\n* emphasize that generally \"hidden variables are what you\r\n  *want to know*, and observables are what you *do know*\";\r\n* emphasize that we should always ask which variables in\r\n  a problem are observable vs. hidden.\r\n* give an ORCT question **like this** -- which 73% of the students\r\n  will completely miss, even though it's a straight application\r\n  of what I told just them.  That really wakes them up!\r\n  Many times I've been bombarded with detailed technical\r\n  questions by students about some abstract implication\r\n  (that would have bored them if I'd lectured about it),\r\n  simply because it gave them a big surprise on an ORCT.\r\n\r\nTo answer why I favor this \"minimal lecture\" approach,\r\nlet's ask: why do 73% of the students get this simple question\r\nwrong?  It's not that the concept is hard, but that using\r\nthe concept to answer the ORCT requires *thinking*\r\n(inferring one of its clear implications).  If I were to\r\nteach this implication by lecturing about it (as I used to do),\r\nthen I would be *doing the thinking for them*.  If I teach\r\nit to them by posing this question, I *make them do the\r\nthinking*.  That is the change that we need to make, and\r\nthat ORCT drives.  ORCT gives students a straightforward\r\npath (that anyone can follow, if they put in the effort)\r\nto make the concepts their own.\r\n\r\nThis also helps explain fundamentally\r\nhow students get stuck in misinterpretations\r\nand incorrect usages of a concept: they simply have not\r\nthought through the implications of their own beliefs to\r\nsee that they lead to obvious inconsistencies, and they have\r\nnot thought through the implications of the simple concept\r\nstatement, which would disprove their wrong beliefs.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "What to Cover in Lecture Prior to ORCT? Answer",
@@ -1340,6 +1378,7 @@
         "concept": null,
         "text": "In my four years of experience testing this, ORCT is\r\n\"where the rubber meets the road\", i.e. where student learning\r\ngains traction by exposing and fixing their many misconceptions.\r\nHence the decision of whether to include an ORCT (or not) for me is\r\nbasically a decision on whether I am genuinely teaching that\r\nconcept or not.  Material with no ORCT in effect becomes\r\nsupplemental; it may help the best students by giving them\r\nanother datapoint to extend their understanding, but I have\r\nno basis for expecting the class as a whole to understand how\r\nto use it correctly.\r\n\r\nNote: by \"lecture\" I simply mean any passive, one-way\r\ncommunication mode, such as lecturing in a classroom or\r\nan online video, or an assigned reading.\r\n\r\nSeeing students' ORCT responses every day has \r\nchanged how I view lecture, into an unreliable, \"noisy channel\"\r\nthat must be back-stopped by *frequent* empirical checkpoints\r\nand error correction.  To set up a 10 minute ORCT, I restrict\r\nmyself to 10 minutes of lecture giving a clear definition\r\nof the concept I want to teach.  In particular, I find that\r\nif I lecture for much longer at a stretch than this, the\r\nstudents switch to a passive mindset -- the number and quality\r\nof questions they ask crashes.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Efficiency Concerns: When to Include an ORCT? Answer",
@@ -1368,6 +1407,7 @@
         "concept": null,
         "text": "Concretely, we want to pose a question and get detailed responses from students that reveal their thinking, whatever it may be.  We'll refer to this as Open Response Concept Testing (ORCT), to emphasize that it accepts any text answer (not limited to multiple choice!).\r\nThe challenge of accurately identifying specific misconceptions suggests the following guidelines:\r\n\r\n* **focus**: an ORCT should exercise a *single* concept.  The purpose\r\n  of an ORCT is to *teach* a concept, not to test the ability\r\n  to *combine* multiple concepts (synthesis).\r\n  An ORCT that involves multiple\r\n  concepts will be opaque to students who don't yet correctly\r\n  understand one of the concepts, yielding no useful learning or\r\n  information.  Focusing on a single concept maximizes\r\n  the chance that students will be able to articulate an\r\n  answer that reveals how they think about that concept.\r\n* **real-world application**: the easiest and most useful model for\r\n  writing an ORCT is to take *any real-world problem that\r\n  involves the concept*, and to ask a question that's simple\r\n  enough to fit our other criteria (e.g. *focus* only on that concept).\r\n  Drawing on real world problems\r\n  that you want students to be able to solve after they complete\r\n  the course, both signals students what really matters, and\r\n  creates powerful motivation (because they see that the concepts\r\n  are key for figuring out real problems).\r\n* **hide in plain sight**: the question should be\r\n  easy for anyone who understands the concept,\r\n  but *requires* understanding (guessing won't work).  Aim for \r\n  1/3 to 2/3 of your students to get it \"mostly right\".\r\n\r\n  \"hide\" means the answer requires *thinking* about the concept,\r\n  not just remembering something you told them;\r\n  \"in plain sight\" means the answer lies directly in view of\r\n  such thought (not hidden under a rock!).\r\n\r\n* **speed**: once the student understands what the question is asking,\r\n  it should only take a minute or two to think out their answer,\r\n  and another couple minutes to type and submit their answer.  ORCT are for *teaching*, hence each ORCT should perform its function as quickly as possible, so that students can learn as many concepts *as possible* per unit time.  In other words, the limit on how much they can learn per unit time should not be *how long the ORCT takes to answer* but rather *how long the students' follow-up work takes* (to fix their misconceptions exposed by the ORCT).\r\n* **simplicity**: to achieve the above goals, we generally have\r\n  to dramatically simplify a real-world problem, down to an\r\n  extremely simple core question.\r\n* **conceptual thinking, not mechanics, and not remembering**:\r\n  the solution should depend only on \r\n  thinking about the concept, not on mechanical operations (e.g.\r\n  solving an algebra equation).  The purpose of ORCT is to reveal how each\r\n  student thinks about the concept; nothing extraneous should be\r\n  allowed to get in the way of that.  Note also that we need the\r\n  students to voice *their own thoughts*, in their own words, otherwise\r\n  we can't learn how they actually think.  In particular, we should\r\n  avoid triggering their instinct to echo back our original \r\n  definition of the concept -- all that would show is that they\r\n  *remember what we said*, not that they understand how to use it.\r\n* **identifiability**: the wording of the question should do its\r\n  best to elicit a specific statement of the student's reasoning,\r\n  so that we can diagnose the underlying conceptual error for\r\n  any wrong answer.  One simple way to do this is to ask for a\r\n  definite answer to a specific question (\"Are Propositions 1 and\r\n  2 in fact contradictory?\"), and then ask them to provide their\r\n  logical justification (\"If so, briefly explain why; if not, why not\").\r\n\r\n  Indeed, one could go so far as to say this is the key purpose of\r\n  ORCT: to elicit *interpretable wrong answers*.  That is, for\r\n  every student with a misconception about this concept, get them\r\n  to articulate it clearly.  (\"All right answers resemble one\r\n  another, but each wrong answer is wrong in its own way\").\r\n  Note that this is *difficult*: if one out of five of the students'\r\n  wrong answers is *lucidly* wrong, you are doing well!\r\n* **independence**: each ORCT should have as little connection as\r\n  possible to \"what you told them\" in your lecture intro.  The key\r\n  word of course is \"possible\": it *must* have some connection to\r\n  what you told them, namely the concept itself -- but no more.\r\n  In particular, it must not be\r\n  possible to \"remember the answer\" to an ORCT -- otherwise it\r\n  is merely testing *memory*, not thinking or understanding.\r\n\r\n  This is challenging, because students (especially undergraduates)\r\n  are trained to think success = \"knowing the right answer\",\r\n  via a process of training by repetition: repeat a procedure\r\n  over and over until you \"know how to do it\".  This \"algorithm\r\n  training\" emphasizes memory.  Concretely, what many students think\r\n  they want is for you to show in class how to solve many example problems,\r\n  for them to practice that repeatedly on related problems\r\n  (provided by homework and practice exams), and then for the exam\r\n  to include only the kinds of problems they trained for.\r\n  But such students are ill-prepared for the real world, which\r\n  will not ask the same questions they practiced in class.\r\n\r\n  One important function of ORCT is to force them out of this model,\r\n  by making it impossible to \"remember the answer\".\r\n  Some students' first reaction may be\r\n  \"why are you asking us questions you haven't already shown us how\r\n  to answer?\"  This is a *good* sign.\r\n\r\n  In the language of probability: *ORCTs should be conditionally\r\n  independent of the training given the concept*, otherwise they\r\n  are testing *memory of the training*, rather than *thinking about\r\n  the concept*.\r\n* **neutral language and context**: there should be nothing about\r\n  the wording of a question or its context that hints at the answer.\r\n  Unfortunately, even the slightest bias in wording (for example,\r\n  if you ask the students to choose between two options, but give\r\n  more text or specificity to one of them) will leak your desired\r\n  answer to the students.  This failure is almost inevitable\r\n  in a \"first draft\" ORCT text, and can only\r\n  be eliminated by very deliberate, explicit checking of the \"final\"\r\n  text, after all other considerations have been satisfied.\r\n\r\n  Note that deliberately reversing the leakage (biasing towards a wrong\r\n  answer) is also bad, both for the same reason (it obscures your view\r\n  of how the students actually think about the concept), and the\r\n  additional reason that it violates their trust.  No trick questions.\r\n\r\n  Furthermore, even if the question text is itself \"perfect\",\r\n  the overall pattern of questions you ask (\"context\") may also\r\n  give away your desired answer.  For example, say you ask many\r\n  questions that each offer a seemingly reasonable conclusion (\"the\r\n  bait\"), which always turns out to be wrong.  This will train students\r\n  to always *reject the bait* even if they don't really understand\r\n  the concept.  Such *language or context leakage* defeats the \r\n  purpose of concept testing.  Randomly vary your \"pattern\" in each\r\n  ORCT you write (i.e. 50% of \"seemingly reasonable conclusions\"\r\n  should turn out to be right).\r\n\r\nIn short, there are *many competing behaviors* students can fall\r\ninto besides \"showing how I think about this concept\".  ORCT design\r\nmust systematically de-select those behaviors and channel students\r\ninto lucidly showing you how they think.\r\n\r\nIt should be emphasized that ORCT is a purposefully *artificial* construct, in that it differs from typical real-world problems in several ways:\r\n\r\n* typically, real-world problems involve *multiple* concepts, which must be selected and combined to solve the problem.\r\n* typically, they require *mechanical operations*, e.g. solving algebra equations or performing substantial computations.\r\n* they take a lot longer to solve than an ORCT.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Identify Student Misconceptions via an Active Learning Exercise? Answer",
@@ -1396,6 +1436,7 @@
         "concept": null,
         "text": "The *average* student has a 50% chance of using a concept right (vs. having a basic misconception about it), and this is where the whole fabric of conceptual thinking and real-world problem solving unravels.  A sequence of thoughts half of which are right (and half wrong) is an extremely unreliable problem solving strategy -- like a novice trying to climb a treacherous rock wall solo, without a rope.  Far safer is to \"rope in\" to procedures they know how to follow.  Weak conceptual understanding *forces* students to retreat to a conservative focus on \"trained procedures\" as their strategy of choice, and of \"training by repetition\" as their learning method.  While we might object that they should instead focus on fixing their misconceptions, that only makes sense for the student if they are given a clear, reliable path to identify and fix each misconception, to climb this huge mountain (to attain **double** the conceptual understanding of their peers).\r\n\r\nReal world problems are especially problematic, since a typical problem requires using *multiple* concepts, reducing their odds of success to near zero.  Personally, I think students implicitly realize this, and this is one reason they get discouraged, focus instead on grades, or quit a class.\r\n\r\nA corollary is that a class will yield relatively little real-world problem solving ability, unless the student attains a high level of conceptual understanding on *core concepts* (concepts that are relevant to most problems).",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Conceptual Thinking as a Student Strategy? Answer",
@@ -1424,6 +1465,7 @@
         "concept": null,
         "text": "The basic challenge is that there are a lot of **other skills** besides conceptual understanding that a test question might be measuring, such as\r\n\r\n* synthesis (the ability to combine multiple concepts)\r\n* mechanics (e.g. solving an algebra equation)\r\n* trained procedures (a way of solving a problem that a student has practiced over and over)\r\n* memory\r\n\r\nFor example, consider my traditional criteria for grading exams, which I think are common:\r\n\r\n* for a problem-to-solve, did they get the right answer and / or show right steps?\r\n* to give out partial credit: did they use (some) right words / \"arguments\"?\r\n\r\nThe first criteria tend to be highly sensitive to mechanics and trained procedures (and problems-to-solve tend to involve synthesis).  The second criterion emphasizes memory.  These are by no means worthless skills, but they aren't the same as conceptual understanding.  Many studies have shown that students who score high on these traditional criteria actually have measurably poor conceptual understanding; the correlation between the two kinds of measures is poor, because they are *different* skills.\r\n\r\nBroadly speaking, we get a measure of conceptual understanding by taking the superset of everything that depends on conceptual understanding, and removing the subset that depends on the other skills.  What's left should be a question that people who understand the concept will uniformly consider to be easy (no mechanics; no procedure; no memory; no synthesis; the answer flows directly from applying the concept), but other people won't be able to guess (because there is a *specific* answer that depends on applying the concept correctly).  For example, such a question should be free of jargon, and knowledge of jargon should be useless for answering it.  Typically we draw on a real-world application problem that gets away both from the jargon and the cases we trained the students on in class.\r\n\r\nTo illustrate these principles, here's an example question paraphrased from the Force Concept Inventory, the \"mother of all concept tests\", designed to probe understanding of Newtonian mechanics:\r\n\r\n  A small car and large truck collide head-on.  Which of the following correctly describes the forces they exert on each other?\r\n\r\n  a. the car exerts a larger force on the truck than the truck exerts on the car;\r\n  b. they exert equal forces on each other;\r\n  c. the truck exerts a larger force on the car than the car exerts on the truck;\r\n  d. they do not exert any force on each other; they are simply in each other's way.\r\n\r\nWhile this question may seem \"trivial\", that is sort of the point:\r\n\r\n* it is easy for anyone who understands Newton's laws (\"interacting objects exert equal and opposite forces on each other\");\r\n* but a majority of students completing a first-year university physics course get it wrong -- even students who scored well on solving mathematically difficult mechanics problems. (This result has been replicated at many universities, and is not a fluke).\r\n* it is sobering to consider that a year's hard study by Harvard students, under a top-rated physics professor, would yield so little conceptual understanding.  It is even more sobering to consider that this went undetected for years -- until testing with the Force Concept Inventory exposed it.  It makes you wonder: **what misconceptions do your students have?**",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Measure Conceptual Understanding? Answer",
@@ -1452,6 +1494,7 @@
         "concept": 29,
         "text": "Some people asserted that :math:`p(A|B)=p(A)` in this Venn diagram,\r\nwhich implies a basic misunderstanding of what :math:`p(A|B)`\r\n*means*.  Suggestion: review the definition of conditional\r\nprobability until you can see clearly that this assertion\r\ndoes not fit this Venn diagram at all.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people asserted that p(A|B)=p(A)",
@@ -1480,6 +1523,7 @@
         "concept": 30,
         "text": "Similarly, some people asserted :math:`p(A \\cap B)=p(A)p(B)` here,\r\nimplying they don't understand what a joint probability is\r\n(i.e. in this case that :math:`p(A \\cap B)=0`).",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "some people asserted p(A & B)=p(A)p(B)",
@@ -1508,6 +1552,7 @@
         "concept": 31,
         "text": "Asserting \"They are independent since they have no overlap\" mixes up the concepts of *independence* vs. *disjoint* (no intersection),\r\nwhich are totally different in meaning!\r\n\r\nSuggestion: Please go back and draw Venn diagrams of *independence* vs. *disjoint*.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people said \"They are independent since they have no overlap\"",
@@ -1536,6 +1581,7 @@
         "concept": 32,
         "text": "Some people seemed to define independence as\r\nmeaning :math:`p(A|B)=0`.  Suggestion: go back to the mathematical\r\ndefinition of independence.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people seemed to define independence as meaning p(A|B)=0",
@@ -1564,6 +1610,7 @@
         "concept": 33,
         "text": "Apparently not thinking about drawing a random event: if we\r\ndraw a point in A, we know it can't be in B, and vice versa,\r\nso actually they are perfectly *anti-correlated*,\r\nnot independent.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people said \"they are independent, because an event in A has no effect on an event in B\"",
@@ -1592,6 +1639,7 @@
         "concept": 34,
         "text": "Some people confused the concepts of *states* vs. *variables*.  Independence\r\nis by definition a statement about *variables*, not states.\r\nWatch out for mixing these up!  A state is just any subset of\r\nthe probability space; A variable is \"the whole picture\" of\r\na way of slicing up the entire space.\r\nSuggestion: draw a Venn diagram representing a single state, vs.\r\na Venn diagram representing a variable.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people seemed to mix up the ideas of a random state vs. random variable",
@@ -1620,6 +1668,7 @@
         "concept": 35,
         "text": "*Au contraire*, the Venn diagram shows they are perfectly anti-correlated.\r\nSuggestion: review the concepts of correlation and Venn diagrams\r\nuntil this is clear.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people said \"we do not have enough info because we don't know the correlation between A and B\"",
@@ -1648,6 +1697,7 @@
         "concept": 36,
         "text": "Some people confused p(A,B) with the union operation :math:`p(A \\cup B)`.  No, joint probability is *intersection*, i.e. :math:`p(A,B)=p(A \\cap B)`.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people confused p(A & B) with the union operation p(A or B)",
@@ -1676,6 +1726,7 @@
         "concept": 15,
         "text": "No, normalization only applies to summing over the *subject* variable, not the *condition*.  Beware of summing over the condition of a conditional probability!!  This is a common error.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought #1 sums to 1",
@@ -1704,6 +1755,7 @@
         "concept": 16,
         "text": "No, this sum isn't even a valid probability!\r\nE.g. consider *p(rains in Seattle|day of week)*.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought #1 sums to p(A)",
@@ -1732,6 +1784,7 @@
         "concept": 14,
         "text": "Many people realized 2 and 3 were equal, because :math:`p(A,B)=p(A|B)p(B)`,\r\nbut then didn't see the connection to 5, 6 (:math:`p(A)`).  This\r\nimplies they didn't realize that summing over *B* eliminates it from\r\nthe probability expression.\r\n\r\nThis is a *really* important tool.  It allows you to properly handle\r\na hidden variable that links what you know (obs) and what you want\r\nto know (some other hidden variable).  Just sum over all possible\r\nvalues of this \"nuisance variable\" and eliminate it from the equation!!",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people realized 2 and 3 were equal, but then didn't see the connection to 5, 6.",
@@ -1760,6 +1813,7 @@
         "concept": 39,
         "text": "Some people assumed A,B were independent, though the question\r\nmade no such stipulation.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people assumed A,B were independent",
@@ -1788,6 +1842,7 @@
         "concept": 17,
         "text": "Some people thought 1 & 4 were equal, implying they think\r\n:math:`p(A|B)=p(A)/p(B)`.  No, :math:`p(A|B)=p(A,B)/p(B)`.\r\n#4 is an *odds-ratio*, not a probability; can be greater than 1!",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought 1 & 4 were equal",
@@ -1816,6 +1871,7 @@
         "concept": 24,
         "text": "No.  You *can* factor p(A) out of the summation, but then you are summing :math:`1/p(B=b_i)` which does *not* sum to 1!",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought the summation could be carried into the denominator in #4, so it sums to p(A)",
@@ -1844,6 +1900,7 @@
         "concept": 27,
         "text": "Some people didn't see that p(A) could be factored out\r\nin #5 (and didn't see that again B can be eliminated\r\nby normalization).",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people didn't see that in #5 again B can be eliminated by normalization",
@@ -1872,6 +1929,7 @@
         "concept": 27,
         "text": "Some people assert p(A) *cannot* be factored out of #5 unless\r\nA and B are *independent*.  No -- please verify for yourself the\r\nassertion that\r\n:math:`\\sum_{i=1}^n p(A=a_j)p(B=b_i)=p(A=a_j)` for all possible\r\nvalues :math:`a_j`.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people assert p(A) cannot be factored out of #5 unless A and B are independent",
@@ -1900,6 +1958,7 @@
         "concept": 37,
         "text": "Optimists learn what pessimists \"know\"; that is their advantage...",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought misconception rates on these basic concepts would be substantially lower.",
@@ -1928,6 +1987,7 @@
         "concept": 18,
         "text": "write more description please",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "some people misread the question (ABORT).",
@@ -1956,6 +2016,7 @@
         "concept": 19,
         "text": "write more description please",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "some people didn't know a basic definition needed for this question (ABORT).",
@@ -1984,6 +2045,7 @@
         "concept": 20,
         "text": "write more description please",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "some people couldn't figure out how to get started -- failed to apply concept(s) that they knew, e.g. due to 'trying to remember the answer' (ABORT).",
@@ -2012,6 +2074,7 @@
         "concept": 21,
         "text": "write more description please",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "some people got hung up on a detail and didn't think through the main question (ABORT).",
@@ -2040,6 +2103,7 @@
         "concept": 22,
         "text": "write more description please",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "This question is mis-phrased: its literal meaning doesn't really ask what you claimed (FAIL).",
@@ -2068,6 +2132,7 @@
         "concept": 1,
         "text": "A concept inventory is a criterion-referenced test designed to evaluate whether a student has an accurate working knowledge of a specific set of concepts. To ensure interpretability, it is common to have multiple items that address a single idea. Typically, concept inventories are organized as multiple-choice tests in order to ensure that they are scored in a reproducible manner, a feature that also facilitates administration in large classes. Unlike a typical, teacher-authored multiple-choice test, questions and response choices on concept inventories are the subject of extensive research. The aims of the research include ascertaining (a) the range of what individuals think a particular question is asking and (b) the most common responses to the questions. Concept inventories are evaluated to ensure test reliability and validity. In its final form, each question includes one correct answer and several distractors. The distractors are incorrect answers that are usually (but not always) based on students' commonly held misconceptions.\nIdeally, a score on a criterion-referenced test reflects the amount of content knowledge a student has mastered. Criterion-referenced tests differ from norm-referenced tests in that (in theory) the former is not used to compare an individual's score to the scores of the group. Ordinarily, the purpose of a criterion-referenced test is to ascertain whether a student mastered a predetermined amount of content knowledge; upon obtaining a test score that is at or above a cutoff score, the student can move on to study a body of content knowledge that follows next in a learning sequence. In general, item difficulty values ranging between 30% and 70% are best able to provide information about student understanding.\nDistractors are often based on ideas commonly held by students, as determined by years of research on misconceptions. Test developers often research student misconceptions by examining students' responses to open-ended essay questions and conducting \"think-aloud\" interviews with students. The distractors chosen by students help researchers understand student thinking and give instructors insights into students' prior knowledge (and, sometimes, firmly held beliefs). This foundation in research underlies instrument construction and design, and plays a role in helping educators obtain clues about students' ideas, scientific misconceptions, and didaskalogenic, that is, teacher-induced confusions and conceptual lacunae that interfere with learning.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Concept inventory",
@@ -2096,6 +2161,7 @@
         "concept": 2,
         "text": "Scientific misconceptions are commonly held scientific beliefs that have no basis in actual scientific fact. Scientific misconceptions can also refer to preconceived notions based on religious and/or cultural influences. Many scientific misconceptions occur because of faulty teaching styles and the sometimes distancing nature of true scientific texts. Some topics, like Evolution, are fettered with so much moral injection that the truth is rarely revealed and the majority of common knowledge regarding the topic is erroneous.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Scientific misconceptions",
@@ -2124,6 +2190,7 @@
         "concept": 3,
         "text": "**Conceptual understanding** even of a seemingly simple concept is actually a large and complex object, most of which is *hidden* beneath the surface, both to experts who understand the concept, and beginners who don't.  \r\n\r\n* Operationally, understanding a concept means using it correctly in a wide variety of scenarios.  Even a simple concept will have many implications across all these scenarios.  Using it correctly means realizing and obeying all those implications.  \r\n* For experts, a simple definition of the concept will seem sufficient, because they long ago learned its implications and take them for granted as part of their unconscious assumptions.  \r\n* By contrast, beginners by definition have not yet thought through all these implications, and hence often go astray when they try to use the concept in different scenarios.\r\n* This \"iceberg\" of hidden implications often wrecks transfer of conceptual understanding from experts to beginners.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "The Conceptual Understanding Iceberg",
@@ -2152,6 +2219,7 @@
         "concept": null,
         "text": "A photon is an elementary particle, the quantum of light and all other forms of electromagnetic radiation, and the force carrier for the electromagnetic force, even when static via virtual photons. The effects of this force are easily observable at both the microscopic and macroscopic level, because the photon has zero rest mass; this allows long distance interactions. Like all elementary particles, photons are currently best explained by quantum mechanics and exhibit wave\u2013particle duality, exhibiting properties of both waves and particles. For example, a single photon may be refracted by a lens or exhibit wave interference with itself, but also act as a particle giving a definite result when its position is measured.\nThe modern photon concept was developed gradually by Albert Einstein to explain experimental observations that did not fit the classical wave model of light. In particular, the photon model accounted for the frequency dependence of light's energy, and explained the ability of matter and radiation to be in thermal equilibrium. It also accounted for anomalous observations, including the properties of black-body radiation, that other physicists, most notably Max Planck, had sought to explain using semiclassical models, in which light is still described by Maxwell's equations, but the material objects that emit and absorb light do so in amounts of energy that are quantized (i.e., they change energy only by certain particular discrete amounts and cannot change energy in any arbitrary way). Although these semiclassical models contributed to the development of quantum mechanics, many further experiments starting with Compton scattering of single photons by electrons, first observed in 1923, validated Einstein's hypothesis that light itself is quantized. In 1926 the optical physicist Frithiof Wolfers and the chemist Gilbert N. Lewis coined the name photon for these particles, and after 1927, when Arthur H. Compton won the Nobel Prize for his scattering studies, most scientists accepted the validity that quanta of light have an independent existence, and the term photon for light quanta was accepted.\nIn the Standard Model of particle physics, photons are described as a necessary consequence of physical laws having a certain symmetry at every point in spacetime. The intrinsic properties of photons, such as charge, mass and spin, are determined by the properties of this gauge symmetry. The photon concept has led to momentous advances in experimental and theoretical physics, such as lasers, Bose\u2013Einstein condensation, quantum field theory, and the probabilistic interpretation of quantum mechanics. It has been applied to photochemistry, high-resolution microscopy, and measurements of molecular distances. Recently, photons have been studied as elements of quantum computers and for applications in optical imaging and optical communication such as quantum cryptography.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Photon",
@@ -2180,6 +2248,7 @@
         "concept": 8,
         "text": "This is unrealistic for three reasons:\r\n\r\n* Experts' low-level knowledge must be mostly *unconscious* (so they can direct their conscious thought towards higher-level issues).  Hence experts are unaware of many implications that beginners do not understand, but that experts take for granted.\r\n* To explain all the implications is an infinite regress problem, limited only by what the individual student already understands -- which is different for each student.\r\n* Most fundamentally, explaining all the implications means the teacher does all the work of understanding the implications, so the students don't have to.  This is the opposite of what needs to happen: if the students cannot reason for themselves what implications flow from the concept, they don't understand it.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Some people thought we could overcome this by just explaining all the possible implications.",
@@ -2208,6 +2277,7 @@
         "concept": null,
         "text": "write an answer",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -2236,6 +2306,7 @@
         "concept": null,
         "text": "write an answer",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -2264,6 +2335,7 @@
         "concept": null,
         "text": "write an answer",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -2292,6 +2364,7 @@
         "concept": 2,
         "text": "scientific misconceptions are bad",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "An obvious point",
@@ -2320,6 +2393,7 @@
         "concept": null,
         "text": "woo boy",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "this is a test",
@@ -2348,6 +2422,7 @@
         "concept": null,
         "text": "they are cute",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "I like rats",
@@ -2376,6 +2451,7 @@
         "concept": 11,
         "text": "In probability theory, the chain rule (also called the general product rule) permits the calculation of any member of the joint distribution of a set of random variables using only conditional probabilities. The rule is useful in the study of Bayesian networks, which describe a probability distribution in terms of conditional probabilities.\nConsider an indexed set of sets . To find the value of this member of the joint distribution, we can apply the definition of conditional probability to obtain:\n\nRepeating this process with each final term creates the product:\n\nWith four variables, the chain rule produces this product of conditional probabilities:\n\nThis rule is illustrated in the following example. Urn 1 has 1 black ball and 2 white balls and Urn 2 has 1 black ball and 3 white balls. Suppose we pick an urn at random and then select a ball from that urn. Let event A be choosing the first urn: P(A) = P(~A) = 1/2. Let event B be the chance we choose a white ball. The chance of choosing a white ball, given that we've chosen the first urn, is P(B|A) = 2/3. Event A, B would be their intersection: choosing the first urn and a white ball from it. The probability can be found by the chain rule for probability:\n\n.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Chain rule (probability)",
@@ -2404,6 +2480,7 @@
         "concept": 12,
         "text": "Reducing the dimensionality of a joint distribution by summing\r\nit over one or more possible random variables to eliminate them.\r\n\r\nBy the chain rule\r\n\r\n.. math:: \\sum_X{p(X,Y)} = \\left(\\sum_X{p(X|Y)}\\right)p(Y) = p(Y)\r\n\r\nThis generalizes to any number of variables.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Projection of a joint probability (marginalization)",
@@ -2432,6 +2509,7 @@
         "concept": 13,
         "text": "The probabilities of a set of disjoint subsets (i.e. all possible states\r\nof any random variable) must sum to 1.\r\n\r\n.. math:: \\sum_X{p(X)}=1\r\n\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Probability normalization",
@@ -2460,15 +2538,16 @@
         "concept": 23,
         "text": "Summation is the operation of adding a sequence of numbers; the result is their sum or total. If numbers are added sequentially from left to right, any intermediate result is a partial sum, prefix sum, or running total of the summation. The numbers to be summed (called addends, or sometimes summands) may be integers, rational numbers, real numbers, or complex numbers. Besides numbers, other types of values can be added as well: vectors, matrices, polynomials and, in general, elements of any additive group (or even monoid). For finite sequences of such elements, summation always produces a well-defined sum (possibly by virtue of the convention for empty sums).\nThe summation of an infinite sequence of values is called a series. A value of such a series may often be defined, by means of a limit (although sometimes the value may be infinite, and often no value results at all). Another notion involving limits of finite sums is integration. The term summation has a special meaning related to extrapolation in the context of divergent series.\nThe summation of the sequence [1, 2, 4, 2] is an expression whose value is the sum of each of the members of the sequence. In the example, 1 + 2 + 4 + 2 = 9. Since addition is associative the value does not depend on how the additions are grouped, for instance (1 + 2) + (4 + 2) and 1 + ((2 + 4) + 2) both have the value 9; therefore, parentheses are usually omitted in repeated additions. Addition is also commutative, so permuting the terms of a finite sequence does not change its sum (for infinite summations this property may fail; see absolute convergence for conditions under which it still holds).\nThere is no special notation for the summation of such explicit sequences, as the corresponding repeated addition expression will do. There is only a slight difficulty if the sequence has fewer than two elements: the summation of a sequence of one term involves no plus sign (it is indistinguishable from the term itself) and the summation of the empty sequence cannot even be written down (but one can write its value \"0\" in its place). If, however, the terms of the sequence are given by a regular pattern, possibly of variable length, then a summation operator may be useful or even essential. For the summation of the sequence of consecutive integers from 1 to 100 one could use an addition expression involving an ellipsis to indicate the missing terms: 1 + 2 + 3 + 4 + ... + 99 + 100. In this case the reader easily guesses the pattern; however, for more complicated patterns, one needs to be precise about the rule used to find successive terms, which can be achieved by using the summation operator \"\u03a3\". Using this sigma notation the above summation is written as:\n\nThe value of this summation is 5050. It can be found without performing 99 additions, since it can be shown (for instance by mathematical induction) that\n\nfor all natural numbers n (see Triangular number). More generally, formulae exist for many summations of terms following a regular pattern.\nThe term \"indefinite summation\" refers to the search for an inverse image of a given infinite sequence s of values for the forward difference operator, in other words for a sequence, called antidifference of s, whose finite differences are given by s. By contrast, summation as discussed in this article is called \"definite summation\".\nWhen it is necessary to clarify that numbers are added with their signs, the term algebraic sum is used. For example, in electric circuit theory Kirchhoff's circuit laws consider the algebraic sum of currents in a network of conductors meeting at a point, assigning opposite signs to currents flowing in and out of the node.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Summation",
         "access": "public",
         "mergeParent": null,
-        "commitTime": null,
+        "commitTime": "2018-04-11T15:37:49.731Z",
         "medium": "reading",
         "parent": null,
-        "changeLog": null,
+        "changeLog": "snapshot for fork by alex",
         "sourceID": "Summation",
         "addedBy": 257,
         "treeID": 69,
@@ -2488,6 +2567,7 @@
         "concept": 25,
         "text": "Any factor inside a summation that does not depend on the summation variable can be factored outside the summation.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Summation factoring",
@@ -2516,6 +2596,7 @@
         "concept": 28,
         "text": "In the study of probability, given at least two random variables X, Y, ..., that are defined on a probability space, the joint probability distribution for X, Y, ... is a probability distribution that gives the probability that each of X, Y, ... falls in any particular range or discrete set of values specified for that variable. In the case of only two random variables, this is called a bivariate distribution, but the concept generalizes to any number of random variables, giving a multivariate distribution.\nThe joint probability distribution can be expressed either in terms of a joint cumulative distribution function or in terms of a joint probability density function (in the case of continuous variables) or joint probability mass function (in the case of discrete variables). These in turn can be used to find two other types of distributions: the marginal distribution giving the probabilities for any one of the variables with no reference to any specific ranges of values for the other variables, and the conditional probability distribution giving the probabilities for any subset of the variables conditional on particular values of the remaining variables.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Joint probability distribution",
@@ -2544,6 +2625,7 @@
         "concept": 38,
         "text": "In probability theory, to say that two events are independent (alternatively called statistically independent or stochastically independent ) means that the occurrence of one does not affect the probability of the other. Similarly, two random variables are independent if the realization of one does not affect the probability distribution of the other.\nThe concept of independence extends to dealing with collections of more than two events or random variables.\n\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Independence (probability theory)",
@@ -2572,6 +2654,7 @@
         "concept": null,
         "text": " Draw a Venn diagram representing two *independent* variables. To keep the diagram clear and simple, restrict each variable to just three states, and draw the diagram so *area* represents (i.e. is proportional to) probability.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Venn Diagram of Independence?",
@@ -2600,6 +2683,7 @@
         "concept": null,
         "text": "Draw a Venn diagram representing two *independent* variables. To keep the diagram clear and simple, restrict each variable to just three states, and draw the diagram so *area* represents (i.e. is proportional to) probability.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Venn Diagram of Independence?",
@@ -2628,6 +2712,7 @@
         "concept": null,
         "text": "We can represent this Venn diagram as a rectangle with orthogonal \"slices\" representing the distinct values of our two variables:\r\n\r\n.. image:: STATICIMAGE/venn_indep.png\r\n\r\nThe X variable is shown as being split into three discrete values on the x-axis: white, red, green.  The Y variable is shown as being split into three discrete values on the y-axis: white, blue, gray.  The probability of a given X value or (X,Y) pair is shown by the area of that region in the figure.  Since the probability (area) of any given (X,Y) pair is indeed proportional to the product of the probabilities (areas) of that value of X and of that value of Y, X and Y are independent in this Venn diagram.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Venn Diagram of Independence Answer",
@@ -2656,6 +2741,7 @@
         "concept": null,
         "text": "When students' conceptual understanding following a course is poor, what would you consider to be the most likely causes, and plausible fixes?  Some possibilities:\r\n\r\n* *insufficient explanation of the course material*: more extensive explanations should be supplied via lectures or reading.\r\n* *not enough worked examples demonstrating procedures for students to follow, or practice problems for students to train on these procedures*: provide more worked examples and practice problems.\r\n* *not enough real-world projects to provide active learning*\r\n\r\nBriefly state what you think are the main causes of poor conceptual understanding and propose how to fix them.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Fundamental cause and remedy?",
@@ -2684,6 +2770,7 @@
         "concept": null,
         "text": "In my view, conceptual understanding means being able to think for yourself about all the implications of a concept, so that you can use it correctly in a wide variety of situations (i.e. deducing and following its implications in each situation).  Just as it can be simple to define an axiom but challenging to deduce all its resulting theorems, so it may seem simple to define a concept, yet its implications may be numerous and non-obvious.  \r\n\r\nHence conceptual understanding mainly consists not of the \"headline\" concept definition that can be stated and memorized, but of its many hidden implications, and the ability to think through these implications from first principles.  I refer to this hidden understanding as the `Conceptual Understanding Iceberg </ct/courses/1/units/1/concepts/46/>`_.\r\n\r\nThis constitutes a huge gap between experts and beginners.  On the one hand, experts have typically internalized these implications as part of their working assumptions, such that they \"take them for granted\".  Experts must make such low-level knowledge unconscious so that they can focus their conscious thought on high-level issues.  By contrast, beginners have not thought through these implications, and will fail to follow them when they try to apply the concept to real problems.  Hence, neither side is really aware of exactly what knowledge (the hidden implications) needs to be transferred.  \r\n\r\n* This gap can only be bridged by a **systematic empirical process** that quickly finds discrepancies between expert vs. beginner thinking, to directly identify the many implications that students need to learn.  However, no step of this process can be left to chance (e.g. \"let the students ask questions if they are confused\") or it will fail, because *neither side can articulate what knowledge needs to be transferred*.\r\n* What students most need to learn is the habit of **thinking through the implications** of how a concept applies to different situations.  This is work that the students must do *themselves*.  Being given longer explanations in lecture or reading will not help develop this muscle.  Nor will practicing procedures taught in class.\r\n* Active learning exercises are clearly needed, but we next need to consider how to make them actually effective and fast at fixing student misconceptions.\r\n",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -2712,6 +2799,7 @@
         "concept": null,
         "text": "One of the most important steps for making a course successful is deciding what its actual learning goals should be.  As we have seen, conceptual understanding can be a bit harder to define as a goal compared with other kinds of skills, such as trained procedures.  What would you propose as the most useful way of specifying the set of conceptual learning goals for your course?  Briefly state what you propose must be specified, and explain how it makes your course goals unambiguous and \"actionable\".",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Specify a Course's Conceptual Learning Goals?",
@@ -2740,6 +2828,7 @@
         "concept": null,
         "text": "The standard practice of writing a laundry list of topics (\"the syllabus\") does not truly define conceptual learning goals, for the simple reason that it is neither actionable nor measurable.  For example, on any given topic there are a wide range of skills students could learn, such as trained procedures or memory, that do not constitute conceptual understanding.  Writing a list of topics doesn't clarify specifically how you're going to teach conceptual understanding, rather than just the other skills -- as so often happens by default.  The real problem here is the `Conceptual Understanding Iceberg </ct/courses/1/units/1/concepts/46/>`_: most experts can't actually articulate what hidden knowledge beginners need to learn.  This makes a syllabus an empty husk: the *appearance* of a plan, without any of the specifics needed for an actionable plan.  Note that this is a very different situation vs. other kinds of skills that experts *can* articulate.  For example, simply writing the name of a procedure to teach is a valid statement of a learning goal, so long as the instructor can indeed articulate (demonstrate) the procedure in a form that students can follow.\r\n\r\nHow can we specify learning goals that we can't articulate? This is a genuine catch-22 that requires some consideration.  Since we can't fully specify exactly what knowledge constitutes understanding of a concept, we need an *empirical* measure that simply tests whether someone understands it (uses it correctly) or not.  Concretely, that means a **concept test** question that we can ask students, and a correct answer that we can score them against.  From this point of view, we would specify the conceptual learning goals for a class by providing a set of such concept tests for all the concepts we want to teach.  This is called a **concept inventory**.\r\n\r\n* it specifies learning goals in a form that is *measurable*: it defines a way of measuring how far we are from the target.\r\n* this also makes it *actionable*: we can use concept tests in class to show students what they need to learn.\r\n\r\nThe obvious downside is that this is a lot of work.  (But not necessarily more work than writing a conventional lecture or readings). We will address later how to cut this effort down to a manageable size.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "How to Specify a Course's Conceptual Learning Goals Answer",
@@ -2768,6 +2857,7 @@
         "concept": null,
         "text": "The empirical data from concept inventory studies highlight some important challenges for instructors:\r\n\r\n* conventional lecture courses yield a poor level of conceptual understanding (basic misconceptions on about half the concepts).\r\n* when beginners try to *use* a concept on real-world problems, they fall into a wide variety of misconceptions.\r\n* conceptual understanding is distinct from other kinds of skills that students learn, such as problem-solving procedures, or memory.  In particular, students who have learned other skills well, may have poor conceptual understanding.\r\n* unless a question is designed very carefully to measure conceptual understanding and *not* other skills such as synthesis, procedures or memory, its scores will correlate poorly with conceptual understanding.\r\n* conceptual understanding is different from other skills, in that it consists largely of *hidden knowledge* -- the ability to think through and obey a concept's many implications.  This is both its power -- it applies to any new situation -- and its challenge.\r\n* Even for experts, these implications are often unconscious.  Concretely, they can neither articulate exactly what hidden implications students need to learn, nor reliably predict all the errors students will make.\r\n* In particular, conceptual understanding is not amenable to a conventional *prescriptive* teaching strategy (telling the students what to think).  It is a thinking skill, and can only be gained by the students thinking for themselves.  Hence an *active* (\"Socratic\") learning strategy is required: the students must be challenged to think, and to learn from their own errors.\r\n* for all these reasons, it is hard to write down a conceptual learning goal in the usual prescriptive way.  It is more useful to define such a goal empirically, by providing a test that measures correct usage of that concept.\r\n\r\nThese conclusions may seem largely negative, i.e. that our standard teaching methods are ineffective, and that we need to do a lot of new work (e.g. write concept inventory questions).  You may well wonder whether this is feasible (too much work for the average instructor?), or scalable for large classes.  We must consider these challenges next.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Concept inventory conclusions",
@@ -2796,6 +2886,7 @@
         "concept": 40,
         "text": "The ability to select and combine multiple concepts to solve a problem.  That is, even if someone understood the individual concepts needed to solve a problem, they might either fail to apply one of those concepts, or fail to combine them successfully to achieve the solution.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Conceptual synthesis",
@@ -2824,6 +2915,7 @@
         "concept": null,
         "text": "It is evident that conceptual understanding requires *active learning* exercises.  Based on the challenges that we've outlined so far, briefly assess the value of the following kinds of active learning exercises for *teaching* conceptual understanding:\r\n\r\n* graded homework problems\r\n* real-world problem solving projects",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Active Learning Approaches for Conceptual Understanding?",
@@ -2852,6 +2944,7 @@
         "concept": null,
         "text": "Both of these approaches have fundamental failings as a method for teaching conceptual understanding:\r\n\r\n* real-world problems inevitably involve *multiple* concepts (unless \"pre-digested\" into an artificially simple form, which defeats the whole purpose of such \"real-world problem solving\" projects).  Hence these projects require **synthesis**, the ability to select and combine the right concepts for solving the problem.  Not only is synthesis a separate and challenging skill in its own right, but it requires as a pre-requisite that the student *already* understand the individual concepts.  If not, the problem may well simply be opaque (\"I wasn't sure how to get started\").  This is appropriate and necessary exercise, but mainly has value *after* students have understood the individual concepts.\r\n* both types of exercises tend to involve many skills *other* than conceptual understanding, such as mechanics, memory, using procedures taught in class, etc.  Again these are necessary skills, but they shift focus away from conceptual understanding, and hence are useful mainly *after* students have understood the individual concepts.\r\n* In my experience, *grading* such exercises (based on correctness of students' answers, as is standard practice) poses a catch-22 for their conceptual learning value.  On the one hand, this is commonly considered necessary motivation for the students to actually *do* the exercises.  On the other hand, taking \"points off\" for errors communicates that **errors are anathema**, and that *avoiding their exposure* is the path to success.  This is exactly backwards to what is needed for successful learning: rapid and specific exposure of errors; identifying your errors is a good thing!  \r\n\r\n  This cuts both ways.  For a graded assignment, students expect problems that are \"doable\" by following the recipe that was taught in lecture, and that is generally what we give them.  Again, this is backwards to what is needed for conceptual learning: to challenge them to use the concepts on problems that you did *not* tell them about, forcing them to think for themselves (rather than follow what you told them), and ideally to fail.  To be effective for teaching conceptual understanding, an exercise should *fail* (expose basic errors in) the majority of the students.  What is needed is a *safe, rewarding environment* for quickly exposing all their misconceptions, but graded assignments do not provide that.\r\n\r\nWhat all of these issues fundamentally reflect is that such exercises function more to *test* conceptual understanding, rather than to successfully *teach* it.",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Active Learning Approaches for Conceptual Understanding Answer",
@@ -2880,6 +2973,7 @@
         "concept": 44,
         "text": "1",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "1",
@@ -2904,28 +2998,29 @@
 },
 {
     "fields": {
-        "number_max_value": 0.0,
+        "number_max_value": 10.0,
         "concept": null,
         "text": "number question ",
-        "number_precision": 0.0,
-        "sub_kind": null,
+        "number_precision": 0.01,
+        "enable_auto_grading": false,
+        "sub_kind": "numbers",
         "number_min_value": 0.0,
         "title": "1",
         "access": "public",
         "mergeParent": null,
-        "commitTime": "2018-04-04T17:01:05.402Z",
+        "commitTime": "2018-04-04T17:01:05Z",
         "medium": "reading",
         "parent": null,
         "changeLog": "initial commit",
-        "sourceID": null,
+        "sourceID": "",
         "addedBy": 258,
         "treeID": 104,
-        "atime": "2018-04-04T17:01:05.401Z",
-        "data": null,
+        "atime": "2018-04-04T17:01:05Z",
+        "data": "",
         "add_unit_aborts": false,
         "kind": "orct",
         "url": "",
-        "sourceDB": null
+        "sourceDB": ""
     },
     "model": "ct.lesson",
     "pk": 104
@@ -2936,6 +3031,7 @@
         "concept": null,
         "text": "1",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -2960,28 +3056,29 @@
 },
 {
     "fields": {
-        "number_max_value": 1.0,
+        "number_max_value": 0.0,
         "concept": null,
         "text": "",
-        "number_precision": 0.1,
+        "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": "numbers",
         "number_min_value": 0.0,
         "title": "number test",
         "access": "public",
         "mergeParent": null,
-        "commitTime": "2018-04-04T17:06:13.566Z",
+        "commitTime": "2018-04-04T17:06:13Z",
         "medium": "reading",
         "parent": null,
         "changeLog": "initial commit",
-        "sourceID": null,
+        "sourceID": "",
         "addedBy": 258,
         "treeID": 106,
-        "atime": "2018-04-04T17:06:13.565Z",
-        "data": null,
+        "atime": "2018-04-04T17:06:13Z",
+        "data": "",
         "add_unit_aborts": false,
         "kind": "orct",
         "url": "",
-        "sourceDB": null
+        "sourceDB": ""
     },
     "model": "ct.lesson",
     "pk": 106
@@ -2992,6 +3089,7 @@
         "concept": null,
         "text": "0.8",
         "number_precision": 0.0,
+        "enable_auto_grading": false,
         "sub_kind": null,
         "number_min_value": 0.0,
         "title": "Answer",
@@ -3016,59 +3114,119 @@
 },
 {
     "fields": {
-        "number_max_value": 1.0,
+        "number_max_value": 0.0,
         "concept": null,
-        "text": "Number test",
-        "number_precision": 0.1,
+        "text": "Number test 2",
+        "number_precision": 0.0,
+        "enable_auto_grading": true,
         "sub_kind": "numbers",
         "number_min_value": 0.0,
-        "title": "number test",
+        "title": "number test 2",
         "access": "public",
         "mergeParent": null,
         "commitTime": null,
         "medium": "reading",
         "parent": 106,
         "changeLog": "",
-        "sourceID": null,
+        "sourceID": "",
         "addedBy": 258,
         "treeID": 106,
-        "atime": "2018-04-04T17:08:15.382Z",
-        "data": null,
+        "atime": "2018-04-04T17:08:15Z",
+        "data": "",
         "add_unit_aborts": false,
         "kind": "orct",
         "url": "",
-        "sourceDB": null
+        "sourceDB": ""
     },
     "model": "ct.lesson",
     "pk": 108
 },
 {
     "fields": {
-        "number_max_value": 10.0,
+        "number_max_value": 1000.0,
         "concept": null,
         "text": "number question ",
-        "number_precision": 0.0,
+        "number_precision": 100.0,
+        "enable_auto_grading": false,
         "sub_kind": "numbers",
-        "number_min_value": -10.0,
+        "number_min_value": 0.0,
         "title": "1",
+        "access": "public",
+        "mergeParent": null,
+        "commitTime": "2018-04-04T18:21:21Z",
+        "medium": "reading",
+        "parent": 104,
+        "changeLog": "",
+        "sourceID": "",
+        "addedBy": 258,
+        "treeID": 104,
+        "atime": "2018-04-04T17:08:47Z",
+        "data": "",
+        "add_unit_aborts": false,
+        "kind": "orct",
+        "url": "",
+        "sourceDB": ""
+    },
+    "model": "ct.lesson",
+    "pk": 109
+},
+{
+    "fields": {
+        "number_max_value": 110.0,
+        "concept": null,
+        "text": "number question ",
+        "number_precision": 10.0,
+        "enable_auto_grading": true,
+        "sub_kind": "numbers",
+        "number_min_value": -110.0,
+        "title": "Number 1",
         "access": "public",
         "mergeParent": null,
         "commitTime": null,
         "medium": "reading",
-        "parent": 104,
+        "parent": 109,
         "changeLog": "",
-        "sourceID": null,
+        "sourceID": "",
         "addedBy": 258,
         "treeID": 104,
-        "atime": "2018-04-04T17:08:47.505Z",
-        "data": null,
+        "atime": "2018-04-04T18:21:22Z",
+        "data": "",
         "add_unit_aborts": false,
         "kind": "orct",
         "url": "",
+        "sourceDB": ""
+    },
+    "model": "ct.lesson",
+    "pk": 110
+},
+{
+    "fields": {
+        "number_max_value": 0.0,
+        "concept": 45,
+        "text": "error 1",
+        "number_precision": 0.0,
+        "enable_auto_grading": false,
+        "sub_kind": null,
+        "number_min_value": 0.0,
+        "title": "some error",
+        "access": "public",
+        "mergeParent": null,
+        "commitTime": "2018-04-11T15:37:13.604Z",
+        "medium": "reading",
+        "parent": null,
+        "changeLog": "initial commit",
+        "sourceID": null,
+        "addedBy": 258,
+        "treeID": 111,
+        "atime": "2018-04-11T15:37:13.604Z",
+        "data": null,
+        "add_unit_aborts": false,
+        "kind": "errmod",
+        "url": null,
         "sourceDB": null
     },
     "model": "ct.lesson",
-    "pk": 109
+    "pk": 111
 },
 {
     "fields": {
@@ -3300,6 +3458,28 @@
     },
     "model": "ct.conceptlink",
     "pk": 53
+},
+{
+    "fields": {
+        "lesson": 110,
+        "concept": 44,
+        "atime": "2018-04-04T17:01:05.430Z",
+        "addedBy": 258,
+        "relationship": "tests"
+    },
+    "model": "ct.conceptlink",
+    "pk": 54
+},
+{
+    "fields": {
+        "lesson": 69,
+        "concept": 45,
+        "atime": "2018-04-11T15:37:49.746Z",
+        "addedBy": 258,
+        "relationship": "resol"
+    },
+    "model": "ct.conceptlink",
+    "pk": 55
 },
 {
     "fields": {
@@ -4418,7 +4598,7 @@
         "addedBy": 258,
         "treeID": 104,
         "branch": "master",
-        "lesson": 109,
+        "lesson": 110,
         "atime": "2018-04-04T17:01:05.445Z",
         "order": 0,
         "unit": 5
@@ -4470,6 +4650,111 @@
     },
     "model": "ct.unitlesson",
     "pk": 122
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": null,
+        "addedBy": 257,
+        "treeID": 41,
+        "branch": "master",
+        "lesson": 41,
+        "atime": "2018-04-10T16:29:19.185Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 123
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": null,
+        "addedBy": 257,
+        "treeID": 42,
+        "branch": "master",
+        "lesson": 42,
+        "atime": "2018-04-10T16:29:19.188Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 124
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": null,
+        "addedBy": 257,
+        "treeID": 43,
+        "branch": "master",
+        "lesson": 43,
+        "atime": "2018-04-10T16:29:19.191Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 125
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": null,
+        "addedBy": 257,
+        "treeID": 44,
+        "branch": "master",
+        "lesson": 44,
+        "atime": "2018-04-10T16:29:19.194Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 126
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": null,
+        "addedBy": 257,
+        "treeID": 45,
+        "branch": "master",
+        "lesson": 45,
+        "atime": "2018-04-10T16:29:19.197Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 127
+},
+{
+    "fields": {
+        "kind": "errmod",
+        "parent": 121,
+        "addedBy": 258,
+        "treeID": 111,
+        "branch": "master",
+        "lesson": 111,
+        "atime": "2018-04-11T15:37:13.648Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 128
+},
+{
+    "fields": {
+        "kind": "resol",
+        "parent": 128,
+        "addedBy": 258,
+        "treeID": 69,
+        "branch": "master",
+        "lesson": 69,
+        "atime": "2014-11-18T00:15:20.053Z",
+        "order": null,
+        "unit": 5
+    },
+    "model": "ct.unitlesson",
+    "pk": 129
 },
 {
     "fields": {
@@ -4693,6 +4978,1518 @@
 },
 {
     "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1.0",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 109,
+        "atime": "2018-04-04T17:31:08.165Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 129
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-04T17:32:11.714Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 130
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "   .m lm\n",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-05T15:21:20.982Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 131
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.3",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-05T15:21:34.356Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 132
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "vu",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-05T16:47:36.189Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 133
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1.0",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-05T16:48:00.638Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 134
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "dasd",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:13:00.854Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 135
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:13:10.511Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 136
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "111",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:14:05.308Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 137
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:15:52.949Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 138
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "doc",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:20:50.922Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 139
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "11\n",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:23:37.348Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 140
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "6",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:32:01.186Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 141
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:36:10.156Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 142
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "reg",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:53:34.985Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 143
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:53:43.258Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 144
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "k",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:55:03.604Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 145
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.2",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:55:11.876Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 146
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:56:37.023Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 147
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:56:43.912Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 148
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-10T15:58:45.991Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 149
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T15:58:52.241Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 150
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:28:37.992Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 151
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:29:09.440Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 152
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:31:46.105Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 153
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1.2",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:32:02.859Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 154
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "4",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:41:18.446Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 155
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "3",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:42:45.207Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 156
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.8",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:43:21.477Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 157
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "100",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:45:11.370Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 158
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0121",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:46:05.908Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 159
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:47:01.672Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 160
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0111",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:47:20.788Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 161
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "12",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-10T16:52:59.110Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 162
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0.8",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-10T16:53:10.348Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 163
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "qw",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-11T11:25:55.971Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 164
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "11",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 110,
+        "atime": "2018-04-11T11:31:11.882Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 165
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "2",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": null,
+        "lesson": 108,
+        "atime": "2018-04-11T11:32:54.141Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 166
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "30",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T12:19:52.270Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 167
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-2",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "notsure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T12:20:03.002Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 168
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "close",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T12:27:10.770Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 169
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T12:31:46.051Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 170
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T12:39:03.973Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 171
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T12:51:45.974Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 172
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T12:52:07.400Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 173
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T13:49:31.026Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 174
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "0",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T13:53:03.649Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 175
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:07:39.380Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 176
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:10:50.494Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 177
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:28:31.707Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 178
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:30:44.160Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 179
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:36:59.776Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 180
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:43:22.832Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 181
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:46:46.933Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 182
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:49:42.108Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 183
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T14:58:36.094Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 184
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:04:08.796Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 185
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "270",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:09:54.620Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 186
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-150",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": null,
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:12:18.716Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 187
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-160",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:14:31.230Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 188
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-150",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:16:20.666Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 189
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "1",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:17:19.206Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 190
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "150",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:18:52.856Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 191
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "111",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:19:11.585Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 192
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "121",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:21:58.455Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 193
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-10",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:32:19.718Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 194
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "17",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:32:44.925Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 195
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "230",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "guess",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:35:53.928Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 196
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "140",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "sure",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:42:15.353Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 197
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-4",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "guess",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:42:51.283Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 198
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "-70",
+        "author": 258,
+        "unitLesson": 119,
+        "confidence": "guess",
+        "course": 4,
+        "selfeval": "correct",
+        "sub_kind": "numbers",
+        "lesson": 110,
+        "atime": "2018-04-11T15:46:44.746Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 199
+},
+{
+    "fields": {
+        "status": null,
+        "kind": "orct",
+        "activity": null,
+        "parent": null,
+        "title": null,
+        "text": "8",
+        "author": 258,
+        "unitLesson": 121,
+        "confidence": "guess",
+        "course": 4,
+        "selfeval": "different",
+        "sub_kind": "numbers",
+        "lesson": 108,
+        "atime": "2018-04-11T15:47:13.294Z",
+        "needsEval": false
+    },
+    "model": "ct.response",
+    "pk": 200
+},
+{
+    "fields": {
         "status": "help",
         "errorModel": 77,
         "author": 257,
@@ -4714,6 +6511,66 @@
     },
     "model": "ct.studenterror",
     "pk": 92
+},
+{
+    "fields": {
+        "status": null,
+        "errorModel": 123,
+        "author": 258,
+        "activity": null,
+        "atime": "2018-04-10T16:43:12.932Z",
+        "response": 156
+    },
+    "model": "ct.studenterror",
+    "pk": 113
+},
+{
+    "fields": {
+        "status": null,
+        "errorModel": 127,
+        "author": 258,
+        "activity": null,
+        "atime": "2018-04-11T15:36:21.092Z",
+        "response": 196
+    },
+    "model": "ct.studenterror",
+    "pk": 114
+},
+{
+    "fields": {
+        "status": null,
+        "errorModel": 127,
+        "author": 258,
+        "activity": null,
+        "atime": "2018-04-11T15:42:40.529Z",
+        "response": 197
+    },
+    "model": "ct.studenterror",
+    "pk": 115
+},
+{
+    "fields": {
+        "status": "help",
+        "errorModel": 128,
+        "author": 258,
+        "activity": null,
+        "atime": "2018-04-11T15:43:02.375Z",
+        "response": 198
+    },
+    "model": "ct.studenterror",
+    "pk": 116
+},
+{
+    "fields": {
+        "status": "review",
+        "errorModel": 128,
+        "author": 258,
+        "activity": null,
+        "atime": "2018-04-11T15:47:29.881Z",
+        "response": 200
+    },
+    "model": "ct.studenterror",
+    "pk": 117
 },
 {
     "fields": {
@@ -4928,5 +6785,907 @@
     },
     "model": "ct.unitstatus",
     "pk": 220
+},
+{
+    "fields": {
+        "startTime": "2018-04-04T17:30:49.064Z",
+        "endTime": "2018-04-04T17:32:15.403Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 221
+},
+{
+    "fields": {
+        "startTime": "2018-04-04T17:45:13.969Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 222
+},
+{
+    "fields": {
+        "startTime": "2018-04-05T15:21:12.376Z",
+        "endTime": "2018-04-05T15:21:38.561Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 223
+},
+{
+    "fields": {
+        "startTime": "2018-04-05T15:21:59.505Z",
+        "endTime": "2018-04-05T16:48:17.338Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 224
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:12:55.327Z",
+        "endTime": "2018-04-10T15:13:15.923Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 225
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:13:52.306Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 226
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:13:57.625Z",
+        "endTime": "2018-04-10T15:17:09.106Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 227
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:19:33.956Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 228
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:19:45.003Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 229
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:20:34.230Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 230
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:20:44.519Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 231
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:23:13.081Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 232
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:23:28.780Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 233
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:27:02.773Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 234
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:27:08.384Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 235
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:31:48.303Z",
+        "endTime": "2018-04-10T15:36:46.277Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 236
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:52:23.270Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 237
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:53:16.843Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 238
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:53:29.399Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 239
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:54:44.360Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 240
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:54:57.061Z",
+        "endTime": "2018-04-10T15:55:56.616Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 241
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:56:01.366Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 242
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:56:32.376Z",
+        "endTime": "2018-04-10T15:57:07.053Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 243
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:58:28.236Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 244
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T15:58:41.803Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 245
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:28:05.150Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 246
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:28:32.952Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 247
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:30:59.002Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 248
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:31:20.471Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 249
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:31:35.324Z",
+        "endTime": "2018-04-10T16:32:10.504Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 250
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:37:25.368Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 251
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:37:43.615Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 252
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:40:50.647Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 253
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:41:08.908Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 254
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:42:01.135Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 255
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:42:18.044Z",
+        "endTime": "2018-04-10T16:43:39.854Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 256
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:44:14.788Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 257
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:45:04.405Z",
+        "endTime": "2018-04-10T16:46:33.441Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 258
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:46:39.537Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 259
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:46:56.608Z",
+        "endTime": "2018-04-10T16:47:28.517Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 260
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:52:37.259Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 261
+},
+{
+    "fields": {
+        "startTime": "2018-04-10T16:52:53.308Z",
+        "endTime": "2018-04-10T16:53:19.917Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 262
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:25:42.308Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 263
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:25:51.480Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 264
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:28:00.361Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 265
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:28:09.097Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 266
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:30:12.640Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 267
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T11:30:20.578Z",
+        "endTime": "2018-04-11T11:33:44.280Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 268
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:16:27.809Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 269
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:16:33.298Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 270
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:16:34.996Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 271
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:16:45.950Z",
+        "endTime": "2018-04-11T12:20:11.829Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 272
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:26:50.398Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 273
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:27:02.075Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 274
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:38:45.049Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 275
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:50:59.736Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 276
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T12:51:40.960Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 277
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T13:49:24.047Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 278
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T13:52:59.359Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 279
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:01:43.576Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 280
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:06:31.031Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 281
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:07:09.746Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 282
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:10:38.873Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 283
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:27:52.019Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 284
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:29:56.602Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 285
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:36:17.354Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 286
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:43:11.711Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 287
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:46:36.446Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 288
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:49:26.841Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 289
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T14:58:22.689Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 290
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:03:52.427Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 291
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:09:41.328Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 292
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:12:06.192Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 293
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:14:24.749Z",
+        "endTime": "2018-04-11T15:22:24.238Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 294
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:16:11.876Z",
+        "endTime": "2018-04-11T15:17:42.281Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 295
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:18:45.438Z",
+        "endTime": "2018-04-11T15:19:44.703Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 296
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:32:10.359Z",
+        "endTime": "2018-04-11T15:32:51.428Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 297
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:35:46.957Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 1
+    },
+    "model": "ct.unitstatus",
+    "pk": 298
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:42:08.818Z",
+        "endTime": "2018-04-11T15:43:31.637Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 299
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:43:02.451Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 300
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:46:39.109Z",
+        "endTime": "2018-04-11T15:47:47.123Z",
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 301
+},
+{
+    "fields": {
+        "startTime": "2018-04-11T15:47:30.043Z",
+        "endTime": null,
+        "user": 258,
+        "unit": 5,
+        "order": 0
+    },
+    "model": "ct.unitstatus",
+    "pk": 302
 }
 ]
