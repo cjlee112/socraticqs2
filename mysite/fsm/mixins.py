@@ -318,9 +318,9 @@ class ChatMixin(object):
             GraderClass = GRADERS.get(message.content.unitLesson.lesson.sub_kind)
             if GraderClass:
                 grader = GraderClass(message.content.unitLesson, message.content)
-                # should exactly calll this method (actually property) to set all needed fields inside grader
-                grade = grader.grade
-                text = 'Your answer was {}! You get {} points for this question.'.format(grader.message, grade)
+                # grade method must be called to actually do the work
+                grader.grade
+                text = 'Your answer is {}!'.format(grader.message)
             else:
                 text = "No such grader! Grading could not be applied."
             message = Message.objects.create(

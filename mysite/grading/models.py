@@ -14,9 +14,9 @@ class CorrectnessMeter(models.Model):
     CORRECT = 'correct'
     PARTIALLY_CORRECT = 'partially_correct'
     CORRECTNESS_CHOICES = (
-        (CORRECT, 'Correct'),
-        (PARTIALLY_CORRECT, 'Partially correct'),
-        (NOT_CORRECT, 'Not correct'),
+        (CORRECT, 'correct'),
+        (PARTIALLY_CORRECT, 'partially correct'),
+        (NOT_CORRECT, 'not correct'),
     )
 
     response = models.ForeignKey(Response)

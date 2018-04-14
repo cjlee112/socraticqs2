@@ -30,7 +30,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 1)
         self.assertEqual(grader.is_correct, True)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"Correct")
+        self.assertEqual(grader.message, u"correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.CORRECT)
@@ -43,7 +43,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 0)
         self.assertEqual(grader.is_correct, False)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"Not correct")
+        self.assertEqual(grader.message, u"not correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.NOT_CORRECT)
@@ -61,7 +61,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 0.9)
         self.assertEqual(grader.is_correct, True)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"Partially correct")
+        self.assertEqual(grader.message, u"partially correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.PARTIALLY_CORRECT)
