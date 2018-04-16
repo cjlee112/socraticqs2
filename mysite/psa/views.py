@@ -24,7 +24,7 @@ from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
-from psa.forms import SignUpForm, EmailLoginForm, UsernameLoginForm, SocialForm
+from psa.forms import SignUpForm, EmailLoginForm
 
 
 def context(**extra):
@@ -147,7 +147,6 @@ def signup(request, next_page=None):
     """
     This function handles custom login to integrate social auth and default login.
     """
-    username = password = ''
     u_hash =request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
 
