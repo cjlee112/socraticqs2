@@ -100,8 +100,10 @@ class MessageSerializer(serializers.ModelSerializer):
                 if i.content.lesson.sub_kind == 'choices':
                     sub_kind = 'choices'
                     incl_msg.append(i.id)
-                if i.content.lesson.sub_kind == 'numbers':
+                elif i.content.lesson.sub_kind == 'numbers':
                     sub_kind = 'numbers'
+                elif i.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
 
         input_data = {
             'type': obj.get_next_input_type(),
@@ -111,6 +113,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
             'includeSelectedValuesFromMessages': incl_msg,
         }
+
         if sub_kind == 'numbers':
             input_data['html'] = '<input type="number" name="{}" max="{}" min="{}" step="{}" value="{}">'.format(
                 "text",
@@ -119,6 +122,9 @@ class MessageSerializer(serializers.ModelSerializer):
                 i.content.lesson.number_precision,
                 0,
             )
+        elif sub_kind == 'canvas':
+            input_data['html'] = '<input type="hidden" />'
+
         if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
@@ -157,6 +163,8 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                     incl_msg.append(msg.id)
                 if msg.content.lesson.sub_kind == 'numbers':
                     sub_kind = 'numbers'
+                if msg.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
 
         input_data = {
             # obj - is the last item from loop
@@ -176,6 +184,9 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                 msg.content.lesson.number_precision,
                 0,
             )
+        elif sub_kind == 'canvas':
+            input_data['html'] = '<input type="hidden" />'
+
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)

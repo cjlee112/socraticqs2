@@ -7,6 +7,7 @@
     color: black;
     background-color: #fff;
     outline: none;
+    padding: 5px 10px;
 
     &:disabled {
       color: lightgray;
@@ -22,8 +23,10 @@
     }
   }
 
-  svg {
-    cursor: url('https://cdn2.iconfinder.com/data/icons/snipicons/500/pencil-128.png') 20 109, auto;
+  &:not([disabled]) {
+    svg {
+      cursor: url('https://cdn2.iconfinder.com/data/icons/snipicons/500/pencil-128.png') 20 109, auto;
+    }
   }
 
   .actions {
@@ -62,7 +65,7 @@
   }
 
   .actions label {
-    margin-bottom: 0;
+    margin: 0;
     cursor: pointer;
     line-height: 35px;
   }
@@ -98,6 +101,7 @@
 
   .shapes-wrapper .btn {
     display: none;
+    padding: 7px 5px;
     width: 50px;
   }
 
@@ -137,6 +141,7 @@
     display: none;
     width: 35px;
     font-size: 14px;
+    padding: 7px 5px;
   }
 
   .widths-wrapper .btn.active {

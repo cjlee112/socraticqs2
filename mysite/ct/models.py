@@ -130,6 +130,7 @@ class Concept(models.Model):
         l = d.values()
         l.sort(lambda x,y:cmp(x.relationship, y.relationship))
         return l
+
     def __unicode__(self):
         return self.title
 
@@ -305,20 +306,22 @@ class Lesson(models.Model):
 
     def get_canvas(self, *args, **kwargs):
         """
-
-        :return:
+        Returns container for drawing
         """
         return """
             <div id="draw-svg--{0}" class="draw-svg-container"></div>
             <script type="text/javascript">
-                document.drawToElement([document.getElementById('draw-svg--{0}')]);
+                document.drawToElement([document.getElementById('draw-svg--{0}')], {1});                
             </script>
-        """.format(self.pk)
+        """.format(self.pk, """
+            function(data) {
+                $('.chat-input').find('.chat-input-custom').find('input').val(data);
+            }
+        """)
 
     def get_html(self, *args, **kwargs):
         """
-
-        :return:
+        Returns html by lesson type
         """
         if self.sub_kind == Lesson.CANVAS:
             return self.get_canvas()
@@ -1320,6 +1323,7 @@ class Course(models.Model):
     def __unicode__(self):
         return self.title
 
+
 class CourseUnit(models.Model):
     'list of units in a course'
     unit = models.ForeignKey(Unit)
@@ -1330,6 +1334,7 @@ class CourseUnit(models.Model):
     releaseTime = models.DateTimeField('time released', null=True, blank=True)
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
+
 
 class Role(models.Model):
     'membership of a user in a course'
@@ -1351,6 +1356,7 @@ class Role(models.Model):
 
     class Meta:
         unique_together = ('role', 'course', 'user')
+
 
 class UnitStatus(models.Model):
     'records what user has completed in a unit lesson sequence'

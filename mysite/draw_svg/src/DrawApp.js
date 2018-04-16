@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
 
 import * as d3 from "d3";
 import {CompactPicker} from 'react-color';
@@ -9,6 +10,8 @@ class DrawApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            'container': null,
+
             'brush': 'pencil',
             'color': '#000000',
             'width': 4,
@@ -25,12 +28,16 @@ class DrawApp extends Component {
         this.changeWidth = this.changeWidth.bind(this);
         this.hidePopups = this.hidePopups.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+        this.toggleEditor = this.toggleEditor.bind(this);
     }
 
     componentDidMount() {
         let svg = d3.select(this.node);
         svg.call(d3.drag().on('start', () => {
             this.hidePopups();
+            if (!this.isEnabled()) {
+                return;
+            }
             switch (this.state.brush) {
                 case 'line':
                     this.drawLine();
@@ -49,6 +56,9 @@ class DrawApp extends Component {
                     break;
             }
         }));
+        this.setState({
+            'container': ReactDOM.findDOMNode(this).parentNode,
+        });
         window.addEventListener('keydown', this.onKeyDown);
     }
 
@@ -109,6 +119,7 @@ class DrawApp extends Component {
                     [x + radius, coordY],
                 ]);
             }
+            this.onChange();
         });
     }
 
@@ -128,6 +139,7 @@ class DrawApp extends Component {
             const coordX = d3.mouse(this.node)[0];
             const coordY = d3.mouse(this.node)[1];
             figure.attr('x2', coordX).attr('y2', coordY);
+            this.onChange();
         });
     }
 
@@ -145,6 +157,7 @@ class DrawApp extends Component {
         d3.event.on('drag', () => {
             const coordX = d3.mouse(this.node)[0];
             figure.attr('r', Math.abs(coordX - x));
+            this.onChange();
         });
     }
 
@@ -174,6 +187,7 @@ class DrawApp extends Component {
                 figure.attr('y', coordY);
                 figure.attr('height', y - coordY);
             }
+            this.onChange();
         });
     }
 
@@ -196,6 +210,7 @@ class DrawApp extends Component {
         d3.event.on('drag', () => {
             figure.datum().push(d3.mouse(this.node));
             figure.attr('d', renderPath);
+            this.onChange();
         });
     }
 
@@ -209,7 +224,7 @@ class DrawApp extends Component {
             this.setState({
                 'figures': figures,
                 'redoFigures': redoFigures,
-            });
+            }, this.onChange);
         }
     }
 
@@ -223,8 +238,14 @@ class DrawApp extends Component {
             this.setState({
                 'figures': figures,
                 'redoFigures': redoFigures,
-            });
+            }, this.onChange);
         }
+    }
+
+    onChange() {
+        try {
+            this.props.onChange(this.node.outerHTML);
+        } catch (e) {}
     }
 
     handleChangeColor(color) {
@@ -232,6 +253,22 @@ class DrawApp extends Component {
             'color': color.hex,
             'showColorPicker': false,
         });
+    }
+
+    isEnabled() {
+        if (this.state.container) {
+            return ['disabled', 'true', '1', ''].indexOf(this.state.container.getAttribute('disabled')) === -1;
+        } else {
+            return false;
+        }
+    }
+
+    toggleEditor() {
+        if (this.isEnabled()) {
+            this.state.container.removeAttribute('disabled');
+        } else {
+            this.state.container.setAttribute('disabled', 'disabled');
+        }
     }
 
     toggleColorPicker() {
@@ -281,104 +318,105 @@ class DrawApp extends Component {
 
     save() {
         this.setState({
-            'isUploading': true,
-        });
-        // svgson(this.node.outerHTML).then(function (data) {
-        //     return JSON.stringify(data[0]);
-        // }).then(function (json_data) {
-        //     fetch('/api/v0/echo/data/', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Accept': 'application/json',
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: json_data,
-        //     }).then(function (response) {
-        //         this.setState({
-        //             'isUploading': false,
-        //         });
-        //         console.log(response);
-        //     }.bind(this)).catch(function (error) {
-        //         console.log(error);
-        //     });
-        // }.bind(this));
+                'isUploading': true,
+            }, () =>
+                fetch('/api/v0/echo/data/', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.node.outerHTML),
+                }).then(function (response) {
+                    this.setState({
+                        'isUploading': false,
+                    });
+                    console.log(response);
+                }.bind(this)).catch(function (error) {
+                    console.log(error);
+                })
+        );
     }
 
     render() {
+        let actions = this.isEnabled() ? (
+            <div className="border-bottom actions">
+                <button className="btn" onClick={this.undo.bind(this)} disabled={!this.state.figures.length}>
+                    <span className="oi oi-action-undo"/>
+                </button>
+                <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
+                    <span className="oi oi-action-redo"/>
+                </button>
+                <button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>
+                    <span className="oi oi-cloud-upload"/>
+                </button>
+
+                <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
+                     onClick={this.toggleShapes.bind(this)}>
+                    <label>Shape</label>
+                    <div className="shapes">
+                        <button className={this.state.brush === 'circle' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush}
+                                data-brush="circle">
+                            <span className="oi oi-media-record"/>
+                        </button>
+                        <button className={this.state.brush === 'rect' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush}
+                                data-brush="rect">
+                            <span className="oi oi-media-stop"/>
+                        </button>
+                        <button className={this.state.brush === 'triangle' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush} data-brush="triangle">
+                            <span className="oi oi-caret-top"/>
+                        </button>
+                        <button className={this.state.brush === 'line' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush} data-brush="line">
+                            <span className="oi oi-minus"/>
+                        </button>
+                        <button className={this.state.brush === 'pencil' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush}
+                                data-brush="pencil">
+                            <span className="oi oi-pencil"/>
+                        </button>
+                    </div>
+                </div>
+                <label>Color <button type="button" className="btn color-picker-handler"
+                                     style={{backgroundColor: this.state.color}}
+                                     onClick={this.toggleColorPicker.bind(this)}/></label>
+                <div className={this.state.showColorPicker ? 'color-picker' : 'color-picker hidden'}>
+                    <CompactPicker onChange={this.handleChangeColor.bind(this)}/>
+                </div>
+
+                <div className={this.state.showWidths ? 'widths-wrapper active' : 'widths-wrapper'}
+                     onClick={this.toggleWidths.bind(this)}>
+                    <label>Width</label>
+                    <div className="widths">
+                        <button className={this.state.width === 2 ? 'btn active' : 'btn'}
+                                onClick={this.changeWidth}
+                                data-width="2">1
+                        </button>
+                        <button className={this.state.width === 4 ? 'btn active' : 'btn'}
+                                onClick={this.changeWidth}
+                                data-width="4">2
+                        </button>
+                        <button className={this.state.width === 6 ? 'btn active' : 'btn'}
+                                onClick={this.changeWidth} data-width="6">3
+                        </button>
+                        <button className={this.state.width === 8 ? 'btn active' : 'btn'}
+                                onClick={this.changeWidth} data-width="8">4
+                        </button>
+                        <button className={this.state.width === 10 ? 'btn active' : 'btn'}
+                                onClick={this.changeWidth} data-width="10">5
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        ) : null;
+
         return (
             <div className="text-center">
-                <div className="border-bottom actions">
-                    <button className="btn" onClick={this.undo.bind(this)} disabled={!this.state.figures.length}>
-                        <span className="oi oi-action-undo"/>
-                    </button>
-                    <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
-                        <span className="oi oi-action-redo"/>
-                    </button>
-                    <button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>
-                        <span className="oi oi-cloud-upload"/>
-                    </button>
-
-                    <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
-                         onClick={this.toggleShapes.bind(this)}>
-                        <label>Shape</label>
-                        <div className="shapes">
-                            <button className={this.state.brush === 'circle' ? 'btn active' : 'btn'}
-                                    onClick={this.changeBrush}
-                                    data-brush="circle">
-                                <span className="oi oi-media-record"/>
-                            </button>
-                            <button className={this.state.brush === 'rect' ? 'btn active' : 'btn'}
-                                    onClick={this.changeBrush}
-                                    data-brush="rect">
-                                <span className="oi oi-media-stop"/>
-                            </button>
-                            <button className={this.state.brush === 'triangle' ? 'btn active' : 'btn'}
-                                    onClick={this.changeBrush} data-brush="triangle">
-                                <span className="oi oi-caret-top"/>
-                            </button>
-                            <button className={this.state.brush === 'line' ? 'btn active' : 'btn'}
-                                    onClick={this.changeBrush} data-brush="line">
-                                <span className="oi oi-minus"/>
-                            </button>
-                            <button className={this.state.brush === 'pencil' ? 'btn active' : 'btn'}
-                                    onClick={this.changeBrush}
-                                    data-brush="pencil">
-                                <span className="oi oi-pencil"/>
-                            </button>
-                        </div>
-                    </div>
-                    <label>Color <button type="button" className="btn color-picker-handler"
-                                         style={{backgroundColor: this.state.color}}
-                                         onClick={this.toggleColorPicker.bind(this)}/></label>
-                    <div className={this.state.showColorPicker ? 'color-picker' : 'color-picker hidden'}>
-                        <CompactPicker onChange={this.handleChangeColor.bind(this)}/>
-                    </div>
-
-                    <div className={this.state.showWidths ? 'widths-wrapper active' : 'widths-wrapper'}
-                         onClick={this.toggleWidths.bind(this)}>
-                        <label>Width</label>
-                        <div className="widths">
-                            <button className={this.state.width === 2 ? 'btn active' : 'btn'}
-                                    onClick={this.changeWidth}
-                                    data-width="2">1
-                            </button>
-                            <button className={this.state.width === 4 ? 'btn active' : 'btn'}
-                                    onClick={this.changeWidth}
-                                    data-width="4">2
-                            </button>
-                            <button className={this.state.width === 6 ? 'btn active' : 'btn'}
-                                    onClick={this.changeWidth} data-width="6">3
-                            </button>
-                            <button className={this.state.width === 8 ? 'btn active' : 'btn'}
-                                    onClick={this.changeWidth} data-width="8">4
-                            </button>
-                            <button className={this.state.width === 10 ? 'btn active' : 'btn'}
-                                    onClick={this.changeWidth} data-width="10">5
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
+                {actions}
                 <svg ref={(node) => this.node = node} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
                      preserveAspectRatio="xMidYMid meet"
                      width={500} height={500}>
