@@ -856,11 +856,14 @@ class Unit(models.Model):
             return 0
         else:
             return n + 1
+
     def no_lessons(self):
         return not self.unitlesson_set.filter(order__isnull=False).count()
+
     def no_orct(self):
         return not self.unitlesson_set.filter(order__isnull=False,
                         lesson__kind=Lesson.ORCT_QUESTION).count()
+
     def create_lesson(self, title, text, author=None, **kwargs):
         if author is None:
             author = self.addedBy
@@ -873,6 +876,7 @@ class Unit(models.Model):
         lesson.treeID = lesson.pk
         lesson.save()
         return lesson
+
     def get_related_concepts(self):
         'get dict of concepts linked to lessons in this unit'
         d = {}
@@ -1027,9 +1031,11 @@ class Response(models.Model):
     # new interactions
     MULTIPLE_CHOICES = 'choices'
     NUMBERS = 'numbers'
+    CANVAS = 'canvas'
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices response'),
         (NUMBERS, 'Numbers response'),
+        (CANVAS, 'Canvas response'),
     )
 
     CORRECT = 'correct'
@@ -1100,6 +1106,7 @@ class Response(models.Model):
             l.append((label, [fmt_count(evalDict.get((conf,selfeval), 0), n)
                               for selfeval,_ in klass.EVAL_CHOICES]))
         return statusTable, l, n
+
     @classmethod
     def get_novel_errors(klass, unitLesson=None, query=None,
                          selfeval=DIFFERENT, **kwargs):
@@ -1110,6 +1117,7 @@ class Response(models.Model):
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
                     Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
+
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'URL for this response'
@@ -1119,6 +1127,7 @@ class Response(models.Model):
             tail = ''
         return '%slessons/%d/responses/%d/%s' % (basePath, self.unitLesson_id,
                                                  self.pk, tail)
+
     def get_next_step(self):
         'indicate what task student should do next'
         if not self.selfeval:

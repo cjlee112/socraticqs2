@@ -998,7 +998,6 @@ CUI.ChatPresenter.prototype._setInput = function(input){
     case 'canvas':
       $textarea.hide();
       $numbers.hide();
-      console.log(input);
       $custom.html($(input.html));
       $custom.show();
       break;
