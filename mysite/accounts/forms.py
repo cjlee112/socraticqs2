@@ -6,17 +6,17 @@ from django.contrib.auth.models import User
 from social.apps.django_app.views import complete
 
 from accounts.models import Instructor
-from psa.models import SecondaryEmail
 
 
 class UserForm(forms.ModelForm):
-    '''
+    """
     This form allow user to edit his profile.
+
     On profile page there are a couple of forms with required fields.
     Field form_id is here to check what form was submitted.
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
     form_id = forms.CharField(max_length=255, initial='user_form', widget=forms.HiddenInput())
 
     class Meta:
@@ -29,11 +29,12 @@ class UserForm(forms.ModelForm):
 
 
 class ChangeEmailForm(forms.Form):
-    '''
+    """
     Field form_id is here to check what form was submitted.
+
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
     form_id = forms.CharField(max_length=255, initial='email_form', widget=forms.HiddenInput())
     email = forms.EmailField()
 
@@ -49,23 +50,25 @@ class ChangeEmailForm(forms.Form):
         return email
 
     def save(self, request, commit=True):
-        '''
-        This form calls to `complete` function of python-social-auth
-        to send email to the user with confirmation link when user changes his email.
+        """
+        This form calls to `complete` function of python-social-auth.
+
+        Send email to the user with confirmation link when user changes his email.
         :param request: django request
         :param commit: save to db or not?
         :return:
-        '''
+        """
         if self.initial['email'] != self.cleaned_data['email']:
             return complete(request, 'email', force_update=True)
 
 
 class InstructorForm(forms.ModelForm):
-    '''
+    """
     Field form_id is here to check what form was submitted.
+
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
     form_id = forms.CharField(max_length=255, initial='instructor_form', widget=forms.HiddenInput())
 
     class Meta:
@@ -78,9 +81,7 @@ class InstructorForm(forms.ModelForm):
 
 
 class CreatePasswordForm(forms.ModelForm):
-    '''
-    This form will be used in case when user has no password and wants to create it.
-    '''
+    """This form will be used in case when user has no password and wants to create it."""
 
     form_id = forms.CharField(max_length=255, initial='password_form', widget=forms.HiddenInput())
     confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput())
@@ -107,11 +108,12 @@ class CreatePasswordForm(forms.ModelForm):
 
 
 class ChangePasswordForm(CreatePasswordForm):
-    '''
+    """
     Field form_id is here to check what form was submitted.
+
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
     current_password = forms.CharField(max_length=255, widget=forms.PasswordInput())
 
     def clean(self):
@@ -127,7 +129,7 @@ class ChangePasswordForm(CreatePasswordForm):
         current_pw = self.cleaned_data.get('current_password')
         user = authenticate(username=self.instance, password=current_pw)
         if user is None:
-            raise forms.ValidationError('Provided current password doesn\'t match your password')
+            raise forms.ValidationError({'current_password': 'Provided current password doesn\'t match your password'})
 
     class Meta:
         model = User
@@ -135,11 +137,12 @@ class ChangePasswordForm(CreatePasswordForm):
 
 
 class DeleteAccountForm(forms.ModelForm):
-    '''
+    """
     Field form_id is here to check what form was submitted.
+
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
     form_id = forms.CharField(max_length=255, initial='delete_account_form', widget=forms.HiddenInput())
     confirm_delete_account = forms.BooleanField(
         required=True,
@@ -162,11 +165,12 @@ class DeleteAccountForm(forms.ModelForm):
 
 
 class CustomPasswordResetForm(PasswordResetForm):
-    '''
+    """
     Field form_id is here to check what form was submitted.
+
     In view: If we found that form_id is present in request.POST we pass POST data to this form and validate it.
     If form_id not found in request.POST we will not validate this form.
-    '''
+    """
 
     def clean_email(self):
         if not User.objects.filter(email=self.cleaned_data['email']):
