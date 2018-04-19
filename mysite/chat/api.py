@@ -1,6 +1,9 @@
+import base64
+
 import injections
 from itertools import chain
 
+from django.core.files.base import ContentFile
 from django.http.response import Http404
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -158,8 +161,17 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             message.chat = chat
             text = self.request.data.get('text')
 
+            resp = StudentResponse(text=text)
+
+            # convert base64 attachment string to django File
+            data_attachment = self.request.data.get('attachment')
+            if data_attachment and data_attachment.startswith('data:image'):
+                format, image_string = data_attachment.split(';base64,')
+                extension = format.split('/')[-1].split('+')[0]
+                name = '{}.{}'.format('canvas', extension)
+                resp.attachment = ContentFile(base64.b64decode(image_string), name=name)
+
             if not message.content_id:
-                resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
                 resp.unitLesson = message.lesson_to_answer
                 resp.course = message.chat.enroll_code.courseUnit.course
@@ -170,6 +182,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp = message.content
                 resp.text = text
             resp.save()
+
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message

@@ -54,6 +54,7 @@ class AdminRole(admin.ModelAdmin):
 
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
+    list_display = ('text', 'attachment',)
     raw_id_fields = ('lesson', 'unitLesson', 'author', 'parent')
 
 

@@ -19,12 +19,6 @@
     display: flex;
     font-size: 12px;
     line-height: 28px; }
-  .draw-svg-container .figure {
-    fill: none;
-    stroke: black;
-    stroke-width: 3px;
-    stroke-linejoin: round;
-    stroke-linecap: round; }
   .draw-svg-container .btn.color-picker-handler {
     padding: 12px;
     margin: 0 12px;

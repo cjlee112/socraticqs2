@@ -305,6 +305,8 @@ class Message(models.Model):
 
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
+                    if self.content.attachment:
+                        html += mark_safe('<img src="{}" />'.format(self.content.attachment.url))
                 else:
                     CONF_CHOICES = dict(Response.CONF_CHOICES)
                     is_chat_fsm = (
@@ -352,7 +354,14 @@ class Message(models.Model):
                         html += self.get_choices()
                 elif self.content.lesson.sub_kind == Lesson.CANVAS:
                     # adds canvas to draw svg image
-                    html = self.content.lesson.get_html()
+                    messages = self.chat.message_set.filter(id__gt=self.id)
+                    lesson_kwargs = {}
+                    try:
+                        response = messages[0].content
+                        lesson_kwargs['attachment'] = response.attachment
+                    except AttributeError:
+                        pass
+                    html = self.content.lesson.get_html(**lesson_kwargs)
                 elif (self.content.kind == 'answers' and
                       self.content.parent.lesson.sub_kind and
                       self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES

@@ -56,8 +56,17 @@ class DrawApp extends Component {
                     break;
             }
         }));
+        let container = ReactDOM.findDOMNode(this).parentNode;
+        container.addEventListener('disable-canvas', () => {
+            container.setAttribute('disabled', 'disabled');
+            this.setState({'enabled': false});
+        });
+        container.addEventListener('enable-canvas', () => {
+            container.removeAttribute('disabled');
+            this.setState({'enabled': true});
+        });
         this.setState({
-            'container': ReactDOM.findDOMNode(this).parentNode,
+            'container': container,
         });
         window.addEventListener('keydown', this.onKeyDown);
     }
@@ -82,7 +91,13 @@ class DrawApp extends Component {
         let svg = d3.select(this.node);
         let figure = svg.append(type);
         figure.attr('class', 'figure');
-        figure.attr('style', 'stroke: ' + this.state.color + '; stroke-width: ' + this.state.width + 'px');
+        figure.attr('style',
+            'fill: none;' +
+            'stroke-linejoin: round;' +
+            'stroke-linecap: round;' +
+            'stroke: ' + this.state.color + ';' +
+            'stroke-width: ' + this.state.width + 'px;'
+        );
         return figure;
     }
 
@@ -245,7 +260,8 @@ class DrawApp extends Component {
     onChange() {
         try {
             this.props.onChange(this.node.outerHTML);
-        } catch (e) {}
+        } catch (e) {
+        }
     }
 
     handleChangeColor(color) {
@@ -347,9 +363,9 @@ class DrawApp extends Component {
                 <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
                     <span className="oi oi-action-redo"/>
                 </button>
-                <button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>
-                    <span className="oi oi-cloud-upload"/>
-                </button>
+                {/*<button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>*/}
+                    {/*<span className="oi oi-cloud-upload"/>*/}
+                {/*</button>*/}
 
                 <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
                      onClick={this.toggleShapes.bind(this)}>
