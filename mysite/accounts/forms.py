@@ -76,6 +76,7 @@ class InstructorForm(forms.ModelForm):
             'form_id': forms.HiddenInput(),
         }
 
+
 class CreatePasswordForm(forms.ModelForm):
     '''
     This form will be used in case when user has no password and wants to create it.
@@ -85,13 +86,13 @@ class CreatePasswordForm(forms.ModelForm):
     confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput())
     password = forms.CharField(max_length=255, widget=forms.PasswordInput())
 
-
     def clean(self):
         data = self.cleaned_data
         if data.get('password') != data.get('confirm_password'):
+            self.add_error(None, 'Password and Confirm password fields doesn\'t match.')
             raise forms.ValidationError(
-                'Password and Confirm password fields doesn\'t match'
-            )
+                {'password': 'Should be equal to confirm password field.',
+                 'confirm_password': 'Should be equal to password field.'})
         return self.cleaned_data
 
     class Meta:
@@ -116,9 +117,10 @@ class ChangePasswordForm(CreatePasswordForm):
     def clean(self):
         data = self.cleaned_data
         if data.get('password') != data.get('confirm_password'):
+            self.add_error(None, 'Password and Confirm password fields doesn\'t match.')
             raise forms.ValidationError(
-                'Password and Confirm password fields doesn\'t match'
-            )
+                {'password': 'Should be equal to confirm password field.',
+                 'confirm_password': 'Should be equal to password field.'})
         return self.cleaned_data
 
     def clean_current_password(self):

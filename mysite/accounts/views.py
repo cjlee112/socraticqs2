@@ -7,6 +7,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import password_reset, password_reset_done
 from django.http.response import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import View, CreateView
 from django.core.urlresolvers import reverse
@@ -69,6 +70,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         }
         kwargs = {}
         has_errors = False
+        non_field_errors_list = []
 
         def get_form_changed_data(form):
             data = form.changed_data
@@ -87,6 +89,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                         return rsp
                 elif changed_data:
                     has_errors = True
+                    non_field_errors_list.append(unicode(form.non_field_errors()))
                 kwargs[form_id] = form
             else:
                 kwargs[form_id] = form_cls()
@@ -95,7 +98,9 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
         else:
-            messages.add_message(request, messages.WARNING, "Please correct errors below")
+
+            msg = u"Please correct errors below: <br> {}".format(u"<br>".join(non_field_errors_list))
+            messages.add_message(request, messages.WARNING, mark_safe(msg))
         return self.render_to_response(
             kwargs
         )
