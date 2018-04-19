@@ -140,7 +140,7 @@ class FormSetBaseView(object):
     def formset_valid(self, formset):
         pass
 
-    def formset_invalid(self, formset):
+    def formset_invalid(self, formset, *args, **kwargs):
         pass
 
     def get_formset_prefix(self):
@@ -695,7 +695,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
                     messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
                     return self.formset_valid(formset)
                 else:
-                    return self.formset_invalid(formset)
+                    return self.formset_invalid(formset, form)
             else:
                 messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
                 return response
@@ -712,9 +712,9 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         context.update(self.kwargs)
         return self.render_to_response(context)
 
-    def formset_invalid(self, formset):
+    def formset_invalid(self, formset, form):
         messages.add_message(self.request, messages.WARNING, "Please correct errors in Error Models section")
-        return self.render_to_response(self.get_context_data(formset=formset))
+        return self.render_to_response(self.get_context_data(formset=formset, form=form))
 
     def get_answer_form_kwargs(self):
         kwargs = {}
