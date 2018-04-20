@@ -163,7 +163,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                     incl_msg.append(msg.id)
                 if msg.content.lesson.sub_kind == 'numbers':
                     sub_kind = 'numbers'
-                if msg.content.lesson.sub_kind == 'canvas':
+                elif msg.content.lesson.sub_kind == 'canvas':
                     sub_kind = 'canvas'
 
         input_data = {
