@@ -3,8 +3,11 @@ from django.forms import widgets
 from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError, UnitLesson
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Field
+from crispy_forms.layout import Submit, Layout, Field, Div
+
+
 ## from crispy_forms.bootstrap import StrictButton
+from mysite.helpers import base64_to_file
 
 
 class ResponseForm(forms.ModelForm):
@@ -234,12 +237,14 @@ class ConceptGraphForm(forms.ModelForm):
 
 class NewErrorForm(forms.ModelForm):
     submitLabel = 'Add'
+
     def __init__(self, *args, **kwargs):
         super(NewErrorForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-errorForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Lesson
         fields = ['title', 'text']
@@ -256,26 +261,50 @@ class ErrorForm(NewErrorForm):
 
 class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper['attachment'].wrap(Field, template='ct/crispy_forms/question_attachment.html')
+
     class Meta:
         model = Lesson
         fields = [
             'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
             'sub_kind',
             'number_max_value', 'number_min_value', 'number_precision',
+            'attachment',
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
 
 class AnswerLessonForm(LessonForm):
+    attachment = forms.CharField(required=False)
+    attachment_clear = forms.BooleanField(required=False, label='Clear attachment')
+
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper['attachment'].wrap(Field, template='ct/crispy_forms/answer_attachment.html')
+
+    def clean_attachment(self):
+        return base64_to_file(self.cleaned_data['attachment'])
+
+    def save(self, commit=True):
+        instance = super(AnswerLessonForm, self).save(commit)
+        if self.cleaned_data['attachment_clear']:
+            instance.attachment = None
+            instance.save(commit=commit)
+        return instance
+
     class Meta:
         model = Lesson
-        fields = ['title', 'text', 'medium', 'url', 'changeLog']
+        fields = ['title', 'text', 'attachment', 'attachment_clear', 'medium', 'url', 'changeLog']
         labels = dict(medium=_('Delivery medium'))
 
 
 class NewLessonForm(NewErrorForm):
     submitLabel = 'Add'
     url = forms.CharField(required=False)
+
     class Meta:
         model = Lesson
         fields = [

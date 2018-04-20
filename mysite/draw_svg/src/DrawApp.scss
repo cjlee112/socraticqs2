@@ -8,6 +8,7 @@
     background-color: #fff;
     outline: none;
     padding: 5px 10px;
+    border-radius: 0;
 
     &:disabled {
       color: lightgray;
@@ -30,6 +31,7 @@
   }
 
   .actions {
+    position: relative;
     display: flex;
     font-size: 12px;
     line-height: 28px;

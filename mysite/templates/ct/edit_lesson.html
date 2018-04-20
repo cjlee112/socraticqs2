@@ -1,6 +1,7 @@
 {% extends "ct/portal.html" %}
 {% load crispy_forms_tags %}
 {% load ct_extras %}
+{% load static %}
 
 {% comment %}
   Show materials relevant for a given concept
@@ -36,7 +37,7 @@ Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 </p>
 
 <p>
-<form action="." method="post">
+<form action="." method="post" enctype="multipart/form-data">
   <div class="form-group">
   {% csrf_token %}
     <select id="js-slct-unit" name="unit_to_move" class="form-control">
@@ -72,5 +73,9 @@ Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 <script type="application/javascript">
 $("#js-slct-unit").select2({placeholder: "Select a unit"});
 </script>
+
+<link rel="stylesheet" href="{% static 'css/draw_svg.css' %}">
+<script src="{% static 'js/draw_svg.js' %}"></script>
+
 {% endblock %}
 
