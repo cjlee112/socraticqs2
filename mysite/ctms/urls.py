@@ -1,5 +1,4 @@
 from django.conf.urls import patterns, url, include
-from django.views.generic import TemplateView
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,

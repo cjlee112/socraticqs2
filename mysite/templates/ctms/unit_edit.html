@@ -170,7 +170,6 @@ Create new courslet
               <div class="error-models-form__items">
                 {% for item_form in errors_formset %}
                   <div id="item-{{ forloop.counter0 }}">
-                    {{ item_form.id }}
                     <!--{#{ item_form.as_p }#}-->
                     {% for field in item_form %}
                       {% if field.is_hidden %}
@@ -184,8 +183,7 @@ Create new courslet
                       {% endif %}
                     {% endfor %}
                     {# <!-- or for crispy forms --> {% crispy item_form %} #}
-
-                    <!-- TODO: Add functionality for removing error models -->
+                    {{ item_form.id }}
                     <a href="#" class="error-models-form__remove">Remove error model</a>
                   </div>
                 {% endfor %}
@@ -254,6 +252,13 @@ Create new courslet
         $('html, body').animate({
           scrollTop: $('.error-models-form__items div:last-of-type').offset().top - 84
         }, 800);
+      });
+
+      $('.error-models-form__remove').on('click', function(e) {
+        var me = $(this);
+        me.siblings('input[id*="-DELETE"]').val('on');
+        me.closest('form').submit();
+        e.preventDefault();
       });
     });
   </script>
