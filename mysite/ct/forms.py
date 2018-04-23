@@ -19,12 +19,14 @@ class ResponseForm(forms.ModelForm):
         fields = ['text', 'confidence']
         labels = dict(text=_('Your answer'))
 
+
 class CommentForm(ResponseForm):
     class Meta:
         model = Response
         fields = ['title', 'text', 'confidence']
         labels = dict(text=_('Your question'),
                       confidence=_('How do you feel about this?'))
+
 
 class ReplyForm(ResponseForm):
     class Meta:
@@ -33,11 +35,13 @@ class ReplyForm(ResponseForm):
         labels = dict(text=_('Your reply'),
                       confidence=_('How do you feel about this?'))
 
+
 class ErrorStatusForm(ResponseForm):
     class Meta:
         model = StudentError
         fields = ['status']
         labels = dict(status=_('How well have you overcome this error?'))
+
 
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES,
@@ -55,9 +59,11 @@ class SelfAssessForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Next'))
 
+
 class AssessErrorsForm(forms.Form):
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False, label='Common errors')
+
 
 class ReorderForm(forms.Form):
     newOrder = forms.ChoiceField()
@@ -94,12 +100,14 @@ class NextForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', label, **submitArgs))
 
+
 class LaunchFSMForm(NextForm):
     fsmName = forms.CharField(widget=forms.HiddenInput)
     def __init__(self, fsmName, label, fsmtask='launch',
                  *args, **kwargs):
         super(LaunchFSMForm, self).__init__(label, fsmtask, *args, **kwargs)
         self.fields['fsmName'].initial = fsmName
+
 
 class TaskForm(forms.Form):
     task = forms.CharField(widget=forms.HiddenInput)
@@ -111,6 +119,7 @@ class TaskForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', label))
+
 
 class LessonRoleForm(forms.Form):
     role = forms.ChoiceField(choices=UnitLesson.ROLE_CHOICES,
@@ -133,6 +142,7 @@ class ResponseListForm(forms.Form):
                                            ('-confidence', 'Most confident first'),
                                            ('confidence', 'Least confident first')))
 
+
 class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
@@ -145,8 +155,10 @@ class UnitTitleForm(forms.ModelForm):
         model = Unit
         fields = ['title', 'description', 'img_url', 'small_img_url']
 
+
 class NewUnitTitleForm(UnitTitleForm):
     submitLabel = 'Add'
+
 
 class CourseTitleForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -160,8 +172,10 @@ class CourseTitleForm(forms.ModelForm):
         model = Course
         fields = ['title', 'access', 'description']
 
+
 class NewCourseTitleForm(CourseTitleForm):
     submitLabel = 'Add'
+
 
 class ConceptForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -175,6 +189,7 @@ class ConceptForm(forms.ModelForm):
         model = Concept
         fields = ['title']
 
+
 class NewConceptForm(forms.Form):
     title = forms.CharField()
     description = forms.CharField(widget=forms.Textarea)
@@ -186,8 +201,10 @@ class NewConceptForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
 
+
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
+
 
 class ConceptLinkForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -201,6 +218,7 @@ class ConceptLinkForm(forms.ModelForm):
         model = ConceptLink
         fields = ['relationship']
 
+
 class ConceptGraphForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
@@ -212,6 +230,7 @@ class ConceptGraphForm(forms.ModelForm):
     class Meta:
         model = ConceptGraph
         fields = ['relationship']
+
 
 class NewErrorForm(forms.ModelForm):
     submitLabel = 'Add'
@@ -225,6 +244,7 @@ class NewErrorForm(forms.ModelForm):
         model = Lesson
         fields = ['title', 'text']
 
+
 class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
     changeLog = forms.CharField(required=False,
@@ -232,6 +252,7 @@ class ErrorForm(NewErrorForm):
     class Meta:
         model = Lesson
         fields = ['title', 'text', 'changeLog']
+
 
 class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
@@ -244,11 +265,13 @@ class LessonForm(ErrorForm):
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
+
 class AnswerLessonForm(LessonForm):
     class Meta:
         model = Lesson
         fields = ['title', 'text', 'medium', 'url', 'changeLog']
         labels = dict(medium=_('Delivery medium'))
+
 
 class NewLessonForm(NewErrorForm):
     submitLabel = 'Add'
@@ -260,6 +283,7 @@ class NewLessonForm(NewErrorForm):
             'sub_kind', 'number_max_value', 'number_min_value', 'number_precision',
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+
 
 class ResponseFilterForm(forms.Form):
     selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,

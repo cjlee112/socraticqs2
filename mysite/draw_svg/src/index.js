@@ -4,5 +4,14 @@ import './index.css';
 import DrawApp from './DrawApp';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<DrawApp />, document.getElementById('root'));
+
+document.drawToElement = function (elements, onChange) {
+    Array.from(elements).forEach((e) => {
+        ReactDOM.render(<DrawApp onChange={onChange}/>, e);
+    });
+};
+
+document.drawToElement(document.getElementsByClassName('draw-svg-container'), function(data) {
+    console.log(data);
+});
 registerServiceWorker();
