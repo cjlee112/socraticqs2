@@ -1,4 +1,7 @@
+import base64
+
 import injections
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
