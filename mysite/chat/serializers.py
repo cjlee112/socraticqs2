@@ -150,6 +150,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         """
         incl_msg = []
         sub_kind = None
+        msg = None
         if obj.state is not None:
             msg = obj.message_set.filter(timestamp__isnull=False).last()
             # only last msg will be in available as obj after exiting from the loop.
@@ -169,7 +170,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             'includeSelectedValuesFromMessages': incl_msg,
         }
 
-        if msg.contenttype == 'unitlesson':
+        if msg and msg.contenttype == 'unitlesson':
             if sub_kind == 'numbers':
                 precision = msg.content.lesson.number_precision
 
