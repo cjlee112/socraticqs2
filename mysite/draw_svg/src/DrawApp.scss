@@ -37,6 +37,19 @@
     line-height: 28px;
   }
 
+  input.editor {
+    position: absolute;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 30px;
+    color: transparent;
+    font-weight: 500;
+    padding: 0;
+    letter-spacing: -0.1px;
+    caret-color: red;
+  }
+
   .btn.color-picker-handler {
     padding: 12px;
     margin: 0 12px;

@@ -29,7 +29,6 @@ class DrawApp extends Component {
         this.hidePopups = this.hidePopups.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.toggleEditor = this.toggleEditor.bind(this);
-        console.log(this.props.svg);
     }
 
     componentDidMount() {
@@ -51,6 +50,9 @@ class DrawApp extends Component {
                     break;
                 case 'rect':
                     this.drawRect();
+                    break;
+                case 'text':
+                    this.printText();
                     break;
                 default:
                     this.drawFree();
@@ -232,6 +234,49 @@ class DrawApp extends Component {
         });
     }
 
+    printText() {
+        let figure = this.createFigure('text');
+        figure.attr('style', figure.attr('style') +
+            'font-size: ' + 10 * this.state.width + '; ' +
+            'fill: ' + this.state.color + '; ' +
+            'stroke-width: 1px; '
+        );
+        let figures = this.state.figures;
+        figures.push(figure);
+        this.setState({
+            'figures': figures,
+            'redoFigures': [],
+        });
+        const x = d3.mouse(this.node)[0];
+        const y = d3.mouse(this.node)[1];
+
+        figure.attr('x', x).attr('y', y);
+        let text = figure.text('text...');
+
+        let coords = text.node().getBoundingClientRect();
+        let input = document.createElement('input');
+        input.setAttribute('class', 'editor');
+        input.setAttribute('style', 'top:' + Math.round(coords.top) + 'px; ' +
+            'left: ' + Math.round(coords.left) + 'px; font-size: ' + 6 * this.state.width + 'px');
+        this.node.parentElement.appendChild(input);
+
+        function endPrint(event) {
+            try {
+                this.node.parentElement.removeChild(input);
+            } catch (e) {}
+        }
+        endPrint = endPrint.bind(this);
+
+        input.addEventListener('keyup', (e) => {
+            figure.text(e.target.value);
+            if (e.key === 'Enter') {
+                endPrint(e);
+            }
+        });
+        input.addEventListener('blur', endPrint);
+        setTimeout(function() { input.focus(); }, 50);
+    }
+
     undo(event) {
         event.preventDefault();
         let figures = this.state.figures;
@@ -327,7 +372,7 @@ class DrawApp extends Component {
             case 'z':
                 if (event.ctrlKey || event.metaKey) {
                     if (event.shiftKey) {
-                        this.redo();
+                        this.redo(event);
                     } else {
                         this.undo();
                     }
@@ -369,9 +414,6 @@ class DrawApp extends Component {
                 <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
                     <span className="oi oi-action-redo"/>
                 </button>
-                {/*<button className="btn" onClick={this.save.bind(this)} disabled={this.state.isUploading}>*/}
-                    {/*<span className="oi oi-cloud-upload"/>*/}
-                {/*</button>*/}
 
                 <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
                      onClick={this.toggleShapes.bind(this)}>
@@ -399,6 +441,11 @@ class DrawApp extends Component {
                                 onClick={this.changeBrush}
                                 data-brush="pencil">
                             <span className="oi oi-pencil"/>
+                        </button>
+                        <button className={this.state.brush === 'text' ? 'btn active' : 'btn'}
+                                onClick={this.changeBrush}
+                                data-brush="text">
+                            <span className="oi oi-text"/>
                         </button>
                     </div>
                 </div>

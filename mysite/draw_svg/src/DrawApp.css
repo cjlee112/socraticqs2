@@ -21,6 +21,17 @@
     display: flex;
     font-size: 12px;
     line-height: 28px; }
+  .draw-svg-container input.editor {
+    position: absolute;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 30px;
+    color: transparent;
+    font-weight: 500;
+    padding: 0;
+    letter-spacing: -0.1px;
+    caret-color: red; }
   .draw-svg-container .btn.color-picker-handler {
     padding: 12px;
     margin: 0 12px;
