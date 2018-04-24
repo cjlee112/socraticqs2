@@ -292,7 +292,7 @@ class AnswerLessonForm(LessonForm):
         instance = super(AnswerLessonForm, self).save(commit)
         if self.cleaned_data['attachment_clear']:
             instance.attachment = None
-            instance.save(commit=commit)
+            instance.save()
         return instance
 
     class Meta:
