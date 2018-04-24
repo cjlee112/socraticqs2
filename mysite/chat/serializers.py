@@ -105,17 +105,22 @@ class MessageSerializer(serializers.ModelSerializer):
 
         input_data = {
             'type': obj.get_next_input_type(),
-            'subType': sub_kind,
             'url': obj.get_next_url(),
             'options': obj.get_options(),
             'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
             'includeSelectedValuesFromMessages': incl_msg,
         }
-        if sub_kind == 'numbers':
-            precision = i.content.lesson.number_precision
-            input_data['html'] = '<input type="number" name="{}" step="{}" value="{}">'.format(
-                "text", precision, 0,
-            )
+        if i.contenttype == 'unitlesson':
+            if sub_kind == 'numbers':
+                input_data['html'] = '<input type="number" name="{}" max="{}" min="{}" step="{}" value="{}">'.format(
+                    "text",
+                    i.content.lesson.number_max_value,
+                    i.content.lesson.number_min_value,
+                    i.content.lesson.number_precision,
+                    0,
+                )
+            input_data['subType'] = sub_kind
+
         if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
@@ -145,6 +150,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         """
         incl_msg = []
         sub_kind = None
+        msg = None
         if obj.state is not None:
             msg = obj.message_set.filter(timestamp__isnull=False).last()
             # only last msg will be in available as obj after exiting from the loop.
@@ -158,19 +164,21 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         input_data = {
             # obj - is the last item from loop
             'type': obj.next_point.input_type if obj.next_point else 'custom',
-            'subType': sub_kind,
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
             'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
             'includeSelectedValuesFromMessages': incl_msg,
         }
 
-        if sub_kind == 'numbers':
-            precision = msg.content.lesson.number_precision
+        if msg and msg.contenttype == 'unitlesson':
+            if sub_kind == 'numbers':
+                precision = msg.content.lesson.number_precision
 
-            input_data['html'] = '<input name="{}" type="number" step="{}" value="{}">'.format(
-                "text", precision, 0,
-            )
+                input_data['html'] = '<input name="{}" type="number" step="{}" value="{}">'.format(
+                    "text", precision, 0,
+                )
+            input_data['subType'] = sub_kind
+
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
