@@ -12,13 +12,14 @@ RUN apt-get -y update && apt-get install -y \
     zlib1g-dev \
     phantomjs \
     wget \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install -U -r /requirements.txt
+RUN pip install --ignore-installed -U -r /requirements.txt
 
 ENV PYTHONUNBUFFERED 1
 
