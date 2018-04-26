@@ -21,7 +21,7 @@ function toggleInterest(o, targeturl, csrftoken)
 }
 
 $(document).ready(function(){
-    var elements = $("#div_id_number_max_value,#div_id_number_min_value,#div_id_number_precision");
+    var elements = $("#div_id_number_max_value,#div_id_number_min_value,#div_id_number_precision,#div_id_enable_auto_grading");
     var sub_kind_field = $('#id_sub_kind');
     if (sub_kind_field.val() != 'numbers') {
       elements.hide();

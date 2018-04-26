@@ -4,6 +4,7 @@ import importlib
 
 GRADERS = {}
 
+
 class KnowChildrenMeta(type):
     def __new__(cls, name, bases, dct):
         kls = super(KnowChildrenMeta, cls).__new__(cls, name, bases, dct)
@@ -51,11 +52,4 @@ ignore = ('base_grader.py',)
 for modpath in glob.glob("*/*_grader.py"):
     splitted_path = modpath[:-3].split('/')
     if splitted_path[-1] not in ignore:
-
         mod = importlib.import_module(".".join(splitted_path))
-
-
-
-
-
-

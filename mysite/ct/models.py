@@ -251,9 +251,9 @@ class Lesson(models.Model):
                             default=BASE_EXPLANATION)
     sub_kind = models.CharField(max_length=50, choices=SUB_KIND_CHOICES,blank=True, null=True)
     # lessons with sub kind numbers
+    number_value = models.FloatField(default=0)
     number_max_value = models.FloatField(default=0)
     number_min_value = models.FloatField(default=0)
-    number_precision = models.FloatField(default=0)
     # end numbers
 
     enable_auto_grading = models.BooleanField(default=False)
@@ -560,9 +560,19 @@ class UnitLesson(models.Model):
 
     @property
     def sub_kind(self):
-        if self.kind == UnitLesson.ANSWERS and not self.lesson.sub_kind and self.parent:
-            return self.parent.sub_kind
-        return self.lesson.sub_kind
+        """Initially sub_kind is present only in answers."""
+        sub_kind = None
+        if not self.lesson.sub_kind:
+            if self.kind == 'part':
+                for answer in self.get_answers():
+                    if answer.sub_kind:
+                        sub_kind = answer.sub_kind
+
+            if self.kind == 'answers':
+                sub_kind = self.parent.lesson.sub_kind
+        else:
+            sub_kind = self.lesson.sub_kind
+        return sub_kind
 
     @sub_kind.setter
     def sub_kind(self, val):

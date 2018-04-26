@@ -100,7 +100,7 @@ class MessageSerializer(serializers.ModelSerializer):
                 if i.content.lesson.sub_kind == 'choices':
                     sub_kind = 'choices'
                     incl_msg.append(i.id)
-                if i.content.lesson.sub_kind == 'numbers':
+                if i.content.sub_kind == 'numbers':
                     sub_kind = 'numbers'
 
         input_data = {
@@ -112,11 +112,8 @@ class MessageSerializer(serializers.ModelSerializer):
         }
         if i.contenttype == 'unitlesson':
             if sub_kind == 'numbers':
-                input_data['html'] = '<input type="number" name="{}" max="{}" min="{}" step="{}" value="{}">'.format(
+                input_data['html'] = '<input type="number" name="{}" value="{}">'.format(
                     "text",
-                    i.content.lesson.number_max_value,
-                    i.content.lesson.number_min_value,
-                    i.content.lesson.number_precision,
                     0,
                 )
             input_data['subType'] = sub_kind
@@ -172,10 +169,8 @@ class ChatHistorySerializer(serializers.ModelSerializer):
 
         if msg and msg.contenttype == 'unitlesson':
             if sub_kind == 'numbers':
-                precision = msg.content.lesson.number_precision
-
-                input_data['html'] = '<input name="{}" type="number" step="{}" value="{}">'.format(
-                    "text", precision, 0,
+                input_data['html'] = '<input name="{}" type="number" value="{}">'.format(
+                    "text", 0,
                 )
             input_data['subType'] = sub_kind
 

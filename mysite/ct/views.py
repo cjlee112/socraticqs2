@@ -1236,7 +1236,11 @@ def edit_lesson(request, course_id, unit_id, ul_id):
     if notInstructor:
         titleform = None
     else:  # let instructor edit this lesson
-        titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
+        sub_kind = ul.sub_kind
+        if not ul.sub_kind and ul.parent and ul.parent.sub_kind:
+            sub_kind = ul.parent.sub_kind
+
+        titleform = formClass(instance=ul.lesson, initial=dict(changeLog='', sub_kind=sub_kind))
         if request.method == 'POST':
             if 'unit_to_move' in request.POST:
                 # check that incoming unit_id is acceptable for us - is in Unit queryset
