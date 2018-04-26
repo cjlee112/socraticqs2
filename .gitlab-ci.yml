@@ -9,13 +9,24 @@ services:
 before_script:
 - docker info
 
-build:
+stages:
+  - build
+  - test
+
+job 1:
   stage: build
   script:
-  - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
-  - mv fab_settings.py.example fab_settings.py
-  - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-  - gunzip GeoLiteCity.dat.gz
-  - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
-  - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
-  - docker run gitlab-courselets-ci pytest
+    - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
+    - mv fab_settings.py.example fab_settings.py
+    - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+    - gunzip GeoLiteCity.dat.gz
+    - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
+    - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
+
+job 2:
+  stage: test
+  script: docker run gitlab-courselets-ci make coverage
+
+job 3:
+  stage: test
+  script: docker run gitlab-courselets-ci make quality

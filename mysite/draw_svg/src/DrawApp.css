@@ -5,7 +5,8 @@
     color: black;
     background-color: #fff;
     outline: none;
-    padding: 5px 10px; }
+    padding: 5px 10px;
+    border-radius: 0; }
     .draw-svg-container .btn:disabled {
       color: lightgray; }
     .draw-svg-container .btn:active, .draw-svg-container .btn:focus, .draw-svg-container .btn.active {
@@ -16,9 +17,21 @@
   .draw-svg-container:not([disabled]) svg {
     cursor: url("https://cdn2.iconfinder.com/data/icons/snipicons/500/pencil-128.png") 20 109, auto; }
   .draw-svg-container .actions {
+    position: relative;
     display: flex;
     font-size: 12px;
     line-height: 28px; }
+  .draw-svg-container input.editor {
+    position: absolute;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 30px;
+    color: transparent;
+    font-weight: 500;
+    padding: 0;
+    letter-spacing: -0.1px;
+    caret-color: red; }
   .draw-svg-container .btn.color-picker-handler {
     padding: 12px;
     margin: 0 12px;
