@@ -306,7 +306,8 @@ class Message(models.Model):
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
                     if self.content.attachment:
-                        html += mark_safe('<img src="{}" />'.format(self.content.attachment.url))
+                        # display svg inline
+                        html += mark_safe(''.join(self.content.attachment.file.readlines()))
                 else:
                     CONF_CHOICES = dict(Response.CONF_CHOICES)
                     is_chat_fsm = (
@@ -382,6 +383,10 @@ class Message(models.Model):
                         raw_html = self.content.lesson.text
 
                     html = mark_safe(md2html(raw_html))
+
+                    if self.content.lesson.attachment:
+                        # append svg attachment to the message
+                        html += mark_safe(''.join(self.content.lesson.attachment.file.readlines()))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:

@@ -256,6 +256,8 @@ class Lesson(models.Model):
     _sourceDBdict = {}
     title = models.CharField(max_length=200)
     text = models.TextField(null=True, blank=True)
+    attachment = models.FileField(null=True, blank=True, upload_to='questions')
+
     data = models.TextField(null=True, blank=True)  # JSON DATA
     url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
@@ -318,18 +320,27 @@ class Lesson(models.Model):
         Returns container for drawing
         """
         return """
-            <div id="draw-svg--{0}" class="draw-svg-container" {1}></div>
+            <p>{text}</p>
+            <div id="draw-svg--{id}" class="draw-svg-container" {disabled}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
+                     xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
+                     height="500">
+                    <image xlink:href="{attachment}"></image>
+                </svg>
+            </div>
             <script type="text/javascript">
-                document.drawToElement([document.getElementById('draw-svg--{0}')], {2});                                
+                document.drawToElement([document.getElementById('draw-svg--{id}')], {func});                                
             </script>
         """.format(
-            self.pk,
-            'disabled' if attachment is not None else '',
-            """
+            id=self.pk,
+            text=self.text,
+            disabled='disabled' if attachment is not None else '',
+            func="""
                 function(data) {
                     $('.chat-input').find('.chat-input-custom').find('input').val(data);
                 }
-            """
+            """,
+            attachment=self.attachment.url,
         )
 
     def get_html(self, *args, **kwargs):

@@ -17,8 +17,8 @@ COPY requirements.txt .
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install -U -r /requirements.txt
-RUN pip install -U -r /requirements/prod.txt
+RUN pip install --ignore-installed -U -r /requirements.txt
+RUN pip install --ignore-installed -U -r /requirements/prod.txt
 
 ENV PYTHONUNBUFFERED 1
 
