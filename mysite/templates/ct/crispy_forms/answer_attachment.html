@@ -4,7 +4,7 @@
     <label for="id_attachment">Answer attachment</label>
     {% if unitLesson.parent.lesson.attachment %}
         <div class="draw-svg-preview form-group">
-            <div id="draw-svg" class="draw-svg-container img-thumbnail">
+            <div id="draw-svg" class="draw-svg-container">
                 {% if unitLesson.lesson.attachment %}
                     {{ unitLesson.lesson.attachment.file.readlines.0|safe }}
                 {% else %}

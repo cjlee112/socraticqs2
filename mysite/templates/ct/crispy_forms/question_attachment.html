@@ -5,7 +5,7 @@
     {% crispy_field titleform.attachment %}
 
     {% if titleform.attachment.value %}
-        <label for="id_attachment" class="img-thumbnail">
+        <label for="id_attachment">
             <img src="{{ titleform.attachment.value.url }}" style="min-width: 100px; max-width: 500px;">
         </label>
     {% endif %}
