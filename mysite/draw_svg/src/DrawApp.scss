@@ -100,7 +100,10 @@
     padding: 7px 5px;
     width: 50px;
     height: 35px;
-    margin-top: 1px;
+
+    &.active {
+      margin-top: 1px;
+    }
   }
 
   .shapes-wrapper .btn.active {
