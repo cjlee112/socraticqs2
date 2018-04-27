@@ -22,11 +22,16 @@ job 1:
     - gunzip GeoLiteCity.dat.gz
     - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
     - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
+    - apt-get -y update && apt-get install -y nodejs
 
 job 2:
   stage: test
   script: docker run gitlab-courselets-ci make coverage
 
 job 3:
+  stage: test
+  script: docker run gitlab-courselets-ci bash -c "cd mysite/draw_svg && npm install && CI=true npm run test"
+
+job 4:
   stage: test
   script: docker run gitlab-courselets-ci make quality
