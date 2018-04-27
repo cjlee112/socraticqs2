@@ -471,7 +471,7 @@ class DrawApp extends Component {
 
         let svg = this.props.svg;
         return (
-            <div className="text-center">
+            <div className="img-thumbnail">
                 {actions}
                 <div className="canvas" ref={(node) => {
                     if (node) {
