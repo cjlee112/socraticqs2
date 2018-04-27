@@ -25,6 +25,7 @@ $(document).ready(function(){
     var sub_kind_field = $('#id_sub_kind');
     if (sub_kind_field.val() != 'numbers') {
       elements.hide();
+
     }
 
     sub_kind_field.on('change', function(e){
@@ -33,6 +34,7 @@ $(document).ready(function(){
           elements.show()
         } else {
           elements.hide();
+          $("#id_enable_auto_grading").prop('checked', false);
         }
     })
 })
