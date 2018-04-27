@@ -1084,7 +1084,7 @@ class NumbersTest(CustomTestCase):
 
         self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
 
-        grading_msg = u'Your answer is correct!'
+        grading_msg = u'Your answer is partially correct!'
         self.assertEquals(json_content['addMessages'][1]['html'], grading_msg)
 
         # post answer (2)

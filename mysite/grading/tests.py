@@ -19,6 +19,7 @@ class NumbersGraderTest(TestCase):
     def setUp(self):
         from base_grader import GRADERS
         self.unitLesson = UnitLesson.objects.get(lesson__id=110)
+        self.answer = self.unitLesson.get_answers()[0]
         self.responses = Response.objects.filter(unitLesson=self.unitLesson)
         CorrectnessMeter.objects.all().delete()
         self.GraderCls = GRADERS.get(self.unitLesson.sub_kind)
@@ -26,7 +27,12 @@ class NumbersGraderTest(TestCase):
     def test_correct_numbers_grading(self):
         cor_met_count = CorrectnessMeter.objects.all().count()
 
-        grader = self.GraderCls(self.unitLesson, self.responses[0])
+        # create partially correct answer
+        response = self.responses[0]
+        response.text = 11.0
+        response.save()
+
+        grader = self.GraderCls(self.unitLesson, response)
         self.assertEqual(grader.grade, 1)
         self.assertEqual(grader.is_correct, True)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
@@ -39,7 +45,12 @@ class NumbersGraderTest(TestCase):
     def test_not_correct_numbers_grading(self):
         cor_met_count = CorrectnessMeter.objects.all().count()
 
-        grader = self.GraderCls(self.unitLesson, Response.objects.get(id=196))
+        # create partially correct answer
+        response = self.responses[0]
+        response.text = 1000.0
+        response.save()
+
+        grader = self.GraderCls(self.unitLesson, response)
         self.assertEqual(grader.grade, 0)
         self.assertEqual(grader.is_correct, False)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
@@ -53,8 +64,8 @@ class NumbersGraderTest(TestCase):
         cor_met_count = CorrectnessMeter.objects.all().count()
 
         # create partially correct answer
-        response = Response.objects.get(id=164)
-        response.text = 120
+        response = self.responses[0]
+        response.text = 100.0
         response.save()
 
         grader = self.GraderCls(self.unitLesson, response)

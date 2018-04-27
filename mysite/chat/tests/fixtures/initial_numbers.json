@@ -2928,6 +2928,7 @@
         "enable_auto_grading": false,
         "sub_kind": "numbers",
         "number_min_value": 0.0,
+        "number_value": 1.0,
         "title": "1",
         "access": "public",
         "mergeParent": null,
@@ -2950,12 +2951,13 @@
 },
 {
     "fields": {
-        "number_max_value": 0.0,
+        "number_max_value": 110.0,
         "concept": null,
         "text": "1",
         "enable_auto_grading": false,
         "sub_kind": null,
-        "number_min_value": 0.0,
+        "number_min_value": -110.0,
+        "number_value": 11.0,
         "title": "Answer",
         "access": "public",
         "mergeParent": null,
