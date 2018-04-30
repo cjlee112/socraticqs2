@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load waffle_tags %}
 {#% load dictionary_extras %#}
 
 
@@ -99,9 +100,13 @@
       <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}">Add unit</a>
     </span>
 
+
+    {% switch "add_unit_by_chat" %}
     <span class="glyphicon glyphicon-plus label label-info">
       <a href="{% url 'ctms:add_units_chat' course_pk=sidebar.course.id pk=sidebar.courslet.id %}">Add unit by chat</a>
     </span>
+    {% endswitch %}
+
     {% endif %}
   {% endif %}
 </nav>

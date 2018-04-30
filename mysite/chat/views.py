@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from waffle import switch_is_active
 
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnitFsmHandler
@@ -486,6 +487,8 @@ class ChatAddLessonView(ChatNoJSInit, ChatInitialView):
     template_name = 'chat/add_unit_chat.html'
 
     def get(self, request, enroll_key, **kwargs):
+        if not switch_is_active("add_unit_by_chat"):
+            raise Http404()
         response = super(ChatAddLessonView, self).get(request, enroll_key)
         return response
 
