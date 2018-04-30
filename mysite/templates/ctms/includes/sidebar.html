@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load waffle_tags %}
 
 <aside class="sidebar" id="sidebar">
   <header>
@@ -154,12 +155,14 @@
                 {% endif %}
               </li>
 
-              {% if sidebar.courslet %}
-              <li>
-                <!-- TODO: Add link to add units by chat -->
-                <a href="{% url 'ctms:add_units_chat' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="sidebar__add">Add Units by Chat</a>
-              </li>
-              {% endif %}
+              {% switch "add_unit_by_chat" %}
+                {% if sidebar.courslet %}
+                <li>
+                  <!-- TODO: Add link to add units by chat -->
+                  <a href="{% url 'ctms:add_units_chat' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="sidebar__add">Add Units by Chat</a>
+                </li>
+                {% endif %}
+              {% endswitch %}
             </ul>
           </nav>
         </section>
