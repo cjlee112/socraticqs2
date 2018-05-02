@@ -122,16 +122,18 @@
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/"
                          class="chat-start-session" data-chat-id="{{ chat_sess.id }}">
-                        <!-- <h3>3 days ago</h3>-->
-                        <!--TODO: replace with correct values -->
-                        <h3>{% if chat_sess.last_modify_timestamp%}{{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat_sess.timestamp }}{% endif %}</h3>
+                        <h3>
+                          {% if chat_sess.last_modify_timestamp%}
+                          {{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}
+                          {% else %}{{ chat_sess.timestamp }}
+                          {% endif %}
+                        </h3>
 
                         <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons completed</p>
-                        <!--<p>2 of 5 lessons completed</p>-->
+                        <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
 
                         <div class="unit-links__progress">
                           <span style="width: {% if chat_sess %}{{ chat_sess.progress }}{% else %}0{% endif %}%;"></span>
-                          <span style="width: 40%"></span>
                         </div>
                       </a>
                     </li>
