@@ -34,6 +34,10 @@ class EditUnitForm(forms.ModelForm):
     )
     DEFAULT_UNIT_TYPE =Lesson.EXPLANATION
 
+    def __init__(self, *args, **kwargs):
+        super(EditUnitForm, self).__init__(*args, **kwargs)
+        self.fields['text'].required = True
+
     unit_type = forms.ChoiceField(
         choices=KIND_CHOICES, widget=forms.RadioSelect, initial=Lesson.EXPLANATION,
         help_text='You can create interactive questions (with answers and self-assessment) or passive introductions.'
@@ -50,13 +54,14 @@ class EditUnitForm(forms.ModelForm):
 
 
 class CreateEditUnitForm(EditUnitForm):
+
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'unit_type')
 
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
-    answer = forms.CharField(required=False, widget=forms.Textarea)
+    answer = forms.CharField(required=True, widget=forms.Textarea)
 
     class Meta:
         model = Lesson
@@ -75,6 +80,11 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 
 
 class ErrorModelForm(forms.ModelForm):
+    """ErrorModelForm, validate data in ErrorModelFormset."""
+    def __init__(self, *args, **kwargs):
+        super(ErrorModelForm, self).__init__(*args, **kwargs)
+        self.fields['text'].required = True
+
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'id')

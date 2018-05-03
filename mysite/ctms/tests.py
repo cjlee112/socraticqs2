@@ -143,8 +143,7 @@ class MyTestCase(TestCase):
 
     def get_model_counts(self, **kwargs):
         if isinstance(self.models_to_check, (list, tuple)):
-            return {model: model.objects.filter().count()
-             for model in self.models_to_check}
+            return {model: model.objects.filter().count() for model in self.models_to_check}
         return {self.models_to_check: self.models_to_check.objects.filter().count()}
 
     def validate_model_counts(self, first_counts, second_counts, must_equal=False):
@@ -682,19 +681,23 @@ class EditUnitViewTests(MyTestCase):
     @unpack
     @data(
         (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer'),
     )
-    def test_post_valid_data(self, kind, text, title):
+    def test_post_valid_data(self, kind, text, title, answer=''):
         counts = self.get_model_counts()
         data = {
             'unit_type': kind,
             'text': text,
             'title': title,
+            'answer_form-answer': answer,
         }
         response = self.post_valid_data(data)
         new_counts = self.get_model_counts()
-
-        self.validate_model_counts(counts, new_counts, must_equal=False) #  must not be equal because we added Answer
+        if kind == EditUnitForm.KIND_CHOICES[1][0]:  # ORCT
+            self.validate_model_counts(counts, new_counts, must_equal=False) #  must not be equal because we added Answer
+        else:
+            self.validate_model_counts(counts, new_counts,
+                                       must_equal=True)  # must not be equal because we added Answer
         ul = self.get_test_unitlesson()
         url = reverse('ctms:unit_edit', kwargs={
             'course_pk': self.get_test_course().id,
