@@ -13,7 +13,7 @@ stages:
   - build
   - test
 
-build:
+Build:
   stage: build
   script:
     - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
@@ -23,14 +23,14 @@ build:
     - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
     - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
 
-draw_svg:
+JavaScript tests:
   stage: test
   script: docker run gitlab-courselets-ci bash -c "cd draw_svg && yarn install && CI=true yarn test"
 
-coverage:
+Python tests:
   stage: test
   script: docker run gitlab-courselets-ci make coverage
 
-quality:
+Check code quality:
   stage: test
   script: docker run gitlab-courselets-ci make quality
