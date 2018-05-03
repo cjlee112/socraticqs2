@@ -28,7 +28,15 @@ class DrawApp extends Component {
         this.changeWidth = this.changeWidth.bind(this);
         this.hidePopups = this.hidePopups.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
+
         this.toggleEditor = this.toggleEditor.bind(this);
+
+        this.toggleShapes = this.toggleShapes.bind(this);
+        this.toggleColorPicker = this.toggleColorPicker.bind(this);
+        this.toggleWidths = this.toggleWidths.bind(this);
+
+        this.undo = this.undo.bind(this);
+        this.redo = this.redo.bind(this);
     }
 
     componentDidMount() {
@@ -78,23 +86,23 @@ class DrawApp extends Component {
         window.removeEventListener('keydown', this.onKeyDown);
     }
 
-    changeBrush(event) {
-        event.preventDefault();
-        this.setState({
-            'brush': event.currentTarget.getAttribute('data-brush')
-        })
-    }
-
-    changeWidth(event) {
-        event.preventDefault();
-        this.setState({
-            'width': parseInt(event.currentTarget.getAttribute('data-width'), 10),
-        });
+    isEnabled() {
+        if (this.state.container) {
+            return ['disabled', 'true', '1', ''].indexOf(this.state.container.getAttribute('disabled')) === -1;
+        } else {
+            return false;
+        }
     }
 
     createFigure(type) {
         let svg = d3.select(this.node);
         let figure = svg.append(type);
+        let figures = this.state.figures;
+        figures.push(figure);
+        this.setState({
+            'figures': figures,
+            'redoFigures': [],
+        });
         figure.attr('class', 'figure');
         figure.attr('style',
             'fill: none;' +
@@ -108,12 +116,6 @@ class DrawApp extends Component {
 
     drawTriangle() {
         let figure = this.createFigure('polygon');
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            'figures': figures,
-            'redoFigures': [],
-        });
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
         let radius = 1;
@@ -145,12 +147,6 @@ class DrawApp extends Component {
 
     drawLine() {
         let figure = this.createFigure('line');
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            figures: figures,
-            redoFigures: [],
-        });
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
         figure.attr('x1', x).attr('y1', y);
@@ -165,12 +161,6 @@ class DrawApp extends Component {
 
     drawCircle() {
         let figure = this.createFigure('circle');
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            'figures': figures,
-            'redoFigures': [],
-        });
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
         figure.attr('cx', x).attr('cy', y);
@@ -183,12 +173,6 @@ class DrawApp extends Component {
 
     drawRect() {
         let figure = this.createFigure('rect');
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            'figures': figures,
-            'redoFigures': [],
-        });
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
         figure.attr('x', x).attr('y', y);
@@ -220,12 +204,6 @@ class DrawApp extends Component {
             .y(function (d) {
                 return d[1];
             });
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            'figures': figures,
-            'redoFigures': [],
-        });
         figure.datum().push(d3.mouse(this.node));
         d3.event.on('drag', () => {
             figure.datum().push(d3.mouse(this.node));
@@ -241,12 +219,6 @@ class DrawApp extends Component {
             'fill: ' + this.state.color + '; ' +
             'stroke-width: 1px; '
         );
-        let figures = this.state.figures;
-        figures.push(figure);
-        this.setState({
-            'figures': figures,
-            'redoFigures': [],
-        });
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
 
@@ -263,9 +235,9 @@ class DrawApp extends Component {
         function endPrint(event) {
             try {
                 this.node.parentElement.removeChild(input);
-            } catch (e) {}
+            } catch (e) {
+            }
         }
-        endPrint = endPrint.bind(this);
 
         input.addEventListener('keyup', (e) => {
             figure.text(e.target.value);
@@ -273,12 +245,17 @@ class DrawApp extends Component {
                 endPrint(e);
             }
         });
-        input.addEventListener('blur', endPrint);
-        setTimeout(function() { input.focus(); }, 50);
+        input.addEventListener('blur', endPrint.bind(this));
+        setTimeout(function () {
+            input.focus();
+        }, 50);
     }
 
     undo(event) {
-        event.preventDefault();
+        try {
+            event.preventDefault();
+        } catch (e) {
+        }
         let figures = this.state.figures;
         let redoFigures = this.state.redoFigures;
         if (figures.length) {
@@ -293,7 +270,10 @@ class DrawApp extends Component {
     }
 
     redo(event) {
-        event.preventDefault();
+        try {
+            event.preventDefault();
+        } catch (e) {
+        }
         let figures = this.state.figures;
         let redoFigures = this.state.redoFigures;
         if (redoFigures.length) {
@@ -314,19 +294,25 @@ class DrawApp extends Component {
         }
     }
 
+    changeBrush(event) {
+        event.preventDefault();
+        this.setState({
+            'brush': event.currentTarget.getAttribute('data-brush')
+        })
+    }
+
+    changeWidth(event) {
+        event.preventDefault();
+        this.setState({
+            'width': parseInt(event.currentTarget.getAttribute('data-width'), 10),
+        });
+    }
+
     handleChangeColor(color) {
         this.setState({
             'color': color.hex,
             'showColorPicker': false,
         });
-    }
-
-    isEnabled() {
-        if (this.state.container) {
-            return ['disabled', 'true', '1', ''].indexOf(this.state.container.getAttribute('disabled')) === -1;
-        } else {
-            return false;
-        }
     }
 
     toggleEditor() {
@@ -398,9 +384,7 @@ class DrawApp extends Component {
                     this.setState({
                         'isUploading': false,
                     });
-                    console.log(response);
                 }.bind(this)).catch(function (error) {
-                    console.log(error);
                 })
         );
     }
@@ -408,15 +392,15 @@ class DrawApp extends Component {
     render() {
         let actions = this.isEnabled() ? (
             <div className="border-bottom actions">
-                <button className="btn" onClick={this.undo.bind(this)} disabled={!this.state.figures.length}>
+                <button className="btn" onClick={this.undo} disabled={!this.state.figures.length}>
                     <span className="oi oi-action-undo"/>
                 </button>
-                <button className="btn" onClick={this.redo.bind(this)} disabled={!this.state.redoFigures.length}>
+                <button className="btn" onClick={this.redo} disabled={!this.state.redoFigures.length}>
                     <span className="oi oi-action-redo"/>
                 </button>
 
                 <div className={this.state.showShapes ? 'shapes-wrapper active' : 'shapes-wrapper'}
-                     onClick={this.toggleShapes.bind(this)}>
+                     onClick={this.toggleShapes}>
                     <label>Shape</label>
                     <div className="shapes">
                         <button className={this.state.brush === 'circle' ? 'btn active' : 'btn'}
@@ -449,15 +433,17 @@ class DrawApp extends Component {
                         </button>
                     </div>
                 </div>
-                <label>Color <button type="button" className="btn color-picker-handler"
-                                     style={{backgroundColor: this.state.color}}
-                                     onClick={this.toggleColorPicker.bind(this)}/></label>
-                <div className={this.state.showColorPicker ? 'color-picker' : 'color-picker hidden'}>
-                    <CompactPicker onChange={this.handleChangeColor.bind(this)}/>
+
+                <div className="colors-wrapper" onClick={this.toggleColorPicker}>
+                    <label>Color <button type="button" className="btn color-picker-handler"
+                                         style={{backgroundColor: this.state.color}}/></label>
+                    <div className={this.state.showColorPicker ? 'color-picker' : 'color-picker hidden'}>
+                        <CompactPicker onChange={this.handleChangeColor.bind(this)}/>
+                    </div>
                 </div>
 
                 <div className={this.state.showWidths ? 'widths-wrapper active' : 'widths-wrapper'}
-                     onClick={this.toggleWidths.bind(this)}>
+                     onClick={this.toggleWidths}>
                     <label>Width</label>
                     <div className="widths">
                         <button className={this.state.width === 2 ? 'btn active' : 'btn'}
@@ -485,9 +471,9 @@ class DrawApp extends Component {
 
         let svg = this.props.svg;
         return (
-            <div className="text-center">
+            <div className="img-thumbnail">
                 {actions}
-                <div ref={(node) => {
+                <div className="canvas" ref={(node) => {
                     if (node) {
                         this.node = node.children[0]
                     }

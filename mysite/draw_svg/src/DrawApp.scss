@@ -14,6 +14,10 @@
       color: lightgray;
     }
 
+    &:hover {
+      transform: none;
+    }
+
     &:active,
     &:focus,
     &.active {
@@ -21,6 +25,7 @@
       box-shadow: none;
       background-color: #fff;
       outline: none;
+      transform: none;
     }
   }
 
@@ -48,22 +53,6 @@
     padding: 0;
     letter-spacing: -0.1px;
     caret-color: red;
-  }
-
-  .btn.color-picker-handler {
-    padding: 12px;
-    margin: 0 12px;
-    border: solid 1px #f1f1f1;
-  }
-
-  .color-picker {
-    display: inline-block;
-    position: absolute;
-    top: 40px;
-  }
-
-  .color-picker.hidden {
-    display: none;
   }
 
   .actions {
@@ -110,10 +99,35 @@
     display: none;
     padding: 7px 5px;
     width: 50px;
+    height: 35px;
+
+    &.active {
+      margin-top: 1px;
+    }
   }
 
   .shapes-wrapper .btn.active {
     display: inline-block;
+  }
+
+  .btn.color-picker-handler {
+    padding: 12px;
+    margin: 0 12px;
+    border: solid 1px #f1f1f1;
+  }
+
+  .colors-wrapper {
+
+    .color-picker {
+      display: inline-block;
+      position: absolute;
+      top: 40px;
+      margin-left: -140px;
+
+      &.hidden {
+        display: none;
+      }
+    }
   }
 
   .widths-wrapper {
