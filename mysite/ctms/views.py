@@ -408,7 +408,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         kwargs.update({
             'course': course,
             'courslet': courslet,
-            'responses': self.object.response_set.all(),
+            'responses': self.object.response_set.all().order_by('-atime'),
             'unit': self.get_object()
         })
         kwargs.update(self.kwargs)
