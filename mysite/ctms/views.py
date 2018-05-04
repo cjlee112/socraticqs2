@@ -674,33 +674,39 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
             )
         form = self.get_form()
-
         answer_form = CreateEditUnitAnswerForm(**self.get_answer_form_kwargs())
-
         formset = self.get_formset()
+
+        answer_required = self.request.POST['unit_type'] == Lesson.ORCT_QUESTION
+        if answer_required:
+            answer_form_is_valid = answer_form.is_valid()
+
+        has_error = False
+
         if form.is_valid():
-            if answer_form.is_valid():
-                answer = answer_form.save(self.object.unit, self.request.user, self.object)
-            else:
-                messages.add_message(request, messages.WARNING, "Please correct error in answer")
+            self.form_valid(form)
+            if answer_required:
+                if answer_form_is_valid:
+                    answer_form.save(self.object.unit, self.request.user, self.object)
+                else:
+                    has_error = True
+                    messages.add_message(request, messages.WARNING, "Please correct error in answer")
 
-            response = self.form_valid(form)
-
-            if not self.HANDLE_FORMSET:
-                messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
-                return response
-
-            if self.object.lesson.kind == Lesson.ORCT_QUESTION:
                 if formset.is_valid():
                     messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
-                    return self.formset_valid(formset)
+                    self.formset_valid(formset)
                 else:
-                    return self.formset_invalid(formset, form)
+                    has_error = True
+                    self.formset_invalid(formset)
             else:
                 messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
-                return response
         else:
+            has_error = True
             messages.add_message(request, messages.WARNING, "Please correct errors below")
+
+        if not has_error:
+            return HttpResponseRedirect(self.get_success_url())
+
         context = {
             'course': self.get_course(),
             'courslet': self.get_courslet(),
@@ -714,7 +720,6 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
     def formset_invalid(self, formset, form):
         messages.add_message(self.request, messages.WARNING, "Please correct errors in Error Models section")
-        return self.render_to_response(self.get_context_data(formset=formset, form=form))
 
     def get_answer_form_kwargs(self):
         kwargs = {}
@@ -732,6 +737,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         return kwargs
 
     def formset_valid(self, formset):
+        """Save data to db from formset instance. NOT return any response to user."""
         error_models = []
         ul = self.get_unit_lesson()
         dummy_concept = self.get_or_create_dummy_concept(ul)
@@ -747,7 +753,6 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
             for del_obj in formset.deleted_objects:
                 del_obj.delete()
 
-        return HttpResponseRedirect(self.get_success_url())
 
     def get_or_create_dummy_concept(self, ul):
         if not ul.lesson.concept:
@@ -762,8 +767,8 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         return concept
 
     def form_valid(self, form):
+        """Save data to DB."""
         form.save(commit=True)
-        return HttpResponseRedirect(self.get_success_url())
 
     def get_initial(self):
         init = super(CreateEditUnitView, self).get_initial()
