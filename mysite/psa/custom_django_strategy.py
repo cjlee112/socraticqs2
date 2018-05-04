@@ -31,10 +31,10 @@ class CustomDjangoStrategy(DjangoStrategy):
                 username=username,
                 first_name=kwargs.get('first_name', ''),
                 last_name=kwargs.get('last_name', ''),
+                password=kwargs.get('password')
             )
             data.update(kwargs)
             user = self.storage.user.create_user(**data)
-            user.password = data['password']
             user.save()
             return user
         else:
@@ -51,7 +51,7 @@ class CustomDjangoStrategy(DjangoStrategy):
         code = CustomCode.objects.filter(email=kwargs.get('email')).first()
         if code:
             return {f: getattr(code, f, '') for f in self.data_from_code_fields}
-        return {}
+        return kwargs
 
     def create_user(self, *args, **kwargs):
         if self.has_all_needed_fields(**kwargs):
