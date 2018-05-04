@@ -54,6 +54,10 @@ class SignUpForm(forms.Form):
         return email
 
 
+class CompleteEmailForm(forms.Form):
+    email = forms.EmailField()
+
+
 class EmailLoginForm(forms.Form):
     next = forms.CharField(required=False, widget=forms.HiddenInput())
     u_hash = forms.CharField(widget=forms.HiddenInput(), required=False)
