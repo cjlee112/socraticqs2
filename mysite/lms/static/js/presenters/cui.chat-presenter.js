@@ -202,6 +202,12 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
    */
   this._$loading = $('.chat-loading');
 
+    /**
+     * Equation preview.
+     * @type {*|jQuery|HTMLElement}
+     */
+  this.equationPreview = $('.preview');
+
   // Add event listeners
   this._addEventListeners();
 
@@ -982,15 +988,21 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
   this._inputSubType = input.subType;
 
-  // if (input.subType) {
-  // }
-
+  // Disable equations preview by default.
+  $textarea.find('textarea').off();
   if (input.subType == 'numbers') {
-    // Hide textarea
-    $textarea.hide();
-    $numbers.html($(input.html));
-    // Show numbers input
-    $numbers.show();
+      // Hide textarea
+      $textarea.hide();
+      $numbers.html($(input.html));
+      // Show numbers input
+      $numbers.show();
+  } else if (input.subType == 'equation') {
+    // If subtype is equation - enable preview.
+    $textarea.find('textarea').writemaths({
+        position:'center top',
+        previewPosition: 'center top',
+        of: this.equationPreview
+    });
   } else {
     // Show textarea
     $textarea.show();
@@ -998,7 +1010,6 @@ CUI.ChatPresenter.prototype._setInput = function(input){
     $numbers.hide();
     // Reset textarea size
     $textarea.val('').attr('rows', 1);
-
   }
 
   // Create new input based on type
