@@ -11,9 +11,10 @@ class NumberGrader(BaseGrader):
 
     def __init__(self, unitlesson, response, *args, **kwargs):
         super(NumberGrader, self).__init__(unitlesson, response)
-        self.min_val = self.unitlesson.lesson.number_min_value
-        self.max_val = self.unitlesson.lesson.number_max_value
-        self.precision = self.unitlesson.lesson.number_precision
+        self.min_val = self.first_answer.lesson.number_min_value
+        self.max_val = self.first_answer.lesson.number_max_value
+        self.correct_answer = self.first_answer.lesson.number_value
+        self.response = response
 
     def convert_recieved_value(self, value):
         try:
@@ -22,7 +23,7 @@ class NumberGrader(BaseGrader):
             raise e
 
     def _is_correct(self, value):
-        return self.min_val - self.precision <= value <= self.max_val + self.precision
+        return self.min_val <= value <= self.max_val
 
     def update_correctness_meter(self, value):
         """Update CorrectMeter model for user.
@@ -30,8 +31,10 @@ class NumberGrader(BaseGrader):
         :param correctnes: {correct, partially_correct}, str, all other values are represented as not_correct value.
         :return None
         """
+        # check that value is between min and max
         if self.is_correct:
-            if self.min_val <= value <= self.max_val:
+            # check if value is exactly the same as expected
+            if value == self.correct_answer:
                 correctness = CorrectnessMeter.CORRECT
                 points = CorrectnessMeter.CORRECT_ANSWER_POINTS
             else:

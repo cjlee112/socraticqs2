@@ -204,7 +204,8 @@ class Message(models.Model):
         )
 
     def render_choices(self, choices, checked_choices):
-        """ This method renders choices as like ErrorModels.
+        """This method renders choices as like ErrorModels.
+
         :param choices: choices to render
         :param checked_choices: choices to mark as checked
         """
@@ -212,19 +213,24 @@ class Message(models.Model):
             '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="choices" '
             'data-selectable-value="%d"></div><h3>%s</h3></li>'
         )
-        return '<ul class="chat-select-list">' + reduce(
-            lambda x, y: x+y,
-            starmap(lambda i, x: choices_template % (
-                'chat-selectable-selected' if i in checked_choices else '',
-                i,
-                x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
-                choices
+        choices = list(choices)
+        if choices:
+            choices_html = reduce(
+                lambda x, y: x + y,
+                starmap(
+                    lambda i, x: choices_template % (
+                        'chat-selectable-selected' if i in checked_choices else '',
+                        i,
+                        x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
+                    choices
+                )
             )
-        ) + '</ul>'
+        else:
+            choices_html = '<h1 class="text-center">Lesson is not properly configured!</h1>'
+        return '<ul class="chat-select-list">{}</ul>'.format(choices_html)
 
     def render_my_choices(self):
-        """ Render user's answer choices.
-        """
+        """Render user's answer choices."""
         if '[selected_choices]' in self.content.text:
             selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
             my_choices = []
@@ -352,8 +358,8 @@ class Message(models.Model):
                         )
                         html += self.get_choices()
                 elif (self.content.kind == 'answers' and
-                      self.content.parent.lesson.sub_kind and
-                      self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
+                      self.content.parent.sub_kind and
+                      self.content.parent.sub_kind == Lesson.MULTIPLE_CHOICES
                     ):
                     if not self.response_to_check.selfeval:
                         correct = self.content.parent.lesson.get_correct_choices()
@@ -362,17 +368,13 @@ class Message(models.Model):
                         correct = self.content.parent.lesson.get_correct_choices()
                         html = self.render_choices(correct, [])
                 elif self.content.kind == 'answers' and self.content.parent.lesson.sub_kind == Lesson.NUMBERS:
-                    max_val = self.content.parent.lesson.number_max_value
-                    min_val = self.content.parent.lesson.number_min_value
-                    precision = self.content.parent.lesson.number_precision
                     html = mark_safe(
-                        md2html("Expected value {value}{precision}{max}{min}.".format(
-                            value=self.content.lesson.text,
-                            precision=" with precision {}".format(precision) if precision else "",
-                            max=", maximum {}".format(max_val) if max_val else "",
-                            min=", minimum {}".format(min_val) if min_val else "",
-
-                        ))
+                        md2html(
+                            "Expected value {value}. \n\n{text}".format(
+                                value=self.content.lesson.number_value,
+                                text=self.content.lesson.text
+                            )
+                        )
                     )
                 else:
                     if self.content.lesson.url:

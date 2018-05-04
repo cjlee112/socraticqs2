@@ -233,22 +233,48 @@ class ErrorForm(NewErrorForm):
         model = Lesson
         fields = ['title', 'text', 'changeLog']
 
+
 class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
+
     class Meta:
         model = Lesson
         fields = [
             'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
             'sub_kind',
-            'number_max_value', 'number_min_value', 'number_precision', 'enable_auto_grading'
+            'enable_auto_grading'
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
+
 class AnswerLessonForm(LessonForm):
+    sub_kind = forms.CharField(widget=forms.HiddenInput)
+
     class Meta:
         model = Lesson
-        fields = ['title', 'text', 'medium', 'url', 'changeLog']
+        fields = [
+            'title', 'text',
+            'number_value', 'number_min_value', 'number_max_value',
+            'medium', 'url', 'changeLog',
+        ]
         labels = dict(medium=_('Delivery medium'))
+
+    def clean(self):
+        if self.cleaned_data['sub_kind'] == 'numbers':
+            cleaned_data = super(AnswerLessonForm, self).clean()
+            val, min_v, max_v = (
+                self.cleaned_data['number_value'], self.cleaned_data['number_min_value'],
+                self.cleaned_data['number_max_value']
+            )
+            if not min_v <= val <= max_v:
+                if min_v > max_v:
+                    self.add_error('number_min_value', "Value should be less than max value")
+                    self.add_error('number_max_value', "Value should be more than min value")
+                raise forms.ValidationError(
+                    {'number_value': "Value should be less than max value and more than min value"}
+                )
+        return cleaned_data
+
 
 class NewLessonForm(NewErrorForm):
     submitLabel = 'Add'
@@ -257,9 +283,10 @@ class NewLessonForm(NewErrorForm):
         model = Lesson
         fields = [
             'title', 'kind', 'text', 'medium', 'url',
-            'sub_kind', 'number_max_value', 'number_min_value', 'number_precision',
+            'sub_kind',
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+
 
 class ResponseFilterForm(forms.Form):
     selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
