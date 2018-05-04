@@ -214,7 +214,7 @@ class Message(models.Model):
             'data-selectable-value="%d"></div><h3>%s</h3></li>'
         )
         choices = list(choices)
-        if list(choices):
+        if choices:
             choices_html = reduce(
                 lambda x, y: x + y,
                 starmap(

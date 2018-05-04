@@ -563,12 +563,12 @@ class UnitLesson(models.Model):
         """Initially sub_kind is present only in answers."""
         sub_kind = None
         if not self.lesson.sub_kind:
-            if self.kind == 'part':
-                for answer in self.get_answers():
-                    if answer.sub_kind:
-                        sub_kind = answer.sub_kind
+            if self.kind == self.COMPONENT:
+                answer = self.get_answers().first()
+                if answer and answer.sub_kind:
+                    sub_kind = answer.sub_kind
 
-            if self.kind == 'answers':
+            if self.kind == self.ANSWERS:
                 sub_kind = self.parent.lesson.sub_kind
         else:
             sub_kind = self.lesson.sub_kind
