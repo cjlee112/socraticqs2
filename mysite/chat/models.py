@@ -204,7 +204,8 @@ class Message(models.Model):
         )
 
     def render_choices(self, choices, checked_choices):
-        """ This method renders choices as like ErrorModels.
+        """This method renders choices as like ErrorModels.
+
         :param choices: choices to render
         :param checked_choices: choices to mark as checked
         """
@@ -212,19 +213,24 @@ class Message(models.Model):
             '<li><div class="chat-check chat-selectable %s" data-selectable-attribute="choices" '
             'data-selectable-value="%d"></div><h3>%s</h3></li>'
         )
-        return '<ul class="chat-select-list">' + reduce(
-            lambda x, y: x+y,
-            starmap(lambda i, x: choices_template % (
-                'chat-selectable-selected' if i in checked_choices else '',
-                i,
-                x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
-                choices
+        choices = list(choices)
+        if choices:
+            choices_html = reduce(
+                lambda x, y: x + y,
+                starmap(
+                    lambda i, x: choices_template % (
+                        'chat-selectable-selected' if i in checked_choices else '',
+                        i,
+                        x[2:] if x.startswith(Lesson.NOT_CORRECT_CHOICE) else x[3:]),
+                    choices
+                )
             )
-        ) + '</ul>'
+        else:
+            choices_html = '<h1 class="text-center">Lesson is not properly configured!</h1>'
+        return '<ul class="chat-select-list">{}</ul>'.format(choices_html)
 
     def render_my_choices(self):
-        """ Render user's answer choices.
-        """
+        """Render user's answer choices."""
         if '[selected_choices]' in self.content.text:
             selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
             my_choices = []
@@ -293,7 +299,8 @@ class Message(models.Model):
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
                 if sub_kind and not self.content.selfeval and not self.content.confidence:
-                    if sub_kind == 'choices':
+                    # no confidence and no selfeval
+                    if sub_kind == Lesson.MULTIPLE_CHOICES:
                         html = self.render_my_choices()
                         return html
 
@@ -342,7 +349,7 @@ class Message(models.Model):
                 elif self.input_type == 'options' and self.text: # and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
                 elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
-                    # render unitlesson (question)
+                    # render unitlesson (question) - answer
                     if self.content.kind == 'part':
                         html = mark_safe(
                             md2html(
@@ -351,8 +358,8 @@ class Message(models.Model):
                         )
                         html += self.get_choices()
                 elif (self.content.kind == 'answers' and
-                      self.content.parent.lesson.sub_kind and
-                      self.content.parent.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
+                      self.content.parent.sub_kind and
+                      self.content.parent.sub_kind == Lesson.MULTIPLE_CHOICES
                     ):
                     if not self.response_to_check.selfeval:
                         correct = self.content.parent.lesson.get_correct_choices()
@@ -360,6 +367,15 @@ class Message(models.Model):
                     elif self.response_to_check.selfeval and self.response_to_check.confidence:
                         correct = self.content.parent.lesson.get_correct_choices()
                         html = self.render_choices(correct, [])
+                elif self.content.kind == 'answers' and self.content.parent.lesson.sub_kind == Lesson.NUMBERS:
+                    html = mark_safe(
+                        md2html(
+                            "Expected value {value}. \n\n{text}".format(
+                                value=self.content.lesson.number_value,
+                                text=self.content.lesson.text
+                            )
+                        )
+                    )
                 else:
                     if self.content.lesson.url:
                         raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
@@ -368,7 +384,6 @@ class Message(models.Model):
                         )
                     else:
                         raw_html = self.content.lesson.text
-
                     html = mark_safe(md2html(raw_html))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()

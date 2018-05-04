@@ -976,10 +976,15 @@ class EditLessonTest(TestCase):
             ),
             {'title': 'new lesson title',
              'kind': 'base',
+             'sub_kind': '',
+             'number_max_value': '0',
+             'number_min_value': '0',
+             'number_precision': '0',
              'text': 'new test text',
              'medium': 'reading',
              'url': '/test/url/',
-             'changeLog': 'test changelog'},
+             'changeLog': 'test changelog'
+             },
             follow=True
         )
         self.assertEqual(response.status_code, 200)
@@ -1073,6 +1078,10 @@ class ResolutionsTests(TestCase):
             ),
             {'title': 'new lesson title',
              'kind': 'errmod',
+             'sub_kind': '',
+             'number_max_value': '0',
+             'number_min_value': '0',
+             'number_precision': '0',
              'text': 'new test text',
              'medium': 'reading',
              'url': '/test/url/',
@@ -1652,6 +1661,10 @@ class ConceptLessonsTeacherTest(TestCase):
             'title': 'SomeTitle',
             'text': 'text',
             'kind': 'orct',
+            'sub_kind': '',
+            'number_max_value': '0',
+            'number_min_value': '0',
+            'number_precision': '0',
             'medium': 'reading',
             'url': '/test/url/',
             }

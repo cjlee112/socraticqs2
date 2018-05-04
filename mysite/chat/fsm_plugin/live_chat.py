@@ -44,6 +44,9 @@ def get_lesson_url(self, node, state, request, **kwargs):
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
 
+    if fsmStack.state.unitLesson.lesson.enable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
+        return fsm.get_node('GRADING')
+
     if not fsmStack.next_point.content.selfeval == 'correct':
         return fsm.get_node('ERRORS')
     return fsm.get_node('WAIT_ASK')
@@ -221,6 +224,16 @@ class GET_ASSESS(object):
         )
 
 
+class GRADING(object):
+    get_path = get_lesson_url
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCYLE"])(check_selfassess_and_next_lesson)
+    # node specification data goes here
+    title = 'Grading for student answer'
+    edges = (
+        dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
+    )
+
+
 class ERRORS(object):
     """
     In this stage you assess whether you made any of the common errors for this concept.
@@ -275,6 +288,7 @@ def get_specs():
             WAIT_ASSESS,
             ASSESS,
             GET_ASSESS,
+            GRADING,
             ERRORS,
             GET_ERRORS,
             END

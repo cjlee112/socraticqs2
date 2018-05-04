@@ -158,6 +158,7 @@ INSTALLED_APPS = (
     'psa',
     # Chat UI
     'chat',
+    'grading',
     'rest_framework',
     'accounts',
     'waffle',

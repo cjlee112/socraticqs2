@@ -327,8 +327,6 @@ CUI.ChatPresenter.prototype._postInput = function(input){
       return;
   }
 
-
-
   // Show loading
   this._showLoading();
 
@@ -391,9 +389,13 @@ CUI.ChatPresenter.prototype._postInput = function(input){
 CUI.ChatPresenter.prototype._postText = function(){
   // Create input object
   var input = {};
-
-  // Find text
-  var text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
+  if (this._inputSubType == 'numbers') {
+    var text = this._$inputContainer.find('.chat-input-text').find('input').val();
+  } else {
+    var text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
+    // reset text in textarea
+    this._$inputContainer.find('.chat-input-text').find('textarea').val('');
+  }
   // Add text to input object if set
   input.text = text;
   input.chat_id = this._chatID;
@@ -959,6 +961,10 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
   // Find containers for the various input types
   $text = this._$inputContainer.find('.chat-input-text');
+
+  $textarea = $text.find('.input-text');
+  $numbers = $text.find('.input-number');
+
   $options = this._$inputContainer.find('.chat-input-options');
   $custom = this._$inputContainer.find('.chat-input-custom');
 
@@ -974,10 +980,26 @@ CUI.ChatPresenter.prototype._setInput = function(input){
   });
   this._inputOptions = [];
 
-  // Reset textarea size
-  $text.find('textarea').val('').attr('rows', 1);
-
   this._inputSubType = input.subType;
+
+  // if (input.subType) {
+  // }
+
+  if (input.subType == 'numbers') {
+    // Hide textarea
+    $textarea.hide();
+    $numbers.html($(input.html));
+    // Show numbers input
+    $numbers.show();
+  } else {
+    // Show textarea
+    $textarea.show();
+    // Hide numbers input
+    $numbers.hide();
+    // Reset textarea size
+    $textarea.val('').attr('rows', 1);
+
+  }
 
   // Create new input based on type
   if(input.doWait === true) {
@@ -1107,7 +1129,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
   }, this));
 
   // Text input submit
-  this._$inputContainer.find('#chat-input-text-form').on('submit', $.proxy(function(e){
+  this._$inputContainer.find('.chat-input-text-form').on('submit', $.proxy(function(e){
     e.preventDefault();
 
     // Validate and post text to server
@@ -1116,7 +1138,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Submit form on ctrl-enter but ignore enter
     if(e.which === 13 && e.ctrlKey) {
       e.preventDefault();
-      this._$inputContainer.find('#chat-input-text-form').submit();
+      this._$inputContainer.find('.chat-input-text-form').submit();
     }
     if (e.which === 13) {
         // when user clicks on ENTER - we just put 2 new lines into inputContainer
