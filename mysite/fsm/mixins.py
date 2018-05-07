@@ -19,6 +19,8 @@ from ct.models import (
     ConceptGraph
 )
 from chat.models import Message, ChatDivider, UnitError
+from grading.base_grader import GRADERS
+
 
 WAIT_NODES_REGS = [r"^WAIT_(?!ASSESS$).*$", r"^RECYCLE$"]
 
@@ -311,6 +313,25 @@ class ChatMixin(object):
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
+
+        if self.node_name_is_one_of('GRADING'):
+            GraderClass = GRADERS.get(message.content.unitLesson.lesson.sub_kind)
+            if GraderClass:
+                grader = GraderClass(message.content.unitLesson, message.content)
+                # grade method must be called to actually do the work
+                grader.grade
+                text = 'Your answer is {}!'.format(grader.message)
+            else:
+                text = "No such grader! Grading could not be applied."
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text=text
+            )
+
         if self.node_name_is_one_of('STUDENTERROR'):
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',

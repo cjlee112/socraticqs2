@@ -218,9 +218,18 @@
         <img src="{% static "img/student/avatar-student.jpg" %}" alt="Avatar" class="chat-avatar">
 
         <div class="chat-input">
+
           <div class="chat-input-text">
-            <form id="chat-input-text-form" action="">
-              <textarea rows="1" placeholder="Type your answer here…"></textarea>
+            <form class="chat-input-text-form" action="">
+
+              <div class="input-text">
+                <textarea name="text" rows="1" placeholder="Type your answer here…"></textarea>
+              </div>
+
+              <div class="input-number">
+
+              </div>
+
               <input type="submit" value="Send">
             </form>
           </div>
