@@ -4,6 +4,7 @@ import logging
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
@@ -315,40 +316,24 @@ class Lesson(models.Model):
         """
         return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
 
-    def get_canvas(self, attachment=None, *args, **kwargs):
+    def get_canvas_html(self, attachment=None):
         """
         Returns container for drawing
         """
-        return """
-            <p>{text}</p>
-            <div id="draw-svg--{id}" class="draw-svg-container" {disabled}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
-                     height="500">
-                    <image xlink:href="{attachment}"></image>
-                </svg>
-            </div>
-            <script type="text/javascript">
-                document.drawToElement([document.getElementById('draw-svg--{id}')], {func});                                
-            </script>
-        """.format(
-            id=self.pk,
-            text=self.text,
-            disabled='disabled' if attachment is not None else '',
-            func="""
-                function(data) {
-                    $('.chat-input').find('.chat-input-custom').find('input').val(data);
-                }
-            """,
-            attachment=self.attachment.url,
-        )
+        html = render_to_string('ct/lesson/sub_kind_canvas.html', context={
+            'id': self.pk,
+            'text': self.text,
+            'disabled': attachment is not None,
+            'attachment': self.attachment.url if self.attachment else None,
+        })
+        return html
 
     def get_html(self, *args, **kwargs):
         """
         Returns html by lesson type
         """
         if self.sub_kind == Lesson.CANVAS:
-            return self.get_canvas(*args, **kwargs)
+            return self.get_canvas_html(*args, **kwargs)
         else:
             return None
 
