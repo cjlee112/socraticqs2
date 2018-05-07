@@ -1,12 +1,21 @@
 import mock
+import unittest
+from uuid import uuid4
+from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.test import TestCase, Client
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User, AnonymousUser
+from django.conf import settings
+from django.utils.importlib import import_module
+
 from social.exceptions import (AuthAlreadyAssociated,
                                AuthException,
                                InvalidEmail)
+from accounts.models import Instructor
+from ctms.models import Invite
+from psa.custom_django_storage import CustomCode
 
 from psa.views import (context,
                        validation_sent,
@@ -29,10 +38,16 @@ class ViewsUnitTest(TestCase):
     Functional tests.
     """
     def setUp(self):
+        engine = import_module(settings.SESSION_ENGINE)
+        store = engine.SessionStore()
+        store.save()  # we need to make load() work, or the cookie is worthless
+
         self.factory = RequestFactory()
         self.request = self.factory.get('/login/')
         self.client = Client()
+        self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
         self.client.get('/login/')
+
         self.request.session = self.client.session
         self.request.session['email_validation_address'] = 'test@test.com'
 
@@ -79,6 +94,48 @@ class ViewsUnitTest(TestCase):
         response = self.client.post('/login/', data=credentials, follow=True)
         self.assertRedirects(response, expected_url='/ct/')
         self.assertTemplateUsed(response, template_name='ct/index.html')
+
+    @unittest.skip("skip unless fixed")
+    def test_new_login_with_u_hash_in_session(self):
+        """
+        If user send request with u_hash in post equals to u_hash in session
+        user will be redirected to ctms:shared_courses page
+        """
+        user = User(username='test', email='test@aa.cc')
+        user.set_password('test')
+        user.save()
+        Instructor.objects.create(user=user, institution='sdfsdf')
+        u_hash = uuid4().hex
+        self.client.session['u_hash'] = u_hash
+        self.client.session.save()
+
+        credentials = {
+            'email': 'test@aa.cc',
+            'password': 'test',
+            'u_hash': u_hash
+        }
+        response = self.client.post(reverse('new_login'), data=credentials, follow=True)
+        self.assertRedirects(response, reverse('ctms:shared_courses'))
+
+    @unittest.skip("skip unless fixed")
+    def test_new_login_without_u_hash_in_session(self):
+        """
+        If user send request with u_hash in post equals to u_hash in session
+        user will be redirected to ctms:shared_courses page
+        """
+        user = User(username='test', email='test@aa.cc')
+        user.set_password('test')
+        user.save()
+        Instructor.objects.create(user=user, institution='sdfsdf')
+        self.client = Client()
+
+        credentials = {
+            'email': 'test@aa.cc',
+            'password': 'test',
+        }
+        response = self.client.post(reverse('new_login'), data=credentials, follow=True)
+        self.assertRedirects(response, '/ct/')
+
 
     def test_done(self):
         user = User(username='test_user')
@@ -740,3 +797,114 @@ class EmailAuthTest(TestCase):
         code.objects.filter.return_value = self.first
         self.email_auth.auth_complete()
         self.assertEqual(self.email_auth.data.get('email'), self.test_email)
+
+
+class SignupTest(TestCase):
+    """
+    Tests that psa.views.signup function works correctly
+    """
+    def setUp(self):
+        self.url = reverse('signup')
+        engine = import_module(settings.SESSION_ENGINE)
+        store = engine.SessionStore()
+        store.save()  # we need to make load() work, or the cookie is worthless
+        self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
+
+    
+    def test_signup_logout(self):
+        User.objects.create_user('test_user', 'test@aa.cc', '123')
+        self.client.login(email='test@aa.cc', password='123')
+        response = self.client.get(self.url)
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_signup_with_u_hash_in_session(self):
+        u_hash = uuid4().hex
+        self.client.logout()
+
+        session = self.client.session
+        session.update({'u_hash': u_hash})
+        session.save()
+
+        self.assertEqual(CustomCode.objects.count(), 0)
+        self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(Instructor.objects.count(), 0)
+
+        response = self.client.post(
+            self.url,
+            {
+                'u_hash': u_hash,
+                'email': 'test_email@aa.cc',
+                'email_confirmation': 'test_email@aa.cc',
+                'last_name': 'Bo',
+                'first_name': 'Alex',
+                'institution': 'testInstitute',
+                'password': '123123123'
+            },
+            follow=True
+        )
+        self.assertRedirects(response, reverse('ctms:shared_courses'))
+        self.assertIn('_auth_user_id', self.client.session)
+
+        new_user = User.objects.get(email='test_email@aa.cc')
+
+        self.assertEqual(int(self.client.session['_auth_user_id']), new_user.pk)
+        self.assertEqual(CustomCode.objects.count(), 0)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(Instructor.objects.count(), 1)
+
+    def test_post_signup_form_invalid(self):
+        response = self.client.post(
+            self.url,
+            {
+                'email': 'test_email@aa.cc',
+                'email_confirmation': 'test_email2222@aa.cc',
+                'last_name': 'Bo',
+                'first_name': 'Alex',
+                'institution': '',
+                'password': '123123123'
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+        self.assertIn(u'Confirmation e-mail should be the same as e-mail.',
+                      response.context['form']['email_confirmation'].errors)
+        self.assertIn(u'This field is required.',
+                      response.context['form']['institution'].errors)
+
+    def test_signup_without_u_hash(self):
+        self.assertEqual(CustomCode.objects.count(), 0)
+        self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(Instructor.objects.count(), 0)
+
+        response = self.client.post(
+            self.url,
+            {
+                'email': 'test_email@aa.cc',
+                'email_confirmation': 'test_email@aa.cc',
+                'last_name': 'Bo',
+                'first_name': 'Alex',
+                'institution': 'testInstitute',
+                'password': '123123123'
+            },
+            follow=True
+        )
+
+        self.assertEqual(CustomCode.objects.count(), 1)
+        self.assertEqual(User.objects.count(), 0)
+
+        self.assertIn('resend_user_email', self.client.session)
+        self.assertEqual(self.client.session['resend_user_email'], 'test_email@aa.cc')
+
+        code = CustomCode.objects.all().first()
+        print code
+
+
+
+
+
+
+
+
+
+
+

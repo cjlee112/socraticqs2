@@ -1,0 +1,56 @@
+{% extends "psa_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <div class="auth-card">
+    <header>
+      <h1>Confirm your email</h1>
+      <p>Please click on the link in your welcome email to activate your account.</p>
+    </header>
+
+    <main class="auth-card__content" style="text-align: center; margin: 0 auto;">
+      {% if resend_user_email %}
+      <form action="{% url 'accounts:resend_email_confirmation_link' %}" method="post">
+        {% csrf_token %}
+        <input type="button" class="button button--primary post__data"
+               value="Send link again">
+        <input type="hidden" value="{{ resend_user_email }}" name="email">
+      </form>
+      {% endif %}
+
+      <div class="auth-card__actions">
+        <a href="{% url 'new_login' %}" style="text-align: center; margin: 0 auto; width: 100%;">
+          I've activated my account and want to log in
+        </a>
+      </div>
+    </main>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+{% if resend_user_email %}
+<script>
+  $(".post__data").on('click', function(e) {
+    var form = $(this).closest('form')
+    $.post(
+      form.attr('action'),
+      form.serialize(),
+      function(data){
+        if(data.ok) {
+          alert("We just re-sent confirmation link to email {{ anonym_user_email }}");
+        } else {
+          alert("We were not able to re-sent confirmation link to email {{ anonym_user_email }}. \n" + "Error was:\n" + data.error);
+        }
+      }
+    ).fail(function(data){
+      alert("We were not able to re-sent confirmation link to email {{ anonym_user_email }}");
+    })
+    e.preventDefault();
+  })
+</script>
+{% endif %}
+{% endblock %}

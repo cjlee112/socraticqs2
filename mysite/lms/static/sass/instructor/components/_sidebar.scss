@@ -1,0 +1,221 @@
+.sidebar {
+  display: none;
+  background: $color-dark;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 101;
+  width: 100%;
+  height: 100%;
+  padding-top: 61px;
+  overflow: hidden;
+
+  header {
+    @include clearfix;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    background: #1B172F;
+    border-bottom: 1px solid #2F2B43;
+    height: 61px;
+
+    a {
+      float: left;
+      line-height: 60px;
+      padding: 0 9px;
+      color: #B1B0B9;
+
+      &:hover, &:focus, &:active {
+        color: #B1B0B9;
+        opacity: 0.6;
+      }
+    }
+
+    .sidebar__logo {
+      display: block;
+      padding: 18px 9px 18px 24px;
+
+      img {
+        display: block;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  section {
+    border-top: 1px solid #2F2B43;
+    padding: 17px 24px 18px 24px;
+
+    &:first-of-type {
+      border-top: 0;
+    }
+  }
+
+  h4 {
+    margin: 0;
+    color: #676476;
+  }
+
+  .dropdown-toggle {
+    font-size: 14px;
+    line-height: 24px;
+    color: #B1B0B9;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover, &:active, &:focus {
+      opacity: 0.6;
+    }
+
+    span:first-child {
+      @include ellipsis;
+      display: inline-block;
+      max-width: calc(100% - 66px);
+      vertical-align: middle;
+    }
+
+    .sidebar__arrow {
+      display: inline-block;
+      background: url(../../img/instructor/dropdown-caret.svg) no-repeat left center;
+      width: 6px;
+      height: 3px;
+      vertical-align: middle;
+      margin: 0px 0 0 12px;
+    }
+  }
+}
+
+.sidebar__scroll-container {
+  position: relative;
+  height: calc(100vh - 61px);
+  overflow: hidden;
+}
+
+.sidebar__actions {
+  ul {
+    @include clearfix;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    float: left;
+    margin-left: 12px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
+  a {
+    position: relative;
+    display: block;
+    font-size: 12px;
+    color: #8C8A98;
+
+    &:before {
+      content: '';
+      visibility: hidden;
+      opacity: 0;
+      background: $color-primary;
+      width: 100%;
+      height: 2px;
+      position: absolute;
+      bottom: -19px;
+      left: 0;
+      transition: all 0.2s;
+    }
+
+    &.sidebar__actions__active, &:hover, &:active, &:focus {
+      color: #8C8A98;
+
+      &:before {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+}
+
+.sidebar__units {
+  ul {
+    margin: 0 0 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: block;
+  }
+
+  a {
+    @include ellipsis;
+    position: relative;
+    display: block;
+    color: #B1B0B9;
+    line-height: 30px;
+    padding-left: 22px;
+    padding-right: 48px;
+    margin-left: -24px;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+
+    &:hover, &:active, &:focus, &.sidebar__units__active {
+      color: #B1B0B9;
+      border-left: 2px solid $color-primary;
+    }
+  }
+}
+
+a.sidebar__add {
+  display: block;
+  color: #8C8A98;
+  font-size: 12px;
+  line-height: 30px;
+  padding-left: 54px;
+  background: url(../../img/instructor/sidebar-add.svg) no-repeat 24px center;
+  margin-top: 6px;
+  margin-bottom: -6px;
+  border-left: 0;
+
+  &:hover, &:active, &:focus {
+    border-left: 0;
+    color: #B1B0B9;
+    opacity: 1;
+  }
+}
+
+.sidebar__empty {
+  p {
+    margin: 0;
+    padding-right: 12px;
+    color: #8C8A98;
+  }
+
+  a {
+    display: block;
+    color: #B1B0B9;
+    margin-top: 12px;
+
+    &:hover, &:active, &:focus {
+      color: #B1B0B9;
+      opacity: 0.6;
+    }
+  }
+}
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .sidebar {
+    display: block !important;
+    width: 308px;
+
+    header {
+      width: 308px;
+    }
+  }
+}

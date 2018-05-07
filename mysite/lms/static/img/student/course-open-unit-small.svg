@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>course-open-unit-small</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="4" transform="translate(-371.000000, -1129.000000)" stroke="#43B02A" stroke-width="2">
+            <g id="Courselet" transform="translate(341.000000, 1099.000000)">
+                <g id="course-open-unit-small" transform="translate(30.000000, 30.000000)">
+                    <rect id="Rectangle-293" x="1" y="1" width="48" height="48" rx="24"></rect>
+                    <path d="M24.84718,19.8427981 C25.9671267,18.3308701 27.9486741,18.3341139 29.0662179,19.8427981 L35.4356194,28.4414901 C36.6465967,30.0763095 35.7666013,31.7997661 33.7354505,31.7997661 L20.1779474,31.7997661 C18.1437043,31.7997661 17.2701543,30.0717828 18.4777785,28.4414901 L24.84718,19.8427981 Z" id="Triangle-2" transform="translate(26.957132, 25.254918) rotate(90.000000) translate(-26.957132, -25.254918) "></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

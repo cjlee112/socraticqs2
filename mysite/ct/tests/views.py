@@ -3,18 +3,12 @@ Unit tests for core app views.py.
 """
 import re
 
-from django.test import TestCase
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.core.paginator import Page
-from django.utils import timezone
-
-from mock import Mock, patch
 from ddt import ddt, data, unpack
+from django.core.paginator import Page
+from django.test import TestCase
+from mock import Mock, patch
 
 from ct.views import *
-from ct.models import UnitLesson, Lesson, Unit
 from fsm.fsm_base import FSMStack
 
 

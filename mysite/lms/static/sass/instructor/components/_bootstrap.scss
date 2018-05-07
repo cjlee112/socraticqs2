@@ -1,0 +1,8 @@
+.checkbox, .radio, .checkbox-inline, .radio-inline {
+  margin: 12px 0 0 0;
+  color: $color-text-primary;
+}
+
+.checkbox-inline + .checkbox-inline, .radio-inline + .radio-inline {
+  margin: 12px 0 0 12px;
+}

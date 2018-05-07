@@ -1,0 +1,44 @@
+{% extends 'ctms_base.html' %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>Add Unit</h1>
+  </header>
+
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+  <main class="card__content">
+    <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
+
+      <label for="{{ form.title.auto_id }}">Unit Name</label>
+      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
+      {{ form.title }}
+      {% if form.title.errors %}
+      {{ form.title.errors }}
+      {% endif %}
+
+      {% csrf_token %}
+
+      <input type="submit" value="Save">
+    </form>
+  </main>
+</div>
+{% endblock %}

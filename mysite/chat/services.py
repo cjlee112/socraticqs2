@@ -110,7 +110,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             next_point = chat.state.fsmNode.get_message(chat)
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
-            chat.state.fsmNode = edge.transition(chat, {})
+            chat.state.fsmNode = edge.transition(chat, request)
             chat.state.save()
             next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
         else:
@@ -158,11 +158,18 @@ class LiveChatFsmHandler(FsmHandler):
 
     def start_point(self, unit, chat, request, **kwargs):
         self.push_state(chat, request, self.FMS_name, **kwargs)
-        # import ipdb; ipdb.set_trace()
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
         return chat.next_point
+
+
+class ChatPreviewFsmHandler(FsmHandler):
+    FMS_name = 'courselet_preview'
+
+
+class ChatAddUnitFsmHandler(FsmHandler):
+    FMS_name = 'chat_add_lesson'
 
 
 class TestHandler(GroupMessageMixin, ProgressHandler):

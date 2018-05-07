@@ -1,6 +1,7 @@
-from copy import copy
 import logging
+from copy import copy
 
+from django.core.validators import RegexValidator
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,6 +9,13 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
+
+
+not_only_spaces_validator = RegexValidator(
+    regex=r'^\s+?$',
+    inverse_match=True,
+    message='This field can not consist of only spaces'
+)
 
 def copy_model_instance(inst, **kwargs):
         n_inst = copy(inst)
@@ -243,7 +251,7 @@ class Lesson(models.Model):
         (SOFTWARE, SOFTWARE),
     )
     _sourceDBdict = {}
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, validators=[not_only_spaces_validator])
     text = models.TextField(null=True, blank=True)
     data = models.TextField(null=True, blank=True)  # JSON DATA
     url = models.CharField(max_length=256, null=True, blank=True)
@@ -559,6 +567,10 @@ class UnitLesson(models.Model):
     ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
 
     @property
+    def text(self):
+        return self.lesson.text
+
+    @property
     def sub_kind(self):
         """Initially sub_kind is present only in answers."""
         sub_kind = None
@@ -579,7 +591,6 @@ class UnitLesson(models.Model):
         l = self.lesson
         l.sub_kind = val
         l.save()
-
 
     def __unicode__(self):
         return self.lesson.title
@@ -811,7 +822,11 @@ class Unit(models.Model):
         (LIVE_SESSION, 'Live session'),
         (RESOLUTION, 'Resolutions for an error model'),
     )
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        help_text='Your students will see this, so give your courselet a descriptive name.',
+        validators=[not_only_spaces_validator]
+    )
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)
@@ -983,6 +998,23 @@ STATUS_TABLE_LABELS = (
 )
 
 
+class ResponseManager(models.Manager):
+    '''
+    Manager for Response model which will return by default Response's with field is_test equals to False
+    To get test responses (marked with flag is_test=True) you should use method test_responses,
+    which will return only test responses.
+    '''
+    def get_queryset(self):
+        return super(ResponseManager, self).get_queryset().filter(is_test=False)
+
+    def test_responses(self, **kwargs):
+        '''
+        Return only test responses marked with flag is_test=True
+        :return:
+        '''
+        return super(ResponseManager, self).get_queryset().filter(is_test=True, **kwargs)
+
+
 class Response(models.Model):
     'answer entered by a student in response to a question'
     ORCT_RESPONSE = 'orct'
@@ -1026,6 +1058,7 @@ class Response(models.Model):
     course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
+    is_test = models.BooleanField(default=False)
     sub_kind = models.CharField(max_length=10, choices=SUB_KIND_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
@@ -1040,6 +1073,8 @@ class Response(models.Model):
     needsEval = models.BooleanField(default=False)
     parent = models.ForeignKey('Response', null=True, blank=True)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
+
+    objects = ResponseManager()
 
     def __unicode__(self):
         return 'answer by ' + self.author.username
@@ -1080,7 +1115,7 @@ class Response(models.Model):
                 raise ValueError('no query and no unitLesson?!?')
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
-                    Q(selfeval=selfeval, studenterror__isnull=True, **kwargs))
+                    Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'URL for this response'
@@ -1189,7 +1224,10 @@ class Course(models.Model):
         (INSTRUCTOR_ENROLLED, 'By instructors only'),
         (PRIVATE_ACCESS, 'By author only'),
     )
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200,
+        validators=[not_only_spaces_validator]
+    )
     description = models.TextField()
     access = models.CharField(max_length=10, choices=ACCESS_CHOICES,
                               default=PUBLIC_ACCESS)
@@ -1278,11 +1316,10 @@ class Course(models.Model):
     def get_course_units(self, publishedOnly=True):
         'ordered list of cunits for this course'
         if publishedOnly: # only those already released
-            return  list(self.courseunit_set
-                .filter(releaseTime__isnull=False,
-                        releaseTime__lt=timezone.now()).order_by('order'))
+            return list(
+                self.courseunit_set.filter(releaseTime__isnull=False, releaseTime__lt=timezone.now()).order_by('order'))
         else:
-            return  list(self.courseunit_set.all().order_by('order'))
+            return list(self.courseunit_set.all().order_by('order'))
 
     reorder_course_unit = reorder_exercise
 
@@ -1304,6 +1341,17 @@ class CourseUnit(models.Model):
     releaseTime = models.DateTimeField('time released', null=True, blank=True)
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
+
+    def __unicode__(self):
+        return "Course - {}, Unit - {}".format(self.course.title, self.unit.title)
+
+    def get_responses(self):
+        return Response.objects.filter(
+            unitLesson__unit=self.unit,
+            kind=Response.ORCT_RESPONSE,
+            course=self.course,
+        )
+
 
 class Role(models.Model):
     'membership of a user in a course'

@@ -103,6 +103,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -126,6 +127,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'ct.middleware.MySocialAuthExceptionMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'ctms.middleware.SideBarMiddleware',
 )
 
 ROOT_URLCONF = 'mysite.urls'
@@ -147,6 +149,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
+    'ctms',
     'fsm',
     'analytics',
     # LTI
@@ -176,6 +179,8 @@ INSTALLED_APPS = (
 
     # Raven
     'raven.contrib.django.raven_compat',
+    # bower requirements
+    'djangobower',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -256,7 +261,7 @@ FORCE_EMAIL_VALIDATION = True
 PASSWORDLESS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
-SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/email-sent/'
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/ctms/email_sent/'
 
 SOCIAL_AUTH_STRATEGY = 'psa.custom_django_strategy.CustomDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'psa.custom_django_storage.CustomDjangoStorage'
@@ -420,3 +425,20 @@ CMS_PLACEHOLDER_CONF = {
         'plugins': ['ParentPersonalGuidesPagePlugin']
     }
 }
+
+CTMS_URL_NAMESPACE = 'ctms'
+
+BOWER_COMPONENTS_ROOT = '{}/chat/static/'.format(BASE_DIR)
+BOWER_INSTALLED_APPS = (
+    'MathJax#2.6.1',
+    'bootstrap#3.3.7',
+    'gsap#1.18.5',
+    'handlebars#4.0.5',
+    'html5shiv#3.7.3',
+    'jquery#2.2.4',
+    'placeholders#4.0.1',
+    'respond#1.4.2',
+    'screenfull#3.0.2',
+    'zoom.js#0.0.1',
+    'bootstrap-sidebar',
+)
