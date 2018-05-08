@@ -159,12 +159,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             text = self.request.data.get('text')
 
             if message.lesson_to_answer.sub_kind == Lesson.EQUATION:
-                print text
                 text = text.strip("$")
-                
-
                 text = '.. math:: ' + text
-
             if not message.content_id:
                 resp = StudentResponse(text=text)
                 resp.lesson = message.lesson_to_answer.lesson
