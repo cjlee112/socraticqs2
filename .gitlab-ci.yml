@@ -15,22 +15,35 @@ stages:
 
 Build:
   stage: build
+  tags:
+    - docker
   script:
     - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
     - mv fab_settings.py.example fab_settings.py
     - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
     - gunzip GeoLiteCity.dat.gz
     - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
-    - docker build -f Dockerfile-ci -t gitlab-courselets-ci .
+    - docker build -f Dockerfile-ci -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker push $DOCKER_IMG_NAME:$CI_COMMIT_SHA
 
 JavaScript tests:
   stage: test
-  script: docker run gitlab-courselets-ci bash -c "cd draw_svg && yarn install && CI=true yarn test"
+  tags:
+    - docker
+  script:
+    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA bash -c "cd draw_svg && yarn install && CI=true yarn test"
 
 Python tests:
   stage: test
-  script: docker run gitlab-courselets-ci make coverage
+  tags:
+    - docker
+  script:
+    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
 
 Check code quality:
   stage: test
-  script: docker run gitlab-courselets-ci make quality
+  tags:
+    - docker
+  script:
+    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make quality

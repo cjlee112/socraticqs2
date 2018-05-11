@@ -104,3 +104,13 @@ Quality check
 
 We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.
+
+
+
+GitLab configuration
+-------------
+
+Need to set following secret variables:
+* DOCKER_IMG_NAME
+* DOCKER_PASSWORD
+* DOCKER_USERNAME
