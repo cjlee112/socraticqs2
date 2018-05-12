@@ -102,6 +102,8 @@ class MessageSerializer(serializers.ModelSerializer):
                     incl_msg.append(i.id)
                 if i.content.sub_kind == 'numbers':
                     sub_kind = 'numbers'
+                if i.content.lesson.sub_kind == 'equation':
+                    sub_kind = 'equation'
 
         input_data = {
             'type': obj.get_next_input_type(),
@@ -157,6 +159,8 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                     incl_msg.append(msg.id)
                 if msg.content.lesson.sub_kind == 'numbers':
                     sub_kind = 'numbers'
+                if msg.content.lesson.sub_kind == 'equation':
+                    sub_kind = 'equation'
 
         input_data = {
             # obj - is the last item from loop

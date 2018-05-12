@@ -216,6 +216,7 @@ class Lesson(models.Model):
     SOFTWARE = 'software'
     MULTIPLE_CHOICES = 'choices'
     NUMBERS = 'numbers'
+    EQUATION = 'equation'
     NOT_CORRECT_CHOICE = '()'
     CORRECT_CHOICE = '(*)'
 
@@ -238,6 +239,7 @@ class Lesson(models.Model):
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices Question'),
         (NUMBERS, 'Numbers'),
+        (EQUATION, 'Equation'),
 
     )
     MEDIA_CHOICES = (
@@ -1030,9 +1032,11 @@ class Response(models.Model):
     # new interactions
     MULTIPLE_CHOICES = 'choices'
     NUMBERS = 'numbers'
+    EQUATION = 'equation'
     SUB_KIND_CHOICES = (
         (MULTIPLE_CHOICES, 'Multiple Choices response'),
         (NUMBERS, 'Numbers response'),
+        (EQUATION, 'Equation response'),
     )
 
     CORRECT = 'correct'

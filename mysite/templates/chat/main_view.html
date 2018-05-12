@@ -220,9 +220,12 @@
         <div class="chat-input">
 
           <div class="chat-input-text">
+
             <form class="chat-input-text-form" action="">
 
               <div class="input-text">
+                <div class="preview" style=""></div>
+
                 <textarea name="text" rows="1" placeholder="Type your answer here…"></textarea>
               </div>
 
@@ -265,8 +268,40 @@
     CUI.config.defaultTeacherAvatar = '{{ instructor_icon }}';
   </script>
 
+  <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <script type="text/javascript" src="{% static 'writemaths/demo/rangy-core.js' %}"></script>
+  <script type="text/javascript" src="{% static 'writemaths/demo/textinputs_jquery.js' %}"></script>
+  <script type="text/javascript" src="{% static 'writemaths/writemaths.js' %}"></script>
+
   <!-- Mathjax -->
-  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js">
+    MathJax.Hub.Config({
+      extensions: ['tex2jax.js',"TeX/AMSmath.js","TeX/AMSsymbols.js"],
+      tex2jax: {inlineMath: [["$","$"]]}, //["\\(","\\)"]
+      jax: ["input/TeX","output/HTML-CSS"],
+      displayAlign: "center",
+      displayIndent: "0.1em",
+      showProcessingMessages: false
+    });
+  </script>
+
+  <script language="javascript">
+      // $(document).ready(function() {
+          // $('div.input-text textarea').writemaths({
+          //     position:'center top',
+          //     previewPosition: 'center top',
+          //     of: $('.preview')
+          // });
+      // });
+  </script>
+
+  <style >
+    .preview {
+      position: relative;
+      bottom: 60px;
+    }
+  </style>
 
   <!-- Chat js -->
   <script src="{% static "bower_components/screenfull/src/screenfull.js" %}"></script>
