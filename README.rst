@@ -115,3 +115,11 @@ Here's a list of switches:
 
  * ctms_invite_students - to invite user as a student
  *
+
+GitLab configuration
+-------------
+
+Need to set following secret variables:
+* DOCKER_IMG_NAME
+* DOCKER_PASSWORD
+* DOCKER_USERNAME

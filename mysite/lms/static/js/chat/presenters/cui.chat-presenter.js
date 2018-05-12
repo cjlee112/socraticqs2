@@ -333,6 +333,13 @@ CUI.ChatPresenter.prototype._postInput = function(input){
       return;
   }
 
+  if (this._inputSubType === 'canvas') {
+    var svgContainer = $('.draw-svg-container:last');
+    if(svgContainer.length) {
+        svgContainer[0].dispatchEvent(new CustomEvent('disable-canvas'));
+    }
+  }
+
   // Show loading
   this._showLoading();
 
@@ -368,6 +375,11 @@ CUI.ChatPresenter.prototype._postInput = function(input){
       // Enable input
       this._inputIsEnabled = true;
 
+      // enable canvas
+      if (this._inputSubType === 'canvas') {
+          $('.draw-svg-container:last')[0].dispatchEvent(new CustomEvent('enable-canvas'));
+      }
+
       // Hide spinner
       this._hideLoading();
 
@@ -379,6 +391,10 @@ CUI.ChatPresenter.prototype._postInput = function(input){
   }).fail(function(){
     // Enable input
     this._inputIsEnabled = true;
+    // enable canvas
+    if (this._inputSubType === 'canvas') {
+        $('.draw-svg-container:last')[0].dispatchEvent(new CustomEvent('enable-canvas'));
+    }
 
     // Hide spinner
     this._hideLoading();
@@ -395,12 +411,18 @@ CUI.ChatPresenter.prototype._postInput = function(input){
 CUI.ChatPresenter.prototype._postText = function(){
   // Create input object
   var input = {};
-  if (this._inputSubType == 'numbers') {
-    var text = this._$inputContainer.find('.chat-input-text').find('input').val();
-  } else {
-    var text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
-    // reset text in textarea
-    this._$inputContainer.find('.chat-input-text').find('textarea').val('');
+  var text;
+  switch(this._inputSubType) {
+    case 'numbers':
+      text = this._$inputContainer.find('.chat-input-text').find('input').val();
+      break;
+    case 'canvas':
+      input.attachment = 'data:image/svg+xml;base64,' + btoa(this._$inputContainer.find('.chat-input-custom').find('input').val());
+      text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
+      break;
+    default:
+      text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
+      break;
   }
   // Add text to input object if set
   input.text = text;
@@ -990,26 +1012,34 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
   // Disable equations preview by default.
   $textarea.find('textarea').off();
-  if (input.subType == 'numbers') {
+  switch (input.subType) {
+    case 'numbers':
       // Hide textarea
       $textarea.hide();
       $numbers.html($(input.html));
       // Show numbers input
       $numbers.show();
-  } else if (input.subType == 'equation') {
-    // If subtype is equation - enable preview.
-    $textarea.find('textarea').writemaths({
-        position:'center top',
-        previewPosition: 'center top',
-        of: this.equationPreview
-    });
-  } else {
-    // Show textarea
-    $textarea.show();
-    // Hide numbers input
-    $numbers.hide();
-    // Reset textarea size
-    $textarea.val('').attr('rows', 1);
+      break;
+    case 'canvas':
+      $numbers.hide();
+      $custom.html($(input.html));
+      $custom.show();
+      break;
+    case 'equation'
+      // If subtype is equation - enable preview.
+      $textarea.find('textarea').writemaths({
+          position:'center top',
+          previewPosition: 'center top',
+          of: this.equationPreview
+      });
+    default:
+      // Show textarea
+      $textarea.show();
+      // Hide numbers input
+      $numbers.hide();
+      // Reset textarea size
+      $textarea.val('').attr('rows', 1);
+      break;
   }
 
   // Create new input based on type
@@ -1020,6 +1050,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
    this._runWaitTimer(input);
    return;
   }
+
   if(input.type === 'text'){
    // Set input type
    this._inputType = 'text';
@@ -1053,7 +1084,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
    // Show input
    $options.show();
-  }else if(input.type === 'custom'){
+  } else if(input.type === 'custom'){
    // Set input type
    this._inputType = 'custom';
 
@@ -1069,7 +1100,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
    // Show input
    $custom.show();
-  }else{
+  } else {
    // Throw an error if type is missing or invalid
    throw new Error('CUI.ChatPresenter._setInput(): Invalid input.type');
   }

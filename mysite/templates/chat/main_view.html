@@ -8,6 +8,8 @@
     document.write('<style>main{display:none;}#page-preloader{display:block;}</style>');
   </script>
   <!-- End hide -->
+
+  <link rel="stylesheet" href="{% static 'css/draw_svg.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -324,5 +326,6 @@
   <script src="{% static "js/chat/presenters/cui.sidebar-resource-presenter.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-presenter.js" %}"></script>
   <script src="{% static "js/helpers.js" %}"></script>
-  <script src="{% static "js/chat/chat.js" %}"></script>
+  <script src="{% static "js/chat.js" %}"></script>
+  <script src="{% static 'js/draw_svg.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,30 @@
+{% load crispy_forms_field %}
+
+{% if unitLesson.parent.lesson.sub_kind == 'canvas' %}
+    <label for="id_attachment">Answer attachment</label>
+    {% if unitLesson.parent.lesson.attachment %}
+        <div class="draw-svg-preview form-group">
+            <div id="draw-svg" class="draw-svg-container">
+                {% if unitLesson.lesson.attachment %}
+                    {{ unitLesson.lesson.attachment.file.readlines.0|safe }}
+                {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
+                         xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
+                         height="500">
+                        <image xlink:href="{{ unitLesson.parent.lesson.attachment.url }}"></image>
+                    </svg>
+                {% endif %}
+            </div>
+            <input type="hidden" id="id_attachment" name="attachment"/>
+            <script type="text/javascript">
+                window.onload = function () {
+                    document.drawToElement([document.getElementById('draw-svg')], function (data) {
+                        $('#id_attachment').val('data:image/svg+xml;base64,' + btoa(data));
+                    });
+                }
+            </script>
+        </div>
+    {% else %}
+        Please upload the attachment in the lesson
+    {% endif %}
+{% endif %}

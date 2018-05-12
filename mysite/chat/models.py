@@ -352,6 +352,9 @@ class Message(models.Model):
 
                 if self.input_type == 'text':
                     html = mark_safe(md2html(self.content.text))
+                    if self.content.attachment:
+                        # display svg inline
+                        html += mark_safe(''.join(self.content.attachment.file.readlines()))
                 else:
                     CONF_CHOICES = dict(Response.CONF_CHOICES)
                     is_chat_fsm = (
@@ -397,6 +400,16 @@ class Message(models.Model):
                             )
                         )
                         html += self.get_choices()
+                elif self.content.lesson.sub_kind == Lesson.CANVAS:
+                    # adds canvas to draw svg image
+                    messages = self.chat.message_set.filter(id__gt=self.id)
+                    lesson_kwargs = {}
+                    try:
+                        response = messages[0].content
+                        lesson_kwargs['attachment'] = response.attachment
+                    except (AttributeError, IndexError):
+                        pass
+                    html = self.content.lesson.get_html(**lesson_kwargs)
                 elif (self.content.kind == 'answers' and
                       self.content.parent.sub_kind and
                       self.content.parent.sub_kind == Lesson.MULTIPLE_CHOICES
@@ -425,6 +438,10 @@ class Message(models.Model):
                     else:
                         raw_html = self.content.lesson.text
                     html = mark_safe(md2html(raw_html))
+
+                    if self.content.lesson.attachment:
+                        # append svg attachment to the message
+                        html += mark_safe(''.join(self.content.lesson.attachment.file.readlines()))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:

@@ -1,14 +1,14 @@
-from rest_framework import viewsets
-from rest_framework.views import APIView
+from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response as RestResponse
+from rest_framework.views import APIView
 
-from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
-from ..permissions import IsInstructor
-from ct.models import Response, StudentError, Course, Role
-from analytics.tasks import report
 from analytics.models import CourseReport
+from analytics.tasks import report
+from ct.models import Response, StudentError, Course, Role
+from ..permissions import IsInstructor
+from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
 
 class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -19,7 +19,6 @@ class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsInstructor,)
     queryset = Response.objects.filter(kind='orct', unitLesson__order__isnull=False)
     serializer_class = ResponseSerializer
-
 
     def get_queryset(self):
         course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
@@ -61,8 +60,8 @@ class GenReportView(APIView):
         course = get_object_or_404(Course, id=course_id)
         course_instructors = course.role_set.filter(role=Role.INSTRUCTOR).values_list('user_id', flat=True)
         if (
-            request.user.id not in course_instructors and
-            not course.addedBy == request.user
+                request.user.id not in course_instructors and
+                not course.addedBy == request.user
         ):
             return RestResponse('action is not allowed', status=403)
         report.delay(course_id, request.user.id)
@@ -85,3 +84,15 @@ class CourseReportViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSe
         )
         queryset = super(CourseReportViewSet, self).get_queryset()
         return queryset.filter(course=course)
+
+
+class EchoDataView(APIView):
+    """
+    Echoes request post data
+    """
+
+    def post(self, request, *args, **kwargs):
+        return RestResponse(
+            request.data,
+            status=status.HTTP_200_OK,
+        )

@@ -1233,6 +1233,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
             formClass = LessonForm
     else:
         formClass = ErrorForm
+
     if notInstructor:
         titleform = None
     else:  # let instructor edit this lesson
@@ -1265,7 +1266,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                     ))
             if 'title' in request.POST:
                 lesson = ul.checkout(request.user)
-                titleform = formClass(request.POST, instance=lesson)
+                titleform = formClass(request.POST, request.FILES, instance=lesson)
                 if titleform.is_valid():
                     titleform.save(commit=False)
                     ul.checkin(lesson)

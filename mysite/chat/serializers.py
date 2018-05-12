@@ -1,4 +1,7 @@
+import base64
+
 import injections
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
@@ -104,6 +107,8 @@ class MessageSerializer(serializers.ModelSerializer):
                     sub_kind = 'numbers'
                 if i.content.lesson.sub_kind == 'equation':
                     sub_kind = 'equation'
+                elif i.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
 
         input_data = {
             'type': obj.get_next_input_type(),
@@ -118,6 +123,9 @@ class MessageSerializer(serializers.ModelSerializer):
                     "text",
                     0,
                 )
+            elif sub_kind == 'canvas':
+                input_data['html'] = '<input type="hidden" />'
+
             input_data['subType'] = sub_kind
 
         if not obj.chat.next_point or input_data['doWait']:
@@ -159,8 +167,10 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                     incl_msg.append(msg.id)
                 if msg.content.lesson.sub_kind == 'numbers':
                     sub_kind = 'numbers'
-                if msg.content.lesson.sub_kind == 'equation':
+                elif msg.content.lesson.sub_kind == 'equation':
                     sub_kind = 'equation'
+                elif msg.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
 
         input_data = {
             # obj - is the last item from loop
@@ -176,6 +186,9 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                 input_data['html'] = '<input name="{}" type="number" value="{}">'.format(
                     "text", 0,
                 )
+            elif sub_kind == 'canvas':
+                input_data['html'] = '<input type="hidden" />'
+
             input_data['subType'] = sub_kind
 
         if not obj.next_point or input_data['doWait']:
