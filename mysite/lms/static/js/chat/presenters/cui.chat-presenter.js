@@ -1025,7 +1025,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
       $custom.html($(input.html));
       $custom.show();
       break;
-    case 'equation'
+    case 'equation':
       // If subtype is equation - enable preview.
       $textarea.find('textarea').writemaths({
           position:'center top',

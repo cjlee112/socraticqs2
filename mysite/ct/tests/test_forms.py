@@ -180,7 +180,10 @@ def test_lesson_answer_attachment_form(base64_gif_image, lesson_answer_canvas):
     attachment = 'data:image/gif;base64,{}'.format(base64_gif_image)
     form = AnswerLessonForm(
         instance=lesson_answer_canvas.lesson,
-        data={'attachment': attachment, 'title': 'test_title', 'medium': Lesson.READING}
+        data={'attachment': attachment, 'title': 'test_title', 'text': '',
+        'medium': Lesson.READING, 'sub_kind': 'canvas',
+        'number_value': '0', 'number_min_value': '0', 'number_max_value': '0',
+        'url': '', 'changeLog': ''}
     )
     assert form.is_valid() == True
 

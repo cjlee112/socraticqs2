@@ -262,12 +262,16 @@ class ErrorForm(NewErrorForm):
 class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
 
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper['attachment'].wrap(
+            Field, template='ct/crispy_forms/question_attachment.html')
+
     class Meta:
         model = Lesson
         fields = [
             'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
-            'sub_kind',
-            'enable_auto_grading'
+            'sub_kind', 'attachment', 'enable_auto_grading'
         ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
