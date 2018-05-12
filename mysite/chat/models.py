@@ -360,7 +360,7 @@ class Message(models.Model):
                     try:
                         response = messages[0].content
                         lesson_kwargs['attachment'] = response.attachment
-                    except AttributeError:
+                    except (AttributeError, IndexError):
                         pass
                     html = self.content.lesson.get_html(**lesson_kwargs)
                 elif (self.content.kind == 'answers' and
