@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ct', '0025_auto_20180402_0432'),
+        ('ct', '0024_auto_20180512_1527'),
     ]
 
     operations = [
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='CorrectnessMeter',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('correctness', models.CharField(max_length=25, choices=[(b'correct', b'Correct'), (b'partially_correct', b'Partially correct'), (b'not_correct', b'Not correct')])),
+                ('correctness', models.CharField(max_length=25, choices=[(b'correct', b'correct'), (b'partially_correct', b'partially correct'), (b'not_correct', b'not correct')])),
                 ('points', models.FloatField(default=0)),
                 ('response', models.ForeignKey(to='ct.Response')),
             ],
