@@ -421,7 +421,9 @@ CUI.ChatPresenter.prototype._postText = function(){
       text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
       break;
     default:
+      // reset text in textarea
       text = this._$inputContainer.find('.chat-input-text').find('textarea').val();
+      this._$inputContainer.find('.chat-input-text').find('textarea').val('');
       break;
   }
   // Add text to input object if set

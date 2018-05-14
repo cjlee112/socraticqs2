@@ -718,7 +718,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         context.update(self.kwargs)
         return self.render_to_response(context)
 
-    def formset_invalid(self, formset, form):
+    def formset_invalid(self, formset):
         messages.add_message(self.request, messages.WARNING, "Please correct errors in Error Models section")
 
     def get_answer_form_kwargs(self):

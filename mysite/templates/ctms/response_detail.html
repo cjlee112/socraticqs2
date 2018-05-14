@@ -30,15 +30,13 @@
       </div>
 
       <div class="user-info">
-        <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author.get_full_name }}" class="avatar">
-        <!-- TODO: Answer and datetime is empty? -->
-        <h3>{{ answer.author }}</h3>
-        <p>{{ answer.atime|date }}</p>
+        <img src="{% if object.author.instructor.icon_url %}{{ object.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ object.author.get_full_name }}" class="avatar">
+        <h3>{{ object.author }}</h3>
+        <p>{{ object.atime|date }}</p>
       </div>
 
       <div class="answer__meta">
-        <!-- TODO: Add status here, e.g. still confused -->
-        <b>Status:</b> ?
+        <b>Status:</b> {{ object.get_status_display }}
       </div>
 
       <div class="answer__answer">

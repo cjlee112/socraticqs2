@@ -241,7 +241,8 @@ def social_auth_complete(request, *args, **kwargs):
 
 
 def complete(request, *args, **kwargs):
-    form = SignUpForm(request.POST or request.GET)
+    data_to_use = request.POST or request.GET
+    form = SignUpForm(data_to_use)
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
@@ -257,6 +258,9 @@ def complete(request, *args, **kwargs):
                 Profile.check_tz(request)
                 return redirect('ct:person_profile', user_id=request.user.id)
             return redirect('ct:home')
+    elif 'confirm' in request.POST:
+        resp = social_complete(request, 'email', *args, **kwargs)
+        return resp
     else:
         # add message with transformed form errors
         err_msg = "\n".join([

@@ -50,8 +50,10 @@
               </td>
 
               <td>
-                <!-- TODO: Add status here -->
-                Still confused
+                {% if answer.status != None %}
+                  {{ answer.get_status_display }}
+                {% endif %}
+
               </td>
 
               <td>
