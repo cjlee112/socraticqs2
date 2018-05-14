@@ -21,16 +21,18 @@ function toggleInterest(o, targeturl, csrftoken)
 }
 
 $(document).ready(function(){
+    var GRADEABLE_SUB_KINDS = ['numbers', 'equation'];
+
     var elements = $("#div_id_number_max_value,#div_id_number_min_value,#div_id_number_precision,#div_id_enable_auto_grading");
     var sub_kind_field = $('#id_sub_kind');
-    if (sub_kind_field.val() !== 'numbers') {
+    if ($.inArray($(sub_kind_field).val(), GRADEABLE_SUB_KINDS) == -1 ) {
       elements.hide();
 
     }
 
     sub_kind_field.on('change', function(e){
         //  show and hide numbers related fields
-        if ($(this).val() === 'numbers') {
+        if ($.inArray($(this).val(), GRADEABLE_SUB_KINDS) != -1 ) {
           elements.show();
         } else {
           elements.hide();
