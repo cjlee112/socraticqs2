@@ -69,12 +69,12 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 
     def save(self, unit, user, ul, commit=True):
         self.instance.text = self.cleaned_data['answer']
-        # if self.instance.id:
         self.instance.title = 'Answer'
         self.instance.addedBy = user
         self.instance.kind = Lesson.ANSWER
         self.instance.save_root()
-        ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
+        if not self.instance.id:
+            ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
         lesson = super(CreateEditUnitAnswerForm, self).save(commit)
         return lesson
 
@@ -91,7 +91,9 @@ class ErrorModelForm(forms.ModelForm):
 
     def save(self, questionUL, user, commit=True):
         self.instance.addedBy = user
-        return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
+        if not self.instance.id:
+            return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
+        return super(ErrorModelForm, self).save(commit=commit)
 
 
 class BaseErrorModelFormSet(BaseModelFormSet):

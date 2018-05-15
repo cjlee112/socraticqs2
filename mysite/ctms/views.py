@@ -751,6 +751,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         if formset.deleted_forms:
             formset.save(commit=False)
             for del_obj in formset.deleted_objects:
+                del_obj.unitlesson_set.all().delete()
                 del_obj.delete()
 
 
