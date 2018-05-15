@@ -26,7 +26,7 @@ from .serializers import (
 )
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
-from ct.models import Response as StudentResponse, Lesson, CourseUnit
+from ct.models import Response as StudentResponse, Lesson, CourseUnit, DONE_STATUS
 from ct.models import UnitLesson
 
 
@@ -386,6 +386,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 else:
                     resp.selfeval = opt_data
                     text = resp.get_selfeval_display()
+                    # FIX if response was correct - user will not go to `else` section and response status should be set
+                    if resp.selfeval == StudentResponse.CORRECT:
+                        resp.status = DONE_STATUS
                 message.text = text
                 resp.save()
                 chat.next_point = message
@@ -399,6 +402,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp = message.student_error
                 resp.status = selfeval
                 resp.save()
+                # pass status to main response
+                resp.response.status = selfeval
+                resp.response.save()
                 chat.next_point = message
                 chat.last_modify_timestamp = timezone.now()
                 chat.save()

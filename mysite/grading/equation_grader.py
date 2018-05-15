@@ -10,7 +10,7 @@ class EquationGrader(BaseGrader):
     grading_type = 'equation'
 
     def convert_recieved_value(self, value):
-        return "".join(value.strip().split())
+        return " ".join(value.strip().split())
 
     def _is_correct(self, value):
         return self.convert_recieved_value(self.first_answer.lesson.text) == value
