@@ -1,4 +1,4 @@
-<p>{{ text }}</p>
+<p>{{ text|safe }}</p>
 <div id="draw-svg--{{ id }}" class="draw-svg-container" disabled="{{ disabled|yesno:'1,0' }}">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
          xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"

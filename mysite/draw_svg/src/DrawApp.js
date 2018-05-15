@@ -221,31 +221,33 @@ class DrawApp extends Component {
         );
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
+        const fontSize = 6 * this.state.width;
 
         figure.attr('x', x).attr('y', y);
-        let text = figure.text('text...');
+        figure.text('text...');
 
-        let coords = text.node().getBoundingClientRect();
         let input = document.createElement('input');
         input.setAttribute('class', 'editor');
-        input.setAttribute('style', 'top:' + Math.round(coords.top) + 'px; ' +
-            'left: ' + Math.round(coords.left) + 'px; font-size: ' + 6 * this.state.width + 'px');
-        this.node.parentElement.appendChild(input);
+        input.setAttribute('style', 'top:' + (d3.event.y - fontSize) + 'px; ' +
+            'left: ' + d3.event.x + 'px; font-size: ' + fontSize + 'px');
+
+        let parentElement = this.node.parentElement;
+        parentElement.appendChild(input);
 
         function endPrint(event) {
             try {
-                this.node.parentElement.removeChild(input);
+                parentElement.removeChild(input);
             } catch (e) {
             }
         }
 
         input.addEventListener('keyup', (e) => {
             figure.text(e.target.value);
-            if (e.key === 'Enter') {
+            if (e.key.toLowerCase() === 'enter') {
                 endPrint(e);
             }
         });
-        input.addEventListener('blur', endPrint.bind(this));
+        input.addEventListener('blur', endPrint);
         setTimeout(function () {
             input.focus();
         }, 50);
