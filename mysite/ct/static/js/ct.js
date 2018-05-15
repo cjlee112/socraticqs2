@@ -22,19 +22,22 @@ function toggleInterest(o, targeturl, csrftoken)
 
 $(document).ready(function(){
     var elements = $("#div_id_number_max_value,#div_id_number_min_value,#div_id_number_precision,#div_id_enable_auto_grading");
+    var attachmentContainer = $('.draw-svg-preview');
     var sub_kind_field = $('#id_sub_kind');
-    if (sub_kind_field.val() !== 'numbers') {
-      elements.hide();
 
-    }
-
-    sub_kind_field.on('change', function(e){
-        //  show and hide numbers related fields
-        if ($(this).val() === 'numbers') {
-          elements.show();
-        } else {
-          elements.hide();
-          $("#id_enable_auto_grading").prop('checked', false);
+    sub_kind_field.on('change', function(e) {
+        $(elements).hide();
+        $(attachmentContainer).hide();
+        switch ($(this).val()) {
+            case 'numbers':
+                elements.show();
+                break;
+            case 'canvas':
+                attachmentContainer.show();
+                break;
+            default:
+                $('#id_enable_auto_grading').prop('checked', false);
+                break;
         }
-    })
+    }).change();
 });
