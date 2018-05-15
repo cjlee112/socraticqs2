@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_complete
 from social_django.utils import psa
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME
+from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME, authenticate
 
 from social_core.backends.utils import load_backends
 from social_django.views import _do_login
@@ -117,10 +117,9 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     if u_hash and u_hash == u_hash_sess:
         # if invited tester join course - create user immediately without confirmation email.
         data = request.POST.dict().copy()
-        pw = make_password(request.POST.get('password'))
-        data['password'] = pw
         user = request.backend.strategy.create_user(**data)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
+        user = authenticate(username=user.username, password=data.get('password'))
         login(request, user)
         request.session['u_hash'] = u_hash
 
@@ -149,9 +148,8 @@ def signup(request, next_page=None):
     """
     This function handles custom login to integrate social auth and default login.
     """
-    u_hash =request.POST.get('u_hash')
+    u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-
     logout(request)
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session

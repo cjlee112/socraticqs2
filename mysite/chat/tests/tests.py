@@ -150,7 +150,6 @@ class MainChatViewTests(CustomTestCase):
             ),
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        # import ipdb; ipdb.set_trace()
         json_content = json.loads(response.content)
         chat_id = json_content['id']
 

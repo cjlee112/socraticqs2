@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
@@ -7,7 +7,7 @@ from ctms.views import (
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
     ReorderUnits, Onboarding)
 
-urlpatterns = (
+urlpatterns = [
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
 
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
@@ -94,4 +94,4 @@ urlpatterns = (
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),
-)
+]

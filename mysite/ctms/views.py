@@ -744,8 +744,6 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         return kw
 
 
-
-
 class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
     model = Lesson
     form_class = CreateEditUnitForm
@@ -1029,7 +1027,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return response
 
 
-class JoinCourseView(CourseCoursletUnitMixin, View): # NewLoginRequiredMixin
+class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
     NEED_INSTRUCTOR = False
 
     def get(self, *args, **kwargs):

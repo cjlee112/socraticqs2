@@ -88,7 +88,7 @@ def lesson_question(user, concept):
 
 @pytest.fixture(scope='session')
 def temp_image():
-    temp = NamedTemporaryFile(suffix=".jpeg")
+    temp = NamedTemporaryFile(suffix='.jpeg', dir='media')
     temp.file.write(base64_gif_image())
     return File(temp)
 

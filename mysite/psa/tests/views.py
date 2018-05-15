@@ -826,7 +826,7 @@ class SignupTest(TestCase):
         self.url = reverse('signup')
         engine = import_module(settings.SESSION_ENGINE)
         store = engine.SessionStore()
-        store.save()  # we need to make load() work, or the cookie is worthless
+        store.create()  # we need to make load() work, or the cookie is worthless
         self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
 
     def test_signup_logout(self):
@@ -946,7 +946,6 @@ class LogoutTest(TestCase):
         response = self.client.get(reverse('logout'), follow=True)
         self.assertRedirects(response, reverse('login'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')
-
 
     def test_new_logout(self):
         response = self.client.get(reverse('new_logout'), follow=True)

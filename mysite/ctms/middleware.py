@@ -32,9 +32,21 @@ class SideBarUtils(object):
     '''
     Utils class.
     '''
-    def __init__(self):
+    def __init__(self, get_response):
         # before using this mixin we have to attach request to mixin's instance
         self.course_mixin = CourseCoursletUnitMixin()
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        response = self.get_response(request)
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
 
     def _get_model_ids(self, kwargs):
         '''

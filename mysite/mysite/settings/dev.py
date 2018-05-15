@@ -1,8 +1,11 @@
 # coding: utf-8
+import os
+import sys
+
 from base import *
 
+
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 
 # this key is only used for dev localhost testing, not for production
@@ -21,7 +24,7 @@ debug_toolbar_enabled = False
 try:
     import debug_toolbar
     INSTALLED_APPS_LOCAL += ('debug_toolbar',)
-    MIDDLEWARE_LOCAL = (
+    MIDDLEWARE_LOCAL += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
 
@@ -44,11 +47,11 @@ except ImportError:
     pass
 
 INSTALLED_APPS += INSTALLED_APPS_LOCAL
-MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + MIDDLEWARE_LOCAL
 INTERNAL_IPS = (
     '127.0.0.1',  # local development
     '172.18.0.1',  # in docker development
 )
+MIDDLEWARE += MIDDLEWARE_LOCAL
 
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -60,11 +63,39 @@ NOSE_ARGS = [
     '--cover-inclusive',
 ]
 
-GOOGLE_ANALYTICS_CODE = ""
+SOCIAL_AUTH_TWITTER_KEY = ''
+SOCIAL_AUTH_TWITTER_SECRET = ''
+
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = ''
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = ''
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+
+SOCIAL_AUTH_KHANACADEMY_OAUTH1_KEY = ''
+SOCIAL_AUTH_KHANACADEMY_OAUTH1_SECRET = ''
+
+# When we will use email auth we need to define SMTP settings
+EMAIL_USE_TLS = True
+EMAIL_HOST = ''
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+EMAIL_FROM = ''
+
+GOOGLE_ANALYTICS_CODE = ''
+
+
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
 
 try:
     from local import *
 except ImportError:
     print '''You must provide a settings/local.py file,
     e.g. by copying the provided local_example.py'''
-    raise
+    pass

@@ -927,7 +927,6 @@ class CoursletSettingsViewTests(MyTestCase):
         (False, {'title': ''})
     )
     def test_post_data(self, is_valid, post_data):
-        # import ipdb; ipdb.set_trace()
         counts = self.get_model_counts()
         response = self.client.post(self.url, post_data, follow=False)
         new_counts = self.get_model_counts()

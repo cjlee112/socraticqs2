@@ -1,9 +1,9 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 from ct.views import *
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', main_page, name='home'),
     url(r'^about/$', about, name='about'),
     url(r'^people/(?P<user_id>\d+)/$', person_profile, name='person_profile'),
@@ -146,4 +146,4 @@ urlpatterns = patterns('',
     url(r'^courses/$', courses, name='courses'),
     # Subscribe to course with particular id
     url(r'^courses/(?P<course_id>\d+)/subscribe/$', courses_subscribe, name='subscribe'),
-)
+]

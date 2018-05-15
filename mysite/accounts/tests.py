@@ -3,9 +3,9 @@ from ddt import ddt, unpack, data
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
-from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
 
-from accounts.models import Instructor, Profile
+from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
+from accounts.models import Instructor
 from core.common.mongo import c_onboarding_status
 from psa.custom_django_storage import CustomCode
 
@@ -66,14 +66,16 @@ class AccountSettingsTests(TestCase):
 
     def test_post_valid_password_create(self):
         # make user password UNUSABLE
-        self.user.password = '!' + self.user.password
+        self.user.set_unusable_password()
         self.user.save()
-        response = self.client.get(self.url)
-        self.assertEqual(type(response.context['password_form']), CreatePasswordForm)
+        self.client.force_login(self.user, backend='django.contrib.auth.backends.ModelBackend')
+        response = self.client.get(self.url, follow=True)
+        self.assertIsInstance(response.context['password_form'], CreatePasswordForm)
 
         data = {'confirm_password': '1234', 'password': '1234', 'form_id': 'password_form'}
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, self.url)
+
         can_login = self.client.login(username='username', password='1234')
         self.assertTrue(can_login)
 
@@ -255,6 +257,3 @@ class ProfileUpdateTests(TestCase):
         }, follow=True)
         self.assertRedirects(response, reverse('ctms:create_course'))
         self.assertEqual(self.get_user().instructor.institution, inst_name)
-
-
-

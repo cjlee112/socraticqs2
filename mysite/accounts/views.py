@@ -1,16 +1,16 @@
 from functools import partial
-from django.contrib import messages
 
-from django.contrib.auth import logout
+from django.contrib import messages
+from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import password_reset, password_reset_done
-from django.http.response import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
+from django.http.response import HttpResponseRedirect, Http404
+from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import View, CreateView
-from django.core.urlresolvers import reverse
+from django.views.generic import CreateView
 from django.views.generic.base import TemplateView
 from django.conf import settings
 
@@ -20,11 +20,11 @@ from accounts.forms import (
     CreatePasswordForm)
 from accounts.models import Instructor
 from ctms.views import json_response
-from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
-from .forms import SocialForm
+from mysite.mixins import NotAnonymousRequiredMixin
 from psa.custom_backends import EmailAuth
 from psa.custom_django_storage import CustomDjangoStorage, CustomCode
 from psa.custom_django_strategy import CustomDjangoStrategy
+from .forms import SocialForm
 
 
 class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
@@ -89,6 +89,9 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                     if form_id == 'email_form':
                         do_email_saving = True
                         email_save = save
+                    elif form_id == 'password_form':
+                        save()
+                        update_session_auth_hash(request, request.user)
                     else:
                         save()
                 elif changed_data:
@@ -103,7 +106,6 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
         else:
-
             msg = u"Please correct errors below: <br> {}".format(u"<br>".join(non_field_errors_list))
             messages.add_message(request, messages.WARNING, mark_safe(msg))
         return self.render_to_response(
