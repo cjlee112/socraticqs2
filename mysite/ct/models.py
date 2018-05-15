@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
-
+from ct.templatetags.ct_extras import md2html
 
 not_only_spaces_validator = RegexValidator(
     regex=r'^\s+?$',
@@ -334,7 +334,7 @@ class Lesson(models.Model):
         """
         html = render_to_string('ct/lesson/sub_kind_canvas.html', context={
             'id': self.pk,
-            'text': self.text,
+            'text': md2html(self.text),
             'disabled': attachment is not None,
             'attachment': self.attachment.url if self.attachment else None,
         })

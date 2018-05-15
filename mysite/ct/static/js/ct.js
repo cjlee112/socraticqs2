@@ -21,28 +21,31 @@ function toggleInterest(o, targeturl, csrftoken)
 }
 
 $(document).ready(function(){
-    var GRADEABLE_SUB_KINDS = ['numbers', 'equation'];
-
     var number_elements = $("#div_id_number_max_value,#div_id_number_min_value,#div_id_number_value");
     var grading_elements = $("#div_id_enable_auto_grading");
+
+    var attachmentContainer = $('.draw-svg-preview,#div_id_attachment_clear');
     var sub_kind_field = $('#id_sub_kind');
 
-    if (sub_kind_field.val() !== 'numbers') {
-      number_elements.hide();
-    }
-
-
-    if ($.inArray(sub_kind_field.val(), GRADEABLE_SUB_KINDS) == -1 ) {
-        grading_elements.hide();
-    }
-
-    sub_kind_field.on('change', function(e){
-        //  show and hide numbers related fields
-        if ($.inArray($(this).val(), GRADEABLE_SUB_KINDS) != -1 ) {
-          grading_elements.show();
-        } else {
-          grading_elements.hide();
-          $("#id_enable_auto_grading").prop('checked', false);
+    sub_kind_field.on('change', function() {
+        $(grading_elements).hide();
+        $(number_elements).hide();
+        $(attachmentContainer).hide();
+        switch ($(this).val()) {
+            case 'numbers':
+                number_elements.show();
+                grading_elements.show();
+                break;
+            // gradings
+            case 'equation':
+                grading_elements.show();
+                break;
+            case 'canvas':
+                attachmentContainer.show();
+                break;
+            default:
+                $('#id_enable_auto_grading').prop('checked', false);
+                break;
         }
-    })
+    }).change();
 });

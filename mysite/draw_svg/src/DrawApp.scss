@@ -56,14 +56,21 @@
   }
 
   .actions {
+    position: relative;
     padding: 3px 0;
     justify-content: center;
+    z-index: 1000;
   }
 
   .actions label {
     margin: 0;
     cursor: pointer;
     line-height: 35px;
+  }
+
+  .canvas {
+    position: relative;
+    z-index: 999;
   }
 
   .shapes-wrapper {
@@ -93,6 +100,7 @@
 
   .shapes-wrapper.active .shapes {
     box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px;
+    background-color: #fff;
   }
 
   .shapes-wrapper .btn {
