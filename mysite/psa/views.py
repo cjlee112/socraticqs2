@@ -19,7 +19,7 @@ from social.backends.utils import load_backends
 from social.apps.django_app.views import _do_login
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
-from accounts.models import Profile
+from accounts.models import Profile, Instructor
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
@@ -247,6 +247,7 @@ def complete(request, *args, **kwargs):
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
             if request.user.is_authenticated():
+                Instructor.objects.get_or_create(user=request.user)
                 Profile.check_tz(request)
             return resp
         except AuthMissingParameter:
