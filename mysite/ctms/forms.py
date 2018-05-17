@@ -68,12 +68,13 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
         fields = ('answer', )
 
     def save(self, unit, user, ul, commit=True):
+        should_create_ul = not self.instance.id
         self.instance.text = self.cleaned_data['answer']
         self.instance.title = 'Answer'
         self.instance.addedBy = user
         self.instance.kind = Lesson.ANSWER
         self.instance.save_root()
-        if not self.instance.id:
+        if should_create_ul:
             ul = UnitLesson.create_from_lesson(self.instance, unit, kind=UnitLesson.ANSWERS, parent=ul)
         lesson = super(CreateEditUnitAnswerForm, self).save(commit)
         return lesson
@@ -85,25 +86,39 @@ class ErrorModelForm(forms.ModelForm):
         super(ErrorModelForm, self).__init__(*args, **kwargs)
         self.fields['text'].required = True
 
+        instance = kwargs.get('instance')
+        if instance:
+            self.fields['ul_id'] = forms.IntegerField(initial=instance.ul_id, widget=forms.HiddenInput())
+
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'id')
 
     def save(self, questionUL, user, commit=True):
         self.instance.addedBy = user
-        if not self.instance.id:
+        if commit and not self.instance.id:
             return self.instance.save_as_error_model(questionUL.lesson.concept, questionUL)
         return super(ErrorModelForm, self).save(commit=commit)
 
 
 class BaseErrorModelFormSet(BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        self.lesson_ul_ids = {}
+        if kwargs.get('queryset'):
+            # hack to pass original quryset instances with attached ul_id to each form
+            self._queryset = kwargs.get('queryset')
+            # map lesson id to unitLesson id
+            self.lesson_ul_ids = {i.id: i.ul_id for i in self._queryset}
+        super(BaseErrorModelFormSet, self).__init__(*args, **kwargs)
+
     def add_fields(self, form, index):
         super(BaseErrorModelFormSet, self).add_fields(form, index)
         form.fields[DELETION_FIELD_NAME].widget = forms.HiddenInput()
 
 
 ErrorModelFormSet = modelformset_factory(
-    Lesson, form=ErrorModelForm, fields=('id', 'title', 'text'), extra=0, can_delete=True, formset=BaseErrorModelFormSet
+    Lesson, form=ErrorModelForm, formset=BaseErrorModelFormSet, fields=('id', 'title', 'text'),
+    extra=0, can_delete=True,
 )
 
 

@@ -1,3 +1,5 @@
+from unittest import skip
+
 from ddt import ddt, data, unpack
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -92,16 +94,20 @@ class MyTestCase(TestCase):
 
     def post_valid_data(self, data={'name': 'some test name'}, method='post'):
         client_method = self.get_client_method(method)
+        copied_data = {}
         if getattr(self, 'default_data', False):
-            data.update(self.default_data)
-        response = client_method(self.url, data, follow=True)
+            copied_data.update(self.default_data)
+            copied_data.update(data)
+        response = client_method(self.url, copied_data, follow=True)
         return response
 
     def post_invalid_data(self, data={'name': ''}, method='post'):
         client_method = self.get_client_method(method)
+        copied_data = {}
         if getattr(self, 'default_data', False):
-            data.update(self.default_data)
-        response = client_method(self.url, data, follow=True)
+            copied_data.update(self.default_data)
+            copied_data.update(data)
+        response = client_method(self.url, copied_data, follow=True)
         return response
 
     def get_my_courses(self):
@@ -510,6 +516,7 @@ class CoursletViewTests(MyTestCase):
 class CreateCoursletViewTests(MyTestCase):
     def setUp(self):
         super(CreateCoursletViewTests, self).setUp()
+        self.default_data = {}
         self.url = reverse(
             'ctms:courslet_create', kwargs={
                 'course_pk': self.course.id,
@@ -520,7 +527,7 @@ class CreateCoursletViewTests(MyTestCase):
             course=self.course
         ).count()
         data = {'title': 'Some new Courslet'}
-        response = self.post_valid_data(data)
+        response = self.client.post(self.url, data, follow=False)
         new_unit = CourseUnit.objects.filter(
             course=self.course
         ).count()
@@ -532,7 +539,6 @@ class CreateCoursletViewTests(MyTestCase):
                 'pk': CourseUnit.objects.all().last().id
             }
         ))
-
 
     def test_post_invalid_data(self):
         courslets_in_course = Unit.objects.filter(
@@ -692,7 +698,13 @@ class EditUnitViewTests(MyTestCase):
             'answer_form-answer': answer,
         }
         response = self.post_valid_data(data)
+
+        self.assertEquals(response.context['form'].errors, {})
+        self.assertEquals(response.context['answer_form'].errors, {})
+        self.assertEquals(response.context['errors_formset'].errors, [])
+
         new_counts = self.get_model_counts()
+
         if kind == EditUnitForm.KIND_CHOICES[1][0]:  # ORCT
             self.validate_model_counts(counts, new_counts, must_equal=False) #  must not be equal because we added Answer
         else:
@@ -715,6 +727,8 @@ class EditUnitViewTests(MyTestCase):
         # (EditUnitForm.KIND_CHOICES[0][0], ''),  # valid kind, empty text
         ('', 'Some New ORCT text is here...', 'Some titile'),  # not valid kind, valid text
         (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', ''),  # valid kind, not valid title
+        (EditUnitForm.KIND_CHOICES[0][0], '', 'Some text'),  # valid kind, not valid title
+        (EditUnitForm.KIND_CHOICES[0][0], '', ''),  # valid kind, not valid title and text
     )
     def test_post_invalid_data(self, kind, text, title):
         counts = self.get_model_counts()
@@ -729,6 +743,114 @@ class EditUnitViewTests(MyTestCase):
         self.assertNotEqual(self.get_test_unitlesson().lesson.kind, kind)
         # self.assertEqual(self.get_test_unitlesson().unit.text, text)
         self.check_context_keys(response)
+
+    @unpack
+    @data(
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'Text', 'EM title', 'EM text'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer',
+         'EM title', 'EM text'),
+    )
+    def test_create_error_model(self, kind, title, text, answer, em_title, em_text):
+        counts = self.get_model_counts()
+        data = self.default_data.copy()
+        data['form-0-title'] = em_title
+        data['form-0-text'] = em_text
+        data.update(
+            {
+                'form-TOTAL_FORMS': 1,
+                'unit_type': kind,
+                'text': text,
+                'title': title,
+                'answer_form-answer': answer,
+            }
+        )
+        response = self.post_valid_data(data)
+        self.assertRedirects(response, self.url)
+        new_counts = self.get_model_counts()
+        self.validate_model_counts(counts, new_counts, must_equal=False)  # must not be equal because we added EM
+        # check that 1 error model is present
+        self.assertIsNotNone(UnitLesson.objects.filter(kind=UnitLesson.MISUNDERSTANDS).first())
+        self.assertEqual(response.context['errors_formset'].errors, [])
+
+    @unpack
+    @data(
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'Text', '', 'EM text'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer', 'EM title',
+         ''),
+    )
+    def test_create_error_model_negative(self, kind, title, text, answer, em_title, em_text):
+        counts = self.get_model_counts()
+        data = self.default_data.copy()
+        data['form-0-title'] = em_title
+        data['form-0-text'] = em_text
+        data.update(
+            {
+                'form-TOTAL_FORMS': 1,
+                'unit_type': kind,
+                'text': text,
+                'title': title,
+                'answer_form-answer': answer,
+            }
+        )
+        # add answer (with no correct EM, so EM will not be added)
+        response = self.post_valid_data(data)
+        self.assertEqual(response.status_code, 200)
+        # check that formset show error
+        self.assertNotEqual(response.context['errors_formset'].errors, [])
+        new_counts = self.get_model_counts()
+        self.validate_model_counts(counts, new_counts, must_equal=False)  # must be not equal
+
+        # add ErrModel
+        counts = self.get_model_counts()
+        response = self.post_valid_data(data)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.context['errors_formset'].errors, [])
+        new_counts = self.get_model_counts()
+        self.validate_model_counts(counts, new_counts, must_equal=True)  # must be equal
+        # check that no error models are present
+        self.assertIsNone(UnitLesson.objects.filter(kind=UnitLesson.MISUNDERSTANDS).first())
+
+    @skip
+    @unpack
+    @data(
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'Text', 'EM title', 'EM text'),
+    )
+    def test_delete_error_mode_delete_only_ul(self, kind, title, text, answer, em_title, em_text):
+        """Test that when delete error model it delete only UnitLesson and not Lesson objects."""
+        # create error model
+        data = self.default_data.copy()
+        data.update(
+            {
+                'form-TOTAL_FORMS': 1,
+                'unit_type': kind,
+                'text': text,
+                'title': title,
+                'answer_form-answer': answer,
+                'form-0-title': em_title,
+                'form-0-text': em_text,
+            }
+        )
+
+        response = self.post_valid_data(data)
+
+        # delete this error model
+        ul = UnitLesson.objects.filter(kind=UnitLesson.MISUNDERSTANDS).first()
+
+        self.assertIsNotNone(ul)
+        data.update({
+            'form-0-DELETE': 'on',
+            'form-0-id': ul.lesson.id,
+            'form-0-ul_id': ul.id,
+        })
+        counts_n = self.get_model_counts()
+        response = self.post_valid_data(data)
+
+        self.assertRedirects(response, self.url)
+        new_counts = self.get_model_counts()
+
+        self.validate_model_counts(counts_n, new_counts, must_equal=False)
+        self.assertIsNone(UnitLesson.objects.filter(kind=UnitLesson.MISUNDERSTANDS, id=ul.id).first())
+        self.assertIsNotNone(Lesson.objects.filter(id=ul.lesson.id).first())
 
 
 class ResponseViewTests(MyTestCase):
@@ -766,6 +888,7 @@ class CoursletSettingsViewTests(MyTestCase):
             'ctms:courslet_settings',
             kwargs=self.kwargs
         )
+        self.default_data = {}
 
     def test_get_page(self):
         response = self.get_page()
@@ -779,14 +902,19 @@ class CoursletSettingsViewTests(MyTestCase):
     def test_post_data(self, is_valid, post_data):
         # import ipdb; ipdb.set_trace()
         counts = self.get_model_counts()
-        response = self.post_valid_data(post_data)
+        response = self.client.post(self.url, post_data, follow=False)
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts, True)
+
+        if is_valid and response.status_code == 200:
+            print response.context['form'].errors
 
         if is_valid:
             url = reverse('ctms:courslet_view', kwargs=self.kwargs)
             self.assertRedirects(response, url)
+            response = self.client.post(self.url, post_data, follow=True)
             self.context_should_contain_keys = ('u_lessons', 'course_pk', 'pk')
+
 
         self.check_context_keys(response)
 
