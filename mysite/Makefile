@@ -19,5 +19,5 @@ make coverage:
 
 
 make quality:
-	diff-quality --violations=pycodestyle --fail-under=80
-	diff-quality --violations=pylint --fail-under=80
+	diff-quality --violations=pycodestyle --fail-under=80 --compare-branch=HEAD~1
+	diff-quality --violations=pylint --fail-under=80 --compare-branch=HEAD~1
