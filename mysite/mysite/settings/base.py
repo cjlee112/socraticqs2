@@ -108,8 +108,8 @@ STATICFILES_FINDERS = (
 )
 
 # URL of the login page.
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/ct/'
+LOGIN_URL = '/new_login/'
+LOGIN_REDIRECT_URL = '/ctms/'
 URL_PATH = ''
 
 MIDDLEWARE_CLASSES = (

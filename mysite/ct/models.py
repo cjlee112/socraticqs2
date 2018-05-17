@@ -644,7 +644,7 @@ class UnitLesson(models.Model):
         l.save()
 
     def __unicode__(self):
-        return self.lesson.title
+        return "UnitLesson: {}".format(self.lesson.title)
 
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,

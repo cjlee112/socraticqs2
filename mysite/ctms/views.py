@@ -122,7 +122,6 @@ class CourseCoursletUnitMixin(View):
         return Invite.get_by_user_or_404(self.request.user, code=code)
 
 
-
 class FormSetBaseView(object):
     formset_prefix = None
 
@@ -155,8 +154,8 @@ class FormSetBaseView(object):
     def get_formset_kwargs(self):
         kwargs = {
             'initial': self.get_formset_initial(),
-            # 'prefix': self.get_formset_prefix(),
-            'queryset': self.get_formset_queryset()
+            'prefix': self.get_formset_prefix(),
+            'queryset': self.get_formset_queryset(),
         }
 
         if self.request.method in ('POST', 'PUT'):
@@ -738,21 +737,25 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
     def formset_valid(self, formset):
         """Save data to db from formset instance. NOT return any response to user."""
-        error_models = []
         ul = self.get_unit_lesson()
         dummy_concept = self.get_or_create_dummy_concept(ul)
         if not ul.lesson.concept:
             ul.lesson.concept = dummy_concept
             ul.lesson.addedBy = self.request.user
+
         for err_form in formset:
-            if err_form.is_valid() and err_form.cleaned_data:
-                error_models.append(err_form.save(ul, self.request.user))
+            # go though all forms in formset except forms which should be deleted.
+            if err_form.is_valid() and err_form.cleaned_data and not err_form.cleaned_data['DELETE']:
+                err_form.save(ul, self.request.user)
 
         if formset.deleted_forms:
             formset.save(commit=False)
-            for del_obj in formset.deleted_objects:
-                del_obj.delete()
-
+            for del_form in formset.deleted_forms:
+                obj = del_form.instance
+                err_ul = UnitLesson.objects.filter(id=formset.lesson_ul_ids.get(obj.id)).first()
+                # check that ul.id was not corrupted and has such lesson.
+                if err_ul and err_ul.lesson == obj:
+                    err_ul.delete()
 
     def get_or_create_dummy_concept(self, ul):
         if not ul.lesson.concept:
@@ -809,9 +812,6 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         if ul:
             return ul.lesson
 
-    def get_formset_initial(self):
-        return []
-
     def get_ul_errors(self):
         ul = self.get_unit_lesson()
         if ul:
@@ -820,7 +820,13 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
             return UnitLesson.objects.none()
 
     def get_formset_queryset(self):
-        return Lesson.objects.filter(id__in=[i['lesson'] for i in self.get_ul_errors().values('lesson')])
+        ul_errors = self.get_ul_errors().values('lesson', 'id')
+        qs = Lesson.objects.filter(id__in=[i['lesson'] for i in ul_errors])
+        lesson_ul_id = {i['lesson']: i['id'] for i in ul_errors}
+        for lesson in qs:
+            # hack to pass ul id to form
+            setattr(lesson, 'ul_id', lesson_ul_id[lesson.id])
+        return qs
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
