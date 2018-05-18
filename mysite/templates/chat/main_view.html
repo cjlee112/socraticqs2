@@ -36,11 +36,7 @@
     <!-- Introduction -->
     <section class="chat-introduction">
       <div class="chat-introduction-title">
-        {% if chat.is_preview %}
-        <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
-        {% else %}
-        <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
-        {% endif %}
+        <a href="{{ back_url }}">{{ back_url_name }}</a>
         {% if chat.is_live %}
         <h2>Live Session - {% if chat.last_modify_timestamp%}{{ chat.last_modify_timestamp|date:"F j, Y P" }}{% else %}{{ chat.timestamp }}{% endif %}</h2>
         {% else %}
