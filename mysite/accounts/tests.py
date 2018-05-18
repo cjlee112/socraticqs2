@@ -25,7 +25,7 @@ class AccountSettingsTests(TestCase):
     def test_login_required(self):
         self.client.logout()
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('login')+'?next='+self.url)
+        self.assertRedirects(response, reverse('new_login')+'?next='+self.url)
 
     def test_get_account_settings_page(self):
         self.client.login(username='username', password='123')
@@ -108,7 +108,7 @@ class AccountSettingsTests(TestCase):
             "/complete/email/?verification_code={}".format(cc.code),
             follow=True
         )
-        self.assertRedirects(response, reverse('ct:home'), target_status_code=200)
+        self.assertRedirects(response, reverse('ctms:create_course'), target_status_code=200)
 
 
 class DeleteAcountTests(AccountSettingsTests):
@@ -153,7 +153,7 @@ class AnonymousUserAccountSettingsTests(TestCase):
         Checks that user with username anonymous will be redirected to login page
         '''
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('login')+'?next='+self.url)
+        self.assertRedirects(response, reverse('new_login')+'?next='+self.url)
 
     def test_login_usual_user(self):
         '''
