@@ -31,10 +31,11 @@ class CustomDjangoStrategy(DjangoStrategy):
                 username=username,
                 first_name=kwargs.get('first_name', ''),
                 last_name=kwargs.get('last_name', ''),
+                password=kwargs.get('password', ''),
             )
             data.update(kwargs)
             user = self.storage.user.create_user(**data)
-            user.password = kwargs.get('password')
+            user.password = kwargs.get('password', '')
             user.save()
             return user
         else:
