@@ -168,7 +168,7 @@ class MainChatViewTests(CustomTestCase):
         self.assertFalse(response.status_code == 404)
 
         response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
-        self.assertTemplateUsed(response, 'psa/custom_login.html')
+        self.assertTemplateUsed(response, 'psa/new_custom_login.html')
 
     def test_404_on_non_existent_enroll_code(self):
         """
