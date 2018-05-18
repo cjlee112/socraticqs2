@@ -41,26 +41,9 @@ class ChatInitialView(LoginRequiredMixin, View):
     @staticmethod
     def get_back_url(*args, **kwargs):
         """
-        {% if chat.is_preview %}
-        <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
-        {% else %}
-        <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
-        {% endif %}
+        Return link to back page - by default - lms course page.
         """
-        chat = kwargs.get('chat')
-        if not chat:
-            # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???
-            return
-
-        if chat.is_preview:
-            return reverse(
-                'ctms:courslet_view',
-                kwargs=dict(
-                    course_pk=kwargs['courseUnit'].course.id,
-                    pk=kwargs['courseUnit'].unit.pk)
-            )
-        else:
-            return reverse('lms:course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
+        return "Course", reverse('lms:course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
     @staticmethod
     def get_enroll_code_object(enroll_key):
@@ -336,7 +319,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             lessons = chat_prog_ser.get_breakpoints(chat_ss)
             chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
             chat_ss.total_lessons = len(lessons)
-
+        back_url_name, back_url = self.get_back_url(**locals())
         return render(
             request,
             self.template_name,
@@ -357,7 +340,8 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'fsmstate': chat.state if chat else None,
                 'enroll_code': enroll_key,
                 # 'next_point': next_point,
-                'back_url': self.get_back_url(**locals())
+                'back_url': back_url,
+                'back_url_name': back_url_name
             }
         )
 
@@ -420,20 +404,9 @@ class CourseletPreviewView(ChatInitialView):
     @staticmethod
     def get_back_url(*args, **kwargs):
         """
-        Return back url.
-
-        {% if chat.is_preview %}
-        <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
-        {% else %}
-        <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
-        {% endif %}
+        Return back url - ctms course page.
         """
-        chat = kwargs.get('courseUnit')
-        if not chat:
-            # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???
-            return
-
-        return reverse(
+        return "Return", reverse(
             'ctms:courslet_view',
             kwargs=dict(
                 course_pk=kwargs['courseUnit'].course.id,
@@ -494,7 +467,7 @@ class ChatAddLessonView(ChatNoJSInit, ChatInitialView):
 
     @staticmethod
     def get_back_url(*args, **kwargs):
-        return reverse('ctms:courslet_view', kwargs={
+        return "Course", reverse('ctms:courslet_view', kwargs={
             'course_pk': kwargs['courseUnit'].course.id,
             'pk': kwargs['courseUnit'].id
         })
@@ -655,27 +628,9 @@ class CheckChatInitialView(ChatInitialView):
     @staticmethod
     def get_back_url(*args, **kwargs):
         """
-        Return back_url.
-        {% if chat.is_preview %}
-        <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=unit.pk %}">Return</a>
-        {% else %}
-        <a href="{% url 'lms:course_view' course_id=course.id %}">Course</a>
-        {% endif %}
+        Return back_url_name and back_url
         """
-        chat = kwargs.get('chat')
-        if not chat:
-            # NOTE: TODO: what should we do in case if get (or not get) some args (kwargs) ???
-            return
-
-        if chat.is_preview:
-            return reverse(
-                'ctms:courslet_view',
-                kwargs=dict(
-                    course_pk=kwargs['courseUnit'].course.id,
-                    pk=kwargs['courseUnit'].unit.pk)
-            )
-        else:
-            return reverse('lms:course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
+        return "Return", reverse('lms:course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
     def check_course_unit_not_published(self, courseUnit):
         return not courseUnit.course.invite_set.filter(
