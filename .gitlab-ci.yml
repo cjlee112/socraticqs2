@@ -12,6 +12,7 @@ before_script:
 stages:
   - build
   - test
+  - deploy
 
 Build:
   stage: build
@@ -47,3 +48,30 @@ Check code quality:
     - docker
   script:
     - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make quality
+
+
+Deploy Stage:
+  stage: deploy
+  tags:
+    - stage
+    - deploy
+    - ssh
+  only:
+    - development
+  script:
+    - cd /home/wwwapps/socraticqs2/
+    - git pull
+    - source /home/wwwapps/_ve_socraticqs3/bin/activate
+    - pip install --ignore-installed -U -r requirements.txt
+    - pip install --ignore-installed -U -r requirements/prod.txt
+    - cd mysite/
+    - python manage.py migrate
+    - python manage.py fsm_deploy
+    - cd draw_svg/
+    - npm install --save-dev
+    - npm run build && npm run build:copy
+    - yarn build && yarn build:copy
+    - cd ..
+    - python manage.py collectstatic --noinput
+    - sudo supervisorctl restart gunicorn
+    - sudo supervisorctl restart celery
