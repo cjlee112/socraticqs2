@@ -644,7 +644,7 @@ class UnitLesson(models.Model):
         l.save()
 
     def __unicode__(self):
-        return "UnitLesson: {}".format(self.lesson.title)
+        return u"UnitLesson: {}".format(self.lesson.title)
 
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,
@@ -1168,7 +1168,7 @@ class Response(models.Model):
     objects = ResponseManager()
 
     def __unicode__(self):
-        return 'answer by ' + self.author.username
+        return u'answer by ' + self.author.username
 
     @classmethod
     def get_counts(klass, query, fmt_count=fmt_count, n=0, tableKey='status',
@@ -1253,7 +1253,7 @@ class StudentError(models.Model):
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
 
     def __unicode__(self):
-        return 'eval by ' + self.author.username
+        return u'eval by ' + self.author.username
 
     @classmethod
     def get_counts(klass, query, n, fmt_count=fmt_count):
@@ -1432,7 +1432,7 @@ class Course(models.Model):
 
 
 class CourseUnit(models.Model):
-    'list of units in a course'
+    '''list of units in a course'''
     unit = models.ForeignKey(Unit)
     course = models.ForeignKey(Course)
     order = models.IntegerField()
@@ -1444,7 +1444,7 @@ class CourseUnit(models.Model):
         return self.releaseTime and self.releaseTime < timezone.now()
 
     def __unicode__(self):
-        return "Course - {}, Unit - {}".format(self.course.title, self.unit.title)
+        return u"Course - {}, Unit - {}".format(self.course.title, self.unit.title)
 
     def get_responses(self):
         return Response.objects.filter(
