@@ -115,15 +115,18 @@ $( "#headtoggle" ).click(function() {
   <p>No students have responded yet.</p>
 {% endif %}
 
-{% if unitLesson.lesson.attachment %}
-    <p><b>Attachment</b></p>
-    <div class="img-thumbnail">
-        {% if unitLesson.lesson.kind == 'answer' %}
-            {{ unitLesson.lesson.attachment.readlines.0|safe }}
-        {% else %}
-            <img src="{{ unitLesson.lesson.attachment.url }}" alt="Attachment" style="max-width: 500px; max-height: 500px;">
-        {% endif %}
-    </div>
+{# if (question or answer) sub_kind is 'canvas' #}
+{% if unitLesson.lesson.sub_kind == 'canvas' or unitLesson.parent.sub_kind == 'canvas' %}
+    {% if unitLesson.lesson.attachment %}
+        <p><b>Attachment</b></p>
+        <div class="img-thumbnail">
+            {% if unitLesson.lesson.kind == 'answer' %}
+                {{ unitLesson.lesson.attachment.readlines.0|safe }}
+            {% else %}
+                <img src="{{ unitLesson.lesson.attachment.url }}" alt="Attachment" style="max-width: 500px; max-height: 500px;">
+            {% endif %}
+        </div>
+    {% endif %}
 {% endif %}
 
 {% if needHelpResponses %}

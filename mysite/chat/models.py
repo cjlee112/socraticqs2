@@ -439,9 +439,11 @@ class Message(models.Model):
                         raw_html = self.content.lesson.text
                     html = mark_safe(md2html(raw_html))
 
-                    if self.content.lesson.attachment:
+                    if (self.content.lesson.sub_kind == Lesson.CANVAS
+                            or (self.content.parent and self.content.parent.sub_kind == Lesson.CANVAS)
+                        ) and self.content.lesson.attachment:
                         # append svg attachment to the message
-                        html += mark_safe(''.join(self.content.lesson.attachment.file.readlines()))
+                        html += mark_safe(u''.join(self.content.lesson.attachment.file.readlines()))
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:
