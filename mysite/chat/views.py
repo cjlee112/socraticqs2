@@ -393,6 +393,7 @@ class ChatNoJSInit(object):
                 request=self.request
             )
         elif not chat.state:
+            next_point = None
             chat.next_point = next_point
             chat.save()
         return chat, chat_id
