@@ -28,7 +28,7 @@ from ctms.forms import (
     CreateEditUnitForm,
     ErrorModelFormSet,
     CreateEditUnitAnswerForm,
-    CreateUnitForm)
+    CreateUnitForm, BecomeInstructorForm)
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
@@ -56,7 +56,7 @@ class CourseCoursletUnitMixin(View):
 
     def dispatch(self, request, *args, **kwargs):
         if self.NEED_INSTRUCTOR and not self.am_i_instructor():
-            raise Http404()
+            return self.render('ctms/become_instructor.html', {'form': BecomeInstructorForm()})
         return super(CourseCoursletUnitMixin, self).dispatch(request, *args, **kwargs)
 
     def am_i_course_owner(self):
@@ -1014,3 +1014,23 @@ class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnit
         kw = super(EmailSentView, self).get_context_data(**kwargs)
         kw.update({'resend_user_email': self.request.session.get('resend_user_email')})
         return kw
+
+
+class BecomeInstructor(NewLoginRequiredMixin, CreateView): # CourseCoursletUnitMixin
+    template_name = 'ctms/become_instructor.html'
+    model = Instructor
+    NEED_INSTRUCTOR = False
+    form_class = BecomeInstructorForm
+
+    def post(self, request):
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+
+        if form.is_valid():
+            if form.cleaned_data['agree']:
+                instructor = form.save(commit=False)
+                instructor.user = self.request.user
+                instructor.save()
+                return redirect('ctms:my_courses')
+        return redirect('ctms:become_instructor')
+

@@ -1,0 +1,28 @@
+{% extends 'ctms_base.html' %}
+
+{% block content %}
+
+    <div class="alert alert-danger text-center" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span >Error: You are not instructor yet! </span>
+
+    </div>
+
+    <div class="text-center">
+        <span>Would you like to become instructor?</span>
+        <p> To get access you have to be instructor, otherwise you will have no access to this part of site.</p>
+        <br>
+
+        {% lorem 3 p %}
+
+        <hr>
+        <form action="{% url 'ctms:become_instructor' %}" method="POST">
+            {% csrf_token %}
+            <div class="row text-center">{{ form.agree.label }}: {{ form.agree}}</div>
+            <input type="submit" class="btn btn-success">
+        </form>
+
+    </div>
+
+
+{% endblock %}

@@ -3,6 +3,8 @@ from django.forms import BaseModelFormSet
 from django.forms.formsets import formset_factory, DELETION_FIELD_NAME
 from django.forms.models import modelformset_factory
 from django.forms.widgets import ChoiceFieldRenderer, RendererMixin, Select
+
+from accounts.models import Instructor
 from ct.models import Course, Unit, Lesson, UnitLesson
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -160,3 +162,11 @@ class InviteForm(forms.ModelForm):
             invite_type=self.cleaned_data['type'],
         )
         return super(InviteForm, self).save(commit=commit)
+
+
+class BecomeInstructorForm(forms.ModelForm):
+    agree = forms.BooleanField(label="I agree to become instructor")
+
+    class Meta:
+        model = Instructor
+        fields = ('agree',)
