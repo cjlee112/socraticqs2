@@ -4,7 +4,7 @@ from ctms.views import (
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
-    InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView)
+    InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView, BecomeInstructor)
 
 urlpatterns = patterns(
     '',
@@ -88,4 +88,6 @@ urlpatterns = patterns(
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),
+
+    url(r'^become_instructor/?$', BecomeInstructor.as_view(), name='become_instructor'),
 )
