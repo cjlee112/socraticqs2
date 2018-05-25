@@ -631,7 +631,8 @@ class CheckChatInitialView(ChatInitialView):
         """
         Return back_url_name and back_url
         """
-        return "Return", reverse('lms:course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
+
+        return "Return", reverse('lms:tester_course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
     def check_course_unit_not_published(self, courseUnit):
         return not courseUnit.course.invite_set.filter(
