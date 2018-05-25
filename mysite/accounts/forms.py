@@ -119,17 +119,17 @@ class ChangePasswordForm(CreatePasswordForm):
     def clean(self):
         data = self.cleaned_data
         if data.get('password') != data.get('confirm_password'):
+            self.add_error('password', 'Should be equal to confirm password field.')
+            self.add_error('confirm_password', 'Should be equal to password field.')
             self.add_error(None, 'Password and Confirm password fields doesn\'t match.')
-            raise forms.ValidationError(
-                {'password': 'Should be equal to confirm password field.',
-                 'confirm_password': 'Should be equal to password field.'})
         return self.cleaned_data
 
     def clean_current_password(self):
         current_pw = self.cleaned_data.get('current_password')
         user = authenticate(username=self.instance, password=current_pw)
         if user is None:
-            raise forms.ValidationError({'current_password': 'Provided current password doesn\'t match your password'})
+            self.add_error('current_password', 'Provided current password doesn\'t match your password')
+        return current_pw
 
     class Meta:
         model = User
