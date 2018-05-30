@@ -43,8 +43,6 @@ try:
 except ImportError:
     pass
 
-print "\n\n\n debug_toolbar == {}\n\n\n".format(debug_toolbar_enabled)
-
 INSTALLED_APPS += INSTALLED_APPS_LOCAL
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + MIDDLEWARE_LOCAL
 INTERNAL_IPS = (

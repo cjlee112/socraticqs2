@@ -16,7 +16,7 @@ LTI_DEBUG = True
 # Default DB settings for docker postgres container
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_NAME', 'courselets'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('PGPASSWORD', 'postgres'),

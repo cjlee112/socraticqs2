@@ -8,7 +8,7 @@ from django.test import TestCase, Client
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User, AnonymousUser
 from django.conf import settings
-from django.utils.importlib import import_module
+from importlib import import_module
 
 from social.exceptions import (AuthAlreadyAssociated,
                                AuthException,
