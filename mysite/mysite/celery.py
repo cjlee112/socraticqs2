@@ -1,16 +1,12 @@
 from __future__ import absolute_import
 
-import os
-import subprocess
+import django
+django.setup()
 
-import json
-import requests
-from django.core.management import call_command
+import os
 
 from celery import Celery
-
 from django.conf import settings
-
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')

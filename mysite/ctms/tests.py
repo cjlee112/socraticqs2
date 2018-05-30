@@ -75,6 +75,7 @@ class MyTestCase(TestCase):
             selfeval=Response.DIFFERENT
         )
         resp2.save()
+        self.default_data = {}
 
         self.client.login(username=self.username, password=self.password)
         self.url = reverse('ctms:course_settings', kwargs={'pk': self.course.id})

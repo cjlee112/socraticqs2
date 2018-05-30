@@ -83,8 +83,12 @@ class CourseCoursletUnitMixin(View):
         return UnitLesson.objects.filter(id=self.kwargs.get(self.unit_pk_name)).first()
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        return kwargs
+        try:
+            context = super(CourseCoursletUnitMixin, self).get_context_data(**kwargs)
+        except AttributeError:
+            context = kwargs
+        context.update(self.kwargs)
+        return context
 
     def get_my_courses(self):
         return Course.objects.filter(
@@ -381,13 +385,13 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        kwargs.update({
+        context = super(CreateCoursletView, self).get_context_data(**kwargs)
+        context.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
             'courslet': self.get_courslet()
         })
-        return kwargs
+        return context
 
 
 class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -461,13 +465,13 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        kwargs.update({
+        context = super(CreateUnitView, self).get_context_data(**kwargs)
+        context.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
             'courslet': self.get_courslet()
         })
-        return kwargs
+        return context
 
 
 class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
@@ -548,12 +552,13 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         return reverse('ctms:courslet_view', kwargs=self.kwargs)
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        kwargs.update({
+        context = super(CoursletSettingsView, self).get_context_data(**kwargs)
+        context.update(self.kwargs)
+        context.update({
             'course': self.get_course(),
             'courslet': self.get_courslet(),
         })
-        return kwargs
+        return context
 
     def form_valid(self, form):
         response = super(CoursletSettingsView, self).form_valid(form)
@@ -829,15 +834,15 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         return qs
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        kwargs.update({
+        context = super(CreateEditUnitView, self).get_context_data(**kwargs)
+        context.update({
             'course': self.get_course(),
             'courslet': self.get_courslet(),
             'unit': self.object,
             'errors_formset': ErrorModelFormSet(**self.get_formset_kwargs()),
             'answer_form': CreateEditUnitAnswerForm(**self.get_answer_form_kwargs()),
         })
-        return kwargs
+        return context
 
 
 class RedirectToCourseletPreviewView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
