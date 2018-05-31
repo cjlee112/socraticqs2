@@ -26,6 +26,7 @@ from ..models import Chat
 from ..fsm_plugin.chat import get_specs, END as CHAT_END
 from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
+from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, InitializeLiveSession, CheckChatInitialView
 
 
 class CustomTestCase(TestCase):
@@ -1650,3 +1651,44 @@ class LessonSerializerTests(CustomTestCase):
 
         self.assertEquals(result['id'], msg_id)
         self.assertEquals(result['html'], msg.content.lesson.title)
+
+
+class TestChatGetBackUrls(CustomTestCase):
+    def test_ChatInitialView_back_url(self):
+        kwargs = {'courseUnit': self.courseunit}
+        name, url = ChatInitialView.get_back_url(**kwargs)
+        valid_name, valid_url = "Course", reverse('lms:course_view', kwargs=dict(course_id=self.course.id))
+        self.assertEqual(name, valid_name)
+        self.assertEqual(url, valid_url)
+
+    def test_CourseletPreviewView_back_url(self):
+        kwargs = {'courseUnit': self.courseunit}
+        valid_name, valid_url = "Return", reverse(
+            'ctms:courslet_view',
+            kwargs=dict(
+                course_pk=self.course.id,
+                pk=self.unit.pk)
+        )
+        name, url = CourseletPreviewView.get_back_url(**kwargs)
+        self.assertEqual(url, valid_url)
+        self.assertEqual(name, valid_name)
+
+    def test_ChatAddLessonView_back_url(self):
+        kwargs = {'courseUnit': self.courseunit}
+        valid_name, valid_url = "Course", reverse('ctms:courslet_view', kwargs={
+            'course_pk': self.course.id,
+            'pk': self.courseunit.id
+        })
+        name, url = ChatAddLessonView.get_back_url(**kwargs)
+        self.assertEqual(url, valid_url)
+        self.assertEqual(name, valid_name)
+
+    def test_CheckChatInitialView_back_url(self):
+        kwargs = {'courseUnit': self.courseunit}
+        valid_name, valid_url = (
+            "Return",
+            reverse('lms:tester_course_view', kwargs=dict(course_id=self.course.id))
+        )
+        name, url = CheckChatInitialView.get_back_url(**kwargs)
+        self.assertEqual(url, valid_url)
+        self.assertEqual(name, valid_name)
