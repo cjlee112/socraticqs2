@@ -41,3 +41,5 @@ pygeoip==0.3.2
 
 # Raven
 raven==6.1.0
+
+kombu==4.1.0
