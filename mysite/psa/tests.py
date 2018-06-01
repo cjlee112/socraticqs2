@@ -12,7 +12,7 @@ from importlib import import_module
 
 from social.exceptions import (AuthAlreadyAssociated,
                                AuthException,
-                               InvalidEmail)
+                               InvalidEmail, AuthMissingParameter)
 from accounts.models import Instructor
 from ctms.models import Invite
 from psa.custom_django_storage import CustomCode
@@ -786,17 +786,24 @@ class EmailAuthTest(TestCase):
         self.test_email = 'test@test.com'
         self.email_auth = EmailAuth()
         self.email_auth.strategy = mock.Mock()
-        self.email_auth.strategy.request.REQUEST.get.return_value = True
+        self.email_auth.strategy.request.GET.get.return_value = True
 
         code_object = mock.Mock()
         code_object.email = self.test_email
         self.first = mock.Mock()
         self.first.first.return_value = code_object
 
-    def test_update_email_from_code(self, code):
+    def test_update_email_from_code_custom_code_found(self, code):
         code.objects.filter.return_value = self.first
         self.email_auth.auth_complete()
         self.assertEqual(self.email_auth.data.get('email'), self.test_email)
+
+    def test_update_email_from_code_no_custom_code_found(self, code):
+        self.first = mock.Mock()
+        self.first.first.return_value = None
+        code.objects.filter.return_value = self.first
+        with self.assertRaises(AuthMissingParameter):
+            self.email_auth.auth_complete()
 
 
 class SignupTest(TestCase):

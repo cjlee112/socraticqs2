@@ -24,7 +24,6 @@ class EmailAuth(LegacyAuth):
         Completes loging process, must return user instance.
         """
         if self.ID_KEY not in self.data:
-            print dir(self.strategy.request)
             code = (self.strategy.request.GET.get('verification_code') or
                     self.strategy.request.POST.get('verification_code'))
             code_object = CustomCode.objects.filter(code=code, verified=False).first()
