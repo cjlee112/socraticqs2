@@ -205,3 +205,9 @@ class SlideSharePlugin(AbstractPlugin):
 class SlideShareItemPlugin(AbstractPlugin):
     title = models.CharField(max_length=200, blank=True)
     slideshare_code = models.TextField()
+
+
+class BecomeInstructorPlugin(AbstractPlugin):
+    error_name = models.CharField(max_length=200, blank=True)
+    agreement_text = models.TextField(blank=True)
+

@@ -11,8 +11,8 @@ CMS_TEMPLATES = (
     ('pages/main_page.html', 'Main Page'),
     ('pages/about_page.html', 'About Page'),
     ('pages/landing_page.html', 'Landing Page'),
-    ('pages/faq_page.html', 'FAQ Page')
-
+    ('pages/faq_page.html', 'FAQ Page'),
+    ('pages/become_instructor.html', 'Become Instructor'),
 )
 
 # Set databases_name
@@ -423,6 +423,9 @@ CMS_PLACEHOLDER_CONF = {
     },
     'landing_personal_guides': {
         'plugins': ['ParentPersonalGuidesPagePlugin']
+    },
+    'become_instructor_placeholder': {
+        'plugins': ['BecomeInstructorPlugin']
     }
 }
 
@@ -442,3 +445,5 @@ BOWER_INSTALLED_APPS = (
     'zoom.js#0.0.1',
     'bootstrap-sidebar',
 )
+
+BECOME_INSTRUCTOR_URL = '/become-instructor/'

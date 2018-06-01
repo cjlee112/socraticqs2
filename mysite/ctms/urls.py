@@ -4,10 +4,10 @@ from ctms.views import (
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
-    InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView, BecomeInstructor)
+    InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
+)
 
-urlpatterns = patterns(
-    '',
+urlpatterns = (
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
 
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
@@ -88,6 +88,4 @@ urlpatterns = patterns(
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),
-
-    url(r'^become_instructor/?$', BecomeInstructor.as_view(), name='become_instructor'),
 )
