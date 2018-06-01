@@ -1,3 +1,4 @@
+from ddt import ddt, unpack, data
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -6,7 +7,7 @@ from accounts.forms import CreatePasswordForm, ChangePasswordForm
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 
-
+@ddt
 class AccountSettingsTests(TestCase):
     def setUp(self):
         self.url = reverse('accounts:settings')
@@ -91,6 +92,52 @@ class AccountSettingsTests(TestCase):
         can_login = self.client.login(username='username', password='1234')
         self.assertTrue(can_login)
 
+
+    @unpack
+    @data(
+        {
+            'data': {
+                'current_password': '123123123',  # not correct current password
+                'confirm_password': '1234',
+                'password': '1234',
+                'form_id': 'password_form'
+            },
+            'errors': {
+                'current_password': u'Provided current password doesn\'t match your password',
+            },
+        },
+        {
+            'data': {
+                'current_password': '123',  # not correct current password
+                'confirm_password': '1234',
+                'password': '12341',
+                'form_id': 'password_form'
+            },
+            'errors': {
+                'password': u'Should be equal to confirm password field.',
+                'confirm_password': u'Should be equal to password field.',
+            }
+        }
+
+    )
+    def test_post_invalid_current_password_change(self, data, errors):
+        response = self.client.get(self.url)
+        self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
+
+        can_login = self.client.login(username='username', password='123')
+        self.assertTrue(can_login)
+
+        response = self.client.post(self.url, data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        if errors:
+            for field, error in errors.items():
+                self.assertIn(
+                    error,
+                    response.context['password_form'].errors.get(field, [])
+                )
+        can_login = self.client.login(username='username', password='1234')
+        self.assertFalse(can_login)
+
     def test_post_valid_email_change(self):
         data = {'email': 'mm@mail.com', 'form_id': 'email_form'}
         response = self.client.post(self.url, data, follow=True)
@@ -110,16 +157,14 @@ class AccountSettingsTests(TestCase):
         )
         self.assertRedirects(response, reverse('ctms:create_course'), target_status_code=200)
 
-
-class DeleteAcountTests(AccountSettingsTests):
-    def test_post_valid_data(self):
+    def test_delete_account_post_valid_data(self):
         data = {'confirm_delete_account': True, 'form_id': 'delete_account_form'}
         response = self.client.post(reverse('accounts:delete'), data)
         user = self.get_user()
         self.assertNotEqual(user.is_active, self.user.is_active)
         self.assertRedirects(response, reverse('accounts:deleted'))
 
-    def test_post_invalid_data(self):
+    def test_delete_account_post_invalid_data(self):
         data = {'confirm_delete_account': False}
         response = self.client.post(reverse('accounts:delete'), data)
         user = self.get_user()
