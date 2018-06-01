@@ -125,7 +125,7 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.language.LanguageCookieMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'ct.middleware.MySocialAuthExceptionMiddleware',
+    'psa.middleware.MySocialAuthExceptionMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'ctms.middleware.SideBarMiddleware',
 )
