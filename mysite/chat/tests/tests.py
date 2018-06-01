@@ -2,6 +2,7 @@
 
 import json
 
+from ddt import ddt, data, unpack
 from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -26,6 +27,7 @@ from ..models import Chat
 from ..fsm_plugin.chat import get_specs, END as CHAT_END
 from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
+from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, InitializeLiveSession, CheckChatInitialView
 
 
 class CustomTestCase(TestCase):
@@ -1650,3 +1652,50 @@ class LessonSerializerTests(CustomTestCase):
 
         self.assertEquals(result['id'], msg_id)
         self.assertEquals(result['html'], msg.content.lesson.title)
+
+
+@ddt
+class TestChatGetBackUrls(CustomTestCase):
+    """
+    Test that back_url on chat pages are correct.
+    Logic should be:
+        - if it is usual course view - back_url should go to LMS
+        - if it is course preview - back_url should go to CTMS
+        - if it is add lesson by chat - back_url shout go to CTMS
+        - if it is course tester - back url should go to LMS
+    """
+    @unpack
+    @data(
+        (ChatInitialView, "Course",
+         lambda self: reverse(
+             'lms:course_view',
+             kwargs={'course_id':self.course.id})
+         ),
+        (CourseletPreviewView, "Return",
+         lambda self: reverse(
+            'ctms:courslet_view',
+            kwargs={
+                'course_pk': self.course.id,
+                'pk': self.unit.pk
+            })
+        ),
+        (ChatAddLessonView, "Course",
+         lambda self: reverse(
+             'ctms:courslet_view',
+             kwargs={
+                 'course_pk': self.course.id,
+                 'pk': self.courseunit.id
+             })
+         ),
+        (CheckChatInitialView, "Return",
+         lambda self: reverse(
+             'lms:tester_course_view',
+             kwargs={'course_id': self.course.id})
+         )
+    )
+    def test_back_url(self, cls, valid_name, url_callable):
+        kwargs = {'courseUnit': self.courseunit}
+        name, url = cls.get_back_url(**kwargs)
+        valid_url = url_callable(self)
+        self.assertEqual(name, valid_name)
+        self.assertEqual(url, valid_url)
