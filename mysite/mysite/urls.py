@@ -72,6 +72,7 @@ urlpatterns = patterns(
     # Base API
     url(r'^api/', include('api.urls', namespace='api')),
     # CMS
+    url(r'^pages/', include('pages.urls')),
     url(r'^', include('cms.urls')),
 )
 

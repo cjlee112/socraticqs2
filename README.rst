@@ -114,7 +114,11 @@ By default all features are switched off.
 Here's a list of switches:
 
  * ctms_invite_students - to invite user as a student
+ * live_session_enabled - to enable button "Live session"
+ * menu_activity_center_link_enabled - to enable activity center link in top menu
+ * add_unit_by_chat - to enable add unit by chat feature in CTMS
  *
+
 
 GitLab configuration
 -------------
@@ -123,3 +127,18 @@ Need to set following secret variables:
 * DOCKER_IMG_NAME
 * DOCKER_PASSWORD
 * DOCKER_USERNAME
+
+
+Instructor Agreement
+--------------------
+
+When user tries to go to CTMS page, but has no Instructor instance attached, user will not see page but will see the error message.
+Error 404, because user's who are not instructor has no access to this part of site.
+
+That's why we created new page named `Instructor Agreement`, which should be added through admin CMS with custom content.
+
+* Go to `/admin/cms/page`
+* Create new page named `Instructor Agreement` (or with any other name, but remember URL to this page)
+* Open `mysite/settings/base.py` file and check `BECOME_INSTRUCTOR_URL`.
+* `BECOME_INSTRUCTOR_URL` must be the same as URL of `Instructor Agreement` page.
+* Reload server.

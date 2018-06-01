@@ -1,0 +1,30 @@
+{% load cms_tags %}
+    <header>
+      <h1>Become Instructor</h1>
+
+      <p>{{ instance.error_name }}</p>
+
+    </header>
+
+    <main class="auth-card__content">
+        {{ instance.agreement_text }}
+      <form name="LoginForm" action="{% url 'become_instructor_form' %}" method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+          {% if field.is_hidden %}
+            {{ field }}
+          {% endif %}
+        {% endfor %}
+
+        <div class="auth-card__actions">
+            {{ form.agree.label }}: {{ form.agree }}
+            {% if form.agree.errors %}
+                {{ form.agree.errors }}
+            {% endif %}
+
+          <input type="submit" value="Log In">
+        </div>
+      </form>
+    </main>
+
