@@ -2,6 +2,7 @@
 
 import json
 
+from ddt import ddt, data, unpack
 from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -1653,42 +1654,48 @@ class LessonSerializerTests(CustomTestCase):
         self.assertEquals(result['html'], msg.content.lesson.title)
 
 
+@ddt
 class TestChatGetBackUrls(CustomTestCase):
-    def test_ChatInitialView_back_url(self):
-        kwargs = {'courseUnit': self.courseunit}
-        name, url = ChatInitialView.get_back_url(**kwargs)
-        valid_name, valid_url = "Course", reverse('lms:course_view', kwargs=dict(course_id=self.course.id))
-        self.assertEqual(name, valid_name)
-        self.assertEqual(url, valid_url)
-
-    def test_CourseletPreviewView_back_url(self):
-        kwargs = {'courseUnit': self.courseunit}
-        valid_name, valid_url = "Return", reverse(
+    """
+    Test that back_url on chat pages are correct.
+    Logic should be:
+        - if it is usual course view - back_url should go to LMS
+        - if it is course preview - back_url should go to CTMS
+        - if it is add lesson by chat - back_url shout go to CTMS
+        - if it is course tester - back url should go to LMS
+    """
+    @unpack
+    @data(
+        (ChatInitialView, "Course",
+         lambda self: reverse(
+             'lms:course_view',
+             kwargs={'course_id':self.course.id})
+         ),
+        (CourseletPreviewView, "Return",
+         lambda self: reverse(
             'ctms:courslet_view',
-            kwargs=dict(
-                course_pk=self.course.id,
-                pk=self.unit.pk)
-        )
-        name, url = CourseletPreviewView.get_back_url(**kwargs)
-        self.assertEqual(url, valid_url)
-        self.assertEqual(name, valid_name)
-
-    def test_ChatAddLessonView_back_url(self):
+            kwargs={
+                'course_pk': self.course.id,
+                'pk': self.unit.pk
+            })
+        ),
+        (ChatAddLessonView, "Course",
+         lambda self: reverse(
+             'ctms:courslet_view',
+             kwargs={
+                 'course_pk': self.course.id,
+                 'pk': self.courseunit.id
+             })
+         ),
+        (CheckChatInitialView, "Return",
+         lambda self: reverse(
+             'lms:tester_course_view',
+             kwargs={'course_id': self.course.id})
+         )
+    )
+    def test_back_url(self, cls, valid_name, url_callable):
         kwargs = {'courseUnit': self.courseunit}
-        valid_name, valid_url = "Course", reverse('ctms:courslet_view', kwargs={
-            'course_pk': self.course.id,
-            'pk': self.courseunit.id
-        })
-        name, url = ChatAddLessonView.get_back_url(**kwargs)
-        self.assertEqual(url, valid_url)
+        name, url = cls.get_back_url(**kwargs)
+        valid_url = url_callable(self)
         self.assertEqual(name, valid_name)
-
-    def test_CheckChatInitialView_back_url(self):
-        kwargs = {'courseUnit': self.courseunit}
-        valid_name, valid_url = (
-            "Return",
-            reverse('lms:tester_course_view', kwargs=dict(course_id=self.course.id))
-        )
-        name, url = CheckChatInitialView.get_back_url(**kwargs)
         self.assertEqual(url, valid_url)
-        self.assertEqual(name, valid_name)
