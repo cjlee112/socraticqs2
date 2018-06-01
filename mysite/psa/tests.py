@@ -810,7 +810,6 @@ class SignupTest(TestCase):
         store.save()  # we need to make load() work, or the cookie is worthless
         self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
 
-    
     def test_signup_logout(self):
         User.objects.create_user('test_user', 'test@aa.cc', '123')
         self.client.login(email='test@aa.cc', password='123')
@@ -897,6 +896,23 @@ class SignupTest(TestCase):
 
         code = CustomCode.objects.all().first()
         print code
+
+    def test_twitter_signup_anonymous_user_cancel(self):
+        """Test when anonymous user cancel auth thought twitter should not see 500 error."""
+        url = "/complete/twitter/?redirect_state=T6zv6SbT2HnhWxLExv1bSrTdcvFMcOMi&denied=06OETwAAAAAAexJsAAABY7v2Lig"
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(response, reverse('new_login') + "?next=/ctms/")
+        self.assertTemplateUsed(response, 'psa/new_custom_login.html')
+
+    def test_twitter_signup_loggedin_user_cancel(self):
+        """Test when logged in user cancel auth thought twitter should not see 500 error."""
+        User.objects.create_user(username='test', email='test@aa.cc', password='123')
+        self.client.login(username='test', password='123')
+        url = "/complete/twitter/?redirect_state=T6zv6SbT2HnhWxLExv1bSrTdcvFMcOMi&denied=06OETwAAAAAAexJsAAABY7v2Lig"
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(response, reverse('accounts:settings'))
+        self.assertTemplateUsed(response, 'accounts/settings.html')
+
 
 
 

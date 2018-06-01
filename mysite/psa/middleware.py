@@ -12,9 +12,8 @@ class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             user_id = request.user.id
             messages.add_message(request, messages.INFO, exception)
             if user_id:
-                return HttpResponseRedirect(reverse('ct:person_profile',
-                                                    kwargs={'user_id': user_id}))
+                return HttpResponseRedirect(reverse('accounts:settings'))
             else:
-                return HttpResponseRedirect(reverse('ct:home'))
+                return HttpResponseRedirect(reverse('ctms:my_courses'))
         else:
             raise exception
