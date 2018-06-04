@@ -277,7 +277,7 @@ class LessonForm(ErrorForm):
 
 
 class AnswerLessonForm(LessonForm):
-    sub_kind = forms.CharField(widget=forms.HiddenInput)
+    sub_kind = forms.CharField(widget=forms.HiddenInput, required=False)
     attachment = forms.CharField(required=False)
     attachment_clear = forms.BooleanField(required=False, label='Clear attachment')
 
@@ -297,10 +297,10 @@ class AnswerLessonForm(LessonForm):
 
     def clean(self):
         cleaned_data = super(AnswerLessonForm, self).clean()
-        if self.cleaned_data['sub_kind'] == 'numbers':
+        if self.cleaned_data.get('sub_kind') == 'numbers':
             val, min_v, max_v = (
-                self.cleaned_data['number_value'], self.cleaned_data['number_min_value'],
-                self.cleaned_data['number_max_value']
+                self.cleaned_data.get('number_value'), self.cleaned_data.get('number_min_value'),
+                self.cleaned_data.get('number_max_value')
             )
             if not min_v <= val <= max_v:
                 if min_v > max_v:
