@@ -17,7 +17,7 @@ from ct.forms import (
     SearchFormBase,
     LogoutForm,
     CancelForm,
-    AnswerLessonForm)
+    AnswerLessonForm, NewLessonForm)
 from ct.models import Lesson
 
 
@@ -174,6 +174,21 @@ def test_cancel_form():
     form = CancelForm(data={'task': 'task_name'})
     assert form.is_valid() == True
 
+
+def test_answerlesson_form_without_sub_kind():
+    """Test case when no sub_kind passed to AnswerLessonForm no raises error."""
+    form = AnswerLessonForm(data={
+        'title': 'Answer',
+        'text': 'some answer',
+        'number_value': '0',
+        'number_min_value': '0',
+        'number_max_value': '0',
+        'medium': Lesson.READING,
+        'url': '',
+        'changeLog': '',
+        'sub_kind': '',
+    })
+    assert form.is_valid() == True
 
 @pytest.mark.django_db
 def test_lesson_answer_attachment_form(base64_gif_image, lesson_answer_canvas):
