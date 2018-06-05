@@ -2,9 +2,9 @@ from ddt import ddt, unpack, data
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
-from accounts.forms import CreatePasswordForm, ChangePasswordForm
+from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
 
-from accounts.models import Instructor
+from accounts.models import Instructor, Profile
 from psa.custom_django_storage import CustomCode
 
 @ddt
@@ -209,6 +209,40 @@ class AnonymousUserAccountSettingsTests(TestCase):
         self.client.login(username=self.username, password=self.user_pw)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+
+class ProfileUpdateTests(TestCase):
+    def setUp(self):
+        self.url = reverse('accounts:profile_update')
+        self.user = User.objects.create_user(
+            username='username',
+            email='email@mail.com',
+            password='123'
+        )
+        self.user = self.get_user()
+        self.client.login(username='username', password='123')
+
+    def get_user(self):
+        return User.objects.get(id=self.user.id)
+
+    def test_get_profile_update_page_without_instructor(self):
+        """Test when user has no instructor it will show social form page."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('form', response.context)
+        self.assertIsInstance(response.context['form'], SocialForm)
+        self.assertTemplateUsed(response, 'accounts/profile_edit.html')
+        self.assertFalse(Instructor.objects.all())
+
+    def test_post_social_form(self):
+        """Test when user has no instructor it will show social form, after submit it - user will have instructor."""
+        inst_name = 'Some Institute'
+        response = self.client.post(self.url, {
+            'institution': inst_name,
+            'user': self.user.id
+        }, follow=True)
+        self.assertRedirects(response, reverse('ctms:create_course'))
+        self.assertEqual(self.get_user().instructor.institution, inst_name)
 
 
 
