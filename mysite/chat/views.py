@@ -562,7 +562,7 @@ class InitializeLiveSession(ChatInitialView):
         chat = Chat.objects.filter(user=request.user, is_live=True, state__linkState=state).first()
 
         if not chat and state:
-            enroll_code = EnrollUnitCode.create_new(course_unit=course_unit, isLive=True)
+            enroll_code = EnrollUnitCode.objects.create(courseUnit=course_unit, isLive=True)
             chat = Chat(
                 user=request.user,
                 instructor=course_unit.course.addedBy,
