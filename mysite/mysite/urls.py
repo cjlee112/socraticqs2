@@ -54,7 +54,7 @@ urlpatterns = patterns(
     url(r'^admin/login_as_user/(?P<user_id>\d+)/?$', 'psa.views.login_as_user', name='admin_login_as_user'),
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^email-sent/$', 'psa.views.validation_sent'),
+    url(r'^email-sent/$', 'psa.views.validation_sent', name='email_sent'),
     url(r'^complete/email{0}$'.format(extra), complete,
         name='complete'),
     url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra), social_auth_complete,

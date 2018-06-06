@@ -1,3 +1,4 @@
+import pytest
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.messages.api import add_message
@@ -24,7 +25,7 @@ from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
-from psa.forms import SignUpForm, EmailLoginForm
+from psa.forms import SignUpForm, EmailLoginForm, CompleteEmailForm
 
 
 def context(**extra):
@@ -243,6 +244,12 @@ def social_auth_complete(request, *args, **kwargs):
 def complete(request, *args, **kwargs):
     data_to_use = request.POST or request.GET
     form = SignUpForm(data_to_use)
+    post_data = request.POST.copy()
+    post_data.pop('csrfmiddlewaretoken', None)
+    # if there's only one email field in POST - it's login by email.
+    complete_email_form = CompleteEmailForm(post_data)
+    login_by_email = len(post_data.keys()) == 1 and 'email' in post_data and complete_email_form.is_valid()
+
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
@@ -259,7 +266,7 @@ def complete(request, *args, **kwargs):
                 Profile.check_tz(request)
                 return redirect('ct:person_profile', user_id=request.user.id)
             return redirect('ct:home')
-    elif 'confirm' in request.POST:
+    elif 'confirm' in request.POST or login_by_email:
         resp = social_complete(request, 'email', *args, **kwargs)
         return resp
     else:

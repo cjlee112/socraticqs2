@@ -126,9 +126,9 @@ class DeleteAccountView(NotAnonymousRequiredMixin, TemplateView):
 
 class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     template_name = 'accounts/profile_edit.html'
-
     model = Instructor
     form_class = SocialForm
+
     def get_success_url(self):
         return reverse('ctms:my_courses')
 

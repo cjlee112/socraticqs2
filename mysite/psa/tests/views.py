@@ -2,6 +2,7 @@ import mock
 import unittest
 from uuid import uuid4
 from django.core.urlresolvers import reverse
+from django.core import mail
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.test import TestCase, Client
@@ -95,6 +96,18 @@ class ViewsUnitTest(TestCase):
         self.assertRedirects(response, expected_url='/ct/')
         self.assertTemplateUsed(response, template_name='ct/index.html')
 
+    def test_login_by_email(self):
+        user = User(username='test', email='test@test.cc')
+        user.set_password('test')
+        user.save()
+        self.client = Client()
+        credentials = {'email': 'test@test.cc'}
+        response = self.client.post(reverse('complete') + '?next=/ct/', data=credentials, follow=True)
+        self.assertRedirects(response, reverse('ctms:email_sent'))
+        self.assertTemplateUsed(response, 'ctms/email_sent.html')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, 'Confirm your email on Courselets')
+
     @unittest.skip("skip unless fixed")
     def test_new_login_with_u_hash_in_session(self):
         """
@@ -135,7 +148,6 @@ class ViewsUnitTest(TestCase):
         }
         response = self.client.post(reverse('new_login'), data=credentials, follow=True)
         self.assertRedirects(response, '/ct/')
-
 
     def test_done(self):
         user = User(username='test_user')
@@ -921,13 +933,24 @@ class SignupTest(TestCase):
         self.assertTemplateUsed(response, 'accounts/settings.html')
 
 
+class LogoutTest(TestCase):
+    def setUp(self):
+        self.url = reverse('signup')
+        engine = import_module(settings.SESSION_ENGINE)
+        store = engine.SessionStore()
+        store.save()  # we need to make load() work, or the cookie is worthless
+        self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
+
+    def test_logout(self):
+        """Test that old logout page redirect to ct page after logout."""
+        response = self.client.get(reverse('logout'), follow=True)
+        self.assertRedirects(response, reverse('login'))
+        self.assertEqual(self.client.cookies.get('sessionid').value, '')
 
 
-
-
-
-
-
-
+    def test_new_logout(self):
+        response = self.client.get(reverse('new_logout'), follow=True)
+        self.assertRedirects(response, reverse('new_login')+'?next='+reverse('ctms:my_courses'))
+        self.assertEqual(self.client.cookies.get('sessionid').value, '')
 
 
