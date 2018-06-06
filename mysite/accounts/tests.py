@@ -212,14 +212,14 @@ class AnonymousUserAccountSettingsTests(TestCase):
 
 
 class ProfileUpdateTests(TestCase):
+    url = reverse('accounts:profile_update')
+
     def setUp(self):
-        self.url = reverse('accounts:profile_update')
         self.user = User.objects.create_user(
             username='username',
             email='email@mail.com',
             password='123'
         )
-        self.user = self.get_user()
         self.client.login(username='username', password='123')
 
     def get_user(self):
@@ -235,7 +235,9 @@ class ProfileUpdateTests(TestCase):
         self.assertFalse(Instructor.objects.all())
 
     def test_post_social_form(self):
-        """Test when user has no instructor it will show social form, after submit it - user will have instructor."""
+        """Test when user has no instructor it will show social form,
+         after submit it - user will have instructor.
+         """
         inst_name = 'Some Institute'
         response = self.client.post(self.url, {
             'institution': inst_name,
