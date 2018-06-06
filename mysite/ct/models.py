@@ -301,7 +301,11 @@ class Lesson(models.Model):
     add_unit_aborts = models.NullBooleanField(default=False, null=True)
 
     _cloneAttrs = ('title', 'text', 'data', 'url', 'kind', 'medium', 'access',
-                   'sourceDB', 'sourceID', 'concept', 'treeID')
+                   'sourceDB', 'sourceID', 'concept', 'treeID',
+                   'attachment',
+                   'number_value', 'number_min_value', 'number_max_value',
+                   'enable_auto_grading',
+                   )
 
     def get_choices(self):
         """Parse self.text and try to find choices.
