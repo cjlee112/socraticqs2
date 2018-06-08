@@ -1,7 +1,16 @@
 @import "https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.css";
 
 .draw-svg-container {
-  background-color: white;
+  display: inline-block;
+  position: relative;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-size: contain;
+  background-image: url(logo.svg);
+  background-position: center;
+  background-color: #fff;
+  background-repeat: no-repeat;
 
   .btn {
     color: black;
@@ -36,13 +45,25 @@
   }
 
   .actions {
-    position: relative;
+    position: absolute;
+    width: 100%;
     display: flex;
     font-size: 12px;
     line-height: 28px;
+    z-index: 1000;
+    justify-content: center;
+    padding: 3px 0;
+    background-color: white;
+
+    label {
+      margin: 0;
+      cursor: pointer;
+      line-height: 35px;
+    }
   }
 
   input.editor {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     position: absolute;
     background: transparent;
     border: none;
@@ -51,21 +72,8 @@
     color: transparent;
     font-weight: 500;
     padding: 0;
-    letter-spacing: -0.1px;
+    letter-spacing: -0.5px;
     caret-color: red;
-  }
-
-  .actions {
-    position: relative;
-    padding: 3px 0;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .actions label {
-    margin: 0;
-    cursor: pointer;
-    line-height: 35px;
   }
 
   .canvas {
@@ -90,7 +98,7 @@
     position: absolute;
     display: flex;
     width: 50px;
-    margin-left: 35px;
+    margin-left: 37px;
     flex-direction: column;
   }
 
@@ -163,7 +171,7 @@
   }
 
   .widths-wrapper.active .widths {
-    box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px;
+    box-shadow: rgba(0, 0, 0, 0.12) 0 2px 10px, rgba(0, 0, 0, 0.16) 0 2px 5px;
   }
 
   .widths-wrapper .btn {

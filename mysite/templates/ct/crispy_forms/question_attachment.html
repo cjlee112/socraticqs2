@@ -6,7 +6,9 @@
 
     {% if titleform.attachment.value %}
         <label for="id_attachment">
-            <img src="{{ titleform.attachment.value.url }}" style="min-width: 100px; max-width: 500px;">
+            <div class="draw-svg-container" style="background-image: url({{ titleform.attachment.value.url }});">
+                <div style="width: 500px; height: 500px;"></div>
+            </div>
         </label>
     {% endif %}
 </div>

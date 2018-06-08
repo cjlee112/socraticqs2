@@ -354,7 +354,7 @@ class Message(models.Model):
                     html = mark_safe(md2html(self.content.text))
                     if self.content.attachment:
                         # display svg inline
-                        html += mark_safe(''.join(self.content.attachment.file.readlines()))
+                        html += mark_safe(self.content.get_html())
                 else:
                     CONF_CHOICES = dict(Response.CONF_CHOICES)
                     is_chat_fsm = (
@@ -406,10 +406,11 @@ class Message(models.Model):
                     lesson_kwargs = {}
                     try:
                         response = messages[0].content
-                        lesson_kwargs['attachment'] = response.attachment
-                    except (AttributeError, IndexError):
+                        lesson_kwargs['disabled'] = response.attachment.url
+                    except (AttributeError, IndexError, ValueError):
                         pass
-                    html = self.content.lesson.get_html(**lesson_kwargs)
+                    html = mark_safe(md2html(self.content.lesson.text))
+                    html += self.content.lesson.get_html(**lesson_kwargs)
                 elif (self.content.kind == 'answers' and
                       self.content.parent.sub_kind and
                       self.content.parent.sub_kind == Lesson.MULTIPLE_CHOICES
@@ -443,7 +444,7 @@ class Message(models.Model):
                             or (self.content.parent and self.content.parent.sub_kind == Lesson.CANVAS)
                         ) and self.content.lesson.attachment:
                         # append svg attachment to the message
-                        html += mark_safe(u''.join(self.content.lesson.attachment.file.readlines()))
+                        html += mark_safe(self.content.lesson.get_html())
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:
