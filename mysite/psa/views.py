@@ -1,4 +1,3 @@
-import pytest
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.messages.api import add_message
@@ -244,16 +243,27 @@ def social_auth_complete(request, *args, **kwargs):
 def complete(request, *args, **kwargs):
     data_to_use = request.POST or request.GET
     form = SignUpForm(data_to_use)
+
     post_data = request.POST.copy()
     post_data.pop('csrfmiddlewaretoken', None)
-    # if there's only one email field in POST - it's login by email.
-    complete_email_form = CompleteEmailForm(post_data)
-    login_by_email = len(post_data.keys()) == 1 and 'email' in post_data and complete_email_form.is_valid()
+    # if there's only email and csrf field in POST - it's login by email.
+    if len(post_data.keys()) == 1 and 'email' in post_data:
+        login_by_email = True
+        form = CompleteEmailForm(request.POST)
+        if form.is_valid():
+            post_data.update({
+                'first_name': '',
+                'last_name': '',
+                'institution': '',
+            })
+            request.POST = post_data
+    else:
+        login_by_email = False
 
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
-            if request.user.is_authenticated():
+            if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
                 Instructor.objects.get_or_create(user=request.user)
                 Profile.check_tz(request)
             return resp
@@ -266,9 +276,6 @@ def complete(request, *args, **kwargs):
                 Profile.check_tz(request)
                 return redirect('ct:person_profile', user_id=request.user.id)
             return redirect('ct:home')
-    elif 'confirm' in request.POST or login_by_email:
-        resp = social_complete(request, 'email', *args, **kwargs)
-        return resp
     else:
         # add message with transformed form errors
         err_msg = "\n".join([
