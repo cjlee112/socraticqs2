@@ -255,6 +255,7 @@ def complete(request, *args, **kwargs):
                 'first_name': '',
                 'last_name': '',
                 'institution': '',
+                REDIRECT_FIELD_NAME: reverse('ctms:my_courses'),
             })
             request.POST = post_data
     else:
@@ -268,14 +269,10 @@ def complete(request, *args, **kwargs):
                 Profile.check_tz(request)
             return resp
         except AuthMissingParameter:
-            messages.error(
-                request,
-                "Email already verified. Please log in using form below or sign up."
-            )
+            messages.error(request, 'Email already verified.')
             if request.user.is_authenticated():
                 Profile.check_tz(request)
-                return redirect('ct:person_profile', user_id=request.user.id)
-            return redirect('ct:home')
+            return redirect('ctms:my_courses')
     else:
         # add message with transformed form errors
         err_msg = "\n".join([
