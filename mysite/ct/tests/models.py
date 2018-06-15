@@ -325,7 +325,12 @@ class LessonTest(TestCase):
     def test_clone_dict(self):
         concept = Concept(title='test title', addedBy=self.user)
         concept.save()
-        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now(), concept=concept)
+        lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now(), concept=concept,
+            attachment='fake_image',
+            number_value=1, number_min_value=0, number_max_value=2,
+            enable_auto_grading=True,
+        )
         lesson.save_root(concept=concept, relationship=ConceptLink.TESTS)
         clone_attr_dict = lesson._clone_dict()
         for attr in Lesson._cloneAttrs:
@@ -333,6 +338,11 @@ class LessonTest(TestCase):
         self.assertEqual(clone_attr_dict['title'], 'ugh')
         self.assertEqual(clone_attr_dict['text'], 'brr')
         self.assertEqual(clone_attr_dict['concept'], concept)
+        self.assertEqual(clone_attr_dict['attachment'], lesson.attachment)
+        self.assertEqual(clone_attr_dict['number_value'], lesson.number_value)
+        self.assertEqual(clone_attr_dict['number_min_value'], lesson.number_min_value)
+        self.assertEqual(clone_attr_dict['number_max_value'], lesson.number_max_value)
+        self.assertEqual(clone_attr_dict['enable_auto_grading'], lesson.enable_auto_grading)
 
     def test_checkout(self):
         lesson = Lesson(

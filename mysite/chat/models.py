@@ -169,10 +169,7 @@ class Message(models.Model):
             return self.text
         app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
         model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
-        if model:
-            return model.objects.filter(id=self.content_id).first()
-        else:
-            return self.contenttype
+        return model.objects.filter(id=self.content_id).first()
 
     def get_next_point(self):
         return self.chat.next_point.id if self.chat and self.chat.next_point else None
@@ -485,18 +482,6 @@ class EnrollUnitCode(models.Model):
         unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
-    def create_new(cls, course_unit, isLive, isPreview=False, isTest=False):
-        enroll_code = EnrollUnitCode(
-            courseUnit=course_unit,
-            isLive=True,
-            isPreview=isPreview,
-            isTest=isTest,
-            enrollCode=uuid4().hex
-        )
-        enroll_code.save()
-        return enroll_code
-
-    @classmethod
     def get_code(cls, course_unit, isLive=False, isPreview=False, isTest=False):
         enroll_code, cr = cls.objects.get_or_create(
             courseUnit=course_unit,
@@ -512,7 +497,6 @@ class EnrollUnitCode(models.Model):
 
     @classmethod
     def get_code_for_user_chat(cls, course_unit, is_live, user, is_preview=False, isTest=False):
-        # enroll = cls(course_unit=course_unit, isLive=is_live)
         filter_kw = {
             'isPreview': is_preview,
             'isTest': isTest
@@ -523,10 +507,6 @@ class EnrollUnitCode(models.Model):
             return enroll
         enroll = cls(courseUnit=course_unit, isLive=is_live, isPreview=is_preview, isTest=isTest)
         enroll.save()
-        if not enroll.enrollCode:
-            enroll.enrollCode = cls.get_code(courseUnit=course_unit, isLive=is_live, isPreview=is_preview)
-            enroll.save()
-            return enroll
         return enroll
 
 
