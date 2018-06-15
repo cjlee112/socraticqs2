@@ -215,9 +215,9 @@ class DrawApp extends Component {
     printText() {
         let figure = this.createFigure('text');
         figure.attr('style', figure.attr('style') +
-            'font-size: ' + 10 * this.state.width + '; ' +
+            'font-size: ' + 10 * this.state.width + 'px; ' +
             'fill: ' + this.state.color + '; ' +
-            'stroke-width: 1px; '
+            'stroke-width: 0; '
         );
         const x = d3.mouse(this.node)[0];
         const y = d3.mouse(this.node)[1];
@@ -228,8 +228,8 @@ class DrawApp extends Component {
 
         let input = document.createElement('input');
         input.setAttribute('class', 'editor');
-        input.setAttribute('style', 'top:' + (d3.event.y - fontSize) + 'px; ' +
-            'left: ' + d3.event.x + 'px; font-size: ' + fontSize + 'px');
+        input.setAttribute('style', 'top:' + (d3.event.y - fontSize - 1) + 'px; ' +
+            'left: ' + (d3.event.x - 1) + 'px; font-size: ' + fontSize + 'px');
 
         let parentElement = this.node.parentElement;
         parentElement.appendChild(input);
@@ -473,7 +473,7 @@ class DrawApp extends Component {
 
         let svg = this.props.svg;
         return (
-            <div className="img-thumbnail">
+            <div className="canvas-wrapper">
                 {actions}
                 <div className="canvas" ref={(node) => {
                     if (node) {

@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from chat.models import Chat, ChatDivider, Message
 from ct.models import Lesson, Concept, Course, Unit, UnitLesson
+from mysite.helpers import base64_to_file
 
 
 def pytest_addoption(parser):
@@ -53,11 +54,11 @@ def lesson_question(user, concept):
 
 
 @pytest.fixture
-def lesson_question_canvas(user, concept):
+def lesson_question_canvas(user, concept, base64_gif_image):
     instance = Lesson(
         title='ugh', text='brr', addedBy=user,
         kind=Lesson.ORCT_QUESTION, sub_kind=Lesson.CANVAS,
-        concept=concept,
+        concept=concept, attachment=base64_to_file('data:image/gif;base64,{}'.format(base64_gif_image)),
     )
     instance.save_root(concept)
     return instance

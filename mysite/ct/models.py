@@ -28,6 +28,36 @@ def copy_model_instance(inst, **kwargs):
     return n_inst
 
 
+class SubKindMixin(object):
+    kind = None
+    sub_kind = None
+
+    MULTIPLE_CHOICES = 'choices'
+    NUMBERS = 'numbers'
+    EQUATION = 'equation'
+    CANVAS = 'canvas'
+
+    def is_canvas(self):
+        try:
+            unit_lesson = self.unitlesson_set.first()
+            return unit_lesson.parent.sub_kind == self.CANVAS
+        except AttributeError:
+            pass
+        return self.sub_kind == self.CANVAS
+
+    def get_canvas_html(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def get_html(self, *args, **kwargs):
+        """
+        Returns html by response type
+        """
+        if self.is_canvas():
+            return self.get_canvas_html(*args, **kwargs)
+        else:
+            return None
+
+
 ########################################################
 # Concept ID and graph -- not version controlled
 
@@ -148,9 +178,6 @@ class Concept(models.Model):
         l.sort(lambda x, y: cmp(x.relationship, y.relationship))
         return l
 
-    def __unicode__(self):
-        return self.title
-
 
 class ConceptGraph(models.Model):
     DEPENDS = 'depends'
@@ -198,7 +225,7 @@ ACCESS_CHOICES = (
 )
 
 
-class Lesson(models.Model):
+class Lesson(models.Model, SubKindMixin):
     BASE_EXPLANATION = 'base'  # focused on one concept, as intro for ORCT
     EXPLANATION = 'explanation'  # conventional textbook or lecture explanation
 
@@ -225,10 +252,6 @@ class Lesson(models.Model):
     IMAGE = 'image'
     DATABASE = 'db'
     SOFTWARE = 'software'
-    MULTIPLE_CHOICES = 'choices'
-    NUMBERS = 'numbers'
-    EQUATION = 'equation'
-    CANVAS = 'canvas'
     NOT_CORRECT_CHOICE = '()'
     CORRECT_CHOICE = '(*)'
 
@@ -249,10 +272,10 @@ class Lesson(models.Model):
         (FORUM, FORUM),
     )
     SUB_KIND_CHOICES = (
-        (MULTIPLE_CHOICES, 'Multiple Choices Question'),
-        (NUMBERS, 'Numbers'),
-        (EQUATION, 'Equation'),
-        (CANVAS, 'Canvas'),
+        (SubKindMixin.MULTIPLE_CHOICES, 'Multiple Choices Question'),
+        (SubKindMixin.NUMBERS, 'Numbers'),
+        (SubKindMixin.EQUATION, 'Equation'),
+        (SubKindMixin.CANVAS, 'Canvas'),
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -332,26 +355,24 @@ class Lesson(models.Model):
         """
         return [(i, choice) for i, choice in self.get_choices() if choice.startswith(self.CORRECT_CHOICE)]
 
-    def get_canvas_html(self, attachment=None):
+    def get_canvas_html(self, disabled=False):
         """
         Returns container for drawing
         """
+        is_answer = self.kind == 'answer'
+        if is_answer:
+            background_image = self.unitlesson_set.first().parent.lesson.attachment
+            svg_image = self.attachment
+        else:
+            background_image = self.attachment
+            svg_image = None
         html = render_to_string('ct/lesson/sub_kind_canvas.html', context={
-            'id': self.pk,
-            'text': md2html(self.text),
-            'disabled': attachment is not None,
-            'attachment': self.attachment.url if self.attachment else None,
+            'lesson': self,
+            'disabled': self.kind == 'answer' or disabled,
+            'background_image': background_image,
+            'svg_image': svg_image,
         })
         return html
-
-    def get_html(self, *args, **kwargs):
-        """
-        Returns html by lesson type
-        """
-        if self.sub_kind == Lesson.CANVAS:
-            return self.get_canvas_html(*args, **kwargs)
-        else:
-            return None
 
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):
@@ -1105,7 +1126,7 @@ class ResponseManager(models.Manager):
         return super(ResponseManager, self).get_queryset().filter(is_test=True, **kwargs)
 
 
-class Response(models.Model):
+class Response(models.Model, SubKindMixin):
     'answer entered by a student in response to a question'
     ORCT_RESPONSE = 'orct'
     STUDENT_QUESTION = 'sq'
@@ -1118,15 +1139,11 @@ class Response(models.Model):
     )
 
     # new interactions
-    MULTIPLE_CHOICES = 'choices'
-    NUMBERS = 'numbers'
-    EQUATION = 'equation'
-    CANVAS = 'canvas'
     SUB_KIND_CHOICES = (
-        (MULTIPLE_CHOICES, 'Multiple Choices response'),
-        (NUMBERS, 'Numbers response'),
-        (EQUATION, 'Equation response'),
-        (CANVAS, 'Canvas response'),
+        (SubKindMixin.MULTIPLE_CHOICES, 'Multiple Choices response'),
+        (SubKindMixin.NUMBERS, 'Numbers response'),
+        (SubKindMixin.EQUATION, 'Equation response'),
+        (SubKindMixin.CANVAS, 'Canvas response'),
     )
     CORRECT = 'correct'
     CLOSE = 'close'
@@ -1173,6 +1190,15 @@ class Response(models.Model):
 
     def __unicode__(self):
         return u'answer by ' + self.author.username
+
+    def get_canvas_html(self):
+        """
+        Returns container for drawing
+        """
+        html = render_to_string('ct/lesson/response_sub_kind_canvas.html', context={
+            'response': self,
+        })
+        return html
 
     @classmethod
     def get_counts(klass, query, fmt_count=fmt_count, n=0, tableKey='status',
