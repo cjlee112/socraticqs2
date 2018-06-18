@@ -81,13 +81,24 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), user=None, **kwargs):
+               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit',), user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.parent:
         outTabs.append(make_tab(path, current, 'Question',
                             get_object_url(path, unitLesson.parent)))
+        if 'courses' in path:
+            spltd = path.split('/')
+            course_id = spltd[spltd.index('courses') + 1] # next after 'courses' word is going course id
+            cu = CourseUnit.objects.filter(unit=unitLesson.unit, course_id=course_id).first()
+            if cu:
+                url = reverse('ctms:unit_edit', kwargs={
+                    'course_pk': course_id,
+                    'courslet_pk': cu.id,
+                    'pk': unitLesson.parent.id,
+                })
+                outTabs.append(make_tab(path, current, 'New UI', url))
     return outTabs
 
 
@@ -999,6 +1010,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     """
     unit = get_object_or_404(Unit, pk=unit_id)
     course = get_object_or_404(Course, pk=course_id)
+    course_unit = get_object_or_404(CourseUnit, course=course, unit=unit)
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
@@ -1034,9 +1046,13 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request,
         'ct/unit_answers.html',
         templateArgs=dict(
+            course_id=course_id,
+            unit_id=unit_id,
+            course_unit=course_unit,
             roles=roles,
             table_head=table_head,
-            table_body=table_body
+            table_body=table_body,
+            back_url_ul_id=request.session.get('unitID')
         )
     )
 

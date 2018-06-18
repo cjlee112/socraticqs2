@@ -184,6 +184,9 @@ Create new courslet
                     {% endfor %}
                     {# <!-- or for crispy forms --> {% crispy item_form %} #}
                     <a href="#" class="error-models-form__remove">Remove error model</a>
+                    <a class="btn btn-success pull-right" style="margin-top:1em;" href="{% url 'ct:resolutions' course_id=course_pk unit_id=courslet.unit.id ul_id=item_form.ul_id.value %}">
+                      Edit resolutions
+                    </a>
                   </div>
                 {% endfor %}
               </div>

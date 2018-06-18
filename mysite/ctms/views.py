@@ -417,6 +417,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
             'unit': self.get_object()
         })
         kwargs.update(self.kwargs)
+        self.request.session['unitID'] = kwargs['unit'].id
         return kwargs
 
 
