@@ -37,7 +37,11 @@
 
       {% csrf_token %}
 
-      <input type="submit" value="Save">
+        <a href="{% url 'ct:unit_lessons' course_id=course.id unit_id=courslet.id %}" class="pull-left" style="margin-top:60px; padding: 14px 0px;">
+          You can also search Courselets for exercises to add, using the old Instructor UI.
+        </a>
+        <input class='push-right' type="submit" value="Save">
+
     </form>
   </main>
 </div>

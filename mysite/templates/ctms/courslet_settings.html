@@ -33,6 +33,17 @@
           {{ form.as_p }}
         -->
 
+        <label for="lti_url">Copy course URL</label>
+        <p>Use this URL to launch course through LTI</p>
+        <input readonly class="textinput textInput form-control"
+               id="id_title" maxlength="200"
+               name="lti_url" type="text"
+               value="{{ domain }}/lti{% url 'ct:study_unit' courslet.course.id courslet.id %}">
+
+        <label for="enrollment">Copy enrollment URL</label>
+        <p>Use this URL to invite users to pass this courslet.</p>
+        <input readonly class="textinput textInput form-control" id="enrollment" maxlength="200" name="enrollment" type="text" value="{{ domain }}/chat/enrollcode/{{ enroll_code }}/">
+
         <input type="submit" value="Save">
       </form>
 
@@ -41,6 +52,22 @@
 
         <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
       </form>
+
+      <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="publish_unpublish">
+        {% csrf_token %}
+        <input type="hidden" name="task" value="{% if courslet.releaseTime %}unrelease{% else %}release{% endif %}">
+        <input type="submit"
+               class="button button--primary"
+               value="{% if courslet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
+               style="margin-top:-48px;"
+        >
+      </form>
     </main>
   </div>
+<style>
+  input.button-primary {
+    margin-top: -48px !important;
+    margin-right: 160px !important;
+  }
+</style>
 {% endblock %}

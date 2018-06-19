@@ -88,10 +88,10 @@ def error_tabs(path, current, unitLesson,
     if unitLesson.parent:
         outTabs.append(make_tab(path, current, 'Question',
                             get_object_url(path, unitLesson.parent)))
-        if 'courses' in path:
+        if 'courses' in path and '/teach/' in path:
             spltd = path.split('/')
             course_id = spltd[spltd.index('courses') + 1] # next after 'courses' word is going course id
-            cu = CourseUnit.objects.filter(unit=unitLesson.unit, course_id=course_id).first()
+            cu = CourseUnit.objects.filter(unit__id=unitLesson.unit.id, course_id=course_id).first()
             if cu:
                 url = reverse('ctms:unit_edit', kwargs={
                     'course_pk': course_id,
@@ -149,7 +149,20 @@ def auto_tabs(path, current, unitLesson, **kwargs):
 
 def unit_tabs(path, current,
               tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), **kwargs):
-    return make_tabs(path, current, tabs, tail=2, **kwargs)
+    tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
+    return tabs
+
+def unit_lessons_tabs(path, current,
+              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), courseUnit=None, **kwargs):
+    tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
+    if courseUnit and '/teach/' in path:
+        tabs.append(make_tab(
+            path, current, 'New UI',
+            reverse('ctms:courslet_view',
+                    kwargs={'course_pk': courseUnit.course.id, 'pk': courseUnit.id}))
+        )
+    return tabs
+
 
 def unit_tabs_student(path, current,
               tabs=('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), **kwargs):
@@ -437,7 +450,7 @@ def edit_course(request, course_id):
             course=course,
             courseform=courseform,
             domain='https://{0}'.format(Site.objects.get_current().domain),
-            reports = CourseReport.objects.filter(course_id=course_id).order_by('-date')
+            reports=CourseReport.objects.filter(course_id=course_id).order_by('-date')
         )
     )
 
@@ -984,8 +997,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
           (To write a new lesson, click on the Concepts tab to identify
           what concept your new lesson will be about).''', **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
+    courseUnit = CourseUnit.objects.filter(course_id=course_id, unit=unit).first()
     pageData = PageData(request, title=unit.title,
-                        navTabs=unit_tabs(request.path, currentTab))
+                        navTabs=unit_lessons_tabs(request.path, currentTab, courseUnit=courseUnit))
     if lessonTable is None:
         lessonTable = unit.get_exercises()
     r = _lessons(request, pageData, msg=msg,

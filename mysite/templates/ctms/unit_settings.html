@@ -1,4 +1,5 @@
 {% extends 'ctms_base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="card">
@@ -23,11 +24,20 @@
   </nav>
 
   <main class="card__content">
+    <form method="post" action="">
+      {% csrf_token %}
+      {% crispy role_form %}
+    </form>
+
     <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
       {% csrf_token %}
-
-      <input type="submit" class="button button--delete" value="Remove Unit" data-confirm-text="Do you really want to remove this unit?">
+      <input type="submit" class="button pull-left button--delete" style="position: inherit; margin-top: 30px;" value="Remove Unit" data-confirm-text="Do you really want to remove this unit?">
     </form>
   </main>
 </div>
+<style>
+  .button--delete {
+    margin-top: -50px !important;
+  }
+</style>
 {% endblock %}
