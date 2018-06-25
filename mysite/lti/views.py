@@ -26,6 +26,7 @@ from accounts.models import Profile
 
 ROLES_MAP = {
     'Instructor': Role.INSTRUCTOR,
+    'Administrator': Role.INSTRUCTOR,
     'Learner': Role.ENROLLED,
 }
 
