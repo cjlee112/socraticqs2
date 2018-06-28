@@ -26,7 +26,7 @@
     <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
       {% csrf_token %}
 
-      <input type="submit" class="button button--delete" value="Remove Unit" data-confirm-text="Do you really want to remove this unit?">
+      <input type="submit" class="button button--delete" value="Remove Thread" data-confirm-text="Do you really want to remove this thread?">
     </form>
   </main>
 </div>

@@ -37,16 +37,15 @@ Create new courslet
 
       {{ errors_formset.management_form }}
 
-        <!-- TODO: Title/name label and input doesn't exist -->
         <!-- Name -->
         <div class="form-group">
-          <label for="{{ form.title.auto_id }}">Unit Name</label>
+          <label for="{{ form.title.auto_id }}">Thread Name</label>
 
           <p>
-            Give your unit a descriptive name. This will show up as one unit in your students sidebar.
+            Give your thread a descriptive name. This will show up as a thread in your students sidebar.
 
             <span class="expandable">
-              <a class="expandable__toggle" href="#">How to name a unit</a>
+              <a class="expandable__toggle" href="#">How to name a thread</a>
 
               <span class="expandable__content">
                 <br> Add a longer description here.
@@ -65,7 +64,7 @@ Create new courslet
 
         <!-- Unit type -->
         <div class="form-group">
-          <label for="{{ form.unit_type.auto_id }}">{{ form.unit_type.label }}</label>
+          <label for="{{ form.unit_type.auto_id }}">Thread Type</label>
 
           <p>{{ form.unit_type.help_text }}</p>
 
