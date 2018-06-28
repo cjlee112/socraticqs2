@@ -29,7 +29,7 @@
     <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
 
       <label for="{{ form.title.auto_id }}">Thread Name</label>
-      <p>Give your unit a descriptive name. This will show up as a thread in your students sidebar.</p>
+      <p>Give your thread a descriptive name. The name will be displayed as a title and in your students sidebar.</p>
       {{ form.title }}
       {% if form.title.errors %}
       {{ form.title.errors }}
