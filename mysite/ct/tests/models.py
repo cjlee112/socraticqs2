@@ -1320,8 +1320,6 @@ class ResponseManagerTest(TestCase):
         self.assertTrue(cnt == count_resp)
 
 
-
-
 class StudentErrorTest(TestCase):
     """
     Tests for StudentError model.

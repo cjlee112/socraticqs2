@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
 from .serializers import (
@@ -291,6 +292,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.author = self.request.user
                 resp.activity = activity
                 resp.is_test = chat.is_test
+                resp.is_preview = chat.enroll_code.isPreview
                 resp.sub_kind = resp.lesson.sub_kind
             else:
                 resp = message.content
@@ -333,6 +335,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
                 resp_text = '[selected_choices] ' + ' '.join(str(i) for i in selected)
             resp = StudentResponse(text=resp_text)
+            # tes, preview flags
+            resp.is_test = chat.is_test
+            resp.is_preview = chat.enroll_code.isPreview
+
             resp.kind = message.lesson_to_answer.kind
             resp.sub_kind = message.lesson_to_answer.sub_kind
             resp.lesson = message.lesson_to_answer.lesson
@@ -427,10 +433,20 @@ class InitNewChat(ValidateMixin, generics.RetrieveAPIView):
     Initialize new chat session if request.GET['chat_id'] is zero and returns serialized chat object
     """
     permission_classes = (IsAuthenticated, IsOwner)
-    view = ChatInitialView()
+
+    def get_view(self, enroll_code):
+        if enroll_code.isTest:
+            return CheckChatInitialView()
+        elif enroll_code.isLive:
+            return InitializeLiveSession()
+        elif enroll_code.isPreview:
+            return CourseletPreviewView()
+        else:
+            return ChatInitialView()
 
     def get(self, request, enroll_key, chat_id, *args, **kwargs):
         enroll_code = get_object_or_404(EnrollUnitCode, enrollCode=enroll_key)
+        self.view = self.get_view(enroll_code)
         if request.is_ajax():
             self.view.request = self.request
             chat, i_chat_id = self.view.get_or_init_chat(enroll_code, chat_id)

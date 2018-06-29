@@ -169,6 +169,11 @@ class Message(models.Model):
             return self.text
         app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
         model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
+        if self.contenttype == 'response':
+            """Filter responses using custom filter_all method. 
+            Because filter() and all() methods are return only valuable responses 
+            with is_test=False and is_preview=False."""
+            return model.objects.filter_all(id=self.content_id).first()
         return model.objects.filter(id=self.content_id).first()
 
     def get_next_point(self):

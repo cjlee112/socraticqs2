@@ -56,25 +56,6 @@ class ChatInitialView(LoginRequiredMixin, View):
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=False)
 
     @staticmethod
-    def create_chat(self, enroll_code, courseUnit):
-        chat = Chat(
-            user=self.request.user,
-            enroll_code=enroll_code,
-            instructor=courseUnit.course.addedBy
-        )
-        chat.save()
-        return chat
-
-    def check_course_unit_not_published(self, courseUnit):
-        return (
-            not courseUnit.is_published() and
-            not User.objects.filter(
-                id=self.request.user.id,
-                role__role=Role.INSTRUCTOR,
-                role__course=courseUnit.course
-            ).exists())
-
-    @staticmethod
     def get_will_learn_need_know(unit, courseUnit):
         """
         Steps to define Concepts for Will learn and Need to know:
@@ -152,25 +133,11 @@ class ChatInitialView(LoginRequiredMixin, View):
             i_chat_id = None
 
         if i_chat_id:  # chat_id is passed - restore chat by id
-            chat = get_object_or_404(
-                Chat,
-                enroll_code=enroll_code,
-                user=self.request.user,
-                id=i_chat_id
-            )
+            chat = self.get_chat(self.request, enroll_code, user=self.request.user, id=i_chat_id)
         elif i_chat_id is None:  # chat_id not passed - restore last session
-            chat = Chat.objects.filter(
-                enroll_code=enroll_code,
-                user=self.request.user,
-                state__isnull=False
-            ).first()
+            chat = self.get_chat(self.request, enroll_code, user=self.request.user)
         elif i_chat_id == 0 and enroll_code:  # create new session
-            chat = Chat(
-                user=self.request.user,
-                enroll_code=enroll_code,
-                instructor=courseUnit.course.addedBy
-            )
-            chat.save()
+            chat = self.create_new_chat(self.request, enroll_code, courseUnit)
 
         if chat and not chat.state:
             chat.next_point = None
@@ -616,15 +583,15 @@ class InitializeLiveSession(ChatInitialView):
 
 class CheckChatInitialView(ChatInitialView):
     @staticmethod
-    def create_chat(self, enroll_code, courseUnit):
-        chat = Chat(
-            user=self.request.user,
+    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
+        return ChatInitialView.create_new_chat(
+            request=request,
+            courseUnit=courseUnit,
+            user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
             is_test=True
         )
-        chat.save()
-        return chat
 
     @staticmethod
     def get_back_url(*args, **kwargs):
@@ -634,11 +601,12 @@ class CheckChatInitialView(ChatInitialView):
 
         return "Return", reverse('lms:tester_course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
-    def check_course_unit_not_published(self, courseUnit):
+    @staticmethod
+    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         return not courseUnit.course.invite_set.filter(
-            Q(user=self.request.user) | Q(email=self.request.user.email),
+            Q(user=request.user) | Q(email=request.user.email),
         ) and not User.objects.filter(
-            id=self.request.user.id,
+            id=request.user.id,
             role__role=Role.INSTRUCTOR,
             role__course=courseUnit.course
         ).exists()
