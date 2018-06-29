@@ -40,8 +40,9 @@
   height: auto;
 
   p {
-    color: #7F7F7F;
-    margin: 6px 0 0 0;
+    color: $color-text-primary;
+    margin: 18px 0 0 0;
+    max-width: 600px;
   }
 }
 
@@ -146,6 +147,10 @@
 
   .card__topbar {
     padding: 36px 400px 36px 60px;
+  }
+
+  .card__topbar.card__topbar--with-description {
+    padding-right: 60px;
   }
 
   .card__nav {

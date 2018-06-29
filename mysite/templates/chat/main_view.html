@@ -92,7 +92,7 @@
         <div class="meta">
           <div class="container">
             {% if not fsmstate %}
-              <span class="lessons">{{ lesson_cnt }} lessons</span>
+              <span class="lessons">{{ lesson_cnt }} threads</span>
               {% if not chat.is_live %}
               <span class="duration">~ {{ duration }} minutes</span>
               {% endif %}
@@ -107,7 +107,7 @@
                 <h2>My History</h2>
                 <p>
                   Click on a chat session to continue working on it or to review your previous answers.
-                  You can start over if you want work on the lessons in this courselet again by clicking
+                  You can start over if you want work on the threads in this courselet again by clicking
                   on <em>New Chat Session</em> below.
                 </p>
 
@@ -127,7 +127,7 @@
                           {% endif %}
                         </h3>
 
-                        <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} lessons completed</p>
+                        <p>{{ chat_sess.lessons_done }} of {{ chat_sess.total_lessons }} threads completed</p>
                         <p>Time spent: {{ chat_sess.get_formatted_time_spent }} </p>
 
                         <div class="unit-links__progress">
@@ -193,7 +193,7 @@
     </section>
 
     <section>
-      <h4>Lessons</h4>
+      <h4>Threads</h4>
       <ul class="chat-sidebar-breakpoints"></ul>
     </section>
 

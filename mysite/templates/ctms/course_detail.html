@@ -62,7 +62,9 @@
         <div class="card__empty-state">
           <h3>Courselets</h3>
 
-          <p>A courselet is a series of short “chat” messages that help students understand one or more important concepts. A course generally contains multiple courselets, and the messages within them are called units. Let’s create your first courselet!</p>
+          <p>
+            A courselet is an automated chat that helps students understand one or a few important concepts. It’s made up of several brief threads where you ask the student to answer a question and self-assess. You can use them in class or create courselets for homework assignments. Let’s create your first courselet!
+          </p>
 
           <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary button--small">Create Courselet</a>
         </div>

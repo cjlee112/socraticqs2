@@ -3,7 +3,7 @@
 {% block content %}
 <div class="card">
   <header class="card__topbar">
-    <h1>Add Unit</h1>
+    <h1>Add Thread</h1>
   </header>
 
   <!-- TODO: We don't need this if when new and edit are separate views -->
@@ -28,8 +28,8 @@
   <main class="card__content">
     <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
 
-      <label for="{{ form.title.auto_id }}">Unit Name</label>
-      <p>Give your unit a descriptive name. This will show up as one unit in your students sidebar.</p>
+      <label for="{{ form.title.auto_id }}">Thread Name</label>
+      <p>Give your thread a descriptive name. The name will be displayed as a title and in your students sidebar.</p>
       {{ form.title }}
       {% if form.title.errors %}
       {{ form.title.errors }}

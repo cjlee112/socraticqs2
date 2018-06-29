@@ -117,7 +117,7 @@
             <nav class="sidebar__actions">
               <ul>
                 <li>
-                  <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_view' %}sidebar__actions__active{% endif %}">Units</a>
+                  <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_view' %}sidebar__actions__active{% endif %}">Threads</a>
                 </li>
 
                 <li>
@@ -133,7 +133,7 @@
         </section>
 
         <section>
-          <h4>Units</h4>
+          <h4>Threads</h4>
 
           <nav class="sidebar__units">
             <ul class="sortable">
@@ -153,16 +153,15 @@
               <li>
                 <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
                 {% if sidebar.courslet %}
-                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Unit</a>
+                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Thread</a>
                 {% endif %}
               </li>
 
               {% switch "add_unit_by_chat" %}
                 {% if sidebar.courslet %}
-                <li>
-                  <!-- TODO: Add link to add units by chat -->
+                <!-- <li>
                   <a href="{% url 'ctms:add_units_chat' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="sidebar__add">Add Units by Chat</a>
-                </li>
+                </li> -->
                 {% endif %}
               {% endswitch %}
             </ul>
