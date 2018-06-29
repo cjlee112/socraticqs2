@@ -16,4 +16,4 @@ class MySocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             else:
                 return HttpResponseRedirect(reverse('ctms:my_courses'))
         else:
-            raise exception
+            return

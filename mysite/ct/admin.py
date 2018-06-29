@@ -64,7 +64,7 @@ def short_text(obj):
 
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
-    list_display = ('author', 'kind', 'course', 'lesson', 'text', 'attachment', short_text)
+    list_display = ('author', 'kind', 'course', 'lesson', 'text', 'attachment', 'is_preview', 'is_test', short_text)
     list_filter = ('author', 'unitLesson')
     raw_id_fields = ('lesson', 'unitLesson', 'author', 'parent')
 

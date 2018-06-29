@@ -276,13 +276,18 @@ class MainChatViewTests(CustomTestCase):
 
 
     # @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
-    @patch('chat.api.InitNewChat.view.next_handler.start_point', return_value=Mock())
-    def test_next_handler_start_point_called_once(self, start_point_mock):
+    @patch('chat.api.InitNewChat.get_view')
+    def test_next_handler_start_point_called_once(self, get_view):
         """
         Check that ChatInitialView.next_handler.start_point called once.
         """
         course_unit = self.get_course_unit()
         enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        start_point = Mock()
+        view = ChatInitialView()
+        view.next_handler = Mock(start_point=start_point)
+        get_view.return_value = view
 
         self.client.login(username='test', password='test')
         response = self.client.get(
@@ -296,19 +301,19 @@ class MainChatViewTests(CustomTestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         json_content = json.loads(response.content)
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
         chat_id = json_content.get('id')
 
         self.assertTrue(response.status_code == 200)
 
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
         self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
         response = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
 
 class MessagesViewTests(CustomTestCase):

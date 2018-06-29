@@ -1115,8 +1115,25 @@ class ResponseManager(models.Manager):
     To get test responses (marked with flag is_test=True) you should use method test_responses,
     which will return only test responses.
     '''
-    def get_queryset(self):
-        return super(ResponseManager, self).get_queryset().filter(is_test=False)
+
+    # return ONLY valuable responses
+    def get_queryset(self, **kwargs):
+        return super(ResponseManager, self).get_queryset().filter(
+            is_test=False, is_preview=False, **kwargs
+        )
+
+    def get_all_responses_queryset(self, **kwargs):
+        """Return new queryset to filter all responsesn, not only valuable."""
+        return self._queryset_class(model=self.model, using=self._db, hints=self._hints)
+
+    def all_all(self):
+        """Return all responses."""
+        return self.get_all_responses_queryset().all()
+
+    def filter_all(self, **kwargs):
+        """Filter all responses."""
+        return self.get_all_responses_queryset().filter(**kwargs)
+
 
     def test_responses(self, **kwargs):
         '''
@@ -1124,6 +1141,13 @@ class ResponseManager(models.Manager):
         :return:
         '''
         return super(ResponseManager, self).get_queryset().filter(is_test=True, **kwargs)
+
+    def preview_responses(self, **kwargs):
+        '''
+        Return only test responses marked with flag is_test=True
+        :return:
+        '''
+        return super(ResponseManager, self).get_queryset().filter(is_preview=True, **kwargs)
 
 
 class Response(models.Model, SubKindMixin):
@@ -1168,7 +1192,11 @@ class Response(models.Model, SubKindMixin):
     course = models.ForeignKey('Course')
     kind = models.CharField(max_length=10, choices=KIND_CHOICES,
                             default=ORCT_RESPONSE)
+
+    # test, preview flags
     is_test = models.BooleanField(default=False)
+    is_preview = models.BooleanField(default=False)
+
     sub_kind = models.CharField(max_length=10, choices=SUB_KIND_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()

@@ -125,7 +125,13 @@ class CourseCoursletUnitMixin(View):
         ).order_by(
             'order'
         ).annotate(
-            responses_count=models.Count('response')
+            responses_count=models.Sum(
+                models.Case(
+                    models.When(models.Q(response__is_test=False, response__is_preview=False), then=1),
+                    default=0,
+                    output_field=models.IntegerField()
+                )
+            )
         )
 
     def get_invite_by_code_request_or_404(self, code):
