@@ -82,6 +82,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
     {% block js %}
     {% endblock %}
@@ -188,6 +190,44 @@
 
       // Custom scrollbar in sidebar
       $('.sidebar__scroll-container').perfectScrollbar();
+
     </script>
+
+    {# this csrf_token needed for ajax requests #}
+    {% csrf_token %}
+
+    {% if sidebar.course and sidebar.courslet %}
+    <script>
+        $(function() {
+            var originalOrder = $('.sortable li').map(function(i) { return this.id; }).get();
+            $('.sortable').sortable({
+                update: function (event, ui) {
+                    var newOrder = $('.sortable').sortable("toArray");
+                    if (newOrder != originalOrder) {
+                        $.post(
+                            "{% url 'ctms:courslet_reorder' course_pk=sidebar.course.pk courslet_pk=sidebar.courslet.pk %}",
+                            {
+                                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                                data: JSON.stringify({'ordered_ids': newOrder})
+                            },
+                            function(resp) {
+                                if (!resp.error) {
+                                    // $.notify(resp.msg);
+                                    // $('.sortable').effect("pulsate", 1000);
+                                    window.location.reload();
+                                } else {
+                                    $.notify('Something went wrong! <br>' + resp.error);
+                                }
+
+                            }
+                        )
+                    }
+                }
+            }).disableSelection();
+        });
+
+    </script>
+    {% endif %}
+
   </body>
 </html>

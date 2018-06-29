@@ -136,20 +136,20 @@
           <h4>Units</h4>
 
           <nav class="sidebar__units">
-            <ul>
+            <ul class="sortable">
               {% if sidebar.courslet and sidebar.courslet in sidebar.course_courslets %}
                 {% if sidebar.courslet_units %}
                   {% for unit in sidebar.courslet_units %}
-                    <!-- TODO: add <a class="sidebar__units__active" ... for the active unit -->
-                    <li>
-                      <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}" class="{{ sidebar.unit }} {{ unit }} {{ sidebar.current_page_name }} {% if sidebar.unit == unit %}{% if sidebar.current_page_name == 'unit_view' or sidebar.current_page_name == 'unit_settings' or sidebar.current_page_name == 'unit_edit' or sidebar.current_page_name == 'response_view' %}sidebar__units__active{% endif %}{% endif %}">
+                    <li id="{{ unit.id }}">
+                      <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}" class="{{ sidebar.unit }} {{ unit }} {{ sidebar.current_page_name }} {% if sidebar.unit == unit %}{% if sidebar.current_page_name == 'unit_view' or sidebar.current_page_name == 'unit_settings' or sidebar.current_page_name == 'unit_edit' or sidebar.current_page_name == 'response_view' %}sidebar__units__active{% endif %}{% endif %} draggable">
                         {{ unit.lesson.title }}
                       </a>
                     </li>
                   {% endfor %}
                 {% endif %}
               {% endif %}
-
+            </ul>
+            <ul>
               <li>
                 <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
                 {% if sidebar.courslet %}

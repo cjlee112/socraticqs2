@@ -5,7 +5,7 @@ from ctms.views import (
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
-)
+    ReorderUnits)
 
 urlpatterns = (
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
@@ -38,6 +38,11 @@ urlpatterns = (
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/delete/?$',
         CoursletDeleteView.as_view(),
         name='courslet_delete'),
+
+    # reorder units
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/reorder/?$',
+        (ReorderUnits.as_view()),
+        name='courslet_reorder'),
 
     # new unit
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/new/?$',

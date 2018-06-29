@@ -66,6 +66,7 @@
     {% else %}
       <p>No answers yet.</p>
     {% endif %}
+    <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.id %}" class="btn btn-warning" style="margin-top:30px;">Switch to an old UI</a>
   </main>
 </div>
 {% endblock %}

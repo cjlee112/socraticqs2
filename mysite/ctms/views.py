@@ -3,11 +3,14 @@ import json
 from uuid import uuid4
 from datetime import datetime
 
+from django.contrib.sites.models import Site
+from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
+from django.utils import timezone
 from django.views.generic.base import View, TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -20,6 +23,7 @@ from social.backends.utils import load_backends
 from accounts.models import Instructor
 
 from chat.models import EnrollUnitCode
+from ct.forms import LessonRoleForm
 
 from ctms.forms import (
     CourseForm,
@@ -231,6 +235,7 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
         self.object = form.save()
+        Role.objects.create(course=self.object, role=Role.INSTRUCTOR, user=self.request.user)
         return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
 
 
@@ -248,7 +253,6 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
         if not self.am_i_instructor():
             raise Http404()
         return super(UpdateCourseView, self).post(request, *args, **kwargs)
-
 
     def get_object(self, queryset=None):
         if 'pk' in self.kwargs:
@@ -272,7 +276,9 @@ class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateVie
         return reverse('ctms:course_view', kwargs={'pk': self.object.id})
 
     def get_context_data(self, **kwargs):
+        kwargs = super(UpdateCourseView, self).get_context_data(**kwargs)
         kwargs.update(self.kwargs)
+        kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
         kwargs['object'] = self.object
         return kwargs
 
@@ -417,6 +423,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
             'unit': self.get_object()
         })
         kwargs.update(self.kwargs)
+        self.request.session['unitID'] = kwargs['unit'].id
         return kwargs
 
 
@@ -549,16 +556,18 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
                 raise Http404()
             return course_unit.unit
 
-
     def get_success_url(self):
         return reverse('ctms:courslet_view', kwargs=self.kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(CoursletSettingsView, self).get_context_data(**kwargs)
         context.update(self.kwargs)
+        courslet = self.get_courslet()
         context.update({
             'course': self.get_course(),
-            'courslet': self.get_courslet(),
+            'courslet': courslet,
+            'domain': 'https://{0}'.format(Site.objects.get_current().domain),
+            'enroll_code': EnrollUnitCode.get_code(courslet)
         })
         return context
 
@@ -566,6 +575,21 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         response = super(CoursletSettingsView, self).form_valid(form)
         messages.add_message(self.request, messages.SUCCESS, "Courselet successfully updated")
         return response
+
+    def post(self, request, *args, **kwargs):
+        task = request.POST.get('task')
+        if task:
+            cu = self.get_courslet()
+            if task == 'release':
+                cu.releaseTime = timezone.now()
+            if task == 'unrelease':
+                cu.releaseTime = None
+            cu.save()
+            return redirect(self.get_success_url())
+        else:
+            return super(CoursletSettingsView, self).post(request, *args, **kwargs)
+
+
 
 
 class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
@@ -640,6 +664,21 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
     unit_pk_name = 'pk'
     template_name = 'ctms/unit_settings.html'
 
+    def post(self, request, *args, **kwargs):
+        ul = self.get_unit_lesson()
+        roleForm = LessonRoleForm('', self.request.POST)
+        if roleForm.is_valid():
+            if roleForm.cleaned_data['role'] == UnitLesson.RESOURCE_ROLE:
+                ul.order = None
+                ul.save()
+                ul.unit.reorder_exercise()
+            elif ul.order is None:
+                ul.unit.append(ul, self.request.user)
+        return redirect(reverse(
+            "ctms:unit_settings",
+            kwargs=self.kwargs)
+        )
+
     def get_object(self, queryset=None):
         ul = self.get_unit_lesson()
         if ul and ul.addedBy == self.request.user:
@@ -647,14 +686,24 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         raise Http404()
 
     def get_context_data(self, **kwargs):
-        kwargs.update(self.kwargs)
-        kwargs.update({
-            'unit_lesson': self.get_unit_lesson(),
+        kw = super(UnitSettingsView, self).get_context_data(**kwargs)
+        kw.update(self.kwargs)
+        ul = self.get_unit_lesson()
+        if ul.order is not None:
+            initial = UnitLesson.LESSON_ROLE
+        else:
+            initial = UnitLesson.RESOURCE_ROLE
+        roleForm = LessonRoleForm(initial)
+        kw.update({
+            'unit_lesson': ul,
             'course': self.get_course(),
             'courslet': self.get_courslet(),
-            'unit': self.get_object()
+            'unit': self.get_object(),
+            'role_form': roleForm
         })
-        return kwargs
+        return kw
+
+
 
 
 class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
@@ -1021,4 +1070,42 @@ class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnit
         kw = super(EmailSentView, self).get_context_data(**kwargs)
         kw.update({'resend_user_email': self.request.session.get('resend_user_email')})
         return kw
+
+class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
+    def post(self, request, course_pk, courslet_pk):
+        # new ordered ids are in request.POST['ordered_ids']
+        data = json.loads(request.POST.get('data') or '{}')
+        ids = [int(i) for i in data.get('ordered_ids')]
+
+        if not ids:
+            return JsonResponse({'ok': 0, 'err': 'empty'})
+
+        order = range(len(ids))
+        id_order = dict(zip(ids, order))
+        # check that all ids are unique
+        if len(set(ids)) != len(ids):
+            raise JsonResponse({'ok': 0, 'err': 'not uniq'})
+
+        courselet = self.get_courslet()
+        units = self.get_units_by_courselet(courselet)
+
+        old_ids = units.values_list('id', flat=True)
+        old_order = units.values_list('order', flat=True)
+        old_id_order = dict(zip(old_ids, old_order))
+
+        # check that all provided ids are correct
+        for _id in ids:
+            if _id not in old_ids:
+                raise JsonResponse({'ok': 0, 'err': 'not correct ids'})
+
+        for unit in units:
+            _id = unit.id
+            order = id_order[_id]
+            if old_id_order[_id] == order:
+                continue
+            unit.order = order
+            unit.save()
+        return JsonResponse({'ok': 1, 'msg': 'Order has been changed!'})
+
+
 

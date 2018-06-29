@@ -6,7 +6,7 @@ import re
 from ddt import ddt, data, unpack
 from django.core.paginator import Page
 from django.test import TestCase
-from mock import Mock, patch
+from mock import Mock, patch, call
 
 from ct.views import *
 from fsm.fsm_base import FSMStack
@@ -93,32 +93,41 @@ class MiscTests(TestCase):
         )
         self.assertEqual(result, make_tabs())
 
+    @patch('ct.views.CourseUnit.objects.filter')
     @patch('ct.views.is_teacher_url')
     @patch('ct.views.make_tabs')
     @patch('ct.views.make_tab')
     @patch('ct.views.get_object_url')
-    def test_error_tabs_teacher_w_parent(self, get_object_url, make_tab, make_tabs, is_teacher_url):
+    def test_error_tabs_teacher_w_parent(self, get_object_url, make_tab, make_tabs, is_teacher_url, CourseUnit_filter):
+        CourseUnit_filter.return_value = Mock(first=Mock(return_value=Mock(id=100)))
         is_teacher_url.return_value = True
         unitLesson = Mock()
-        unitLesson.parent = True
+        unitLesson.parent = Mock(id=1)
         current = 'FAQ'
         path = '/ct/teach/courses/1/units/1/'
         result = error_tabs(path, current, unitLesson)
         make_tabs.assert_called_once_with(
             path, current, ('Resolutions:', 'Resources', 'FAQ', 'Edit')
         )
-        make_tab.assert_called_once_with(path, current, 'Question', get_object_url())
+        make_tab.assert_has_calls(
+            [
+                call(path, current, 'Question', get_object_url()),
+                call(path, current, "New UI", "/ctms/course/1/courselet/100/unit/1/edit"),
+            ],
+            any_order=True)
         get_object_url.assert_called_with()
         self.assertEqual(result, make_tabs())
 
+    @patch('ct.views.CourseUnit.objects.filter')
     @patch('ct.views.is_teacher_url')
     @patch('ct.views.make_tabs')
     @patch('ct.views.make_tab')
     @patch('ct.views.get_object_url')
-    def test_error_tabs_student(self, get_object_url, make_tab, make_tabs, is_teacher_url):
+    def test_error_tabs_student(self, get_object_url, make_tab, make_tabs, is_teacher_url, CourseUnit_filter):
+        CourseUnit_filter.return_value = Mock(first=Mock(return_value=Mock(id=100)))
         is_teacher_url.return_value = False
         unitLesson = Mock()
-        unitLesson.parent = True
+        unitLesson.parent = Mock(id=112)
         current = 'FAQ'
         path = '/ct/courses/1/units/1/'
         error_tabs(path, current, unitLesson)
@@ -179,21 +188,24 @@ class MiscTests(TestCase):
         )
 
     @patch('ct.views.get_object_url')
-    def test_auto_tabs_error(self, get_object_url):
+    @patch('ct.views.CourseUnit.objects.filter')
+    def test_auto_tabs_error(self, CourseUnit_filter, get_object_url):
+        CourseUnit_filter.return_value = Mock(first=Mock(return_value=Mock(id=100)))
         path = '/ct/teach/courses/1/units/1/errors/1/'
         current = 'FAQ'
-        unitLesson = Mock()
-        unitLesson.parent = Mock()
+        unitLesson = Mock(unit=Mock(id=12))
+        unitLesson.parent = Mock(id=10)
         get_object_url.return_value = '/ct/teach/courses/1/units/1/'
         result = auto_tabs(path, current, unitLesson)
         self.assertEqual(
             result,
-            [('Resolutions',
-             '/ct/teach/courses/1/units/1/errors/1/'),
+            [('Resolutions', '/ct/teach/courses/1/units/1/errors/1/'),
              ('Resources', '/ct/teach/courses/1/units/1/errors/1/resources/'),
              ('FAQ', '#FAQTabDiv'),
              ('Edit', '/ct/teach/courses/1/units/1/errors/1/edit/'),
-             ('Question', '/ct/teach/courses/1/units/1/')]
+             ('Question', '/ct/teach/courses/1/units/1/'),
+             ('New UI', '/ctms/course/1/courselet/100/unit/10/edit'),
+             ]
         )
 
     @patch('ct.views.make_tabs')
