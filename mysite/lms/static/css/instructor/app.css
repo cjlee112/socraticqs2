@@ -478,6 +478,14 @@ a.sidebar__add {
   padding: 48px 24px; }
   .card__content > *:first-child {
     margin-top: -12px; }
+  .card__content .alert {
+    padding: 12px 24px; }
+  .card__content .alert-info a {
+    color: #31708f;
+    font-weight: 500;
+    text-decoration: underline; }
+    .card__content .alert-info a:hover, .card__content .alert-info a:focus, .card__content .alert-info a:active {
+      text-decoration: none; }
 
 .card__empty-state h3 {
   margin: 4px 0 0 0; }
@@ -485,6 +493,18 @@ a.sidebar__add {
   margin: 15px 0 0 0; }
 .card__empty-state .button {
   margin: 27px 0 0 0; }
+
+.card__notice {
+  background: #d9edf7;
+  color: #31708f;
+  border-bottom: 1px solid #DDE2E6;
+  padding: 23px 24px; }
+  .card__notice a {
+    color: #31708f;
+    font-weight: 500;
+    text-decoration: underline; }
+    .card__notice a:hover, .card__notice a:focus, .card__notice a:active {
+      text-decoration: none; }
 
 @media (min-width: 1024px) {
   .card {
@@ -527,7 +547,10 @@ a.sidebar__add {
     position: absolute;
     bottom: 60px;
     left: 60px;
-    margin: 0; } }
+    margin: 0; }
+
+  .card__notice {
+    padding: 23px 60px; } }
 .avatar {
   display: inline-block;
   width: 30px;
@@ -842,19 +865,3 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     margin: 0; }
 
 /*# sourceMappingURL=app.css.map */
-.jquery-notify {
-  font-size: 15px;
-  line-height: 22px;
-  color: #333;
-  width: 400px;
-  padding: 30px 36px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 10px 30px 0 rgba(0, 0, 0, 0.12);
-  -webkit-animation: jelly 1000ms linear both;
-  animation: jelly 1000ms linear both;
-  cursor: pointer; }
-  .jquery-notify:hover {
-    opacity: 0.8; }

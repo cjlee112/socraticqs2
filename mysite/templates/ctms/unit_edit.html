@@ -183,11 +183,11 @@ Create new courslet
                     {% endfor %}
                     {# <!-- or for crispy forms --> {% crispy item_form %} #}
                     <a href="#" class="error-models-form__remove">Remove error model</a>
+
                     {% if course_pk and courslet and item_form.ul_id.value %}
-                    <a class="btn btn-success pull-right edit-resolutions" style="margin-top:1em;"
-                       href="{% url 'ct:resolutions' course_id=course_pk unit_id=courslet.unit.id ul_id=item_form.ul_id.value %}">
-                      Edit resolutions
-                    </a>
+                      <div class="alert alert-info">
+                        <a class="edit-resolutions" href="{% url 'ct:resolutions' course_id=course_pk unit_id=courslet.unit.id ul_id=item_form.ul_id.value %}">Switch to the old Instructor UI</a> if you want to add resolutions.
+                      </div>
                     {% endif %}
                   </div>
                 {% endfor %}
@@ -264,7 +264,7 @@ Create new courslet
         me.closest('form').submit();
         e.preventDefault();
       });
-      
+
       $('.edit-resolutions').on('click', function (e) {
           var form = $(this).closest('form');
           var action = form.attr('action');

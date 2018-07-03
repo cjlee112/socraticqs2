@@ -25,6 +25,10 @@
   </nav>
   {% endif %}
 
+  <div class="card__notice">
+    You can also search Courselets for exercises to add, using <a href="{% url 'ct:unit_lessons' course_id=course.id unit_id=courslet.id %}">the old Instructor UI</a>.
+  </div>
+
   <main class="card__content">
     <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
 
@@ -37,11 +41,7 @@
 
       {% csrf_token %}
 
-        <a href="{% url 'ct:unit_lessons' course_id=course.id unit_id=courslet.id %}" class="pull-left" style="margin-top:60px; padding: 14px 0px;">
-          You can also search Courselets for exercises to add, using the old Instructor UI.
-        </a>
-        <input class='push-right' type="submit" value="Save">
-
+      <input type="submit" value="Save">
     </form>
   </main>
 </div>
