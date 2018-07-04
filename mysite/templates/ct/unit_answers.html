@@ -70,6 +70,11 @@
   </ul>
 {% endif %}
 
+  {% if back_url_ul_id %}
+  <a href="{% url 'ctms:unit_view' course_pk=course_id courslet_pk=course_unit.id pk=back_url_ul_id %}" class="btn btn-success">
+    Switch to the new UI
+  </a>
+  {% endif %}
 </div>
 
 {% endblock %}

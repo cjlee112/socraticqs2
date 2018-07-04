@@ -86,8 +86,59 @@ There are a couple of files related to docker. They are:
  - docker-commands.sh - clear *.pyc files and starts web server
 
 
+Multiple Choices Feature:
+-------------------------
+
+How to test this functionality:
+* setup project
+* load fixtures from dumpdata/debug-wo-fsm.json
+* load fixtures from dumpdata/ct_mult_choices.json
+* open admin UI and create roles for your user and course named `test MultChoices`
+* observe Courses Dashboard and you will see `test MultChoices` course with a couple of cocurselets inside of it.
+* .....
+* Profit!
+
+
 Quality check
 -------------
 
 We can check code quality using ``./check-quality.sh {pep8|pylint} {lti|psa|fsm|ct|mysite|all}`` script.
 We encourage you to run this script before each commit.
+
+
+Feature Switches
+----------------
+
+We can switch on and switch off different features.
+By default all features are switched off.
+Here's a list of switches:
+
+ * ctms_invite_students - to invite user as a student
+ * live_session_enabled - to enable button "Live session"
+ * menu_activity_center_link_enabled - to enable activity center link in top menu
+ * add_unit_by_chat - to enable add unit by chat feature in CTMS
+ *
+
+
+GitLab configuration
+-------------
+
+Need to set following secret variables:
+* DOCKER_IMG_NAME
+* DOCKER_PASSWORD
+* DOCKER_USERNAME
+
+
+Instructor Agreement
+--------------------
+
+When user tries to go to CTMS page, but has no Instructor instance attached, user will not see page but will see the error message.
+Error 404, because user's who are not instructor has no access to this part of site.
+
+That's why we created new page named `Instructor Agreement`, which should be added through admin CMS with custom content.
+
+* Go to `/admin/cms/page`
+* Create new page named `Instructor Agreement` (or with any other name, but remember URL to this page)
+* Open `mysite/settings/base.py` file and check `BECOME_INSTRUCTOR_URL`.
+* `BECOME_INSTRUCTOR_URL` must be the same as URL of `Instructor Agreement` page.
+* Reload server.

@@ -3,8 +3,11 @@ from django.forms import widgets
 from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError, UnitLesson
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Field
+from crispy_forms.layout import Submit, Layout, Field, Div
+
+
 ## from crispy_forms.bootstrap import StrictButton
+from mysite.helpers import base64_to_file
 
 
 class ResponseForm(forms.ModelForm):
@@ -19,12 +22,14 @@ class ResponseForm(forms.ModelForm):
         fields = ['text', 'confidence']
         labels = dict(text=_('Your answer'))
 
+
 class CommentForm(ResponseForm):
     class Meta:
         model = Response
         fields = ['title', 'text', 'confidence']
         labels = dict(text=_('Your question'),
                       confidence=_('How do you feel about this?'))
+
 
 class ReplyForm(ResponseForm):
     class Meta:
@@ -33,11 +38,13 @@ class ReplyForm(ResponseForm):
         labels = dict(text=_('Your reply'),
                       confidence=_('How do you feel about this?'))
 
+
 class ErrorStatusForm(ResponseForm):
     class Meta:
         model = StudentError
         fields = ['status']
         labels = dict(status=_('How well have you overcome this error?'))
+
 
 class SelfAssessForm(forms.Form):
     selfeval = forms.ChoiceField(choices=(('', '----'),) + Response.EVAL_CHOICES,
@@ -55,9 +62,11 @@ class SelfAssessForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Next'))
 
+
 class AssessErrorsForm(forms.Form):
     emlist = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                        required=False, label='Common errors')
+
 
 class ReorderForm(forms.Form):
     newOrder = forms.ChoiceField()
@@ -94,12 +103,14 @@ class NextForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', label, **submitArgs))
 
+
 class LaunchFSMForm(NextForm):
     fsmName = forms.CharField(widget=forms.HiddenInput)
     def __init__(self, fsmName, label, fsmtask='launch',
                  *args, **kwargs):
         super(LaunchFSMForm, self).__init__(label, fsmtask, *args, **kwargs)
         self.fields['fsmName'].initial = fsmName
+
 
 class TaskForm(forms.Form):
     task = forms.CharField(widget=forms.HiddenInput)
@@ -111,6 +122,7 @@ class TaskForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', label))
+
 
 class LessonRoleForm(forms.Form):
     role = forms.ChoiceField(choices=UnitLesson.ROLE_CHOICES,
@@ -133,6 +145,7 @@ class ResponseListForm(forms.Form):
                                            ('-confidence', 'Most confident first'),
                                            ('confidence', 'Least confident first')))
 
+
 class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
@@ -145,8 +158,10 @@ class UnitTitleForm(forms.ModelForm):
         model = Unit
         fields = ['title', 'description', 'img_url', 'small_img_url']
 
+
 class NewUnitTitleForm(UnitTitleForm):
     submitLabel = 'Add'
+
 
 class CourseTitleForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -160,8 +175,10 @@ class CourseTitleForm(forms.ModelForm):
         model = Course
         fields = ['title', 'access', 'description']
 
+
 class NewCourseTitleForm(CourseTitleForm):
     submitLabel = 'Add'
+
 
 class ConceptForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -175,6 +192,7 @@ class ConceptForm(forms.ModelForm):
         model = Concept
         fields = ['title']
 
+
 class NewConceptForm(forms.Form):
     title = forms.CharField()
     description = forms.CharField(widget=forms.Textarea)
@@ -186,8 +204,10 @@ class NewConceptForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
 
+
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(label='Search for concepts containing')
+
 
 class ConceptLinkForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -201,6 +221,7 @@ class ConceptLinkForm(forms.ModelForm):
         model = ConceptLink
         fields = ['relationship']
 
+
 class ConceptGraphForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
@@ -213,17 +234,21 @@ class ConceptGraphForm(forms.ModelForm):
         model = ConceptGraph
         fields = ['relationship']
 
+
 class NewErrorForm(forms.ModelForm):
     submitLabel = 'Add'
+
     def __init__(self, *args, **kwargs):
         super(NewErrorForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-errorForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Lesson
         fields = ['title', 'text']
+
 
 class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
@@ -233,26 +258,82 @@ class ErrorForm(NewErrorForm):
         model = Lesson
         fields = ['title', 'text', 'changeLog']
 
+
 class LessonForm(ErrorForm):
     url = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper['attachment'].wrap(
+            Field, template='ct/crispy_forms/question_attachment.html')
+
     class Meta:
         model = Lesson
-        fields = ['title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog']
+        fields = [
+            'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
+            'sub_kind', 'attachment', 'enable_auto_grading'
+        ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
 
+
 class AnswerLessonForm(LessonForm):
+    sub_kind = forms.CharField(widget=forms.HiddenInput, required=False)
+    attachment = forms.CharField(required=False)
+    attachment_clear = forms.BooleanField(required=False, label='Clear attachment')
+
+    def __init__(self, *args, **kwargs):
+        super(LessonForm, self).__init__(*args, **kwargs)
+        self.helper['attachment'].wrap(Field, template='ct/crispy_forms/answer_attachment.html')
+
     class Meta:
         model = Lesson
-        fields = ['title', 'text', 'medium', 'url', 'changeLog']
+        fields = [
+            'title', 'text',
+            'attachment', 'attachment_clear',
+            'number_value', 'number_min_value', 'number_max_value',
+            'medium', 'url', 'changeLog',
+        ]
         labels = dict(medium=_('Delivery medium'))
+
+    def clean(self):
+        cleaned_data = super(AnswerLessonForm, self).clean()
+        if self.cleaned_data.get('sub_kind') == 'numbers':
+            val, min_v, max_v = (
+                self.cleaned_data.get('number_value'), self.cleaned_data.get('number_min_value'),
+                self.cleaned_data.get('number_max_value')
+            )
+            if not min_v <= val <= max_v:
+                if min_v > max_v:
+                    self.add_error('number_min_value', "Value should be less than max value")
+                    self.add_error('number_max_value', "Value should be more than min value")
+                raise forms.ValidationError(
+                    {'number_value': "Value should be less than max value and more than min value"}
+                )
+        return cleaned_data
+
+    def clean_attachment(self):
+        return base64_to_file(self.cleaned_data['attachment'])
+
+    def save(self, commit=True):
+        instance = super(AnswerLessonForm, self).save(commit)
+        if self.cleaned_data['attachment_clear']:
+            instance.attachment = None
+            instance.save()
+        return instance
+
 
 class NewLessonForm(NewErrorForm):
     submitLabel = 'Add'
     url = forms.CharField(required=False)
+
     class Meta:
         model = Lesson
-        fields = ['title', 'kind', 'text', 'medium', 'url']
+        fields = [
+            'title', 'kind', 'text', 'medium', 'url',
+            'sub_kind',
+        ]
         labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+
 
 class ResponseFilterForm(forms.Form):
     selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
@@ -334,4 +415,3 @@ class CloneCourseForm(forms.Form):
     ]
     copy_options = forms.ChoiceField(choices=OPTS_CHOICES)
     with_students = forms.BooleanField(required=False)
-

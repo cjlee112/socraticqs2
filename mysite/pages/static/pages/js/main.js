@@ -3,7 +3,6 @@
 
     init: function(){
       this.initAffix();
-      this.initButtons();
       this.initFAQ();
       this.initForms();
     },
@@ -19,15 +18,6 @@
       } else {
         console.log('No block to apply affix plugin.')
       }
-    },
-
-    initButtons: function(){
-      $('.im-interested').on('click', function(e){
-        e.preventDefault();
-        $('html, body').animate({
-            scrollTop: $("#interested").offset().top-60
-        }, 1200);
-      })
     },
 
     initFAQ: function(){

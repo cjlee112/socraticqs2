@@ -1,0 +1,11 @@
+.form-group {
+  margin: 48px 0 0 0;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
+  display: none;
+}

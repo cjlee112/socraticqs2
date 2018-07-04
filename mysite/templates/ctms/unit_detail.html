@@ -1,0 +1,72 @@
+{% extends 'ctms_base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ unit.lesson.title }}</h1>
+  </header>
+
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    {% if responses %}
+      <table>
+        <thead>
+          <tr>
+            <th>Answer</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for answer in responses %}
+            <tr>
+              <td>
+                <div class="user-info">
+                  <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author.get_full_name }}" class="avatar">
+                  <h3>{{ answer.author }}</h3>
+                  <p>{{ answer.atime|date }}</p>
+                </div>
+
+                <div class="table-answer">
+                  {{ answer.text|truncatechars:150 }}
+                </div>
+              </td>
+
+              <td>
+                {% if answer.status != None %}
+                  {{ answer.get_status_display }}
+                {% endif %}
+
+              </td>
+
+              <td>
+                <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No answers yet.</p>
+    {% endif %}
+    <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.id %}" class="btn btn-warning" style="margin-top:30px;">Switch to an old UI</a>
+  </main>
+</div>
+{% endblock %}

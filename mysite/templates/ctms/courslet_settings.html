@@ -1,0 +1,73 @@
+{% extends "ctms_base.html" %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ courslet.unit.title }}</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=pk %}">Threads</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courselet_preview' course_pk=course_pk pk=pk %}" target="_blank">Preview</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
+        {% csrf_token %}
+
+        <label for="name">Courselet Name</label>
+        <p>Give your courselet a descriptive name.</p>
+        {{ form.title }}
+        <!-- TODO: Replace label, description and input with real form
+          {{ form.as_p }}
+        -->
+
+        <label for="lti_url">Copy course URL</label>
+        <p>Use this URL to launch course through LTI</p>
+        <input readonly class="textinput textInput form-control"
+               id="id_title" maxlength="200"
+               name="lti_url" type="text"
+               value="{{ domain }}/lti{% url 'ct:study_unit' courslet.course.id courslet.id %}">
+
+        <label for="enrollment">Copy enrollment URL</label>
+        <p>Use this URL to invite users to pass this courslet.</p>
+        <input readonly class="textinput textInput form-control" id="enrollment" maxlength="200" name="enrollment" type="text" value="{{ domain }}/chat/enrollcode/{{ enroll_code }}/">
+
+        <input type="submit" value="Save">
+      </form>
+
+      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+      </form>
+
+      <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="publish_unpublish">
+        {% csrf_token %}
+        <input type="hidden" name="task" value="{% if courslet.releaseTime %}unrelease{% else %}release{% endif %}">
+        <input type="submit"
+               class="button button--primary"
+               value="{% if courslet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
+               style="margin-top:-48px;"
+        >
+      </form>
+    </main>
+  </div>
+<style>
+  input.button-primary {
+    margin-top: -48px !important;
+    margin-right: 160px !important;
+  }
+</style>
+{% endblock %}

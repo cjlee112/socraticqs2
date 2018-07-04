@@ -81,13 +81,24 @@ def concept_tabs(path, current, unitLesson,
     return make_tabs(path, current, tabs, **kwargs)
 
 def error_tabs(path, current, unitLesson,
-               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit'), user=None, **kwargs):
+               tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit',), user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.parent:
         outTabs.append(make_tab(path, current, 'Question',
                             get_object_url(path, unitLesson.parent)))
+        if 'courses' in path and '/teach/' in path:
+            spltd = path.split('/')
+            course_id = spltd[spltd.index('courses') + 1] # next after 'courses' word is going course id
+            cu = CourseUnit.objects.filter(unit__id=unitLesson.unit.id, course_id=course_id).first()
+            if cu:
+                url = reverse('ctms:unit_edit', kwargs={
+                    'course_pk': course_id,
+                    'courslet_pk': cu.id,
+                    'pk': unitLesson.parent.id,
+                })
+                outTabs.append(make_tab(path, current, 'New UI', url))
     return outTabs
 
 
@@ -138,7 +149,20 @@ def auto_tabs(path, current, unitLesson, **kwargs):
 
 def unit_tabs(path, current,
               tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), **kwargs):
-    return make_tabs(path, current, tabs, tail=2, **kwargs)
+    tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
+    return tabs
+
+def unit_lessons_tabs(path, current,
+              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), courseUnit=None, **kwargs):
+    tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
+    if courseUnit and '/teach/' in path:
+        tabs.append(make_tab(
+            path, current, 'New UI',
+            reverse('ctms:courslet_view',
+                    kwargs={'course_pk': courseUnit.course.id, 'pk': courseUnit.id}))
+        )
+    return tabs
+
 
 def unit_tabs_student(path, current,
               tabs=('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), **kwargs):
@@ -426,7 +450,7 @@ def edit_course(request, course_id):
             course=course,
             courseform=courseform,
             domain='https://{0}'.format(Site.objects.get_current().domain),
-            reports = CourseReport.objects.filter(course_id=course_id).order_by('-date')
+            reports=CourseReport.objects.filter(course_id=course_id).order_by('-date')
         )
     )
 
@@ -973,8 +997,9 @@ def unit_lessons(request, course_id, unit_id, lessonTable=None,
           (To write a new lesson, click on the Concepts tab to identify
           what concept your new lesson will be about).''', **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
+    courseUnit = CourseUnit.objects.filter(course_id=course_id, unit=unit).first()
     pageData = PageData(request, title=unit.title,
-                        navTabs=unit_tabs(request.path, currentTab))
+                        navTabs=unit_lessons_tabs(request.path, currentTab, courseUnit=courseUnit))
     if lessonTable is None:
         lessonTable = unit.get_exercises()
     r = _lessons(request, pageData, msg=msg,
@@ -999,6 +1024,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     """
     unit = get_object_or_404(Unit, pk=unit_id)
     course = get_object_or_404(Course, pk=course_id)
+    course_unit = get_object_or_404(CourseUnit, course=course, unit=unit)
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
@@ -1034,9 +1060,13 @@ def unit_answers(request, course_id, unit_id, **kwargs):
         request,
         'ct/unit_answers.html',
         templateArgs=dict(
+            course_id=course_id,
+            unit_id=unit_id,
+            course_unit=course_unit,
             roles=roles,
             table_head=table_head,
-            table_body=table_body
+            table_body=table_body,
+            back_url_ul_id=request.session.get('unitID')
         )
     )
 
@@ -1069,7 +1099,11 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
     'page for viewing or adding Wikipedia concept to this courselet'
     opt = None
     unit = get_object_or_404(Unit, pk=unit_id)
-    sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
+    try:
+        sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
+    except UnicodeEncodeError:
+        # TODO refactor this part - need to separate search and add actions
+        sourceID = urllib.unquote(source_id).encode('utf-8').decode('utf-8')
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     addForm = push_button(request, 'add', 'Add to this courselet')
@@ -1229,10 +1263,15 @@ def edit_lesson(request, course_id, unit_id, ul_id):
             formClass = LessonForm
     else:
         formClass = ErrorForm
+
     if notInstructor:
         titleform = None
     else:  # let instructor edit this lesson
-        titleform = formClass(instance=ul.lesson, initial=dict(changeLog=''))
+        sub_kind = ul.sub_kind
+        if not ul.sub_kind and ul.parent and ul.parent.sub_kind:
+            sub_kind = ul.parent.sub_kind
+
+        titleform = formClass(instance=ul.lesson, initial=dict(changeLog='', sub_kind=sub_kind))
         if request.method == 'POST':
             if 'unit_to_move' in request.POST:
                 # check that incoming unit_id is acceptable for us - is in Unit queryset
@@ -1257,7 +1296,7 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                     ))
             if 'title' in request.POST:
                 lesson = ul.checkout(request.user)
-                titleform = formClass(request.POST, instance=lesson)
+                titleform = formClass(request.POST, request.FILES, instance=lesson)
                 if titleform.is_valid():
                     titleform.save(commit=False)
                     ul.checkin(lesson)

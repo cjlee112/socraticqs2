@@ -1,0 +1,58 @@
+ <div class="card">
+   <header class="card__topbar">
+     <h1>Courses</h1>
+   </header>
+
+   <nav class="card__nav">
+     <ul>
+       <li>
+         <a href="{% url 'ctms:my_courses' %}" class="card__nav-active">My Courses</a>
+       </li>
+
+       <li>
+         <a href="{% url 'ctms:shared_courses' %}">Shared with Me</a>
+       </li>
+     </ul>
+   </nav>
+
+   <main class="card__content">
+    {% if courses %}
+      <h2>
+        <span>{{ list_name }}</span>
+        <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
+      </h2>
+
+      <table>
+         <thead>
+           <th>Course</th>
+           <th>Answers</th>
+         </thead>
+
+         <tbody>
+           {% for course in courses %}
+             <tr>
+               <td>
+                <a href="{% url 'ctms:course_view' pk=course.id %}">{{ course.title }}</a>
+               </td>
+
+               <td>
+                <!-- TODO: Display amount of answers -->
+                {{ course.response_set.count }}
+               </td>
+             </tr>
+           {% endfor %}
+         </tbody>
+       </table>
+      {% else %}
+        <div class="card__empty-state">
+          <h3>My courses</h3>
+
+          <p>
+            You don't have any course yet. Let's create one!
+          </p>
+
+          <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
+        </div>
+      {% endif %}
+   </main>
+ </div>

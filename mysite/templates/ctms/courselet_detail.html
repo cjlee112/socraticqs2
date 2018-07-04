@@ -1,0 +1,90 @@
+{% extends "ctms_base.html" %}
+{% load waffle_tags %}
+
+{% block title %}
+  {{ object.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.unit.title }}</h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=object.course.id pk=object.id %}" class="card__nav-active">Threads</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courselet_preview' course_pk=object.course.id pk=object.id %}" target="_blank">Preview</a>
+        </li><li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=object.course.id pk=object.id %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      {% if u_lessons %}
+        <h2>
+          <span>Threads</span>
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary button--small">Add Thread</a>
+
+          {% switch "add_unit_by_chat" %}
+          <!-- <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="button button--small">Add Units by Chat</a> -->
+          {% endswitch %}
+        </h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Thread Name</th>
+              <th>Answers</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for u_lesson in u_lessons %}
+              <tr>
+                <td>
+                  <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.lesson.title }}
+                  </a>
+                </td>
+
+                <td>
+                  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                    {{ u_lesson.responses_count }}
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="card__empty-state">
+          <h3>Threads</h3>
+
+          <p>
+            Your courselet is made up of threads. A thread starts with a short message, often a brief introduction and a question. Your students will answer the question, read your answer, and assess how similar they are.
+          </p>
+
+          <p>
+            If they got it wrong, they’ll see a list of common misconceptions. They’ll compare their answer with the misconceptions as they try to understand how they got it wrong. This is the beauty of active learning – they’re engaged, compare, analyze, and practice critical thinking.
+          </p>
+
+          <p>
+            Let’s create a thread!
+          </p>
+
+          {% switch "add_unit_by_chat" %}
+          <!-- <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk  %}" class="button button--small">Add Units by Chat</a> -->
+          {% endswitch %}
+
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--small button--primary">Add Thread</a>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+{% endblock %}

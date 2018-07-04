@@ -1,0 +1,48 @@
+{% extends 'ctms_base.html' %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>Add Thread</h1>
+  </header>
+
+  <!-- TODO: We don't need this if when new and edit are separate views -->
+  {% if pk %}
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+  <main class="card__content">
+    <form action="{% url 'ctms:unit_create' course_pk=course.id courslet_pk=courslet.id %}" method="POST">
+
+      <label for="{{ form.title.auto_id }}">Thread Name</label>
+      <p>Give your thread a descriptive name. The name will be displayed as a title and in your students sidebar.</p>
+      {{ form.title }}
+      {% if form.title.errors %}
+      {{ form.title.errors }}
+      {% endif %}
+
+      {% csrf_token %}
+
+        <a href="{% url 'ct:unit_lessons' course_id=course.id unit_id=courslet.id %}" class="pull-left" style="margin-top:60px; padding: 14px 0px;">
+          You can also search Courselets for exercises to add, using the old Instructor UI.
+        </a>
+        <input class='push-right' type="submit" value="Save">
+
+    </form>
+  </main>
+</div>
+{% endblock %}

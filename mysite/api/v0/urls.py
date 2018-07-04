@@ -1,6 +1,7 @@
 """ API v0 URLs. """
 from django.conf.urls import url
 
+from api.v0.views import EchoDataView
 from .views import ResponseViewSet, ErrorViewSet, GenReportView, CourseReportViewSet
 
 
@@ -25,5 +26,9 @@ urlpatterns = [
         GenReportView.as_view(),
         name='gen-report'
     ),
-
+    url(
+        r'^echo/data/$',
+        EchoDataView.as_view(),
+        name='echo-data',
+    ),
 ]

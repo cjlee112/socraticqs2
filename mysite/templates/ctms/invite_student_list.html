@@ -1,0 +1,42 @@
+{% extends "ctms/invite_list.html" %}
+{% load waffle_tags %}
+
+{% block title %}
+  Share {{ object.title }}
+{% endblock %}
+
+
+{% block invite_tester_tab_cls %}{% endblock %}
+
+{% block invite_student_tab_cls %}card__nav-active{% endblock %}
+
+{% block how_to %}
+  {% switch "ctms_invite_students" %}
+    <p>How to invite students... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>
+  {% else %}
+    <p>Coming soon...</p>
+  {% endswitch %}
+{% endblock %}
+
+
+{% block invite_form %}
+  {% for field in invite_student_form %}
+    {{ field }}
+  {% endfor %}
+  {% switch "ctms_invite_students" %}
+  <input type="submit" value="Invite"
+                   class="invite__submit__form__"
+                   data-success-msg="Invitation sent successfully. "
+                   data-fail-msg="Invitation could not be sent now. Try again later.">
+  {% endswitch %}
+{% endblock %}
+
+{% block invites_list %}
+  {% switch "ctms_invite_students" %}
+    {% with 'Student' as list_name %}
+      {% with invites.students as objects %}
+        {% include 'ctms/includes/invites_list.html' %}
+      {% endwith %}
+    {% endwith %}
+  {% endswitch %}
+{% endblock %}

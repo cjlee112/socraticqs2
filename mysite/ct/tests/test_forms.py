@@ -1,3 +1,5 @@
+import pytest
+
 from ct.forms import (
     ResponseForm,
     SelfAssessForm,
@@ -14,8 +16,9 @@ from ct.forms import (
     NewErrorForm,
     SearchFormBase,
     LogoutForm,
-    CancelForm
-)
+    CancelForm,
+    AnswerLessonForm, NewLessonForm)
+from ct.models import Lesson
 
 
 def test_response_form_positive():
@@ -170,3 +173,35 @@ def test_logout_form():
 def test_cancel_form():
     form = CancelForm(data={'task': 'task_name'})
     assert form.is_valid() == True
+
+
+def test_answerlesson_form_without_sub_kind():
+    """Test case when no sub_kind passed to AnswerLessonForm no raises error."""
+    form = AnswerLessonForm(data={
+        'title': 'Answer',
+        'text': 'some answer',
+        'number_value': '0',
+        'number_min_value': '0',
+        'number_max_value': '0',
+        'medium': Lesson.READING,
+        'url': '',
+        'changeLog': '',
+        'sub_kind': '',
+    })
+    assert form.is_valid() == True
+
+@pytest.mark.django_db
+def test_lesson_answer_attachment_form(base64_gif_image, lesson_answer_canvas):
+    attachment = 'data:image/gif;base64,{}'.format(base64_gif_image)
+    form = AnswerLessonForm(
+        instance=lesson_answer_canvas.lesson,
+        data={'attachment': attachment, 'title': 'test_title', 'text': '',
+        'medium': Lesson.READING, 'sub_kind': 'canvas',
+        'number_value': '0', 'number_min_value': '0', 'number_max_value': '0',
+        'url': '', 'changeLog': ''}
+    )
+    assert form.is_valid() == True
+
+    lesson_answer = form.save(commit=True)
+    assert lesson_answer == lesson_answer_canvas.lesson
+    assert lesson_answer.attachment.url is not None

@@ -21,13 +21,15 @@ from .models import (
 MODELS = (
     Concept,
     ConceptGraph,
-    Lesson,
     ConceptLink,
-    UnitLesson,
     Unit,
     Course,
     CourseUnit
 )
+
+@admin.register(UnitLesson)
+class UnitLessonAdmin(admin.ModelAdmin):
+    list_display = ('unit', 'lesson', 'order', 'addedBy', 'kind')
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -42,6 +44,11 @@ class BaseAdmin(admin.ModelAdmin):
     form = BaseForm
 
 
+@admin.register(Lesson)
+class AdminLesson(admin.ModelAdmin):
+    list_display = ('title', 'text', 'kind', 'sub_kind', 'enable_auto_grading', 'parent')
+
+
 @admin.register(*MODELS)
 class AdminModel(BaseAdmin):
     pass
@@ -52,8 +59,13 @@ class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
 
 
+def short_text(obj):
+    return obj.text[:25] + " ..."
+
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
+    list_display = ('author', 'kind', 'course', 'lesson', 'text', 'attachment', 'is_preview', 'is_test', short_text)
+    list_filter = ('author', 'unitLesson')
     raw_id_fields = ('lesson', 'unitLesson', 'author', 'parent')
 
 

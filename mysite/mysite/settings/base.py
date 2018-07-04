@@ -11,8 +11,8 @@ CMS_TEMPLATES = (
     ('pages/main_page.html', 'Main Page'),
     ('pages/about_page.html', 'About Page'),
     ('pages/landing_page.html', 'Landing Page'),
-    ('pages/faq_page.html', 'FAQ Page')
-
+    ('pages/faq_page.html', 'FAQ Page'),
+    ('pages/become_instructor.html', 'Become Instructor'),
 )
 
 # Set databases_name
@@ -24,7 +24,7 @@ ADMINS = (
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'django.db.backends.postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': DATABASES_NAME,  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
@@ -73,7 +73,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -84,7 +84,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -103,12 +103,13 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # URL of the login page.
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/ct/'
+LOGIN_URL = '/new_login/'
+LOGIN_REDIRECT_URL = '/ctms/'
 URL_PATH = ''
 
 MIDDLEWARE_CLASSES = (
@@ -124,8 +125,9 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.language.LanguageCookieMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'ct.middleware.MySocialAuthExceptionMiddleware',
+    'psa.middleware.MySocialAuthExceptionMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'ctms.middleware.SideBarMiddleware',
 )
 
 ROOT_URLCONF = 'mysite.urls'
@@ -147,6 +149,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'crispy_forms',
     'ct',
+    'ctms',
     'fsm',
     'analytics',
     # LTI
@@ -158,6 +161,7 @@ INSTALLED_APPS = (
     'psa',
     # Chat UI
     'chat',
+    'grading',
     'rest_framework',
     'accounts',
     'waffle',
@@ -175,6 +179,8 @@ INSTALLED_APPS = (
 
     # Raven
     'raven.contrib.django.raven_compat',
+    # bower requirements
+    'djangobower',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -255,7 +261,7 @@ FORCE_EMAIL_VALIDATION = True
 PASSWORDLESS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
-SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/email-sent/'
+SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/ctms/email_sent/'
 
 SOCIAL_AUTH_STRATEGY = 'psa.custom_django_strategy.CustomDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'psa.custom_django_storage.CustomDjangoStorage'
@@ -417,5 +423,27 @@ CMS_PLACEHOLDER_CONF = {
     },
     'landing_personal_guides': {
         'plugins': ['ParentPersonalGuidesPagePlugin']
+    },
+    'become_instructor_placeholder': {
+        'plugins': ['BecomeInstructorPlugin']
     }
 }
+
+CTMS_URL_NAMESPACE = 'ctms'
+
+BOWER_COMPONENTS_ROOT = '{}/chat/static/'.format(BASE_DIR)
+BOWER_INSTALLED_APPS = (
+    'MathJax#2.6.1',
+    'bootstrap#3.3.7',
+    'gsap#1.18.5',
+    'handlebars#4.0.5',
+    'html5shiv#3.7.3',
+    'jquery#2.2.4',
+    'placeholders#4.0.1',
+    'respond#1.4.2',
+    'screenfull#3.0.2',
+    'zoom.js#0.0.1',
+    'bootstrap-sidebar',
+)
+
+BECOME_INSTRUCTOR_URL = '/become-instructor/'

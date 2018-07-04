@@ -1,0 +1,14 @@
+{% load crispy_forms_field %}
+
+<div class="draw-svg-preview form-group">
+    <label for="id_attachment">Question attachment</label>
+    {% crispy_field titleform.attachment %}
+
+    {% if titleform.attachment.value %}
+        <label for="id_attachment">
+            <div class="draw-svg-container" style="background-image: url({{ titleform.attachment.value.url }});">
+                <div style="width: 500px; height: 500px;"></div>
+            </div>
+        </label>
+    {% endif %}
+</div>

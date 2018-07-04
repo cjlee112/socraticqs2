@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>course-new-unit-small</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="4" transform="translate(-371.000000, -1263.000000)">
+            <g id="course-new-unit-small" transform="translate(371.000000, 1263.000000)">
+                <rect id="Rectangle-293" stroke="#43B02A" stroke-width="2" x="1" y="1" width="48" height="48" rx="24"></rect>
+                <g id="Group-5" transform="translate(17.000000, 17.000000)" fill="#43B02A">
+                    <rect id="Rectangle-5" x="7" y="0" width="2" height="16" rx="1"></rect>
+                    <rect id="Rectangle-5" x="0" y="7" width="16" height="2" rx="1"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

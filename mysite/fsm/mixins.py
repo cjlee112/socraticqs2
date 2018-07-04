@@ -19,6 +19,8 @@ from ct.models import (
     ConceptGraph
 )
 from chat.models import Message, ChatDivider, UnitError
+from grading.base_grader import GRADERS
+
 
 WAIT_NODES_REGS = [r"^WAIT_(?!ASSESS$).*$", r"^RECYCLE$"]
 
@@ -184,14 +186,21 @@ class ChatMixin(object):
                             input_type=input_type,
                             kind=kind,
                             is_additional=is_additional)[0]
-        if self.node_name_is_one_of('ASK'):
+        if self.name == 'ASK':
+            SUB_KIND_TO_KIND_MAP = {
+                'choices': 'button',
+            }
+            SUBKIND_TO_INPUT_TYPE_MAP = {
+                'choices': 'options',
+            }
+            sub_kind = next_lesson.lesson.sub_kind
             _data = {
                 'contenttype': 'unitlesson',
                 'content_id': next_lesson.id,
                 'chat': chat,
                 'owner': chat.user,
-                'input_type': 'custom',
-                'kind': next_lesson.lesson.kind,
+                'input_type': 'custom', # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+                'kind': next_lesson.lesson.kind,  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
                 'is_additional': is_additional
             }
             if not self.fsm.fsm_name_is_one_of('live_chat'):
@@ -211,6 +220,12 @@ class ChatMixin(object):
                 'userMessage': True,
                 'is_additional': is_additional
             }
+            if current.lesson.sub_kind == 'choices':
+                _data.update(dict(
+                    input_type='options',
+
+                ))
+
             if not self.fsm.fsm_name_is_one_of('live_chat'):
                 message = Message.objects.get_or_create(**_data)[0]
             else:
@@ -227,7 +242,7 @@ class ChatMixin(object):
                     answer = message.response_to_check.unitLesson.get_answers().first()
                 else:
                     answer = message.lesson_to_answer.get_answers().first()
-            message = Message.objects.get_or_create(
+            message = Message.objects.create(  # get_or_create
                             contenttype='unitlesson',
                             response_to_check=response_to_chk,
                             input_type='custom',
@@ -235,7 +250,7 @@ class ChatMixin(object):
                             chat=chat,
                             owner=chat.user,
                             kind=answer.kind,
-                            is_additional=is_additional)[0]
+                            is_additional=is_additional)
         if self.node_name_is_one_of('GET_CONFIDENCE'):
             _data = dict(
                 contenttype='response',
@@ -247,11 +262,9 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional,
             )
-            if not self.fsm.fsm_name_is_one_of('live_chat'):
-                message = Message.objects.get_or_create(**_data)[0]
-            else:
-                message = Message(**_data)
-                message.save()
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
+            message = Message(**_data)
+            message.save()
         if self.node_name_is_one_of("WAIT_ASSESS"):
             if isinstance(current, Response):
                 resp_to_chk = current
@@ -297,11 +310,28 @@ class ChatMixin(object):
                 userMessage=True,
                 is_additional=is_additional
             )
-            # if not self.fsm.name == 'live_chat':
-            #     message = Message.objects.get_or_create(**_data)[0]
-            # else:
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
+
+        if self.node_name_is_one_of('GRADING'):
+            GraderClass = GRADERS.get(message.content.unitLesson.lesson.sub_kind)
+            if GraderClass:
+                grader = GraderClass(message.content.unitLesson, message.content)
+                # grade method must be called to actually do the work
+                grader.grade
+                text = 'Your answer is {}!'.format(grader.message)
+            else:
+                text = "No such grader! Grading could not be applied."
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text=text
+            )
+
         if self.node_name_is_one_of('STUDENTERROR'):
             resolve_message = Message.objects.get(
                             contenttype='unitlesson',
@@ -422,9 +452,99 @@ class ChatMixin(object):
                 chat=chat,
                 text=self.title,
                 kind='button',
-                is_additional=True,
+                is_additional=is_additional,
                 owner=chat.user,
             )[0]
+
+
+        if self.name in (
+                'GET_UNIT_NAME_TITLE',
+                'GET_UNIT_QUESTION',
+                'GET_UNIT_ANSWER',
+                'GET_HAS_UNIT_ANSWER',
+        ):
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                input_type='text',
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional
+            )
+            if isinstance(current, UnitLesson):
+                _data['content_id'] = current.id
+                # _data['text'] = current.lesson.title
+                _data['contenttype'] = 'unitlesson'
+            elif message and message.content:
+                # _data['text'] = "current.lesson"
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = message.contenttype
+
+            # content_id = current.id if current else None
+            message = Message.objects.create(**_data)
+
+        if self.name in ('START', 'UNIT_NAME_TITLE', 'NOT_A_QUESTION') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=is_additional,
+                owner=chat.user,
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=is_additional,
+                owner=chat.user,
+            )
+            # import ipdb; ipdb.set_trace()
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            elif isinstance(current, UnitLesson):
+                _data['content_id'] = current.id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
+
+        if self.name in ('HAS_UNIT_ANSWER', 'WELL_DONE'):
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='options',
+                kind='message',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional
+            )
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
+
+        if self.name in ('WELL_DONE',):
+            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
+            _data = dict(
+                chat=chat,
+                text=text,
+                input_type='options',
+                kind='button',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional
+            )
+            if message and message.content_id:
+                _data['content_id'] = message.content_id
+                _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
 
         # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS
         if is_wait_node(self.name):

@@ -3,6 +3,7 @@ import re
 from cms.plugin_base import CMSPluginBase
 from cms.plugin_pool import plugin_pool
 
+from pages.forms import BecomeInstructorForm
 from pages.models import (
     LandingPlugin,
     BannerPlugin,
@@ -23,7 +24,8 @@ from pages.models import (
     DetailsVideoPlugin,
     DetailsQuotePlugin,
     SlideShareItemPlugin,
-    SlideSharePlugin
+    SlideSharePlugin,
+    BecomeInstructorPlugin as BecomeInstructorPluginModel,
 )
 
 
@@ -227,6 +229,20 @@ class SplitThreeColumns(CMSPluginBase):
     allow_children = True
 
 
+class BecomeInstructorPlugin(CMSPluginBase):
+    render_template = 'pages/become_instructor_plugin.html'
+    model = BecomeInstructorPluginModel
+
+    def render(self, context, instance, placeholder):
+        context.update({
+            'instance': instance,
+            'placeholder': placeholder,
+            'form': BecomeInstructorForm(),
+        })
+        return context
+
+
+plugin_pool.register_plugin(BecomeInstructorPlugin)
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
 plugin_pool.register_plugin(ActiveLearningRatesPagePlugin)

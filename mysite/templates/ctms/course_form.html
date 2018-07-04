@@ -1,0 +1,58 @@
+{% extends "ctms_base.html" %}
+
+{% block title %}
+  {{ object.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>{{ object.title }}  </h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:course_view' pk=object.id %}">Courselets</a>
+        </li>
+
+        <li>
+          <!-- TODO: Add link to share -->
+          <a href="{% url 'ctms:course_invite' pk=object.id %}">Share</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:course_settings' pk=object.id %}" class="card__nav-active">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="card__content">
+      <form class="form" action="{% url 'ctms:course_settings' pk=object.id %}" method="post">
+        {% csrf_token %}
+
+        <label for="title">Course Name</label>
+        <p>Give your course a descriptive name.</p>
+        {{ form.title }}
+        {% if form.title.errors %}
+          {{ form.title.errors }}
+        {% endif %}
+
+        <label for="lti">Copy course URL</label>
+        <p>
+           LTI URL for dropping into your campus LMS
+        </p>
+        <input readonly class="textinput textInput form-control" id="id_title" maxlength="200" name="lti" type="text" value="{{ domain }}/lti{% url 'ct:course_student' object.id %}">
+
+        <input type="submit" value="Save">
+      </form>
+
+
+      <form action="{% url 'ctms:course_delete' pk=object.id %}" class="card__delete" method="post" onsubmit="return confirm('Are you sure want to delete course \n {{ object.title }}?')">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Course" class="button button--delete" data-confirm-text="Do you really want to remove this course?">
+      </form>
+    </main>
+  </div>
+{% endblock %}

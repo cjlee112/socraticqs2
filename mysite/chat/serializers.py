@@ -1,4 +1,7 @@
+import base64
+
 import injections
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
@@ -42,6 +45,7 @@ class InputSerializer(serializers.Serializer):
     Serializer for input description for next message.
     """
     type = serializers.CharField(max_length=16, read_only=True)
+    subType = serializers.CharField(max_length=16, read_only=True)
     url = serializers.CharField(max_length=64, read_only=True)
     options = serializers.ListField()
     includeSelectedValuesFromMessages = serializers.ListField(
@@ -90,13 +94,40 @@ class MessageSerializer(serializers.ModelSerializer):
         Getting description for next message.
         """
         self.set_group(obj)
+        incl_msg = []
+        sub_kind = None
+        for i in self.qs:
+            if i.contenttype == 'uniterror':
+                incl_msg.append(i.id)
+            if i.contenttype == 'unitlesson' and i.content:
+                if i.content.lesson.sub_kind == 'choices':
+                    sub_kind = 'choices'
+                    incl_msg.append(i.id)
+                if i.content.sub_kind == 'numbers':
+                    sub_kind = 'numbers'
+                if i.content.lesson.sub_kind == 'equation':
+                    sub_kind = 'equation'
+                elif i.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
+
         input_data = {
             'type': obj.get_next_input_type(),
             'url': obj.get_next_url(),
             'options': obj.get_options(),
             'doWait': obj.chat.state.fsmNode.name.startswith('WAIT_') if obj.chat.state else False,
-            'includeSelectedValuesFromMessages': [i.id for i in self.qs if i.contenttype == 'uniterror']
+            'includeSelectedValuesFromMessages': incl_msg,
         }
+        if i.contenttype == 'unitlesson':
+            if sub_kind == 'numbers':
+                input_data['html'] = '<input type="number" name="{}" value="{}">'.format(
+                    "text",
+                    0,
+                )
+            elif sub_kind == 'canvas':
+                input_data['html'] = '<input type="hidden" />'
+
+            input_data['subType'] = sub_kind
+
         if not obj.chat.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
@@ -124,14 +155,42 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         """
         Getting description for next message.
         """
+        incl_msg = []
+        sub_kind = None
+        msg = None
+        if obj.state is not None:
+            msg = obj.message_set.filter(timestamp__isnull=False).last()
+            # only last msg will be in available as obj after exiting from the loop.
+            if msg.contenttype == 'unitlesson' and msg.content:
+                if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
+                    sub_kind = 'choices'
+                    incl_msg.append(msg.id)
+                if msg.content.lesson.sub_kind == 'numbers':
+                    sub_kind = 'numbers'
+                elif msg.content.lesson.sub_kind == 'equation':
+                    sub_kind = 'equation'
+                elif msg.content.lesson.sub_kind == 'canvas':
+                    sub_kind = 'canvas'
+
         input_data = {
+            # obj - is the last item from loop
             'type': obj.next_point.input_type if obj.next_point else 'custom',
             'url': reverse('chat:messages-detail', args=(obj.next_point.id,)) if obj.next_point else None,
             'options': obj.get_options() if obj.next_point else None,
             'doWait': obj.state.fsmNode.name.startswith('WAIT_') if obj.state else False,
-            # for test purpose only
-            'includeSelectedValuesFromMessages': []
+            'includeSelectedValuesFromMessages': incl_msg,
         }
+
+        if msg and msg.contenttype == 'unitlesson':
+            if sub_kind == 'numbers':
+                input_data['html'] = '<input name="{}" type="number" value="{}">'.format(
+                    "text", 0,
+                )
+            elif sub_kind == 'canvas':
+                input_data['html'] = '<input type="hidden" />'
+
+            input_data['subType'] = sub_kind
+
         if not obj.next_point or input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
@@ -202,9 +261,10 @@ class LessonSerializer(serializers.ModelSerializer):
                     return True
                 else:
                     return False
-            if check_fsm_name('chat', 'additional'):
-                current_unitlesson_order = chat.state.unitLesson.order
-                return lesson_order < current_unitlesson_order
+            if check_fsm_name('chat'):
+                return lesson_order < chat.state.unitLesson.order
+            if check_fsm_name('additional'):
+                return lesson_order < chat.state.parentState.unitLesson.order
             else:
                 return True
         else:
@@ -279,6 +339,59 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                 # we are sendign grade only for updated progress
                 # send_outcome.delay(progress, assignment.id)
         return progress
+
+
+class AddUnitByChatStepSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Message, used when user in "Add unit by chat"
+    chat to serialize messages for Progress
+    """
+    html = serializers.CharField(source='get_sidebar_html', read_only=True)
+    isDone = serializers.SerializerMethodField()
+    isUnlocked = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return obj.id
+
+    def get_isUnlocked(self, obj):
+        return bool(obj.timestamp)
+
+    def get_isDone(self, obj):
+        return bool(obj.timestamp and obj.chat.message_set.filter(
+            userMessage=True,
+            timestamp__isnull=False,
+            id__gt=obj.id
+        ).count())
+
+    class Meta:
+        model = Message
+        fields = (
+            'id',
+            'html',
+            'isUnlocked',
+            'isDone'
+        )
+
+class AddUnitByChatSerializer(ChatProgressSerializer):
+    """
+    Serializer for progress in "Add unit by chat"
+    """
+    breakpoints = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Chat
+        fields = (
+            'progress',
+            'breakpoints',
+            'is_live',
+        )
+
+    def get_breakpoints(self, obj):
+        steps = obj.message_set.filter(is_additional=False, userMessage=False, timestamp__isnull=False)
+        self.lessons_dict = AddUnitByChatStepSerializer(many=True).to_representation(steps)
+        return self.lessons_dict
 
 
 class ResourcesSerializer(serializers.ModelSerializer):

@@ -1,6 +1,7 @@
 """
 Unit tests for core app models.py.
 """
+from random import choice
 from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -324,7 +325,12 @@ class LessonTest(TestCase):
     def test_clone_dict(self):
         concept = Concept(title='test title', addedBy=self.user)
         concept.save()
-        lesson = Lesson(title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now(), concept=concept)
+        lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, commitTime=timezone.now(), concept=concept,
+            attachment='fake_image',
+            number_value=1, number_min_value=0, number_max_value=2,
+            enable_auto_grading=True,
+        )
         lesson.save_root(concept=concept, relationship=ConceptLink.TESTS)
         clone_attr_dict = lesson._clone_dict()
         for attr in Lesson._cloneAttrs:
@@ -332,6 +338,11 @@ class LessonTest(TestCase):
         self.assertEqual(clone_attr_dict['title'], 'ugh')
         self.assertEqual(clone_attr_dict['text'], 'brr')
         self.assertEqual(clone_attr_dict['concept'], concept)
+        self.assertEqual(clone_attr_dict['attachment'], lesson.attachment)
+        self.assertEqual(clone_attr_dict['number_value'], lesson.number_value)
+        self.assertEqual(clone_attr_dict['number_min_value'], lesson.number_min_value)
+        self.assertEqual(clone_attr_dict['number_max_value'], lesson.number_max_value)
+        self.assertEqual(clone_attr_dict['enable_auto_grading'], lesson.enable_auto_grading)
 
     def test_checkout(self):
         lesson = Lesson(
@@ -1238,6 +1249,75 @@ class ResponseTest(TestCase):
         self.response.selfeval = False
         result = self.response.get_next_step()
         self.assertEqual(result, (Response.SELFEVAL_STEP, 'self-assess your answer'))
+
+
+class ResponseManagerTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='test', password='test')
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
+        self.unit = Unit(title='Unit title', addedBy=self.user)
+        self.unit.save()
+        self.concept = Concept(title='test title', addedBy=self.user)
+        self.concept.save()
+        self.lesson = Lesson(
+            title='ugh', text='brr', addedBy=self.user, kind=Lesson.ORCT_QUESTION, concept=self.concept
+        )
+        self.lesson.save_root()
+        self.lesson.add_concept_link(self.concept, ConceptLink.TESTS, self.user)
+        self.unit_lesson = UnitLesson(
+            unit=self.unit, addedBy=self.user, treeID=self.lesson.id, lesson=self.lesson, order=0
+        )
+        self.unit_lesson.save()
+        self.responses = []
+        for cnt in xrange(100):
+            self.responses.append(Response(
+                lesson=self.lesson,
+                unitLesson=self.unit_lesson,
+                course=self.course,
+                kind=Response.ORCT_RESPONSE,
+                text='test text {}'.format(cnt),
+                confidence=Response.GUESS,
+                selfeval=Response.DIFFERENT,
+                status=NEED_HELP_STATUS,
+                author=self.user,
+                is_test=choice([False, True])
+            ))
+            self.responses[cnt].save()
+
+    def test_has_no_test_responses(self):
+        responses = Response.objects.all()
+        has_test = any(i.is_test for i in responses)
+        # should be False
+        self.assertFalse(has_test)
+
+    def test_filter_by_is_test__response_is_empty(self):
+        responses = Response.objects.filter(is_test=True)
+        # should be empty
+        self.assertFalse(bool(list(responses)))
+
+    def test_test_responses_method(self):
+        responses = Response.objects.test_responses()
+        has_test = any(i.is_test for i in responses)
+        # should be True
+        self.assertTrue(has_test)
+
+    def test_test_responses_method_get_kwargs(self):
+        responses = Response.objects.test_responses(**{'kind': 'dasd'})
+        # response should be empty
+        self.assertFalse(bool(responses))
+
+    def test_test_responses_method_get_kwargs2(self):
+        responses = Response.objects.test_responses(**dict(course=self.course))
+        # response should be not empty
+        self.assertTrue(bool(responses))
+
+    def test_test_responses(self):
+        responses = Response.objects.test_responses()
+        count_resp = responses.count()
+        cnt = len([r for r in self.responses if r.is_test])
+        # should be True
+        self.assertTrue(cnt == count_resp)
 
 
 class StudentErrorTest(TestCase):

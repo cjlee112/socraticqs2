@@ -1,0 +1,16 @@
+<div id="draw-svg--{{ lesson.id }}" class="draw-svg-container" disabled="{{ disabled|yesno:'1,0' }}"
+     style="background-image: url({{ background_image.url }})">
+    {% if svg_image %}
+        {{ svg_image.read|safe }}
+    {% else %}
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
+             xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
+             height="500">
+        </svg>
+    {% endif %}
+</div>
+<script type="text/javascript">
+    document.drawToElement([document.getElementById('draw-svg--{{ lesson.id }}')], function (data) {
+        $('.chat-input').find('.chat-input-custom').find('input').val(data);
+    });
+</script>

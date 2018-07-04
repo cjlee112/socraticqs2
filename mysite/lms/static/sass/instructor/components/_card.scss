@@ -1,0 +1,201 @@
+.card {
+  position: relative;
+  background: #fff;
+  border-top: 1px solid #DDE2E6;
+  border-bottom: 1px solid #DDE2E6;
+  margin: 23px 0 0 0;
+
+  section {
+    margin-top: 60px;
+    border-top: 1px solid #DDE2E6;
+    padding-top: 60px;
+
+    &:first-of-type {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    h2 {
+      margin-top: 3px;
+    }
+
+    form {
+      margin-top: 45px;
+    }
+  }
+}
+
+.card__topbar {
+  height: 96px;
+  border-bottom: 1px solid #DDE2E6;
+  padding: 36px 24px;
+
+  h1 {
+    @include ellipsis;
+  }
+}
+
+.card__topbar.card__topbar--with-description {
+  height: auto;
+
+  p {
+    color: $color-text-primary;
+    margin: 18px 0 0 0;
+    max-width: 600px;
+  }
+}
+
+.card__nav {
+  border-bottom: 1px solid #DDE2E6;
+  padding-left: 9px;
+  height: 48px;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0; // Removes space between inline-block elements
+    white-space: nowrap;
+    overflow: scroll; // Makes long navigation scrollable on smaller viewports
+  }
+
+  li {
+    display: inline-block;
+  }
+
+  a {
+    position: relative;
+    display: inline-block;
+    color: #333;
+    font-size: 14px;
+    line-height: 24px;
+    padding: 12px 15px;
+    transition: all 0.2s;
+
+    &:before {
+      content: '';
+      visibility: hidden;
+      opacity: 0;
+      background: $color-primary;
+      width: calc(100% - 30px);
+      height: 2px;
+      position: absolute;
+      bottom: 0;
+      left: 15px;
+      transition: all 0.2s;
+    }
+
+    &.card__nav-active, &:hover, &:active, &:focus {
+      color: $color-primary;
+
+      &:before {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+}
+
+.card__sub {
+  position: relative;
+
+  .card__topbar {
+    height: 60px;
+    padding: 18px 24px;
+
+    h2 {
+      @include ellipsis;
+      font-size: 16px;
+      line-height: 24px;
+      margin: 0;
+    }
+  }
+}
+
+.card__content {
+  position: relative;
+  padding: 48px 24px;
+
+  > *:first-child {
+    margin-top: -12px;;
+  }
+}
+
+.card__empty-state {
+  h3 {
+    margin: 4px 0 0 0;
+  }
+
+  p {
+    margin: 15px 0 0 0;
+  }
+
+  .button {
+    margin: 27px 0 0 0;
+  }
+}
+
+// Larger viewports
+@media (min-width: 1024px) {
+  .card {
+    margin: 59px 60px 0 60px;
+    border-radius: 4px;
+    border-left: 1px solid #DDE2E6;
+    border-right: 1px solid #DDE2E6;
+  }
+
+  .card__topbar {
+    padding: 36px 400px 36px 60px;
+  }
+
+  .card__topbar.card__topbar--with-description {
+    padding-right: 60px;
+  }
+
+  .card__nav {
+    position: absolute;
+    top: 0;
+    right: 45px;
+    height: 96px;
+    padding-left: 0;
+
+    ul {
+      overflow: auto;
+    }
+
+    a {
+      padding-top: 39px;
+      padding-bottom: 33px;
+    }
+  }
+
+  .card__sub {
+    .card__topbar {
+      padding: 18px 24px 18px 60px;
+    }
+
+    .card__nav {
+      height: 60px;
+
+      a {
+        padding-top: 19px;
+        padding-bottom: 17px;
+      }
+    }
+  }
+
+  .card__content {
+    padding: 60px;
+    min-height: 168px;
+  }
+
+  .card__delete {
+    .button, input[type=submit], input[type=submit].button {
+      position: absolute;
+      bottom: 60px;
+      left: 60px;
+      margin: 0;
+    }
+  }
+}

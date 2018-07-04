@@ -26,6 +26,7 @@ from accounts.models import Profile
 
 ROLES_MAP = {
     'Instructor': Role.INSTRUCTOR,
+    'Administrator': Role.INSTRUCTOR,
     'Learner': Role.ENROLLED,
 }
 
@@ -173,10 +174,19 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
 
     user.enroll(roles, course_id)
     if Role.INSTRUCTOR in roles:
-        if not unit_id:
-            return redirect(reverse('ct:course', args=(course_id,)))
+        # TODO: change redirect urls when instructor UI completed
+        # NOTE: waffle allow to disable\enable features in the project through admin UI.
+        # Here we enable\disable redirecting user to instructor UI.
+        if waffle.switch_is_active('instructor_UI'):
+            if not unit_id:
+                return redirect(reverse('ct:course', args=(course_id,)))
+            else:
+                return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
         else:
-            return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
+            if not unit_id:
+                return redirect(reverse('ct:course', args=(course_id,)))
+            else:
+                return redirect(reverse('ct:unit_tasks', args=(course_id, unit_id)))
     else:
         course = get_object_or_404(Course, id=course_id)
         unit = None

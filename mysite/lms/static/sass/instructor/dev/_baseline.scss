@@ -1,0 +1,22 @@
+body {
+	position: relative;
+}
+
+body:after {
+	position: absolute;
+	width: auto;
+	height: auto;
+	z-index: 9999;
+	content: '';
+	display: block;
+	pointer-events: none;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: url(http://basehold.it/i/12/ff00ff) repeat top left;
+}
+
+body:active:after {
+	display: none;
+}

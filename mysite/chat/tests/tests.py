@@ -2,6 +2,7 @@
 
 import json
 
+from ddt import ddt, data, unpack
 from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -26,6 +27,7 @@ from ..models import Chat
 from ..fsm_plugin.chat import get_specs, END as CHAT_END
 from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
+from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, InitializeLiveSession, CheckChatInitialView
 
 
 class CustomTestCase(TestCase):
@@ -168,7 +170,7 @@ class MainChatViewTests(CustomTestCase):
         self.assertFalse(response.status_code == 404)
 
         response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code,)), follow=True)
-        self.assertTemplateUsed(response, 'psa/custom_login.html')
+        self.assertTemplateUsed(response, 'psa/new_custom_login.html')
 
     def test_404_on_non_existent_enroll_code(self):
         """
@@ -274,13 +276,18 @@ class MainChatViewTests(CustomTestCase):
 
 
     # @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
-    @patch('chat.api.InitNewChat.view.next_handler.start_point', return_value=Mock())
-    def test_next_handler_start_point_called_once(self, start_point_mock):
+    @patch('chat.api.InitNewChat.get_view')
+    def test_next_handler_start_point_called_once(self, get_view):
         """
         Check that ChatInitialView.next_handler.start_point called once.
         """
         course_unit = self.get_course_unit()
         enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        start_point = Mock()
+        view = ChatInitialView()
+        view.next_handler = Mock(start_point=start_point)
+        get_view.return_value = view
 
         self.client.login(username='test', password='test')
         response = self.client.get(
@@ -294,19 +301,19 @@ class MainChatViewTests(CustomTestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         json_content = json.loads(response.content)
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
         chat_id = json_content.get('id')
 
         self.assertTrue(response.status_code == 200)
 
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
         self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
         response = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
-        start_point_mock.assert_called_once()
+        start_point.assert_called_once()
 
 
 class MessagesViewTests(CustomTestCase):
@@ -939,6 +946,258 @@ class HistoryAPIViewTests(CustomTestCase):
         # self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.get_help())
 
 
+class NumbersTest(CustomTestCase):
+    """Tests to check numbers functionality."""
+
+    fixtures = ['chat/tests/fixtures/initial_numbers.json']
+
+    def test_typical_chat_flow(self):
+        """
+        Check for typical chat flow.
+        """
+        course_unit = Course.objects.get(title='numbers course').get_course_units()[0]
+        enroll_code = EnrollUnitCode.get_code(course_unit)
+
+        self.client.login(username='alex', password='123')
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
+        )
+
+        # get history
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        self.assertEquals(json_content['input']['subType'], 'numbers')
+
+        next_url = json_content['input']['url']
+
+        # post answer
+        not_correct_answer = 'SOmeText'
+        answer = '1'
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": not_correct_answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        self.assertEquals({'error': 'Not correct value!'}, json_content)
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next message (confidence)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
+
+        # confidence answer
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
+        # self eval answer
+        self_eval = json_content['input']['options'][2]['value']
+        self_eval_text = json_content['input']['options'][2]['text']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": self_eval, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+
+        # get next question (2)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['input']['subType'], 'numbers')
+
+        self.assertEquals(len(json_content['addMessages']), 4)  # + 1 message for grading
+
+        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+
+        grading_msg = u'Your answer is partially correct!'
+        self.assertEquals(json_content['addMessages'][1]['html'], grading_msg)
+
+        # post answer (2)
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"text": answer, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next message (confidence) (2)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # confidence answer
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next message - self eval (2)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
+        self_eval = json_content['input']['options'][0]['value']
+
+        # self eval answer (2)
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": self_eval, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next message - error models
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        self.assertNotIn(
+            'data-selectable-value=""', json_content['addMessages'][-1]['html']
+        )
+
+        # Lesson from fixtures
+        lesson = Lesson.objects.get(id=78)
+        lesson.add_unit_aborts = True
+        lesson.save()
+
+        # get the same message - error models
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        self.assertIn(
+            'data-selectable-value="128"', json_content['addMessages'][-1]['html']
+        )
+
+        next_url = json_content['input']['url']
+        msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
+
+        # post error model answer
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"selected": {msg_id: {"errorModel": ["80"]}}, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # # get next message - question (3)
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        self.assertEquals(next_url, None)
+
+
 class ProgressAPIViewTests(CustomTestCase):
     """
     Tests for /progress API.
@@ -1398,3 +1657,50 @@ class LessonSerializerTests(CustomTestCase):
 
         self.assertEquals(result['id'], msg_id)
         self.assertEquals(result['html'], msg.content.lesson.title)
+
+
+@ddt
+class TestChatGetBackUrls(CustomTestCase):
+    """
+    Test that back_url on chat pages are correct.
+    Logic should be:
+        - if it is usual course view - back_url should go to LMS
+        - if it is course preview - back_url should go to CTMS
+        - if it is add lesson by chat - back_url shout go to CTMS
+        - if it is course tester - back url should go to LMS
+    """
+    @unpack
+    @data(
+        (ChatInitialView, "Course",
+         lambda self: reverse(
+             'lms:course_view',
+             kwargs={'course_id':self.course.id})
+         ),
+        (CourseletPreviewView, "Return",
+         lambda self: reverse(
+            'ctms:courslet_view',
+            kwargs={
+                'course_pk': self.course.id,
+                'pk': self.unit.pk
+            })
+        ),
+        (ChatAddLessonView, "Course",
+         lambda self: reverse(
+             'ctms:courslet_view',
+             kwargs={
+                 'course_pk': self.course.id,
+                 'pk': self.courseunit.id
+             })
+         ),
+        (CheckChatInitialView, "Return",
+         lambda self: reverse(
+             'lms:tester_course_view',
+             kwargs={'course_id': self.course.id})
+         )
+    )
+    def test_back_url(self, cls, valid_name, url_callable):
+        kwargs = {'courseUnit': self.courseunit}
+        name, url = cls.get_back_url(**kwargs)
+        valid_url = url_callable(self)
+        self.assertEqual(name, valid_name)
+        self.assertEqual(url, valid_url)

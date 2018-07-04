@@ -1,0 +1,233 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Courselets{% endblock %}</title>
+    <meta name="description" content="{% block description %}Write your own exercises using our fast, effective Open Response Concept Testing methodology.{% endblock %}">
+    <link rel="icon" href="{% static "img/instructor/favicon.png" %}">
+
+    <link rel="stylesheet" href="//fast.fonts.net/cssapi/295027bc-49f8-4267-859a-8e5aea9f11b6.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/css/perfect-scrollbar.css">
+    <link rel="stylesheet" href="{% static "css/instructor/app.css" %}">
+    {# render_block "css" #}
+
+    {% include "google-analytics.html" %}
+  </head>
+
+  <body>
+    {% include "ctms/includes/sidebar.html" %}
+
+    <a href="#sidebar" class="hamburger" aria-expanded="false" aria-controls="sidebar"><span class="sr-only">Toggle navigation</span></a>
+
+    <div class="page">
+      <header class="page__topbar">
+        <div class="page__topbar-inner">
+          {% if user and user.is_authenticated %}
+            <a class="page__account" href={% url "accounts:settings" %}>
+              <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt={% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %} class="avatar">
+
+              <span>
+                {% if user.first_name %}
+                    {{ user.first_name }}
+                {% else %}
+                    {{ user.username }}
+                {% endif %}
+              </span>
+            </a>
+          {% else %}
+            <a class="page__account" href={% url "new_login" %}>
+              <span>Sign in</span>
+            </a>
+          {% endif %}
+        </div>
+      </header>
+
+      {% if messages %}
+      <div class="page__messages">
+        {% for message in messages %}
+        <div class="alert alert-{%if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+        <!-- TODO: Add notifications here -->
+
+        <!--
+          <div class="alert alert-success">
+            Succcess
+          </div>
+
+          <div class="alert alert-info">
+            Info
+          </div>
+
+          <div class="alert alert-warning">
+            Warning
+          </div>
+
+          <div class="alert alert-danger">
+            Danger
+          </div>
+        -->
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+
+    {% block js %}
+    {% endblock %}
+
+    <!-- TODO: Move this to an external js file -->
+    <script>
+      $(function(){
+        // Mobile navigation
+        $('.hamburger').on('click', function(e){
+          e.preventDefault();
+          var sidebarSelector = $(this).attr('href');
+
+          $(this).toggleClass('hamburger--active');
+          $(sidebarSelector).stop().fadeToggle();
+        });
+      });
+
+      // Confirm on delete buttons
+      $('.button--delete').on('click', function(e) {
+        var text = $(this).data('confirm-text') || 'Are you sure?';
+
+        if(!window.confirm(text)) {
+          e.preventDefault();
+        }
+      });
+
+      // Cookies
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+
+      // Expandable content
+      $('.expandable__toggle').on('click', function(e) {
+        e.preventDefault();
+
+        const content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
+        content.toggle();
+      });
+
+      $('.link__post__data').on('click', function(e) {
+        var csrftoken = getCookie('csrftoken');
+        var linkData = $(this).data();
+        var scs_callback = linkData.onSuccessCallback;
+        var fl_callback = linkData.onFailCallback;
+        if(linkData['href']){
+          $.post(
+            linkData['href'],
+            {"csrfmiddlewaretoken": csrftoken},
+            function(data) {
+              if(scs_callback){
+                $.globalEval(scs_callback);
+              }
+              alert(linkData['successMsg'] || "Succeeded!");
+            }).fail(function() {
+              if(fl_callback){
+                $.globalEval(fl_callback);
+              }
+              alert(linkData['failMsg'] || "Failed!");
+            });
+        }
+        e.preventDefault();
+      });
+
+      $('.invite__submit__form').on('click', function(e) {
+        var linkData = $(this).data();
+        var scs_callback = linkData.onSuccessCallback;
+        var fl_callback = linkData.onFailCallback;
+        var my_form = $(this).closest('form');
+        var action_url = my_form.attr('action');
+        if(action_url) {
+          $.post(
+            action_url,
+            my_form.serialize(),
+            function(data) {
+              if(data.success) {
+                if(scs_callback){
+                  $.globalEval(scs_callback);
+                }
+              }
+              alert(linkData['successMsg'] || "Succeeded!");
+            },
+            'json').fail(function(){
+              if(fl_callback){
+                $.globalEval(fl_callback);
+              }
+              alert(linkData['failMsg'] || "Failed!");
+            })
+        }
+        e.preventDefault();
+      })
+
+      // Custom scrollbar in sidebar
+      $('.sidebar__scroll-container').perfectScrollbar();
+
+    </script>
+
+    {# this csrf_token needed for ajax requests #}
+    {% csrf_token %}
+
+    {% if sidebar.course and sidebar.courslet %}
+    <script>
+        $(function() {
+            var originalOrder = $('.sortable li').map(function(i) { return this.id; }).get();
+            $('.sortable').sortable({
+                update: function (event, ui) {
+                    var newOrder = $('.sortable').sortable("toArray");
+                    if (newOrder != originalOrder) {
+                        $.post(
+                            "{% url 'ctms:courslet_reorder' course_pk=sidebar.course.pk courslet_pk=sidebar.courslet.pk %}",
+                            {
+                                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                                data: JSON.stringify({'ordered_ids': newOrder})
+                            },
+                            function(resp) {
+                                if (!resp.error) {
+                                    // $.notify(resp.msg);
+                                    // $('.sortable').effect("pulsate", 1000);
+                                    window.location.reload();
+                                } else {
+                                    $.notify('Something went wrong! <br>' + resp.error);
+                                }
+
+                            }
+                        )
+                    }
+                }
+            }).disableSelection();
+        });
+
+    </script>
+    {% endif %}
+
+  </body>
+</html>

@@ -1,25 +1,30 @@
-import pygeoip
-
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 from django.contrib.messages.api import add_message
-from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.conf import settings
+from django.http.response import HttpResponseRedirect
 from django.http.response import Http404
-from django.template import RequestContext
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render_to_response, get_object_or_404
-from django.contrib.auth import logout, login, authenticate
+from django.core.urlresolvers import reverse
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from social.actions import do_complete
+from social.apps.django_app.utils import psa
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME
 
 from social.backends.utils import load_backends
+from social.apps.django_app.views import _do_login
 from social.apps.django_app.views import complete as social_complete
 from social.exceptions import AuthMissingParameter
-from accounts.models import Profile
-from psa.forms import CompleteEmailForm
+from accounts.models import Profile, Instructor
+from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
 from psa.models import SecondaryEmail
+from psa.forms import SignUpForm, EmailLoginForm, CompleteEmailForm
 
 
 def context(**extra):
@@ -63,40 +68,138 @@ def validation_sent(request):
     )
 
 
-def custom_login(request):
+def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/', login_form_cls=EmailLoginForm):
     """
     Custom login to integrate social auth and default login.
     """
     username = password = ''
+    u_hash_sess = request.session.get('u_hash')
     logout(request)
-    kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
-    if request.POST:
-        params = request.POST
-        username = request.POST['username']
-        password = request.POST['password']
+    if u_hash_sess:
+        request.session['u_hash'] = u_hash_sess
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                Profile.check_tz(request)
-                return redirect(request.POST.get('next', '/ct/'))
+    if not next_page.startswith('/'):
+        next_page = reverse(next_page)
+    if request.method == 'GET' and 'next' in request.GET:
+        next_page = request.GET['next']
+    kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
+    form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
+    if request.POST:
+        form = login_form_cls(request.POST, initial=form_initial)
+        if form.is_valid():
+            user = form.get_user()
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
+                        del request.session['u_hash']
+                        return redirect('ctms:shared_courses')
+                    return redirect(request.POST.get('next', next_page))
+        messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
-        params = request.GET
-    if 'next' in params:  # must pass through for both GET or POST
-        kwargs['next'] = params['next']
-    return render_to_response(
-        'psa/custom_login.html', context_instance=RequestContext(request, kwargs)
+        form = login_form_cls(initial=form_initial)
+    kwargs['form'] = form
+    kwargs['next'] = next_page
+    return render(
+        request,
+        template_name,
+        kwargs
     )
 
 
-@login_required
-@render_to('ct/person.html')
+@never_cache
+@csrf_exempt
+@psa('ctms:email_sent')
+def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
+    """Authentication complete view"""
+    if u_hash and u_hash == u_hash_sess:
+        # if invited tester join course - create user immediately without confirmation email.
+        data = request.POST.dict().copy()
+        pw = make_password(request.POST.get('password'))
+        data['password'] = pw
+        user = request.backend.strategy.create_user(**data)
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+        request.session['u_hash'] = u_hash
+
+    response = do_complete(
+        request.backend, _do_login, request.user,
+        redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
+
+    if not u_hash or u_hash != u_hash_sess:
+        # if not invited tester join course - logout user
+        logout(request)
+
+        # add resend_user_email to the session to be able to resend link
+        request.session['resend_user_email'] = request.POST.get('email')
+        # getting just created CustomCode
+        cc = CustomCode.objects.filter(email=request.POST.get('email')).order_by('-id').first()
+        if cc:
+            request.session['cc_id'] = cc.id
+    # remove u_hash from session
+    request.session.pop('u_hash', None)
+    if request.user.is_authenticated():
+        Profile.check_tz(request)
+    return response
+
+
+def signup(request, next_page=None):
+    """
+    This function handles custom login to integrate social auth and default login.
+    """
+    u_hash =request.POST.get('u_hash')
+    u_hash_sess = request.session.get('u_hash')
+
+    logout(request)
+    if u_hash and u_hash == u_hash_sess:
+        # if we have u_hash and it's equal with u_hash from session
+        # replacenexturl with shared_courses page url
+        next_page = reverse('ctms:shared_courses')
+        request.session['next'] = next_page
+        post = request.POST.copy()
+        post['next'] = next_page
+        request.POST = post
+    else:
+        next_page = request.POST.get('next') or request.GET.get('next') or next_page
+
+    form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
+    kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
+    if request.POST:
+        form = SignUpForm(request.POST)
+        # params = request.POST
+        if form.is_valid():
+            response = custom_complete(request, 'email', u_hash=u_hash, u_hash_sess=u_hash_sess)
+            return response
+        else:
+            messages.error(
+                request, "We could not create the account. Please review the errors below."
+            )
+    kwargs['form'] = form
+    kwargs['next'] = next_page
+    return render(request, 'psa/signup.html', kwargs)
+
+
 def done(request):
     """
     Login complete view, displays user data.
     """
-    return context(person=request.user)
+    @login_required
+    @render_to('ct/person.html')
+    def old_UI_wrap(request):
+        return context(person=request.user)
+
+    @login_required
+    def new_UI_wrap(request):
+        if not request.user.course_set.count():
+            # if newly created user - show create_course page
+            return HttpResponseRedirect(reverse('ctms:create_course'))
+        return HttpResponseRedirect(reverse('ctms:my_courses'))
+
+    # NOTE: IF USER has attached instructor instance will be redirected to /ctms/ (ctms dashboard)
+    if getattr(request.user, 'instructor', None):
+        return new_UI_wrap(request)
+
+    return old_UI_wrap(request)
 
 
 @login_required
@@ -138,22 +241,38 @@ def social_auth_complete(request, *args, **kwargs):
 
 
 def complete(request, *args, **kwargs):
-    form = CompleteEmailForm(request.POST or request.GET)
+    data_to_use = request.POST or request.GET
+    form = SignUpForm(data_to_use)
+
+    post_data = request.POST.copy()
+    post_data.pop('csrfmiddlewaretoken', None)
+    # if there's only email and csrf field in POST - it's login by email.
+    if len(post_data.keys()) == 1 and 'email' in post_data:
+        login_by_email = True
+        form = CompleteEmailForm(request.POST)
+        if form.is_valid():
+            post_data.update({
+                'first_name': '',
+                'last_name': '',
+                'institution': '',
+                REDIRECT_FIELD_NAME: reverse('ctms:my_courses'),
+            })
+            request.POST = post_data
+    else:
+        login_by_email = False
+
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
-            if request.user.is_authenticated():
+            if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
+                Instructor.objects.get_or_create(user=request.user)
                 Profile.check_tz(request)
             return resp
         except AuthMissingParameter:
-            messages.error(
-                request,
-                "Email already verified. Please log in using form below or sign up."
-            )
+            messages.error(request, 'Email already verified.')
             if request.user.is_authenticated():
                 Profile.check_tz(request)
-                return redirect('ct:person_profile', user_id=request.user.id)
-            return redirect('ct:home')
+            return redirect('ctms:my_courses')
     else:
         # add message with transformed form errors
         err_msg = "\n".join([

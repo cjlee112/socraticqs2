@@ -1,0 +1,43 @@
+{% extends 'ctms_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card">
+  <header class="card__topbar">
+    <h1>{{ unit.title }}</h1>
+  </header>
+
+  <nav class="card__nav">
+    <ul>
+      <li>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Edit</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+      </li>
+
+      <li>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Settings</a>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="card__content">
+    <form method="post" action="">
+      {% csrf_token %}
+      {% crispy role_form %}
+    </form>
+
+    <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
+      {% csrf_token %}
+      <input type="submit" class="button pull-left button--delete" style="position: inherit; margin-top: 30px;" value="Remove Thread" data-confirm-text="Do you really want to remove this thread?">
+    </form>
+  </main>
+</div>
+<style>
+  .button--delete {
+    margin-top: -50px !important;
+  }
+</style>
+{% endblock %}

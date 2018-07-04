@@ -42,7 +42,15 @@
 {% endif %}
 
 {{ unitLesson.lesson.text |md2html }}
+{% if unitLesson.parent.lesson.sub_kind == 'numbers' %}
 
+
+    <div  class="col-lg-12 row">
+      <div class="alert-danger col-md-4 text-right">Min value: {{ unitLesson.lesson.number_min_value }}</div>
+      <div class="alert-success col-md-4 text-center">Exact value: {{ unitLesson.lesson.number_value }}</div>
+      <div class="alert-danger col-md-4 text-left">Max value: {{ unitLesson.lesson.number_max_value }}</div>
+    </div>
+{% endif %}
 {% if unitLesson.lesson.sourceDB == 'youtube' %}
 <iframe width="560" height="315"
         src="http://www.youtube.com/embed/{{ unitLesson.lesson.sourceID }}?rel=0"
@@ -107,7 +115,20 @@ $( "#headtoggle" ).click(function() {
   <p>No students have responded yet.</p>
 {% endif %}
 
-    
+{# if (question or answer) sub_kind is 'canvas' #}
+{% if unitLesson.lesson.sub_kind == 'canvas' or unitLesson.parent.sub_kind == 'canvas' %}
+    {% if unitLesson.lesson.attachment %}
+        <p><b>Attachment</b></p>
+        <div class="draw-svg-container" style="background-image: url({% if unitLesson.lesson.kind == 'answer' %}{{ unitLesson.parent.lesson.attachment.url }}{% else %}{{ unitLesson.lesson.attachment.url }}{% endif %})" disabled="1">
+            {% if unitLesson.lesson.kind == 'answer' %}
+                {{ unitLesson.lesson.attachment.read|safe }}
+            {% else %}
+                <div style="width: 500px; height: 500px;"></div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}
+
 {% if needHelpResponses %}
 {% include 'ct/steel_need_help_responses.html' %}
 {% endif %}

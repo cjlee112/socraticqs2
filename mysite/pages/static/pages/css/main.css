@@ -3,6 +3,9 @@
  * Author: Karl Ollars
  * Email: karlmagnusollars@gmail.com
  */
+html {
+  margin-top: 0 !important; }
+
 body {
   background: #fff;
   font: normal 14px/24px "proxima-nova", sans-serif;
@@ -102,12 +105,17 @@ ol {
 
 ul {
   list-style: none;
-  margin: 26px 0 0 0;
+  margin: 0;
   padding: 0; }
+  ul.nav li {
+    list-style-image: none; }
+  ul.dropdown-menu li {
+    padding: 5px; }
+    ul.dropdown-menu li .form-group {
+      margin-bottom: 0; }
   ul li {
-    padding: 0 0 0 32px;
-    background: url(../img/list-icon.png) no-repeat 0 6px;
-    margin: 0 0 12px 0; }
+    list-style-image: url(../img/list-icon.svg);
+    list-style-position: inside; }
     ul li:last-child {
       margin: 0; }
 
@@ -615,5 +623,7 @@ section {
   .faq dt {
     background-image: url(../img/faq-expand@2x.png);
     background-size: 19px 19px; } }
+#cms-top + .navbar-fixed-top {
+  margin-top: 46px; }
 
 /*# sourceMappingURL=main.css.map */

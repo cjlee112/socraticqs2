@@ -17,19 +17,37 @@ INSTALLED_APPS_LOCAL = (
 )
 MIDDLEWARE_LOCAL = ()
 
+debug_toolbar_enabled = False
 try:
     import debug_toolbar
     INSTALLED_APPS_LOCAL += ('debug_toolbar',)
     MIDDLEWARE_LOCAL = (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
+
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.versions.VersionsPanel',
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.settings.SettingsPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        'debug_toolbar.panels.templates.TemplatesPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+        'debug_toolbar.panels.logging.LoggingPanel',
+        'debug_toolbar.panels.redirects.RedirectsPanel',
+    ]
+    debug_toolbar_enabled = True
 except ImportError:
     pass
 
 INSTALLED_APPS += INSTALLED_APPS_LOCAL
-MIDDLEWARE_CLASSES = MIDDLEWARE_LOCAL + MIDDLEWARE_CLASSES
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + MIDDLEWARE_LOCAL
 INTERNAL_IPS = (
-    '127.0.0.1',
+    '127.0.0.1',  # local development
+    '172.18.0.1',  # in docker development
 )
 
 # Use nose to run all tests

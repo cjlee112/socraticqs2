@@ -1,0 +1,22 @@
+{% extends "ctms/invite_list.html" %}
+
+{% block title %}
+  Share {{ object.title }}
+{% endblock %}
+
+{% block how_to %}
+  <p>TODO: Add a description here.</p>
+{% endblock %}
+
+
+{% block invite_tester_tab_cls %}card__nav-active{% endblock %}
+
+{% block invite_student_tab_cls %}{% endblock %}
+
+{% block invites_list %}
+  {% with 'Tester' as list_name %}
+    {% with invites.testers as objects %}
+      {% include 'ctms/includes/invites_list.html' %}
+    {% endwith %}
+  {% endwith %}
+{% endblock %}

@@ -1,0 +1,187 @@
+@import "https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.css";
+
+.draw-svg-container {
+  display: inline-block;
+  position: relative;
+
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-size: contain;
+  background-image: url(logo.svg);
+  background-position: center;
+  background-color: #fff;
+  background-repeat: no-repeat;
+
+  .btn {
+    color: black;
+    background-color: #fff;
+    outline: none;
+    padding: 5px 10px;
+    border-radius: 0;
+
+    &:disabled {
+      color: lightgray;
+    }
+
+    &:hover {
+      transform: none;
+    }
+
+    &:active,
+    &:focus,
+    &.active {
+      color: #4890c4;
+      box-shadow: none;
+      background-color: #fff;
+      outline: none;
+      transform: none;
+    }
+  }
+
+  &:not([disabled]) {
+    svg {
+      cursor: url('https://cdn2.iconfinder.com/data/icons/snipicons/500/pencil-128.png') 20 109, auto;
+    }
+  }
+
+  .actions {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    font-size: 12px;
+    line-height: 28px;
+    z-index: 1000;
+    justify-content: center;
+    padding: 3px 0;
+    background-color: white;
+
+    label {
+      margin: 0;
+      cursor: pointer;
+      line-height: 35px;
+    }
+  }
+
+  input.editor {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    position: absolute;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 30px;
+    color: transparent;
+    font-weight: 500;
+    padding: 0;
+    letter-spacing: -0.5px;
+    caret-color: red;
+  }
+
+  .canvas {
+    position: relative;
+    z-index: 999;
+  }
+
+  .shapes-wrapper {
+    position: relative;
+    display: flex;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 20px;
+    margin-right: 10px;
+  }
+
+  .shapes-wrapper label {
+    margin-right: 50px;
+  }
+
+  .shapes {
+    position: absolute;
+    display: flex;
+    width: 50px;
+    margin-left: 37px;
+    flex-direction: column;
+  }
+
+  .shapes-wrapper.active .btn {
+    display: inline-block;
+  }
+
+  .shapes-wrapper.active .shapes {
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px, rgba(0, 0, 0, 0.16) 0px 2px 5px;
+    background-color: #fff;
+  }
+
+  .shapes-wrapper .btn {
+    display: none;
+    padding: 7px 5px;
+    width: 50px;
+    height: 35px;
+
+    &.active {
+      margin-top: 1px;
+    }
+  }
+
+  .shapes-wrapper .btn.active {
+    display: inline-block;
+  }
+
+  .btn.color-picker-handler {
+    padding: 12px;
+    margin: 0 12px;
+    border: solid 1px #f1f1f1;
+  }
+
+  .colors-wrapper {
+
+    .color-picker {
+      display: inline-block;
+      position: absolute;
+      top: 40px;
+      margin-left: -140px;
+
+      &.hidden {
+        display: none;
+      }
+    }
+  }
+
+  .widths-wrapper {
+    position: relative;
+    display: flex;
+    white-space: nowrap;
+    vertical-align: middle;
+    margin-left: 20px;
+  }
+
+  .widths-wrapper label {
+    margin-right: 50px;
+  }
+
+  .widths {
+    position: absolute;
+    display: flex;
+    width: 35px;
+    margin-left: 35px;
+    flex-direction: column;
+  }
+
+  .widths-wrapper.active .btn {
+    display: inline-block;
+  }
+
+  .widths-wrapper.active .widths {
+    box-shadow: rgba(0, 0, 0, 0.12) 0 2px 10px, rgba(0, 0, 0, 0.16) 0 2px 5px;
+  }
+
+  .widths-wrapper .btn {
+    display: none;
+    width: 35px;
+    font-size: 14px;
+    padding: 7px 5px;
+  }
+
+  .widths-wrapper .btn.active {
+    display: inline-block;
+  }
+}

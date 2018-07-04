@@ -1,0 +1,38 @@
+FROM ubuntu:14.04
+
+RUN apt-get -y update && apt-get install -y \
+    pandoc \
+    python2.7 \
+    python-pip \
+    git \
+    libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    python-dev \
+    zlib1g-dev \
+    phantomjs \
+    wget \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+# install latest nodejs
+RUN wget -O - https://deb.nodesource.com/setup_8.x | bash - \
+    && apt-get install -y nodejs
+
+# install yarn
+RUN wget -O - https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get update && apt-get install -y yarn \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+COPY requirements ./requirements
+
+RUN pip install --upgrade pip setuptools
+RUN pip install --ignore-installed -U -r /requirements.txt
+
+ENV PYTHONUNBUFFERED 1
+
+RUN mkdir /courselets
+ADD . /courselets
+WORKDIR /courselets/mysite
