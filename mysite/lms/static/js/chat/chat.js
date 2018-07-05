@@ -27,6 +27,8 @@ $(function(){
           dataType: 'json',
           success: function(result) {
             CUI.config.chatID = Number(result.id);
+            CUI.config.is_test = result.is_test;
+            CUI.config.is_preview = result.is_preview;
           }
         })
       }
