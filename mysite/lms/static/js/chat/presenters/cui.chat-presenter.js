@@ -208,6 +208,8 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
      */
   this.equationPreview = $('.preview');
 
+  this.sidebarCourseLink = $('aside.chat-sidebar header a');
+
   // Add event listeners
   this._addEventListeners();
 
@@ -514,6 +516,10 @@ CUI.ChatPresenter.prototype._showChat = function(){
     this._getProgress();
     this._getResources();
   }, this)});
+
+  if(CUI.config.is_test || CUI.config.is_preview) {
+    this.sidebarCourseLink.attr('href', '');
+  };
 };
 
 /**
