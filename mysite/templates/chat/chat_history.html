@@ -116,7 +116,7 @@
   <!-- Chat sidebar -->
   <aside class="chat-sidebar">
     <header>
-      <a href="{{ domain }}/lms/courses/{{ course.id }}">
+      <a {% if chat.is_test or chat.is_preview %}{% else %}href="{{ domain }}/lms/courses/{{ course.id }}"{% endif %}>
         <div class="inner clearfix">
           {% if small_img_url %}
           <div class="cover" style="background-image:url('{{ small_img_url }}');"></div>

@@ -504,7 +504,9 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     session = serializers.CharField(source='state.id', read_only=True)
+    is_preview = serializers.BooleanField(read_only=True)
+    is_test = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Chat
-        fields = ('id', 'session',)
+        fields = ('id', 'session', 'is_test', 'is_preview')
