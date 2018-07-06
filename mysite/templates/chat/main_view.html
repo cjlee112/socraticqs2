@@ -272,12 +272,14 @@
   <script type="text/javascript" src="{% static 'writemaths/writemaths.js' %}"></script>
 
   <!-- Mathjax -->
-  <!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">-->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
     MathJax.Hub.Config({
-      extensions: ['tex2jax.js',"TeX/AMSmath.js","TeX/AMSsymbols.js"],
-      tex2jax: {inlineMath: [["$","$"]]}, //["\\(","\\)"]
-      jax: ["input/TeX","output/HTML-CSS"],
+      config: ["MMLorHTML.js"],
+      jax: ["input/TeX","input/MathML","input/AsciiMath","output/HTML-CSS","output/NativeMML", "output/PreviewHTML"],
+      extensions: ["tex2jax.js","mml2jax.js","asciimath2jax.js","MathMenu.js","MathZoom.js", "fast-preview.js", "AssistiveMML.js", "a11y/accessibility-menu.js"],
+      TeX: {
+        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+      },
       displayAlign: "center",
       displayIndent: "0.1em",
       showProcessingMessages: false
