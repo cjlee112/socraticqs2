@@ -86,6 +86,15 @@ There are a couple of files related to docker. They are:
  - docker-commands.sh - clear *.pyc files and starts web server
 
 
+
+New Interactions Features:
+--------------------------
+ * Multiple Choices Feature
+ * Equation Feature
+ * Numbers Feature
+ * Canvas Feature
+
+
 Multiple Choices Feature:
 -------------------------
 
@@ -97,6 +106,70 @@ How to test this functionality:
 * observe Courses Dashboard and you will see `test MultChoices` course with a couple of cocurselets inside of it.
 * .....
 * Profit!
+
+
+To create unit with multiple choices:
+ * create course, courselet in old UI
+ * create thread with ``kind`` ``Question`` (``ORCT``)
+ * input this text in question text area:
+
+::
+
+   [choices]
+   () a
+   (*) b
+   () c
+   () d
+
+
+Where: not correct answer is empty parenthes ``()`` and correct answer is ``(*)``
+ * change field ``sub_kind`` to ``Multiple choices``
+ * save
+ * go to New IU and click ``Courselet Preview`` to view changes.
+
+
+Equation Feature:
+-----------------
+To create a thread with numbers answer (and grading):
+ * create course, courselet (or use existing one) in old UI
+ * create thread with ``kind`` ``Question`` (``ORCT``)
+ * input this text in `Question` field for example: ``.. math:: F=mg``
+
+
+ Please note that ``..`` and ``::`` are required ``.. math::`` is a prefix to find formulas.
+ * input some text in ``Answer`` field
+ * change field ``sub_kind`` to ``Equation``
+ * save
+ * go to new UI and click ``Preview Courselet``
+
+
+
+Numbers Feature:
+-----------------
+To create a thread with numbers answer (and grading):
+ * create course, courselet (or use existing one) in old UI
+ * create thread with ``kind`` ``Question`` (``ORCT``)
+ * input this text in ``Question`` field for example: ``1+1=?``
+ * input answer in field ``Answer``
+ * change field ``sub_kind`` to ``Numbers``, also you can enable autograding with ``Enable autograding checkbox``
+ * go to answer and change ``Number value`` - it's exact answer for this question
+ * change  and ``Number max value`` and ``Number min value`` - this is precision.
+ * Please note that ``Number min value <= Number value <= Number max value``
+ * save
+ * go to new UI and click ``Preview Courselet``
+
+
+Canvas Feature:
+---------------
+To create a thread with canvas answer:
+ * create course, courselet (or use existing one) (in old UI)
+ * create thread with ``kind`` ``Question`` (``ORCT``)
+ * input this text in ``Question`` field for example: ``Paint number 1``
+ * change field ``sub_kind`` to ``Canvas``
+ * you also can upload image that will be used as a back ground for space where user will draw image
+ * save
+ * go to new UI and click ``Preview Courselet``
+
 
 
 Quality check
