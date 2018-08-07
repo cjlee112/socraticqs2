@@ -37,6 +37,8 @@
         {% if form.title.errors %}
           {{ form.title.errors }}
         {% endif %}
+          {{ form.trial.label_tag }}
+          {{ form.trial }}
 
         <label for="lti">Copy course URL</label>
         <p>
