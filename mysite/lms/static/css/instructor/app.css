@@ -864,4 +864,10 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     right: 4px;
     margin: 0; }
 
+.chat-input-text-form textarea {
+  min-height: 20px; /* for default height */
+  overflow: hidden;
+  resize: none;
+  border: 1px solid #000;
+}
 /*# sourceMappingURL=app.css.map */

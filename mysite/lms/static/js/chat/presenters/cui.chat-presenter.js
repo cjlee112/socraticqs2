@@ -1190,17 +1190,9 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
       e.preventDefault();
       this._$inputContainer.find('.chat-input-text-form').submit();
     }
-    if (e.which === 13) {
-        // when user clicks on ENTER - we just put 2 new lines into inputContainer
-        // but don't submit data to the server.
-//        var $textarea = this._$inputContainer.find('textarea');
-//        var value = $textarea.val();
-//        var position = $textarea.getCursorPosition();
-//        var new_val = value.slice(0, position) + "\r\n" + value.slice(position);
-//        $textarea.val(new_val);
-//        $textarea.selectRange(position+1);
-//        $textarea.trigger({ type : 'keypress' });
-    }
+    var $textarea = this._$inputContainer.find('textarea');
+    $textarea.css('height','auto');
+    $textarea.height($textarea.get(0).scrollHeight);
   }, this));
 
   // Overflow actions
@@ -1215,6 +1207,4 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     this._postAction(action);
   }, this));
 
-  // Autoexpanding textarea for text input
-  this._$inputContainer.find('.chat-input-text textarea').expandingTextarea({maxRows: 10});
 };
