@@ -248,7 +248,7 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
 class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     template_name = 'ctms/course_form.html'
     model = Course
-    fields = ['title']
+    fields = ['title', 'trial']
 
     def get(self, request, *args, **kwargs):
         if not self.am_i_instructor():

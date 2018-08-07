@@ -173,7 +173,7 @@ class CourseTitleForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', self.submitLabel))
     class Meta:
         model = Course
-        fields = ['title', 'access', 'description']
+        fields = ['title', 'access', 'description', 'trial']
 
 
 class NewCourseTitleForm(CourseTitleForm):

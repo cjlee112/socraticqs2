@@ -1393,6 +1393,7 @@ class Course(models.Model):
     atime = models.DateTimeField('time submitted', default=timezone.now)
 
     copied_from = models.ForeignKey('Course', blank=True, null=True)
+    trial = models.BooleanField(default=False)
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)
