@@ -61,11 +61,7 @@ class Invite(models.Model):
 
     @staticmethod
     def search_user_by_email(email):
-        email_name, domain = clean_email_name(email)
-        return User.objects.filter(
-            models.Q(email=email) |
-            models.Q(email__iregex="^{}@{}$".format(r"\.?".join(email_name), domain))
-        ).first()
+        return User.objects.filter(email=email).first()
 
     @classmethod
     def create_new(cls, commit, course, instructor, email, invite_type):
