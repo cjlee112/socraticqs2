@@ -70,9 +70,12 @@
           </section>
 
           <section>
+        {% if user.has_usable_password %}
             <h2>Change Password</h2>
-
-            {% if password_form %}
+        {% else %}
+              <h2>Create Password</h2>
+        {% endif %}
+        {% if password_form %}
               <form name="" action="." method="post">
                 {% csrf_token %}
 
