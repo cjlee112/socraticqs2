@@ -255,6 +255,8 @@ SOCIAL_AUTH_DISCONNECT_PIPELINE = (
     'social.pipeline.disconnect.disconnect'
 )
 
+SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user/'
+
 PROTECTED_USER_FIELDS = ['first_name', 'last_name', 'email']
 
 FORCE_EMAIL_VALIDATION = True
