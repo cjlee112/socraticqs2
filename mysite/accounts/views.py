@@ -71,6 +71,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         kwargs = {}
         has_errors = False
         non_field_errors_list = []
+        do_email_saving = False
 
         def get_form_changed_data(form):
             data = form.changed_data
@@ -84,16 +85,19 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                 changed_data = get_form_changed_data(form)
                 if form.is_valid() and changed_data:
                     save = form_save_part[form_id](form)
-                    rsp = save()
                     if form_id == 'email_form':
-                        return rsp
+                        do_email_saving = True
+                        email_save = save
+                    else:
+                        save()
                 elif changed_data:
                     has_errors = True
                     non_field_errors_list.append(unicode(form.non_field_errors()))
                 kwargs[form_id] = form
             else:
                 kwargs[form_id] = form_cls()
-
+        if do_email_saving:
+            return email_save()
         kwargs['person'] = request.user
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
