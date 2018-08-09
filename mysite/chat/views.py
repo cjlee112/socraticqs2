@@ -37,6 +37,7 @@ class ChatInitialView(LoginRequiredMixin, View):
     """
     next_handler = injections.depends(ProgressHandler)
     template_name = 'chat/main_view.html'
+    tester_mode = False
 
     @staticmethod
     def get_back_url(*args, **kwargs):
@@ -194,6 +195,22 @@ class ChatInitialView(LoginRequiredMixin, View):
         kw.update(kwargs)
         return Chat.objects.filter(**kw).first()
 
+    def get_chat_sessions(self, request, enroll_code, courseUnit):
+        return Chat.objects.filter(
+            enroll_code=enroll_code,
+            user=request.user,
+            instructor=courseUnit.course.addedBy,
+            is_live=False,
+            is_test=self.tester_mode,
+            is_preview=False
+        ).annotate(
+            not_finished=Case(
+                When(state_id__isnull=True, then=0),
+                When(state_id__isnull=False, then=1),
+                default=0,
+                output_field=IntegerField())
+        ).order_by('-not_finished', '-last_modify_timestamp')
+
     def get(self, request, enroll_key, chat_id=None):
         enroll_code = self.get_enroll_code_object(enroll_key)
         courseUnit = enroll_code.courseUnit
@@ -240,18 +257,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         except AttributeError:
             instructor_icon = static('img/student/avatar-teacher.jpg')
 
-        chat_sessions = Chat.objects.filter(
-            enroll_code=enroll_code,
-            user=request.user,
-            instructor=courseUnit.course.addedBy,
-            is_live=False
-        ).annotate(
-            not_finished=Case(
-            When(state_id__isnull=True, then=0),
-            When(state_id__isnull=False, then=1),
-            default=0,
-            output_field=IntegerField())
-        ).order_by('-not_finished', '-last_modify_timestamp')
+        chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
         # ).annotate(
         #     lessons_done=models.Sum(
@@ -582,6 +588,8 @@ class InitializeLiveSession(ChatInitialView):
 
 
 class CheckChatInitialView(ChatInitialView):
+    tester_mode = True
+
     @staticmethod
     def create_new_chat(request, enroll_code, courseUnit, **kwargs):
         return ChatInitialView.create_new_chat(
