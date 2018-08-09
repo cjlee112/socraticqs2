@@ -26,7 +26,9 @@ class CourseView(View):
                     enroll_code__courseUnit=courselet,
                     user=request.user,
                     state__isnull=False,
-                    is_live=False
+                    is_live=False,
+                    is_preview=False,
+                    is_test=False
                 ).first()
             }
             for courselet in course.get_course_units(True)
@@ -115,7 +117,15 @@ class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
             (
                 courselet,
                 EnrollUnitCode.get_code(courselet, isTest=True),
-                len(courselet.unit.get_exercises())
+                len(courselet.unit.get_exercises()),
+                Chat.objects.filter(
+                    enroll_code__courseUnit=courselet,
+                    user=request.user,
+                    state__isnull=False,
+                    is_live=False,
+                    is_test=True,
+                    is_preview=False
+                ).first()
             )
             for courselet in course.get_course_units(False)
         )
