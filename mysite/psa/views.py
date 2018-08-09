@@ -95,6 +95,8 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
                         del request.session['u_hash']
                         return redirect('ctms:shared_courses')
                     return redirect(request.POST.get('next', next_page))
+                else:
+                    return redirect('inactive-user-error')
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial=form_initial)
@@ -304,3 +306,7 @@ def login_as_user(request, user_id):
         return redirect('ct:home')
     else:
         raise Http404("This action is not allowed")
+
+
+def inactive_user_error(request):
+    return render(request, 'accounts/inactive_user_login_error.html')

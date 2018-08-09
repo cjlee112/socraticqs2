@@ -33,6 +33,7 @@ urlpatterns = patterns(
             'next_page': '/ct/',
             'login_form_cls': UsernameLoginForm
         }, name='login'),
+    url(r'^inactive-user/$', 'psa.views.inactive_user_error', name="inactive-user-error"),
     url(r'^signup/$', 'psa.views.signup', {'next_page': 'login'}, name='signup'),
     url(r'^new_login/$',
         'psa.views.custom_login',
