@@ -90,6 +90,7 @@ class Chat(models.Model):
     last_modify_timestamp = models.DateTimeField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     progress = models.IntegerField(default=0, blank=True, null=True)
+    is_trial = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-last_modify_timestamp']

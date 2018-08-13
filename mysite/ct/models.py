@@ -1530,6 +1530,7 @@ class Role(models.Model):
     course = models.ForeignKey(Course)
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    trial_mode = models.NullBooleanField()
 
     class Meta:
         unique_together = ('role', 'course', 'user')

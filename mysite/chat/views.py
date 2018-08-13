@@ -1,4 +1,5 @@
 import logging
+import random
 from django.db.models.aggregates import Count
 from django.db.models.expressions import When, Case
 from django.db.models.fields import BooleanField, IntegerField
@@ -170,18 +171,54 @@ class ChatInitialView(LoginRequiredMixin, View):
             user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
         )
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        user_trial_mode = self.define_user_trial_mode(request, courseUnit)
         defaults = dict(
             user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
-            is_preview=False
+            is_preview=False,
+            is_trial=user_trial_mode
         )
         defaults.update(kwargs)
         chat = Chat(**defaults)
-        chat.save(request)
+        chat.save()
         return chat
+
+    def define_user_trial_mode(self, request, course_unit):
+        """
+        Define trial mode for enrolled user depending on course's trial mode settings
+        If mode still is undefined get percent of user's trial mode
+         and if count of them is less than 50% set trial mode randomly,
+        Arguments:
+            request (obj): Django Request
+            course_unit (obj): Model object
+        Return (bool): Existing or newly added trial mode
+        """
+        user = request.user
+        user_enrolled = self.user_enrolled(request, course_unit).first()
+        if user_enrolled:
+            if course_unit.course.trial and user_enrolled.trial_mode is None:
+                # get users enrolled to this course
+                enrolled_users = Role.objects.filter(
+                    course=course_unit.course.id,
+                    role=Role.ENROLLED
+                )
+                trial_mode_percent = float(enrolled_users.filter(trial_mode=True).count()) / enrolled_users.count() * 100
+                roles_to_update = Role.objects.filter(
+                      user=user.id, role__in=[Role.ENROLLED, Role.SELFSTUDY], course=course_unit.course.id)
+                if trial_mode_percent < 50:  # hardcoded but can be implemented for adjusting from admin
+                    random_choice = random.choice([True, False])
+                    roles_to_update.update(trial_mode=random_choice)
+                    return random_choice
+                else:
+                    roles_to_update.update(trial_mode=False)
+                    return False
+            else:
+                return bool(user_enrolled.trial_mode)
+        return False
+
+
 
     @staticmethod
     def check_unitlessons_with_order_null_exists(unit):
@@ -397,9 +434,8 @@ class CourseletPreviewView(ChatInitialView):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
-        return ChatInitialView.create_new_chat(
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        return self.create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
@@ -590,9 +626,8 @@ class InitializeLiveSession(ChatInitialView):
 class CheckChatInitialView(ChatInitialView):
     tester_mode = True
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
-        return ChatInitialView.create_new_chat(
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        return self.create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
