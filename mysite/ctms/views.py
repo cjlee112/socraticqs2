@@ -422,11 +422,14 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         super(UnitView, self).get_context_data(**kwargs)
         course = self.get_course()
         courslet = self.get_courslet()
+        is_trial = self.request.GET.get('is_trial') in ['true', 'True', '1']
+        responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
         kwargs.update({
             'course': course,
             'courslet': courslet,
-            'responses': self.object.response_set.all().order_by('-atime'),
-            'unit': self.get_object()
+            'responses': responses,
+            'unit': self.get_object(),
+            'is_trial': is_trial
         })
         kwargs.update(self.kwargs)
         self.request.session['unitID'] = kwargs['unit'].id

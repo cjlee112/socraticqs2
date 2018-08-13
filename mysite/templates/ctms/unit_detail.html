@@ -28,6 +28,10 @@
   </div>
 
   <main class="card__content">
+    <ul class="nav nav-tabs custom-nav-tabs">
+      <li class="{% if not is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courslet_pk=courslet.pk pk=unit.pk %}">Common</a></li>
+      <li class="{% if is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courslet_pk=courslet.pk pk=unit.pk %}?is_trial=true">Trial</a></li>
+    </ul>
     {% if responses %}
       <table>
         <thead>

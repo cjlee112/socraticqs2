@@ -1025,6 +1025,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
     course = get_object_or_404(Course, pk=course_id)
     course_unit = get_object_or_404(CourseUnit, course=course, unit=unit)
+    is_trial = request.GET.get('is_trial') in ['true', 'True', '1']
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
@@ -1053,6 +1054,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
             table_body[role.user].append(
                 Response.objects.filter(
                     unitLesson=orct,
+                    is_trial=is_trial,
                     lesson=orct.lesson, author=role.user
                 ).order_by('-atime').first()
             )
@@ -1066,7 +1068,8 @@ def unit_answers(request, course_id, unit_id, **kwargs):
             roles=roles,
             table_head=table_head,
             table_body=table_body,
-            back_url_ul_id=request.session.get('unitID')
+            back_url_ul_id=request.session.get('unitID'),
+            is_trial=is_trial
         )
     )
 
