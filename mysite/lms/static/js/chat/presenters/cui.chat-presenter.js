@@ -1192,7 +1192,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     }
     var $textarea = this._$inputContainer.find('textarea');
     $textarea.css('height','auto');
-    $textarea.height($textarea.get(0).scrollHeight);
+    $textarea.height($textarea.get(0).scrollHeight || '24px');
   }, this));
 
   // Overflow actions
