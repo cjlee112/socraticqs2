@@ -213,9 +213,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 # if the percent is not exceeded get random value for trial mode
                 if trial_mode_percent < 50:  # hardcoded but can be implemented for adjusting from admin
                     trial_mode = random.choice([True, False])
-                    roles_to_update.update(trial_mode=trial_mode)
-                else:  # the percent exceeded - leave value with False
-                    roles_to_update.update(trial_mode=trial_mode)
+                roles_to_update.update(trial_mode=trial_mode)
             else:
                 trial_mode = bool(user_enrolled.trial_mode)  # course is not trial or role has already been set
         return trial_mode
