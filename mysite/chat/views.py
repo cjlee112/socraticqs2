@@ -435,7 +435,7 @@ class CourseletPreviewView(ChatInitialView):
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
     def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
-        return self.create_new_chat(
+        return super(CourseletPreviewView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
@@ -627,7 +627,7 @@ class CheckChatInitialView(ChatInitialView):
     tester_mode = True
 
     def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
-        return self.create_new_chat(
+        return super(CheckChatInitialView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
