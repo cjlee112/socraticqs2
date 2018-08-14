@@ -197,26 +197,28 @@ class ChatInitialView(LoginRequiredMixin, View):
         """
         user = request.user
         user_enrolled = self.user_enrolled(request, course_unit).first()
-        if user_enrolled:
+        trial_mode = False
+        if user_enrolled:  # if user's role exists
+            # course is trial and role.trial_mode has been set
             if course_unit.course.trial and user_enrolled.trial_mode is None:
                 # get users enrolled to this course
                 enrolled_users = Role.objects.filter(
-                    course=course_unit.course.id,
+                    course_id=course_unit.course.id,
                     role=Role.ENROLLED
                 )
+                # count the percent of users in trial mode
                 trial_mode_percent = float(enrolled_users.filter(trial_mode=True).count()) / enrolled_users.count() * 100
                 roles_to_update = Role.objects.filter(
-                      user=user.id, role__in=[Role.ENROLLED, Role.SELFSTUDY], course=course_unit.course.id)
+                      user=user.id, role__in=[Role.ENROLLED, Role.SELFSTUDY], course_id=course_unit.course.id)
+                # if the percent is not exceeded get random value for trial mode
                 if trial_mode_percent < 50:  # hardcoded but can be implemented for adjusting from admin
-                    random_choice = random.choice([True, False])
-                    roles_to_update.update(trial_mode=random_choice)
-                    return random_choice
-                else:
-                    roles_to_update.update(trial_mode=False)
-                    return False
+                    trial_mode = random.choice([True, False])
+                    roles_to_update.update(trial_mode=trial_mode)
+                else:  # the percent exceeded - leave value with False
+                    roles_to_update.update(trial_mode=trial_mode)
             else:
-                return bool(user_enrolled.trial_mode)
-        return False
+                trial_mode = bool(user_enrolled.trial_mode)  # course is not trial or role has already been set
+        return trial_mode
 
 
 
