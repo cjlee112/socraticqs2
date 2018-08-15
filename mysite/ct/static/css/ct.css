@@ -31,3 +31,16 @@
 ul.messages > li {
     color: red;
 }
+
+.custom-nav-tabs {
+    border-bottom: 0 !important;
+    margin-bottom: 5px;
+}
+
+.custom-nav-tabs-li > a {
+    border: none !important;
+}
+
+.custom-nav-tabs-li > a:hover {
+    border-radius: 4px;
+}

@@ -1214,6 +1214,8 @@ class Response(models.Model, SubKindMixin):
     parent = models.ForeignKey('Response', null=True, blank=True)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
 
+    is_trial = models.BooleanField(default=False)
+
     objects = ResponseManager()
 
     def __unicode__(self):

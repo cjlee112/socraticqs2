@@ -297,6 +297,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 resp = message.content
                 resp.text = text
+            resp.is_trial = chat.is_trial
             resp.save()
 
             if not message.timestamp:
@@ -338,6 +339,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             # tes, preview flags
             resp.is_test = chat.is_test
             resp.is_preview = chat.enroll_code.isPreview
+            resp.is_trial = chat.is_trial
 
             resp.kind = message.lesson_to_answer.kind
             resp.sub_kind = message.lesson_to_answer.sub_kind
