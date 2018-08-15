@@ -75,4 +75,4 @@ Deploy Stage:
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart gunicorn
     - sudo supervisorctl restart celery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org"}'
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
