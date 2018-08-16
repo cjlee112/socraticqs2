@@ -86,7 +86,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.push_state(chat, request, self.FMS_name if chat.is_trial else self.FMS_name)
+        self.push_state(chat, request, 'chat_trial' if chat.is_trial else self.FMS_name)
         m = chat.state.fsmNode.get_message(chat)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
