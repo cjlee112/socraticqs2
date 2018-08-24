@@ -57,7 +57,7 @@ class AdminModel(BaseAdmin):
 @admin.register(Role)
 class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
-    exclude = ('trial_mode',)
+    # exclude = ('trial_mode',)
 
 
 def short_text(obj):

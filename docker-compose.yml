@@ -21,5 +21,15 @@ services:
     volumes:
       - cr_db:/var/lib/postgresql/data/
 
+  mongo:
+    container_name: cr_mongo
+    restart: unless-stopped
+    image: mongo:latest
+    volumes:
+      - cr_mongo:/data/db
+    ports:
+      - "27017:27017"
+
 volumes:
   cr_db:
+  cr_mongo:

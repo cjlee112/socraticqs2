@@ -449,3 +449,8 @@ BOWER_INSTALLED_APPS = (
 )
 
 BECOME_INSTRUCTOR_URL = '/become-instructor/'
+
+
+# Mongo
+DB_DATA = 'data'
+MONGO_HOST = 'localhost'

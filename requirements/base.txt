@@ -43,3 +43,5 @@ pygeoip==0.3.2
 raven==6.1.0
 
 kombu==4.1.0
+
+pymongo==3.7.1
