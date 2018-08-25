@@ -453,4 +453,4 @@ BECOME_INSTRUCTOR_URL = '/become-instructor/'
 
 # Mongo
 DB_DATA = 'data'
-MONGO_HOST = 'localhost'
+MONGO_HOST = 'mongo'
