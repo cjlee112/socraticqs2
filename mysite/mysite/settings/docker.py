@@ -53,7 +53,6 @@ GOOGLE_ANALYTICS_CODE = ""
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
-
 try:
     from local import *
 except ImportError:

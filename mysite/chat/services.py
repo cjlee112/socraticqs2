@@ -31,6 +31,7 @@ class GroupMessageMixin(object):
     """
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
+        Lesson.ORCT_QUESTION: ('message',),
         Lesson.EXPLANATION: ('message', 'button'),
         Lesson.ERROR_MODEL: ('message', 'button'),
         'response': ('message',
@@ -87,7 +88,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
 
     def start_point(self, unit, chat, request):
         self.push_state(chat, request, 'chat_trial' if chat.is_trial else self.FMS_name)
-        m = chat.state.fsmNode.get_message(chat)
+        m = chat.state.fsmNode.get_message(chat, request)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
         return chat.next_point
@@ -104,15 +105,15 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         if additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
             unitlesson = additionals.first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
-            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         elif resources:
             self.push_state(chat, request, 'resource', {'unitlesson': current})
-            next_point = chat.state.fsmNode.get_message(chat)
+            next_point = chat.state.fsmNode.get_message(chat, request)
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
             chat.state.fsmNode = edge.transition(chat, request)
             chat.state.save()
-            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         else:
             return None
 
@@ -158,7 +159,7 @@ class LiveChatFsmHandler(FsmHandler):
 
     def start_point(self, unit, chat, request, **kwargs):
         self.push_state(chat, request, self.FMS_name, **kwargs)
-        m = chat.state.fsmNode.get_message(chat)
+        m = chat.state.fsmNode.get_message(chat, request)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
         return chat.next_point

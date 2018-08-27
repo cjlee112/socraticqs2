@@ -125,15 +125,34 @@ class ASK(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+            dict(name='next', toNode='ABORTS', title='Answer a question'),
         )
+
+
+class ABORTS(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Error options'
+    edges = (
+        dict(name='next', toNode='GET_ABORTS', title='Choose errors'),
+    )
+
+
+class GET_ABORTS(object):
+    get_path = get_lesson_url
+    next_edge = next_lesson
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    edges = (
+        dict(name='next', toNode='GET_ANSWER', title='View Next Lesson'),
+    )
 
 
 class GET_ANSWER(object):
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
-        )
+        dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
+    )
 
 
 class CONFIDENCE(object):
@@ -239,6 +258,8 @@ def get_specs():
             TITLE,
             LESSON,
             ASK,
+            ABORTS,
+            GET_ABORTS,
             GET_ANSWER,
             CONFIDENCE,
             GET_CONFIDENCE,
