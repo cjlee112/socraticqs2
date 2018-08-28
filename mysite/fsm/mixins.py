@@ -177,7 +177,10 @@ class ChatMixin(object):
                     raise UnitLesson.DoesNotExist
                 unitStatus = chat.state.get_data_attr('unitStatus')
                 next_ul = unitStatus.unit.unitlesson_set.get(order=unitStatus.order+1)
-                if next_ul and next_ul.lesson.kind in SIMILAR_KINDS and kind in SIMILAR_KINDS:
+                # Add CONTINUE button here
+                if (next_ul and next_ul.lesson.kind in SIMILAR_KINDS and
+                    kind in SIMILAR_KINDS or
+                    next_ul.lesson.kind == Lesson.ORCT_QUESTION):
                     input_type = 'options'
                     kind = 'button'
             except UnitLesson.DoesNotExist:

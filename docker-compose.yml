@@ -13,6 +13,7 @@ services:
       - "8000:8000"
     links:
       - postgres
+      - mongo
 
   postgres:
     container_name: cr_postgres
@@ -23,7 +24,6 @@ services:
 
   mongo:
     container_name: cr_mongo
-    restart: unless-stopped
     image: mongo:latest
     volumes:
       - cr_mongo:/data/db

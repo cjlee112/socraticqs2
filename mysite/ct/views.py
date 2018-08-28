@@ -1048,16 +1048,21 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     table_head = [i.lesson.title for i in exercises]
     table_body = OrderedDict()
     for role in roles:
-        for orct in exercises:
-            if not table_body.get(role.user):
-                table_body[role.user] = []
-            table_body[role.user].append(
-                Response.objects.filter(
-                    unitLesson=orct,
-                    is_trial=is_trial,
-                    lesson=orct.lesson, author=role.user
-                ).order_by('-atime').first()
-            )
+        if Response.objects.filter(
+            unitLesson__unit=unit,
+            is_trial=is_trial,
+            author=role.user
+        ).exists():
+            for orct in exercises:
+                if not table_body.get(role.user):
+                    table_body[role.user] = []
+                table_body[role.user].append(
+                    Response.objects.filter(
+                        unitLesson=orct,
+                        is_trial=is_trial,
+                        lesson=orct.lesson, author=role.user
+                    ).order_by('-atime').first()
+                )
     return pageData.render(
         request,
         'ct/unit_answers.html',
