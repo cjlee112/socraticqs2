@@ -393,7 +393,6 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
             unit=self.object,
             course=self.get_course(),
             addedBy=self.request.user,
-            releaseTime=datetime.now(),
             order=0,
         )
         return redirect(self.get_success_url())
@@ -1115,6 +1114,3 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
             unit.order = order
             unit.save()
         return JsonResponse({'ok': 1, 'msg': 'Order has been changed!'})
-
-
-

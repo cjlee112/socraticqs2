@@ -85,3 +85,5 @@ mysite/media/
 *.dat
 
 *journal*
+
+.pytest_cache
