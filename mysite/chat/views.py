@@ -84,11 +84,10 @@ class ChatInitialView(LoginRequiredMixin, View):
             containers_with_querysets = (
                 (will_learn, ConceptLink.objects.filter(
                     Q(lesson=unit_lesson.lesson),
-                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
-                )),
+                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS)))
+                 if unit_lesson.unit.is_show_will_learn else ()),
                 (need_to_know, ConceptLink.objects.filter(
-                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES
-                ))
+                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES))
             )
             for contaner, qs in containers_with_querysets:
                 for concept_link in qs:

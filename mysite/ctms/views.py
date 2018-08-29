@@ -550,7 +550,7 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = Unit
-    fields = ('title',)
+    fields = ('title', 'is_show_will_learn')
     course_pk_name = 'course_pk'
     courslet_pk_name = 'pk'
     template_name = 'ctms/courslet_settings.html'
