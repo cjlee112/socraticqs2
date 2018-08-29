@@ -237,8 +237,9 @@ class PageData(object):
         self.fsmLauncher = {}
         self.fsmData = {}
         if self.fsmStack.state:
-            if self.fsmStack.state.hideTabs: # turn off tab interface
-                self.navTabs = ()
+            # Disable this for now
+            # if self.fsmStack.state.hideTabs: # turn off tab interface
+            #     self.navTabs = ()
             self.fsm_help_message = self.fsmStack.state.fsmNode \
               .get_help(self.fsmStack.state, request)
         else: # only show Start Activity menu if no FSM running
@@ -270,9 +271,14 @@ class PageData(object):
         url = self.fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
     def fsm_off_path(self):
-        'True if not on current node view or Activity Center view'
-        return not self.fsmStack.state.fsm_on_path(self.path) and \
-          self.path != reverse('fsm:fsm_status')
+        """
+        True if not on current node view or Activity Center viewself.
+
+        False if preview modeself.
+        """
+        return ('preview' not in self.fsmStack.state.fsmNode.funcName and
+                not self.fsmStack.state.fsm_on_path(self.path) and
+                self.path != reverse('fsm:fsm_status'))
     def set_refresh_timer(self, request, timer=True):
         'start or end the refresh timer'
         if timer:

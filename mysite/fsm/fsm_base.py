@@ -14,6 +14,8 @@ class FSMStack(object):
     """
     Main interface to our current FSM if any.
     """
+    CHAT_NAMES = ('chat', 'additional', 'courselet_preview')
+
     def __init__(self, request, **kwargs):
         try:
             fsmID = request.session['fsmID']
@@ -64,7 +66,7 @@ class FSMStack(object):
         startArgs = startArgs or {}
         fsm = FSM.objects.select_related('startNode').get(name=fsmName)
         activity = None
-        if not activity and self.state and fsmName not in ('chat', 'additional'):
+        if not activity and self.state and fsmName not in self.CHAT_NAMES:
             activity = self.state.activity
         self.state = FSMState(
             user=request.user,
@@ -78,7 +80,7 @@ class FSMStack(object):
             **kwargs
         )
         path = self.state.start_fsm(self, request, stateData, **startArgs)
-        if fsmName not in ('chat', 'additional'):
+        if fsmName not in self.CHAT_NAMES:
             request.session['fsmID'] = self.state.pk
         return path
 
