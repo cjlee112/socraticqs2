@@ -925,6 +925,7 @@ class Unit(models.Model):
     description = models.TextField(blank=True)
     img_url = models.URLField(blank=True)
     small_img_url = models.URLField(blank=True)
+    is_show_will_learn = models.BooleanField(default=False)
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'
