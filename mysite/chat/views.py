@@ -261,7 +261,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             return render(
                 request,
                 'lti/error.html',
-                {'message': 'This Courselet is not published yet.'}
+                {'message': 'This Courselet is not published yet or you have no permisions to open it.'}
             )
         if not self.user_enrolled(request, courseUnit):
             enrolling = Role.objects.get_or_create(user=request.user,
@@ -452,7 +452,7 @@ class CourseletPreviewView(ChatInitialView):
         :param courseUnit: course unit
         :return: True | False
         """
-        return False
+        return not courseUnit.addedBy == request.user
 
     @staticmethod
     def get_chat(request, enroll_code, **kwargs):

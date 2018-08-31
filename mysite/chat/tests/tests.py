@@ -874,6 +874,26 @@ class MessagesViewTests(CustomTestCase):
         self.assertEquals(len(json_content['addMessages']), 4)
         self.assertEquals(json_content['addMessages'][0]['html'], status_msg)
 
+    def test_preview_forbidden(self):
+        """
+        Check that ON author can't access preview page.
+        """
+        course_unit = Course.objects.all()[0].get_course_units()[0]
+
+        response = self.client.login(username='test', password='test')
+        enroll = EnrollUnitCode.get_code_for_user_chat(
+            course_unit=course_unit,
+            is_live=False,
+            user=User.objects.get(username='test'),
+            is_preview=True
+        )
+
+        response = self.client.get(
+            reverse('chat:preview_courselet',
+                    kwargs={'enroll_key': enroll.enrollCode}),
+        )
+        assert 'This Courselet is not published yet or you have no permisions to open it.' in response.content
+
 
 class HistoryAPIViewTests(CustomTestCase):
     """
