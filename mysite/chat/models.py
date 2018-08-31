@@ -171,8 +171,8 @@ class Message(models.Model):
         app_label = 'chat' if self.contenttype == 'uniterror' or self.contenttype == 'chatdivider' else 'ct'
         model = ContentType.objects.get(app_label=app_label, model=self.contenttype).model_class()
         if self.contenttype == 'response':
-            """Filter responses using custom filter_all method. 
-            Because filter() and all() methods are return only valuable responses 
+            """Filter responses using custom filter_all method.
+            Because filter() and all() methods are return only valuable responses
             with is_test=False and is_preview=False."""
             return model.objects.filter_all(id=self.content_id).first()
         return model.objects.filter(id=self.content_id).first()
@@ -218,7 +218,7 @@ class Message(models.Model):
                 )
             )
         return u'<ul class="chat-select-list">{}</ul>'.format(
-            errors or '<li><h3>There are no Misunderstands to display.</h3></li>'
+            errors or '<li><h3>There are no misconceptions to display.</h3></li>'
         )
 
     def render_choices(self, choices, checked_choices):
@@ -527,7 +527,7 @@ class UnitError(models.Model):
         unit_lesson = self.response.unitLesson
         error_list = list(unit_lesson.get_errors())
         # Change this to real check
-        if unit_lesson.lesson.add_unit_aborts or not error_list:
+        if unit_lesson.lesson.add_unit_aborts:
             error_list += self.unit.get_aborts()
         return error_list
 
