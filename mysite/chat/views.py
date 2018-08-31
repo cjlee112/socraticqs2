@@ -171,13 +171,13 @@ class ChatInitialView(LoginRequiredMixin, View):
         )
 
     def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
-        user_trial_mode = self.define_user_trial_mode(request, courseUnit)
+        # TODO user_trial_mode = self.define_user_trial_mode(request, courseUnit)
         defaults = dict(
             user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
             is_preview=False,
-            is_trial=user_trial_mode
+            is_trial=False
         )
         defaults.update(kwargs)
         chat = Chat(**defaults)
@@ -206,11 +206,11 @@ class ChatInitialView(LoginRequiredMixin, View):
                     role=Role.ENROLLED
                 )
                 # count the percent of users in trial mode
-                trial_mode_percent = float(enrolled_users.filter(trial_mode=True).count()) / enrolled_users.count() * 100
+                trial_mode_prsnt = float(enrolled_users.filter(trial_mode=True).count()) / enrolled_users.count() * 100
                 roles_to_update = Role.objects.filter(
                       user=user.id, role__in=[Role.ENROLLED, Role.SELFSTUDY], course_id=course_unit.course.id)
                 # if the percent is not exceeded get random value for trial mode
-                if trial_mode_percent < 50:  # hardcoded but can be implemented for adjusting from admin
+                if trial_mode_prsnt < 50:  # hardcoded but can be implemented for adjusting from admin
                     trial_mode = random.choice([True, False])
                 roles_to_update.update(trial_mode=trial_mode)
             else:

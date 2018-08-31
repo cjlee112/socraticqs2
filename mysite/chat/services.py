@@ -87,7 +87,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.push_state(chat, request, 'chat_trial' if chat.is_trial else self.FMS_name)
+        # use chat.is_trial in future
+        self.push_state(chat, request, chat.enroll_code.courseUnit.course.FSM_flow)
         m = chat.state.fsmNode.get_message(chat, request)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
@@ -143,15 +144,13 @@ class LiveChatFsmHandler(FsmHandler):
     def push_state(self, chat, request, name, start_args=None, **kwargs):
         fsm_stack = FSMStack(request)
         linkState = kwargs.get('linkState')
-        # data = linkState.get_all_state_data()
         course_unit = kwargs.get('courseUnit', chat.enroll_code.courseUnit)
         fsm_stack.push(request, name,
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course},
                        startArgs=start_args,
                        isLiveSession=True,
-                       linkState=linkState
-        )
+                       linkState=linkState)
         fsm_stack.state.parentState = chat.state
         fsm_stack.state.save()
         chat.state = fsm_stack.state
