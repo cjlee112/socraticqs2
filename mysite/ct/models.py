@@ -223,6 +223,8 @@ ACCESS_CHOICES = (
     (FINAL_EXAM_ONLY, 'Protected exam only'),
     (PRIVATE_ACCESS, 'By author only'),
 )
+DEFAULT_FSM = 'chat'
+TRIAL_FSM = 'chat_trial'
 
 
 class Lesson(models.Model, SubKindMixin):
@@ -1383,6 +1385,10 @@ class Course(models.Model):
         (INSTRUCTOR_ENROLLED, 'By instructors only'),
         (PRIVATE_ACCESS, 'By author only'),
     )
+    FSM_CHOICES = (
+        (DEFAULT_FSM, 'Default FSM flow'),
+        (TRIAL_FSM, 'Trial FSM flow - ABORTS before Student answer'),
+    )
     title = models.CharField(
         max_length=200,
         validators=[not_only_spaces_validator]
@@ -1397,6 +1403,8 @@ class Course(models.Model):
 
     copied_from = models.ForeignKey('Course', blank=True, null=True)
     trial = models.BooleanField(default=False)
+    FSM_flow = models.CharField(max_length=10, choices=FSM_CHOICES,
+                                default=DEFAULT_FSM)
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)

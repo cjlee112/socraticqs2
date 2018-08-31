@@ -20,8 +20,8 @@
 
 <h2>Answers for Courselet</h2>
 <ul class="nav nav-tabs custom-nav-tabs">
-  <li class="{% if not is_trial %}active {% endif %}custom-nav-tabs-li"><a href="{% url 'ct:unit_answers' course_id=course_id unit_id=unit_id %}">Common</a></li>
-  <li class="{% if is_trial %}active {% endif %}custom-nav-tabs-li"><a href="{% url 'ct:unit_answers' course_id=course_id unit_id=unit_id %}?is_trial=true">Trial</a></li>
+  {# <li class="{% if not is_trial %}active {% endif %}custom-nav-tabs-li"><a href="{% url 'ct:unit_answers' course_id=course_id unit_id=unit_id %}">Common</a></li> #}
+  {# <li class="{% if is_trial %}active {% endif %}custom-nav-tabs-li"><a href="{% url 'ct:unit_answers' course_id=course_id unit_id=unit_id %}?is_trial=true">Trial</a></li> #}
 </ul>
 
 <table class="table table-hover table-bordered table-striped">
