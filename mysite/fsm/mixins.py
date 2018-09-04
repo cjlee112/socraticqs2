@@ -219,8 +219,6 @@ class ChatMixin(object):
             find_crit = {
                 "stack_id": stack_pattern
             }
-            # TODO: remove print after complete the task
-            print('Pushing to {} value: {}'.format(stack_pattern, next_lesson.id))
             c_chat_stack().update_one(
                 find_crit,
                 {"$push": {"stack": next_lesson.id}},
@@ -234,7 +232,7 @@ class ChatMixin(object):
                     request.session[stack_pattern].append(next_lesson.id)
             else:
                 request.session[stack_pattern] = [next_lesson.id]
-        if self.node_name_is_one_of('ABORTS', 'GET_ABORTS'):
+        if self.node_name_is_one_of('ABORTS'):
             message = Message.objects.create(
                 owner=chat.user,
                 chat=chat,
@@ -243,10 +241,16 @@ class ChatMixin(object):
                 is_additional=is_additional,
                 text=self.name
             )
+        if self.node_name_is_one_of('GET_ABORTS'):
+            message = Message.objects.get_or_create(
+                            contenttype='NoneType',
+                            kind='abort',
+                            input_type='options',
+                            chat=chat,
+                            owner=chat.user,
+                            userMessage=False,
+                            is_additional=is_additional)[0]
         if self.node_name_is_one_of('GET_ANSWER'):
-            # TODO: remove print after complete the task
-            print('Getting the session data: {}'.format(stack_pattern))
-            print('From session: {}'.format(request.session.get(stack_pattern)))
             find_crit = {
                 "stack_id": stack_pattern
             }
@@ -266,8 +270,6 @@ class ChatMixin(object):
                 else:
                     fallback_ul_id = current.id
             unit_lesson_id = stack.pop() if stack else fallback_ul_id
-            # TODO: remove print after complete the task
-            print('UL_ID: {}'.format(unit_lesson_id))
             lesson_to_answer = UnitLesson.objects.filter(id=unit_lesson_id).first()
             _data = {
                 'contenttype': 'response',
@@ -418,6 +420,16 @@ class ChatMixin(object):
                             owner=chat.user,
                             input_type='custom',
                             kind='message',
+                            timestamp__isnull=True,
+                            is_additional=True)[0]
+        if self.node_name_is_one_of('HELP_RESOLVE'):
+            message = Message.objects.get_or_create(
+                            contenttype='unitlesson',
+                            content_id=next_lesson.id,
+                            chat=chat,
+                            owner=chat.user,
+                            input_type='options',
+                            kind='button',
                             timestamp__isnull=True,
                             is_additional=True)[0]
         if self.node_name_is_one_of('MESSAGE_NODE'):

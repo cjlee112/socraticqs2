@@ -1,9 +1,9 @@
 -r base.txt
 
-pytest
+pytest==3.7.3
 pytest-mock
 pytest-django
-pytest-cov
+pytest-cov==2.5.1
 pytest-xdist
 pytest-selenium
 docker-py

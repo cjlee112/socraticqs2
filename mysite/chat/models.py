@@ -53,7 +53,8 @@ KIND_CHOICES = (
     ('uniterror', 'uniterror'),
     ('response', 'response'),
     ('message', 'message'),
-    ('button', 'button')
+    ('button', 'button'),
+    ('abort', 'abort')
 )
 
 EVAL_OPTIONS = {
@@ -330,6 +331,8 @@ class Message(models.Model):
         return stripped_text
 
     def get_html(self):
+        if self.kind == 'abort':
+            return self.get_aborts()
         html = self.text
         if self.is_in_fsm_node('chat_add_lesson'):
             if self.contenttype == 'chatdivider':
@@ -451,11 +454,7 @@ class Message(models.Model):
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:
-            html = (
-                self.content.selfeval
-                if self.content.selfeval else
-                str(self.content)
-            )
+            html = 'Answer please'
 
         return html
 
@@ -472,6 +471,29 @@ class Message(models.Model):
                     self.content.unitlesson.addedBy.username
                 )
         return name
+
+    def get_aborts(self):
+        aborts = None
+        aborts_list = self.chat.enroll_code.courseUnit.unit.get_aborts()
+        if aborts_list:
+            checked_aborts = ()
+            abort_str = (
+                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+            )
+            aborts = reduce(
+                lambda x, y: x+y, map(
+                    lambda x: abort_str.format(
+                        'chat-selectable-selected' if x.id in checked_aborts else '',
+                        x.id,
+                        x.lesson.title
+                    ),
+                    aborts_list
+                )
+            )
+        return u'<ul class="chat-select-list">{}</ul>'.format(
+            aborts or '<li><h3>There are no aborts to display.</h3></li>'
+        )
 
 
 class EnrollUnitCode(models.Model):
