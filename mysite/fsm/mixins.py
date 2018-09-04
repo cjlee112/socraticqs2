@@ -239,7 +239,7 @@ class ChatMixin(object):
                 kind='message',
                 input_type='custom',
                 is_additional=is_additional,
-                text=self.name
+                text=self.title
             )
         if self.node_name_is_one_of('GET_ABORTS'):
             message = Message.objects.get_or_create(

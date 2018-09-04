@@ -68,7 +68,7 @@ class START(object):
 class START_MESSAGE(object):
     get_path = get_lesson_url
     # node specification data goes here
-    title = 'Click continue to get additional materials'
+    title = 'Look at the lessons below to overcome issues'
     edges = (
         dict(name='next', toNode='HELP_RESOLVE', title='View Next Lesson'),
     )
@@ -94,9 +94,7 @@ class END(object):
         return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
     title = 'Additional lessons completed'
-    help = '''You've finished resolving previous Unit.'''
-
-
+    help = 'I hope you\'ve overcome all misunderstanding.<br>Let\'s come back to the previous question.'
 def get_specs():
     """
     Get FSM specifications stored in this file.
