@@ -322,6 +322,27 @@ class MessagesViewTests(CustomTestCase):
     """
     fixtures = ['chat/tests/fixtures/initial_data_enchanced.json']
 
+    def _push_continue(self, next_url, chat_id):
+        """
+        Click Continue button to roll forward to the next Message.
+        """
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        return json_content['input']['url'], json_content
+
     def test_positive_case(self):
         """
         Check positive case for MessagesView response.
@@ -468,6 +489,8 @@ class MessagesViewTests(CustomTestCase):
 
         next_url = json_content['input']['url']
 
+        next_url, _ = self._push_continue(next_url, chat_id)
+
         answer = 'My Answer'
         response = self.client.put(
             next_url,
@@ -528,6 +551,8 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
 
         next_url = json_content['input']['url']
+
+        next_url, _ = self._push_continue(next_url, chat_id)
 
         # post answer
         answer = 'My Answer'
@@ -708,8 +733,11 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        next_url, json_content = self._push_continue(next_url, chat_id)
+
         self.assertEquals(json_content['input']['type'], 'text')
-        self.assertEquals(len(json_content['addMessages']), 4)
+        # Response should contain only DIVIDER and Question (ORCT) itself
+        self.assertEquals(len(json_content['addMessages']), 2)
 
         # post answer (3)
         response = self.client.put(
@@ -845,6 +873,26 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertEquals(len(json_content['addMessages']), 4)
         self.assertEquals(json_content['addMessages'][0]['html'], status_msg)
+
+    def test_preview_forbidden(self):
+        """
+        Check that ON author can't access preview page.
+        """
+        course_unit = Course.objects.all()[0].get_course_units()[0]
+
+        response = self.client.login(username='test', password='test')
+        enroll = EnrollUnitCode.get_code_for_user_chat(
+            course_unit=course_unit,
+            is_live=False,
+            user=User.objects.get(username='test'),
+            is_preview=True
+        )
+
+        response = self.client.get(
+            reverse('chat:preview_courselet',
+                    kwargs={'enroll_key': enroll.enrollCode}),
+        )
+        assert 'This Courselet is not published yet or you have no permisions to open it.' in response.content
 
 
 class HistoryAPIViewTests(CustomTestCase):

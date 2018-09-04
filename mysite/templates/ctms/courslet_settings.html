@@ -23,12 +23,15 @@
     </nav>
 
     <main class="card__content">
+      <div>
       <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
         {% csrf_token %}
 
         <label for="name">Courselet Name</label>
         <p>Give your courselet a descriptive name.</p>
         {{ form.title }}
+        <br>
+        Show Concepts in the Chat start page? {{ form.is_show_will_learn }}
         <!-- TODO: Replace label, description and input with real form
           {{ form.as_p }}
         -->
@@ -46,13 +49,15 @@
 
         <input type="submit" value="Save">
       </form>
-
+      <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
+      <div>
       <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
         {% csrf_token %}
 
         <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
       </form>
-
+      </div>
+      <div>
       <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="publish_unpublish">
         {% csrf_token %}
         <input type="hidden" name="task" value="{% if courslet.releaseTime %}unrelease{% else %}release{% endif %}">
@@ -63,6 +68,8 @@
         >
       </form>
     </main>
+  </div>
+  </div>
   </div>
 <style>
   input.button-primary {

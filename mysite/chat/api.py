@@ -50,6 +50,18 @@ def get_additional_messages(response, chat):
             reversed(each.errorModel.get_em_resolutions()[1]))
 
 
+def get_help_messages(chat):
+    for each in chat.enroll_code.courseUnit.unit.get_aborts():
+        map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
+                                                     content_id=ul.id,
+                                                     chat=chat,
+                                                     owner=chat.user,
+                                                     input_type='custom',
+                                                     kind='abort',
+                                                     is_additional=True),
+            reversed(each.get_em_resolutions()[1]))
+
+
 class ValidateMixin(object):
     """
     Validate request for `chat_id`.
@@ -111,7 +123,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
         if is_chat_add_lesson(message) and message.content_id and next_point == message:
             return self.roll_fsm_forward(chat, message)
-
         if (
             message.contenttype in ['response', 'uniterror'] and
             message.content_id and
@@ -123,16 +134,19 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
+        # Important for resolving additional messages
         if message and message.kind != 'button':
-            # Set next message for user
-            if not message.timestamp:
-                message.timestamp = timezone.now()
-                message.save()
-            chat.next_point = self.next_handler.next_point(
-                current=message.content, chat=chat, message=message, request=self.request
-            )
-            chat.save()
-            message.chat = chat
+            if not (not 'additional' in chat.state.fsmNode.funcName and
+                    message.kind == 'response'):
+                # Set next message for user
+                if not message.timestamp:
+                    message.timestamp = timezone.now()
+                    message.save()
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content, chat=chat, message=message, request=self.request
+                )
+                chat.save()
+                message.chat = chat
 
         serializer = self.get_serializer(message)
         return Response(serializer.data)
@@ -297,6 +311,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 resp = message.content
                 resp.text = text
+            resp.is_trial = chat.is_trial
             resp.save()
 
             if not message.timestamp:
@@ -338,6 +353,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             # tes, preview flags
             resp.is_test = chat.is_test
             resp.is_preview = chat.enroll_code.isPreview
+            resp.is_trial = chat.is_trial
 
             resp.kind = message.lesson_to_answer.kind
             resp.sub_kind = message.lesson_to_answer.sub_kind
@@ -353,7 +369,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 serializer.save()
             return
-
         if message.input_type == 'options' and message.kind != 'button':
             if (
                 message.contenttype == 'uniterror' and
@@ -371,7 +386,26 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 uniterror.save_response(user=self.request.user, response_list=selected)
                 if not message.chat.is_live:
                     get_additional_messages(uniterror.response, chat)
-
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content,
+                    chat=chat,
+                    message=message,
+                    request=self.request
+                )
+                chat.last_modify_timestamp = timezone.now()
+                chat.save()
+                serializer.save(chat=chat)
+            elif message.contenttype == 'NoneType' and message.kind == 'abort':
+                # user selected abort model
+                message.chat = chat
+                try:
+                    selected = self.request.data.get(
+                        'selected'
+                    )[str(message.id)]['errorModel']
+                except KeyError:
+                    selected = []
+                if not message.chat.is_live and selected:
+                    get_help_messages(chat)
                 chat.next_point = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,

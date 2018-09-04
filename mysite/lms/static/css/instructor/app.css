@@ -870,4 +870,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   resize: none;
   border: 1px solid #000;
 }
+
+.custom-nav-tabs>li>a {
+  color: #31708f;
+}
 /*# sourceMappingURL=app.css.map */

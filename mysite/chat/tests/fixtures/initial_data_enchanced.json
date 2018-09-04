@@ -1280,7 +1280,8 @@
     "changeLog": null,
     "atime": "2014-11-11T00:53:47.055Z",
     "data": null,
-    "commitTime": null
+    "commitTime": null,
+    "add_unit_aborts": true
   },
   "model": "ct.lesson",
   "pk": 13

@@ -223,6 +223,8 @@ ACCESS_CHOICES = (
     (FINAL_EXAM_ONLY, 'Protected exam only'),
     (PRIVATE_ACCESS, 'By author only'),
 )
+DEFAULT_FSM = 'chat'
+TRIAL_FSM = 'chat_trial'
 
 
 class Lesson(models.Model, SubKindMixin):
@@ -925,6 +927,7 @@ class Unit(models.Model):
     description = models.TextField(blank=True)
     img_url = models.URLField(blank=True)
     small_img_url = models.URLField(blank=True)
+    is_show_will_learn = models.BooleanField(default=False)
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'
@@ -1214,6 +1217,8 @@ class Response(models.Model, SubKindMixin):
     parent = models.ForeignKey('Response', null=True, blank=True)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True)
 
+    is_trial = models.BooleanField(default=False)
+
     objects = ResponseManager()
 
     def __unicode__(self):
@@ -1380,6 +1385,10 @@ class Course(models.Model):
         (INSTRUCTOR_ENROLLED, 'By instructors only'),
         (PRIVATE_ACCESS, 'By author only'),
     )
+    FSM_CHOICES = (
+        (DEFAULT_FSM, 'Default FSM flow'),
+        (TRIAL_FSM, 'Trial FSM flow - ABORTS before Student answer'),
+    )
     title = models.CharField(
         max_length=200,
         validators=[not_only_spaces_validator]
@@ -1394,6 +1403,8 @@ class Course(models.Model):
 
     copied_from = models.ForeignKey('Course', blank=True, null=True)
     trial = models.BooleanField(default=False)
+    FSM_flow = models.CharField(max_length=10, choices=FSM_CHOICES,
+                                default=DEFAULT_FSM)
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)
@@ -1530,6 +1541,7 @@ class Role(models.Model):
     course = models.ForeignKey(Course)
     user = models.ForeignKey(User)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    trial_mode = models.NullBooleanField()
 
     class Meta:
         unique_together = ('role', 'course', 'user')

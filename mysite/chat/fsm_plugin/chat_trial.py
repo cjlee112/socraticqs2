@@ -43,11 +43,15 @@ def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **k
 def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
 
+    if fsmStack.state.unitLesson.lesson.enable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
+        return fsm.get_node('GRADING')
+
     if fsmStack.next_point.content.selfeval != 'correct':
         if (fsmStack.next_point.content.unitLesson.get_errors() or
             fsmStack.next_point.content.lesson.add_unit_aborts and
             fsmStack.next_point.content.unitLesson.unit.get_aborts()):
             return fsm.get_node('ERRORS')
+
 
     return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
@@ -124,17 +128,47 @@ class ASK(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+            dict(name='next', toNode='ABORTS', title='Answer a question'),
         )
+
+
+class ABORTS(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Please select general misunderstanding you fall into.'
+    edges = (
+        dict(name='next', toNode='GET_ABORTS', title='Choose errors'),
+    )
+
+
+class GET_ABORTS(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Classify your error(s)'
+    edges = (
+        dict(name='next', toNode='GET_ANSWER', title='View Next Lesson'),
+    )
 
 
 class GET_ANSWER(object):
-    get_path = get_lesson_url
-    # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
-        )
+        dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
+    )
+
+
+class CONFIDENCE(object):
+    title = 'Select the level of your confidence?'
+    edges = (
+        dict(name='next', toNode='GET_CONFIDENCE', title='Go to choosing your confidence'),
+    )
+
+
+class GET_CONFIDENCE(object):
+    title = 'Choose confidence'
+    edges = (
+        dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
+    )
 
 
 class ASSESS(object):
@@ -156,6 +190,15 @@ class GET_ASSESS(object):
         )
 
 
+class GRADING(object):
+    get_path = get_lesson_url
+    next_edge = check_selfassess_and_next_lesson
+    # node specification data goes here
+    title = 'Grading for student answer'
+    edges = (
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
+
 class ERRORS(object):
     get_path = get_lesson_url
     # node specification data goes here
@@ -176,9 +219,8 @@ class GET_ERRORS(object):
 
 
 class IF_RESOURCES(object):
-    help = '''Congratulations!  You have completed the core lessons for this
-              courselet.  See below for suggested next steps for what to study now in
-              this courselet.'''
+    help = '''Congratulations! You have completed the core lessons for this
+              courselet.'''
 
     title = 'Courselet core lessons completed'
     edges = (
@@ -191,14 +233,16 @@ class END(object):
     def get_help(self, node, state, request):
         'provide help messages for all views relevant to this stage.'
         unit = state.get_data_attr('unit')
-        lessons = list(unit.unitlesson_set \
-                       .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        lessons = list(
+            unit.unitlesson_set.filter(
+                kind=UnitLesson.COMPONENT, order__isnull=True
+            )
+        )
         if lessons:
-            return '''Resources is there'''
+            return '''Please look over the available resources in the side panel.'''
         else:
-            return '''Congratulations!  You have completed the core lessons for this
-                      courselet.  See below for suggested next steps for what to study now in
-                      this courselet.'''
+            return '''Congratulations! You have completed the core lessons for this
+                      courselet.'''
     title = 'Courselet core lessons completed'
 
 
@@ -208,11 +252,27 @@ def get_specs():
     """
     from fsm.fsmspec import FSMSpecification
     spec = FSMSpecification(
-        name='courselet_preview',
+        name='chat_trial',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, TITLE, LESSON, ASK, GET_ANSWER, ASSESS,
-                     GET_ASSESS, ERRORS, GET_ERRORS, IF_RESOURCES, END],
+        pluginNodes=[
+            START,
+            TITLE,
+            LESSON,
+            ASK,
+            ABORTS,
+            GET_ABORTS,
+            GET_ANSWER,
+            CONFIDENCE,
+            GET_CONFIDENCE,
+            ASSESS,
+            GET_ASSESS,
+            GRADING,
+            ERRORS,
+            GET_ERRORS,
+            IF_RESOURCES,
+            END
+        ],
 
     )
     return (spec,)

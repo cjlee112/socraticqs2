@@ -64,6 +64,7 @@ def report(course_id, user_id):
         unitLesson_id = obj.unitLesson.id
         courselet_id = obj.unitLesson.unit.id
         submit_time = obj.atime
+        is_trial = obj.is_trial
 
         try:
             u_tz = obj.author.profile.timezone or settings.TIME_ZONE
@@ -89,7 +90,8 @@ def report(course_id, user_id):
           status=status,
           unitLesson_id=unitLesson_id,
           courselet_id=courselet_id,
-          submitted_time=localized_ts
+          submitted_time=localized_ts,
+          is_trial=is_trial
         )
         report.append(r)
     if report:

@@ -1,15 +1,11 @@
 """
 Handler container module.
 """
-from datetime import timedelta
-
 from django.utils import timezone
-from chat.models import TYPE_CHOICES, MESSAGE_TYPES
 
+from .models import Message
 from fsm.fsm_base import FSMStack
-from fsm.models import FSMNode
-from ct.models import Unit, Lesson, UnitLesson, Response, CourseUnit
-from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
+from ct.models import Lesson
 
 
 class ProgressHandler(object):
@@ -31,8 +27,10 @@ class GroupMessageMixin(object):
     """
     available_steps = {
         Lesson.BASE_EXPLANATION: (Lesson.ORCT_QUESTION, 'message', 'button'),
+        Lesson.ORCT_QUESTION: ('message',),
         Lesson.EXPLANATION: ('message', 'button'),
         Lesson.ERROR_MODEL: ('message', 'button'),
+        'abort': ('message', 'button'),
         'response': ('message',
                      'answers',
                      'button',
@@ -45,7 +43,8 @@ class GroupMessageMixin(object):
                     'button',
                     Lesson.EXPLANATION,
                     Lesson.BASE_EXPLANATION,
-                    Lesson.ORCT_QUESTION)
+                    Lesson.ORCT_QUESTION,
+                    'abort')
     }
 
     def group_filter(self, message, next_message=None):
@@ -86,8 +85,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         current_state.delete()
 
     def start_point(self, unit, chat, request):
-        self.push_state(chat, request, self.FMS_name)
-        m = chat.state.fsmNode.get_message(chat)
+        # use chat.is_trial in future
+        self.push_state(chat, request, chat.enroll_code.courseUnit.course.FSM_flow)
+        m = chat.state.fsmNode.get_message(chat, request)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
         return chat.next_point
@@ -98,21 +98,29 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                              chat=chat,
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
+        helps = Message.objects.filter(is_additional=True,
+                                       chat=chat,
+                                       kind='abort',
+                                       timestamp__isnull=True)
 
         if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
             self.pop_state(chat)
-        if additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
+        if helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
+            unitlesson = helps.first().content
+            self.push_state(chat, request, 'help', {'unitlesson': unitlesson})
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+        elif additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
             unitlesson = additionals.first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
-            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         elif resources:
             self.push_state(chat, request, 'resource', {'unitlesson': current})
-            next_point = chat.state.fsmNode.get_message(chat)
+            next_point = chat.state.fsmNode.get_message(chat, request)
         elif chat.state:
             edge = chat.state.fsmNode.outgoing.get(name='next')
             chat.state.fsmNode = edge.transition(chat, request)
             chat.state.save()
-            next_point = chat.state.fsmNode.get_message(chat, current=current, message=message)
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         else:
             return None
 
@@ -142,15 +150,13 @@ class LiveChatFsmHandler(FsmHandler):
     def push_state(self, chat, request, name, start_args=None, **kwargs):
         fsm_stack = FSMStack(request)
         linkState = kwargs.get('linkState')
-        # data = linkState.get_all_state_data()
         course_unit = kwargs.get('courseUnit', chat.enroll_code.courseUnit)
         fsm_stack.push(request, name,
                        stateData={'unit': course_unit.unit,
                                   'course': course_unit.course},
                        startArgs=start_args,
                        isLiveSession=True,
-                       linkState=linkState
-        )
+                       linkState=linkState)
         fsm_stack.state.parentState = chat.state
         fsm_stack.state.save()
         chat.state = fsm_stack.state
@@ -158,7 +164,7 @@ class LiveChatFsmHandler(FsmHandler):
 
     def start_point(self, unit, chat, request, **kwargs):
         self.push_state(chat, request, self.FMS_name, **kwargs)
-        m = chat.state.fsmNode.get_message(chat)
+        m = chat.state.fsmNode.get_message(chat, request)
         chat.next_point = self.next_point(m.content, chat, m, request)
         chat.save()
         return chat.next_point

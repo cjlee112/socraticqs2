@@ -1,4 +1,5 @@
 import logging
+import random
 from django.db.models.aggregates import Count
 from django.db.models.expressions import When, Case
 from django.db.models.fields import BooleanField, IntegerField
@@ -83,11 +84,10 @@ class ChatInitialView(LoginRequiredMixin, View):
             containers_with_querysets = (
                 (will_learn, ConceptLink.objects.filter(
                     Q(lesson=unit_lesson.lesson),
-                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS))
-                )),
+                    (Q(relationship=ConceptLink.DEFINES) | Q(relationship=ConceptLink.TESTS)))
+                 if unit_lesson.unit.is_show_will_learn else ()),
                 (need_to_know, ConceptLink.objects.filter(
-                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES
-                ))
+                    lesson=unit_lesson.lesson, relationship=ConceptLink.ASSUMES))
             )
             for contaner, qs in containers_with_querysets:
                 for concept_link in qs:
@@ -170,18 +170,54 @@ class ChatInitialView(LoginRequiredMixin, View):
             user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
         )
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        # TODO user_trial_mode = self.define_user_trial_mode(request, courseUnit)
         defaults = dict(
             user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
-            is_preview=False
+            is_preview=False,
+            is_trial=False
         )
         defaults.update(kwargs)
         chat = Chat(**defaults)
-        chat.save(request)
+        chat.save()
         return chat
+
+    def define_user_trial_mode(self, request, course_unit):
+        """
+        Define trial mode for enrolled user depending on course's trial mode settings
+        If mode still is undefined get percent of user's trial mode
+         and if count of them is less than 50% set trial mode randomly,
+        Arguments:
+            request (obj): Django Request
+            course_unit (obj): Model object
+        Return (bool): Existing or newly added trial mode
+        """
+        user = request.user
+        user_enrolled = self.user_enrolled(request, course_unit).first()
+        trial_mode = False
+        if user_enrolled:  # if user's role exists
+            # course is trial and role.trial_mode has been set
+            if course_unit.course.trial and user_enrolled.trial_mode is None:
+                # get users enrolled to this course
+                enrolled_users = Role.objects.filter(
+                    course_id=course_unit.course.id,
+                    role=Role.ENROLLED
+                )
+                # count the percent of users in trial mode
+                trial_mode_prsnt = float(enrolled_users.filter(trial_mode=True).count()) / enrolled_users.count() * 100
+                roles_to_update = Role.objects.filter(
+                      user=user.id, role__in=[Role.ENROLLED, Role.SELFSTUDY], course_id=course_unit.course.id)
+                # if the percent is not exceeded get random value for trial mode
+                if trial_mode_prsnt < 50:  # hardcoded but can be implemented for adjusting from admin
+                    trial_mode = random.choice([True, False])
+                roles_to_update.update(trial_mode=trial_mode)
+            else:
+                trial_mode = bool(user_enrolled.trial_mode)  # course is not trial or role has already been set
+        return trial_mode
+
+
 
     @staticmethod
     def check_unitlessons_with_order_null_exists(unit):
@@ -225,7 +261,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             return render(
                 request,
                 'lti/error.html',
-                {'message': 'This Courselet is not published yet.'}
+                {'message': 'This Courselet is not published yet or you have no permisions to open it.'}
             )
         if not self.user_enrolled(request, courseUnit):
             enrolling = Role.objects.get_or_create(user=request.user,
@@ -397,9 +433,8 @@ class CourseletPreviewView(ChatInitialView):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
-        return ChatInitialView.create_new_chat(
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        return super(CourseletPreviewView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
@@ -417,7 +452,7 @@ class CourseletPreviewView(ChatInitialView):
         :param courseUnit: course unit
         :return: True | False
         """
-        return False
+        return not courseUnit.addedBy == request.user
 
     @staticmethod
     def get_chat(request, enroll_code, **kwargs):
@@ -590,9 +625,8 @@ class InitializeLiveSession(ChatInitialView):
 class CheckChatInitialView(ChatInitialView):
     tester_mode = True
 
-    @staticmethod
-    def create_new_chat(request, enroll_code, courseUnit, **kwargs):
-        return ChatInitialView.create_new_chat(
+    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+        return super(CheckChatInitialView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,

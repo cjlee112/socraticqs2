@@ -8,6 +8,7 @@ services:
 
 before_script:
 - docker info
+- docker ps
 
 stages:
   - build
@@ -40,7 +41,8 @@ Python tests:
   tags:
     - docker
   script:
-    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
+    - docker run -d --name mongo -p 27017:27017 mongo:latest
+    - docker run --link mongo:mongo $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
 
 Check code quality:
   stage: test
@@ -49,8 +51,7 @@ Check code quality:
   script:
     - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make quality
 
-
-Deploy Stage:
+Deploy Dev:
   stage: deploy
   tags:
     - stage
@@ -59,7 +60,36 @@ Deploy Stage:
   only:
     - development
   script:
+    - cd /home/wwwapps/dev/socraticqs2/
+    - git checkout development
+    - git pull
+    - source /home/wwwapps/dev/_ve_socraticqs2/bin/activate
+    - pip install --ignore-installed -U -r requirements.txt
+    - pip install --ignore-installed -U -r requirements/prod.txt
+    - cd mysite/
+    - python manage.py migrate
+    - python manage.py fsm_deploy
+    - cd draw_svg/
+    - npm install --save-dev
+    - npm run build && npm run build:copy
+    - yarn build && yarn build:copy
+    - cd ..
+    - python manage.py collectstatic --noinput
+    - sudo supervisorctl restart devgunicorn
+    - sudo supervisorctl restart devcelery
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n@redilonka (・ω・)", "link_names":1}'
+
+Deploy Stage:
+  stage: deploy
+  tags:
+    - stage
+    - deploy
+    - ssh
+  only:
+    - master
+  script:
     - cd /home/wwwapps/socraticqs2/
+    - git checkout master
     - git pull
     - source /home/wwwapps/_ve_socraticqs3/bin/activate
     - pip install --ignore-installed -U -r requirements.txt
@@ -75,4 +105,4 @@ Deploy Stage:
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart gunicorn
     - sudo supervisorctl restart celery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org"}'
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'

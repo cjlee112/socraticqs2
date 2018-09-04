@@ -97,7 +97,7 @@ class MessageSerializer(serializers.ModelSerializer):
         incl_msg = []
         sub_kind = None
         for i in self.qs:
-            if i.contenttype == 'uniterror':
+            if i.contenttype == 'uniterror' or i.kind == 'abort':
                 incl_msg.append(i.id)
             if i.contenttype == 'unitlesson' and i.content:
                 if i.content.lesson.sub_kind == 'choices':

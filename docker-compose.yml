@@ -13,6 +13,7 @@ services:
       - "8000:8000"
     links:
       - postgres
+      - mongo
 
   postgres:
     container_name: cr_postgres
@@ -21,5 +22,14 @@ services:
     volumes:
       - cr_db:/var/lib/postgresql/data/
 
+  mongo:
+    container_name: cr_mongo
+    image: mongo:latest
+    volumes:
+      - cr_mongo:/data/db
+    ports:
+      - "27017:27017"
+
 volumes:
   cr_db:
+  cr_mongo:

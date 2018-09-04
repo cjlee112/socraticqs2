@@ -237,8 +237,9 @@ class PageData(object):
         self.fsmLauncher = {}
         self.fsmData = {}
         if self.fsmStack.state:
-            if self.fsmStack.state.hideTabs: # turn off tab interface
-                self.navTabs = ()
+            # Disable this for now
+            # if self.fsmStack.state.hideTabs: # turn off tab interface
+            #     self.navTabs = ()
             self.fsm_help_message = self.fsmStack.state.fsmNode \
               .get_help(self.fsmStack.state, request)
         else: # only show Start Activity menu if no FSM running
@@ -270,9 +271,14 @@ class PageData(object):
         url = self.fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
     def fsm_off_path(self):
-        'True if not on current node view or Activity Center view'
-        return not self.fsmStack.state.fsm_on_path(self.path) and \
-          self.path != reverse('fsm:fsm_status')
+        """
+        True if not on current node view or Activity Center viewself.
+
+        False if preview modeself.
+        """
+        return ('preview' not in self.fsmStack.state.fsmNode.funcName and
+                not self.fsmStack.state.fsm_on_path(self.path) and
+                self.path != reverse('fsm:fsm_status'))
     def set_refresh_timer(self, request, timer=True):
         'start or end the refresh timer'
         if timer:
@@ -1025,6 +1031,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     unit = get_object_or_404(Unit, pk=unit_id)
     course = get_object_or_404(Course, pk=course_id)
     course_unit = get_object_or_404(CourseUnit, course=course, unit=unit)
+    is_trial = request.GET.get('is_trial') in ['true', 'True', '1']
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
@@ -1047,15 +1054,21 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     table_head = [i.lesson.title for i in exercises]
     table_body = OrderedDict()
     for role in roles:
-        for orct in exercises:
-            if not table_body.get(role.user):
-                table_body[role.user] = []
-            table_body[role.user].append(
-                Response.objects.filter(
-                    unitLesson=orct,
-                    lesson=orct.lesson, author=role.user
-                ).order_by('-atime').first()
-            )
+        if Response.objects.filter(
+            unitLesson__unit=unit,
+            is_trial=is_trial,
+            author=role.user
+        ).exists():
+            for orct in exercises:
+                if not table_body.get(role.user):
+                    table_body[role.user] = []
+                table_body[role.user].append(
+                    Response.objects.filter(
+                        unitLesson=orct,
+                        is_trial=is_trial,
+                        lesson=orct.lesson, author=role.user
+                    ).order_by('-atime').first()
+                )
     return pageData.render(
         request,
         'ct/unit_answers.html',
@@ -1066,7 +1079,8 @@ def unit_answers(request, course_id, unit_id, **kwargs):
             roles=roles,
             table_head=table_head,
             table_body=table_body,
-            back_url_ul_id=request.session.get('unitID')
+            back_url_ul_id=request.session.get('unitID'),
+            is_trial=is_trial
         )
     )
 
