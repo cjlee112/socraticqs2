@@ -1,15 +1,11 @@
 """
 Handler container module.
 """
-from datetime import timedelta
-
 from django.utils import timezone
-from chat.models import TYPE_CHOICES, MESSAGE_TYPES
 
+from .models import Message
 from fsm.fsm_base import FSMStack
-from fsm.models import FSMNode
-from ct.models import Unit, Lesson, UnitLesson, Response, CourseUnit
-from .models import Message, UnitError, ChatDivider, MODEL_CHOISES
+from ct.models import Lesson
 
 
 class ProgressHandler(object):
@@ -34,6 +30,7 @@ class GroupMessageMixin(object):
         Lesson.ORCT_QUESTION: ('message',),
         Lesson.EXPLANATION: ('message', 'button'),
         Lesson.ERROR_MODEL: ('message', 'button'),
+        'abort': ('message', 'button'),
         'response': ('message',
                      'answers',
                      'button',
@@ -46,7 +43,8 @@ class GroupMessageMixin(object):
                     'button',
                     Lesson.EXPLANATION,
                     Lesson.BASE_EXPLANATION,
-                    Lesson.ORCT_QUESTION)
+                    Lesson.ORCT_QUESTION,
+                    'abort')
     }
 
     def group_filter(self, message, next_message=None):
@@ -100,10 +98,18 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                              chat=chat,
                                              student_error__isnull=False,
                                              timestamp__isnull=True)
+        helps = Message.objects.filter(is_additional=True,
+                                       chat=chat,
+                                       kind='abort',
+                                       timestamp__isnull=True)
 
         if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
             self.pop_state(chat)
-        if additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
+        if helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
+            unitlesson = helps.first().content
+            self.push_state(chat, request, 'help', {'unitlesson': unitlesson})
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+        elif additionals and not chat.state.fsmNode.fsm.fsm_name_is_one_of('additional'):
             unitlesson = additionals.first().content
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
