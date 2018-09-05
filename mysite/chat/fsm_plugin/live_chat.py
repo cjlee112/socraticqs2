@@ -47,8 +47,13 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
     if fsmStack.state.unitLesson.lesson.enable_auto_grading and not fsmStack.state.fsmNode.name == 'GRADING':
         return fsm.get_node('GRADING')
 
-    if not fsmStack.next_point.content.selfeval == 'correct':
-        return fsm.get_node('ERRORS')
+    # TODO add tests for this case
+    if fsmStack.next_point.content.selfeval != 'correct':  # pragma: no cover
+        if (fsmStack.next_point.content.unitLesson.get_errors() or
+            fsmStack.next_point.content.lesson.add_unit_aborts and
+            fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+            return fsm.get_node('ERRORS')
+
     return fsm.get_node('WAIT_ASK')
     # return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
