@@ -428,9 +428,10 @@ class Message(models.Model):
                         correct = self.content.parent.lesson.get_correct_choices()
                         html = self.render_choices(correct, [])
                 elif self.content.kind == 'answers' and self.content.parent.lesson.sub_kind == Lesson.NUMBERS:
+                    # TODO add tests for this case
                     html = mark_safe(
                         md2html(
-                            "Expected value {value}. \n\n{text}".format(
+                            u"Expected value {value}. \n\n{text}".format(
                                 value=self.content.lesson.number_value,
                                 text=self.content.lesson.text
                             )
