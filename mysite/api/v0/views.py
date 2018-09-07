@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
+from core.common.mongo import do_health
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
@@ -96,3 +97,25 @@ class EchoDataView(APIView):
             request.data,
             status=status.HTTP_200_OK,
         )
+
+class HealthCheck(APIView):
+    """
+    Sevice health check.
+    """
+
+    def get(self, request, *args, **kwargs):
+        # TODO add django-health-check
+        response  = None
+        try:
+            ping, stats = do_health()
+        # broad exception to handle all possible error during interaction with MongoDB
+        except:
+            response = RestResponse(status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        else:
+            if not ('ok' in ping and 'ok' in stats):
+                # TODO implement analyzing and return more descriptive response
+                response = RestResponse(status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            else:
+                response = RestResponse(ping, status=status.HTTP_200_OK)
+
+        return response

@@ -56,3 +56,8 @@ def mongo_data_database(db=DB_DATA, use_secondary=False):
 
 def c_chat_stack(use_secondary=False):
     return mongo_data_database(use_secondary=use_secondary)[COLLECTION_CHAT_STACK]
+
+
+def do_health(use_secondary=False):
+    db = mongo_data_database(use_secondary=use_secondary)
+    return db.command('ping'), db.command('serverStatus')
