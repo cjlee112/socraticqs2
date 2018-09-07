@@ -471,7 +471,8 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     def form_valid(self, form):
         courslet = self.get_courslet()
         unit = courslet.unit
-        self.object = Lesson(title=form.cleaned_data['title'], text='', addedBy=self.request.user)
+        self.object = Lesson(title=form.cleaned_data['title'], text='',
+                             kind=Lesson.ORCT_QUESTION, addedBy=self.request.user)
         self.object.save()
         self.object.treeID = self.object.pk
         self.object.save()

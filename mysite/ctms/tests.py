@@ -440,7 +440,7 @@ class SharedCoursesListViewTests(MyTestCase):
         self.assertEqual(invite.status, 'joined')
 
         self.join_course_cases(url, self.student_shared_course)
-        
+
 
 class CourseViewTests(MyTestCase):
     def setUp(self):
@@ -626,6 +626,7 @@ class CreateUnitViewTests(MyTestCase):
                 'courslet_pk': self.get_test_courseunit().id,
                 'pk': last_ul.id
         })
+        assert last_ul.lesson.kind == Lesson.ORCT_QUESTION
         self.assertRedirects(response, success_url)
         self.assertNotEqual(lessons_cnt, new_lessons_cnt)
         self.assertNotEqual(unit_lsn_cnt, new_unit_lsn_cnt)
@@ -648,7 +649,7 @@ class CreateUnitViewTests(MyTestCase):
 
 @ddt
 class EditUnitViewTests(MyTestCase):
-    
+
     models_to_check = (UnitLesson, Lesson)
     context_should_contain_keys = ('unit', 'course', 'courslet')
 
@@ -1013,23 +1014,3 @@ class UnitSettingsViewTests(MyTestCase):
     #         self.assertNotEqual(n_ul.title, ul.title)
     #     else:
     #         self.assertEqual(n_ul.title, ul.title)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
