@@ -162,7 +162,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         message = self.get_object()
         if (
             message.input_type == 'text' and not
-            self.request.data.get('text', '').strip()
+            self.request.data.get('text', '').strip() and not
+            message.lesson_to_answer.lesson.sub_kind == Lesson.CANVAS
         ):
             return Response({'error': 'Empty response. Enter something!'})
 
