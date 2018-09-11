@@ -11,7 +11,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.conf import settings
 from importlib import import_module
 
-from social.exceptions import (AuthAlreadyAssociated,
+from social_core.exceptions import (AuthAlreadyAssociated,
                                AuthException,
                                InvalidEmail, AuthMissingParameter)
 from accounts.models import Instructor
@@ -952,5 +952,3 @@ class LogoutTest(TestCase):
         response = self.client.get(reverse('new_logout'), follow=True)
         self.assertRedirects(response, reverse('new_login')+'?next='+reverse('ctms:my_courses'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')
-
-

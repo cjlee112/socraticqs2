@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.contrib.auth.signals import user_logged_in
 
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 
 
 class AnonymEmail(models.Model):

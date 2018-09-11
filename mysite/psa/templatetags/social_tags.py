@@ -5,8 +5,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from collections import defaultdict
 
-from social.backends.utils import load_backends
-from social.backends.oauth import OAuthAuth
+from social_core.backends.utils import load_backends
+from social_core.backends.oauth import OAuthAuth
 
 from psa.models import SecondaryEmail
 

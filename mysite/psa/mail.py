@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.template.context import Context
 
 
-def send_validation(strategy, backend, code):
+def send_validation(strategy, backend, code, *args, **kwargs):
     """
     Send email validation link.
     When user clicks <resened email> button on /ctms/email-sent/ page
