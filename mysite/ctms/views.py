@@ -18,7 +18,7 @@ from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
 from django.conf import settings
-from social.backends.utils import load_backends
+from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
 

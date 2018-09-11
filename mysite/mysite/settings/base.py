@@ -157,7 +157,7 @@ INSTALLED_APPS = (
     # API
     'api',
     # Socials
-    'social.apps.django_app.default',
+    'social_django',
     'psa',
     # Chat UI
     'chat',
@@ -209,8 +209,8 @@ TEMPLATES = [
                 'django.template.context_processors.csrf',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'social.apps.django_app.context_processors.backends',
-                'social.apps.django_app.context_processors.login_redirect',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'psa.context_processors.debug_settings',
                 'mysite.context_processors.google_analytics',
                 'sekizai.context_processors.sekizai',
@@ -222,37 +222,37 @@ TEMPLATES = [
 
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.twitter.TwitterOAuth',
-    'social.backends.facebook.FacebookOAuth2',
-    'social.backends.google.GoogleOAuth2',
-    'social.backends.linkedin.LinkedinOAuth2',
-    'social.backends.khanacademy.KhanAcademyOAuth1',
+    'social_core.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.linkedin.LinkedinOAuth2',
+    'social_core.backends.khanacademy.KhanAcademyOAuth1',
     'psa.custom_backends.EmailAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 SOCIAL_AUTH_PIPELINE = (
-    'social.pipeline.social_auth.social_details',
-    'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
     'psa.pipeline.social_user',
-    'social.pipeline.user.get_username',
+    'social_core.pipeline.user.get_username',
     'psa.pipeline.custom_mail_validation',
     'psa.pipeline.associate_by_email',
-    'social.pipeline.user.create_user',
+    'social_core.pipeline.user.create_user',
     'psa.pipeline.validated_user_details',
     # 'psa.pipeline.password_ask',
     'psa.pipeline.associate_user',
-    'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
 )
 
 SOCIAL_AUTH_DISCONNECT_PIPELINE = (
     # 'psa.pipeline.password_check',
-    'social.pipeline.disconnect.allowed_to_disconnect',
-    'social.pipeline.disconnect.get_entries',
-    'social.pipeline.disconnect.revoke_tokens',
-    'social.pipeline.disconnect.disconnect'
+    'social_core.pipeline.disconnect.allowed_to_disconnect',
+    'social_core.pipeline.disconnect.get_entries',
+    'social_core.pipeline.disconnect.revoke_tokens',
+    'social_core.pipeline.disconnect.disconnect'
 )
 
 SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user/'
@@ -267,6 +267,8 @@ SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/ctms/email_sent/'
 
 SOCIAL_AUTH_STRATEGY = 'psa.custom_django_strategy.CustomDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'psa.custom_django_storage.CustomDjangoStorage'
+
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.email',

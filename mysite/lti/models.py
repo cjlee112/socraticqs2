@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 
 from ct.models import Role, Course
 from .utils import (
