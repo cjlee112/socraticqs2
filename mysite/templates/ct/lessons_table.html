@@ -17,30 +17,6 @@
                 <thead>
                     <th>Lesson</th><th>Branch</th><th>Author</th><th>Commit message</th><th></th><th>Commit time</th><th>Type</th>
                 </thead>
-                <tr>
-                  <td>
-                    <a href="{{ actionTarget|get_object_url:tree }}">{{ tree.lesson.title }}</a>
-                  </td>
-                  <td>{{ tree.branch }}</td>
-                  {% with tree.lesson.addedBy.get_full_name as full_name %}
-                  {% if full_name %}
-                  <td>{{ full_name }}</td>
-                  {% else %}
-                  <td>{{ tree.lesson.addedBy.username }}</td>
-                  {% endif %}
-                  {% endwith %}
-                  <td>{{ tree.lesson.changeLog }}</td>
-                  <td>
-                  <form action="{{ actionTarget }}" method="post"
-                   style=" display:inline!important;" class="pull-right">
-                  {% csrf_token %}
-                  <input type="hidden" name="ulID" value="{{ tree.pk }}" />
-                  <input type="submit" value="{{ actionLabel }}" />
-                  </form>
-                  </td>
-                  <td>{{ tree.lesson.commitTime }}</td>
-                <td>{{ tree.lesson.get_kind_display }}</td>
-               </tr>
                {% for unit_lesson in branch %}
                   <tr>
                   <td>

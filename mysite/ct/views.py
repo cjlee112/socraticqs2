@@ -903,7 +903,7 @@ def _lessons(request, pageData, concept=None, msg='',
             treeIDs_head = distinct_subset(lessonSet)
             branches = lessonSet.exclude(id__in=[each.id for each in treeIDs_head])
             tree_dict = {
-                head_lesson: list(branches.filter(treeID=head_lesson.treeID))
+                head_lesson: list(distinct_subset(branches.filter(treeID=head_lesson.treeID), distinct_func=lambda x: x.lesson.id))
                 for head_lesson in treeIDs_head
             }
             foundNothing = not lessonSet
