@@ -56,23 +56,25 @@
       {% block how_to %}
       <p>TODO: Add a description here.</p>
       {% endblock %}
-      <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
-        {% csrf_token %}
+      {% block invitation_content %}
+          <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
+            {% csrf_token %}
 
-        <div class="input-with-button">
-           {% block invite_form %}
-             {% for field in  invite_tester_form %}
-               {{ field }}
-             {% endfor %}
+            <div class="input-with-button">
+               {% block invite_form %}
+                 {% for field in  invite_tester_form %}
+                   {{ field }}
+                 {% endfor %}
 
-          <input type="submit" value="Invite"
-                 class="invite__submit__form__"
-                 data-success-msg="Invitation sent successfully. "
-                 data-fail-msg="Invitation could not be sent now. Try again later.">
-          {% endblock %}
-        </div>
+              <input type="submit" value="Invite"
+                     class="invite__submit__form__"
+                     data-success-msg="Invitation sent successfully. "
+                     data-fail-msg="Invitation could not be sent now. Try again later.">
+              {% endblock %}
+            </div>
 
-      </form>
+          </form>
+      {% endblock %}
 
       {% block invites_list %}
       {% with 'Tester' as list_name %}
