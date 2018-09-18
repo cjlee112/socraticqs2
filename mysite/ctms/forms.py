@@ -53,7 +53,7 @@ class CreateEditUnitForm(EditUnitForm):
 
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'unit_type')
+        fields = ('title', 'text', 'unit_type', 'add_unit_aborts')
 
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
