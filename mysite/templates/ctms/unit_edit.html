@@ -213,7 +213,14 @@ Create new courselet
           {% endif %}
         </div>
 
-
+        <!-- Add unit aborts from the legacy interface -->
+        <div class="form-group form-group--unit-aborts">
+          <label>Add unit aborts </label>
+          <p>
+            Enabling unit aborts provide your students with possibility to see other students' general misconceptions.
+          </p>
+          {{ form.add_unit_aborts }}
+        </div>
 
       <!-- Submit -->
       <input type="submit" value="Save">
@@ -236,11 +243,12 @@ Create new courselet
       if(unitType === "{{ unit.lesson.ORCT_QUESTION }}") {
         $(".form-group--question, .form-group--answer, .form-group--error-models").show();
         $(".form-group--introduction").hide();
-
+        $(".form-group--unit-aborts").show();
       // Introduction
       } else if(unitType === "{{ unit.lesson.EXPLANATION }}") {
         $(".form-group--introduction").show();
         $(".form-group--question, .form-group--answer, .form-group--error-models").hide();
+        $(".form-group--unit-aborts").hide();
       }
     };
 

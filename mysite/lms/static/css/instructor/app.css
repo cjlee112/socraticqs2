@@ -875,3 +875,15 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   color: #31708f;
 }
 /*# sourceMappingURL=app.css.map */
+
+.form-group.form-group--unit-aborts {
+    margin: 0;
+    border-bottom:  1px solid #E6E8EB;
+    padding: 10px 0 16px;
+}
+
+#id_add_unit_aborts {
+    -webkit-appearance: menulist-button;
+    -moz-appearance: menulist-button;
+    appearance: menulist-button;
+}
