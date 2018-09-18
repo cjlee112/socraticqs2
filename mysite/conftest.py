@@ -1,8 +1,10 @@
 from collections import namedtuple
-
 import pytest
+from tempfile import NamedTemporaryFile
+
 from django.contrib.auth.models import User
 from django.core.management import call_command
+from django.core.files import File
 
 from chat.models import Chat, Message, UnitError, EnrollUnitCode
 from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Response
@@ -84,6 +86,13 @@ def lesson_question(user, concept):
     return instance
 
 
+@pytest.fixture(scope='session')
+def temp_image():
+    temp = NamedTemporaryFile(suffix=".jpeg")
+    temp.file.write(base64_gif_image())
+    return File(temp)
+
+
 @pytest.fixture
 def lesson_question_canvas(user, concept, base64_gif_image):
     instance = Lesson(
@@ -94,6 +103,17 @@ def lesson_question_canvas(user, concept, base64_gif_image):
     instance.save_root(concept)
     return instance
 
+
+@pytest.fixture(params=[Lesson.MULTIPLE_CHOICES, Lesson.NUMBERS, Lesson.EQUATION])
+def lesson_question_parametrized(request, user, concept, temp_image):
+    instance = Lesson(
+        title='ugh', text='brr', addedBy=user,
+        kind=Lesson.ORCT_QUESTION, sub_kind=request.param,
+        concept=concept
+    )
+    instance.attachment.save(temp_image.name, temp_image)
+    instance.save_root(concept)
+    return instance
 
 @pytest.fixture
 def unit_lesson(user, unit, lesson_question):
@@ -107,6 +127,14 @@ def unit_lesson_canvas(user, unit, lesson_question_canvas):
     return UnitLesson.objects.create(
         unit=unit, lesson=lesson_question_canvas, addedBy=user,
         treeID=lesson_question_canvas.id, order=0,
+    )
+
+
+@pytest.fixture
+def unit_lesson_parametrized(user, unit, lesson_question_parametrized):
+    return UnitLesson.objects.create(
+        unit=unit, lesson=lesson_question_parametrized, addedBy=user,
+        treeID=lesson_question_parametrized.id, order=0,
     )
 
 
@@ -179,3 +207,16 @@ def message_canvas(chat, user, unit_lesson_canvas):
         type='message',
         lesson_to_answer=unit_lesson_canvas,
     )
+
+
+@pytest.fixture
+def message_parametrized(chat, user, unit_lesson_parametrized):
+    return Message.objects.create(
+        chat=chat,
+        contenttype='unitlesson',
+        content_id=unit_lesson_parametrized.id,
+        owner=user,
+        type='message',
+        lesson_to_answer=unit_lesson_parametrized,
+    )
+

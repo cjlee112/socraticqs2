@@ -1,0 +1,11 @@
+<div class="image-upload-container">
+    <img id="image-{{ id }}" src="{% if value %}/media/{{ value }}{% endif %}" alt=""
+         class="image-holder js-image-holder"><br>
+    <button type="button" class=" btn btn-success js-upload-image" data-id="{{ id }}">Choose</button>
+    <div class="image-clear">
+        <label for="{{ name }}-clear_id">Clear</label>
+        <input id="{{ name }}-clear_id" name="{{ name }}-clear" type="checkbox">
+    </div>
+
+    <input type="file" class="hidden js-upload-input" id="input-{{ id }}" data-id="{{ id }}" name="{{ name }}">
+</div>

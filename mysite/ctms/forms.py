@@ -6,6 +6,18 @@ from django.forms.models import modelformset_factory
 from accounts.models import Instructor
 from ct.models import Course, Unit, Lesson, UnitLesson
 from ctms.models import Invite
+from django.template.loader import render_to_string
+
+
+class CustomFileInput(forms.ClearableFileInput):
+
+    def render(self, name, value, attrs):
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        attrs.update({
+            'name': name,
+            'value': value
+        }, **final_attrs)
+        return render_to_string('forms/widgets/file.html', attrs)
 
 
 class CourseForm(forms.ModelForm):
@@ -50,18 +62,20 @@ class EditUnitForm(forms.ModelForm):
 
 
 class CreateEditUnitForm(EditUnitForm):
+    attachment = forms.FileField(required=False, widget=CustomFileInput)
 
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'unit_type', 'add_unit_aborts')
+        fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'attachment')
 
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
     answer = forms.CharField(required=True, widget=forms.Textarea)
+    attachment = forms.FileField(required=False, widget=CustomFileInput)
 
     class Meta:
         model = Lesson
-        fields = ('answer', )
+        fields = ('answer', 'attachment')
 
     def save(self, unit, user, ul, commit=True):
         should_create_ul = not self.instance.id
@@ -78,6 +92,8 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 
 class ErrorModelForm(forms.ModelForm):
     """ErrorModelForm, validate data in ErrorModelFormset."""
+    attachment = forms.FileField(required=False, widget=CustomFileInput, label='')
+
     def __init__(self, *args, **kwargs):
         super(ErrorModelForm, self).__init__(*args, **kwargs)
         self.fields['text'].required = True
@@ -88,7 +104,7 @@ class ErrorModelForm(forms.ModelForm):
 
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'id')
+        fields = ('title', 'text', 'id', 'attachment')
 
     def save(self, questionUL, user, commit=True):
         self.instance.addedBy = user
@@ -113,7 +129,7 @@ class BaseErrorModelFormSet(BaseModelFormSet):
 
 
 ErrorModelFormSet = modelformset_factory(
-    Lesson, form=ErrorModelForm, formset=BaseErrorModelFormSet, fields=('id', 'title', 'text'),
+    Lesson, form=ErrorModelForm, formset=BaseErrorModelFormSet, fields=('id', 'title', 'text', 'attachment'),
     extra=0, can_delete=True,
 )
 

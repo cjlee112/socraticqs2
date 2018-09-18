@@ -6,13 +6,22 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from chat.models import EnrollUnitCode
-from ct.models import CourseUnit
+from ct.models import CourseUnit, Lesson
 
 
 @pytest.mark.django_db
 def test_message_canvas(message_canvas):
     html = message_canvas.get_html()
     assert re.search(r'<svg([^>]+)>[\s\S]*?</svg>', html) is not None
+    assert '<img src="{}" alt=""/>'.format(message_canvas.content.lesson.attachment.url) not in html
+
+
+@pytest.mark.django_db
+def test_message_html(message_parametrized):
+    assert message_parametrized.content.lesson.attachment is not None
+    html = message_parametrized.get_html()
+    assert '<img src="{}" alt=""/>'.format(message_parametrized.content.lesson.attachment.url) in html
+    assert re.search(r'<svg([^>]+)>[\s\S]*?</svg>', html) is None
 
 
 @pytest.mark.django_db

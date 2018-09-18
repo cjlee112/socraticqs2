@@ -30,7 +30,7 @@ Courselet
   {% endif %}
 
   <main class="card__content">
-    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" method="POST">
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" method="POST" enctype="multipart/form-data">
       <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
 
       {% csrf_token %}
@@ -129,6 +129,8 @@ Courselet
           {{ form.text.errors }}
         {% endif %}
 
+        {{ form.attachment }}
+
         <!-- Answer -->
         <div class="form-group form-group--answer">
           <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
@@ -149,7 +151,7 @@ Courselet
               </ul>
             </div>
           </div>
-
+          {{ answer_form.attachment }}
           {{ answer_form.answer }}
           {% if answer_form.answer.errors %}
             {{ answer_form.answer.errors }}
@@ -301,6 +303,19 @@ Courselet
                   window.location.href = $(e.currentTarget).attr('href');
               }
           });
+      });
+
+      $('.js-upload-input').on('change', function(event) {
+          var file = this.files[0];
+          var fr = new FileReader();
+          fr.onload = function(e) {
+              $('#image-'+ $(event.currentTarget).data('id')).attr('src', this.result);
+          };
+          fr.readAsDataURL(file);
+      });
+
+      $('.js-upload-image').on('click', function(event) {
+          $('#input-' + $(event.currentTarget).data('id')).click();
       });
     });
   </script>

@@ -896,5 +896,27 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   background: #43B02A;
   color: #fff;
   padding: 14px 30px;
+}
 
+.image-upload-container {
+  margin: 5px 0;
+}
+
+.image-holder {
+  max-width: 300px;
+  margin: 10px;
+}
+
+.image-clear {
+  float: left;
+  width: 60px;
+  overflow: hidden;
+}
+
+.image-clear label {
+  float: left;
+}
+
+.image-clear input {
+  margin: 11px 0 0 5px;
 }
