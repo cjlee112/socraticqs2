@@ -32,7 +32,7 @@
           <tbody>
             {% for sh in shared_courses %}
               <tr>
-                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}">{{ sh.course.title }}</a></td>
+                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}" target="_blank">{{ sh.course.title }}</a></td>
                 <td>{{ sh.instructor }}</td>
               </tr>
             {% endfor %}
