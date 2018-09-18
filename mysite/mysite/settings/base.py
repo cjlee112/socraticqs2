@@ -278,6 +278,10 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 # Facebook email scope declaring
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'first_name, last_name, email'
+}
+
 # Facebook API version to use
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '3.1'
 
