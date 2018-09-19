@@ -11,7 +11,8 @@ from django.utils import timezone
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from accounts.models import Profile
+
+from accounts.models import Profile, Instructor
 
 from psa.models import UserSocialAuth
 from ct.models import Course, Role, Unit, CourseUnit, UnitLesson, Lesson
@@ -431,6 +432,53 @@ class TestUnit(LTITestCase):
             '/lti/unit/{}/'.format(self.unit.id), data=self.headers, follow=True
         )
         self.assertTemplateUsed(response, 'chat/main_view.html')
+    
+    def test_instructor_enabled_404_wo_instructor_profile(self, mocked, switch):
+        """
+        Checks redirect to the new Instructor UI but fail on became instructor.
+        """
+        mocked.return_value.is_valid_request.return_value = True
+        switch.return_value = True
+        headers = self.headers.copy()
+        headers['roles'] = 'Instructor'
+        response = self.client.post(
+            '/lti/unit/{}/'.format(self.unit.id), data=headers, follow=True
+        )
+        assert response.status_code == 404
+    
+    @unpack
+    @data((Role.INSTRUCTOR, {u'roles': u'Instructor'}),
+          (Role.ENROLLED, {u'roles': u'Learner'}))
+    def test_instructor_enabled_w_instructor_profile_unit_view(self, mocked, switch):
+        """
+        Checks redirect to the new Instructor UI on courselet detail page.
+        """
+        mocked.return_value.is_valid_request.return_value = True
+        switch.return_value = True
+        headers = self.headers.copy()
+        headers['roles'] = 'Instructor'
+
+        Instructor.objects.create(user=self.user)
+        response = self.client.post(
+            '/lti/unit/{}/'.format(self.unit.id), data=headers, follow=True
+        )
+        assert response.status_code == 200
+        self.assertTemplateUsed(response, 'ctms/courselet_detail.html')
+    
+    def test_instructor_enabled_w_instructor_profile_course_view(self, mocked, switch):
+        """
+        Checks redirect to the new Instructor UI on course detail page.
+        """
+        mocked.return_value.is_valid_request.return_value = True
+        switch.return_value = True
+        headers = self.headers.copy()
+        headers['roles'] = 'Instructor'
+
+        Instructor.objects.create(user=self.user)
+
+        response = self.client.post('/lti/', data=headers, follow=True)
+        assert response.status_code == 200
+        self.assertTemplateUsed(response, 'ctms/course_detail.html')
 
 
 class AcceptanceTests(LTITestCase):
