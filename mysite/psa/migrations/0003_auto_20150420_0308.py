@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('email', models.EmailField(max_length=75, verbose_name=b'Secondary Email')),
-                ('provider', models.ForeignKey(to='social_auth.UserSocialAuth')),
+                ('provider', models.ForeignKey(to='social_django.UserSocialAuth')),
                 ('user', models.ForeignKey(related_name='secondary', to=settings.AUTH_USER_MODEL)),
             ],
             options={

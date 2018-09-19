@@ -2,7 +2,7 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
-from social.strategies.django_strategy import DjangoStrategy
+from social_django.strategy import DjangoStrategy
 from accounts.models import Instructor
 from psa.custom_django_storage import CustomCode
 

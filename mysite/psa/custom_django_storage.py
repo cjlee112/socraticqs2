@@ -5,7 +5,7 @@ CustomDjangoStorage -> Storage to use this CustomCode
 """
 from django.db import models
 
-from social.apps.django_app.default.models import DjangoStorage, Code
+from social_django.models import DjangoStorage, Code
 
 
 class CustomCode(Code):

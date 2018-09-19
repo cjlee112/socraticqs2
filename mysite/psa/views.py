@@ -10,15 +10,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from social.actions import do_complete
-from social.apps.django_app.utils import psa
+from social_core.actions import do_complete
+from social_django.utils import psa
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME
 
-from social.backends.utils import load_backends
-from social.apps.django_app.views import _do_login
-from social.apps.django_app.views import complete as social_complete
-from social.exceptions import AuthMissingParameter
+from social_core.backends.utils import load_backends
+from social_django.views import _do_login
+from social_django.views import complete as social_complete
+from social_core.exceptions import AuthMissingParameter
 from accounts.models import Profile, Instructor
 from psa.custom_django_storage import CustomCode
 

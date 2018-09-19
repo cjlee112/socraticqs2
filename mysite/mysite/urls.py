@@ -11,7 +11,7 @@ from accounts.views import AccountSettingsView
 admin.autodiscover()
 
 
-from social.utils import setting_name
+from social_core.utils import setting_name
 from psa.views import complete, social_auth_complete
 
 
@@ -61,7 +61,7 @@ urlpatterns = patterns(
     url(r'^complete/(?P<backend>[^/]+){0}$'.format(extra), social_auth_complete,
         name='soc_complete'),
 
-    url('', include('social.apps.django_app.urls', namespace='social')),
+    url('', include('social_django.urls', namespace='social')),
 
     url(r'^tmp-email-ask/$', 'psa.views.ask_stranger'),
     url(r'^set-pass/$', 'psa.views.set_pass'),

@@ -3,8 +3,8 @@
 Original Legacy Email backend docs at:
 http://psa.matiasaguirre.net/docs/backends/email.html
 """
-from social.backends.legacy import LegacyAuth
-from social.exceptions import AuthMissingParameter
+from social_core.backends.legacy import LegacyAuth
+from social_core.exceptions import AuthMissingParameter
 from psa.custom_django_storage import CustomCode
 
 

@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordResetForm
 from django.db.models import Q
 from django.contrib.auth.models import User
-from social.apps.django_app.views import complete
+from social_django.views import complete
 
 from accounts.models import Instructor
 

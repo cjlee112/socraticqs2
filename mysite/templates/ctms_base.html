@@ -82,7 +82,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
-    <script src="{% static "js/plugins/jquery.notify.js" %}"></script>
+    {# <script src="{% static "js/plugins/jquery.notify.js" %}"></script>#}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
     {% block js %}
@@ -190,6 +191,14 @@
 
       // Custom scrollbar in sidebar
       $('.sidebar__scroll-container').perfectScrollbar();
+
+      // Copy the enroll code (invite students)
+      $('#copy_enroll_code').on('click', function(e){
+        e.preventDefault();
+        document.getElementById("enroll_code").select();
+        document.execCommand("copy");
+        $.notify("Copied the enroll code to clipboard.", "info");
+      });
 
     </script>
 

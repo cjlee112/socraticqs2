@@ -12,12 +12,12 @@ from django.contrib.auth.models import User
 import time
 from datetime import datetime
 
-from social.pipeline.partial import partial
-from social.exceptions import (InvalidEmail,
+from social_core.pipeline.partial import partial
+from social_core.exceptions import (InvalidEmail,
                                AuthException,
                                AuthAlreadyAssociated)
-from social.backends.utils import load_backends
-from social.apps.django_app.default.models import UserSocialAuth
+from social_core.backends.utils import load_backends
+from social_django.models import UserSocialAuth
 
 from psa.models import AnonymEmail, SecondaryEmail
 

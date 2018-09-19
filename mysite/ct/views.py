@@ -16,7 +16,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from social.backends.utils import load_backends
+from social_core.backends.utils import load_backends
 from collections import defaultdict
 
 from ct.forms import *
@@ -903,7 +903,7 @@ def _lessons(request, pageData, concept=None, msg='',
             treeIDs_head = distinct_subset(lessonSet)
             branches = lessonSet.exclude(id__in=[each.id for each in treeIDs_head])
             tree_dict = {
-                head_lesson: list(branches.filter(treeID=head_lesson.treeID))
+                head_lesson: list(distinct_subset(branches.filter(treeID=head_lesson.treeID), distinct_func=lambda x: x.lesson.id))
                 for head_lesson in treeIDs_head
             }
             foundNothing = not lessonSet

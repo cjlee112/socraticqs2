@@ -17,11 +17,11 @@ class Migration(migrations.Migration):
             fields=[
                 ('code_ptr', models.OneToOneField(
                     parent_link=True, auto_created=True, primary_key=True,
-                    serialize=False, to='social_auth.Code')),
+                    serialize=False, to='social_django.Code')),
                 ('user_id', models.IntegerField(null=True)),
             ],
             options={
             },
-            bases=('social_auth.code',),
+            bases=('social_django.code',),
         ),
     ]

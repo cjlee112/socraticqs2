@@ -8,3 +8,5 @@ ipdb<=0.11
 pep8
 pylint
 django-debug-toolbar==1.8
+flake8
+ptvsd

@@ -18,7 +18,7 @@ from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
 from django.conf import settings
-from social.backends.utils import load_backends
+from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
 
@@ -954,9 +954,16 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
     def get_context_data(self, **kwargs):
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
         kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
+        course = self.get_course()
         if waffle.switch_is_active('ctms_invite_students'):
-            kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
-        kwargs['course'] = self.get_course()
+            courselet = CourseUnit.objects.filter(course=course).first()
+            # We no longer need a form
+            # kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
+            if courselet:
+                kwargs['enroll_code'] = EnrollUnitCode.get_code(courselet)
+
+        kwargs['course'] = course
+        kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
         return kwargs
 
     def get_form_kwargs(self):
@@ -971,12 +978,13 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         }
 
     def form_valid(self, form):
-        if form.cleaned_data['type'] == 'student' and not waffle.switch_is_active('ctms_invite_students'):
-            # if type - student and ctms_invite_students is disabled
-            messages.add_message(
-                self.request, messages.WARNING, "You can not send invitations to students yet"
-            )
-            return self.form_invalid(form)
+        # There's no longer a form on the students invitation page
+        # if form.cleaned_data['type'] == 'student' and not waffle.switch_is_active('ctms_invite_students'):
+        #     # if type - student and ctms_invite_students is disabled
+        #     messages.add_message(
+        #         self.request, messages.WARNING, "You can not send invitations to students yet"
+        #     )
+        #     return self.form_invalid(form)
         response = super(InvitesListView, self).form_valid(form)
         self.object.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")

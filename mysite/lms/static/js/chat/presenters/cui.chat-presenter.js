@@ -1046,7 +1046,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
       // Hide numbers input
       $numbers.hide();
       // Reset textarea size
-      $textarea.val('').attr('rows', 1);
+      $textarea.find('textarea').val('').attr('rows', 1);
       break;
   }
 
@@ -1069,6 +1069,9 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
    // Show text input
    $text.show();
+
+   // Automatically increase the height of the textarea when new rows are added
+   $textarea.find('textarea').expandingTextarea({maxRows: 10});
   } else if(input.type === 'options'){
    // Set input type
    this._inputType = 'options';
@@ -1185,14 +1188,10 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Validate and post text to server
     this._postText();
   }, this)).on('keyup', $.proxy(function(e){
-    // Submit form on ctrl-enter but ignore enter
-    if(e.which === 13 && e.ctrlKey) {
-      e.preventDefault();
-      this._$inputContainer.find('.chat-input-text-form').submit();
+    // Enter should add a new line instead of submitting the form
+    if(e.which === 13) {
+      e.preventDefault()
     }
-    var $textarea = this._$inputContainer.find('textarea');
-    $textarea.css('height','auto');
-    $textarea.height($textarea.get(0).scrollHeight || '24px');
   }, this));
 
   // Overflow actions
@@ -1206,5 +1205,4 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     var action = $(e.currentTarget).data('action');
     this._postAction(action);
   }, this));
-
 };

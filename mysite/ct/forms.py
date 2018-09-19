@@ -358,8 +358,7 @@ class SearchFormBase(forms.Form):
     ##                              label='Search Courselets.org and')
 
 class LessonSearchForm(SearchFormBase):
-    searchType = forms.ChoiceField(choices=(('lesson', 'lessons'),
-                                      ('question', 'questions'),),
+    searchType = forms.ChoiceField(choices=(('question', 'questions'), ('lesson', 'lessons')),
                              label='Search for')
     search = forms.CharField(label='containing')
 
