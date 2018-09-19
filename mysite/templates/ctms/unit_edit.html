@@ -151,10 +151,14 @@ Courselet
               </ul>
             </div>
           </div>
-          {{ answer_form.attachment }}
           {{ answer_form.answer }}
           {% if answer_form.answer.errors %}
             {{ answer_form.answer.errors }}
+          {% endif %}
+        
+          {{ answer_form.attachment }}
+          {% if answer_form.attachment.errors %}
+            {{ answer_form.attachment.errors }}
           {% endif %}
         </div>
 

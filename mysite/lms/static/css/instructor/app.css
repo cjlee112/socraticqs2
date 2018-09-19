@@ -908,15 +908,15 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 }
 
 .image-clear {
-  float: left;
-  width: 60px;
   overflow: hidden;
 }
 
 .image-clear label {
-  float: left;
+  width: 250px;
+  margin-bottom: 10px;
 }
 
 .image-clear input {
-  margin: 11px 0 0 5px;
+  float: left;
+  margin: 11px 10px 0 5px;
 }
