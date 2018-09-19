@@ -127,6 +127,18 @@ class BaseErrorModelFormSet(BaseModelFormSet):
         super(BaseErrorModelFormSet, self).add_fields(form, index)
         form.fields[DELETION_FIELD_NAME].widget = forms.HiddenInput()
 
+    @property
+    def empty_form(self):
+        form = self.form(
+            auto_id=self.auto_id,
+            prefix=self.add_prefix('__prefix__'),
+            empty_permitted=True,
+            **self.get_form_kwargs(None)
+        )
+        form.fields.pop('attachment')
+        self.add_fields(form, None)
+        return form
+
 
 ErrorModelFormSet = modelformset_factory(
     Lesson, form=ErrorModelForm, formset=BaseErrorModelFormSet, fields=('id', 'title', 'text', 'attachment'),
