@@ -6,7 +6,7 @@
 </tr></thead>
 <tbody>
 {% for tree, branch in found_lessons.items %}
-    {% if branch %}
+    {% if branch and branch|length > 1 %}
         <tr><td colspan="4">
         {{ tree.lesson.title }} &nbsp;
     <a role="button" data-toggle="collapse" class="btn btn-default" href="#{{ tree.id }}" aria-expanded="false" aria-controls="{{ tree.id }}">
