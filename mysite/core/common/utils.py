@@ -18,7 +18,7 @@ def send_email(context_data, from_email, to_email, template_subject, template_te
         from_email (str): sender's email.
         to_email (list): list of addresses to send an email to.
         template_subject (str): path to a subject template, e.g. 'ctms/email/subject.txt'
-        template_text:  path to a body template, e.g. 'ctms/email/text.txt'
+        template_text (str):  path to a body template, e.g. 'ctms/email/text.txt'
     """
     context = Context(context_data)
 
@@ -37,7 +37,7 @@ def send_email(context_data, from_email, to_email, template_subject, template_te
     )
 
 
-def suspendingreceiver(signal, **decorator_kwargs):
+def suspending_receiver(signal, **decorator_kwargs):
     """
     Custom decorator to disable signals.
 
