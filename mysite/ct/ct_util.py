@@ -109,3 +109,17 @@ def cache_this(fn):
             cache.add(cache_key, result)
         return result
     return wrapped
+
+
+def get_middle_indexes(lst):
+    """
+    Fetch indexes of one or two middle numbers of a list.
+    """
+    n = len(lst)
+    if n <= 2:
+        return [None]
+    if n % 2 == 0:
+        return [n / 2 - 1, n / 2]
+    else:
+        return [n // 2]
+

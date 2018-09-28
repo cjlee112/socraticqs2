@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from ct.models import Response, UnitLesson
 from grading.models import CorrectnessMeter
@@ -13,6 +14,7 @@ class BaseGraderTests(TestCase):
         self.assertIsNone(GRADERS.get('base'))
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class NumbersGraderTest(TestCase):
     fixtures = ["chat/tests/fixtures/initial_numbers.json"]
 

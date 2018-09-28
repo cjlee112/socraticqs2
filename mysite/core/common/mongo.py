@@ -10,6 +10,7 @@ from django.conf import settings
 DB_DATA = settings.DB_DATA
 
 COLLECTION_CHAT_STACK = 'chat_stack'
+COLLECTION_MILESTONE_ORCT = 'milestone_students_orct'
 
 
 class Singleton(object):
@@ -56,6 +57,10 @@ def mongo_data_database(db=DB_DATA, use_secondary=False):
 
 def c_chat_stack(use_secondary=False):
     return mongo_data_database(use_secondary=use_secondary)[COLLECTION_CHAT_STACK]
+
+
+def c_milestone_orct(use_secondary=False):
+    return mongo_data_database(use_secondary=use_secondary)[COLLECTION_MILESTONE_ORCT]
 
 
 def do_health(use_secondary=False):

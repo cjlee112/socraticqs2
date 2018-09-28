@@ -3,10 +3,10 @@ Unit tests for ct/ct_util.py.
 """
 from django.test import TestCase
 
-from ddt import ddt, data
+from ddt import ddt, data, unpack
 from mock import Mock
 
-from ct.ct_util import get_path_kwargs, reverse_path_args
+from ct.ct_util import get_path_kwargs, reverse_path_args, get_middle_indexes
 
 
 @ddt
@@ -41,3 +41,24 @@ class ReversePathArgsTest(TestCase):
         unit_lesson_object.pk = 2
         result = reverse_path_args('ct:ul_teach', '/ct/teach/courses/21/units/33/', unitLesson=unit_lesson_object)
         self.assertEqual(result, '/ct/teach/courses/21/units/33/lessons/2/')
+
+
+@ddt
+class AuxiliariesTest(TestCase):
+    """
+    Tests various auxiliary functions.
+    """
+
+    @data(
+        ([1], [None]),
+        ([1, 2], [None]),
+        ([1, 2, 3], [1]),
+        ([1, 2, 3, 4], [1, 2])
+    )
+    @unpack
+    def test_get_middle_indexes(self, input_value, output_value):
+        """
+        Ensure proper middle indexes are returned.
+        """
+        output = get_middle_indexes(input_value)
+        self.assertEqual(output, output_value)

@@ -876,6 +876,12 @@ class UnitTest(TestCase):
 
         unitlesson_set.filter.assert_called_with(order__isnull=False, lesson__kind=Lesson.ORCT_QUESTION)
 
+    def test_all_orct(self):
+        """
+        Test a method fetching all ORCT.
+        """
+        self.assertTrue(self.unit.all_orct().count(), 1)
+
     def test_create_lesson(self):
         lesson_title = 'lesson title'
         lesson_text = 'lesson test'
