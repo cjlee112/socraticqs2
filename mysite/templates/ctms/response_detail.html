@@ -1,5 +1,5 @@
 {% extends 'ctms_base.html' %}
-{% load staticfiles %}
+{% load staticfiles ct_extras %}
 
 {% block content %}
 <div class="card">
@@ -30,8 +30,8 @@
       </div>
 
       <div class="user-info">
-        <img src="{% if object.author.instructor.icon_url %}{{ object.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ object.author.get_full_name }}" class="avatar">
-        <h3>{{ object.author }}</h3>
+        <img src="{% if object.author.instructor.icon_url %}{{ object.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ object.author|display_full_username }}" class="avatar">
+        <h3>{{ object.author|display_full_username }}</h3>
         <p>{{ object.atime|date }}</p>
       </div>
 
