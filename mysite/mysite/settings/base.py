@@ -466,7 +466,7 @@ MONGO_HOST = 'mongo'
 
 # Number of students answered to ORCT.
 # Used to notify the instructor(s) when N students answer the first/last/middle question in a courselet.
-MILESTONE_ORCT_NUMBER = 2
+MILESTONE_ORCT_NUMBER = 10
 
 # Configure if Django signals should be suspended
 SUSPEND_SIGNALS = False
