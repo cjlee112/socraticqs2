@@ -4,6 +4,7 @@ import json
 
 from ddt import ddt, data, unpack
 from django.test import TestCase, Client
+from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -82,6 +83,7 @@ class CustomTestCase(TestCase):
         return md2html(raw_html)
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class MainChatViewTests(CustomTestCase):
     """
     Tests for main view.
@@ -316,6 +318,7 @@ class MainChatViewTests(CustomTestCase):
         start_point.assert_called_once()
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class MessagesViewTests(CustomTestCase):
     """
     Test for MessagesView API.
@@ -994,6 +997,7 @@ class HistoryAPIViewTests(CustomTestCase):
         # self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.get_help())
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class NumbersTest(CustomTestCase):
     """Tests to check numbers functionality."""
 

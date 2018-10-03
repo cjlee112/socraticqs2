@@ -1,9 +1,11 @@
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import timezone
 from django.core.management import call_command
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Role
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class CloneCourseCommandTest(TestCase):
     fixtures = [
         'ct/tests/fixtures/initial_data.json'

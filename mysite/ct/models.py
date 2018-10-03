@@ -944,6 +944,13 @@ class Unit(models.Model):
         return not self.unitlesson_set.filter(order__isnull=False,
                                               lesson__kind=Lesson.ORCT_QUESTION).count()
 
+    def all_orct(self):
+        """
+        Return all ORCT objects.
+        """
+        return self.unitlesson_set.filter(order__isnull=False,
+                                          lesson__kind=Lesson.ORCT_QUESTION)
+
     def create_lesson(self, title, text, author=None, **kwargs):
         if author is None:
             author = self.addedBy

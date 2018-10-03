@@ -104,6 +104,7 @@ class Invite(models.Model):
 
     def send_mail(self, request, view):
         try:
+            # TODO: use `send_email` utility function here (see `core`)
             context = Context({
                 'invite': self,
                 'current_site': Site.objects.get_current(request)

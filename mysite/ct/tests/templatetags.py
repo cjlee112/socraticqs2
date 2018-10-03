@@ -5,6 +5,7 @@ import inspect
 
 from datetime import timedelta
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.template import Context, Template
 
@@ -15,6 +16,7 @@ from ct.models import UnitLesson, Course, Unit, Concept, Lesson, ConceptLink, Re
 from ct.templatetags.ct_extras import *
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 @ddt
 class TagsTest(TestCase):
     def setUp(self):

@@ -34,9 +34,13 @@ class CustomDjangoStrategy(DjangoStrategy):
                 password=kwargs.get('password', ''),
             )
             data.update(kwargs)
+            for _ in ('first_name', 'last_name', 'password'):
+                if not data[_]:
+                    data[_] = ''
+            if not data['password']:
+                del data['password']
             user = self.storage.user.create_user(**data)
-            user.password = kwargs.get('password', '')
-            user.save()
+            user.set_unusable_password()
             return user
         else:
             username += '_'
@@ -67,7 +71,7 @@ class CustomDjangoStrategy(DjangoStrategy):
         user = self.check_username_and_create_user(username, **data)
         Instructor.objects.create(
             user=user,
-            institution=data.get('institution', ''),
+            institution=data.get('institution', '') if data.get('institution', '') is not None else '',
         )
         return user
 

@@ -4,6 +4,7 @@ from ddt import ddt, data, unpack
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import timezone
 from django.db import models
 from accounts.models import Instructor
@@ -14,6 +15,7 @@ from ctms.models import Invite
 from psa.forms import EmailLoginForm, SignUpForm
 
 
+@override_settings(SUSPEND_SIGNALS=True)
 class MyTestCase(TestCase):
     models_to_check = tuple()
     context_should_contain_keys = tuple()

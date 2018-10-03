@@ -90,3 +90,5 @@ mysite/media/
 src/
 mysite/lms/static/css/draw_svg.css
 mysite/lms/static/js/draw_svg.js
+
+.*env*
