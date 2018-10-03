@@ -57,6 +57,9 @@ Deploy Dev:
     - stage
     - deploy
     - ssh
+  environment:
+    name: development
+    url: https://dev.courselets.org
   only:
     - development
   script:
