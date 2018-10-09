@@ -355,7 +355,7 @@ LOGGING = {
             'class': 'logging.StreamHandler'
         },
         'file': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
             'formatter': 'verbose'
@@ -377,6 +377,14 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'core': {
+            'handlers': ['file'],
+            'level': 'INFO'
+        },
+        'ct': {
+            'handlers': ['file'],
+            'level': 'INFO'
+        }
     }
 }
 
