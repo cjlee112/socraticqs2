@@ -690,10 +690,11 @@ class EditUnitViewTests(MyTestCase):
 
     @unpack
     @data(
-        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title', 'tests/files/raccoon.jpg'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'tests/files/image.svg', 'ORCT Answer'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text w/o image', 'Some ORCT title w/o image', '', 'ORCT Answer'),
     )
-    def test_post_valid_data(self, kind, text, title, answer=''):
+    def test_post_valid_data(self, kind, text, title, attachment, answer=''):
         counts = self.get_model_counts()
         data = {
             'unit_type': kind,
@@ -701,7 +702,14 @@ class EditUnitViewTests(MyTestCase):
             'title': title,
             'answer_form-answer': answer,
         }
-        response = self.post_valid_data(data)
+        if attachment:
+            with open(attachment) as img:
+                data.update({
+                    'attachment': img
+                })
+                response = self.post_valid_data(data)
+        else:
+            response = self.post_valid_data(data)
 
         self.assertEquals(response.context['form'].errors, {})
         self.assertEquals(response.context['answer_form'].errors, {})
@@ -729,21 +737,31 @@ class EditUnitViewTests(MyTestCase):
     @unpack
     @data(
         # (EditUnitForm.KIND_CHOICES[0][0], ''),  # valid kind, empty text
-        ('', 'Some New ORCT text is here...', 'Some titile'),  # not valid kind, valid text
-        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', ''),  # valid kind, not valid title
-        (EditUnitForm.KIND_CHOICES[0][0], '', 'Some text'),  # valid kind, not valid title
-        (EditUnitForm.KIND_CHOICES[0][0], '', ''),  # valid kind, not valid title and text
+        ('', 'Some New ORCT text is here...', 'Some titile', 'tests/files/document.pdf'),  # not valid kind, valid text
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', '', 'pytest.ini'),  # valid kind, not valid title
+        (EditUnitForm.KIND_CHOICES[0][0], '', 'Some text', 'tests/files/raccoon3.mp3'),  # valid kind, not valid title
+        (EditUnitForm.KIND_CHOICES[0][0], '', '', 'tests/files/raccoon3.mpeg'),  # valid kind, not valid title and text
     )
-    def test_post_invalid_data(self, kind, text, title):
+    def test_post_invalid_data(self, kind, text, title, attachment):
         counts = self.get_model_counts()
         data = {
             'unit_type': kind,
             'text': text,
             'title': title
         }
-        response = self.post_valid_data(data)
+        if attachment:
+            with open(attachment) as img:
+                data.update({
+                    'attachment': img
+                })
+                response = self.post_valid_data(data)
+        else:
+            response = self.post_valid_data(data)
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts, must_equal=True)
+
+        self.assertNotEquals(response.context['form'].errors.get('attachment', []), [])
+
         self.assertNotEqual(self.get_test_unitlesson().lesson.kind, kind)
         # self.assertEqual(self.get_test_unitlesson().unit.text, text)
         self.check_context_keys(response)
