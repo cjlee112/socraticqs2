@@ -1,6 +1,8 @@
 """
 Django signals for the app.
 """
+import logging
+
 from django.db.models.signals import post_save
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -10,6 +12,8 @@ from .ct_util import get_middle_indexes
 
 from core.common.mongo import c_milestone_orct
 from core.common.utils import send_email, suspending_receiver
+
+log = logging.getLogger(__name__)
 
 
 @suspending_receiver(post_save, sender=Response)
@@ -78,17 +82,26 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
                 # If N students responded to a milestone question, send an email.
                 # The threshold holds for each milestone separately.
                 if milestone_orct_answers_number == settings.MILESTONE_ORCT_NUMBER:
+                    context_data = {
+                        "milestone": milestone,
+                        "students_number": milestone_orct_answers_number,
+                        "course_title": course.title if course else None,
+                        "lesson_title": lesson.title if lesson else None,
+                        "current_site": Site.objects.get_current(),
+                        "course_id": course_id,
+                        "unit_lesson_id": unit_lesson_id,
+                        "courselet_pk": unit_lesson.unit.id if unit_lesson.unit else None
+                    }
+                    log.info(u"""Courselet notification with data:
+                        Course title - {course_title},
+                        Lesson title - {lesson_title},
+                        Students number - {students_number},
+                        Unit lesson id - {unit_lesson_id},
+                        Course id - {course_id},
+                        Milestone - {milestone}
+                        """.format(**context_data))  # pragma: no cover
                     send_email(
-                        context_data={
-                            "milestone": milestone,
-                            "students_number": milestone_orct_answers_number,
-                            "course_title": course.title if course else None,
-                            "lesson_title": lesson.title if lesson else None,
-                            "current_site": Site.objects.get_current(),
-                            "course_id": course_id,
-                            "unit_lesson_id": unit_lesson_id,
-                            "courselet_pk": unit_lesson.unit.id if unit_lesson.unit else None
-                        },
+                        context_data=context_data,
                         from_email=settings.EMAIL_FROM,
                         to_email=[instructor.email for instructor in instructors],
                         template_subject="ct/email/milestone_ortc_notify_subject",
