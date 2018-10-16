@@ -359,6 +359,12 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
             'formatter': 'verbose'
+        },
+        'notifications': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/notifs.log'),
+            'formatter': 'verbose'
         }
     },
     'loggers': {
@@ -382,7 +388,7 @@ LOGGING = {
             'level': 'INFO'
         },
         'ct': {
-            'handlers': ['file'],
+            'handlers': ['notifications'],
             'level': 'INFO'
         }
     }

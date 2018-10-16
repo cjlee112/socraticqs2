@@ -99,7 +99,7 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
                         Unit lesson id - {unit_lesson_id},
                         Course id - {course_id},
                         Milestone - {milestone}
-                        """.format(**context_data))
+                        """.format(**context_data))  # pragma: no cover
                     send_email(
                         context_data=context_data,
                         from_email=settings.EMAIL_FROM,
