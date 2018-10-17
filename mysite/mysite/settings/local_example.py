@@ -1,12 +1,15 @@
 # coding: utf-8
-import os
 import sys
-import raven
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
 
 
-RAVEN_CONFIG = {
-    'dsn': '',
-}
+sentry_sdk.init(
+    dsn="",
+    integrations=[DjangoIntegration(), CeleryIntegration()]
+)
 
 
 DATABASES = {

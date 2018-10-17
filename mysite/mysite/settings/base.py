@@ -177,8 +177,6 @@ INSTALLED_APPS = (
     # CMS pages
     'pages',
 
-    # Raven
-    'raven.contrib.django.raven_compat',
     # bower requirements
     'djangobower',
 )
