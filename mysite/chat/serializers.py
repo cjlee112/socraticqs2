@@ -293,7 +293,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             if obj.is_live:
                 lessons = []
                 for msg in messages:
-                    try:
+                    try:  # pragma: no cover
                         lesson = msg.content.unitlesson
                         lesson.message = msg.id
                         lessons.append(lesson)
@@ -306,7 +306,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                                 self.context['request'].user.username,
                                 msg.kind,
                                 msg.text
-                        ))
+                        ))  # pragma: no cover
             else:
                 lessons = list(
                     obj.enroll_code.courseUnit.unit.unitlesson_set.filter(
