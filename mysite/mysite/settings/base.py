@@ -390,6 +390,10 @@ LOGGING = {
         'ct': {
             'handlers': ['notifications'],
             'level': 'INFO'
+        },
+        'ctms': {
+            'handlers': ['file'],
+            'level': 'INFO'
         }
     }
 }

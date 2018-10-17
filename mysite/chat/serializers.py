@@ -1,16 +1,15 @@
-import base64
 
+import logging
 import injections
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.core.urlresolvers import reverse
 
-from .models import Message, Chat, ChatDivider
+from .models import Message, Chat
 from .services import ProgressHandler
-from ct.models import UnitLesson, Response
+from ct.models import UnitLesson
 from accounts.models import Instructor
-from mysite.celery import send_outcome
-from lti.models import GradedLaunch
+
+log = logging.getLogger(__name__)
 
 
 class InternalMessageSerializer(serializers.ModelSerializer):
@@ -294,9 +293,20 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             if obj.is_live:
                 lessons = []
                 for msg in messages:
-                    lesson = msg.content.unitlesson
-                    lesson.message = msg.id
-                    lessons.append(lesson)
+                    try:
+                        lesson = msg.content.unitlesson
+                        lesson.message = msg.id
+                        lessons.append(lesson)
+                    except AttributeError as ex:
+                        log.error(
+                            "{}, Error details: message_id '{}', chat_id '{}', user '{}', kind '{}', text '{}'".format(
+                                ex,
+                                msg.id,
+                                obj.id,
+                                self.context['request'].user.username,
+                                msg.kind,
+                                msg.text
+                        ))
             else:
                 lessons = list(
                     obj.enroll_code.courseUnit.unit.unitlesson_set.filter(
