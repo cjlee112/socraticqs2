@@ -486,3 +486,4 @@ MILESTONE_ORCT_NUMBER = 10
 
 # Configure if Django signals should be suspended
 SUSPEND_SIGNALS = False
+EMAIL_BACKEND = 'django_ses.SESBackend'

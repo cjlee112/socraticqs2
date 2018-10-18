@@ -45,3 +45,7 @@ sentry-sdk==0.4.1
 kombu==4.1.0
 
 pymongo==3.7.1
+
+# SES
+boto==2.49.0
+django-ses==0.8.7
