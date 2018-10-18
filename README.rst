@@ -215,3 +215,12 @@ That's why we created new page named `Instructor Agreement`, which should be add
 * Open `mysite/settings/base.py` file and check `BECOME_INSTRUCTOR_URL`.
 * `BECOME_INSTRUCTOR_URL` must be the same as URL of `Instructor Agreement` page.
 * Reload server.
+
+SES configuration
+-----------------
+
+fill the following settings in order to have ability to send emails
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_SES_REGION_NAME = ''
+AWS_SES_REGION_ENDPOINT = ''
