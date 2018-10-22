@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.generic import View, CreateView
 from django.core.urlresolvers import reverse
 from django.views.generic.base import TemplateView
+from django.conf import settings
 
 from accounts.forms import (
     UserForm, InstructorForm, ChangePasswordForm,
@@ -182,7 +183,7 @@ def custom_password_reset(request, is_admin_site=False,
                    password_reset_form=PasswordResetForm,
                    token_generator=default_token_generator,
                    post_reset_redirect=None,
-                   from_email=None,
+                   from_email=settings.EMAIL_FROM,
                    current_app=None,
                    extra_context=None,
                    html_email_template_name=None):
