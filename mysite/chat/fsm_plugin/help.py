@@ -84,7 +84,6 @@ class HELP_RESOLVE(object):
         )
 
 
-
 class END(object):
     def get_path(self, node, state, request, **kwargs):
         """
@@ -95,6 +94,8 @@ class END(object):
     # node specification data goes here
     title = 'Additional lessons completed'
     help = 'I hope you\'ve overcome all misunderstanding.<br>Let\'s come back to the previous question.'
+
+
 def get_specs():
     """
     Get FSM specifications stored in this file.

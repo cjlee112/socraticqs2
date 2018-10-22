@@ -67,8 +67,8 @@ class CreateEditUnitForm(EditUnitForm):
 
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'attachment')
-
+        fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'mc_simplified', 'attachment')
+ 
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
     answer = forms.CharField(required=True, widget=forms.Textarea)

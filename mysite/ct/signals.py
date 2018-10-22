@@ -91,7 +91,7 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
                         "course_id": course_id,
                         "unit_lesson_id": unit_lesson_id,
                         "courselet_pk": unit_lesson.unit.id if unit_lesson.unit else None
-                    }
+                    }  # pragma: no cover
                     log.info(u"""Courselet notification with data:
                         Course title - {course_title},
                         Lesson title - {lesson_title},

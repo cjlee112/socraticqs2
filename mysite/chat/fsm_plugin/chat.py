@@ -1,4 +1,4 @@
-from ct.models import UnitStatus, UnitLesson
+from ct.models import UnitStatus, UnitLesson, Lesson
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -132,6 +132,30 @@ class ASK(object):
 
 
 class GET_ANSWER(object):
+    """
+    Get answer and decide where to go next.
+    """
+    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        fsm = edge.fromNode.fsm
+
+        unitStatus = fsmStack.state.get_data_attr('unitStatus')
+        unit_lesson = unitStatus.get_lesson()
+        if unit_lesson.sub_kind == Lesson.MULTIPLE_CHOICES and unit_lesson.lesson.mc_simplified:
+            nextUL = unitStatus.start_next_lesson()
+            if not nextUL:  # pragma: no cover
+                unit = fsmStack.state.get_data_attr('unit')
+                if unit.unitlesson_set.filter(
+                    kind=UnitLesson.COMPONENT, order__isnull=True
+                ).exists():
+                    return fsm.get_node('IF_RESOURCES') 
+                else:
+                    return fsm.get_node('END')
+            else:  # just a lesson to read
+                fsmStack.state.unitLesson = nextUL
+                return fsm.get_node('TITLE')
+        else:
+            return edge.toNode
+
     title = 'It is time to answer'
     edges = (
             dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
