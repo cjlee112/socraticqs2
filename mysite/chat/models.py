@@ -301,7 +301,7 @@ class Message(models.Model):
                   and not self.response_to_check
             ):
                 options = [CONTINUE_BTN]
-            elif next_point.contenttype == 'response':
+            elif next_point.contenttype == 'response' and next_point.content:
                 if self.should_ask_confidence():
                     if not next_point.content.confidence:
                         options = [dict(value=i[0], text=i[1]) for i in Response.CONF_CHOICES]
