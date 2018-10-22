@@ -177,8 +177,6 @@ INSTALLED_APPS = (
     # CMS pages
     'pages',
 
-    # Raven
-    'raven.contrib.django.raven_compat',
     # bower requirements
     'djangobower',
 )
@@ -355,9 +353,15 @@ LOGGING = {
             'class': 'logging.StreamHandler'
         },
         'file': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
+            'formatter': 'verbose'
+        },
+        'notifications': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/notifs.log'),
             'formatter': 'verbose'
         }
     },
@@ -377,6 +381,18 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'core': {
+            'handlers': ['file'],
+            'level': 'INFO'
+        },
+        'ct': {
+            'handlers': ['notifications'],
+            'level': 'INFO'
+        },
+        'ctms': {
+            'handlers': ['file'],
+            'level': 'INFO'
+        }
     }
 }
 
@@ -470,3 +486,4 @@ MILESTONE_ORCT_NUMBER = 10
 
 # Configure if Django signals should be suspended
 SUSPEND_SIGNALS = False
+EMAIL_BACKEND = 'django_ses.SESBackend'

@@ -250,13 +250,14 @@ class Message(models.Model):
 
     def render_my_choices(self):
         """Render user's answer choices."""
+        choices_template = u'<h3>{}</h3>'  # pragma: no cover
         if '[selected_choices]' in self.content.text:
             selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
             my_choices = []
             for i, c in self.content.lesson.get_choices():
                 if i in selected:
-                    my_choices.append((i, c))
-            return self.render_choices(my_choices, selected)
+                    my_choices.append(choices_template.format(c.split(' ')[1]))  # pragma: no cover
+            return ''.join(my_choices)  # pragma: no cover
         else:
             return self.render_choices([], [])
 

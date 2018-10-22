@@ -270,10 +270,14 @@ class LessonForm(ErrorForm):
     class Meta:
         model = Lesson
         fields = [
-            'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'url', 'changeLog',
+            'title', 'kind', 'text', 'medium', 'add_unit_aborts', 'mc_simplified', 'url', 'changeLog',
             'sub_kind', 'attachment', 'enable_auto_grading'
         ]
-        labels = dict(kind=_('Lesson Type'), medium=_('Delivery medium'))
+        labels = dict(
+            kind=_('Lesson Type'),
+            medium=_('Delivery medium'),
+            mc_simplified=_("Multiple Choices Simplified Flow")
+        )
 
 
 class AnswerLessonForm(LessonForm):

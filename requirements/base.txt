@@ -39,9 +39,13 @@ django-bower==5.2.0
 
 pygeoip==0.3.2
 
-# Raven
-raven==6.1.0
+# Sentry
+sentry-sdk==0.4.1
 
 kombu==4.1.0
 
 pymongo==3.7.1
+
+# SES
+boto==2.49.0
+django-ses==0.8.7

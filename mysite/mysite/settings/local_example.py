@@ -1,12 +1,15 @@
 # coding: utf-8
-import os
 import sys
-import raven
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
 
 
-RAVEN_CONFIG = {
-    'dsn': '',
-}
+sentry_sdk.init(
+    dsn="",
+    integrations=[DjangoIntegration(), CeleryIntegration()]
+)
 
 
 DATABASES = {
@@ -44,6 +47,12 @@ EMAIL_PORT = 587
 EMAIL_FROM = ''
 
 GOOGLE_ANALYTICS_CODE = ""
+
+# SES settings
+AWS_ACCESS_KEY_ID = ''
+AWS_SECRET_ACCESS_KEY = ''
+AWS_SES_REGION_NAME = ''
+AWS_SES_REGION_ENDPOINT = ''
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'

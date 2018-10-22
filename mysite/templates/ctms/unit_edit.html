@@ -130,6 +130,9 @@ Courselet
         {% endif %}
 
         {{ form.attachment }}
+        {% if form.attachment.errors %}
+            {{ form.attachment.errors }}
+          {% endif %}
 
         <!-- Answer -->
         <div class="form-group form-group--answer">

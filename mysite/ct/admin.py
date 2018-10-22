@@ -46,7 +46,7 @@ class BaseAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class AdminLesson(admin.ModelAdmin):
-    list_display = ('title', 'text', 'kind', 'sub_kind', 'enable_auto_grading', 'parent')
+    list_display = ('title', 'text', 'kind', 'sub_kind', 'enable_auto_grading', 'parent', 'mc_simplified')
 
 
 @admin.register(*MODELS)

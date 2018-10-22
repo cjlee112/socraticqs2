@@ -2,11 +2,12 @@ from django import forms
 from django.forms import BaseModelFormSet
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.forms.models import modelformset_factory
+from django.template.loader import render_to_string
 
-from accounts.models import Instructor
+
 from ct.models import Course, Unit, Lesson, UnitLesson
 from ctms.models import Invite
-from django.template.loader import render_to_string
+from .fields import SvgAllowedImageField
 
 
 class CustomFileInput(forms.ClearableFileInput):
@@ -62,16 +63,16 @@ class EditUnitForm(forms.ModelForm):
 
 
 class CreateEditUnitForm(EditUnitForm):
-    attachment = forms.FileField(required=False, widget=CustomFileInput)
+    attachment = SvgAllowedImageField(required=False, widget=CustomFileInput)
 
     class Meta:
         model = Lesson
-        fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'attachment')
-
+        fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'mc_simplified', 'attachment')
+ 
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
     answer = forms.CharField(required=True, widget=forms.Textarea)
-    attachment = forms.FileField(required=False, widget=CustomFileInput)
+    attachment = SvgAllowedImageField(required=False, widget=CustomFileInput)
 
     class Meta:
         model = Lesson
@@ -92,7 +93,7 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 
 class ErrorModelForm(forms.ModelForm):
     """ErrorModelForm, validate data in ErrorModelFormset."""
-    attachment = forms.FileField(required=False, widget=CustomFileInput, label='')
+    attachment = SvgAllowedImageField(required=False, widget=CustomFileInput, label='')
 
     def __init__(self, *args, **kwargs):
         super(ErrorModelForm, self).__init__(*args, **kwargs)
