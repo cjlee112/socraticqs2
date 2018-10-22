@@ -337,6 +337,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         lesson_has_sub_kind = message.lesson_to_answer and message.lesson_to_answer.sub_kind
         content_is_not_additional = not message.content and not message.is_additional
 
+        mc_selfeval = None
         if message_is_response and lesson_has_sub_kind and content_is_not_additional:
             resp_text = ''
             if message.lesson_to_answer.sub_kind == Lesson.MULTIPLE_CHOICES:
@@ -359,9 +360,22 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     selected = chain(*selected_choices)
 
                 resp_text = '[selected_choices] ' + ' '.join(str(i) for i in selected)
+
+                correct_choices = set([_[0] for _ in message.lesson_to_answer.lesson.get_correct_choices()])
+                selected_choices = set([_ for _ in chain(*selected_choices)])
+
+                if not (correct_choices - selected_choices or correct_choices ^ selected_choices):
+                    mc_selfeval = StudentResponse.CORRECT
+                elif selected_choices & correct_choices:
+                    mc_selfeval = StudentResponse.CLOSE
+                else:
+                    mc_selfeval = StudentResponse.DIFFERENT
+
+
             resp = StudentResponse(text=resp_text)
             # tes, preview flags
             resp.is_test = chat.is_test
+            resp.selfeval = mc_selfeval or None
             resp.is_preview = chat.enroll_code.isPreview
             resp.is_trial = chat.is_trial
 
