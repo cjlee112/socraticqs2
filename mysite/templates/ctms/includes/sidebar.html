@@ -8,7 +8,9 @@
     </a>
 
     <a href="{% url 'ctms:my_courses' %}">Courses</a>
-    <a href="{% url 'ctms:onboarding' %}">Onboarding</a>
+    <a href="{% url 'ctms:onboarding' %}">Onboarding
+        <span>{{ onboarding_percentage_of_done | floatformat:"0" }} %</span>
+    </a>
   </header>
 
   <div class="sidebar__scroll-container">

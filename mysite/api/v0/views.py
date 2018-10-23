@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
-from core.common.mongo import do_health
+from core.common.mongo import do_health, c_onboarding_status
+from core.common.utils import get_onboarding_steps
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
@@ -98,6 +99,7 @@ class EchoDataView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class HealthCheck(APIView):
     """
     Sevice health check.
@@ -119,3 +121,18 @@ class HealthCheck(APIView):
                 response = RestResponse(ping, status=status.HTTP_200_OK)
 
         return response
+
+
+class UpdateOnboardingStatus(APIView):
+
+    authentication_classes = (SessionAuthentication, )
+
+    def post(self, request, *args, **kwargs):
+        steps_to_update = request.data
+        to_update = {
+            k: v for k, v in steps_to_update.items() if k in get_onboarding_steps()
+        }
+        if to_update and request.user.id:
+            c_onboarding_status().update_one({'user_id': request.user.id}, {'$set': to_update})
+            return RestResponse({'updated': 'Ok'}, status=status.HTTP_200_OK)
+        return RestResponse({'updated': 'failed'}, status=status.HTTP_400_BAD_REQUEST)

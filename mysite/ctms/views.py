@@ -1,7 +1,6 @@
 import waffle
 import json
 from uuid import uuid4
-from datetime import datetime
 
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
@@ -22,19 +21,18 @@ from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
 
+from core.common.mongo import c_onboarding_status
+from core.common.utils import get_onboarding_steps, get_onboarding_percentage
+
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
 
 from ctms.forms import (
-    CourseForm,
-    CreateCourseletForm,
-    EditUnitForm,
     CreateEditUnitForm,
     ErrorModelFormSet,
     CreateEditUnitAnswerForm,
     CreateUnitForm)
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
-from pages.forms import BecomeInstructorForm
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
@@ -201,6 +199,8 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         my_courses = self.get_my_courses()
+        if get_onboarding_percentage(request.user.id) != 100:
+            return redirect('ctms:onboarding')
         if not my_courses and not self.request.user.invite_set.all():
             # no my_courses and no shared courses
             return redirect('ctms:create_course')
@@ -1128,3 +1128,13 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
 
 class Onboarding(NewLoginRequiredMixin, TemplateView):
     template_name = 'ctms/onboarding.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(Onboarding, self).get_context_data(**kwargs)
+        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id})
+        if status:
+            steps = [(key, status[key]) for key in get_onboarding_steps()]
+            context.update({
+                'steps': steps,
+            })
+        return context

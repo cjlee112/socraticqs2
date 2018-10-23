@@ -6,11 +6,13 @@
 {% endblock %}
 
 {% block content %}
-{#    <div class="card">#}
-{#        <h5>Here will be some content of progress</h5>#}
-{##}
-{#    </div>#}
     <main class="card__content">
-        <p>Page's Content</p>
+        <h4>Onboarding status</h4>
+        <ul>
+            {% for step, value in steps %}
+                <!-- Depending on value we can change css class etc. -->
+            <li>{{ step }} - {% if value %}done{% else %}not done{% endif %}</li>
+            {% endfor %}
+        </ul>
     </main>
 {% endblock %}
