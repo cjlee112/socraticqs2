@@ -1088,6 +1088,7 @@ class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnit
         kw.update({'resend_user_email': self.request.session.get('resend_user_email')})
         return kw
 
+
 class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, course_pk, courslet_pk):
         # new ordered ids are in request.POST['ordered_ids']
@@ -1123,3 +1124,7 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
             unit.order = order
             unit.save()
         return JsonResponse({'ok': 1, 'msg': 'Order has been changed!'})
+
+
+class Onboarding(NewLoginRequiredMixin, TemplateView):
+    template_name = 'ctms/onboarding.html'
