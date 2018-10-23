@@ -326,6 +326,25 @@ class ChatMixin(object):
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
+        if self.node_name_is_one_of('CORRECT_ANSWER'):
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text='text1'
+            )
+        if self.node_name_is_one_of('INCORRECT_ANSWER'):
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text='text2'
+            )
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
         if self.node_name_is_one_of("WAIT_ASSESS"):
             if isinstance(current, Response):
                 resp_to_chk = current
