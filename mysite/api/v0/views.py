@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
 
@@ -125,14 +126,15 @@ class HealthCheck(APIView):
 
 class UpdateOnboardingStatus(APIView):
 
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         steps_to_update = request.data
         to_update = {
             k: v for k, v in steps_to_update.items() if k in get_onboarding_steps()
         }
         if to_update and request.user.id:
             c_onboarding_status().update_one({'user_id': request.user.id}, {'$set': to_update})
-            return RestResponse({'updated': 'Ok'}, status=status.HTTP_200_OK)
-        return RestResponse({'updated': 'failed'}, status=status.HTTP_400_BAD_REQUEST)
+            return RestResponse({'status': 'Ok'}, status=status.HTTP_200_OK)
+        return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
