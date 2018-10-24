@@ -1,16 +1,17 @@
 """
 Test core utility functions.
 """
+import mock
+from ddt import ddt, data, unpack
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.test import TestCase
-from django.test.utils import override_settings
-from mock import patch
 
-from core.common.utils import send_email
+from core.common.utils import send_email, get_onboarding_percentage
 
 
+@ddt
 class UtilityTest(TestCase):
     """
     Test auxiliary functions.
@@ -50,3 +51,17 @@ class UtilityTest(TestCase):
         # self.assertContains(mail.outbox[0].body, "2")
         # self.assertContains(mail.outbox[0].body, "Test Course")
         # self.assertContains(mail.outbox[0].body, "Test Lesson")
+
+    @mock.patch('core.common.utils.c_onboarding_status')
+    @unpack
+    @data(
+        ({'step1': 0, 'step2': 0, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 0}, 0),
+        ({'step1': 1, 'step2': 0, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 0}, 17.0),
+        ({'step1': 0, 'step2': 1, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 1}, 33.0),
+        ({'step1': 0, 'step2': 0, 'step3': 1, 'step4': 1, 'step5': 1, 'step6': 1}, 67.0),
+        ({'step1': 1, 'step2': 1, 'step3': 1, 'step4': 1, 'step5': 1, 'step6': 1}, 100.0)
+    )
+    def test_percentage_of_done(self, steps, result, mock):
+        _mock = mock.return_value
+        _mock.find_one.return_value = steps
+        self.assertEqual(get_onboarding_percentage(1), result)

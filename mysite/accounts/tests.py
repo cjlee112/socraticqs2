@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
 
 from accounts.models import Instructor, Profile
+from core.common.mongo import c_onboarding_status
 from psa.custom_django_storage import CustomCode
+
 
 @ddt
 class AccountSettingsTests(TestCase):
@@ -76,6 +78,9 @@ class AccountSettingsTests(TestCase):
         self.assertTrue(can_login)
 
     def test_post_valid_password_change(self):
+        # it is just to clear up onboarding_status collection in mongo
+        c_onboarding_status().remove()
+        
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
 
