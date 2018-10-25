@@ -1,3 +1,4 @@
+import mock
 from unittest import skip
 
 from ddt import ddt, data, unpack
@@ -238,7 +239,9 @@ class MyCoursesTests(MyTestCase):
         self.client.login(username=self.username, password=self.password)
         self.url = reverse('ctms:my_courses')
 
-    def test_get_my_courses_page(self):
+    @mock.patch('ctms.views.get_onboarding_percentage')
+    def test_get_my_courses_page(self, onboarding_percentage):
+        onboarding_percentage.return_value = 100
         response = self.client.get(self.url)
         # should contain 1 course
         self.assertEqual(response.status_code, 200)
@@ -246,7 +249,9 @@ class MyCoursesTests(MyTestCase):
         self.assertIn('my_courses', response.context)
         self.assertIn(self.course, response.context['my_courses'])
 
-    def test_my_courses_show_shared_courses(self):
+    @mock.patch('ctms.views.get_onboarding_percentage')
+    def test_my_courses_show_shared_courses(self, onboarding_percentage):
+        onboarding_percentage.return_value = 100
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course

@@ -8,6 +8,11 @@
     </a>
 
     <a href="{% url 'ctms:my_courses' %}">Courses</a>
+    {% switch "ctms_onboarding_enabled" %}
+        <a href="{% url 'ctms:onboarding' %}">Onboarding
+            <span>{{ onboarding_percentage_of_done | floatformat:"0" }} %</span>
+        </a>
+    {% endswitch %}
   </header>
 
   <div class="sidebar__scroll-container">

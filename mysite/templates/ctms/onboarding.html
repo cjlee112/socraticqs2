@@ -1,0 +1,18 @@
+{% extends "ctms_base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Onboarding progress
+{% endblock %}
+
+{% block content %}
+    <main class="card__content">
+        <h4>Onboarding status</h4>
+        <ul>
+            {% for step, value in steps %}
+                <!-- Depending on value we can change css class etc. -->
+            <li>{{ step }} - {% if value %}done{% else %}not done{% endif %}</li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}

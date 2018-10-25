@@ -211,6 +211,7 @@ TEMPLATES = [
                 'social_django.context_processors.login_redirect',
                 'psa.context_processors.debug_settings',
                 'mysite.context_processors.google_analytics',
+                'mysite.context_processors.onboarding_percentage_of_done',
                 'sekizai.context_processors.sekizai',
                 'cms.context_processors.cms_settings',
             )
