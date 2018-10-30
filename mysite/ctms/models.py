@@ -182,3 +182,14 @@ class Invite(models.Model):
 
     def __unicode__(self):
         return "Code {}, User {}".format(self.code, self.email)
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
+
+
+@receiver(post_save, sender=Invite)
+def onboarding_invite_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_6, instance.instructor.user_id)

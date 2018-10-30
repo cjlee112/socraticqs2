@@ -22,8 +22,10 @@ from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
 
+from core.common import onboarding
 from core.common.mongo import c_onboarding_status
-from core.common.utils import get_onboarding_steps, get_onboarding_percentage
+from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
+    get_onboarding_setting, update_onboarding_step
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -443,6 +445,9 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         courslet = self.get_courslet()
         is_trial = self.request.GET.get('is_trial') in ['true', 'True', '1']
         responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
+        # Onboarding step 7, haven't resolved yet, need to decide.
+        # if responses and course.id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID):
+        #     update_onboarding_step(onboarding.STEP_7, self.request.user.id)
         kwargs.update({
             'course': course,
             'courslet': courslet,
@@ -1157,10 +1162,24 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Onboarding, self).get_context_data(**kwargs)
-        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id})
-        if status:
-            steps = [(key, status[key]) for key in get_onboarding_steps()]
-            context.update({
-                'steps': steps,
-            })
+        users_course = Course.objects.filter(addedBy=self.request.user).last()
+        users_courselet = Unit.objects.filter(addedBy=self.request.user).last()
+        users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
+        introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
+        course = Course.objects.filter(id=introduction_course_id).first()
+        course_unit = course.courseunit_set.all().first()
+        enroll_unit_code = course_unit.enrollunitcode_set.all().first()
+        enroll_url = '/chat/enrollcode/{}'.format(enroll_unit_code.get_code(course_unit))
+        context.update(dict(
+            introduction_course=course,
+            users_course=users_course,
+            users_courselet=users_courselet,
+            users_thread=users_thread,
+            enroll_url=enroll_url
+        ))
+        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id}) or {}
+        steps = [(key, status.get(key, False)) for key in get_onboarding_steps()]
+        context.update({
+            'steps': steps,
+        })
         return context

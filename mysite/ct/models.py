@@ -3,15 +3,19 @@ import logging
 from copy import copy
 
 from django.core.validators import RegexValidator
-from django.db import models, transaction
+from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
-from ct.templatetags.ct_extras import md2html
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
+
 
 not_only_spaces_validator = RegexValidator(
     regex=r'^\s+?$',
@@ -1636,3 +1640,18 @@ class UnitStatus(models.Model):
         except UnitLesson.DoesNotExist:
             self.done()
             return None
+
+
+@receiver(post_save, sender=Course)
+def onboarding_course_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_3, instance.addedBy.id)
+
+
+@receiver(post_save, sender=Unit)
+def onboarding_unit_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_4, instance.addedBy.id)
+
+
+@receiver(post_save, sender=Lesson)
+def onboarding_lesson_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)
