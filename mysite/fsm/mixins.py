@@ -394,7 +394,7 @@ class ChatMixin(object):
             )
 
         if self.node_name_is_one_of('STUDENTERROR'):
-            resolve_message = Message.objects.get(
+            resolve_message = Message.objects.filter(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
@@ -402,7 +402,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             timestamp__isnull=True,
-                            is_additional=True)
+                            is_additional=True).first()
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=resolve_message.student_error.errorModel.id,
@@ -413,7 +413,7 @@ class ChatMixin(object):
                             kind='button',
                             is_additional=True)[0]
         if self.node_name_is_one_of('RESOLVE'):
-            message = Message.objects.get_or_create(
+            message = Message.objects.filter(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
@@ -421,7 +421,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             timestamp__isnull=True,
-                            is_additional=True)[0]
+                            is_additional=True).first()
         if self.node_name_is_one_of('HELP_RESOLVE'):
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',

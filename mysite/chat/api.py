@@ -38,7 +38,16 @@ MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 def get_additional_messages(response, chat):
     student_errors = response.studenterror_set.all()
+    dummy_ul = UnitLesson.objects.filter(lesson__title='Hope you\'ve overcame the misconception').first()
     for each in student_errors:
+        if not each.errorModel.get_em_resolutions()[1]:
+            Message.objects.get_or_create(contenttype='unitlesson', content_id=dummy_ul.id, chat=chat,
+                                        owner=chat.user,
+                                        input_type='custom',
+                                        student_error=each,
+                                        kind='message',
+                                        text='Hope you\'ve overcame the misconception',
+                                        is_additional=True)
         map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
                                                      content_id=ul.id,
                                                      chat=chat,
