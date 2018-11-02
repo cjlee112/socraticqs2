@@ -72,7 +72,7 @@ def get_onboarding_percentage(user_id):
     if user_id:
         status = c_onboarding_status(use_secondary=True).find_one({'user_id': user_id})
         if status:
-            steps = [status[key] for key in get_onboarding_steps()]
+            steps = [status.get(key) for key in get_onboarding_steps()]
             return round(
                 len(filter(lambda x: x, steps)) / float(len(steps)) * 100,
                 0

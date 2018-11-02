@@ -325,15 +325,15 @@ CUI.ChatPresenter.prototype._postInput = function(input){
   input.chat_id = this._chatID;
 
   // Add selected elements to input
-  if (this._inputType == 'options' &&
-      this._includeSelectedValuesFromMessages.length &&
-      this._inputSubType == 'choices' &&
-      !Object.keys(input.selected).length
-  ) {
-      this._inputIsEnabled = true;
-      this._showNotification("Choose a correct answer!");
-      return;
-  }
+  // if (this._inputType == 'options' &&
+  //     this._includeSelectedValuesFromMessages.length &&
+  //     this._inputSubType == 'choices' &&
+  //     !Object.keys(input.selected).length
+  // ) {
+  //     this._inputIsEnabled = true;
+  //     this._showNotification("Choose a correct answer!zjhb zkjzbdfmz bmdfjh");
+  //     return;
+  // }
 
   if (this._inputSubType === 'canvas') {
     var svgContainer = $('.draw-svg-container:last');
