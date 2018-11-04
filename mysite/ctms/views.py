@@ -17,6 +17,7 @@ from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
 from django.conf import settings
+from django.core.cache import cache
 from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
@@ -37,6 +38,10 @@ from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
+from .utils import Memoize
+
+
+memoize = Memoize()
 
 
 def json_response(x):
@@ -116,8 +121,12 @@ class CourseCoursletUnitMixin(View):
         return course.courseunit_set.filter(order__isnull=False)
 
     def get_units_by_courselet(self, courselet):
+        cache_key = memoize.cache_key('get_units_by_courselet', courselet)
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
         # UnitLesson
-        return courselet.unit.unitlesson_set.filter(
+        courslet_units = courselet.unit.unitlesson_set.filter(
             kind=UnitLesson.COMPONENT,
             order__isnull=False
         ).order_by(
@@ -131,6 +140,17 @@ class CourseCoursletUnitMixin(View):
                 )
             )
         )
+        for unit in courslet_units:
+            unit.url = reverse(
+                'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION and unit.response_set.exists() else 'ctms:unit_edit',
+                kwargs={
+                    'course_pk': courselet.course.id,
+                    'courslet_pk': courselet.id,
+                    'pk': unit.id
+                }
+            )
+        cache.set(cache_key, courslet_units, 60)
+        return courslet_units
 
     def get_invite_by_code_request_or_404(self, code):
         return Invite.get_by_user_or_404(self.request.user, code=code)
@@ -480,6 +500,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
         self.object.unit_lesson = unit_lesson
+        cache.delete(memoize.cache_key('get_units_by_courselet', courslet))
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -519,6 +540,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         self.object = form.save(commit=True)
         # self.object.save()
         messages.add_message(self.request, messages.SUCCESS, "Unit successfully updated")
+        cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -663,6 +685,7 @@ class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView)
     def delete(self, request, *args, **kwargs):
         response = super(DeleteUnitView, self).delete(request, *args, **kwargs)
         messages.add_message(self.request, messages.SUCCESS, "Unit successfully deleted")
+        cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return response
 
 
@@ -683,6 +706,7 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
                 ul.unit.reorder_exercise()
             elif ul.order is None:
                 ul.unit.append(ul, self.request.user)
+            cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(reverse(
             "ctms:unit_settings",
             kwargs=self.kwargs)
@@ -769,6 +793,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
             messages.add_message(request, messages.WARNING, "Please correct errors below")
 
         if not has_error:
+            cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
             return HttpResponseRedirect(self.get_success_url())
 
         context = {
@@ -1123,6 +1148,7 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
                 continue
             unit.order = order
             unit.save()
+        cache.delete(memoize.cache_key('get_units_by_courselet', courselet))
         return JsonResponse({'ok': 1, 'msg': 'Order has been changed!'})
 
 
