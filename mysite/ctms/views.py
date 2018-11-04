@@ -142,7 +142,9 @@ class CourseCoursletUnitMixin(View):
         )
         for unit in courslet_units:
             unit.url = reverse(
-                'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION and unit.response_set.exists() else 'ctms:unit_edit',
+                'ctms:unit_edit',
+                # Commended out due to discussion in the https://github.com/cjlee112/socraticqs2/issues/755
+                # 'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION and unit.response_set.exists() else 'ctms:unit_edit',
                 kwargs={
                     'course_pk': courselet.course.id,
                     'courslet_pk': courselet.id,
