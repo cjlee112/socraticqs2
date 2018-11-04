@@ -228,11 +228,18 @@ class CORRECT_ANSWER(object):
 
 
 class INCORRECT_ANSWER(object):
+    title = 'Show correct answer for Multiple Choices'
+    edges = (
+            dict(name='next', toNode='INCORRECT_CHOICE', title='Assess yourself'),
+        )
+
+
+class INCORRECT_CHOICE(object):
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         return fsm.get_node('ERRORS')
 
-    title = 'Show correct answer for Multiple Choices'
+    title = 'Show incorrect choice for Multiple Choices'
     edges = (
             dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
         )
@@ -330,6 +337,9 @@ def get_specs():
             GET_ANSWER,
             CONFIDENCE,
             GET_CONFIDENCE,
+            CORRECT_ANSWER,
+            INCORRECT_ANSWER,
+            INCORRECT_CHOICE,
             ASSESS,
             GET_ASSESS,
             GRADING,

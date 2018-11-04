@@ -345,7 +345,7 @@ class Message(models.Model):
                 html = self.content.text
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
-                if sub_kind and not self.content.selfeval and not self.content.confidence:
+                if sub_kind and sub_kind == Lesson.MULTIPLE_CHOICES and not self.content.confidence:
                     # no confidence and no selfeval
                     if sub_kind == Lesson.MULTIPLE_CHOICES:
                         html = self.render_my_choices()
