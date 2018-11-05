@@ -15,6 +15,8 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
+from core.common import onboarding
+from core.common.utils import get_onboarding_setting, update_onboarding_step
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
 from .serializers import (
@@ -337,6 +339,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         lesson_has_sub_kind = message.lesson_to_answer and message.lesson_to_answer.sub_kind
         content_is_not_additional = not message.content and not message.is_additional
 
+        mc_selfeval = None
         if message_is_response and lesson_has_sub_kind and content_is_not_additional:
             resp_text = ''
             if message.lesson_to_answer.sub_kind == Lesson.MULTIPLE_CHOICES:
@@ -359,9 +362,22 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     selected = chain(*selected_choices)
 
                 resp_text = '[selected_choices] ' + ' '.join(str(i) for i in selected)
+
+                correct_choices = set([_[0] for _ in message.lesson_to_answer.lesson.get_correct_choices()])
+                selected_choices = set([_ for _ in chain(*selected_choices)])
+
+                if not (correct_choices - selected_choices or correct_choices ^ selected_choices):
+                    mc_selfeval = StudentResponse.CORRECT
+                elif selected_choices & correct_choices:
+                    mc_selfeval = StudentResponse.CLOSE
+                else:
+                    mc_selfeval = StudentResponse.DIFFERENT
+
+
             resp = StudentResponse(text=resp_text)
             # tes, preview flags
             resp.is_test = chat.is_test
+            resp.selfeval = mc_selfeval or None
             resp.is_preview = chat.enroll_code.isPreview
             resp.is_trial = chat.is_trial
 
@@ -548,7 +564,14 @@ class ProgressView(ValidateMixin, generics.RetrieveAPIView):
             serializer = AddUnitByChatSerializer(chat)
         else:
             serializer = ChatProgressSerializer(chat)
-        return Response(serializer.data)
+
+        serializer_data = serializer.data
+        course_id = serializer.instance.get_course_unit().course.id
+        # onboarding checking
+        if course_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID) and \
+                serializer_data.get('progress', 0) * 100 >= 70:
+            update_onboarding_step(onboarding.STEP_2, self.request.user.id)
+        return Response(serializer_data)
 
 
 class AddUnitByChatProgressView(ValidateMixin, generics.RetrieveAPIView):

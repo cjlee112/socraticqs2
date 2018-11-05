@@ -1,16 +1,21 @@
+import re
 import logging
 from copy import copy
 
 from django.core.validators import RegexValidator
-from django.db import models, transaction
+from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.db.models import Q, Count, Max
 
-from ct.templatetags.ct_extras import md2html
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
+
 
 not_only_spaces_validator = RegexValidator(
     regex=r'^\s+?$',
@@ -333,7 +338,7 @@ class Lesson(models.Model, SubKindMixin):
                    'enable_auto_grading',
                    )
 
-    def get_choices(self):
+    def get_choices(self, with_description=False):
         """Parse self.text and try to find choices.
 
         () - empty parenthes - for not correct answer
@@ -341,12 +346,38 @@ class Lesson(models.Model, SubKindMixin):
         :return: list of choices
         """
         choices = []
+        choice_description = []
+        choice_index = -1  # To start with index 0 of choice
         if '[choices]' in self.text:
             listed = self.text.split('\r\n')
-            for i in range(listed.index('[choices]'), len(listed)):
+            for i in range(listed.index('[choices]') + 1, len(listed)):
                 if listed[i].startswith(self.CORRECT_CHOICE) or listed[i].startswith(self.NOT_CORRECT_CHOICE):
                     choices.append(listed[i])
+                    choice_index += 1
+                elif with_description:
+                    choice_description.append((choice_index, listed[i]))
+        if with_description:
+            # The structure of choices with description - [(choice, description), (choice, description)]
+            _choices = []
+            for ind, choice in enumerate(choices):
+                choice_desc = ''
+                for desc_index, desc in choice_description:
+                    if desc_index == ind and desc:
+                        choice_desc += desc + '\r\n'
+                _choices.append((choice, choice_desc))
+            return enumerate(_choices)
         return enumerate(choices)
+
+    def get_choice_title(self, index):
+        for idx, choice in self.get_choices():
+            if index == idx:
+                splitted_title = re.split('\(\**\) *', choice)
+                return splitted_title[1] if len(splitted_title) > 1 else splitted_title[0]
+
+    def get_choice_description(self, index):
+        for idx, (choice, description) in self.get_choices(with_description=True):
+            if index == idx:
+                return description
 
     def get_choices_wrap_text(self):
         return self.text.split('[choices]')[0]
@@ -1609,3 +1640,18 @@ class UnitStatus(models.Model):
         except UnitLesson.DoesNotExist:
             self.done()
             return None
+
+
+@receiver(post_save, sender=Course)
+def onboarding_course_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_3, instance.addedBy.id)
+
+
+@receiver(post_save, sender=Unit)
+def onboarding_unit_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_4, instance.addedBy.id)
+
+
+@receiver(post_save, sender=Lesson)
+def onboarding_lesson_created(sender, instance, **kwargs):
+    update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)

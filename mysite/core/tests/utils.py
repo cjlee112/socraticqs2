@@ -9,6 +9,7 @@ from django.core import mail
 from django.test import TestCase
 
 from core.common.utils import send_email, get_onboarding_percentage
+from core.common import onboarding
 
 
 @ddt
@@ -55,11 +56,12 @@ class UtilityTest(TestCase):
     @mock.patch('core.common.utils.c_onboarding_status')
     @unpack
     @data(
-        ({'step1': 0, 'step2': 0, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 0}, 0),
-        ({'step1': 1, 'step2': 0, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 0}, 17.0),
-        ({'step1': 0, 'step2': 1, 'step3': 0, 'step4': 0, 'step5': 0, 'step6': 1}, 33.0),
-        ({'step1': 0, 'step2': 0, 'step3': 1, 'step4': 1, 'step5': 1, 'step6': 1}, 67.0),
-        ({'step1': 1, 'step2': 1, 'step3': 1, 'step4': 1, 'step5': 1, 'step6': 1}, 100.0)
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 14.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 1, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 43.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 0}, 57.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 86.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 1, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 100.0)
     )
     def test_percentage_of_done(self, steps, result, mock):
         _mock = mock.return_value

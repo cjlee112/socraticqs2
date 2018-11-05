@@ -257,7 +257,7 @@ class Message(models.Model):
             for i, c in self.content.lesson.get_choices():
                 if i in selected:
                     my_choices.append(choices_template.format(c.split(' ')[1]))  # pragma: no cover
-            return ''.join(my_choices)  # pragma: no cover
+            return ''.join(my_choices) if my_choices else "You've chosen nothing"  # pragma: no cover
         else:
             return self.render_choices([], [])
 
@@ -345,7 +345,7 @@ class Message(models.Model):
                 html = self.content.text
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
-                if sub_kind and not self.content.selfeval and not self.content.confidence:
+                if sub_kind and sub_kind == Lesson.MULTIPLE_CHOICES and not self.content.confidence:
                     # no confidence and no selfeval
                     if sub_kind == Lesson.MULTIPLE_CHOICES:
                         html = self.render_my_choices()
