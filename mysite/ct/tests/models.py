@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
 from django.db import IntegrityError
 from mock import Mock, patch
+from ddt import data, unpack, ddt
 
 from ct.models import *
 from ct.sourcedb_plugin.wikipedia_plugin import LessonDoc
@@ -237,6 +238,8 @@ class ConceptGraphTest(TestCase):
         self.assertIsNotNone(concept_graph.atime)
 
 
+
+@ddt
 class LessonTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -401,6 +404,23 @@ class LessonTest(TestCase):
     def test_title(self):
         lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
         self.assertEqual(lesson.__unicode__(), lesson.title)
+
+    @unpack
+    @data(
+        (0, '''1.a explanation\r\n1.b explanation\r\n''', 'nc 1'),
+        (1, '''2.a explanation\r\n2.b explanation\r\n2.c explanation\r\n''', 'nc 2'),
+        (2, '''3.a correct explanation\r\n''', 'c 3'),
+        (3, '', 'nc'),
+        (4, 'description\r\n', 'c (text)empty')
+    )
+    def test_lesson_get_choice_description(self, index, description, title):
+        text = 'some text\r\n[choices]\r\n() nc 1\r\n1.a explanation\r\n1.b explanation\r\n' \
+               '() nc 2\r\n2.a explanation\r\n2.b explanation\r\n2.c explanation\r\n' \
+               '(*) c 3\r\n3.a correct explanation\r\n() nc\r\n(*) c (text)empty\r\ndescription'
+        lesson = Lesson(title='ugh', addedBy=self.user, text=text)
+        self.assertEqual(lesson.get_choice_title(index), title)
+        self.assertEqual(lesson.get_choice_description(index), description)
+
 
 
 class ConceptLinkTest(TestCase):
