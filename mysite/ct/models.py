@@ -1,3 +1,4 @@
+import re
 import logging
 from copy import copy
 
@@ -363,9 +364,15 @@ class Lesson(models.Model, SubKindMixin):
             return enumerate(_choices)
         return enumerate(choices)
 
+    def get_choice_title(self, index):
+        for idx, choice in self.get_choices():
+            if index == idx:
+                splitted_title = re.split('\(\**\) *', choice)
+                return splitted_title[1] if len(splitted_title) > 1 else splitted_title[0]
+
     def get_choice_description(self, index):
-        for ind, (choice, description) in self.get_choices(with_description=True):
-            if index == ind:
+        for idx, (choice, description) in self.get_choices(with_description=True):
+            if index == idx:
                 return description
 
     def get_choices_wrap_text(self):

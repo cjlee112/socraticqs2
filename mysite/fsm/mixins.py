@@ -331,7 +331,15 @@ class ChatMixin(object):
             message = Message(**_data)
             message.save()
         if self.node_name_is_one_of('CORRECT_ANSWER'):
-            answer = message.content.unitLesson.get_answers().first()
+            lesson = message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
             message = Message.objects.create(
                 owner=chat.user,
                 chat=chat,
@@ -343,13 +351,18 @@ class ChatMixin(object):
                     <br>
                     {}
                 """
-                .format(
-                    answer.lesson.title if answer else 'Answer title',
-                    mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
-                )
+                .format(correct_title, correct_description)
             )
         if self.node_name_is_one_of('INCORRECT_ANSWER'):
-            answer = message.content.unitLesson.get_answers().first()
+            lesson = message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
             message = Message.objects.create(
                 owner=chat.user,
                 chat=chat,
@@ -363,14 +376,12 @@ class ChatMixin(object):
                     <br>
                     {}
                 """
-                .format(
-                    answer.lesson.title if answer else 'Answer title',
-                    mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
-                )
+                .format(correct_title, correct_description)
             )
         if self.node_name_is_one_of('INCORRECT_CHOICE'):
-            answer = message.lesson_to_answer.get_answers().first()
+            lesson = message.lesson_to_answer.lesson
             selected = [int(i) for i in message.response_to_check.text.split('[selected_choices] ')[1].split()]
+            incorrect_description = lesson.get_choice_description(selected[0]) if selected else ''
             my_choices = []
             for i, c in message.response_to_check.lesson.get_choices():
                 if i in selected:
@@ -390,9 +401,7 @@ class ChatMixin(object):
                 """
                 .format(
                     my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(['<h3>{}</h3>'.format(_) for _ in my_choices]),
-                    # TODO add incorrecr choice description here
-                    # mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
-                    '<hr>'
+                    incorrect_description
                 )
             )
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
