@@ -15,6 +15,8 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
+from core.common import onboarding
+from core.common.utils import get_onboarding_setting, update_onboarding_step
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
 from .serializers import (
@@ -562,7 +564,14 @@ class ProgressView(ValidateMixin, generics.RetrieveAPIView):
             serializer = AddUnitByChatSerializer(chat)
         else:
             serializer = ChatProgressSerializer(chat)
-        return Response(serializer.data)
+
+        serializer_data = serializer.data
+        course_id = serializer.instance.get_course_unit().course.id
+        # onboarding checking
+        if course_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID) and \
+                serializer_data.get('progress', 0) * 100 >= 70:
+            update_onboarding_step(onboarding.STEP_2, self.request.user.id)
+        return Response(serializer_data)
 
 
 class AddUnitByChatProgressView(ValidateMixin, generics.RetrieveAPIView):

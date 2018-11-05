@@ -8,11 +8,42 @@
 {% block content %}
     <main class="card__content">
         <h4>Onboarding status</h4>
-        <ul>
-            {% for step, value in steps %}
-                <!-- Depending on value we can change css class etc. -->
-            <li>{{ step }} - {% if value %}done{% else %}not done{% endif %}</li>
-            {% endfor %}
-        </ul>
+        <ol>
+            <li>
+                <span>{{ steps.0.1 }} - </span>
+                <span>View our introduction to Courselets</span>
+                <a href="#">View</a>
+            </li>
+            <li>
+                <span>{{ steps.1.1 }} - </span>
+                <span>Test the student experience in the "Instructor Intro" courselet</span>
+                <a href="{{ enroll_url }}" target="_blank">View</a>
+            </li>
+            <li>
+                <span>{{ steps.2.1 }} - </span>
+                <span>Create your first course</span>
+                <a href="{% url 'ctms:create_course' %}">View</a>
+            </li>
+            <li>
+                <span>{{ steps.3.1 }} - </span>
+                <span>Create your first courselet</span>
+                <a href="{% if users_course.id %}{% url 'ctms:courslet_create' course_pk=users_course.id %}{% else %}#{% endif %}">View</a>
+            </li>
+            <li>
+                <span>{{ steps.4.1 }} - </span>
+                <span>Create your first threads</span>
+                <a href="{% if users_courselet.id %}{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
+            </li>
+            <li>
+                <span>{{ steps.5.1 }} - </span>
+                <span>Invite testers or students</span>
+                <a href="{% if users_course.id %}{% url 'ctms:course_invite' pk=users_course.id %}{% else %}#{% endif %}">View</a>
+            </li>
+            <li>
+                <span>{{ steps.6.1 }} - </span>
+                <span>Review answers to improve your course</span>
+                <a href="#">View</a>
+            </li>
+        </ol>
     </main>
 {% endblock %}

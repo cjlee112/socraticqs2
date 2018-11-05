@@ -24,4 +24,4 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 587
 EMAIL_FROM = ''
 
-DB_DATA = 'test_data'
+DB_DATA = '{}:test_data'.format(os.getpid())
