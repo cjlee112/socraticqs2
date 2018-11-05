@@ -856,7 +856,7 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertEquals(
             json_content['addMessages'][0]['html'],
-            '<dl>\n<dt><strong>Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
+            '<dl>\n<dt><strong>Re: Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
         )
 
         response = self.client.get(

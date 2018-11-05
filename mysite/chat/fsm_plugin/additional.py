@@ -84,7 +84,7 @@ class START(object):
 class START_MESSAGE(object):
     get_path = get_lesson_url
     # node specification data goes here
-    title = 'Click continue to get additional materials'
+    title = 'Let\'s address each blindspot'
     edges = (
         dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
     )

@@ -392,7 +392,7 @@ class Message(models.Model):
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
                         md2html(
-                            '**%s** \n %s' %
+                            '**Re: %s** \n %s' %
                             (self.content.lesson.title, self.content.lesson.text)
                         )
                     )
