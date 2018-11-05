@@ -163,7 +163,7 @@ class GET_ANSWER(object):
 
 
 class CONFIDENCE(object):
-    title = 'Select the level of your confidence?'
+    title = 'How confident are you?'
     edges = (
         dict(name='next', toNode='GET_CONFIDENCE', title='Go to choosing your confidence'),
     )

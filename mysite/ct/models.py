@@ -1110,7 +1110,7 @@ NEED_REVIEW_STATUS = 'review'
 DONE_STATUS = 'done'
 STATUS_CHOICES = (
     (NEED_HELP_STATUS, 'Still confused, need help'),
-    (NEED_REVIEW_STATUS, 'OK, but need further review and practice'),
+    (NEED_REVIEW_STATUS, 'OK, but flag this for me to review'),
     (DONE_STATUS, 'Solidly'),
 )
 STATUS_TABLE_LABELS = (

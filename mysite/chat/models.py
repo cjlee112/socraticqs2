@@ -65,7 +65,7 @@ EVAL_OPTIONS = {
 
 STATUS_OPTIONS = {
     'help': 'Still confused, need help',
-    'review': 'OK, but need further review and practice',
+    'review': 'OK, but flag this for me to review',
     'done': 'Solidly',
 }
 

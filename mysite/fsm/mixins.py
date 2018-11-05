@@ -468,8 +468,9 @@ class ChatMixin(object):
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
-                            text='''Below are some common misconceptions. '''
-                                 '''Select one or more that is similar to your reasoning.''',
+                            text=''''''
+                            '''Here are the most common blindspots people reported when comparing their answer vs.'''
+                            '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
                             kind='message',
                             input_type='custom',
                             is_additional=is_additional)[0]
