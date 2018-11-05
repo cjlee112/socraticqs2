@@ -333,7 +333,7 @@ class Lesson(models.Model, SubKindMixin):
                    'enable_auto_grading',
                    )
 
-    def get_choices(self):
+    def get_choices(self, with_description=False):
         """Parse self.text and try to find choices.
 
         () - empty parenthes - for not correct answer
@@ -341,12 +341,32 @@ class Lesson(models.Model, SubKindMixin):
         :return: list of choices
         """
         choices = []
+        choice_description = []
+        choice_index = -1  # To start with index 0 of choice
         if '[choices]' in self.text:
             listed = self.text.split('\r\n')
-            for i in range(listed.index('[choices]'), len(listed)):
+            for i in range(listed.index('[choices]') + 1, len(listed)):
                 if listed[i].startswith(self.CORRECT_CHOICE) or listed[i].startswith(self.NOT_CORRECT_CHOICE):
                     choices.append(listed[i])
+                    choice_index += 1
+                elif with_description:
+                    choice_description.append((choice_index, listed[i]))
+        if with_description:
+            # The structure of choices with description - [(choice, description), (choice, description)]
+            _choices = []
+            for ind, choice in enumerate(choices):
+                choice_desc = ''
+                for desc_index, desc in choice_description:
+                    if desc_index == ind and desc:
+                        choice_desc += desc + '\r\n'
+                _choices.append((choice, choice_desc))
+            return enumerate(_choices)
         return enumerate(choices)
+
+    def get_choice_description(self, index):
+        for ind, (choice, description) in self.get_choices(with_description=True):
+            if index == ind:
+                return description
 
     def get_choices_wrap_text(self):
         return self.text.split('[choices]')[0]
