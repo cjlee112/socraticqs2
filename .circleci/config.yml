@@ -9,6 +9,7 @@ jobs:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
       - image: circleci/python:2.7-browsers
+      - image: circleci/mongo:latest
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -31,7 +32,8 @@ jobs:
             sudo apt-get install pandoc
             python -m virtualenv venv
             . venv/bin/activate
-            pip install -r requirements.txt -U pip
+            pip install --ignore-installed -U -r requirements.txt
+            pip install --ignore-installed -U -r requirements/prod.txt
 
       - save_cache:
           paths:
@@ -54,7 +56,7 @@ jobs:
           command: |
             . venv/bin/activate
             cd mysite
-            pytest
+            export DJANGO_SETTINGS_MODULE=mysite.settings.test_localhost && pytest
 
       - store_artifacts:
           path: test-reports
