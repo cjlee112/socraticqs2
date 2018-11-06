@@ -178,17 +178,12 @@ class GET_CONFIDENCE(object):
             3& Partially correct choice -> ERRORS
         """
         fsm = edge.fromNode.fsm
-        unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        unit_lesson = unitStatus.get_lesson()
 
         if not fsmStack.next_point.content.selfeval:
             return edge.toNode
 
         if fsmStack.next_point.content.selfeval != 'correct':
-            if (fsmStack.next_point.content.unitLesson.get_errors() or
-                fsmStack.next_point.content.lesson.add_unit_aborts and
-                fsmStack.next_point.content.unitLesson.unit.get_aborts()):
-                return fsm.get_node('INCORRECT_ANSWER')
+            return fsm.get_node('INCORRECT_ANSWER')
         elif fsmStack.next_point.content.selfeval == 'correct':
             return fsm.get_node('CORRECT_ANSWER')
         else:
@@ -206,7 +201,6 @@ class CORRECT_ANSWER(object):
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        unit_lesson = unitStatus.get_lesson()
 
         nextUL = unitStatus.start_next_lesson()
         if not nextUL:  # pragma: no cover
@@ -237,12 +231,30 @@ class INCORRECT_ANSWER(object):
 class INCORRECT_CHOICE(object):
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
-        return fsm.get_node('ERRORS')
+        if (fsmStack.next_point.content.unitLesson.get_errors() or
+            fsmStack.next_point.content.lesson.add_unit_aborts and
+            fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+            return fsm.get_node('ERRORS')
+        else:
+            unitStatus = fsmStack.state.get_data_attr('unitStatus')
+
+            nextUL = unitStatus.start_next_lesson()
+            if not nextUL:  # pragma: no cover
+                unit = fsmStack.state.get_data_attr('unit')
+                if unit.unitlesson_set.filter(
+                    kind=UnitLesson.COMPONENT, order__isnull=True
+                ).exists():
+                    return fsm.get_node('IF_RESOURCES') 
+                else:
+                    return fsm.get_node('END')
+            else:  # just a lesson to read
+                fsmStack.state.unitLesson = nextUL
+                return fsm.get_node('TITLE')
 
     title = 'Show incorrect choice for Multiple Choices'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
 
 
 class ASSESS(object):
