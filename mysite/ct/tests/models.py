@@ -407,16 +407,18 @@ class LessonTest(TestCase):
 
     @unpack
     @data(
-        (0, '''1.a explanation\r\n1.b explanation\r\n''', 'nc 1'),
+        (0, '''1.a, explanation\r\n1.b explanation\r\n''', 'nc, 1'),
         (1, '''2.a explanation\r\n2.b explanation\r\n2.c explanation\r\n''', 'nc 2'),
-        (2, '''3.a correct explanation\r\n''', 'c 3'),
+        (2, '''3.a correct, explanation\r\n''', 'c 3'),
         (3, '', 'nc'),
-        (4, 'description\r\n', 'c (text)empty')
+        (4, 'description\r\n', 'c (text)empty'),
+        (5, 'corner () case\r\n', 'empty parentheses () empty'),
     )
     def test_lesson_get_choice_description(self, index, description, title):
-        text = 'some text\r\n[choices]\r\n() nc 1\r\n1.a explanation\r\n1.b explanation\r\n' \
+        text = 'some text\r\n[choices]\r\n() nc, 1\r\n1.a, explanation\r\n1.b explanation\r\n' \
                '() nc 2\r\n2.a explanation\r\n2.b explanation\r\n2.c explanation\r\n' \
-               '(*) c 3\r\n3.a correct explanation\r\n() nc\r\n(*) c (text)empty\r\ndescription'
+               '(*) c 3\r\n3.a correct, explanation\r\n() nc\r\n(*) c (text)empty\r\ndescription\r\n' \
+               '() empty parentheses () empty\r\ncorner () case\r\n'
         lesson = Lesson(title='ugh', addedBy=self.user, text=text)
         self.assertEqual(lesson.get_choice_title(index), title)
         self.assertEqual(lesson.get_choice_description(index), description)

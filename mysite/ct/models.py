@@ -371,7 +371,7 @@ class Lesson(models.Model, SubKindMixin):
     def get_choice_title(self, index):
         for idx, choice in self.get_choices():
             if index == idx:
-                splitted_title = re.split('\(\**\) *', choice)
+                splitted_title = re.split('^\(\**\) *', choice)
                 return splitted_title[1] if len(splitted_title) > 1 else splitted_title[0]
 
     def get_choice_description(self, index):

@@ -385,7 +385,7 @@ class ChatMixin(object):
             my_choices = []
             for i, c in message.response_to_check.lesson.get_choices():
                 if i in selected:
-                    my_choices.append(c.split(' ')[1])
+                    my_choices.append(c.split(' ', 1)[1])
             if not my_choices:
                 my_choices.append('Nothing')
             message = Message.objects.create(
