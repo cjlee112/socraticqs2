@@ -25,3 +25,5 @@ EMAIL_PORT = 587
 EMAIL_FROM = ''
 
 DB_DATA = '{}:test_data'.format(os.getpid())
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
