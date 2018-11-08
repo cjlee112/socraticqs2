@@ -1,3 +1,5 @@
+from __future__  import unicode_literals
+
 import re
 from uuid import uuid4
 from itertools import starmap
@@ -65,7 +67,7 @@ EVAL_OPTIONS = {
 
 STATUS_OPTIONS = {
     'help': 'Still confused, need help',
-    'review': 'OK, but need further review and practice',
+    'review': 'OK, but flag this for me to review',
     'done': 'Solidly',
 }
 
@@ -256,8 +258,8 @@ class Message(models.Model):
             my_choices = []
             for i, c in self.content.lesson.get_choices():
                 if i in selected:
-                    my_choices.append(choices_template.format(c.split(' ')[1]))  # pragma: no cover
-            return ''.join(my_choices)  # pragma: no cover
+                    my_choices.append(choices_template.format(c.split(' ', 1)[1]))  # pragma: no cover
+            return ''.join(my_choices) if my_choices else "You've chosen nothing"  # pragma: no cover
         else:
             return self.render_choices([], [])
 
@@ -345,7 +347,7 @@ class Message(models.Model):
                 html = self.content.text
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
-                if sub_kind and not self.content.selfeval and not self.content.confidence:
+                if sub_kind and sub_kind == Lesson.MULTIPLE_CHOICES and not self.content.confidence:
                     # no confidence and no selfeval
                     if sub_kind == Lesson.MULTIPLE_CHOICES:
                         html = self.render_my_choices()
@@ -392,7 +394,7 @@ class Message(models.Model):
                 if self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
                         md2html(
-                            '**%s** \n %s' %
+                            '**Re: %s** \n %s' %
                             (self.content.lesson.title, self.content.lesson.text)
                         )
                     )

@@ -1,13 +1,16 @@
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
 
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
-from core.common.mongo import do_health
+from core.common.mongo import do_health, c_onboarding_status
+from core.common import onboarding
+from core.common.utils import get_onboarding_steps
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
@@ -98,6 +101,7 @@ class EchoDataView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class HealthCheck(APIView):
     """
     Sevice health check.
@@ -119,3 +123,19 @@ class HealthCheck(APIView):
                 response = RestResponse(ping, status=status.HTTP_200_OK)
 
         return response
+
+
+class UpdateOnboardingStatus(APIView):
+
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request, *args, **kwargs):
+        steps_to_update = request.data
+        to_update = {
+            k: bool(v) for k, v in steps_to_update.items() if k in get_onboarding_steps()
+        }
+        if to_update and request.user.id:
+            c_onboarding_status().update_one({onboarding.USER_ID: request.user.id}, {'$set': to_update}, upsert=True)
+            return RestResponse({'status': 'Ok'}, status=status.HTTP_200_OK)
+        return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)

@@ -2,6 +2,9 @@ import json
 from pymongo.errors import ServerSelectionTimeoutError
 
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
+from core.common.mongo import c_onboarding_status
+from core.common import onboarding
 
 HEALTH_URL = reverse('api:v0:health-check')
 
@@ -35,3 +38,37 @@ def test_health_exception(client, db, mocker):
     result = client.get(HEALTH_URL)
 
     assert result.status_code == 503
+
+
+def test_onboarding_update_data(client, db, user):
+    # Hack: remove collection before test
+    c_onboarding_status().remove()
+    data = {
+        onboarding.USER_ID: user.id,
+        onboarding.STEP_1: False,
+        onboarding.STEP_2: False,
+        onboarding.STEP_3: False,
+        onboarding.STEP_4: False,
+    }
+    data_to_update = {onboarding.STEP_2: True}
+
+    c_onboarding_status().insert(data.copy())
+    ensure_saved = c_onboarding_status().find_one({onboarding.USER_ID: user.id}, {'_id': False})
+
+    assert ensure_saved == data
+
+    assert client.login(username='admin', password='test_admin') is True
+    response = client.put(
+        reverse('api:v0:update-onboarding-status'),
+        data=json.dumps(data_to_update),
+        content_type="application/json"
+    )
+    assert response.status_code == 200
+    data.update(data_to_update)
+    mongo_data = c_onboarding_status().find_one({onboarding.USER_ID: user.id}, {'_id': False})
+
+    assert mongo_data == data
+
+    # need to delete these entries after test test_post_valid_password_change done
+    c_onboarding_status().remove()
+

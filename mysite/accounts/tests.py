@@ -1,3 +1,4 @@
+import mock
 from ddt import ddt, unpack, data
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -5,7 +6,9 @@ from django.contrib.auth.models import User
 from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
 
 from accounts.models import Instructor, Profile
+from core.common.mongo import c_onboarding_status
 from psa.custom_django_storage import CustomCode
+
 
 @ddt
 class AccountSettingsTests(TestCase):
@@ -75,6 +78,9 @@ class AccountSettingsTests(TestCase):
         self.assertTrue(can_login)
 
     def test_post_valid_password_change(self):
+        # it is just to clear up onboarding_status collection in mongo
+        c_onboarding_status().remove()
+        
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
 
@@ -138,7 +144,9 @@ class AccountSettingsTests(TestCase):
         can_login = self.client.login(username='username', password='1234')
         self.assertFalse(can_login)
 
-    def test_post_valid_email_change(self):
+    @mock.patch('ctms.views.get_onboarding_percentage')
+    def test_post_valid_email_change(self, onboarding_percentage):
+        onboarding_percentage.return_value = 100
         data = {'email': 'mm@mail.com', 'form_id': 'email_form'}
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, reverse('ctms:email_sent'))
@@ -234,10 +242,12 @@ class ProfileUpdateTests(TestCase):
         self.assertTemplateUsed(response, 'accounts/profile_edit.html')
         self.assertFalse(Instructor.objects.all())
 
-    def test_post_social_form(self):
+    @mock.patch('ctms.views.get_onboarding_percentage')
+    def test_post_social_form(self, onboarding_percentage):
         """Test when user has no instructor it will show social form,
          after submit it - user will have instructor.
          """
+        onboarding_percentage.return_value = 100
         inst_name = 'Some Institute'
         response = self.client.post(self.url, {
             'institution': inst_name,

@@ -7,9 +7,9 @@ from .views import (
     ErrorViewSet,
     GenReportView,
     CourseReportViewSet,
-    HealthCheck
+    HealthCheck,
+    UpdateOnboardingStatus
 )
-
 
 urlpatterns = [
     url(
@@ -38,4 +38,6 @@ urlpatterns = [
         name='echo-data',
     ),
     url(r'^health/*$', HealthCheck.as_view(), name='health-check'),
+
+    url(r'^update-onboarding-status/$', UpdateOnboardingStatus.as_view(), name='update-onboarding-status'),
 ]

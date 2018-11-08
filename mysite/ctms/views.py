@@ -1,7 +1,6 @@
 import waffle
 import json
 from uuid import uuid4
-from datetime import datetime
 
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
@@ -18,27 +17,33 @@ from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
 from django.conf import settings
+from django.core.cache import cache
 from social_core.backends.utils import load_backends
 
 from accounts.models import Instructor
+
+from core.common import onboarding
+from core.common.mongo import c_onboarding_status
+from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
+    get_onboarding_setting, update_onboarding_step
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
 
 from ctms.forms import (
-    CourseForm,
-    CreateCourseletForm,
-    EditUnitForm,
     CreateEditUnitForm,
     ErrorModelFormSet,
     CreateEditUnitAnswerForm,
     CreateUnitForm)
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
-from pages.forms import BecomeInstructorForm
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
 from ctms.models import Invite
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
+from .utils import Memoize
+
+
+memoize = Memoize()
 
 
 def json_response(x):
@@ -118,8 +123,12 @@ class CourseCoursletUnitMixin(View):
         return course.courseunit_set.filter(order__isnull=False)
 
     def get_units_by_courselet(self, courselet):
+        cache_key = memoize.cache_key('get_units_by_courselet', courselet)
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
         # UnitLesson
-        return courselet.unit.unitlesson_set.filter(
+        courslet_units = courselet.unit.unitlesson_set.filter(
             kind=UnitLesson.COMPONENT,
             order__isnull=False
         ).order_by(
@@ -133,6 +142,19 @@ class CourseCoursletUnitMixin(View):
                 )
             )
         )
+        for unit in courslet_units:
+            unit.url = reverse(
+                'ctms:unit_edit',
+                # Commended out due to discussion in the https://github.com/cjlee112/socraticqs2/issues/755
+                # 'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION and unit.response_set.exists() else 'ctms:unit_edit',
+                kwargs={
+                    'course_pk': courselet.course.id,
+                    'courslet_pk': courselet.id,
+                    'pk': unit.id
+                }
+            )
+        cache.set(cache_key, courslet_units, 60)
+        return courslet_units
 
     def get_invite_by_code_request_or_404(self, code):
         return Invite.get_by_user_or_404(self.request.user, code=code)
@@ -201,6 +223,8 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         my_courses = self.get_my_courses()
+        if waffle.switch_is_active('ctms_onboarding_enabled') and get_onboarding_percentage(request.user.id) != 100:
+            return redirect('ctms:onboarding')
         if not my_courses and not self.request.user.invite_set.all():
             # no my_courses and no shared courses
             return redirect('ctms:create_course')
@@ -423,6 +447,9 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         courslet = self.get_courslet()
         is_trial = self.request.GET.get('is_trial') in ['true', 'True', '1']
         responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
+        # Onboarding step 7, haven't resolved yet, need to decide.
+        # if responses and course.id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID):
+        #     update_onboarding_step(onboarding.STEP_7, self.request.user.id)
         kwargs.update({
             'course': course,
             'courslet': courslet,
@@ -480,6 +507,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         unit_lesson = UnitLesson.create_from_lesson(self.object, unit, order='APPEND', addAnswer=False)
 
         self.object.unit_lesson = unit_lesson
+        cache.delete(memoize.cache_key('get_units_by_courselet', courslet))
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -519,6 +547,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         self.object = form.save(commit=True)
         # self.object.save()
         messages.add_message(self.request, messages.SUCCESS, "Unit successfully updated")
+        cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -663,6 +692,7 @@ class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView)
     def delete(self, request, *args, **kwargs):
         response = super(DeleteUnitView, self).delete(request, *args, **kwargs)
         messages.add_message(self.request, messages.SUCCESS, "Unit successfully deleted")
+        cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return response
 
 
@@ -683,6 +713,7 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
                 ul.unit.reorder_exercise()
             elif ul.order is None:
                 ul.unit.append(ul, self.request.user)
+            cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(reverse(
             "ctms:unit_settings",
             kwargs=self.kwargs)
@@ -769,6 +800,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
             messages.add_message(request, messages.WARNING, "Please correct errors below")
 
         if not has_error:
+            cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
             return HttpResponseRedirect(self.get_success_url())
 
         context = {
@@ -1088,6 +1120,7 @@ class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnit
         kw.update({'resend_user_email': self.request.session.get('resend_user_email')})
         return kw
 
+
 class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, course_pk, courslet_pk):
         # new ordered ids are in request.POST['ordered_ids']
@@ -1122,4 +1155,33 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
                 continue
             unit.order = order
             unit.save()
+        cache.delete(memoize.cache_key('get_units_by_courselet', courselet))
         return JsonResponse({'ok': 1, 'msg': 'Order has been changed!'})
+
+
+class Onboarding(NewLoginRequiredMixin, TemplateView):
+    template_name = 'ctms/onboarding.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(Onboarding, self).get_context_data(**kwargs)
+        users_course = Course.objects.filter(addedBy=self.request.user).last()
+        users_courselet = Unit.objects.filter(addedBy=self.request.user).last()
+        users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
+        introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
+        course = Course.objects.filter(id=introduction_course_id).first()
+        course_unit = course.courseunit_set.all().first()
+        enroll_unit_code = course_unit.enrollunitcode_set.all().first()
+        enroll_url = '/chat/enrollcode/{}'.format(enroll_unit_code.get_code(course_unit))
+        context.update(dict(
+            introduction_course=course,
+            users_course=users_course,
+            users_courselet=users_courselet,
+            users_thread=users_thread,
+            enroll_url=enroll_url
+        ))
+        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id}) or {}
+        steps = [(key, status.get(key, False)) for key in get_onboarding_steps()]
+        context.update({
+            'steps': steps,
+        })
+        return context

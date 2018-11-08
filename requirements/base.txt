@@ -21,7 +21,7 @@ pypandoc==1.4
 
 # social authentication/registration mechanizm
 social-auth-app-django==2.1.0
-requests==2.18.4
+requests==2.20.0
 
 pytz==2018.4
 wikipedia==1.4.0

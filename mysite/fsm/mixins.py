@@ -1,8 +1,11 @@
+from __future__ import unicode_literals
+
 import json
 import re
 from functools import partial
 
 from pymongo.errors import ConnectionFailure
+from django.utils.safestring import mark_safe
 
 from ct.models import (
     Role,
@@ -18,6 +21,7 @@ from ct.models import (
     StudentError,
     ConceptGraph
 )
+from ct.templatetags.ct_extras import md2html
 from chat.models import Message, ChatDivider, UnitError
 from grading.base_grader import GRADERS
 from core.common.mongo import c_chat_stack
@@ -326,6 +330,81 @@ class ChatMixin(object):
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
+        if self.node_name_is_one_of('CORRECT_ANSWER'):
+            lesson = message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>You got it right, the correct answer is: {}</b>
+                    <br>
+                    {}
+                """
+                .format(correct_title, correct_description)
+            )
+        if self.node_name_is_one_of('INCORRECT_ANSWER'):
+            lesson = message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                lesson_to_answer=message.content.unitLesson,
+                response_to_check=current,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>The correct answer is: {}</b>
+                    <br>
+                    {}
+                """
+                .format(correct_title, correct_description)
+            )
+        if self.node_name_is_one_of('INCORRECT_CHOICE'):
+            lesson = message.lesson_to_answer.lesson
+            selected = [int(i) for i in message.response_to_check.text.split('[selected_choices] ')[1].split()]
+            incorrect_description = lesson.get_choice_description(selected[0]) if selected else ''
+            my_choices = []
+            for i, c in message.response_to_check.lesson.get_choices():
+                if i in selected:
+                    my_choices.append(c.split(' ', 1)[1])
+            if not my_choices:
+                my_choices.append('Nothing')
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>You selected: {}</b>
+                    <br>
+                    {}
+                """
+                .format(
+                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(['<h3>{}</h3>'.format(_) for _ in my_choices]),
+                    incorrect_description
+                )
+            )
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
         if self.node_name_is_one_of("WAIT_ASSESS"):
             if isinstance(current, Response):
                 resp_to_chk = current
@@ -394,7 +473,7 @@ class ChatMixin(object):
             )
 
         if self.node_name_is_one_of('STUDENTERROR'):
-            resolve_message = Message.objects.get(
+            resolve_message = Message.objects.filter(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
@@ -402,7 +481,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             timestamp__isnull=True,
-                            is_additional=True)
+                            is_additional=True).first()
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
                             content_id=resolve_message.student_error.errorModel.id,
@@ -413,7 +492,7 @@ class ChatMixin(object):
                             kind='button',
                             is_additional=True)[0]
         if self.node_name_is_one_of('RESOLVE'):
-            message = Message.objects.get_or_create(
+            message = Message.objects.filter(
                             contenttype='unitlesson',
                             content_id=next_lesson.id,
                             chat=chat,
@@ -421,7 +500,7 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             timestamp__isnull=True,
-                            is_additional=True)[0]
+                            is_additional=True).first()
         if self.node_name_is_one_of('HELP_RESOLVE'):
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
@@ -468,8 +547,9 @@ class ChatMixin(object):
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
-                            text='''Below are some common misconceptions. '''
-                                 '''Select one or more that is similar to your reasoning.''',
+                            text=''''''
+                            '''Here are the most common blindspots people reported when comparing their answer vs.'''
+                            '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
                             kind='message',
                             input_type='custom',
                             is_additional=is_additional)[0]

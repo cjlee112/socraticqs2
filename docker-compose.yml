@@ -14,6 +14,7 @@ services:
     links:
       - postgres
       - mongo
+      - memcached
 
   postgres:
     container_name: cr_postgres
@@ -29,6 +30,10 @@ services:
       - cr_mongo:/data/db
     ports:
       - "27017:27017"
+  
+  memcached:
+    container_name: cr_memcached
+    image: memcached:latest
 
 volumes:
   cr_db:

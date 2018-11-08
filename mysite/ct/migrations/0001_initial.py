@@ -188,7 +188,7 @@ class Migration(migrations.Migration):
                 ('confidence', models.CharField(max_length=10, choices=[(b'guess', b'Just guessing'), (b'notsure', b'Not quite sure'), (b'sure', b'Pretty sure')])),
                 ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time submitted')),
                 ('selfeval', models.CharField(max_length=10, null=True, choices=[(b'different', b'Different'), (b'close', b'Close'), (b'correct', b'Essentially the same')])),
-                ('status', models.CharField(max_length=10, null=True, choices=[(b'help', b'Still confused, need help'), (b'review', b'OK, but need further review and practice'), (b'done', b'Solidly')])),
+                ('status', models.CharField(max_length=10, null=True, choices=[(b'help', b'Still confused, need help'), (b'review', b'OK, but flag this for me to review'), (b'done', b'Solidly')])),
                 ('needsEval', models.BooleanField(default=False)),
                 ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
                 ('course', models.ForeignKey(to='ct.Course', null=True)),
@@ -217,7 +217,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time submitted')),
-                ('status', models.CharField(max_length=10, null=True, choices=[(b'help', b'Still confused, need help'), (b'review', b'OK, but need further review and practice'), (b'done', b'Solidly')])),
+                ('status', models.CharField(max_length=10, null=True, choices=[(b'help', b'Still confused, need help'), (b'review', b'OK, but flag this for me to review'), (b'done', b'Solidly')])),
                 ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={

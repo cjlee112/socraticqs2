@@ -69,6 +69,15 @@ class CustomTestCase(TestCase):
             unit=self.unit, lesson=resource_lesson, addedBy=self.user, treeID=resource_lesson.id
         )
         self.resource_unitlesson.save()
+        # TODO remove this later
+        self.unit_dummy = Unit(title='Test title', addedBy=self.user)
+        self.unit_dummy.save()
+        lesson_dummy = Lesson(title='Hope you\'ve overcame the misconception', text=u'Hope you\'ve overcame the misconception', addedBy=self.user, url='/test/url/')
+        lesson_dummy.save()
+        self.unitlesson_dummy = UnitLesson(
+            unit=self.unit_dummy, lesson=lesson_dummy, addedBy=self.user, treeID=lesson_dummy.id
+        )
+        self.unitlesson_dummy.save()
 
     @staticmethod
     def compile_html(resource):
@@ -717,10 +726,13 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
+
+        # TODO select error model 80 after changing the flow
+        # {"selected": {msg_id: {"errorModel": ["80"]}}
         # post error model answer
         response = self.client.put(
             next_url,
-            data=json.dumps({"selected": {msg_id: {"errorModel": ["80"]}}, "chat_id": chat_id}),
+            data=json.dumps({"selected": {}, "chat_id": chat_id}),
             content_type='application/json',
             follow=True
         )
@@ -844,7 +856,7 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertEquals(
             json_content['addMessages'][0]['html'],
-            '<dl>\n<dt><strong>Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
+            '<dl>\n<dt><strong>Re: Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
         )
 
         response = self.client.get(
@@ -1230,10 +1242,12 @@ class NumbersTest(CustomTestCase):
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
+        # TODO select error model 80 after changing the flow
+        # {"selected": {msg_id: {"errorModel": ["80"]}}
         # post error model answer
         response = self.client.put(
             next_url,
-            data=json.dumps({"selected": {msg_id: {"errorModel": ["80"]}}, "chat_id": chat_id}),
+            data=json.dumps({"selected": {}, "chat_id": chat_id}),
             content_type='application/json',
             follow=True
         )
