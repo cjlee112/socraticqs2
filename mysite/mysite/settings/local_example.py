@@ -48,6 +48,8 @@ EMAIL_FROM = ''
 
 GOOGLE_ANALYTICS_CODE = ""
 
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 # SES settings
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''

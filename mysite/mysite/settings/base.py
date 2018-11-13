@@ -490,6 +490,6 @@ MILESTONE_ORCT_NUMBER = 10
 SUSPEND_SIGNALS = False
 EMAIL_BACKEND = 'django_ses.SESBackend'
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 ONBOARDING_INTRODUCTION_COURSE_ID = 1
