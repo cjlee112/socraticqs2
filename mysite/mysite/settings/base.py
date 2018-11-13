@@ -179,6 +179,7 @@ INSTALLED_APPS = (
 
     # bower requirements
     'djangobower',
+    'storages'
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -488,5 +489,7 @@ MILESTONE_ORCT_NUMBER = 10
 # Configure if Django signals should be suspended
 SUSPEND_SIGNALS = False
 EMAIL_BACKEND = 'django_ses.SESBackend'
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 ONBOARDING_INTRODUCTION_COURSE_ID = 1
