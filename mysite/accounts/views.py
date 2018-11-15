@@ -178,7 +178,7 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
 
 
 @csrf_protect
-def custom_password_reset(request, is_admin_site=False,
+def custom_password_reset(request,
                    template_name='registration/password_reset_form.html',
                    email_template_name='registration/password_reset_email.html',
                    subject_template_name='registration/password_reset_subject.txt',
@@ -190,7 +190,7 @@ def custom_password_reset(request, is_admin_site=False,
                    extra_context=None,
                    html_email_template_name=None):
     response = password_reset(
-        request, is_admin_site=is_admin_site,
+        request,
         template_name=template_name,
         email_template_name=email_template_name,
         subject_template_name=subject_template_name,
