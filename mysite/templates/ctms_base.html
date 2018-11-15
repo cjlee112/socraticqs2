@@ -200,6 +200,14 @@
         $.notify("Copied the enroll code to clipboard.", "info");
       });
 
+      $('#send_to_courselets').click(function(event) {
+        let button = $(event.currentTarget);
+        let email = button.data('courselets-email');
+        $('#id_email').val(email);
+        button.parent().next('form').find('input[type=submit]').click();
+      });
+
+
     </script>
 
     {# this csrf_token needed for ajax requests #}

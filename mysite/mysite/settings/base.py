@@ -494,3 +494,5 @@ EMAIL_BACKEND = 'django_ses.SESBackend'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 ONBOARDING_INTRODUCTION_COURSE_ID = 1
+
+COURSELETS_EMAIL = 'info@courselets.org'

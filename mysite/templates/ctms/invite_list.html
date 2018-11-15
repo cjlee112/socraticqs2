@@ -57,6 +57,12 @@
       <p>TODO: Add a description here.</p>
       {% endblock %}
       {% block invitation_content %}
+
+          {% if courselets_email %}
+              <div class="invite-courselets">
+                <input type="button" value="Send invite to Courselets" class="invite__submit__form__" id="send_to_courselets" data-courselets-email="{{ courselets_email }}">
+              </div>
+          {% endif %}
           <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
             {% csrf_token %}
 

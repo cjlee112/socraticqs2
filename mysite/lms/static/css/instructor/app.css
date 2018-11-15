@@ -914,3 +914,30 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   float: left;
   margin: 11px 10px 0 5px;
 }
+
+.invite-courselets {
+  overflow: hidden;
+}
+
+input[type=button] {
+  display: inline-block;
+  width: auto;
+  float: right;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-decoration: none;
+  background: #43B02A;
+  color: #fff;
+  padding: 14px 30px;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid #43B02A;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+input[type=button]:hover, input[type=button]:active, input[type=button]:focus {
+  opacity: 0.6;
+  outline: 0;
+}

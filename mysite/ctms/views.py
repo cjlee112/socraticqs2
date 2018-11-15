@@ -994,6 +994,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
         kwargs['course'] = course
         kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
+        kwargs['courselets_email'] = settings.COURSELETS_EMAIL
         return kwargs
 
     def get_form_kwargs(self):
