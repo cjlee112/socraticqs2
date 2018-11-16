@@ -12,10 +12,9 @@ from django.conf import settings
 from importlib import import_module
 
 from social_core.exceptions import (AuthAlreadyAssociated,
-                               AuthException,
-                               InvalidEmail, AuthMissingParameter)
+                                    AuthException,
+                                    InvalidEmail, AuthMissingParameter)
 from accounts.models import Instructor
-from ctms.models import Invite
 from psa.custom_django_storage import CustomCode
 
 from psa.views import (context,
@@ -832,7 +831,7 @@ class SignupTest(TestCase):
     def test_signup_logout(self):
         User.objects.create_user('test_user', 'test@aa.cc', '123')
         self.client.login(email='test@aa.cc', password='123')
-        response = self.client.get(self.url)
+        self.client.get(self.url)
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_signup_with_u_hash_in_session(self):
@@ -894,7 +893,7 @@ class SignupTest(TestCase):
         self.assertEqual(User.objects.count(), 0)
         self.assertEqual(Instructor.objects.count(), 0)
 
-        response = self.client.post(
+        self.client.post(
             self.url,
             {
                 'email': 'test_email@aa.cc',
@@ -912,9 +911,6 @@ class SignupTest(TestCase):
 
         self.assertIn('resend_user_email', self.client.session)
         self.assertEqual(self.client.session['resend_user_email'], 'test_email@aa.cc')
-
-        code = CustomCode.objects.all().first()
-        print code
 
     def test_twitter_signup_anonymous_user_cancel(self):
         """Test when anonymous user cancel auth thought twitter should not see 500 error."""
@@ -949,5 +945,5 @@ class LogoutTest(TestCase):
 
     def test_new_logout(self):
         response = self.client.get(reverse('new_logout'), follow=True)
-        self.assertRedirects(response, reverse('new_login')+'?next='+reverse('ctms:my_courses'))
+        self.assertRedirects(response, reverse('new_login') + '?next=' + reverse('ctms:my_courses'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')

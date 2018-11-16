@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.hashers import make_password
 from django.contrib.messages.api import add_message
 from django.db.models import Q
 from django.conf import settings
@@ -72,7 +71,6 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     """
     Custom login to integrate social auth and default login.
     """
-    username = password = ''
     u_hash_sess = request.session.get('u_hash')
     logout(request)
     if u_hash_sess:

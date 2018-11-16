@@ -112,12 +112,14 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
             kwargs
         )
 
+
 class DeleteAccountView(NotAnonymousRequiredMixin, TemplateView):
     template_name = 'accounts/settings.html'
+
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
         if form.is_valid():
-            new_user = form.save()
+            form.save()
             logout(request)
             return HttpResponseRedirect(reverse('accounts:deleted'))
         return self.render_to_response(
@@ -140,9 +142,7 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
         return reverse('ctms:my_courses')
 
     def get_initial(self):
-        return {
-           'user': self.request.user,
-        }
+        return {'user': self.request.user}
 
     def get_form_kwargs(self):
         """
@@ -164,7 +164,7 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     def get_instance(self):
         try:
             instructor = self.request.user.instructor
-        except self.request.user._meta.model.instructor.RelatedObjectDoesNotExist as e:
+        except self.request.user._meta.model.instructor.RelatedObjectDoesNotExist:
             instructor = None
         return instructor
 
@@ -179,45 +179,42 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
 
 @csrf_protect
 def custom_password_reset(request,
-                   template_name='registration/password_reset_form.html',
-                   email_template_name='registration/password_reset_email.html',
-                   subject_template_name='registration/password_reset_subject.txt',
-                   password_reset_form=PasswordResetForm,
-                   token_generator=default_token_generator,
-                   post_reset_redirect=None,
-                   from_email=settings.EMAIL_FROM,
-                   current_app=None,
-                   extra_context=None,
-                   html_email_template_name=None):
-    response = password_reset(
-        request,
-        template_name=template_name,
-        email_template_name=email_template_name,
-        subject_template_name=subject_template_name,
-        password_reset_form=password_reset_form,
-        token_generator=token_generator,
-        post_reset_redirect=post_reset_redirect,
-        from_email=from_email,
-        current_app=current_app,
-        extra_context=extra_context,
-        html_email_template_name=html_email_template_name)
+                          template_name='registration/password_reset_form.html',
+                          email_template_name='registration/password_reset_email.html',
+                          subject_template_name='registration/password_reset_subject.txt',
+                          password_reset_form=PasswordResetForm,
+                          token_generator=default_token_generator,
+                          post_reset_redirect=None,
+                          from_email=settings.EMAIL_FROM,
+                          current_app=None,
+                          extra_context=None,
+                          html_email_template_name=None):
+    response = password_reset(request,
+                              template_name=template_name,
+                              email_template_name=email_template_name,
+                              subject_template_name=subject_template_name,
+                              password_reset_form=password_reset_form,
+                              token_generator=token_generator,
+                              post_reset_redirect=post_reset_redirect,
+                              from_email=from_email,
+                              current_app=current_app,
+                              extra_context=extra_context,
+                              html_email_template_name=html_email_template_name)
     if request.method == 'POST' and isinstance(response, HttpResponseRedirect):
         request.session['anonym_user_email'] = request.POST.get('email')
     return response
 
 
-def custom_password_reset_done(
-        request,
-        template_name='registration/password_reset_done.html',
-        current_app=None, extra_context=None):
+def custom_password_reset_done(request,
+                               template_name='registration/password_reset_done.html',
+                               current_app=None, extra_context=None):
     if extra_context:
         extra_context.update({'anonym_user_email': request.session.get('anonym_user_email')})
     else:
         extra_context = {'anonym_user_email': request.session.get('anonym_user_email')}
-    return password_reset_done(
-        request,
-        template_name=template_name,
-        current_app=current_app, extra_context=extra_context)
+    return password_reset_done(request,
+                               template_name=template_name,
+                               current_app=current_app, extra_context=extra_context)
 
 
 def resend_email_confirmation_link(request):

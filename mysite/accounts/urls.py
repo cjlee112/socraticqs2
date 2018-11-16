@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.contrib.auth.views import password_reset_confirm, password_reset_complete
 from accounts.forms import CustomPasswordResetForm

@@ -58,7 +58,6 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
         backend.REQUIRES_EMAIL_VALIDATION or backend.setting('FORCE_EMAIL_VALIDATION', False)
     )
 
-
     u_hash = backend.strategy.request.POST.get('u_hash')
     u_hash_sess = backend.strategy.session_get('u_hash')
 

@@ -5,7 +5,7 @@ from uuid import uuid4
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
@@ -76,7 +76,7 @@ class CourseCoursletUnitMixin(View):
 
     def am_i_instructor(self):
         try:
-            instructor = self.request.user.instructor
+            self.request.user.instructor
             return True
         except Instructor.DoesNotExist:
             return False
@@ -484,7 +484,6 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
             raise Http404()
         return super(CreateUnitView, self).post(request, *args, **kwargs)
 
-
     def get_success_url(self):
         return reverse(
             'ctms:unit_edit',
@@ -534,7 +533,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         :param queryset:
         :return:
         """
-        course, ul = self.get_course(), self.get_unit_lesson()
+        course = self.get_course()
         if not course.addedBy == self.request.user:
             raise Http404()
         self.object = self.get_unit_lesson().lesson
@@ -626,8 +625,6 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
             return redirect(self.get_success_url())
         else:
             return super(CoursletSettingsView, self).post(request, *args, **kwargs)
-
-
 
 
 class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
@@ -762,10 +759,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not self.object:
-            return self.render(
-                'ctms/error.html',
-
-            )
+            return self.render('ctms/error.html')
         form = self.get_form()
         answer_form = CreateEditUnitAnswerForm(**self.get_answer_form_kwargs())
         formset = self.get_formset()

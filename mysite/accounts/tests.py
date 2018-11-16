@@ -29,7 +29,7 @@ class AccountSettingsTests(TestCase):
     def test_login_required(self):
         self.client.logout()
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('new_login')+'?next='+self.url)
+        self.assertRedirects(response, reverse('new_login') + '?next=' + self.url)
 
     def test_get_account_settings_page(self):
         self.client.login(username='username', password='123')
@@ -99,7 +99,6 @@ class AccountSettingsTests(TestCase):
         self.assertRedirects(response, self.url)
         can_login = self.client.login(username='username', password='1234')
         self.assertTrue(can_login)
-
 
     @unpack
     @data(
@@ -208,7 +207,7 @@ class AnonymousUserAccountSettingsTests(TestCase):
         Checks that user with username anonymous will be redirected to login page
         '''
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('new_login')+'?next='+self.url)
+        self.assertRedirects(response, reverse('new_login') + '?next=' + self.url)
 
     def test_login_usual_user(self):
         '''
