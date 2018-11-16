@@ -58,15 +58,6 @@
       </form>
       </div>
       <div>
-      <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="publish_unpublish">
-        {% csrf_token %}
-        <input type="hidden" name="task" value="{% if courslet.releaseTime %}unrelease{% else %}release{% endif %}">
-        <input type="submit"
-               class="button button--primary"
-               value="{% if courslet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
-               style="margin-top:-48px;"
-        >
-      </form>
     </main>
   </div>
   </div>

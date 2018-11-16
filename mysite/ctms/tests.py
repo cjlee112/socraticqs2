@@ -9,6 +9,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from django.db import models
 from accounts.models import Instructor
+from chat.models import EnrollUnitCode
 
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
@@ -255,7 +256,8 @@ class MyCoursesTests(MyTestCase):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
-        shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester')
+        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
+        shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester', enroll_unit_code)
         response = self.client.get(self.url, follow=True)
         # should return shared courses
         self.assertRedirects(response, reverse('ctms:shared_courses'))
@@ -367,12 +369,14 @@ class DeleteCourseViewTest(MyTestCase):
 class SharedCoursesListViewTests(MyTestCase):
     def setUp(self):
         super(SharedCoursesListViewTests, self).setUp()
+        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
         self.student_shared_course = Invite.create_new(
             invite_type='student',
             commit=True,
             instructor=self.instructor2,
             email=self.user.email,
             course=self.course,
+            enroll_unit_code=enroll_unit_code
         )
         self.tester_shared_course = Invite.create_new(
             invite_type='tester',
@@ -380,6 +384,7 @@ class SharedCoursesListViewTests(MyTestCase):
             instructor=self.instructor2,
             email=self.user.email,
             course=self.course,
+            enroll_unit_code=enroll_unit_code
         )
         self.url = reverse('ctms:shared_courses')
 
@@ -397,7 +402,7 @@ class SharedCoursesListViewTests(MyTestCase):
         response = self.client.get(url)
         self.assertRedirects(
             response,
-            reverse('lms:tester_course_view', kwargs={'course_id': self.tester_shared_course.course.pk})
+            reverse('chat:tester_chat_enroll', kwargs={'enroll_key': self.tester_shared_course.enroll_unit_code.enrollCode})
         )
         invite = self.get_invite_by_id(self.tester_shared_course.id)
         self.assertEqual(invite.status, 'joined')
