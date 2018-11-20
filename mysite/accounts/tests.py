@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import mock
 from ddt import ddt, unpack, data
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm
+from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm, CustomPasswordResetForm
 from accounts.models import Instructor
 from core.common.mongo import c_onboarding_status
 from psa.custom_django_storage import CustomCode
@@ -82,7 +83,7 @@ class AccountSettingsTests(TestCase):
     def test_post_valid_password_change(self):
         # it is just to clear up onboarding_status collection in mongo
         c_onboarding_status().remove()
-        
+
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
 
@@ -125,8 +126,8 @@ class AccountSettingsTests(TestCase):
                 'confirm_password': u'Should be equal to password field.',
             }
         }
-
     )
+
     def test_post_invalid_current_password_change(self, data, errors):
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
@@ -144,6 +145,7 @@ class AccountSettingsTests(TestCase):
                 )
         can_login = self.client.login(username='username', password='1234')
         self.assertFalse(can_login)
+
 
     @mock.patch('ctms.views.get_onboarding_percentage')
     def test_post_valid_email_change(self, onboarding_percentage):
@@ -257,3 +259,30 @@ class ProfileUpdateTests(TestCase):
         }, follow=True)
         self.assertRedirects(response, reverse('ctms:create_course'))
         self.assertEqual(self.get_user().instructor.institution, inst_name)
+
+@ddt
+class PasswordResetTest(TestCase):
+    url = reverse('accounts:password_reset')
+
+    @unpack
+    @data(
+        ('username','email@mail.com', '123', u'Иван', u'Иванов'),
+        (u'ИванИванов','email@mail.com', '123', 'first_name', 'last_name')
+    )
+    def test_password_reset(self, username, email, password, first_name, last_name):
+        with mock.patch('django_ses.SESBackend.send_messages') as mock_send_message:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            response = self.client.get(self.url)
+            self.assertIsInstance(response.context['form'], CustomPasswordResetForm)
+            self.assertTemplateUsed(response, 'accounts/password_reset_form.html')
+            response = self.client.post(self.url, {'email':user.email}, follow=True)
+            self.assertTemplateUsed(response, 'accounts/password_reset_done.html')
+            self.assertRedirects(response, reverse('accounts:password_reset_done'))
+            self.assertEqual(response.context['anonym_user_email'], user.email)
+            mock_send_message.assert_called_once()
