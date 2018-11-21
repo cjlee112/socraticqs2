@@ -75,19 +75,26 @@ class CustomDjangoStrategy(DjangoStrategy):
         )
         return user
 
-    def send_email_validation(self, backend, email, force_update=False):
-        code = super(CustomDjangoStrategy, self).send_email_validation(backend, email)
+    def send_email_validation(self, backend, email, force_update=False, partial_token=None):
+        from social_core.utils import module_member
+
+        email_validation = self.setting('EMAIL_VALIDATION_FUNCTION')
+        send_email = module_member(email_validation)
+        code = self.storage.code.make_code(email)
         user = self.request.user
         # store user data in code. We will use it after confirmation email link click.
-        fields_to_store = ('institution', 'first_name', 'last_name', 'password')
+        fields_to_store = ('institution', 'first_name', 'last_name', 'password', 'next')
         for field in fields_to_store:
             f_val = self.request.POST.get(field)
+            if field == 'next':
+                field = 'next_page'
             setattr(
                 code, field,
-                f_val if field != 'password' else make_password(f_val)
+                f_val
             )
         if user and user.is_authenticated():
             code.force_update = force_update
             code.user_id = user.id
         code.save()
+        send_email(self, backend, code, partial_token)
         return code

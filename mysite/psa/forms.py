@@ -82,7 +82,6 @@ class EmailLoginForm(forms.Form):
                 user = sec_mail.user
         if user:
             username = user.username
-
         user = authenticate(username=username, password=self.cleaned_data.get('password'))
         if user and user.is_active:
             # create instructor if not exist

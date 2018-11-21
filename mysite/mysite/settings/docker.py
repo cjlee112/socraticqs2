@@ -61,8 +61,9 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 try:
-    from local import *
-except ImportError:
+    from mysite.settings.local import *
+except ImportError as e:
+    print e
     print '''You must provide a settings/local.py file,
     e.g. by copying the provided local_example.py'''
     pass

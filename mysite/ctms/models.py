@@ -118,7 +118,6 @@ class Invite(models.Model):
 
             text_template = loader.get_template('ctms/email/invite_text.txt')
             rendered_text = text_template.render(context)
-
             send_mail(
                 rendered_subj,
                 rendered_text,
