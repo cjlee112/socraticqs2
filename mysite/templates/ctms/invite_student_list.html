@@ -40,4 +40,28 @@
 {% endblock %}
 
 {% block invites_list %}
+    {% switch "ctms_invite_students" %}
+        <div class="input-with-button">
+            <label for="lti_url">Copy course URL</label>
+                <p>Use this URL to launch course through LTI</p>
+                <input readonly class="textinput textInput form-control"
+                       id="id_title" maxlength="200"
+                       name="lti_url" type="text"
+                       value="{{ domain }}/lti{% url 'ct:study_unit' courselet.course.id courselet.id %}">
+
+        </div>
+    {% endswitch %}
+
+    <!-- Publish/Unpublish -->
+      <div>
+          <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}" class="publish_unpublish">
+            {% csrf_token %}
+            <input type="hidden" name="task" value="{% if courselet.releaseTime %}unrelease{% else %}release{% endif %}">
+            <input type="submit"
+                   class="button button--primary"
+                   value="{% if courselet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
+            >
+          </form>
+
+      </div>
 {% endblock %}

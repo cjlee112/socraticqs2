@@ -36,17 +36,6 @@
           {{ form.as_p }}
         -->
 
-        <label for="lti_url">Copy course URL</label>
-        <p>Use this URL to launch course through LTI</p>
-        <input readonly class="textinput textInput form-control"
-               id="id_title" maxlength="200"
-               name="lti_url" type="text"
-               value="{{ domain }}/lti{% url 'ct:study_unit' courslet.course.id courslet.id %}">
-
-        <label for="enrollment">Copy enrollment URL</label>
-        <p>Use this URL to invite users to pass this courslet.</p>
-        <input readonly class="textinput textInput form-control" id="enrollment" maxlength="200" name="enrollment" type="text" value="{{ domain }}/chat/enrollcode/{{ enroll_code }}/">
-
         <input type="submit" value="Save">
       </form>
       <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">

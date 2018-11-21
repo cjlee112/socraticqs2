@@ -20,7 +20,7 @@
         </li>
 
         <li>
-          <a href="{% url 'ctms:course_invite' pk=course.id %}" class="card__nav-active">Share</a>
+          <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="card__nav-active">Share</a>
         </li>
 
         <li>
@@ -38,13 +38,13 @@
       <nav class="card__nav">
         <ul>
           <li>
-            <a href="{% url 'ctms:course_invite_student' pk=course.id %}" class="{% block invite_student_tab_cls %}{% endblock %}">
+            <a href="{% url 'ctms:courselet_invite_student' pk=course.id courselet_pk=courselet.id %}" class="{% block invite_student_tab_cls %}{% endblock %}">
               Invite Students
             </a>
           </li>
 
           <li>
-            <a href="{% url 'ctms:course_invite' pk=course.id %}" class="{% block invite_tester_tab_cls %}{% endblock %}">
+            <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="{% block invite_tester_tab_cls %}{% endblock %}">
               Invite Testers
             </a>
           </li>
@@ -63,7 +63,7 @@
                 <input type="button" value="Invite an Expert" class="invite__submit__form__" id="send_to_courselets" data-courselets-email="{{ courselets_email }}">
               </div>
           {% endif %}
-          <form class="form" action="{% url 'ctms:course_invite' pk=course.id courslet_pk=courselet.id %}" method="POST">
+          <form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">
             {% csrf_token %}
 
             <div class="input-with-button">
@@ -89,24 +89,12 @@
         {% endwith %}
       {% endwith %}
       {% endblock %}
-      <!-- Publish/Unpublish -->
-      <div>
-          <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}" class="publish_unpublish">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{% if courselet.releaseTime %}unrelease{% else %}release{% endif %}">
-            <input type="submit"
-                   class="button button--primary"
-                   value="{% if courselet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
-            >
-          </form>
-
-      </div>
     </main>
 
     <!--<main class="card__content">-->
       <!--<p>How to invite students... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>-->
 
-      <!--<form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">-->
+      <!--<form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">-->
         <!--{% csrf_token %}-->
 
         <!--<div class="input-with-button">-->

@@ -36,7 +36,6 @@ def send_validation(strategy, backend, code, *args, **kwargs):
 
     text_template = loader.get_template('psa/email/confirmation_text.txt')
     rendered_text = text_template.render(context)
-    print(rendered_text.encode('utf-8'))
     send_mail(
         rendered_subj,
         rendered_text,
