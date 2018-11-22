@@ -10,6 +10,8 @@ from django.test import TestCase
 
 from core.common.utils import send_email, get_onboarding_percentage
 from core.common import onboarding
+from core.common.utils import get_onboarding_setting, ONBOARDING_STEPS_DEFAULT_TEMPLATE, \
+    get_onboarding_status_with_settings
 
 
 @ddt
@@ -67,3 +69,137 @@ class UtilityTest(TestCase):
         _mock = mock.return_value
         _mock.find_one.return_value = steps
         self.assertEqual(get_onboarding_percentage(1), result)
+
+    @mock.patch('core.common.utils.c_onboarding_status')
+    @unpack
+    @data(
+        (onboarding.INTRODUCTION_COURSE_ID, settings.ONBOARDING_INTRODUCTION_COURSE_ID),
+        (onboarding.VIEW_INTRODUCTION, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.INTRODUCTION_INTRO, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.CREATE_COURSE, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.CREATE_COURSELET, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.CREATE_THREAD, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.INVITE_SOMEBODY, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.REVIEW_ANSWERS, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        # nonexistent key
+        ('fake_key', None)
+    )
+    def test_get_onboarding_setting(self, setting_name, value, _mock):
+        self.assertEqual(get_onboarding_setting(setting_name), value)
+
+    @mock.patch('core.common.utils.get_onboarding_setting')
+    @mock.patch('core.common.utils.c_onboarding_status')
+    def test_get_onboarding_status_with_settings(self, status_mock, settings_mock):
+
+        def mocked_setting(setting_name):
+            data = {
+                "instructor_intro": {
+                    "html": "<p>instructor_intro</p>",
+                    "description": "instructor_intro desc",
+                    "title": "instructor_intro"
+                },
+                "create_course": {
+                    "html": "<p>create_course</p>",
+                    "description": "create_course desc",
+                    "title": "create_course"
+                },
+                "create_courselet": {
+                    "html": "<p>create_courselet</p>",
+                    "description": "create_courselet desc",
+                    "title": "create_courselet"
+                },
+                "review_answers": {
+                    "html": "<p>review_answers</p>",
+                    "description": "review_answers desc",
+                    "title": "review_answers"
+                },
+                "invite_somebody": {
+                    "html": "<p>invite_somebody</p>",
+                    "description": "invite_somebody desc",
+                    "title": "invite_somebody"
+                },
+                "create_thread": {
+                    "html": "<p>create_thread</p>",
+                    "description": "create_thread desc",
+                    "title": "create_thread"
+                },
+                "view_introduction": {
+                    "html": "<p>view_introduction</p>",
+                    "description": "view_introduction desc",
+                    "title": "view_introduction"
+                }
+            }
+            return data[setting_name]
+
+        expected_result = {
+            "instructor_intro": {
+                "done": False,
+                "settings": {
+                    "html": "<p>instructor_intro</p>",
+                    "description": "instructor_intro desc",
+                    "title": "instructor_intro"
+                }
+            },
+            "create_course": {
+                "done": True,
+                "settings": {
+                    "html": "<p>create_course</p>",
+                    "description": "create_course desc",
+                    "title": "create_course"
+                }
+            },
+            "create_courselet": {
+                "done": False,
+                "settings": {
+                    "html": "<p>create_courselet</p>",
+                    "description": "create_courselet desc",
+                    "title": "create_courselet"
+                }
+            },
+            "review_answers": {
+                "done": False,
+                "settings": {
+                    "html": "<p>review_answers</p>",
+                    "description": "review_answers desc",
+                    "title": "review_answers"
+                }
+            },
+            "invite_somebody": {
+                "done": True,
+                "settings": {
+                    "html": "<p>invite_somebody</p>",
+                    "description": "invite_somebody desc",
+                    "title": "invite_somebody"
+                }
+            },
+            "create_thread": {
+                "done": False,
+                "settings": {
+                    "html": "<p>create_thread</p>",
+                    "description": "create_thread desc",
+                    "title": "create_thread"
+                }
+            },
+            "view_introduction": {
+                "done": False,
+                "settings": {
+                    "html": "<p>view_introduction</p>",
+                    "description": "view_introduction desc",
+                    "title": "view_introduction"
+                }
+            }
+        }
+        status_mock = status_mock.return_value
+        status_mock.find_one.return_value = {
+            onboarding.VIEW_INTRODUCTION: False,
+            onboarding.INTRODUCTION_INTRO: False,
+            onboarding.CREATE_COURSE: True,
+            onboarding.CREATE_COURSELET: False,
+            onboarding.CREATE_THREAD: False,
+            onboarding.INVITE_SOMEBODY: True,
+            onboarding.REVIEW_ANSWERS: False
+        }
+        settings_mock.side_effect = mocked_setting
+        user_id = 1  # value doesn't matter
+        data = get_onboarding_status_with_settings(user_id)
+        self.assertEqual(data, expected_result)

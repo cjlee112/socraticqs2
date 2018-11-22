@@ -10,7 +10,7 @@ from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
-from core.common.utils import get_onboarding_steps
+from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
@@ -143,7 +143,7 @@ class OnboardingStatus(APIView):
 
     def get(self, request, *args, **kwargs):
         user_id = request.data.get('user_id') or request.user.id
-        onboarding_status = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, {'_id': 0})
-        if onboarding_status:
-            return RestResponse({'status': 'Ok', 'data': onboarding_status}, status=status.HTTP_200_OK)
+        data = get_onboarding_status_with_settings(user_id)
+        if data:
+            return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
