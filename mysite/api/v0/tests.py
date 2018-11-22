@@ -59,7 +59,7 @@ def test_onboarding_update_data(client, db, user):
 
     assert client.login(username='admin', password='test_admin') is True
     response = client.put(
-        reverse('api:v0:update-onboarding-status'),
+        reverse('api:v0:onboarding-status'),
         data=json.dumps(data_to_update),
         content_type="application/json"
     )

@@ -125,17 +125,25 @@ class HealthCheck(APIView):
         return response
 
 
-class UpdateOnboardingStatus(APIView):
+class OnboardingStatus(APIView):
 
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def put(self, request, *args, **kwargs):
-        steps_to_update = request.data
+        steps_to_update = request.data.copy()
+        user_id = steps_to_update.pop('user_id', None) or request.user.id
         to_update = {
             k: bool(v) for k, v in steps_to_update.items() if k in get_onboarding_steps()
         }
         if to_update and request.user.id:
-            c_onboarding_status().update_one({onboarding.USER_ID: request.user.id}, {'$set': to_update}, upsert=True)
+            c_onboarding_status().update_one({onboarding.USER_ID: user_id}, {'$set': to_update}, upsert=True)
             return RestResponse({'status': 'Ok'}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id') or request.user.id
+        onboarding_status = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, {'_id': 0})
+        if onboarding_status:
+            return RestResponse({'status': 'Ok', 'data': onboarding_status}, status=status.HTTP_200_OK)
+        return RestResponse({'status': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
