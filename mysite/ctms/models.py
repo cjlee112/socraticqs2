@@ -1,19 +1,25 @@
 import re
 from uuid import uuid4
-from django.template import loader, Context
+
+from django.db import models
+from django.db.models.signals import post_save
 from django.db.utils import IntegrityError
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db import models
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.http.response import Http404
-from django.shortcuts import get_object_or_404
+from django.template import loader, Context
+
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
-
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
 from ct.models import Course
+
+
 
 
 STATUS_CHOICES = (
@@ -185,12 +191,6 @@ class Invite(models.Model):
 
     def __unicode__(self):
         return "Code {}, User {}".format(self.code, self.email)
-
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from core.common import onboarding
-from core.common.utils import update_onboarding_step
 
 
 @receiver(post_save, sender=Invite)
