@@ -80,12 +80,15 @@ class CustomDjangoStrategy(DjangoStrategy):
 
         email_validation = self.setting('EMAIL_VALIDATION_FUNCTION')
         send_email = module_member(email_validation)
+        # remove all codes with this email before creating new one
+        CustomCode.objects.filter(email=email).delete()
         code = self.storage.code.make_code(email)
         user = self.request.user
         # store user data in code. We will use it after confirmation email link click.
         fields_to_store = ('institution', 'first_name', 'last_name', 'password', 'next')
         for field in fields_to_store:
             f_val = self.request.POST.get(field)
+            # hack: to not override built-in func `next` in model, it is saved under 'next_page' filedname
             if field == 'next':
                 field = 'next_page'
             setattr(
@@ -96,5 +99,6 @@ class CustomDjangoStrategy(DjangoStrategy):
             code.force_update = force_update
             code.user_id = user.id
         code.save()
+        self.request.session['cc_id'] = code.id
         send_email(self, backend, code, partial_token)
         return code

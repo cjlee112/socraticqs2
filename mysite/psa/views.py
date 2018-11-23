@@ -151,6 +151,7 @@ def signup(request, next_page=None):
     u_hash_sess = request.session.get('u_hash')
     _next_page = request.POST.get('next') or request.GET.get('next')
     logout(request)
+    request.session['u_hash'] = u_hash_sess
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
         # replacenexturl with shared_courses page url

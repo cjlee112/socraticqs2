@@ -41,5 +41,5 @@ def send_validation(strategy, backend, code, *args, **kwargs):
         rendered_text,
         settings.EMAIL_FROM,
         [code.email],
-        fail_silently=True
+        fail_silently=False
     )

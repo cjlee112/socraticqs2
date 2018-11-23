@@ -1011,7 +1011,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         kwargs = super(InvitesListView, self).get_form_kwargs()
         kwargs['course'] = self.get_course()
         kwargs['instructor'] = self.request.user.instructor
-        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courslet_pk'), give_instance=True)
+        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True)
         return kwargs
 
     def get_initial(self):
@@ -1034,7 +1034,6 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
     def form_invalid(self, form):
         response = super(InvitesListView, self).form_invalid(form)
-        print form.errors
         messages.add_message(self.request, messages.WARNING,
                              "Invitation could not be sent because of errors listed below")
         return response

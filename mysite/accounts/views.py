@@ -239,10 +239,13 @@ def resend_email_confirmation_link(request):
         try:
             post = request.POST.dict()
             cc = CustomCode.objects.filter(pk=request.session.get('cc_id')).first()
-            fields = ['first_name', 'last_name', 'institution']
+            fields = ['first_name', 'last_name', 'institution', 'next']
             if cc:
                 for field in fields:
-                    post[field] = getattr(cc, field, '')
+                    if field == 'next':
+                        post[field] = getattr(cc, 'next_page', None)
+                    else:
+                        post[field] = getattr(cc, field, '')
             request.POST = post
 
             strategy = CustomDjangoStrategy(CustomDjangoStorage, request=request)
