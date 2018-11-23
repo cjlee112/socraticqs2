@@ -37,7 +37,7 @@
             <li>
                 <span>{{ steps.5.1 }} - </span>
                 <span>Invite testers or students</span>
-                <a href="{% if users_course.id %}{% url 'ctms:course_invite' pk=users_course.id %}{% else %}#{% endif %}">View</a>
+                <a href="{% if users_course.id %}{% url 'ctms:courselet_invite' pk=users_course.id courselet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
             </li>
             <li>
                 <span>{{ steps.6.1 }} - </span>

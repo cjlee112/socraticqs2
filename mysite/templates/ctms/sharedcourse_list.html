@@ -3,7 +3,7 @@
 {% block content %}
   <div class="card">
     <header class="card__topbar">
-      <h1>Courses</h1>
+      <h1>Courselets</h1>
     </header>
 
     <nav class="card__nav">
@@ -20,19 +20,19 @@
 
     <main class="card__content">
       <h2>
-        <span>Shared Courses</span>
+        <span>Shared Courselets</span>
       </h2>
       {% if shared_courses %}
         <table>
           <thead >
-            <th>Course</th>
+            <th>Courselet</th>
             <th>Author</th>
           </thead>
 
           <tbody>
             {% for sh in shared_courses %}
               <tr>
-                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}" target="_blank">{{ sh.course.title }}</a></td>
+                <td><a href="{% url 'ctms:tester_join_course' code=sh.code %}" target="_blank">{{ sh.enroll_unit_code.courseUnit.unit.title }}</a></td>
                 <td>{{ sh.instructor }}</td>
               </tr>
             {% endfor %}

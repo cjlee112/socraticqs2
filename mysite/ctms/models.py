@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from accounts.models import Instructor
+from chat.models import EnrollUnitCode
 
 from ct.models import Course
 
@@ -54,6 +55,7 @@ class Invite(models.Model):
     status = models.CharField('status', max_length=20, choices=STATUS_CHOICES, default='pending')
     type = models.CharField('invite type', max_length=50, choices=TYPE_CHOICES, default='tester')
     course = models.ForeignKey(Course)
+    enroll_unit_code = models.ForeignKey(EnrollUnitCode, null=True)
 
     added = models.DateTimeField('added datetime', auto_now_add=True)
 
@@ -64,14 +66,15 @@ class Invite(models.Model):
         return User.objects.filter(email=email).first()
 
     @classmethod
-    def create_new(cls, commit, course, instructor, email, invite_type):
+    def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code):
         user = Invite.search_user_by_email(email)
         try:
             old_invite = Invite.get_by_user_or_404(
                 user=user,
                 type=invite_type,
                 course=course,
-                instructor=instructor
+                instructor=instructor,
+                enroll_unit_code=enroll_unit_code
             )
             if old_invite:
                 return old_invite
@@ -85,6 +88,7 @@ class Invite(models.Model):
             status='pending',
             type=invite_type,
             course=course,
+            enroll_unit_code=enroll_unit_code
         )
         if commit:
             code.save()
@@ -114,7 +118,6 @@ class Invite(models.Model):
 
             text_template = loader.get_template('ctms/email/invite_text.txt')
             rendered_text = text_template.render(context)
-
             send_mail(
                 rendered_subj,
                 rendered_text,

@@ -975,16 +975,26 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return self.request.path
 
     def get_context_data(self, **kwargs):
-        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
-        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
+        courselet_pk = self.kwargs.get('courslet_pk')
         course = self.get_course()
-        if waffle.switch_is_active('ctms_invite_students'):
+        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
+        if courselet_pk:
+            courselet = CourseUnit.objects.get(id=courselet_pk)
+        else:
             courselet = CourseUnit.objects.filter(course=course).first()
+        kwargs['invite_tester_form'] = self.form_class(
+            initial={
+                'type': 'tester',
+                'course': self.get_course(),
+            }
+        )
+        if waffle.switch_is_active('ctms_invite_students'):
             # We no longer need a form
             # kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
             if courselet:
                 kwargs['enroll_code'] = EnrollUnitCode.get_code(courselet)
 
+        kwargs['courselet'] = courselet
         kwargs['course'] = course
         kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
         kwargs['courselets_email'] = settings.COURSELETS_EMAIL
@@ -994,6 +1004,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         kwargs = super(InvitesListView, self).get_form_kwargs()
         kwargs['course'] = self.get_course()
         kwargs['instructor'] = self.request.user.instructor
+        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True)
         return kwargs
 
     def get_initial(self):
@@ -1034,13 +1045,19 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                                          "You just joined course as tester")
                     invite.status = 'joined'
                     invite.save()
-                    return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
+                    if invite.enroll_unit_code:
+                        return redirect(reverse('chat:tester_chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                    else:
+                        return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
                 elif invite.type == 'student':
                     messages.add_message(self.request, messages.SUCCESS,
                                          "You just joined course as student")
                     invite.status = 'joined'
                     invite.save()
-                    return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+                    if invite.enroll_unit_code:
+                        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                    else:
+                        return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
             # if user is not owned this invite
             return HttpResponseRedirect("{}?next={}".format(reverse('new_login'), self.request.path))
         else:
@@ -1096,7 +1113,11 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
         return Invite.objects.my_invites(self.request)
 
     def get_success_url(self):
-        return reverse('ctms:course_invite', kwargs={'pk': self.get_object().course.id})
+        kwargs = {
+            'pk': self.get_object().course.id,
+            'courselet_pk': self.get_object().enroll_unit_code.courseUnit.unit.id
+        }
+        return reverse('ctms:courselet_invite', kwargs=kwargs)
 
     def delete(self, request, *args, **kwargs):
         response = super(DeleteInviteView, self).delete(request, *args, **kwargs)

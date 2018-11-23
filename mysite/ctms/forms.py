@@ -154,9 +154,10 @@ class CreateCourseletForm(forms.ModelForm):
 
 
 class InviteForm(forms.ModelForm):
-    def __init__(self, course=None, instructor=None, *args, **kwargs):
+    def __init__(self, course=None, instructor=None, enroll_unit_code=None, *args, **kwargs):
         self.course = course
         self.instructor = instructor
+        self.enroll_unit_code = enroll_unit_code
         super(InviteForm, self).__init__(*args, **kwargs)
 
     class Meta:
@@ -172,6 +173,7 @@ class InviteForm(forms.ModelForm):
         existed_invite = Invite.objects.filter(
             instructor=self.instructor,
             course=self.course,
+            enroll_unit_code=self.enroll_unit_code,
             email=self.cleaned_data['email'],
             type=self.cleaned_data['type'],
         ).first()
@@ -183,6 +185,7 @@ class InviteForm(forms.ModelForm):
                 commit=False,
                 instructor=self.instructor,
                 course=self.course,
+                enroll_unit_code=self.enroll_unit_code,
                 email=self.cleaned_data['email'],
                 invite_type=self.cleaned_data['type'],
             )

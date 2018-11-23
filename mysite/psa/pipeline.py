@@ -68,7 +68,6 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
     send_validation = (
         details.get('email') and (is_new or backend.setting('PASSWORDLESS', False)) and not_tester_join_course
     )
-
     if requires_validation and send_validation and backend.name == 'email':
         data = backend.strategy.request_data()
         if 'verification_code' in data:
@@ -81,11 +80,11 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
             code = backend.strategy.storage.code.get_code(data['verification_code'])
             # This is very straightforward method
             # TODO Need to check current user to avoid unnecessary check
-            if code.user_id:
-                user_from_code = User.objects.filter(id=code.user_id).first()
+            if code.email:
+                user_from_code = User.objects.filter(email=code.email).first()
                 if user_from_code:
                     user = user_from_code
-                    _next = backend.strategy.request.session.get('next')
+                    _next = code.next_page or backend.strategy.request.session.get('next')
                     logout(backend.strategy.request)
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
@@ -249,7 +248,6 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
     Create UserSocialAuth.
     """
     email = details.get('email')
-
     if user and force_update:
         if not social:
             try:

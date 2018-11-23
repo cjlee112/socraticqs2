@@ -10,11 +10,11 @@ from django.core.urlresolvers import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_complete
-from social_django.utils import psa
+from social_django.utils import psa, load_backend, load_strategy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME, authenticate
 
-from social_core.backends.utils import load_backends
+from social_core.backends.utils import load_backends, get_backend
 from social_django.views import _do_login
 from social_django.views import complete as social_complete
 from social_core.exceptions import AuthMissingParameter
@@ -120,7 +120,6 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
         user = authenticate(username=user.username, password=data.get('password'))
         login(request, user)
         request.session['u_hash'] = u_hash
-
     response = do_complete(
         request.backend, _do_login, request.user,
         redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
@@ -148,17 +147,19 @@ def signup(request, next_page=None):
     """
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
+    _next_page = request.POST.get('next') or request.GET.get('next')
     logout(request)
+    request.session['u_hash'] = u_hash_sess
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
         # replacenexturl with shared_courses page url
-        next_page = reverse('ctms:shared_courses')
+        next_page = _next_page or reverse('ctms:shared_courses')
         request.session['next'] = next_page
         post = request.POST.copy()
         post['next'] = next_page
         request.POST = post
     else:
-        next_page = request.POST.get('next') or request.GET.get('next') or next_page
+        next_page = _next_page or next_page
 
     form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
@@ -261,6 +262,18 @@ def complete(request, *args, **kwargs):
 
     if form.is_valid() or 'verification_code' in request.GET:
         try:
+            logout(request)
+            code = CustomCode.objects.filter(code=request.GET.get('verification_code')).first()
+            if code:
+                strategy = load_strategy(request)
+
+                user = strategy.create_user(
+                    email=code.email,
+                    first_name=code.first_name,
+                    last_name=code.last_name,
+                    password=code.password
+                )
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             resp = social_complete(request, 'email', *args, **kwargs)
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
                 Instructor.objects.get_or_create(user=request.user)
