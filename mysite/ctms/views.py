@@ -23,9 +23,8 @@ from social_core.backends.utils import load_backends
 from accounts.models import Instructor
 
 from core.common import onboarding
-from core.common.mongo import c_onboarding_status
 from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
-    get_onboarding_setting, update_onboarding_step
+    get_onboarding_setting, get_onboarding_status_with_settings
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -1172,8 +1171,11 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             users_thread=users_thread,
             enroll_url=enroll_url
         ))
-        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id}) or {}
-        steps = [(key, status.get(key, False)) for key in get_onboarding_steps()]
+        status = get_onboarding_status_with_settings(self.request.user.id)
+        steps = [
+            (key, status.get(key, {}).get('done', False), status.get(key, {}).get('settings', {}))
+            for key in get_onboarding_steps()
+        ]
         context.update({
             'steps': steps,
         })

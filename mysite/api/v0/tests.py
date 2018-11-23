@@ -3,7 +3,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-from core.common.mongo import c_onboarding_status
+from core.common.mongo import c_onboarding_status, _conn, DB_DATA
 from core.common import onboarding
 
 HEALTH_URL = reverse('api:v0:health-check')
@@ -59,7 +59,7 @@ def test_onboarding_update_data(client, db, user):
 
     assert client.login(username='admin', password='test_admin') is True
     response = client.put(
-        reverse('api:v0:update-onboarding-status'),
+        reverse('api:v0:onboarding-status'),
         data=json.dumps(data_to_update),
         content_type="application/json"
     )
@@ -69,6 +69,6 @@ def test_onboarding_update_data(client, db, user):
 
     assert mongo_data == data
 
-    # need to delete these entries after test test_post_valid_password_change done
-    c_onboarding_status().remove()
+    # need to delete db after test test_post_valid_password_change done
+    _conn.connector.drop_database(DB_DATA)
 
