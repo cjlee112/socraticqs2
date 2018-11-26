@@ -35,11 +35,11 @@
           {{ form.trial.label_tag }}
           {{ form.trial }}
 
-        <label for="lti">Copy course URL</label>
-        <p>
-           LTI URL for dropping into your campus LMS
-        </p>
-        <input readonly class="textinput textInput form-control" id="id_title" maxlength="200" name="lti" type="text" value="{{ domain }}/lti{% url 'ct:course_student' object.id %}">
+{#        <label for="lti">Copy course URL</label>#}
+{#        <p>#}
+{#           LTI URL for dropping into your campus LMS#}
+{#        </p>#}
+{#        <input readonly class="textinput textInput form-control" id="id_title" maxlength="200" name="lti" type="text" value="{{ domain }}/lti{% url 'ct:course_student' object.id %}">#}
 
         <input type="submit" value="Save">
       </form>
