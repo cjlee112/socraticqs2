@@ -19,6 +19,9 @@
         <li>
           <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
         </li>
+          <li>
+          <a href="{% url 'ctms:courselet_invite' pk=course_pk courselet_pk=pk %}" class="">Share</a>
+        </li>
       </ul>
     </nav>
 
@@ -40,11 +43,12 @@
       </form>
       <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
       <div>
-      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
-        {% csrf_token %}
+          <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+            {% csrf_token %}
 
-        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
-      </form>
+            <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+          </form>
+      {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=pk course_pk=course_pk courselet=courslet %}
       </div>
       <div>
     </main>

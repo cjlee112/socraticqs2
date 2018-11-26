@@ -938,10 +938,11 @@ class CoursletSettingsViewTests(MyTestCase):
             print response.context['form'].errors
 
         if is_valid:
-            url = reverse('ctms:courslet_view', kwargs=self.kwargs)
+            url = reverse('ctms:courselet_invite_student', kwargs={'pk': self.kwargs['course_pk'],
+                                                                   'courselet_pk': self.kwargs['pk']})
             self.assertRedirects(response, url)
             response = self.client.post(self.url, post_data, follow=True)
-            self.context_should_contain_keys = ('u_lessons', 'course_pk', 'pk')
+            self.context_should_contain_keys = ('invite_tester_form', 'courselet', 'course')
 
         self.check_context_keys(response)
 

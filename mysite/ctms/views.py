@@ -593,7 +593,8 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
             return course_unit.unit
 
     def get_success_url(self):
-        return reverse('ctms:courslet_view', kwargs=self.kwargs)
+        return reverse('ctms:courselet_invite_student', kwargs={'pk': self.get_course().id,
+                                                        'courselet_pk': self.get_courslet().id})
 
     def get_context_data(self, **kwargs):
         context = super(CoursletSettingsView, self).get_context_data(**kwargs)
@@ -621,7 +622,8 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
             if task == 'unrelease':
                 cu.releaseTime = None
             cu.save()
-            return redirect(self.get_success_url())
+            messages.add_message(self.request, messages.SUCCESS, "Courselet successfully updated")
+            return redirect(self.request.META.get('HTTP_REFERER', self.get_success_url()))
         else:
             return super(CoursletSettingsView, self).post(request, *args, **kwargs)
 
