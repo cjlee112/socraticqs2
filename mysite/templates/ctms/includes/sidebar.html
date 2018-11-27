@@ -128,7 +128,7 @@
                   <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
                 </li>
                   <li>
-                    <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'course_invite' or sidebar.current_page_name == 'course_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
+                    <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
                   </li>
               </ul>
             </nav>

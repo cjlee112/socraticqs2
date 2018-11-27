@@ -9,22 +9,23 @@
   <div class="card">
     <header class="card__topbar">
       <!-- TODO: Add course name -->
-      <h1>{{ course.title }}</h1>
+      <h1>{{ courselet.unit.title }}</h1>
     </header>
 
-    <!-- TODO: Add real links -->
-    <nav class="card__nav">
+  <nav class="card__nav">
       <ul>
         <li>
-          <a href="{% url 'ctms:course_view' pk=course.id %}">Courselets</a>
+          <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courselet.id %}">Threads</a>
         </li>
 
+        <li>
+          <a href="{% url 'ctms:courselet_preview' course_pk=course.id pk=courselet.id %}" target="_blank">Preview</a>
+        </li>
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}">Settings</a>
+        </li>
         <li>
           <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="card__nav-active">Share</a>
-        </li>
-
-        <li>
-          <a href="{% url 'ctms:course_settings' pk=course.id %}">Settings</a>
         </li>
       </ul>
     </nav>
@@ -58,11 +59,11 @@
       {% endblock %}
       {% block invitation_content %}
 
-          {% if courselets_email %}
+          {% comment %}
               <div class="invite-courselets">
                 <input type="button" value="Invite an Expert" class="invite__submit__form__" id="send_to_courselets" data-courselets-email="{{ courselets_email }}">
               </div>
-          {% endif %}
+          {% endcomment %}
           <form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">
             {% csrf_token %}
 

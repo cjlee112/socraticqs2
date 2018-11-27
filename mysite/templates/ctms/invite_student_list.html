@@ -54,14 +54,7 @@
 
     <!-- Publish/Unpublish -->
       <div>
-          <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}" class="publish_unpublish">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{% if courselet.releaseTime %}unrelease{% else %}release{% endif %}">
-            <input type="submit"
-                   class="button button--primary"
-                   value="{% if courselet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
-            >
-          </form>
+          {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=courselet.id course_pk=courselet.course.id %}
 
       </div>
 {% endblock %}
