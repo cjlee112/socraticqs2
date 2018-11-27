@@ -79,10 +79,10 @@ urlpatterns = [
 
     # url(r'^course/(?P<pk>\d+)/share_course/$', InvitesListView.as_view(),
     #     name='share_course'),
-    url(r'^course/(?P<pk>\d+)/share_courselet/tester/(?P<courselet_pk>\d+)?$',
+    url(r'^course/(?P<pk>\d+)/share_courselet/tester/(?P<courselet_pk>\d+)?/$',
         InvitesListView.as_view(template_name='ctms/invite_tester_list.html'), name='courselet_invite'),
 
-    url(r'^course/(?P<pk>\d+)/share_courselet/student/(?P<courselet_pk>\d+)?$',
+    url(r'^course/(?P<pk>\d+)/share_courselet/student/(?P<courselet_pk>\d+)?/$',
         InvitesListView.as_view(template_name='ctms/invite_student_list.html'), name='courselet_invite_student'),
 
     # url(r'^course/(?P<pk>\d+)/invite/?$', InvitesListView.as_view(), name='course_invite'),
