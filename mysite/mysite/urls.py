@@ -35,7 +35,7 @@ urlpatterns = [
             'login_form_cls': UsernameLoginForm
         }, name='login'),
     url(r'^inactive-user/$', inactive_user_error, name="inactive-user-error"),
-    url(r'^signup/$', signup, {'next_page': 'login'}, name='signup'),
+    url(r'^signup/$', signup, name='signup'),
     url(r'^new_login/$', custom_login,
         {
             'template_name': 'psa/new_custom_login.html',

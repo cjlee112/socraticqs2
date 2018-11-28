@@ -26,7 +26,6 @@ class SignUpForm(forms.Form):
     email_confirmation = forms.EmailField()
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
-    institution = forms.CharField(help_text='We can help you with integration once we know where you teach.')
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
         help_text='Create a password that at least six chars length.'

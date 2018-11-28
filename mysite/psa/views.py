@@ -72,7 +72,7 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
     Custom login to integrate social auth and default login.
     """
     u_hash_sess = request.session.get('u_hash')
-    logout(request)
+    # logout(request)
     if u_hash_sess:
         request.session['u_hash'] = u_hash_sess
 
@@ -148,7 +148,7 @@ def signup(request, next_page=None):
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
     _next_page = request.POST.get('next') or request.GET.get('next')
-    logout(request)
+    # logout(request)
     request.session['u_hash'] = u_hash_sess
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
@@ -160,7 +160,6 @@ def signup(request, next_page=None):
         request.POST = post
     else:
         next_page = _next_page or next_page
-
     form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:

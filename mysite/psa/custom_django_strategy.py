@@ -85,7 +85,7 @@ class CustomDjangoStrategy(DjangoStrategy):
         code = self.storage.code.make_code(email)
         user = self.request.user
         # store user data in code. We will use it after confirmation email link click.
-        fields_to_store = ('institution', 'first_name', 'last_name', 'password', 'next')
+        fields_to_store = ('first_name', 'last_name', 'password', 'next')
         for field in fields_to_store:
             f_val = self.request.POST.get(field)
             # hack: to not override built-in func `next` in model, it is saved under 'next_page' filedname

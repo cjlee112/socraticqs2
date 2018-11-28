@@ -26,10 +26,12 @@ class MyTestCase(TestCase):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
 
-        self.instructor = Instructor.objects.create(user=self.user)
+        self.instructor = Instructor.objects.create(user=self.user, institution='institute',
+                                                    what_do_you_teach='something')
 
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
-        self.instructor2 = Instructor.objects.create(user=self.user2)
+        self.instructor2 = Instructor.objects.create(user=self.user2, institution='institute',
+                                                     what_do_you_teach='something')
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -206,10 +208,12 @@ class MyCoursesTests(MyTestCase):
     def setUp(self):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
-        self.instructor = Instructor.objects.create(user=self.user)
+        self.instructor = Instructor.objects.create(user=self.user, institution='institute',
+                                                    what_do_you_teach='something')
 
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
-        self.instructor2 = Instructor.objects.create(user=self.user2)
+        self.instructor2 = Instructor.objects.create(user=self.user2, institution='institution',
+                                                     what_do_you_teach='something')
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()

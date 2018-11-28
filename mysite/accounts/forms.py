@@ -179,14 +179,17 @@ class CustomPasswordResetForm(PasswordResetForm):
 
 
 class SocialForm(forms.ModelForm):
+    institution = forms.CharField(required=True)
+    what_do_you_teach = forms.CharField(required=True)
+
     class Meta:
         model = Instructor
         fields = (
             'user',
             'institution',
+            'what_do_you_teach'
         )
         widgets = {
             'user': forms.HiddenInput(),
-            # 'id': forms.HiddenInput(),
 
         }
