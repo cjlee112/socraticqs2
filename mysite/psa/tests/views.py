@@ -854,12 +854,24 @@ class SignupTest(TestCase):
                 'email_confirmation': 'test_email@aa.cc',
                 'last_name': 'Bo',
                 'first_name': 'Alex',
-                'institution': 'testInstitute',
                 'password': '123123123'
             },
             follow=True
         )
-        self.assertRedirects(response, reverse('ctms:shared_courses'))
+        registered_user = User.objects.get(email='test_email@aa.cc')
+        self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), reverse('ctms:shared_courses')))
+
+        redirect_url = response.redirect_chain[-1][0]
+
+        resp = self.client.post(redirect_url, {
+            'institution': 'testInstitute',
+            'what_do_you_teach': 'something',
+            'user': registered_user.id,
+            'next': redirect_url.split('next=')[-1]
+        }, follow=True)
+
+        self.assertRedirects(resp, reverse('ctms:shared_courses'))
+
         self.assertIn('_auth_user_id', self.client.session)
 
         new_user = User.objects.get(email='test_email@aa.cc')
@@ -877,7 +889,6 @@ class SignupTest(TestCase):
                 'email_confirmation': 'test_email2222@aa.cc',
                 'last_name': 'Bo',
                 'first_name': 'Alex',
-                'institution': '',
                 'password': '123123123'
             },
         )
@@ -885,8 +896,6 @@ class SignupTest(TestCase):
         self.assertIn('form', response.context)
         self.assertIn(u'Confirmation e-mail should be the same as e-mail.',
                       response.context['form']['email_confirmation'].errors)
-        self.assertIn(u'This field is required.',
-                      response.context['form']['institution'].errors)
 
     def test_signup_without_u_hash(self):
         self.assertEqual(CustomCode.objects.count(), 0)

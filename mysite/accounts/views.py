@@ -139,6 +139,8 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     form_class = SocialForm
 
     def get_success_url(self):
+        if self.request.POST.get('next'):
+            return self.request.POST.get('next')
         return reverse('ctms:my_courses')
 
     def get_initial(self):
@@ -170,8 +172,8 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
 
     def get(self, request):
         instructor = self.get_instance()
-        if instructor is not None and instructor.institution:
-            return redirect(self.get_success_url())
+        if instructor is not None and instructor.institution and instructor.what_do_you_teach:
+            return redirect(self.request.GET.get('next') or self.get_success_url())
         else:
             form = self.get_form()
             return self.render_to_response({'form': form})

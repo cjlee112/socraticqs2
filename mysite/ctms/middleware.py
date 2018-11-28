@@ -4,6 +4,7 @@ from collections import OrderedDict
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.conf import settings
 from django.core.urlresolvers import resolve
+from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
 from ctms.urls import urlpatterns as ctms_urls
@@ -174,6 +175,13 @@ class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
         # urls = self._get_urls(request)
         current_url = resolve(request.path_info).url_name
+        if request.path.startswith('/ctms/') and reverse('accounts:profile_update') != request.path and \
+                request.path != reverse('ctms:email_sent'):
+            # if we are going to /ctms/ namespace except of /ctms/email_sent/
+            if (request.user.is_authenticated and (not getattr(request.user, 'instructor', None)
+                          or not request.user.instructor.institution or not request.user.instructor.what_do_you_teach)):
+                # if we don't have instructor or instructor.institution
+                    return HttpResponseRedirect('{}?next={}'.format(reverse('accounts:profile_update'), request.path))
         if 'ctms' in request.path and current_url != 'my_courses':
             model_ids = self._get_model_ids(view_kwargs)
             objects = self._get_objects(model_ids)

@@ -164,7 +164,7 @@ class AccountSettingsTests(TestCase):
             "/complete/email/?verification_code={}".format(cc.code),
             follow=True
         )
-        self.assertRedirects(response, reverse('ctms:create_course'), target_status_code=200)
+        self.assertRedirects(response, '{}?next=/ctms/'.format(reverse('accounts:profile_update')), target_status_code=200)
 
     def test_delete_account_post_valid_data(self):
         data = {'confirm_delete_account': True, 'form_id': 'delete_account_form'}
@@ -252,6 +252,7 @@ class ProfileUpdateTests(TestCase):
         inst_name = 'Some Institute'
         response = self.client.post(self.url, {
             'institution': inst_name,
+            'what_do_you_teach': 'something',
             'user': self.user.id
         }, follow=True)
         self.assertRedirects(response, reverse('ctms:create_course'))
