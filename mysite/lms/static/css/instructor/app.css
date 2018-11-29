@@ -941,3 +941,14 @@ input[type=button]:hover, input[type=button]:active, input[type=button]:focus {
   opacity: 0.6;
   outline: 0;
 }
+
+p.error {
+    color: #a94442;
+    background: #f2dede;
+    border: 1px solid #ebccd1;
+    border-radius: 4px;
+    margin: 3px 0 0 0;
+    padding: 12px 18px;
+    list-style: none;
+    display: block;
+}
