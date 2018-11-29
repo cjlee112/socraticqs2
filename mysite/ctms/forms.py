@@ -94,10 +94,15 @@ class CreateEditUnitAnswerForm(forms.ModelForm):
 class ErrorModelForm(forms.ModelForm):
     """ErrorModelForm, validate data in ErrorModelFormset."""
     attachment = SvgAllowedImageField(required=False, widget=CustomFileInput, label='')
+    title = forms.CharField(required=True, widget=forms.TextInput(
+        attrs={'class': 'ignore'}
+    ))
+    text = forms.CharField(required=True, widget=forms.Textarea(
+        attrs={'class': 'ignore'}
+    ))
 
     def __init__(self, *args, **kwargs):
         super(ErrorModelForm, self).__init__(*args, **kwargs)
-        self.fields['text'].required = True
 
         instance = kwargs.get('instance')
         if instance:

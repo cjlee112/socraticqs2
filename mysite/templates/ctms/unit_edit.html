@@ -30,7 +30,8 @@ Courselet
   {% endif %}
 
   <main class="card__content">
-    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" method="POST" enctype="multipart/form-data">
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}"
+          method="POST" enctype="multipart/form-data" id="unitEditForm">
       <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
 
       {% csrf_token %}
@@ -158,7 +159,7 @@ Courselet
           {% if answer_form.answer.errors %}
             {{ answer_form.answer.errors }}
           {% endif %}
-        
+
           {{ answer_form.attachment }}
           {% if answer_form.attachment.errors %}
             {{ answer_form.attachment.errors }}
@@ -239,12 +240,27 @@ Courselet
 {% endblock %}
 
 {% block js %}
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.0/dist/jquery.validate.min.js"></script>
   <script>
+    $.validator.setDefaults({
+        errorElement: 'p',
+    });
+    const formValidator = $('#unitEditForm').validate({
+      ignore: '.ignore'
+    });
+    $('input[type=submit]').click((event)=>{
+        event.preventDefault();
+        if (formValidator.valid()) {
+          $(event.currentTarget).parent('form').submit();
+        }
+    });
+
     // Courselets namespace
     var Courselets = Courselets || {};
 
     // Toggles inputs visibility based on unit type
     Courselets.updateUnitType = function() {
+        formValidator.resetForm();
       // Get current unit type
       var unitType = $("input[name=unit_type]:checked").val();
 
