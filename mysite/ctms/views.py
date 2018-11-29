@@ -42,6 +42,7 @@ from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
 
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 memoize = Memoize()
 
@@ -463,6 +464,24 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
         })
         return context
 
+def pagination(pages, page):
+        page_list = []
+        page = int(page)
+        if page - 2 > 1:
+            page_list.append(("...", page - 3))
+        for i in range(1, pages + 1):
+            if page < 4:
+                if i < 7:
+                    page_list.append((i, i))
+            elif page > pages - 3:
+                if i > pages - 6:
+                    page_list.append((i, i))
+            elif i > page - 3 and i < page + 3:
+                    page_list.append((i, i))
+        if page < pages - 2 and pages > 6:
+            page_list.append(("...", page + 3))
+
+        return page_list
 
 class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     template_name = 'ctms/unit_detail.html'
@@ -470,7 +489,6 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
-
     def get_queryset(self):
         return self.model.objects.filter(addedBy=self.request.user)
 
@@ -480,10 +498,18 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         courslet = self.get_courslet()
         is_trial = self.request.GET.get('is_trial') in ['true', 'True', '1']
         responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
+
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(responses, 50) #Show 50 contacts per page
+        current_page = paginator.page(page)
+        page_count = len(current_page.paginator.page_range)
+        pages = pagination(page_count, page)
         # Onboarding step 7, haven't resolved yet, need to decide.
         # if responses and course.id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID):
         #     update_onboarding_step(onboarding.STEP_7, self.request.user.id)
         kwargs.update({
+            'pages': pages,
+            'current_page': current_page,
             'course': course,
             'courslet': courslet,
             'responses': responses,

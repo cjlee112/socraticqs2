@@ -33,50 +33,95 @@
       {# <li class="{% if is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courslet_pk=courslet.pk pk=unit.pk %}?is_trial=true">Trial</a></li> #}
     </ul>
     {% if responses %}
-      <table>
-        <thead>
-          <tr>
-            <th>Answer</th>
-            <th>Status</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-        </thead>
+    <table>
+      <thead>
+        <tr>
+          <th>Answer</th>
+          <th>Status</th>
+          <th>Role</th>
+          <th></th>
+        </tr>
+      </thead>
 
-        <tbody>
-          {% for answer in responses %}
-            <tr>
-              <td>
-                <div class="user-info">
-                  <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author|display_full_username }}" class="avatar">
-                  <h3>{{ answer.author|display_full_username }}</h3>
-                  <p>{{ answer.atime|date }}</p>
-                </div>
+      <tbody>
+        {% for answer in current_page %}
+        <tr>
+          <td>
+            <div class="user-info">
+              <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author|display_full_username }}" class="avatar">
+              <h3>{{ answer.author|display_full_username }}</h3>
+              <p>{{ answer.atime|date }}</p>
+            </div>
 
-                <div class="table-answer">
-                  {{ answer.text|truncatechars:150 }}
-                </div>
-              </td>
+            <div class="table-answer">
+              {{ answer.text|truncatechars:150 }}
+            </div>
+          </td>
 
-              <td>
-                {% if answer.status != None %}
-                  {{ answer.get_status_display }}
-                {% endif %}
+          <td>
+            {% if answer.status != None %}
+            {{ answer.get_status_display }}
+            {% endif %}
 
-              </td>
-              <td>
-                  {{ answer.is_tester|yesno:"tester,student" }}
-              </td>
+          </td>
+          <td>
+            {{ answer.is_tester|yesno:"tester,student" }}
+          </td>
 
-              <td>
-                <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          <td>
+            <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+    {% if current_page.has_other_pages %}
+    <center>
+      <ul class="pagination">
+        {% if current_page.has_previous %}
+        <li class="page-item">
+          <span><a class="page-link" href="?page={{ current_page.previous_page_number }}">Previous</a></span>
+        </li>
+        {%else%}
+        <li class="page-item disabled">
+          <span><a class="page-link">Previous</a></span>
+        </li>
+        {% endif %}
+
+        {% for i, j in pages %}
+
+          {% if current_page.number == j %}
+          <li class="page-item active">
+            <span class="page-link">
+              {{ i }}
+              <span class="sr-only">(current)</span>
+            </span>
+          </li>
+          {% else %}
+          <li class="page-item disable">
+            <li class="page-item"><a class="page-link" href="?page={{ j }}">{{ i }}</a></li>
+          </li>
+          {%endif%}
+
+        {%endfor%}
+
+        {% if current_page.has_next %}
+        <li class="page-item">
+          <span><a class="page-link" href="?page={{ current_page.next_page_number }}">Next</a></span>
+        </li>
+        {%else%}
+        <li class="page-item disabled"> 
+          <span><a class="page-link">Next</a></span>
+        </li>
+        {% endif %} 
+      </ul>
+    </center>
+    {% endif %}
+
     {% else %}
-      <p>No answers yet.</p>
+    <p>No answers yet.</p>
     {% endif %}
   </main>
 </div>
