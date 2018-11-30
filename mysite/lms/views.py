@@ -1,15 +1,14 @@
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
-from django.db import models
 
+from chat.models import EnrollUnitCode, Chat, Message
 from ct.models import Course
 from ctms.models import Invite
 from fsm.models import FSMState
-from chat.models import EnrollUnitCode, Chat, Message
-from chat.serializers import ChatProgressSerializer
 from mysite.mixins import NewLoginRequiredMixin
 
 
@@ -112,20 +111,23 @@ class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
     template_name = 'lms/tester_course_page.html'
 
     def get_courselets(self, request, course):
-        Invite.get_by_user_or_404(user=self.request.user, course=course, status='joined', type='tester')
-        return (
-            (
-                courselet,
-                EnrollUnitCode.get_code(courselet, isTest=True),
-                len(courselet.unit.get_exercises()),
-                Chat.objects.filter(
-                    enroll_code__courseUnit=courselet,
-                    user=request.user,
-                    state__isnull=False,
-                    is_live=False,
-                    is_test=True,
-                    is_preview=False
-                ).first()
+        # User can see courselets only by getting here from the Shared Courses page
+        invites = Invite.objects.filter(user=self.request.user, course=course, status='joined', type='tester')
+        if invites:
+            return (
+                (
+                    invite.enroll_unit_code.courseUnit,
+                    EnrollUnitCode.get_code(invite.enroll_unit_code.courseUnit, isTest=True),
+                    len(invite.enroll_unit_code.courseUnit.unit.get_exercises()),
+                    Chat.objects.filter(
+                        enroll_code__courseUnit=invite.enroll_unit_code.courseUnit,
+                        user=request.user,
+                        state__isnull=False,
+                        is_live=False,
+                        is_test=True,
+                        is_preview=False
+                    ).first()
+                )
+                for invite in invites
             )
-            for courselet in course.get_course_units(False)
-        )
+        raise Http404('Message')
