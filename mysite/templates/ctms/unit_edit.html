@@ -242,38 +242,37 @@ Courselet
 {% block js %}
   <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.0/dist/jquery.validate.min.js"></script>
   <script>
-    $.validator.setDefaults({
-        errorElement: 'p',
-    });
-    const formValidator = $('#unitEditForm').validate({
-      ignore: '.ignore'
-    });
-    $('input[type=submit]').click((event)=>{
-        event.preventDefault();
-        if (formValidator.valid()) {
-          $(event.currentTarget).parent('form').submit();
-        }
-    });
-
     // Courselets namespace
     var Courselets = Courselets || {};
 
     // Toggles inputs visibility based on unit type
     Courselets.updateUnitType = function() {
+      $.validator.setDefaults({
+          errorElement: 'p',
+      });
+      const formValidator = $('#unitEditForm').validate({
+        ignore: '.ignore'
+      });
+      $('input[type=submit]').click((event)=>{
+          event.preventDefault();
+          if (formValidator.valid()) {
+            $(event.currentTarget).parent('form').submit();
+          }
+      });
         formValidator.resetForm();
       // Get current unit type
       var unitType = $("input[name=unit_type]:checked").val();
 
       // Question
       if(unitType === "{{ unit.lesson.ORCT_QUESTION }}") {
-        $(".form-group--question, .form-group--answer, .form-group--error-models").show();
-        $(".form-group--introduction").hide();
-        $(".form-group--unit-aborts").show();
+        $(".form-group--question, .form-group--answer, .form-group--error-models").show().find('input, textarea').removeClass('ignore');
+        $(".form-group--introduction").hide().find('input, textarea').addClass('ignore');
+        $(".form-group--unit-aborts").show().find('input, textarea').removeClass('ignore');
       // Introduction
       } else if(unitType === "{{ unit.lesson.EXPLANATION }}") {
-        $(".form-group--introduction").show();
-        $(".form-group--question, .form-group--answer, .form-group--error-models").hide();
-        $(".form-group--unit-aborts").hide();
+        $(".form-group--introduction").show().find('input, textarea').removeClass('ignore');
+        $(".form-group--question, .form-group--answer, .form-group--error-models").hide().find('input, textarea').addClass('ignore');
+        $(".form-group--unit-aborts").hide().find('input, textarea').addClass('ignore');
       }
     };
 
