@@ -5,7 +5,7 @@
   <header>
     <h1>Sign Up</h1>
 
-    <p>Already have an account? <a href="{% url 'new_login' %}{% if form.next.value %}?next={{ form.next.value }}{% endif %}">Log in</a></p>
+    <p>For new users. Already have an account? <a href="{% url 'new_login' %}{% if form.next.value %}?next={{ form.next.value }}{% endif %}">Log in</a></p>
   </header>
 
   <section class="auth-card__social-options">
