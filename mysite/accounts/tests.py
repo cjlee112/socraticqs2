@@ -124,10 +124,10 @@ class AccountSettingsTests(TestCase):
             'errors': {
                 'password': u'Should be equal to confirm password field.',
                 'confirm_password': u'Should be equal to password field.',
+                '__all__': 'Password and Confirm password fields doesn\'t match.'
             }
         }
     )
-
     def test_post_invalid_current_password_change(self, data, errors):
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
