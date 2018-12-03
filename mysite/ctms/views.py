@@ -544,7 +544,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=True)
         # self.object.save()
-        messages.add_message(self.request, messages.SUCCESS, "Unit successfully updated")
+        messages.add_message(self.request, messages.SUCCESS, "Thread successfully updated")
         cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(self.get_success_url())
 
@@ -781,13 +781,13 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
                     messages.add_message(request, messages.WARNING, "Please correct error in answer")
 
                 if formset.is_valid():
-                    messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+                    messages.add_message(request, messages.SUCCESS, "Thread successfully updated")
                     self.formset_valid(formset)
                 else:
                     has_error = True
                     self.formset_invalid(formset)
             else:
-                messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+                messages.add_message(request, messages.SUCCESS, "Thread successfully updated")
         else:
             has_error = True
             messages.add_message(request, messages.WARNING, "Please correct errors below")
