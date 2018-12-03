@@ -21,3 +21,6 @@ coverage:
 quality:
 	diff-quality --violations=pycodestyle --fail-under=80 --compare-branch=HEAD~1
 	diff-quality --violations=pylint --fail-under=80 --compare-branch=HEAD~1
+
+run:
+	python manage.py runserver 0.0.0.0:8000 --settings=mysite.settings.docker

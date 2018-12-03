@@ -1,3 +1,16 @@
+FROM node AS build
+
+WORKDIR /app
+COPY . .
+
+
+WORKDIR /app/mysite/draw_svg
+
+RUN npm install && npm rebuild node-sass
+RUN	npm run build && npm run build:copy
+RUN	yarn build && yarn build:copy
+
+
 FROM python:2.7-slim
 LABEL maintainer="cmltaWt0@gmail.com"
 
@@ -14,14 +27,15 @@ RUN apt-get -y update && apt-get install -y \
     phantomjs \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install --ignore-installed -U -r /requirements.txt
+RUN pip install --ignore-installed -U -r /requirements/base.txt
 RUN pip install --ignore-installed -U -r /requirements/prod.txt
 
 ENV PYTHONUNBUFFERED 1
 
 RUN mkdir /app
 WORKDIR /app/mysite
+
+EXPOSE 9000

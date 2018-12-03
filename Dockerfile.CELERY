@@ -1,0 +1,39 @@
+FROM python:2.7-slim
+LABEL maintainer="cmltaWt0@gmail.com"
+
+RUN apt-get -y update && apt-get install -y \
+    pandoc \
+    python2.7 \
+    python-pip \
+    git \
+    libpq-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    python-dev \
+    zlib1g-dev \
+    phantomjs \
+    wget \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd user && useradd --create-home --home-dir /home/user -g user user
+WORKDIR /home/user
+
+COPY requirements.txt .
+COPY requirements ./requirements
+
+RUN pip install -r requirements.txt
+RUN pip install -r requirements/prod.txt
+
+
+RUN { \
+	echo 'import os'; \
+	echo "BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')"; \
+} > celeryconfig.py
+
+# --link some-rabbit:rabbit "just works"
+ENV CELERY_BROKER_URL amqp://guest@rabbit
+
+USER user
+WORKDIR /home/user/app/mysite
+CMD ["celery", "worker"]
