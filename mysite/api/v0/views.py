@@ -142,8 +142,6 @@ class OnboardingStatus(APIView):
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        user_id = request.data.get('user_id') or request.user.id
-        data = get_onboarding_status_with_settings(user_id)
+        data = get_onboarding_status_with_settings(request.user.id)
         if data:
             return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
-        return RestResponse({'status': 'Not found'}, status=status.HTTP_404_NOT_FOUND)

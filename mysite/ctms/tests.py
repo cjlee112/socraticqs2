@@ -24,12 +24,13 @@ class MyTestCase(TestCase):
 
     def setUp(self):
         self.username, self.password = 'test', 'test'
-        self.user = User.objects.create_user('test', 'test@test.com', 'test')
+        self.user = User.objects.create_user(self.username, 'test@test.com', self.password)
 
         self.instructor = Instructor.objects.create(user=self.user, institution='institute',
                                                     what_do_you_teach='something')
 
-        self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
+        self.username2, self.password2 = 'test1', 'test'
+        self.user2 = User.objects.create_user(self.username2, 'test1@test.com', self.password2)
         self.instructor2 = Instructor.objects.create(user=self.user2, institution='institute',
                                                      what_do_you_teach='something')
 
@@ -57,7 +58,7 @@ class MyTestCase(TestCase):
         )
         self.unitlesson.save()
 
-        resp1 = Response(
+        self.resp1 = Response(
             unitLesson=self.unitlesson,
             kind=Response.ORCT_RESPONSE,
             lesson=self.lesson,
@@ -67,9 +68,9 @@ class MyTestCase(TestCase):
             status=NEED_HELP_STATUS,
             selfeval=Response.DIFFERENT
         )
-        resp1.save()
+        self.resp1.save()
 
-        resp2 = Response(
+        self.resp2 = Response(
             unitLesson=self.unitlesson,
             kind=Response.ORCT_RESPONSE,
             lesson=self.lesson,
@@ -79,7 +80,7 @@ class MyTestCase(TestCase):
             status=NEED_HELP_STATUS,
             selfeval=Response.DIFFERENT
         )
-        resp2.save()
+        self.resp2.save()
         self.default_data = {}
 
         self.client.login(username=self.username, password=self.password)
