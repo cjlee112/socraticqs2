@@ -339,8 +339,29 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = super(SharedCoursesListView, self).get_queryset()
-        q = qs.shared_for_me(self.request)
-        return q
+        queryset = qs.shared_for_me(self.request)
+        course_title = ''
+        data = {}
+        for invite in queryset:
+            if invite.course.title != course_title and invite.course.title not in data:
+                data[invite.course.title] = dict(
+                    method='get',
+                    link=reverse('ctms:tester_join_course', kwargs={'code': invite.code}),
+                    title=invite.course.title,
+                    instructor=invite.instructor,
+                    course_pk=invite.course.id
+                )
+            else:
+                if invite.course.title in data:
+                    data[invite.course.title] = dict(
+                        method='post',
+                        link=reverse('ctms:shared_courses'),
+                        title=invite.course.title,
+                        instructor=invite.instructor,
+                        course_pk=invite.course.id
+                    )
+            course_title = invite.course.title
+        return data
 
     def get_context_data(self, **kwargs):
         kwargs = super(SharedCoursesListView, self).get_context_data(**kwargs)
@@ -348,6 +369,15 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
             role__role=Role.INSTRUCTOR, role__user=self.request.user
         )
         return kwargs
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('course_pk'):
+            Invite.objects.shared_for_me(request).filter(
+                status='pending',
+                course_id=request.POST.get('course_pk')
+            ).update(status='joined')
+            return HttpResponseRedirect(
+                reverse('lms:tester_course_view', kwargs={'course_id': request.POST.get('course_pk')}))
 
 
 class CourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -977,13 +1007,14 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return self.request.path
 
     def get_context_data(self, **kwargs):
-        courselet_pk = self.kwargs.get('courslet_pk')
+        courselet_pk = self.kwargs.get('courselet_pk')
         course = self.get_course()
-        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
         if courselet_pk:
             courselet = CourseUnit.objects.get(id=courselet_pk)
         else:
             courselet = CourseUnit.objects.filter(course=course).first()
+        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(
+            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True))
         kwargs['invite_tester_form'] = self.form_class(
             initial={
                 'type': 'tester',
