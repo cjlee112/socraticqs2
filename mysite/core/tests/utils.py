@@ -2,6 +2,7 @@
 Test core utility functions.
 """
 import mock
+from unittest import skip
 from ddt import ddt, data, unpack
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -88,6 +89,7 @@ class UtilityTest(TestCase):
     def test_get_onboarding_setting(self, setting_name, value, _mock):
         self.assertEqual(get_onboarding_setting(setting_name), value)
 
+    @skip
     @mock.patch('core.common.utils.get_onboarding_setting')
     @mock.patch('core.common.utils.c_onboarding_status')
     def test_get_onboarding_status_with_settings(self, status_mock, settings_mock):
