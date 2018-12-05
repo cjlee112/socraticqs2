@@ -1215,9 +1215,13 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
         course = Course.objects.filter(id=introduction_course_id).first()
-        course_unit = course.courseunit_set.all().first()
-        enroll_unit_code = course_unit.enrollunitcode_set.all().first()
-        enroll_url = '/chat/enrollcode/{}'.format(enroll_unit_code.get_code(course_unit))
+        enroll_unit_code = EnrollUnitCode.objects.filter(
+            courseUnit__course_id=introduction_course_id,
+            isLive=False, isPreview=False, isTest=False
+        ).first()
+        enroll_url = '/chat/enrollcode/{}'.format(
+            enroll_unit_code.enrollCode or EnrollUnitCode.get_code(enroll_unit_code.courseUnit)
+        ) if enroll_unit_code else '#'
         context.update(dict(
             introduction_course=course,
             users_course=users_course,
