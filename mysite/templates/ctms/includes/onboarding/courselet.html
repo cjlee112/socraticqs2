@@ -1,0 +1,17 @@
+<p>
+  TODO. Learn more about courselets in the short video below.
+</p>
+
+<a href="https://vimeo.com/299775228" class="video-link">
+  <div class="video-link__image"></div>
+  <h3>Create a courselet</h3>
+  <p>0:16</p>
+</a>
+
+{% if users_course.id %}
+  <a href="{% url 'ctms:courslet_create' course_pk=users_course.id %}" class="button button--primary">Create a Courselet</a>
+{% else %}
+  <div class="alert alert-warning">
+    You need to create a course before you can create a courselet.
+  </div>
+{% endif %}

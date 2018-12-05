@@ -1,0 +1,18 @@
+<p>
+  TODO
+</p>
+
+<a href="https://vimeo.com/299981035" class="video-link">
+  <div class="video-link__image"></div>
+  <h3>Create a thread</h3>
+  <p>0:58</p>
+</a>
+
+
+{% if users_courselet.id %}
+  <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Create a Thread</a>
+{% else %}
+  <div class="alert alert-warning">
+    You need to create a courselet before you can create a thread.
+  </div>
+{% endif %}

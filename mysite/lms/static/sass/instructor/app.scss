@@ -1,6 +1,3 @@
-// Uncomment this @import to display the baseline grid during development
-// @import 'dev/baseline';
-
 // # Guidelines
 // - Use existing components when possible
 // - Break down your code into small reusable components
@@ -9,6 +6,9 @@
 // # Recommended reading
 // - BEM: http://getbem.com/introduction/ https://csswizardry.com/2013/01/mindbemding-getting-your-head-round-bem-syntax/
 // - Single margin declarations: https://csswizardry.com/2012/06/single-direction-margin-declarations/ (we use top-margin instead)
+
+// Uncomment this @import to display the baseline grid during development
+@import 'dev/baseline';
 
 // Base
 @import 'base/variables';
@@ -36,3 +36,5 @@
 @import 'components/error-models-form';
 @import 'components/dropdown';
 @import 'components/input-with-button';
+@import 'components/get-started';
+@import 'components/video-link';
