@@ -12,6 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
 from .utils import enroll_generator
 from ct.models import (
     CourseUnit,
@@ -539,7 +541,7 @@ class EnrollUnitCode(models.Model):
             'isPreview': is_preview,
             'isTest': isTest
         }
-
+        update_onboarding_step(onboarding.STEP_6, user.id)
         enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll

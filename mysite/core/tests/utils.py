@@ -58,12 +58,12 @@ class UtilityTest(TestCase):
     @mock.patch('core.common.utils.c_onboarding_status')
     @unpack
     @data(
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 14.0),
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 1, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 43.0),
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 0}, 57.0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 86.0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 1, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 100.0)
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 13.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 1, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 0}, 38.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 50.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 0}, 75.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 1, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 1}, 100.0)
     )
     def test_percentage_of_done(self, steps, result, mock):
         _mock = mock.return_value
@@ -80,7 +80,8 @@ class UtilityTest(TestCase):
         (onboarding.CREATE_COURSELET, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.CREATE_THREAD, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.INVITE_SOMEBODY, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
-        (onboarding.REVIEW_ANSWERS, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.PREVIEW_COURSELET, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
+        (onboarding.NEXT_STEPS, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         # nonexistent key
         ('fake_key', None)
     )
@@ -93,46 +94,51 @@ class UtilityTest(TestCase):
 
         def mocked_setting(setting_name):
             data = {
-                "instructor_intro": {
+                onboarding.INTRODUCTION_INTRO: {
                     "html": "<p>instructor_intro</p>",
                     "description": "instructor_intro desc",
                     "title": "instructor_intro"
                 },
-                "create_course": {
+                onboarding.CREATE_COURSE: {
                     "html": "<p>create_course</p>",
                     "description": "create_course desc",
                     "title": "create_course"
                 },
-                "create_courselet": {
+                onboarding.CREATE_COURSELET: {
                     "html": "<p>create_courselet</p>",
                     "description": "create_courselet desc",
                     "title": "create_courselet"
                 },
-                "review_answers": {
-                    "html": "<p>review_answers</p>",
-                    "description": "review_answers desc",
-                    "title": "review_answers"
+                onboarding.NEXT_STEPS: {
+                    "html": "<p>next_steps</p>",
+                    "description": "next_steps desc",
+                    "title": "next_steps"
                 },
-                "invite_somebody": {
+                onboarding.INVITE_SOMEBODY: {
                     "html": "<p>invite_somebody</p>",
                     "description": "invite_somebody desc",
                     "title": "invite_somebody"
                 },
-                "create_thread": {
+                onboarding.CREATE_THREAD: {
                     "html": "<p>create_thread</p>",
                     "description": "create_thread desc",
                     "title": "create_thread"
                 },
-                "view_introduction": {
+                onboarding.VIEW_INTRODUCTION: {
                     "html": "<p>view_introduction</p>",
                     "description": "view_introduction desc",
                     "title": "view_introduction"
+                },
+                onboarding.PREVIEW_COURSELET: {
+                    "html": "<p>preview_courselet</p>",
+                    "description": "preview_courselet desc",
+                    "title": "preview_courselet"
                 }
             }
             return data[setting_name]
 
         expected_result = {
-            "instructor_intro": {
+            onboarding.INTRODUCTION_INTRO: {
                 "done": False,
                 "settings": {
                     "html": "<p>instructor_intro</p>",
@@ -140,7 +146,7 @@ class UtilityTest(TestCase):
                     "title": "instructor_intro"
                 }
             },
-            "create_course": {
+            onboarding.CREATE_COURSE: {
                 "done": True,
                 "settings": {
                     "html": "<p>create_course</p>",
@@ -148,7 +154,7 @@ class UtilityTest(TestCase):
                     "title": "create_course"
                 }
             },
-            "create_courselet": {
+            onboarding.CREATE_COURSELET: {
                 "done": False,
                 "settings": {
                     "html": "<p>create_courselet</p>",
@@ -156,15 +162,15 @@ class UtilityTest(TestCase):
                     "title": "create_courselet"
                 }
             },
-            "review_answers": {
+            onboarding.NEXT_STEPS: {
                 "done": False,
                 "settings": {
-                    "html": "<p>review_answers</p>",
-                    "description": "review_answers desc",
-                    "title": "review_answers"
+                    "html": "<p>next_steps</p>",
+                    "description": "next_steps desc",
+                    "title": "next_steps"
                 }
             },
-            "invite_somebody": {
+            onboarding.INVITE_SOMEBODY: {
                 "done": True,
                 "settings": {
                     "html": "<p>invite_somebody</p>",
@@ -172,7 +178,7 @@ class UtilityTest(TestCase):
                     "title": "invite_somebody"
                 }
             },
-            "create_thread": {
+            onboarding.CREATE_THREAD: {
                 "done": False,
                 "settings": {
                     "html": "<p>create_thread</p>",
@@ -180,12 +186,20 @@ class UtilityTest(TestCase):
                     "title": "create_thread"
                 }
             },
-            "view_introduction": {
+            onboarding.VIEW_INTRODUCTION: {
                 "done": False,
                 "settings": {
                     "html": "<p>view_introduction</p>",
                     "description": "view_introduction desc",
                     "title": "view_introduction"
+                }
+            },
+            onboarding.PREVIEW_COURSELET: {
+                "done": False,
+                "settings": {
+                    "html": "<p>preview_courselet</p>",
+                    "description": "preview_courselet desc",
+                    "title": "preview_courselet"
                 }
             }
         }
@@ -197,7 +211,8 @@ class UtilityTest(TestCase):
             onboarding.CREATE_COURSELET: False,
             onboarding.CREATE_THREAD: False,
             onboarding.INVITE_SOMEBODY: True,
-            onboarding.REVIEW_ANSWERS: False
+            onboarding.NEXT_STEPS: False,
+            onboarding.PREVIEW_COURSELET: False
         }
         settings_mock.side_effect = mocked_setting
         user_id = 1  # value doesn't matter

@@ -195,4 +195,4 @@ class Invite(models.Model):
 
 @receiver(post_save, sender=Invite)
 def onboarding_invite_created(sender, instance, **kwargs):
-    update_onboarding_step(onboarding.STEP_6, instance.instructor.user_id)
+    update_onboarding_step(onboarding.STEP_8, instance.instructor.user_id)

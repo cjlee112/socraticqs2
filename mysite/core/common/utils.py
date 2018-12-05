@@ -74,7 +74,8 @@ def get_onboarding_steps():
         onboarding.STEP_4,
         onboarding.STEP_5,
         onboarding.STEP_6,
-        onboarding.STEP_7
+        onboarding.STEP_7,
+        onboarding.STEP_8
     ]
 
 
@@ -113,7 +114,8 @@ ONBOARDING_SETTINGS_DEFAULT = {
     onboarding.CREATE_COURSELET: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
     onboarding.CREATE_THREAD: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
     onboarding.INVITE_SOMEBODY: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
-    onboarding.REVIEW_ANSWERS: ONBOARDING_STEPS_DEFAULT_TEMPLATE
+    onboarding.PREVIEW_COURSELET: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.NEXT_STEPS: ONBOARDING_STEPS_DEFAULT_TEMPLATE
 }
 
 
