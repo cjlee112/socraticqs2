@@ -1,3 +1,4 @@
+import waffle
 from django.contrib import messages
 from django.contrib.messages.api import add_message
 from django.db.models import Q
@@ -19,6 +20,7 @@ from social_django.views import _do_login
 from social_django.views import complete as social_complete
 from social_core.exceptions import AuthMissingParameter
 from accounts.models import Profile, Instructor
+from core.common.utils import get_onboarding_percentage
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
@@ -89,12 +91,16 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    redirect_url = request.POST.get('next', next_page)
                     if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
                         del request.session['u_hash']
-                        return redirect('ctms:shared_courses')
-                    return redirect(request.POST.get('next', next_page))
+                        redirect_url = 'ctms:shared_courses'
+                    if waffle.switch_is_active('ctms_onboarding_enabled') and get_onboarding_percentage(
+                            user.id) != 100:
+                        redirect_url = 'ctms:onboarding'
                 else:
-                    return redirect('inactive-user-error')
+                    redirect_url = 'inactive-user-error'
+                return redirect(redirect_url)
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial=form_initial)
