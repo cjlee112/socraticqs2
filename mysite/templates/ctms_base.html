@@ -113,6 +113,28 @@
         }
       });
 
+      // Get started accordion
+      $('.get-started__step-toggle').on('click', function(e) {
+        e.preventDefault();
+
+        // Save a reference to the button
+        const $button = $(e.currentTarget);
+
+        // Find the parent step
+        const $step = $button.closest('.get-started__step');
+
+        // Close if the step is open
+        if($step.hasClass('get-started__step--open')) {
+          $button.html('View');
+          $step.removeClass('get-started__step--open');
+
+        // Otherwise open it
+        } else {
+          $button.html('Hide');
+          $step.addClass('get-started__step--open');
+        }
+      })
+
       // Cookies
       function getCookie(name) {
         var cookieValue = null;
@@ -129,7 +151,6 @@
         }
         return cookieValue;
       }
-
 
       // Expandable content
       $('.expandable__toggle').on('click', function(e) {

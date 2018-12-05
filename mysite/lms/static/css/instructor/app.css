@@ -653,6 +653,18 @@ a.sidebar__add {
   padding: 8px 18px;
   font-size: 14px; }
 
+.button--no-focus-style:focus {
+  text-decoration: none;
+  border-color: #D0D5D9;
+  background: #fff;
+  color: #333;
+  outline: 0;
+  opacity: 1; }
+  .button--no-focus-style:focus:hover, .button--no-focus-style:focus:active {
+    border-color: #43B02A;
+    background: #43B02A;
+    color: #fff; }
+
 .button + .button {
   margin-left: 18px; }
 
