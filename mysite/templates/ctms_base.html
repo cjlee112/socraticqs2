@@ -135,6 +135,49 @@
         }
       })
 
+      // Complete get started step
+      $('[data-complete-step]').on('click', function(e) {
+        // Get the step name and element
+        const stepName = $(e.currentTarget).data('complete-step');
+        const $step = $('.get-started__step[data-step-id='+ stepName +']')
+        const data = {};
+        data[stepName] = true;
+
+        // Send an ajax request to save the update
+        this.updateCartXhr = $.ajax({
+          headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+          },
+          cache: false,
+          context: this,
+          data: data,
+          dataType: 'json',
+          method: 'PUT',
+          url: '/api/v0/onboarding-status/'
+        })
+        .done( function(response) { })
+        .fail( function(error) {
+          alert('Something went wrong. Please refresh the page and try again.');
+        });
+
+        // Update the status checkbox
+        $step.addClass('get-started__step--done');
+
+        // Open the next step after 1 second (let e.g. video overlays animate in first)
+        setTimeout(function() {
+          // Hide open steps
+          $('.get-started__step').removeClass('get-started__step--open');
+          $('.get-started__step-toggle').html('View');
+
+          // Find next incomplete step
+          const $nextStep = $('.get-started__step').not('.get-started__step--done').first();
+
+          // Open the next step if one exists
+          $nextStep.addClass('get-started__step--open');
+          $nextStep.find('.get-started__step-toggle').html('Hide');
+        }, 1000)
+      });
+
       // Cookies
       function getCookie(name) {
         var cookieValue = null;

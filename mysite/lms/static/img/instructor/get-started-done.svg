@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>get-started-done</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="4" transform="translate(-428.000000, -391.000000)">
+            <g id="Content" transform="translate(308.000000, -542.000000)">
+                <g id="Card" transform="translate(60.000000, 0.000000)">
+                    <g id="Group-Copy" transform="translate(0.000000, 914.000000)">
+                        <g id="get-started-done" transform="translate(60.000000, 19.000000)">
+                            <rect id="Rectangle" stroke-opacity="0.08" stroke="#000000" fill="#43B02A" x="0.5" y="0.5" width="23" height="23" rx="11.5"></rect>
+                            <g id="Group-6" transform="translate(12.000000, 11.000000) rotate(-45.000000) translate(-12.000000, -11.000000) translate(7.000000, 8.000000)" fill="#FFFFFF" stroke="#3DA226">
+                                <path d="M2.5,3.5 L9,3.5 C9.82842712,3.5 10.5,4.17157288 10.5,5 C10.5,5.82842712 9.82842712,6.5 9,6.5 L1,6.5 C0.597201064,6.5 0.218504529,6.33982487 -0.0606601718,6.06066017 C-0.339824873,5.78149547 -0.5,5.40279894 -0.5,5 L-0.5,1 C-0.5,0.171572875 0.171572875,-0.5 1,-0.5 C1.82842712,-0.5 2.5,0.171572875 2.5,1 L2.5,3.5 Z" id="Combined-Shape"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

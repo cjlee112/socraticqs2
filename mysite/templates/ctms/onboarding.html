@@ -18,7 +18,8 @@
     </header>
 
     <div class="get-started__steps">
-      <div class="get-started__step get-started__step--open" data-step-id="1">
+
+      <div class="get-started__step get-started__step--open" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>1. What is Courselets and how much does it boost learning outcomes?</h2>
@@ -31,10 +32,10 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="2">
+      <div class="get-started__step" data-step-id="instructor_intro">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>2. Test a courselet TODO</h2>
+          <h2>2. Test a courselet</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -44,7 +45,7 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="3">
+      <div class="get-started__step" data-step-id="create_course">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>3. Create your first course</h2>
@@ -57,7 +58,7 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="4">
+      <div class="get-started__step" data-step-id="create_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>4. Create a courselet</h2>
@@ -70,7 +71,7 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="5">
+      <div class="get-started__step" data-step-id="create_thread">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>5. Create a thread</h2>
@@ -83,7 +84,7 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="6">
+      <div class="get-started__step" data-step-id="preview_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>6. Preview your courselet</h2>
@@ -96,10 +97,10 @@
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="7">
+      <div class="get-started__step" data-step-id="next_steps" data-redirect-after-done="TODO Add redirect url here, only if some steps are incomplete">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>7. Next steps, sharing and help center</h2>
+          <h2>7. Next steps and help center</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -108,8 +109,20 @@
           {% include 'ctms/includes/onboarding/next.html' %}
         </div>
       </div>
+
+      <div class="get-started__step" data-step-id="next_steps" data-redirect-after-done="TODO Add redirect url here, only if some steps are incomplete">
+        <div class="get-started__step-header">
+          <div class="get-started__step-status"></div>
+          <h2>8. Share your courselet</h2>
+
+          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
+        </div>
+
+        <div class="get-started__step-content">
+          {% include 'ctms/includes/onboarding/share.html' %}
+        </div>
+      </div>
+
     </div>
   </div>
-
-<!-- <a href="{% if users_course.id %}{% url 'ctms:courselet_invite' pk=users_course.id courselet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a> -->
 {% endblock %}

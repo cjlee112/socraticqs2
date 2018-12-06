@@ -1,0 +1,17 @@
+<p>
+  TODO. Learn more about sharing in the short video below.
+</p>
+
+<a data-fancybox href="TODO" class="video-link">
+  <div class="video-link__image"></div>
+  <h3>Share a courselet</h3>
+  <p>?:??</p>
+</a>
+
+{% if users_course.id %}
+  <a href="{% url 'ctms:courselet_invite' pk=users_course.id courselet_pk=users_courselet.id %}" class="button button--primary">Invite a Tester</a>
+{% else %}
+  <div class="alert alert-warning">
+    You need to create a course before you can share it.
+  </div>
+{% endif %}

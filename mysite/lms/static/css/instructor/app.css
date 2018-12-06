@@ -1,25 +1,4 @@
 body {
-  position: relative; }
-
-body:after {
-  position: absolute;
-  width: auto;
-  height: auto;
-  z-index: 9999;
-  content: '';
-  display: block;
-  pointer-events: none;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: url(http://basehold.it/i/12/ff00ff) repeat top left;
-  background-size: 4px 12px; }
-
-body:active:after {
-  display: none; }
-
-body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -918,6 +897,9 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .get-started__step--open .get-started__step-content {
   display: block; }
 
+.get-started__step--done .get-started__step-status {
+  background: url(../../img/instructor/get-started-done.svg) no-repeat top left; }
+
 .get-started__step-header {
   position: relative;
   padding: 30px 24px 24px 72px; }
@@ -934,7 +916,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   left: 24px;
   width: 24px;
   height: 24px;
-  background: #ccc; }
+  background: #ccc;
+  background: url(../../img/instructor/get-started-not-done.svg) no-repeat top left; }
 
 .get-started__step-toggle {
   position: static;
@@ -1022,7 +1005,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   display: inline-block;
   width: 120px;
   height: 72px;
-  background: #ccc; }
+  background: url(../../img/instructor/video-thumb@2x.png) no-repeat top left;
+  background-size: 120px 72px; }
 
 @media (min-width: 1024px) {
   .video-link {

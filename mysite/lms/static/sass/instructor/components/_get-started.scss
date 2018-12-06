@@ -30,6 +30,12 @@
   }
 }
 
+.get-started__step--done {
+  .get-started__step-status {
+    background: url(../../img/instructor/get-started-done.svg) no-repeat top left;
+  }
+}
+
 .get-started__step-header {
   position: relative;
   padding: 30px 24px 24px 72px;
@@ -50,6 +56,7 @@
   width: 24px;
   height: 24px;
   background: #ccc;
+  background: url(../../img/instructor/get-started-not-done.svg) no-repeat top left;
 }
 
 .get-started__step-toggle {
