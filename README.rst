@@ -1,9 +1,6 @@
 Socraticqs2
 ===========
 
-.. image:: https://travis-ci.org/cjlee112/socraticqs2.svg?branch=master
-    :target: https://travis-ci.org/cjlee112/socraticqs2
-
 .. image:: https://coveralls.io/repos/github/cjlee112/socraticqs2/badge.svg?branch=master
     :target: https://coveralls.io/github/cjlee112/socraticqs2?branch=master
 
