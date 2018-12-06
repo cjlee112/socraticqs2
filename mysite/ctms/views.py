@@ -222,8 +222,6 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         my_courses = self.get_my_courses()
-        if waffle.switch_is_active('ctms_onboarding_enabled') and get_onboarding_percentage(request.user.id) != 100:
-            return redirect('ctms:onboarding')
         if not my_courses and not self.request.user.invite_set.all():
             # no my_courses and no shared courses
             return redirect('ctms:create_course')
