@@ -85,6 +85,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
     {# <script src="{% static "js/plugins/jquery.notify.js" %}"></script>#}
     <script src="{% static "js/instructor/jquery.fancybox.min.js" %}"></script>
+    <script src="{% static "js/instructor/progressbar.min.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
@@ -93,6 +94,7 @@
 
     <!-- TODO: Move this to an external js file -->
     <script>
+      // Add listeners once DOM is ready
       $(function(){
         // Mobile navigation
         $('.hamburger').on('click', function(e){
@@ -102,80 +104,93 @@
           $(this).toggleClass('hamburger--active');
           $(sidebarSelector).stop().fadeToggle();
         });
-      });
 
-      // Confirm on delete buttons
-      $('.button--delete').on('click', function(e) {
-        var text = $(this).data('confirm-text') || 'Are you sure?';
+        // Confirm on delete buttons
+        $('.button--delete').on('click', function(e) {
+          var text = $(this).data('confirm-text') || 'Are you sure?';
 
-        if(!window.confirm(text)) {
-          e.preventDefault();
-        }
-      });
-
-      // Get started accordion
-      $('.get-started__step-toggle').on('click', function(e) {
-        e.preventDefault();
-
-        // Save a reference to the button
-        const $button = $(e.currentTarget);
-
-        // Find the parent step
-        const $step = $button.closest('.get-started__step');
-
-        // Close if the step is open
-        if($step.hasClass('get-started__step--open')) {
-          $button.html('View');
-          $step.removeClass('get-started__step--open');
-
-        // Otherwise open it
-        } else {
-          $button.html('Hide');
-          $step.addClass('get-started__step--open');
-        }
-      })
-
-      // Complete get started step
-      $('[data-complete-step]').on('click', function(e) {
-        // Get the step name and element
-        const stepName = $(e.currentTarget).data('complete-step');
-        const $step = $('.get-started__step[data-step-id='+ stepName +']')
-        const data = {};
-        data[stepName] = true;
-
-        // Send an ajax request to save the update
-        this.updateCartXhr = $.ajax({
-          headers: {
-            "X-CSRFToken": getCookie('csrftoken')
-          },
-          cache: false,
-          context: this,
-          data: data,
-          dataType: 'json',
-          method: 'PUT',
-          url: '/api/v0/onboarding-status/'
-        })
-        .done( function(response) { })
-        .fail( function(error) {
-          alert('Something went wrong. Please refresh the page and try again.');
+          if(!window.confirm(text)) {
+            e.preventDefault();
+          }
         });
 
-        // Update the status checkbox
-        $step.addClass('get-started__step--done');
+        // Expandable content
+        $('.expandable__toggle').on('click', function(e) {
+          e.preventDefault();
 
-        // Open the next step after 1 second (let e.g. video overlays animate in first)
-        setTimeout(function() {
-          // Hide open steps
-          $('.get-started__step').removeClass('get-started__step--open');
-          $('.get-started__step-toggle').html('View');
+          var content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
+          content.toggle();
+        });
 
-          // Find next incomplete step
-          const $nextStep = $('.get-started__step').not('.get-started__step--done').first();
+        $('.link__post__data').on('click', function(e) {
+          var csrftoken = getCookie('csrftoken');
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          if(linkData['href']){
+            $.post(
+              linkData['href'],
+              {"csrfmiddlewaretoken": csrftoken},
+              function(data) {
+                if(scs_callback){
+                  $.globalEval(scs_callback);
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              }).fail(function() {
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              });
+          }
+          e.preventDefault();
+        });
 
-          // Open the next step if one exists
-          $nextStep.addClass('get-started__step--open');
-          $nextStep.find('.get-started__step-toggle').html('Hide');
-        }, 1000)
+        $('.invite__submit__form').on('click', function(e) {
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          var my_form = $(this).closest('form');
+          var action_url = my_form.attr('action');
+          if(action_url) {
+            $.post(
+              action_url,
+              my_form.serialize(),
+              function(data) {
+                if(data.success) {
+                  if(scs_callback){
+                    $.globalEval(scs_callback);
+                  }
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              },
+              'json').fail(function(){
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              })
+          }
+          e.preventDefault();
+        })
+
+        // Custom scrollbar in sidebar
+        $('.sidebar__scroll-container').perfectScrollbar();
+
+        // Copy the enroll code (invite students)
+        $('#copy_enroll_code').on('click', function(e){
+          e.preventDefault();
+          document.getElementById("enroll_code").select();
+          document.execCommand("copy");
+          $.notify("Copied the enroll code to clipboard.", "info");
+        });
+
+        $('#send_to_courselets').click(function(event) {
+          let button = $(event.currentTarget);
+          let email = button.data('courselets-email');
+          $('#id_email').val(email);
+          button.parent().next('form').find('input[type=submit]').click();
+        });
       });
 
       // Cookies
@@ -194,84 +209,6 @@
         }
         return cookieValue;
       }
-
-      // Expandable content
-      $('.expandable__toggle').on('click', function(e) {
-        e.preventDefault();
-
-        const content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
-        content.toggle();
-      });
-
-      $('.link__post__data').on('click', function(e) {
-        var csrftoken = getCookie('csrftoken');
-        var linkData = $(this).data();
-        var scs_callback = linkData.onSuccessCallback;
-        var fl_callback = linkData.onFailCallback;
-        if(linkData['href']){
-          $.post(
-            linkData['href'],
-            {"csrfmiddlewaretoken": csrftoken},
-            function(data) {
-              if(scs_callback){
-                $.globalEval(scs_callback);
-              }
-              alert(linkData['successMsg'] || "Succeeded!");
-            }).fail(function() {
-              if(fl_callback){
-                $.globalEval(fl_callback);
-              }
-              alert(linkData['failMsg'] || "Failed!");
-            });
-        }
-        e.preventDefault();
-      });
-
-      $('.invite__submit__form').on('click', function(e) {
-        var linkData = $(this).data();
-        var scs_callback = linkData.onSuccessCallback;
-        var fl_callback = linkData.onFailCallback;
-        var my_form = $(this).closest('form');
-        var action_url = my_form.attr('action');
-        if(action_url) {
-          $.post(
-            action_url,
-            my_form.serialize(),
-            function(data) {
-              if(data.success) {
-                if(scs_callback){
-                  $.globalEval(scs_callback);
-                }
-              }
-              alert(linkData['successMsg'] || "Succeeded!");
-            },
-            'json').fail(function(){
-              if(fl_callback){
-                $.globalEval(fl_callback);
-              }
-              alert(linkData['failMsg'] || "Failed!");
-            })
-        }
-        e.preventDefault();
-      })
-
-      // Custom scrollbar in sidebar
-      $('.sidebar__scroll-container').perfectScrollbar();
-
-      // Copy the enroll code (invite students)
-      $('#copy_enroll_code').on('click', function(e){
-        e.preventDefault();
-        document.getElementById("enroll_code").select();
-        document.execCommand("copy");
-        $.notify("Copied the enroll code to clipboard.", "info");
-      });
-
-      $('#send_to_courselets').click(function(event) {
-        let button = $(event.currentTarget);
-        let email = button.data('courselets-email');
-        $('#id_email').val(email);
-        button.parent().next('form').find('input[type=submit]').click();
-      });
     </script>
 
     {# this csrf_token needed for ajax requests #}

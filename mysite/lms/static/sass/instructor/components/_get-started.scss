@@ -16,6 +16,34 @@
   }
 }
 
+.get-started__progress-circle {
+  display: none;
+  position: absolute;
+  top: 95px;
+  right: 60px;
+  width: 120px;
+  height: 120px;
+
+  div {
+    display: block;
+    width: 120px;
+    height: 120px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 34px;
+    color: #333;
+    line-height: 120px;
+    vertical-align: baseline;
+    text-align: center;
+  }
+
+  span {
+    font-size: 24px;
+    color: #808080;
+  }
+}
+
 .get-started__step {
   border-top: 1px solid #DDE2E6;
 }
@@ -95,7 +123,12 @@
 // Larger viewports
 @media (min-width: 1024px) {
   .get-started__intro {
-    padding: 51px 60px 53px 60px;
+    padding: 51px 240px 53px 60px;
+    position: relative;
+  }
+
+  .get-started__progress-circle {
+    display: block;
   }
 
   .get-started__step-header {
@@ -121,5 +154,17 @@
     .get-started__step-header {
       padding-bottom: 12px;
     }
+  }
+}
+
+@media (min-width: 1080px) {
+  .get-started__progress-circle {
+    top: 83px;
+  }
+}
+
+@media (min-width: 1172px) {
+  .get-started__progress-circle {
+    top: 59px;
   }
 }
