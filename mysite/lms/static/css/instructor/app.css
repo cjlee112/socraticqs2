@@ -1,25 +1,4 @@
 body {
-  position: relative; }
-
-body:after {
-  position: absolute;
-  width: auto;
-  height: auto;
-  z-index: 9999;
-  content: '';
-  display: block;
-  pointer-events: none;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: url(http://basehold.it/i/12/ff00ff) repeat top left;
-  background-size: 4px 12px; }
-
-body:active:after {
-  display: none; }
-
-body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -910,6 +889,11 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     color: #333;
     margin: 15px 0 0 0;
     max-width: 480px; }
+  .get-started__intro .progress-line {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    margin: 25px 0 7px 0; }
 
 .get-started__progress-circle {
   display: none;
@@ -930,9 +914,10 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     line-height: 120px;
     vertical-align: baseline;
     text-align: center; }
-  .get-started__progress-circle span {
-    font-size: 24px;
-    color: #808080; }
+
+.get-started__progress-sign {
+  font-size: 24px;
+  color: #808080; }
 
 .get-started__step {
   border-top: 1px solid #DDE2E6; }
@@ -989,6 +974,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   .get-started__intro {
     padding: 51px 240px 53px 60px;
     position: relative; }
+    .get-started__intro .progress-line {
+      display: none; }
 
   .get-started__progress-circle {
     display: block; }
@@ -1085,7 +1072,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   border: 1px solid #666374; }
   .progress-line span {
     display: block;
-    min-width: 12px;
+    min-width: 6px;
     height: 4px;
     background: #43B02A;
     border: 1px solid #7BC76A;
@@ -1093,5 +1080,10 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     position: absolute;
     top: -1px;
     left: -1px; }
+
+.progress-line--over-white {
+  border-color: #DDE2E6; }
+  .progress-line--over-white span {
+    border-color: #43B02A; }
 
 /*# sourceMappingURL=app.css.map */

@@ -14,6 +14,13 @@
     margin: 15px 0 0 0;
     max-width: 480px;
   }
+
+  .progress-line {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    margin: 25px 0 7px 0;
+  }
 }
 
 .get-started__progress-circle {
@@ -37,11 +44,11 @@
     vertical-align: baseline;
     text-align: center;
   }
+}
 
-  span {
-    font-size: 24px;
-    color: #808080;
-  }
+.get-started__progress-sign {
+  font-size: 24px;
+  color: #808080;
 }
 
 .get-started__step {
@@ -125,6 +132,10 @@
   .get-started__intro {
     padding: 51px 240px 53px 60px;
     position: relative;
+
+    .progress-line {
+      display: none;
+    }
   }
 
   .get-started__progress-circle {

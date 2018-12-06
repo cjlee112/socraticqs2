@@ -17,8 +17,14 @@
       </p>
 
       <div data-progress="{{ onboarding_percentage_of_done | floatformat:"0" }}" class="get-started__progress-circle">
-        <div>{{ onboarding_percentage_of_done | floatformat:"0" }}<span>%</span></div>
+        <div>
+          <span class="get-started__progress-text">{{ onboarding_percentage_of_done | floatformat:"0" }}</span><span class="get-started__progress-sign">%</span>
+        </div>
       </div>
+
+      <span class="progress-line progress-line--over-white">
+        <span style="width: calc({{ onboarding_percentage_of_done | floatformat:"0" }}% + 2px);"></span>
+      </span>
     </header>
 
     <div class="get-started__steps">
@@ -197,8 +203,15 @@
         // Update the status checkbox
         $step.addClass('get-started__step--done');
 
-        // Open the next step after 1 second (let e.g. video overlays animate in first)
+        // Delay updates for 1 second (let e.g. video overlays animate in first)
         setTimeout(function() {
+          // Update the progress bars
+          var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
+          var newProgressPercentage = Math.floor(newProgress * 100);
+          progressCircle.set(newProgress)
+          $('.get-started__progress-text').html(newProgressPercentage)
+          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'})
+
           // Hide open steps
           $('.get-started__step').removeClass('get-started__step--open');
           $('.get-started__step-toggle').html('View');
