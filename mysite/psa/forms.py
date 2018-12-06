@@ -28,7 +28,7 @@ class SignUpForm(forms.Form):
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
-        help_text='Create a password that at least six chars length.'
+        help_text='Choose a password that\'s at least six characters long.'
         # validators=[password_validator]
     )
 

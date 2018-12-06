@@ -104,7 +104,7 @@ class Invite(models.Model):
         return self.email.split("@")[0] if self.email else ''
 
     class Meta:
-        unique_together = ('instructor', 'email', 'type', 'course')
+        unique_together = ('instructor', 'email', 'type', 'course', 'enroll_unit_code')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -195,4 +195,4 @@ class Invite(models.Model):
 
 @receiver(post_save, sender=Invite)
 def onboarding_invite_created(sender, instance, **kwargs):
-    update_onboarding_step(onboarding.STEP_6, instance.instructor.user_id)
+    update_onboarding_step(onboarding.STEP_8, instance.instructor.user_id)

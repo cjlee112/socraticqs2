@@ -3,15 +3,17 @@
 
 <aside class="sidebar" id="sidebar">
   <header>
-    <a href="{% url 'ctms:my_courses' %}" class="sidebar__logo">
-      <img src="{% static "img/instructor/courselets-logo.svg" %}" alt="Courselets logo">
-    </a>
-
     <a href="{% url 'ctms:my_courses' %}">Courses</a>
+
+    <a href="https://intercom.help/courselets" target="_blank" rel="noopener noreferrer">Help Center</a>
+
     {% switch "ctms_onboarding_enabled" %}
-        <a href="{% url 'ctms:onboarding' %}">Onboarding
-            <span>{{ onboarding_percentage_of_done | floatformat:"0" }} %</span>
-        </a>
+      <a href="{% url 'ctms:onboarding' %}" class="sidebar__link-with-progress">
+        Get Started
+        <span class="progress-line">
+          <span style="width: calc({{ onboarding_percentage_of_done | floatformat:"0" }}% + 2px);"></span>
+        </span>
+      </a>
     {% endswitch %}
   </header>
 
@@ -125,11 +127,12 @@
                 </li>
 
                 <li>
+                  <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
+                </li>
+
+                <li>
                   <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
                 </li>
-                  <li>
-                    <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
-                  </li>
               </ul>
             </nav>
           {% endif %}

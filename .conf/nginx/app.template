@@ -1,0 +1,14 @@
+server {
+    listen          ${NGINX_PORT};
+    server_name     ${NGINX_HOST};
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://app:9000/;
+    }
+
+    location /static/{
+        autoindex on;
+        root /mnt;
+    }
+}

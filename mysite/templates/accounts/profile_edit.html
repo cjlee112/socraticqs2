@@ -21,13 +21,13 @@
               </p>
             {{ form.institution }}
           {% elif field.name == 'what_do_you_teach'%}
-              <label for="{{ form.what_do_you_teach.auto_id }}">What do you teach?</label>
+            <label for="{{ form.what_do_you_teach.auto_id }}">What do you teach?</label>
             {{ field }}
           {% endif %}
         {% endif %}
         {% endfor %}
         {% csrf_token %}
-        <input type="submit" value="Sign Up" class=" ">
+        <input type="submit" value="Continue" class=" ">
       </form>
     </main>
   </div>

@@ -263,7 +263,7 @@ class MyCoursesTests(MyTestCase):
         # should return shared courses
         self.assertRedirects(response, reverse('ctms:shared_courses'))
         self.assertIn('shared_courses', response.context)
-        self.assertTrue(shared_course in response.context['shared_courses'])
+        self.assertTrue(shared_course.course.title in response.context['shared_courses'])
 
     def my_courses_show_create_course_form(self):
         self.course.delete()
@@ -370,15 +370,32 @@ class DeleteCourseViewTest(MyTestCase):
 class SharedCoursesListViewTests(MyTestCase):
     def setUp(self):
         super(SharedCoursesListViewTests, self).setUp()
-        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
-        self.student_shared_course = Invite.create_new(
-            invite_type='student',
-            commit=True,
-            instructor=self.instructor2,
-            email=self.user.email,
-            course=self.course,
-            enroll_unit_code=enroll_unit_code
+        self.unit2 = Unit(title='Test title2', addedBy=self.user)
+        self.unit2.save()
+
+        self.course2 = Course(title='Test title2',
+                              description='test description2',
+                              access='Public2',
+                              enrollCode='1112',
+                              lockout='1222',
+                              addedBy=self.user)
+        self.course2.save()
+
+        self.courseunit2 = CourseUnit(
+            unit=self.unit2, course=self.course,
+            order=0, addedBy=self.user, releaseTime=timezone.now()
         )
+        self.courseunit2.save()
+
+        self.courseunit3 = CourseUnit(
+            unit=self.unit, course=self.course2,
+            order=0, addedBy=self.user, releaseTime=timezone.now()
+        )
+        self.courseunit3.save()
+
+        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
+        enroll_unit_code2 = EnrollUnitCode.get_code(self.courseunit2, give_instance=True)
+        enroll_unit_code3 = EnrollUnitCode.get_code(self.courseunit3, give_instance=True)
         self.tester_shared_course = Invite.create_new(
             invite_type='tester',
             commit=True,
@@ -387,6 +404,22 @@ class SharedCoursesListViewTests(MyTestCase):
             course=self.course,
             enroll_unit_code=enroll_unit_code
         )
+        self.tester_shared_course2 = Invite.create_new(
+            invite_type='tester',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course,
+            enroll_unit_code=enroll_unit_code2
+        )
+        self.tester_shared_course3 = Invite.create_new(
+            invite_type='tester',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course2,
+            enroll_unit_code=enroll_unit_code3
+        )
         self.url = reverse('ctms:shared_courses')
 
     def get_invite_by_id(self, id):
@@ -394,8 +427,17 @@ class SharedCoursesListViewTests(MyTestCase):
 
     def test_shared_courses_list(self):
         response = self.client.get(self.url)
-        self.assertIn(self.student_shared_course, response.context['shared_courses'])
-        self.assertIn(self.tester_shared_course, response.context['shared_courses'])
+
+        self.assertEquals(
+            reverse('ctms:shared_courses'),
+            response.context['shared_courses'][self.course.title]['link']
+        )
+        self.assertEquals(
+            reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course3.code}),
+            response.context['shared_courses'][self.course2.title]['link']
+        )
+
+
 
     def test_join_course(self):
         url = reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course.code})

@@ -37,7 +37,7 @@
     bottom: -12px;
     width: 100%;
     text-align: center;
-    margin: 0;
+    margin: 0 0 0 -24px;
 
     span {
       display: inline-block;
@@ -65,7 +65,7 @@
 }
 
 .auth-card__content--centered {
-  text-align: center; 
+  text-align: center;
 }
 
 .auth-card__actions {

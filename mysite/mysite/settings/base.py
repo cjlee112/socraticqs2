@@ -305,8 +305,8 @@ X_FRAME_OPTIONS = "GOFORIT"
 # SSL proxy fix
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp://'
+BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'amqp://')
 CELERY_TIMEZONE = 'UTC'
 
 CELERYBEAT_SCHEDULE = {
@@ -482,7 +482,7 @@ BECOME_INSTRUCTOR_URL = '/become-instructor/'
 
 # Mongo
 DB_DATA = 'data'
-MONGO_HOST = 'mongo'
+MONGO_HOST = os.environ.get('MONGO_HOST', 'mongo')
 
 # Number of students answered to ORCT.
 # Used to notify the instructor(s) when N students answer the first/last/middle question in a courselet.
