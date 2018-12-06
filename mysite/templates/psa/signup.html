@@ -5,7 +5,7 @@
   <header>
     <h1>Sign Up</h1>
 
-    <p>For new instructors. Already have an account? <a href="{% url 'new_login' %}{% if form.next.value %}?next={{ form.next.value }}{% endif %}">Log in</a></p>
+    <p>For new users. Already have an account? <a href="{% url 'new_login' %}{% if form.next.value %}?next={{ form.next.value }}{% endif %}">Log in</a></p>
   </header>
 
   <section class="auth-card__social-options">
@@ -22,37 +22,48 @@
 
       {% for field in form %}
         {% if not field.is_hidden %}
+
           {% if field.name == 'first_name' %}
             <label for="{{ field.auto_id }}">Name</label>
             <div class="row">
               <div class="col-lg-6">
                 {{ field }}
               </div>
-            {% elif field.name == 'last_name' %}
+
+          {% elif field.name == 'last_name' %}
               <div class="col-lg-6">
                 {{ field }}
               </div>
             </div>
+
             {% if form.first_name.errors or form.last_name.errors %}
-            <div class="row">
-              <div class="col-lg-6">
-                {{ form.first_name.errors }}
+              <div class="row">
+                <div class="col-lg-6">
+                  {{ form.first_name.errors }}
+                </div>
+                <div class="col-lg-6">
+                  {{ form.last_name.errors }}
+                </div>
               </div>
-              <div class="col-lg-6">
-                {{ form.last_name.errors }}
-              </div>
-            </div>
             {% endif %}
+
+          {% elif field.name == 'email_confirmation' %}
+            <label for="{{ field.auto_id }}">Repeat your email</label>
+            {{ field }}
+
           {% else %}
-        {# ALL FIELDS EXCL. first_name, last_name #}
+            {# ALL FIELDS EXCL. first_name, last_name, email_confirmation #}
             <label for="{{ field.auto_id }}">{{ field.label }}</label>
+
             {% if field.help_text %}
-              <p><span>{{ field.help_text }}</span></p>
+            <p><span>{{ field.help_text }}</span></p>
             {% endif %}
+
             {{ field }}
             {{ field.errors }}
           {% endif %}
         {% else %}
+
         {# HIDDEN FIELDS #}
           {{ field }}
         {% endif %}

@@ -705,7 +705,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     bottom: -12px;
     width: 100%;
     text-align: center;
-    margin: 0; }
+    margin: 0 0 0 -24px; }
     .auth-card__social-options p span {
       display: inline-block;
       background: #fff;
