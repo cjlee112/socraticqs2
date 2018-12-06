@@ -24,7 +24,7 @@ endif
 run:
 	docker-compose -f $(DOCKERFILE_PATH) up
 
-build: .prepare-geolite .build .migrate .load-fixtures .fsm-deploy .collect-static
+build: .build .prepare-geo .migrate .load-fixtures .fsm-deploy .collect-static
 
 .build:
 	docker-compose -f $(DOCKERFILE_PATH) build $(APP)
@@ -54,15 +54,15 @@ build: .prepare-geolite .build .migrate .load-fixtures .fsm-deploy .collect-stat
 			--settings=mysite.settings.docker
 
 .collect-static:
-		docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
 			python manage.py collectstatic --noinput \
 			--settings=mysite.settings.docker
 
-.prepare-geolite:
-	cd mysite && \
-		wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && \
-		gunzip GeoLiteCity.dat.gz && \
-		mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
+.prepare-geo:
+	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
+			wget -c http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && \
+			gunzip GeoLiteCity.dat.gz && \
+			mv GeoLiteCity.dat GeoLiteCityLocal.dat
 
 stop:
 	docker-compose -f $(DOCKERFILE_PATH) stop

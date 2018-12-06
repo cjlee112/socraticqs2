@@ -1,7 +1,9 @@
 FROM python:2.7-slim
 LABEL maintainer="cmltaWt0@gmail.com"
 
-RUN apt-get -y update && apt-get install -y \
+RUN apt-get -y update && \
+    apt-get install -y \
+    wget \
     pandoc \
     python2.7 \
     python-pip \
