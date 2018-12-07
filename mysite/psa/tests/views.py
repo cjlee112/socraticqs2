@@ -92,8 +92,8 @@ class ViewsUnitTest(TestCase):
         credentials = {'username': 'test',
                        'password': 'test'}
         response = self.client.post('/login/', data=credentials, follow=True)
-        self.assertRedirects(response, expected_url='/ct/')
-        self.assertTemplateUsed(response, template_name='ct/index.html')
+        self.assertRedirects(response, expected_url='{}?next=/ctms/'.format(reverse('accounts:profile_update')))
+        self.assertTemplateUsed(response, template_name='accounts/profile_edit.html')
 
     def test_login_by_email(self):
         user = User(username='test', email='test@test.cc')
@@ -858,19 +858,7 @@ class SignupTest(TestCase):
             },
             follow=True
         )
-        registered_user = User.objects.get(email='test_email@aa.cc')
-        self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), reverse('ctms:shared_courses')))
-
-        redirect_url = response.redirect_chain[-1][0]
-
-        resp = self.client.post(redirect_url, {
-            'institution': 'testInstitute',
-            'what_do_you_teach': 'something',
-            'user': registered_user.id,
-            'next': redirect_url.split('next=')[-1]
-        }, follow=True)
-
-        self.assertRedirects(resp, reverse('ctms:shared_courses'))
+        self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), reverse('ctms:onboarding')))
 
         self.assertIn('_auth_user_id', self.client.session)
 
@@ -949,10 +937,10 @@ class LogoutTest(TestCase):
     def test_logout(self):
         """Test that old logout page redirect to ct page after logout."""
         response = self.client.get(reverse('logout'), follow=True)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('new_login'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')
 
     def test_new_logout(self):
         response = self.client.get(reverse('new_logout'), follow=True)
-        self.assertRedirects(response, reverse('new_login') + '?next=' + reverse('ctms:my_courses'))
+        self.assertRedirects(response, reverse('new_login'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')

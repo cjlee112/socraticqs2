@@ -7,7 +7,7 @@ from django.http.response import HttpResponseRedirect
 from django.http.response import Http404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_complete
@@ -69,19 +69,20 @@ def validation_sent(request):
     )
 
 
-def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/', login_form_cls=EmailLoginForm):
+def custom_login(request, template_name='psa/custom_login.html', next_page='/ctms/', login_form_cls=EmailLoginForm):
     """
     Custom login to integrate social auth and default login.
     """
+    # Anyway we need checking this before defining next_page
+
+    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    if request.user.is_authenticated() and not request.user.is_anonymous():
+        return redirect(next_page)
     u_hash_sess = request.session.get('u_hash')
     # logout(request)
     if u_hash_sess:
         request.session['u_hash'] = u_hash_sess
 
-    if not next_page.startswith('/'):
-        next_page = reverse(next_page)
-    if request.method == 'GET' and 'next' in request.GET:
-        next_page = request.GET['next']
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
     if request.POST:
@@ -91,16 +92,13 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    redirect_url = request.POST.get('next', next_page)
-                    if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
-                        del request.session['u_hash']
-                        redirect_url = 'ctms:shared_courses'
-                    if waffle.switch_is_active('ctms_onboarding_enabled') and get_onboarding_percentage(
-                            user.id) != 100:
-                        redirect_url = 'ctms:onboarding'
+                    if next_page == '/ctms/' and \
+                       waffle.switch_is_active('ctms_onboarding_enabled') and \
+                       get_onboarding_percentage(user.id) != 100:
+                        return redirect('ctms:onboarding')
+                    return redirect(next_page)
                 else:
-                    redirect_url = 'inactive-user-error'
-                return redirect(redirect_url)
+                    return redirect('inactive-user-error')
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial=form_initial)
@@ -153,19 +151,17 @@ def signup(request, next_page=None):
     """
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-    _next_page = request.POST.get('next') or request.GET.get('next')
-    # logout(request)
+    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    if request.user.is_authenticated() and not request.user.is_anonymous():
+        return redirect(next_page)
     request.session['u_hash'] = u_hash_sess
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
         # replacenexturl with shared_courses page url
-        next_page = _next_page or reverse('ctms:shared_courses')
         request.session['next'] = next_page
         post = request.POST.copy()
         post['next'] = next_page
         request.POST = post
-    else:
-        next_page = _next_page or next_page
     form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
@@ -267,7 +263,7 @@ def complete(request, *args, **kwargs):
 
     if form.is_valid() or 'verification_code' in request.GET:
         try:
-            logout(request)
+            # logout(request)
             code = CustomCode.objects.filter(code=request.GET.get('verification_code')).first()
             if code:
                 strategy = load_strategy(request)

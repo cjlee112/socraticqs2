@@ -1,14 +1,12 @@
 from django.conf.urls import include, url
 from django.conf import settings
-from django.apps import apps
 from django.contrib import admin
 from django.views.static import serve
 from social_core.utils import setting_name
 
 from mysite.views import markup_view, logout_page
 from pages.views import interested_form
-from accounts.views import AccountSettingsView
-from psa.forms import UsernameLoginForm, EmailLoginForm
+from psa.forms import UsernameLoginForm
 from psa.views import (
     complete, social_auth_complete, custom_login, signup,
     validation_sent, ask_stranger, set_pass, done, login_as_user, inactive_user_error
@@ -31,20 +29,18 @@ urlpatterns = [
     # Login / logout.
     url(r'^login/$', custom_login,
         {
-            'next_page': '/ct/',
+            'next_page': '/ctms/',
             'login_form_cls': UsernameLoginForm
         }, name='login'),
     url(r'^inactive-user/$', inactive_user_error, name="inactive-user-error"),
-    url(r'^signup/$', signup, name='signup'),
+    url(r'^signup/$', signup, {'next_page': '/ctms/onboarding/'}, name='signup'),
     url(r'^new_login/$', custom_login,
         {
             'template_name': 'psa/new_custom_login.html',
-            'next_page': 'accounts:profile_update',
-            'login_form_cls': EmailLoginForm
         },
         name='new_login'),
-    url(r'^logout/$', logout_page, {'next_page': '/login/'}, name='logout'),
-    url(r'^new_logout/$', logout_page, {'next_page': '/ctms/'}, name='new_logout'),
+    url(r'^logout/$', logout_page, {'next_page': '/new_login/'}, name='logout'),
+    url(r'^new_logout/$', logout_page, {'next_page': '/new_login/'}, name='new_logout'),
 
     url(r'^accounts/', include('accounts.urls', namespace='accounts')),
 
