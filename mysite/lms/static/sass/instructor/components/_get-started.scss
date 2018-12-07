@@ -103,28 +103,6 @@
 .get-started__step-content {
   display: none;
   padding: 7px 24px 36px 24px;
-
-  > p {
-    margin: 0;
-    max-width: 480px;
-  }
-
-  > p + p {
-    margin: 12px 0 0 0;
-  }
-
-  .button {
-    margin-top: 17px;
-  }
-
-  .video-link + .button {
-    margin-top: 24px;
-  }
-
-  .alert {
-    padding: 11px 24px;
-    margin: 24px 0 0 0;
-  }
 }
 
 // Larger viewports

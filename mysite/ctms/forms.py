@@ -38,8 +38,8 @@ class CreateUnitForm(forms.ModelForm):
 
 class EditUnitForm(forms.ModelForm):
     KIND_CHOICES = (
-        (Lesson.EXPLANATION, 'Introduction'),
         (Lesson.ORCT_QUESTION, 'Question'),
+        (Lesson.EXPLANATION, 'Introduction'),
     )
     DEFAULT_UNIT_TYPE =Lesson.EXPLANATION
 
@@ -68,7 +68,7 @@ class CreateEditUnitForm(EditUnitForm):
     class Meta:
         model = Lesson
         fields = ('title', 'text', 'unit_type', 'add_unit_aborts', 'mc_simplified', 'attachment')
- 
+
 
 class CreateEditUnitAnswerForm(forms.ModelForm):
     answer = forms.CharField(required=True, widget=forms.Textarea)

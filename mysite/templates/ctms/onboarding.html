@@ -11,9 +11,9 @@
       <h1>Get Started</h1>
 
       <p>
-        We’re so happy you’ve decided to try out Courselets, Chris.
+        We’re so happy you’ve decided to test Courselets, {{ user.first_name }}.
         This guide will help you get started, and you can return to it at any time by clicking on “Get Started” in your sidebar.
-        If you have any questions or feedback, please send us an email at <a href="mailto:info@courselets.org">info@courselets.org</a>.
+        If you have any questions or feedback, please open the chat in your lower right corner and send us a message.
       </p>
 
       <div data-progress="{{ onboarding_percentage_of_done | floatformat:"0" }}" class="get-started__progress-circle">
@@ -29,19 +29,36 @@
 
     <div class="get-started__steps">
 
+
+      <!-- view_introduction -->
       <div class="get-started__step get-started__step--open" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>1. What is Courselets and how much does it boost learning outcomes?</h2>
+          <h2>1.Watch our introduction to Courselets</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">Hide</a>
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/introduction.html' %}
+          <div class="onboarding-content">
+            <p>
+              The product of seven years of classroom studies and peer-reviewed research,
+              Courselets has been shown to produce big improvements in exam scores, student attrition,
+              and student engagement – with its most powerful boosts for the bottom half of the class.
+              Learn more about Courselets in the short video below.
+            </p>
+
+            <a data-fancybox data-ratio="1.333333333333" data-width="600" data-height="450" data-complete-step="view_introduction" href="https://vimeo.com/299782628" class="video-link">
+              <div class="video-link__image"></div>
+              <h3>What is Courselets?</h3>
+              <p>1:17</p>
+            </a>
+          </div>
         </div>
       </div>
 
+
+      <!-- test_courselet -->
       <div class="get-started__step" data-step-id="instructor_intro">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
@@ -51,10 +68,26 @@
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/test.html' %}
+          <div class="onboarding-content">
+            <p>
+              Is there an easy way for your class to get the best boost from Courselets?
+              Try this 3 minute courselet to assess this for yourself, and experience directly
+              how Courselets will actually work for your students.
+            </p>
+
+            <p>
+              The courselet will open in a new tab. Simply close the tab when you’re done to return to this page.
+            </p>
+
+            <a data-complete-step="instructor_intro" href="https://www.courselets.org/chat/enrollcode/bd85034b6f274458af7cea0c0cd2c278/" class="button button--primary" target="_blank">
+              Test a Courselet
+            </a>
+          </div>
         </div>
       </div>
 
+
+      <!-- create_course -->
       <div class="get-started__step" data-step-id="create_course">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
@@ -64,10 +97,16 @@
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/course.html' %}
+          <div class="onboarding-content">
+            {% include 'ctms/includes/onboarding/course.html' %}
+
+            <a href="{% url 'ctms:create_course' %}" class="button button--primary">Create a Course</a>
+          </div>
         </div>
       </div>
 
+
+      <!-- create_courselet -->
       <div class="get-started__step" data-step-id="create_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
@@ -77,10 +116,24 @@
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/courselet.html' %}
+          <div class="onbarding-content">
+            <div class="onboarding-content">
+              {% include 'ctms/includes/onboarding/courselet.html' %}
+
+              {% if users_course.id %}
+                <a href="{% url 'ctms:courslet_create' course_pk=users_course.id %}" class="button button--primary">Create a Courselet</a>
+              {% else %}
+                <div class="alert alert-warning">
+                  You need to create a course before you can create a courselet.
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
       </div>
 
+
+      <!-- create_thread -->
       <div class="get-started__step" data-step-id="create_thread">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
@@ -90,11 +143,25 @@
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/threads.html' %}
+          <div class="onboarding-content">
+            {% include 'ctms/includes/onboarding/threads.html' %}
+
+            {% comment %}
+              TODO Check if the user has a courselet
+                <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Create a Thread</a>
+              else
+                <div class="alert alert-warning">
+                  You need to create a courselet before you can create a thread.
+                </div>
+              endif
+            {% endcomment %}
+          </div>
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="preview_courselet">
+
+      <!-- preview_courselet -->
+      <div id="#preview" class="get-started__step" data-step-id="preview_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>6. Preview your courselet</h2>
@@ -103,35 +170,59 @@
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/preview.html' %}
+          <div class="onboarding-content">
+            <p>
+              You’ve created your first thread. Nice! Let’s see what your courselet will look
+              like for your students by clicking on the preview button below.
+            </p>
+
+            <p>
+              The preview will open in a new tab, and you can simply close it when you’re done. You can click on
+              “Preview” in your sidebar at any time to test your courselet again.
+            </p>
+
+            {% comment %}
+              TODO Check if the user has created a thread
+                <a data-complete-step="preview_courselet" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="button button--primary" target="_blank">
+                  Preview {{ users_courselet.title }}
+                </a>
+              else
+                <div class="alert alert-warning">
+                  You need to create a thread before you preview your courselet.
+                </div>
+              endif
+            {% endcomment %}
+          </div>
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="next_steps" data-redirect-after-done="TODO Add redirect url here, only if some steps are incomplete">
+
+      <!-- next_step -->
+      <div class="get-started__step" data-step-id="next_steps" data-redirect-to-after-done="TOOD Add url to the threads page with success message">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>7. Next steps and help center</h2>
+          <h2>7. Learn more about your next steps</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
 
         <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/next.html' %}
+          <div class="onboarding-content">
+            <p>
+              Well done! You’ve created and tested your first courselet. Watch the video below to
+              complete this tutorial, get some tips, and learn about sharing your courselets.
+              We'll also show you how to get help when you need it.
+            </p>
+
+            <a data-complete-step="next_steps" data-fancybox data-width="800" data-height="450" href="https://vimeo.com/300625888" class="video-link">
+              <div class="video-link__image"></div>
+              <h3>Next steps and Help Center</h3>
+              <p>1:18</p>
+            </a>
+          </div>
         </div>
       </div>
 
-      <div class="get-started__step" data-step-id="next_steps" data-redirect-after-done="TODO Add redirect url here, only if some steps are incomplete">
-        <div class="get-started__step-header">
-          <div class="get-started__step-status"></div>
-          <h2>8. Share your courselet</h2>
-
-          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
-        </div>
-
-        <div class="get-started__step-content">
-          {% include 'ctms/includes/onboarding/share.html' %}
-        </div>
-      </div>
 
     </div>
   </div>
@@ -139,10 +230,10 @@
 
 {% block js %}
   <script>
-    // Add listeners once DOM is ready
+    // Add listeners once the DOM is ready
     $(function(){
 
-      // Create progress circle
+      // Create the progress circle
       var progressCircle = new ProgressBar.Circle('.get-started__progress-circle', {
         strokeWidth: 2,
         trailColor: '#DDE2E6',
@@ -175,7 +266,7 @@
         }
       })
 
-      // Complete get started step
+      // Complete get started steps
       $('[data-complete-step]').on('click', function(e) {
         // Get the step name and element
         var stepName = $(e.currentTarget).data('complete-step');
@@ -223,6 +314,19 @@
           $nextStep.addClass('get-started__step--open');
           $nextStep.find('.get-started__step-toggle').html('Hide');
         }, 1000)
+      });
+
+      // Redirect when the user closes the final video
+      $("[data-fancybox]").fancybox({
+        afterClose: function( instance, slide ) {
+          var steps = $('.get-started__step').length
+          var done = $('.get-started__step--done').length;
+          var redirectTo = $('[data-redirect-to-after-done]').data('redirect-to-after-done');
+
+          if(steps == done) {
+            window.location.href = redirectTo;
+          }
+        }
       });
     });
   </script>

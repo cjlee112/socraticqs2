@@ -8,7 +8,7 @@
 // - Single margin declarations: https://csswizardry.com/2012/06/single-direction-margin-declarations/ (we use top-margin instead)
 
 // Uncomment this @import to display the baseline grid during development
-// @import 'dev/baseline';
+@import 'dev/baseline';
 
 // Base
 @import 'base/variables';
@@ -37,5 +37,7 @@
 @import 'components/dropdown';
 @import 'components/input-with-button';
 @import 'components/get-started';
+@import 'components/onboarding-content';
 @import 'components/video-link';
 @import 'components/progress-line';
+@import 'components/fancybox';

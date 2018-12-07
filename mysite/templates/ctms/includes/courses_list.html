@@ -47,11 +47,11 @@
         <div class="card__empty-state">
           <h3>My courses</h3>
 
-          <p>
-            You don't have any course yet. Let's create one!
-          </p>
+          <div class="onboarding-content">
+            {% include 'ctms/includes/onboarding/course.html' %}
 
-          <a href="{% url 'ctms:create_course' %}" class="button button--primary button--small">Create Course</a>
+            <a href="{% url 'ctms:create_course' %}" class="button button--primary">Create a Course</a>
+          </div>
         </div>
       {% endif %}
    </main>

@@ -1,18 +1,17 @@
 <p>
-  TODO
+  Your courselet is made up of multiple brief discussions with your students, called threads.
+  A thread usually contains a question that challenges the student with a real-world problem.
+  They will practice critical thinking, self-assess, and get a personalized path based on their
+  knowledge and their answers. We never grade students on Courselets – we just want to uncover conceptual
+  errors (we call them blindspots) and fix them.
 </p>
 
-<a data-fancybox href="https://vimeo.com/299981035" class="video-link">
+<p>
+  Learn more about threads in this short video, and then click on the button below to create a thread.
+</p>
+
+<a data-fancybox data-width="800" data-height="450" href="https://vimeo.com/299981035" class="video-link">
   <div class="video-link__image"></div>
-  <h3>Create a thread</h3>
+  <h3>Threads</h3>
   <p>0:58</p>
 </a>
-
-
-{% if users_courselet.id %}
-  <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Create a Thread</a>
-{% else %}
-  <div class="alert alert-warning">
-    You need to create a courselet before you can create a thread.
-  </div>
-{% endif %}

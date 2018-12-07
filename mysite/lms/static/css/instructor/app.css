@@ -1,4 +1,25 @@
 body {
+  position: relative; }
+
+body:after {
+  position: absolute;
+  width: auto;
+  height: auto;
+  z-index: 9999;
+  content: '';
+  display: block;
+  pointer-events: none;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: url(http://basehold.it/i/12/ff00ff) repeat top left;
+  background-size: 4px 12px; }
+
+body:active:after {
+  display: none; }
+
+body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
   font: normal 14px/24px "Avenir Next Rounded W01", sans-serif;
@@ -100,7 +121,7 @@ form {
 label {
   display: block;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 24px;
   color: #000;
   margin: 48px 0 0 0;
@@ -111,8 +132,9 @@ label {
     color: #7F7F7F; }
 
 label + p {
-  color: #7F7F7F;
-  margin: 6px 0 0 0; }
+  color: #333;
+  margin: 0px 0 0 0;
+  max-width: 600px; }
 
 input[type=text], input[type=password], input[type=email], textarea {
   display: block;
@@ -127,7 +149,7 @@ input[type=text], input[type=password], input[type=email], textarea {
   border: 1px solid #D0D5D9;
   border-radius: 4px;
   color: #333;
-  margin: 18px 0 0 0; }
+  margin: 12px 0 0 0; }
 
 textarea {
   height: 300px;
@@ -417,10 +439,11 @@ a.sidebar__add {
     text-overflow: ellipsis; }
 
 .card__topbar.card__topbar--with-description {
-  height: auto; }
+  height: auto;
+  padding: 39px 24px 35px 24px; }
   .card__topbar.card__topbar--with-description p {
     color: #333;
-    margin: 18px 0 0 0;
+    margin: 9px 0 0 0;
     max-width: 600px; }
 
 .card__nav {
@@ -490,10 +513,8 @@ a.sidebar__add {
 
 .card__empty-state h3 {
   margin: 4px 0 0 0; }
-.card__empty-state p {
-  margin: 15px 0 0 0; }
-.card__empty-state .button {
-  margin: 27px 0 0 0; }
+.card__empty-state .onboarding-content {
+  margin-top: 13px; }
 
 .card__notice {
   background: #d9edf7;
@@ -518,7 +539,7 @@ a.sidebar__add {
     padding: 36px 400px 36px 60px; }
 
   .card__topbar.card__topbar--with-description {
-    padding-right: 60px; }
+    padding: 39px 60px 35px 60px; }
 
   .card__nav {
     position: absolute;
@@ -791,6 +812,12 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .alert {
   padding: 12px 24px;
   margin: 12px 0 0 0; }
+  .alert b {
+    font-weight: 600; }
+  .alert p {
+    margin: 0;
+    padding: 12px 0;
+    max-width: 600px; }
 
 @media (min-width: 1024px) {
   .alert {
@@ -830,7 +857,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .radio-list li + li {
   margin-left: 24px; }
 .radio-list label {
-  cursor: pointer; }
+  cursor: pointer;
+  font-weight: 400; }
 .radio-list input[type=radio] {
   margin-right: 6px; }
 
@@ -957,18 +985,6 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .get-started__step-content {
   display: none;
   padding: 7px 24px 36px 24px; }
-  .get-started__step-content > p {
-    margin: 0;
-    max-width: 480px; }
-  .get-started__step-content > p + p {
-    margin: 12px 0 0 0; }
-  .get-started__step-content .button {
-    margin-top: 17px; }
-  .get-started__step-content .video-link + .button {
-    margin-top: 24px; }
-  .get-started__step-content .alert {
-    padding: 11px 24px;
-    margin: 24px 0 0 0; }
 
 @media (min-width: 1024px) {
   .get-started__intro {
@@ -1003,6 +1019,20 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 @media (min-width: 1172px) {
   .get-started__progress-circle {
     top: 59px; } }
+.onboarding-content > p {
+  margin: 0;
+  max-width: 480px; }
+.onboarding-content > p + p {
+  margin: 12px 0 0 0; }
+.onboarding-content .button {
+  margin-top: 17px; }
+.onboarding-content .video-link + .button {
+  margin-top: 24px; }
+.onboarding-content .alert {
+  padding: 11px 24px;
+  margin: 24px 0 0 0;
+  max-width: 480px; }
+
 .video-link {
   position: relative;
   top: 0;
@@ -1026,11 +1056,11 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     left: 0;
     background: transparent;
     transition: all 0.2s; }
-  .video-link:hover, .video-link:active, .video-link:focus {
+  .video-link:hover, .video-link:active {
     top: -4px;
     color: #333;
     box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.15), 0 50px 50px -35px rgba(0, 0, 0, 0.25); }
-    .video-link:hover:after, .video-link:active:after, .video-link:focus:after {
+    .video-link:hover:after, .video-link:active:after {
       bottom: -4px;
       height: 4px; }
   .video-link h3 {
@@ -1079,11 +1109,26 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     border-radius: 2px;
     position: absolute;
     top: -1px;
-    left: -1px; }
+    left: -1px;
+    transition: width 0.3s; }
 
 .progress-line--over-white {
   border-color: #DDE2E6; }
   .progress-line--over-white span {
     border-color: #43B02A; }
+
+.fancybox-bg {
+  background: #000 !important; }
+
+.fancybox-is-open .fancybox-bg {
+  opacity: .75 !important; }
+
+.fancybox-content {
+  box-shadow: 0 0 50px 20px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 5px !important;
+  overflow: hidden !important; }
+
+.fancybox-button {
+  background: transparent !important; }
 
 /*# sourceMappingURL=app.css.map */
