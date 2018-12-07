@@ -16,6 +16,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.conf import settings
 from django.core.cache import cache
 from social_core.backends.utils import load_backends
@@ -1068,6 +1069,8 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
 
     def get(self, *args, **kwargs):
         invite = get_object_or_404(Invite, code=self.kwargs['code'])
+        if self.request.user.is_authenticated() and invite.email != self.request.user.email:
+            logout(self.request)
         if self.request.user.is_authenticated():
             if invite.user and invite.user == self.request.user or invite.email == self.request.user.email:
                 # if user is a person for whom this invite
@@ -1080,15 +1083,16 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                         return redirect(reverse('chat:tester_chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
                     else:
                         return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
-                elif invite.type == 'student':
-                    messages.add_message(self.request, messages.SUCCESS,
-                                         "You just joined course as student")
-                    invite.status = 'joined'
-                    invite.save()
-                    if invite.enroll_unit_code:
-                        return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
-                    else:
-                        return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+                # TODO: It seems to be no longer needed owing to absent invites for students
+                # elif invite.type == 'student':
+                #     messages.add_message(self.request, messages.SUCCESS,
+                #                          "You just joined course as student")
+                #     invite.status = 'joined'
+                #     invite.save()
+                #     if invite.enroll_unit_code:
+                #         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                #     else:
+                #         return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
             # if user is not owned this invite
             return HttpResponseRedirect("{}?next={}".format(reverse('new_login'), self.request.path))
         else:
@@ -1236,3 +1240,9 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             'steps': steps,
         })
         return context
+
+    def get(self, request, *args, **kwargs):
+        response = super(Onboarding, self).get(kwargs)
+        if not waffle.switch_is_active('ctms_onboarding_enabled'):
+            return redirect('ctms:my_courses')
+        return response

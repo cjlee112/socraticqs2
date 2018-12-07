@@ -129,7 +129,7 @@ class Invite(models.Model):
                 rendered_text,
                 settings.EMAIL_FROM,
                 [self.email],
-                fail_silently=True
+                fail_silently=False
             )
             return {
                 'success': True,

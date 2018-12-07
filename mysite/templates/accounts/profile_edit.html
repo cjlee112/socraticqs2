@@ -7,7 +7,6 @@
       <h1>Almost Done</h1>
       <p>Please fill in the form below to create your account.</p>
     </header>
-
     <main class="auth-card__content" style="text-align: left; margin: 0 auto;">
       <form class="form" action="{% url 'accounts:profile_update' %}" method="post">
         {% for field in form %}
@@ -27,6 +26,7 @@
         {% endif %}
         {% endfor %}
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
         <input type="submit" value="Continue" class=" ">
       </form>
     </main>

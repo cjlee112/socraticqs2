@@ -208,6 +208,7 @@ class AnonymousUserAccountSettingsTests(TestCase):
         '''
         Checks that user with username anonymous will be redirected to login page
         '''
+        self.client.logout()
         response = self.client.get(self.url)
         self.assertRedirects(response, reverse('new_login') + '?next=' + self.url)
 
