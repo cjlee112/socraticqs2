@@ -14,8 +14,6 @@ RUN apt-get -y update && \
     python-dev \
     zlib1g-dev \
     phantomjs \
-    wget \
-    make \
     && rm -rf /var/lib/apt/lists/*
 
 # install latest nodejs

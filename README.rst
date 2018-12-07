@@ -20,6 +20,11 @@ To run project locally
 
     make run
 
+To develop/debug project locally
+::
+
+    make debug
+
 To build project locally
 ::
 

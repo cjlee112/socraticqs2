@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
   web:
     container_name: cr_web
@@ -21,7 +21,7 @@ services:
     env_file: ./envs/prod.env
     build:
       context: .
-      dockerfile: Dockerfile.PROD
+      dockerfile: Dockerfile.prod
     volumes:
       - .:/app
     command: gunicorn --config ../.conf/gunicorn/gunicorn.conf -b :9000 mysite.wsgi
@@ -35,7 +35,7 @@ services:
   postgres:
     container_name: cr_postgres
     image: postgres:9.6
-    env_file: ./envs/local.env
+    env_file: ./envs/prod.env
     restart: on-failure
     volumes:
       - cr_db:/var/lib/postgresql/data/
@@ -59,9 +59,9 @@ services:
     container_name: cr_celery
     build:
       context: .
-      dockerfile: Dockerfile.CELERY
+      dockerfile: Dockerfile.celery
     command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
-    env_file: ./envs/local.env
+    env_file: ./envs/prod.env
     volumes:
       - ./:/home/user/app
     links:
@@ -78,6 +78,13 @@ services:
     container_name: cr_redis
     image: redis:latest
     restart: on-failure
+  
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    volumes:
+      - ./:/app
 
 volumes:
   cr_db:

@@ -16,11 +16,10 @@ RUN apt-get -y update && \
     phantomjs \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install --ignore-installed -U -r /requirements.txt
+RUN pip install --ignore-installed -U -r /requirements/dev.txt
 RUN pip install --ignore-installed -U -r /requirements/prod.txt
 
 ENV PYTHONUNBUFFERED 1

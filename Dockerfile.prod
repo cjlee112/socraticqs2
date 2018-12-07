@@ -1,16 +1,3 @@
-FROM node AS build
-
-WORKDIR /app
-COPY . .
-
-
-WORKDIR /app/mysite/draw_svg
-
-RUN npm install && npm rebuild node-sass
-RUN	npm run build && npm run build:copy
-RUN	yarn build && yarn build:copy
-
-
 FROM python:2.7-slim
 LABEL maintainer="cmltaWt0@gmail.com"
 

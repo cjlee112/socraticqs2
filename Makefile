@@ -24,10 +24,19 @@ endif
 run:
 	docker-compose -f $(DOCKERFILE_PATH) up
 
-build: .build .prepare-geo .migrate .load-fixtures .fsm-deploy .collect-static
+start:
+	docker-compose -f $(DOCKERFILE_PATH) start
+
+debug:
+	docker-compose -f dev.yml run --service-ports dev_app
+
+build: .build .prepare-geo .migrate .load-fixtures .fsm-deploy .react
+ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
+	make .static
+endif
 
 .build:
-	docker-compose -f $(DOCKERFILE_PATH) build $(APP)
+	docker-compose -f $(DOCKERFILE_PATH) build
 
 .migrate:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
@@ -53,16 +62,23 @@ build: .build .prepare-geo .migrate .load-fixtures .fsm-deploy .collect-static
 			python manage.py loaddata dumpdata/debug-wo-fsm.json \
 			--settings=mysite.settings.docker
 
-.collect-static:
-	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
+.static: .node
+	docker-compose -f $(DOCKERFILE_PATH) run --no-deps $(APP) \
 			python manage.py collectstatic --noinput \
 			--settings=mysite.settings.docker
 
+.react:
+	docker-compose -f $(DOCKERFILE_PATH) run react
+
 .prepare-geo:
-	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			wget -c http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && \
+	docker-compose -f $(DOCKERFILE_PATH) run --no-deps $(APP) \
+			bash -c \
+			" \
+			find . | grep -E "GeoLiteCity.dat.gz" | xargs rm -rf && \
+			wget -q http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && \
 			gunzip GeoLiteCity.dat.gz && \
-			mv GeoLiteCity.dat GeoLiteCityLocal.dat
+			mv GeoLiteCity.dat GeoLiteCityLocal.dat \
+			"
 
 stop:
 	docker-compose -f $(DOCKERFILE_PATH) stop
@@ -71,9 +87,12 @@ rm:
 	docker-compose -f $(DOCKERFILE_PATH) rm
 
 test:
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$\)" | xargs rm -rf && \
-			docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			make coverage
+	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
+			bash -c \
+			" \
+			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \
+			make coverage \
+			"
 
 version:
 	echo "Tagged release $(VERSION)\n" > Changelog-$(VERSION).txt
