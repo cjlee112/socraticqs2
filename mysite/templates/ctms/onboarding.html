@@ -137,7 +137,7 @@
       <div class="get-started__step" data-step-id="create_thread">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>5. Create a thread</h2>
+          <h2>5. Add a thread</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -148,10 +148,10 @@
 
             {% comment %}
               TODO Check if the user has a courselet
-                <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Create a Thread</a>
+                <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Add a Thread</a>
               else
                 <div class="alert alert-warning">
-                  You need to create a courselet before you can create a thread.
+                  You need to create a courselet before you can add a thread.
                 </div>
               endif
             {% endcomment %}
@@ -188,7 +188,7 @@
                 </a>
               else
                 <div class="alert alert-warning">
-                  You need to create a thread before you preview your courselet.
+                  You need to add a thread before you preview your courselet.
                 </div>
               endif
             {% endcomment %}
