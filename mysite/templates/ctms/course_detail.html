@@ -55,13 +55,13 @@
         </table>
       {% else %}
         <div class="card__empty-state">
-          <h3>Courselets</h3>
+          <h3>Create a Courselet</h3>
 
-          <p>
-            A courselet is an automated chat that helps students understand one or a few important concepts. It’s made up of several brief threads where you ask the student to answer a question and self-assess. You can use them in class or create courselets for homework assignments. Let’s create your first courselet!
-          </p>
+          <div class="onboarding-content">
+            {% include 'ctms/includes/onboarding/courselet.html' %}
 
-          <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary button--small">Create Courselet</a>
+            <a href="{% url 'ctms:courslet_create' course_pk=object.id %}" class="button button--primary">Create a Courselet</a>
+          </div>
         </div>
       {% endif %}
     </main>

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/css/perfect-scrollbar.css">
     <link rel="stylesheet" href="{% static "css/instructor/app.css" %}">
+    <link rel="stylesheet" href="{% static "css/instructor/jquery.fancybox.css" %}">
     {# render_block "css" #}
 
     {% include "google-analytics.html" %}
@@ -83,6 +84,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
     {# <script src="{% static "js/plugins/jquery.notify.js" %}"></script>#}
+    <script src="{% static "js/instructor/jquery.fancybox.min.js" %}"></script>
+    <script src="{% static "js/instructor/progressbar.min.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
 
@@ -91,6 +94,7 @@
 
     <!-- TODO: Move this to an external js file -->
     <script>
+      // Add listeners once DOM is ready
       $(function(){
         // Mobile navigation
         $('.hamburger').on('click', function(e){
@@ -100,15 +104,93 @@
           $(this).toggleClass('hamburger--active');
           $(sidebarSelector).stop().fadeToggle();
         });
-      });
 
-      // Confirm on delete buttons
-      $('.button--delete').on('click', function(e) {
-        var text = $(this).data('confirm-text') || 'Are you sure?';
+        // Confirm on delete buttons
+        $('.button--delete').on('click', function(e) {
+          var text = $(this).data('confirm-text') || 'Are you sure?';
 
-        if(!window.confirm(text)) {
+          if(!window.confirm(text)) {
+            e.preventDefault();
+          }
+        });
+
+        // Expandable content
+        $('.expandable__toggle').on('click', function(e) {
           e.preventDefault();
-        }
+
+          var content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
+          content.toggle();
+        });
+
+        $('.link__post__data').on('click', function(e) {
+          var csrftoken = getCookie('csrftoken');
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          if(linkData['href']){
+            $.post(
+              linkData['href'],
+              {"csrfmiddlewaretoken": csrftoken},
+              function(data) {
+                if(scs_callback){
+                  $.globalEval(scs_callback);
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              }).fail(function() {
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              });
+          }
+          e.preventDefault();
+        });
+
+        $('.invite__submit__form').on('click', function(e) {
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          var my_form = $(this).closest('form');
+          var action_url = my_form.attr('action');
+          if(action_url) {
+            $.post(
+              action_url,
+              my_form.serialize(),
+              function(data) {
+                if(data.success) {
+                  if(scs_callback){
+                    $.globalEval(scs_callback);
+                  }
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              },
+              'json').fail(function(){
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              })
+          }
+          e.preventDefault();
+        })
+
+        // Custom scrollbar in sidebar
+        $('.sidebar__scroll-container').perfectScrollbar();
+
+        // Copy the enroll code (invite students)
+        $('#copy_enroll_code').on('click', function(e){
+          e.preventDefault();
+          document.getElementById("enroll_code").select();
+          document.execCommand("copy");
+          $.notify("Copied the enroll code to clipboard.", "info");
+        });
+
+        $('#send_to_courselets').click(function(event) {
+          let button = $(event.currentTarget);
+          let email = button.data('courselets-email');
+          $('#id_email').val(email);
+          button.parent().next('form').find('input[type=submit]').click();
+        });
       });
 
       // Cookies
@@ -127,87 +209,6 @@
         }
         return cookieValue;
       }
-
-
-      // Expandable content
-      $('.expandable__toggle').on('click', function(e) {
-        e.preventDefault();
-
-        const content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
-        content.toggle();
-      });
-
-      $('.link__post__data').on('click', function(e) {
-        var csrftoken = getCookie('csrftoken');
-        var linkData = $(this).data();
-        var scs_callback = linkData.onSuccessCallback;
-        var fl_callback = linkData.onFailCallback;
-        if(linkData['href']){
-          $.post(
-            linkData['href'],
-            {"csrfmiddlewaretoken": csrftoken},
-            function(data) {
-              if(scs_callback){
-                $.globalEval(scs_callback);
-              }
-              alert(linkData['successMsg'] || "Succeeded!");
-            }).fail(function() {
-              if(fl_callback){
-                $.globalEval(fl_callback);
-              }
-              alert(linkData['failMsg'] || "Failed!");
-            });
-        }
-        e.preventDefault();
-      });
-
-      $('.invite__submit__form').on('click', function(e) {
-        var linkData = $(this).data();
-        var scs_callback = linkData.onSuccessCallback;
-        var fl_callback = linkData.onFailCallback;
-        var my_form = $(this).closest('form');
-        var action_url = my_form.attr('action');
-        if(action_url) {
-          $.post(
-            action_url,
-            my_form.serialize(),
-            function(data) {
-              if(data.success) {
-                if(scs_callback){
-                  $.globalEval(scs_callback);
-                }
-              }
-              alert(linkData['successMsg'] || "Succeeded!");
-            },
-            'json').fail(function(){
-              if(fl_callback){
-                $.globalEval(fl_callback);
-              }
-              alert(linkData['failMsg'] || "Failed!");
-            })
-        }
-        e.preventDefault();
-      })
-
-      // Custom scrollbar in sidebar
-      $('.sidebar__scroll-container').perfectScrollbar();
-
-      // Copy the enroll code (invite students)
-      $('#copy_enroll_code').on('click', function(e){
-        e.preventDefault();
-        document.getElementById("enroll_code").select();
-        document.execCommand("copy");
-        $.notify("Copied the enroll code to clipboard.", "info");
-      });
-
-      $('#send_to_courselets').click(function(event) {
-        let button = $(event.currentTarget);
-        let email = button.data('courselets-email');
-        $('#id_email').val(email);
-        button.parent().next('form').find('input[type=submit]').click();
-      });
-
-
     </script>
 
     {# this csrf_token needed for ajax requests #}
