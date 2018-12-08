@@ -73,8 +73,8 @@ Deploy Dev:
     - python manage.py fsm_deploy
     - cd draw_svg/
     - npm install --save-dev
-    - npm run build && npm run build:copy
-    - yarn build && yarn build:copy
+    - npm run build && npm run build:copy-local
+    - yarn build && yarn build:copy-local
     - cd ..
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart devgunicorn
@@ -100,8 +100,8 @@ Deploy Stage:
     - python manage.py fsm_deploy
     - cd draw_svg/
     - npm install --save-dev
-    - npm run build && npm run build:copy
-    - yarn build && yarn build:copy
+    - npm run build && npm run build:copy-local
+    - yarn build && yarn build:copy-local
     - cd ..
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart gunicorn
