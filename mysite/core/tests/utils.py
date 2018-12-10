@@ -59,12 +59,12 @@ class UtilityTest(TestCase):
     @mock.patch('core.common.utils.c_onboarding_status')
     @unpack
     @data(
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 13.0),
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 1, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 0}, 38.0),
-        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 0, onboarding.STEP_8: 0}, 50.0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 0}, 75.0),
-        ({onboarding.STEP_1: 1, onboarding.STEP_2: 1, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1, onboarding.STEP_8: 1}, 100.0)
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 0, onboarding.STEP_7: 0}, 14.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 1, onboarding.STEP_3: 0, onboarding.STEP_4: 0, onboarding.STEP_5: 0, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 43.0),
+        ({onboarding.STEP_1: 0, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 0}, 57.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 0, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 86.0),
+        ({onboarding.STEP_1: 1, onboarding.STEP_2: 1, onboarding.STEP_3: 1, onboarding.STEP_4: 1, onboarding.STEP_5: 1, onboarding.STEP_6: 1, onboarding.STEP_7: 1}, 100.0)
     )
     def test_percentage_of_done(self, steps, result, mock):
         _mock = mock.return_value
@@ -80,7 +80,6 @@ class UtilityTest(TestCase):
         (onboarding.CREATE_COURSE, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.CREATE_COURSELET, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.CREATE_THREAD, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
-        (onboarding.INVITE_SOMEBODY, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.PREVIEW_COURSELET, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         (onboarding.NEXT_STEPS, ONBOARDING_STEPS_DEFAULT_TEMPLATE),
         # nonexistent key
@@ -115,11 +114,6 @@ class UtilityTest(TestCase):
                     "html": "<p>next_steps</p>",
                     "description": "next_steps desc",
                     "title": "next_steps"
-                },
-                onboarding.INVITE_SOMEBODY: {
-                    "html": "<p>invite_somebody</p>",
-                    "description": "invite_somebody desc",
-                    "title": "invite_somebody"
                 },
                 onboarding.CREATE_THREAD: {
                     "html": "<p>create_thread</p>",
@@ -172,14 +166,6 @@ class UtilityTest(TestCase):
                     "title": "next_steps"
                 }
             },
-            onboarding.INVITE_SOMEBODY: {
-                "done": True,
-                "settings": {
-                    "html": "<p>invite_somebody</p>",
-                    "description": "invite_somebody desc",
-                    "title": "invite_somebody"
-                }
-            },
             onboarding.CREATE_THREAD: {
                 "done": False,
                 "settings": {
@@ -212,7 +198,6 @@ class UtilityTest(TestCase):
             onboarding.CREATE_COURSE: True,
             onboarding.CREATE_COURSELET: False,
             onboarding.CREATE_THREAD: False,
-            onboarding.INVITE_SOMEBODY: True,
             onboarding.NEXT_STEPS: False,
             onboarding.PREVIEW_COURSELET: False
         }

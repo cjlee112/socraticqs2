@@ -49,7 +49,7 @@ class EditUnitForm(forms.ModelForm):
 
     unit_type = forms.ChoiceField(
         choices=KIND_CHOICES, widget=forms.RadioSelect, initial=Lesson.EXPLANATION,
-        help_text='You can create interactive questions (with answers and self-assessment) or passive introductions.'
+        help_text='Questions are interactive threads where your students submit answers and self assess. Introductions are simple messages sent to your students, they can read it but can\'t send anything back. Try to ask questions early and often. An introduction can be helpful when you need to explain something in a bit more detail before asking a question.'
     )
 
     class Meta:

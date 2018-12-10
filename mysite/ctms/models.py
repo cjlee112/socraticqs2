@@ -191,8 +191,3 @@ class Invite(models.Model):
 
     def __unicode__(self):
         return "Code {}, User {}".format(self.code, self.email)
-
-
-@receiver(post_save, sender=Invite)
-def onboarding_invite_created(sender, instance, **kwargs):
-    update_onboarding_step(onboarding.STEP_8, instance.instructor.user_id)

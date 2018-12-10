@@ -52,7 +52,7 @@
       <div class="page__messages">
         {% for message in messages %}
         <div class="alert alert-{%if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-          {{ message }}
+          {{ message|safe }}
         </div>
         {% endfor %}
         <!-- TODO: Add notifications here -->
@@ -117,9 +117,19 @@
         // Expandable content
         $('.expandable__toggle').on('click', function(e) {
           e.preventDefault();
+          var $toggle = $(e.currentTarget);
+          var $content = $toggle.closest('.expandable').find('.expandable__content');
+          var text = $toggle.html();
 
-          var content = $(e.currentTarget).closest('.expandable').find('.expandable__content');
-          content.toggle();
+          // Toggle visibility
+          $content.toggle();
+
+          // Toggle text (only if it contains read more/less)
+          if(text == 'Read more') {
+            $toggle.html('Read less');
+          } else if(text == 'Read less') {
+            $toggle.html('Read more');
+          }
         });
 
         $('.link__post__data').on('click', function(e) {

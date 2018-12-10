@@ -112,7 +112,7 @@ label {
 
 label + p {
   color: #333;
-  margin: 0px 0 0 0;
+  margin: 0;
   max-width: 600px; }
 
 input[type=text], input[type=password], input[type=email], textarea {
@@ -818,6 +818,11 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   .errorlist li {
     display: block; }
 
+.expandable--form-description > p {
+  margin: 0; }
+.expandable--form-description .expandable__content p {
+  margin: 0; }
+
 .expandable__toggle {
   cursor: pointer; }
 
@@ -828,6 +833,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   margin: 48px 0 0 0; }
   .form-group:first-of-type {
     margin-top: 0; }
+  .form-group .radio-list {
+    margin-bottom: -6px; }
 
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none; }
@@ -1119,6 +1126,29 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .fancybox-button {
   background: transparent !important; }
+
+.line-list {
+  list-style: none;
+  margin: 12px 0 0 0;
+  padding: 0;
+  max-width: 600px; }
+  .line-list li {
+    background: url(../../img/instructor/line-list.svg) no-repeat 0 11px;
+    padding: 0 0 0 20px; }
+
+.image-upload img {
+  display: block;
+  max-width: 360px;
+  height: auto;
+  margin: 12px 0 0 0;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.12), 0 25px 50px -25px rgba(0, 0, 0, 0.2);
+  border-radius: 5px; }
+.image-upload .image-clear {
+  margin: 12px 0 0 0; }
+.image-upload .button {
+  margin: 12px 0 0 0; }
+.image-upload label {
+  font-weight: normal; }
 
 .share-group {
   margin: 48px 0 0 0; }
