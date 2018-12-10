@@ -47,6 +47,7 @@ def suspending_receiver(signal, **decorator_kwargs):
     Reference:
         https://devblog.kogan.com/blog/disable-signal-receivers-in-your-django-tests
     """
+
     def our_wrapper(func):
         @receiver(signal, **decorator_kwargs)
         @functools.wraps(func)
@@ -54,7 +55,9 @@ def suspending_receiver(signal, **decorator_kwargs):
             if settings.SUSPEND_SIGNALS:
                 return
             return func(sender, **kwargs)
+
         return fake_receiver
+
     return our_wrapper
 
 
@@ -71,7 +74,8 @@ def get_onboarding_steps():
         onboarding.STEP_4,
         onboarding.STEP_5,
         onboarding.STEP_6,
-        onboarding.STEP_7
+        onboarding.STEP_7,
+        onboarding.STEP_8
     ]
 
 
@@ -96,15 +100,115 @@ def update_onboarding_step(step, user_id):
         }}, upsert=True)
 
 
+ONBOARDING_STEPS_DEFAULT_TEMPLATE = {
+    'title': '',
+    'description': '',
+    'html': ''
+}
+
 ONBOARDING_SETTINGS_DEFAULT = {
-    onboarding.INTRODUCTION_COURSE_ID: settings.ONBOARDING_INTRODUCTION_COURSE_ID
+    onboarding.INTRODUCTION_COURSE_ID: settings.ONBOARDING_INTRODUCTION_COURSE_ID,
+    onboarding.VIEW_INTRODUCTION: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.INTRODUCTION_INTRO: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.CREATE_COURSE: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.CREATE_COURSELET: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.CREATE_THREAD: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.INVITE_SOMEBODY: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.PREVIEW_COURSELET: ONBOARDING_STEPS_DEFAULT_TEMPLATE,
+    onboarding.NEXT_STEPS: ONBOARDING_STEPS_DEFAULT_TEMPLATE
 }
 
 
+# TODO: write unit tests
 def get_onboarding_setting(setting_name):
-    setting_value = ONBOARDING_SETTINGS_DEFAULT.get(setting_name)
-    onboarding_setting = [_ for _ in c_onboarding_settings().find().sort('_id', -1).limit(1)]
-    onboarding_setting = onboarding_setting[0] if onboarding_setting else {}
-    if onboarding_setting and onboarding_setting.get(setting_name):
-        setting_value = onboarding_setting.get(setting_name)
-    return setting_value
+    """
+    Return settings for the certain `settings_name`
+    If it does not exist take default settings and save it to the MongoDB
+    Argument:
+        setting_name (str): name of setting e.g. `create_course`
+    Return:
+        dict object with the data. See ONBOARDING_STEPS_DEFAULT_TEMPLATE
+    """
+    try:
+        ONBOARDING_SETTINGS_DEFAULT[setting_name]
+    except KeyError:
+        return
+
+    onboarding_setting = c_onboarding_settings(use_secondary=True).find_one({'name': setting_name})
+    if not onboarding_setting:
+        c_onboarding_settings().insert({'name': setting_name, 'data': ONBOARDING_SETTINGS_DEFAULT[setting_name]})
+        return ONBOARDING_SETTINGS_DEFAULT[setting_name]
+    return onboarding_setting['data']
+
+
+# TODO: refactor this, settings for each step no need longer
+def get_onboarding_status_with_settings(user_id):
+    """
+    Return combined data with the status by on-boarding steps (done: true/false)
+    and settings for according status name
+    Argument:
+        user_id (int): user's id
+    Return:
+        dict with data
+    Example:
+    {
+        "instructor_intro": {
+            "done": true,
+            "settings": {
+                "html": "",
+                "description": "",
+                "title": ""
+            }
+        },
+        "create_course": {
+            "done": true,
+            "settings": {
+                "html": "",
+                "description": "",
+                "title": ""
+            }
+        },
+        "create_courselet": {
+            "done": false,
+            "settings": {
+                "html": "",
+                "description": "",
+                "title": ""
+            }
+        },
+        "review_answers": {
+            "done": true,
+            "settings": {
+                "html": "<p>Title</p>",
+                "description": "Here is some description",
+                "title": "Title"
+            }
+        },
+        "invite_somebody": {
+            "done": true,
+            "settings": {
+                "html": "",
+                "description": "",
+                "title": ""
+            }
+        },
+        "create_thread": {
+            "done": false,
+            "settings": {
+                "html": "",
+                "description": "",
+                "title": ""
+            }
+        }
+    }
+    """
+    onboarding_status = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, {'_id': 0, 'user_id': 0}) or {}
+    data = {}
+
+    for step in get_onboarding_steps():
+        data[step] = {
+            'done': onboarding_status.get(step, False)
+        }
+    return data
+
+

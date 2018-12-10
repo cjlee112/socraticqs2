@@ -1,0 +1,91 @@
+version: '3'
+services:
+  web:
+    container_name: cr_web
+    image: nginx
+    volumes:
+      - .conf/nginx/app.template:/etc/nginx/conf.d/app.template
+      - ./mysite/static:/mnt/static
+    ports:
+      - "${NGINX_PORT}:${NGINX_PORT}"
+    environment:
+      NGINX_HOST: ${NGINX_HOST}
+      NGINX_PORT: ${NGINX_PORT}
+    restart: on-failure
+    command: /bin/bash -c "envsubst < /etc/nginx/conf.d/app.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+    links:
+      - app  
+
+  app:
+    container_name: cr_app
+    env_file: ./envs/prod.env
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    volumes:
+      - .:/app
+    command: gunicorn --config ../.conf/gunicorn/gunicorn.conf -b :9000 mysite.wsgi
+    restart: on-failure
+    links:
+      - postgres
+      - mongo
+      - memcached
+      - celery
+
+  postgres:
+    container_name: cr_postgres
+    image: postgres:9.6
+    env_file: ./envs/prod.env
+    restart: on-failure
+    volumes:
+      - cr_db:/var/lib/postgresql/data/
+
+  mongo:
+    container_name: cr_mongo
+    image: mongo:latest
+    
+    expose:
+      - "27017"
+    volumes:
+      - cr_mongo:/data/db
+    restart: on-failure
+  
+  memcached:
+    container_name: cr_memcached
+    image: memcached:latest
+    restart: on-failure
+  
+  celery:
+    container_name: cr_celery
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
+    env_file: ./envs/prod.env
+    volumes:
+      - ./:/home/user/app
+    links:
+      - rabbit
+      - redis
+    restart: on-failure
+
+  rabbit:
+    container_name: cr_rabbit
+    image: rabbitmq:latest
+    restart: on-failure
+  
+  redis:
+    container_name: cr_redis
+    image: redis:latest
+    restart: on-failure
+  
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    volumes:
+      - ./:/app
+
+volumes:
+  cr_db:
+  cr_mongo:

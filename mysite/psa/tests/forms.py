@@ -66,7 +66,6 @@ class SignUpFormTest(BaseFormMixin, TestCase):
             'email_confirmation': '1234@aa.cc',
             'first_name': 'Ale',
             'last_name': 'Bo',
-            'institution': 'KTUR',
             'password': '123123123'
 
         },
@@ -76,18 +75,7 @@ class SignUpFormTest(BaseFormMixin, TestCase):
             'email_confirmation': '1234@aa.cc',
             'first_name': '',
             'last_name': '',
-            'institution': 'KTUR',
             'password': '123123123'
-        },
-        {
-            # institution is required
-            'email': '1234@aa.cc',
-            'email_confirmation': '1234@aa.cc',
-            'first_name': 'Ale',
-            'last_name': 'Bo',
-            'institution': '',
-            'password': '123123123'
-
         },
         {
             # pw is required
@@ -95,7 +83,6 @@ class SignUpFormTest(BaseFormMixin, TestCase):
             'email_confirmation': '1234@aa.cc',
             'first_name': 'Ale',
             'last_name': 'Bo',
-            'institution': 'KTUR',
             'password': ''
         },
         {
@@ -104,7 +91,6 @@ class SignUpFormTest(BaseFormMixin, TestCase):
             'email_confirmation': '123@aa.cc',
             'first_name': 'Ale',
             'last_name': 'Bo',
-            'institution': 'KTUR',
             'password': '123123123'
         }
     ]

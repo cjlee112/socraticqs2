@@ -1,18 +1,25 @@
 import re
 from uuid import uuid4
-from django.template import loader, Context
+
+from django.db import models
+from django.db.models.signals import post_save
 from django.db.utils import IntegrityError
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db import models
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.http.response import Http404
-from django.shortcuts import get_object_or_404
-from accounts.models import Instructor
+from django.template import loader, Context
 
+from accounts.models import Instructor
+from chat.models import EnrollUnitCode
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
 from ct.models import Course
+
+
 
 
 STATUS_CHOICES = (
@@ -54,6 +61,7 @@ class Invite(models.Model):
     status = models.CharField('status', max_length=20, choices=STATUS_CHOICES, default='pending')
     type = models.CharField('invite type', max_length=50, choices=TYPE_CHOICES, default='tester')
     course = models.ForeignKey(Course)
+    enroll_unit_code = models.ForeignKey(EnrollUnitCode, null=True)
 
     added = models.DateTimeField('added datetime', auto_now_add=True)
 
@@ -64,14 +72,15 @@ class Invite(models.Model):
         return User.objects.filter(email=email).first()
 
     @classmethod
-    def create_new(cls, commit, course, instructor, email, invite_type):
+    def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code):
         user = Invite.search_user_by_email(email)
         try:
             old_invite = Invite.get_by_user_or_404(
                 user=user,
                 type=invite_type,
                 course=course,
-                instructor=instructor
+                instructor=instructor,
+                enroll_unit_code=enroll_unit_code
             )
             if old_invite:
                 return old_invite
@@ -85,6 +94,7 @@ class Invite(models.Model):
             status='pending',
             type=invite_type,
             course=course,
+            enroll_unit_code=enroll_unit_code
         )
         if commit:
             code.save()
@@ -94,7 +104,7 @@ class Invite(models.Model):
         return self.email.split("@")[0] if self.email else ''
 
     class Meta:
-        unique_together = ('instructor', 'email', 'type', 'course')
+        unique_together = ('instructor', 'email', 'type', 'course', 'enroll_unit_code')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -114,13 +124,12 @@ class Invite(models.Model):
 
             text_template = loader.get_template('ctms/email/invite_text.txt')
             rendered_text = text_template.render(context)
-
             send_mail(
                 rendered_subj,
                 rendered_text,
                 settings.EMAIL_FROM,
                 [self.email],
-                fail_silently=True
+                fail_silently=False
             )
             return {
                 'success': True,
@@ -184,12 +193,6 @@ class Invite(models.Model):
         return "Code {}, User {}".format(self.code, self.email)
 
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from core.common import onboarding
-from core.common.utils import update_onboarding_step
-
-
 @receiver(post_save, sender=Invite)
 def onboarding_invite_created(sender, instance, **kwargs):
-    update_onboarding_step(onboarding.STEP_6, instance.instructor.user_id)
+    update_onboarding_step(onboarding.STEP_8, instance.instructor.user_id)

@@ -1,9 +1,6 @@
 Socraticqs2
 ===========
 
-.. image:: https://travis-ci.org/cjlee112/socraticqs2.svg?branch=master
-    :target: https://travis-ci.org/cjlee112/socraticqs2
-
 .. image:: https://coveralls.io/repos/github/cjlee112/socraticqs2/badge.svg?branch=master
     :target: https://coveralls.io/github/cjlee112/socraticqs2?branch=master
 
@@ -14,6 +11,72 @@ Socraticqs2
   :target: https://circleci.com/gh/raccoongang/socraticqs2/tree/development
 
 Socraticqs2 is the web engine for courselets.org.
+
+Local development environment
+-------------------------------
+
+To run project locally
+::
+
+    make run
+
+To develop/debug project locally
+::
+
+    make debug
+
+To build project locally
+::
+
+    make build
+
+
+To run tests:
+::
+
+    make test
+
+To stop containers:
+::
+
+    make stop
+
+To clean/rm containers:
+::
+
+    make rm
+
+To run production/staging environment locally:
+::
+
+    make run env=stage
+
+
+To build production/staging environment locally:
+::
+
+    make build env=stage
+
+
+CI/CD
+-----
+
+CI/CD configuration is described by `.gitlab-ci.yml`_ file.
+
+.. _.gitlab-ci.yml: ./.gitlab-ci.yml
+
+
+Current deployment scheme is the following:
+
+* any commit pushed in development branch is deployed on **dev** environment
+* any commit pushed in master branch is deployed on **stage** environment
+* to publish version on **production** you need to create an annotated tag in format of "vX.X.X" (where X.X.X is version number) and push it to repository.
+
+There is a helper that creates a tag for you:
+::
+
+    make version VERSION=vX.X.X
+
 
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 

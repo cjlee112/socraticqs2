@@ -180,7 +180,8 @@ input[type=submit] {
     width: 100%;
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
-    height: 61px; }
+    height: 61px;
+    padding: 0 15px 0 15px; }
     .sidebar header:before, .sidebar header:after {
       content: " ";
       display: table; }
@@ -194,13 +195,13 @@ input[type=submit] {
       .sidebar header a:hover, .sidebar header a:focus, .sidebar header a:active {
         color: #B1B0B9;
         opacity: 0.6; }
-    .sidebar header .sidebar__logo {
-      display: block;
-      padding: 18px 9px 18px 24px; }
-      .sidebar header .sidebar__logo img {
-        display: block;
-        width: 24px;
-        height: 24px; }
+    .sidebar header .sidebar__link-with-progress {
+      position: relative; }
+      .sidebar header .sidebar__link-with-progress .progress-line {
+        position: absolute;
+        bottom: 12px;
+        left: 9px;
+        width: calc(100% - 18px); }
   .sidebar section {
     border-top: 1px solid #2F2B43;
     padding: 17px 24px 18px 24px; }
@@ -704,7 +705,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     bottom: -12px;
     width: 100%;
     text-align: center;
-    margin: 0; }
+    margin: 0 0 0 -24px; }
     .auth-card__social-options p span {
       display: inline-block;
       background: #fff;
@@ -864,53 +865,22 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     right: 4px;
     margin: 0; }
 
-.chat-input-text-form textarea {
-  min-height: 20px; /* for default height */
-  overflow: hidden;
-  resize: none;
-  border: 1px solid #000;
-}
+.progress-line {
+  position: relative;
+  display: block;
+  width: 100px;
+  height: 4px;
+  border-radius: 2px;
+  border: 1px solid #666374; }
+  .progress-line span {
+    display: block;
+    min-width: 12px;
+    height: 4px;
+    background: #43B02A;
+    border: 1px solid #7BC76A;
+    border-radius: 2px;
+    position: absolute;
+    top: -1px;
+    left: -1px; }
 
-.custom-nav-tabs>li>a {
-  color: #31708f;
-}
 /*# sourceMappingURL=app.css.map */
-
-.form-group.form-group--unit-aborts {
-    margin: 0;
-    border-bottom:  1px solid #E6E8EB;
-    padding: 10px 0 16px;
-}
-
-#copy_enroll_code {
-  font-family: "proxima-nova", sans-serif;
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 18px;
-  background: #43B02A;
-  color: #fff;
-  padding: 14px 30px;
-}
-
-.image-upload-container {
-  margin: 5px 0;
-}
-
-.image-holder {
-  max-width: 300px;
-  margin: 10px;
-}
-
-.image-clear {
-  overflow: hidden;
-}
-
-.image-clear label {
-  width: 250px;
-  margin-bottom: 10px;
-}
-
-.image-clear input {
-  float: left;
-  margin: 11px 10px 0 5px;
-}

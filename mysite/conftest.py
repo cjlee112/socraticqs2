@@ -1,7 +1,9 @@
+import os
 from collections import namedtuple
-import pytest
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryFile
 
+import pytest
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.files import File
@@ -86,11 +88,14 @@ def lesson_question(user, concept):
     return instance
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='function')
 def temp_image():
-    temp = NamedTemporaryFile(suffix=".jpeg")
-    temp.file.write(base64_gif_image())
-    return File(temp)
+    media_dir = settings.MEDIA_ROOT
+    if not os.path.exists(media_dir):
+        os.makedirs(media_dir)
+    temp = TemporaryFile(suffix='.jpeg', dir=media_dir)
+    temp.write(base64_gif_image())
+    yield File(temp)
 
 
 @pytest.fixture
@@ -109,11 +114,11 @@ def lesson_question_parametrized(request, user, concept, temp_image):
     instance = Lesson(
         title='ugh', text='brr', addedBy=user,
         kind=Lesson.ORCT_QUESTION, sub_kind=request.param,
-        concept=concept
+        concept=concept, attachment=temp_image
     )
-    instance.attachment.save(temp_image.name, temp_image)
     instance.save_root(concept)
     return instance
+
 
 @pytest.fixture
 def unit_lesson(user, unit, lesson_question):

@@ -1,16 +1,16 @@
 from functools import partial
-from django.contrib import messages
 
-from django.contrib.auth import logout
+from django.contrib import messages
+from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import password_reset, password_reset_done
-from django.http.response import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
+from django.http.response import HttpResponseRedirect, Http404
+from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
-from django.views.generic import View, CreateView
-from django.core.urlresolvers import reverse
+from django.views.generic import CreateView
 from django.views.generic.base import TemplateView
 from django.conf import settings
 
@@ -20,11 +20,11 @@ from accounts.forms import (
     CreatePasswordForm)
 from accounts.models import Instructor
 from ctms.views import json_response
-from mysite.mixins import LoginRequiredMixin, NotAnonymousRequiredMixin
-from .forms import SocialForm
+from mysite.mixins import NotAnonymousRequiredMixin
 from psa.custom_backends import EmailAuth
 from psa.custom_django_storage import CustomDjangoStorage, CustomCode
 from psa.custom_django_strategy import CustomDjangoStrategy
+from .forms import SocialForm
 
 
 class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
@@ -89,6 +89,9 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                     if form_id == 'email_form':
                         do_email_saving = True
                         email_save = save
+                    elif form_id == 'password_form':
+                        save()
+                        update_session_auth_hash(request, request.user)
                     else:
                         save()
                 elif changed_data:
@@ -103,19 +106,20 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
         else:
-
             msg = u"Please correct errors below: <br> {}".format(u"<br>".join(non_field_errors_list))
             messages.add_message(request, messages.WARNING, mark_safe(msg))
         return self.render_to_response(
             kwargs
         )
 
+
 class DeleteAccountView(NotAnonymousRequiredMixin, TemplateView):
     template_name = 'accounts/settings.html'
+
     def post(self, request):
         form = DeleteAccountForm(request.POST, instance=request.user)
         if form.is_valid():
-            new_user = form.save()
+            form.save()
             logout(request)
             return HttpResponseRedirect(reverse('accounts:deleted'))
         return self.render_to_response(
@@ -135,12 +139,12 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     form_class = SocialForm
 
     def get_success_url(self):
+        if self.request.POST.get('next'):
+            return self.request.POST.get('next')
         return reverse('ctms:my_courses')
 
     def get_initial(self):
-        return {
-           'user': self.request.user,
-        }
+        return {'user': self.request.user}
 
     def get_form_kwargs(self):
         """
@@ -162,60 +166,57 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     def get_instance(self):
         try:
             instructor = self.request.user.instructor
-        except self.request.user._meta.model.instructor.RelatedObjectDoesNotExist as e:
+        except self.request.user._meta.model.instructor.RelatedObjectDoesNotExist:
             instructor = None
         return instructor
 
     def get(self, request):
         instructor = self.get_instance()
-        if instructor is not None and instructor.institution:
-            return redirect(self.get_success_url())
+        if instructor is not None and instructor.institution and instructor.what_do_you_teach:
+            return redirect(self.request.GET.get('next') or self.get_success_url())
         else:
             form = self.get_form()
             return self.render_to_response({'form': form})
 
 
 @csrf_protect
-def custom_password_reset(request, is_admin_site=False,
-                   template_name='registration/password_reset_form.html',
-                   email_template_name='registration/password_reset_email.html',
-                   subject_template_name='registration/password_reset_subject.txt',
-                   password_reset_form=PasswordResetForm,
-                   token_generator=default_token_generator,
-                   post_reset_redirect=None,
-                   from_email=settings.EMAIL_FROM,
-                   current_app=None,
-                   extra_context=None,
-                   html_email_template_name=None):
-    response = password_reset(
-        request, is_admin_site=is_admin_site,
-        template_name=template_name,
-        email_template_name=email_template_name,
-        subject_template_name=subject_template_name,
-        password_reset_form=password_reset_form,
-        token_generator=token_generator,
-        post_reset_redirect=post_reset_redirect,
-        from_email=from_email,
-        current_app=current_app,
-        extra_context=extra_context,
-        html_email_template_name=html_email_template_name)
+def custom_password_reset(request,
+                          template_name='registration/password_reset_form.html',
+                          email_template_name='registration/password_reset_email.html',
+                          subject_template_name='registration/password_reset_subject.txt',
+                          password_reset_form=PasswordResetForm,
+                          token_generator=default_token_generator,
+                          post_reset_redirect=None,
+                          from_email=settings.EMAIL_FROM,
+                          current_app=None,
+                          extra_context=None,
+                          html_email_template_name=None):
+    response = password_reset(request,
+                              template_name=template_name,
+                              email_template_name=email_template_name,
+                              subject_template_name=subject_template_name,
+                              password_reset_form=password_reset_form,
+                              token_generator=token_generator,
+                              post_reset_redirect=post_reset_redirect,
+                              from_email=from_email,
+                              current_app=current_app,
+                              extra_context=extra_context,
+                              html_email_template_name=html_email_template_name)
     if request.method == 'POST' and isinstance(response, HttpResponseRedirect):
         request.session['anonym_user_email'] = request.POST.get('email')
     return response
 
 
-def custom_password_reset_done(
-        request,
-        template_name='registration/password_reset_done.html',
-        current_app=None, extra_context=None):
+def custom_password_reset_done(request,
+                               template_name='registration/password_reset_done.html',
+                               current_app=None, extra_context=None):
     if extra_context:
         extra_context.update({'anonym_user_email': request.session.get('anonym_user_email')})
     else:
         extra_context = {'anonym_user_email': request.session.get('anonym_user_email')}
-    return password_reset_done(
-        request,
-        template_name=template_name,
-        current_app=current_app, extra_context=extra_context)
+    return password_reset_done(request,
+                               template_name=template_name,
+                               current_app=current_app, extra_context=extra_context)
 
 
 def resend_email_confirmation_link(request):
@@ -237,10 +238,13 @@ def resend_email_confirmation_link(request):
         try:
             post = request.POST.dict()
             cc = CustomCode.objects.filter(pk=request.session.get('cc_id')).first()
-            fields = ['first_name', 'last_name', 'institution']
+            fields = ['first_name', 'last_name', 'institution', 'next']
             if cc:
                 for field in fields:
-                    post[field] = getattr(cc, field, '')
+                    if field == 'next':
+                        post[field] = getattr(cc, 'next_page', None)
+                    else:
+                        post[field] = getattr(cc, field, '')
             request.POST = post
 
             strategy = CustomDjangoStrategy(CustomDjangoStorage, request=request)

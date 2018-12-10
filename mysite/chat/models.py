@@ -12,6 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
+from core.common import onboarding
+from core.common.utils import update_onboarding_step
 from .utils import enroll_generator
 from ct.models import (
     CourseUnit,
@@ -518,7 +520,7 @@ class EnrollUnitCode(models.Model):
         unique_together = ('enrollCode', 'courseUnit', 'isLive')
 
     @classmethod
-    def get_code(cls, course_unit, isLive=False, isPreview=False, isTest=False):
+    def get_code(cls, course_unit, isLive=False, isPreview=False, isTest=False, give_instance=False):
         enroll_code, cr = cls.objects.get_or_create(
             courseUnit=course_unit,
             isLive=isLive,
@@ -529,6 +531,8 @@ class EnrollUnitCode(models.Model):
             enroll_code.enrollCode = uuid4().hex
             enroll_code.isLive = isLive
             enroll_code.save()
+        if give_instance:
+            return enroll_code
         return enroll_code.enrollCode
 
     @classmethod
@@ -537,7 +541,7 @@ class EnrollUnitCode(models.Model):
             'isPreview': is_preview,
             'isTest': isTest
         }
-
+        update_onboarding_step(onboarding.STEP_6, user.id)
         enroll = cls.objects.filter(courseUnit=course_unit, isLive=is_live, chat__user=user, **filter_kw).first()
         if enroll:
             return enroll

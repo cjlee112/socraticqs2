@@ -112,23 +112,25 @@ LOGIN_URL = '/new_login/'
 LOGIN_REDIRECT_URL = '/ctms/'
 URL_PATH = ''
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.page.CurrentPageMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
     'cms.middleware.language.LanguageCookieMiddleware',
     # Uncomment the next line for simple clickjacking protection:
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'psa.middleware.MySocialAuthExceptionMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'ctms.middleware.SideBarMiddleware',
-)
+]
 
 ROOT_URLCONF = 'mysite.urls'
 
@@ -179,6 +181,7 @@ INSTALLED_APPS = (
 
     # bower requirements
     'djangobower',
+    'storages'
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -198,12 +201,12 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': (
                 'django.contrib.auth.context_processors.auth',
-                'django.core.context_processors.debug',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.request',
-                'django.core.context_processors.media',
-                'django.core.context_processors.static',
-                'django.core.context_processors.tz',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.request',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'django.template.context_processors.csrf',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
@@ -302,8 +305,8 @@ X_FRAME_OPTIONS = "GOFORIT"
 # SSL proxy fix
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp://'
+BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'amqp://')
 CELERY_TIMEZONE = 'UTC'
 
 CELERYBEAT_SCHEDULE = {
@@ -479,7 +482,7 @@ BECOME_INSTRUCTOR_URL = '/become-instructor/'
 
 # Mongo
 DB_DATA = 'data'
-MONGO_HOST = 'mongo'
+MONGO_HOST = os.environ.get('MONGO_HOST', 'mongo')
 
 # Number of students answered to ORCT.
 # Used to notify the instructor(s) when N students answer the first/last/middle question in a courselet.
@@ -489,4 +492,8 @@ MILESTONE_ORCT_NUMBER = 10
 SUSPEND_SIGNALS = False
 EMAIL_BACKEND = 'django_ses.SESBackend'
 
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 ONBOARDING_INTRODUCTION_COURSE_ID = 1
+
+COURSELETS_EMAIL = 'info@courselets.org'

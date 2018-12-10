@@ -39,7 +39,7 @@ class TestCourseView(TestCase):
         self.history_live_chat.save()
 
 
-    @patch('lms.views.ChatProgressSerializer')
+    @patch('chat.serializers.ChatProgressSerializer')
     @patch('lms.views.get_object_or_404')
     @patch('lms.views.EnrollUnitCode.get_code')
     @patch('fsm.models.FSMState.find_live_sessions')

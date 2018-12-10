@@ -1,5 +1,5 @@
 import injections
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 from chat.api import AddUnitByChatProgressView
@@ -19,8 +19,7 @@ router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, base_name='messages')
 router.register(r'resources', ResourcesView, base_name='resources')
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>0)/?$',
@@ -63,4 +62,4 @@ urlpatterns = patterns(
     url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),
     url(r'^', include(router.urls)),
-)
+]

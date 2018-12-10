@@ -655,7 +655,6 @@ class ChatMixin(object):
                 is_additional=is_additional,
                 owner=chat.user,
             )
-            # import ipdb; ipdb.set_trace()
             if message and message.content_id:
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'

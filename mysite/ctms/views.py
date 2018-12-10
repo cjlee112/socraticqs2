@@ -5,7 +5,7 @@ from uuid import uuid4
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
@@ -16,6 +16,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.conf import settings
 from django.core.cache import cache
 from social_core.backends.utils import load_backends
@@ -23,9 +24,8 @@ from social_core.backends.utils import load_backends
 from accounts.models import Instructor
 
 from core.common import onboarding
-from core.common.mongo import c_onboarding_status
 from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
-    get_onboarding_setting, update_onboarding_step
+    get_onboarding_setting, get_onboarding_status_with_settings
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -76,7 +76,7 @@ class CourseCoursletUnitMixin(View):
 
     def am_i_instructor(self):
         try:
-            instructor = self.request.user.instructor
+            self.request.user.instructor
             return True
         except Instructor.DoesNotExist:
             return False
@@ -223,8 +223,6 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         my_courses = self.get_my_courses()
-        if waffle.switch_is_active('ctms_onboarding_enabled') and get_onboarding_percentage(request.user.id) != 100:
-            return redirect('ctms:onboarding')
         if not my_courses and not self.request.user.invite_set.all():
             # no my_courses and no shared courses
             return redirect('ctms:create_course')
@@ -340,8 +338,29 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = super(SharedCoursesListView, self).get_queryset()
-        q = qs.shared_for_me(self.request)
-        return q
+        queryset = qs.shared_for_me(self.request)
+        course_title = ''
+        data = {}
+        for invite in queryset:
+            if invite.course.title != course_title and invite.course.title not in data:
+                data[invite.course.title] = dict(
+                    method='get',
+                    link=reverse('ctms:tester_join_course', kwargs={'code': invite.code}),
+                    title=invite.course.title,
+                    instructor=invite.instructor,
+                    course_pk=invite.course.id
+                )
+            else:
+                if invite.course.title in data:
+                    data[invite.course.title] = dict(
+                        method='post',
+                        link=reverse('ctms:shared_courses'),
+                        title=invite.course.title,
+                        instructor=invite.instructor,
+                        course_pk=invite.course.id
+                    )
+            course_title = invite.course.title
+        return data
 
     def get_context_data(self, **kwargs):
         kwargs = super(SharedCoursesListView, self).get_context_data(**kwargs)
@@ -349,6 +368,15 @@ class SharedCoursesListView(NewLoginRequiredMixin, ListView):
             role__role=Role.INSTRUCTOR, role__user=self.request.user
         )
         return kwargs
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('course_pk'):
+            Invite.objects.shared_for_me(request).filter(
+                status='pending',
+                course_id=request.POST.get('course_pk')
+            ).update(status='joined')
+            return HttpResponseRedirect(
+                reverse('lms:tester_course_view', kwargs={'course_id': request.POST.get('course_pk')}))
 
 
 class CourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
@@ -484,7 +512,6 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
             raise Http404()
         return super(CreateUnitView, self).post(request, *args, **kwargs)
 
-
     def get_success_url(self):
         return reverse(
             'ctms:unit_edit',
@@ -534,7 +561,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         :param queryset:
         :return:
         """
-        course, ul = self.get_course(), self.get_unit_lesson()
+        course = self.get_course()
         if not course.addedBy == self.request.user:
             raise Http404()
         self.object = self.get_unit_lesson().lesson
@@ -546,7 +573,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=True)
         # self.object.save()
-        messages.add_message(self.request, messages.SUCCESS, "Unit successfully updated")
+        messages.add_message(self.request, messages.SUCCESS, "Thread successfully updated")
         cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
         return redirect(self.get_success_url())
 
@@ -595,7 +622,8 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
             return course_unit.unit
 
     def get_success_url(self):
-        return reverse('ctms:courslet_view', kwargs=self.kwargs)
+        return reverse('ctms:courselet_invite_student', kwargs={'pk': self.get_course().id,
+                                                        'courselet_pk': self.get_courslet().id})
 
     def get_context_data(self, **kwargs):
         context = super(CoursletSettingsView, self).get_context_data(**kwargs)
@@ -623,11 +651,10 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
             if task == 'unrelease':
                 cu.releaseTime = None
             cu.save()
-            return redirect(self.get_success_url())
+            messages.add_message(self.request, messages.SUCCESS, "Courselet successfully updated")
+            return redirect(self.request.META.get('HTTP_REFERER', self.get_success_url()))
         else:
             return super(CoursletSettingsView, self).post(request, *args, **kwargs)
-
-
 
 
 class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView):
@@ -744,8 +771,6 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         return kw
 
 
-
-
 class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSetBaseView, UpdateView):
     model = Lesson
     form_class = CreateEditUnitForm
@@ -764,10 +789,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not self.object:
-            return self.render(
-                'ctms/error.html',
-
-            )
+            return self.render('ctms/error.html')
         form = self.get_form()
         answer_form = CreateEditUnitAnswerForm(**self.get_answer_form_kwargs())
         formset = self.get_formset()
@@ -788,13 +810,13 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
                     messages.add_message(request, messages.WARNING, "Please correct error in answer")
 
                 if formset.is_valid():
-                    messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+                    messages.add_message(request, messages.SUCCESS, "Thread successfully updated")
                     self.formset_valid(formset)
                 else:
                     has_error = True
                     self.formset_invalid(formset)
             else:
-                messages.add_message(request, messages.SUCCESS, "Unit successfully updated")
+                messages.add_message(request, messages.SUCCESS, "Thread successfully updated")
         else:
             has_error = True
             messages.add_message(request, messages.WARNING, "Please correct errors below")
@@ -984,24 +1006,37 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return self.request.path
 
     def get_context_data(self, **kwargs):
-        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(course=self.get_course())
-        kwargs['invite_tester_form'] = self.form_class(initial={'type': 'tester', 'course': self.get_course()})
+        courselet_pk = self.kwargs.get('courselet_pk')
         course = self.get_course()
-        if waffle.switch_is_active('ctms_invite_students'):
+        if courselet_pk:
+            courselet = CourseUnit.objects.get(id=courselet_pk)
+        else:
             courselet = CourseUnit.objects.filter(course=course).first()
+        kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(
+            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True))
+        kwargs['invite_tester_form'] = self.form_class(
+            initial={
+                'type': 'tester',
+                'course': self.get_course(),
+            }
+        )
+        if waffle.switch_is_active('ctms_invite_students'):
             # We no longer need a form
             # kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
             if courselet:
                 kwargs['enroll_code'] = EnrollUnitCode.get_code(courselet)
 
+        kwargs['courselet'] = courselet
         kwargs['course'] = course
         kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
+        kwargs['courselets_email'] = settings.COURSELETS_EMAIL
         return kwargs
 
     def get_form_kwargs(self):
         kwargs = super(InvitesListView, self).get_form_kwargs()
         kwargs['course'] = self.get_course()
         kwargs['instructor'] = self.request.user.instructor
+        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True)
         return kwargs
 
     def get_initial(self):
@@ -1029,11 +1064,13 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return response
 
 
-class JoinCourseView(CourseCoursletUnitMixin, View): # NewLoginRequiredMixin
+class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
     NEED_INSTRUCTOR = False
 
     def get(self, *args, **kwargs):
         invite = get_object_or_404(Invite, code=self.kwargs['code'])
+        if self.request.user.is_authenticated() and invite.email != self.request.user.email:
+            logout(self.request)
         if self.request.user.is_authenticated():
             if invite.user and invite.user == self.request.user or invite.email == self.request.user.email:
                 # if user is a person for whom this invite
@@ -1042,13 +1079,20 @@ class JoinCourseView(CourseCoursletUnitMixin, View): # NewLoginRequiredMixin
                                          "You just joined course as tester")
                     invite.status = 'joined'
                     invite.save()
-                    return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
-                elif invite.type == 'student':
-                    messages.add_message(self.request, messages.SUCCESS,
-                                         "You just joined course as student")
-                    invite.status = 'joined'
-                    invite.save()
-                    return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
+                    if invite.enroll_unit_code:
+                        return redirect(reverse('chat:tester_chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                    else:
+                        return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
+                # TODO: It seems to be no longer needed owing to absent invites for students
+                # elif invite.type == 'student':
+                #     messages.add_message(self.request, messages.SUCCESS,
+                #                          "You just joined course as student")
+                #     invite.status = 'joined'
+                #     invite.save()
+                #     if invite.enroll_unit_code:
+                #         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                #     else:
+                #         return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
             # if user is not owned this invite
             return HttpResponseRedirect("{}?next={}".format(reverse('new_login'), self.request.path))
         else:
@@ -1104,7 +1148,11 @@ class DeleteInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteVie
         return Invite.objects.my_invites(self.request)
 
     def get_success_url(self):
-        return reverse('ctms:course_invite', kwargs={'pk': self.get_object().course.id})
+        kwargs = {
+            'pk': self.get_object().course.id,
+            'courselet_pk': self.get_object().enroll_unit_code.courseUnit.unit.id
+        }
+        return reverse('ctms:courselet_invite', kwargs=kwargs)
 
     def delete(self, request, *args, **kwargs):
         response = super(DeleteInviteView, self).delete(request, *args, **kwargs)
@@ -1169,9 +1217,13 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
         course = Course.objects.filter(id=introduction_course_id).first()
-        course_unit = course.courseunit_set.all().first()
-        enroll_unit_code = course_unit.enrollunitcode_set.all().first()
-        enroll_url = '/chat/enrollcode/{}'.format(enroll_unit_code.get_code(course_unit))
+        enroll_unit_code = EnrollUnitCode.objects.filter(
+            courseUnit__course_id=introduction_course_id,
+            isLive=False, isPreview=False, isTest=False
+        ).first()
+        enroll_url = '/chat/enrollcode/{}'.format(
+            enroll_unit_code.enrollCode or EnrollUnitCode.get_code(enroll_unit_code.courseUnit)
+        ) if enroll_unit_code else '#'
         context.update(dict(
             introduction_course=course,
             users_course=users_course,
@@ -1179,9 +1231,18 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             users_thread=users_thread,
             enroll_url=enroll_url
         ))
-        status = c_onboarding_status(use_secondary=True).find_one({'user_id': self.request.user.id}) or {}
-        steps = [(key, status.get(key, False)) for key in get_onboarding_steps()]
+        status = get_onboarding_status_with_settings(self.request.user.id)
+        steps = [
+            (key, status.get(key, {}).get('done', False), status.get(key, {}).get('settings', {}))
+            for key in get_onboarding_steps()
+        ]
         context.update({
             'steps': steps,
         })
         return context
+
+    def get(self, request, *args, **kwargs):
+        response = super(Onboarding, self).get(kwargs)
+        if not waffle.switch_is_active('ctms_onboarding_enabled'):
+            return redirect('ctms:my_courses')
+        return response

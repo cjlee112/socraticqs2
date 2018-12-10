@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
@@ -7,7 +7,7 @@ from ctms.views import (
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
     ReorderUnits, Onboarding)
 
-urlpatterns = (
+urlpatterns = [
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
 
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
@@ -79,10 +79,11 @@ urlpatterns = (
 
     # url(r'^course/(?P<pk>\d+)/share_course/$', InvitesListView.as_view(),
     #     name='share_course'),
-    url(r'^course/(?P<pk>\d+)/share_course/tester$', InvitesListView.as_view(template_name='ctms/invite_tester_list.html'),
-        name='course_invite'),
-    url(r'^course/(?P<pk>\d+)/share_course/student', InvitesListView.as_view(template_name='ctms/invite_student_list.html'),
-        name='course_invite_student'),
+    url(r'^course/(?P<pk>\d+)/share_courselet/tester/(?P<courselet_pk>\d+)?/$',
+        InvitesListView.as_view(template_name='ctms/invite_tester_list.html'), name='courselet_invite'),
+
+    url(r'^course/(?P<pk>\d+)/share_courselet/student/(?P<courselet_pk>\d+)?/$',
+        InvitesListView.as_view(template_name='ctms/invite_student_list.html'), name='courselet_invite_student'),
 
     # url(r'^course/(?P<pk>\d+)/invite/?$', InvitesListView.as_view(), name='course_invite'),
     url(r'^invites/(?P<code>\w+)/join/$', JoinCourseView.as_view(), name='tester_join_course'),
@@ -94,4 +95,4 @@ urlpatterns = (
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/add_units_chat/?$',
         RedirectToAddUnitsView.as_view(),
         name='add_units_chat'),
-)
+]

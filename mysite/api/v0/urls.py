@@ -8,7 +8,7 @@ from .views import (
     GenReportView,
     CourseReportViewSet,
     HealthCheck,
-    UpdateOnboardingStatus
+    OnboardingStatus
 )
 
 urlpatterns = [
@@ -39,5 +39,5 @@ urlpatterns = [
     ),
     url(r'^health/*$', HealthCheck.as_view(), name='health-check'),
 
-    url(r'^update-onboarding-status/$', UpdateOnboardingStatus.as_view(), name='update-onboarding-status'),
+    url(r'^onboarding-status/$', OnboardingStatus.as_view(), name='onboarding-status'),
 ]

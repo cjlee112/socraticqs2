@@ -16,7 +16,7 @@
             </li>
             <li>
                 <span>{{ steps.1.1 }} - </span>
-                <span>Test the student experience in the "Instructor Intro" courselet</span>
+                <span>Test the student experience</span>
                 <a href="{{ enroll_url }}" target="_blank">View</a>
             </li>
             <li>
@@ -26,23 +26,28 @@
             </li>
             <li>
                 <span>{{ steps.3.1 }} - </span>
-                <span>Create your first courselet</span>
+                <span>Create a courselet</span>
                 <a href="{% if users_course.id %}{% url 'ctms:courslet_create' course_pk=users_course.id %}{% else %}#{% endif %}">View</a>
             </li>
             <li>
                 <span>{{ steps.4.1 }} - </span>
-                <span>Create your first threads</span>
-                <a href="{% if users_courselet.id %}{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
+                <span>Create a thread</span>
+                <a href="{% if users_course.id and users_courselet.id %}{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
             </li>
             <li>
                 <span>{{ steps.5.1 }} - </span>
-                <span>Invite testers or students</span>
-                <a href="{% if users_course.id %}{% url 'ctms:course_invite' pk=users_course.id %}{% else %}#{% endif %}">View</a>
+                <span>Preview your courselet</span>
+                <a href="{% if users_course.id and users_courselet.id %}{% url 'ctms:courselet_preview' course_pk=users_course.id pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
             </li>
             <li>
                 <span>{{ steps.6.1 }} - </span>
-                <span>Review answers to improve your course</span>
+                <span>Next steps and Help Center</span>
                 <a href="#">View</a>
+            </li>
+            <li>
+                <span>{{ steps.7.1 }} - </span>
+                <span>Share and get feedback</span>
+                <a href="{% if users_course.id and users_courselet.id %}{% url 'ctms:courselet_invite' pk=users_course.id courselet_pk=users_courselet.id %}{% else %}#{% endif %}">View</a>
             </li>
         </ol>
     </main>

@@ -444,7 +444,8 @@ class TestUnit(LTITestCase):
         response = self.client.post(
             '/lti/unit/{}/'.format(self.unit.id), data=headers, follow=True
         )
-        assert response.status_code == 404
+        _next = reverse('ctms:courslet_view', args=(self.course.id, self.unit.id))
+        self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), _next))
     
     @unpack
     @data((Role.INSTRUCTOR, {u'roles': u'Instructor'}),
@@ -458,7 +459,8 @@ class TestUnit(LTITestCase):
         headers = self.headers.copy()
         headers['roles'] = 'Instructor'
 
-        Instructor.objects.create(user=self.user)
+        Instructor.objects.create(user=self.user, institution='institute',
+                                  what_do_you_teach='something')
         response = self.client.post(
             '/lti/unit/{}/'.format(self.unit.id), data=headers, follow=True
         )
@@ -474,7 +476,8 @@ class TestUnit(LTITestCase):
         headers = self.headers.copy()
         headers['roles'] = 'Instructor'
 
-        Instructor.objects.create(user=self.user)
+        Instructor.objects.create(user=self.user, institution='institute',
+                                  what_do_you_teach='something')
 
         response = self.client.post('/lti/', data=headers, follow=True)
         assert response.status_code == 200

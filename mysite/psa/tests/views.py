@@ -12,10 +12,9 @@ from django.conf import settings
 from importlib import import_module
 
 from social_core.exceptions import (AuthAlreadyAssociated,
-                               AuthException,
-                               InvalidEmail, AuthMissingParameter)
+                                    AuthException,
+                                    InvalidEmail, AuthMissingParameter)
 from accounts.models import Instructor
-from ctms.models import Invite
 from psa.custom_django_storage import CustomCode
 
 from psa.views import (context,
@@ -93,8 +92,8 @@ class ViewsUnitTest(TestCase):
         credentials = {'username': 'test',
                        'password': 'test'}
         response = self.client.post('/login/', data=credentials, follow=True)
-        self.assertRedirects(response, expected_url='/ct/')
-        self.assertTemplateUsed(response, template_name='ct/index.html')
+        self.assertRedirects(response, expected_url='{}?next=/ctms/'.format(reverse('accounts:profile_update')))
+        self.assertTemplateUsed(response, template_name='accounts/profile_edit.html')
 
     def test_login_by_email(self):
         user = User(username='test', email='test@test.cc')
@@ -826,13 +825,13 @@ class SignupTest(TestCase):
         self.url = reverse('signup')
         engine = import_module(settings.SESSION_ENGINE)
         store = engine.SessionStore()
-        store.save()  # we need to make load() work, or the cookie is worthless
+        store.create()  # we need to make load() work, or the cookie is worthless
         self.client.cookies[settings.SESSION_COOKIE_NAME] = store.session_key
 
     def test_signup_logout(self):
         User.objects.create_user('test_user', 'test@aa.cc', '123')
         self.client.login(email='test@aa.cc', password='123')
-        response = self.client.get(self.url)
+        self.client.get(self.url)
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_signup_with_u_hash_in_session(self):
@@ -855,12 +854,12 @@ class SignupTest(TestCase):
                 'email_confirmation': 'test_email@aa.cc',
                 'last_name': 'Bo',
                 'first_name': 'Alex',
-                'institution': 'testInstitute',
                 'password': '123123123'
             },
             follow=True
         )
-        self.assertRedirects(response, reverse('ctms:shared_courses'))
+        self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), reverse('ctms:onboarding')))
+
         self.assertIn('_auth_user_id', self.client.session)
 
         new_user = User.objects.get(email='test_email@aa.cc')
@@ -878,7 +877,6 @@ class SignupTest(TestCase):
                 'email_confirmation': 'test_email2222@aa.cc',
                 'last_name': 'Bo',
                 'first_name': 'Alex',
-                'institution': '',
                 'password': '123123123'
             },
         )
@@ -886,15 +884,13 @@ class SignupTest(TestCase):
         self.assertIn('form', response.context)
         self.assertIn(u'Confirmation e-mail should be the same as e-mail.',
                       response.context['form']['email_confirmation'].errors)
-        self.assertIn(u'This field is required.',
-                      response.context['form']['institution'].errors)
 
     def test_signup_without_u_hash(self):
         self.assertEqual(CustomCode.objects.count(), 0)
         self.assertEqual(User.objects.count(), 0)
         self.assertEqual(Instructor.objects.count(), 0)
 
-        response = self.client.post(
+        self.client.post(
             self.url,
             {
                 'email': 'test_email@aa.cc',
@@ -912,9 +908,6 @@ class SignupTest(TestCase):
 
         self.assertIn('resend_user_email', self.client.session)
         self.assertEqual(self.client.session['resend_user_email'], 'test_email@aa.cc')
-
-        code = CustomCode.objects.all().first()
-        print code
 
     def test_twitter_signup_anonymous_user_cancel(self):
         """Test when anonymous user cancel auth thought twitter should not see 500 error."""
@@ -944,11 +937,10 @@ class LogoutTest(TestCase):
     def test_logout(self):
         """Test that old logout page redirect to ct page after logout."""
         response = self.client.get(reverse('logout'), follow=True)
-        self.assertRedirects(response, reverse('login'))
+        self.assertRedirects(response, reverse('new_login'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')
-
 
     def test_new_logout(self):
         response = self.client.get(reverse('new_logout'), follow=True)
-        self.assertRedirects(response, reverse('new_login')+'?next='+reverse('ctms:my_courses'))
+        self.assertRedirects(response, reverse('new_login'))
         self.assertEqual(self.client.cookies.get('sessionid').value, '')

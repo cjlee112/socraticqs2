@@ -1,7 +1,7 @@
 {% load static %}
-
+{% load media %}
 <div class="image-upload-container">
-    <img id="image-{{ id }}" src="{% if value %}{% get_media_prefix %}{{ value }}{% endif %}" alt=""
+    <img id="image-{{ id }}" src="{% media_prefix value %}" alt=""
          class="image-holder js-image-holder"><br>
     {% if value %}
         <div class="image-clear">

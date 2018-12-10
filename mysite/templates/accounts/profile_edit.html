@@ -7,7 +7,6 @@
       <h1>Almost Done</h1>
       <p>Please fill in the form below to create your account.</p>
     </header>
-
     <main class="auth-card__content" style="text-align: left; margin: 0 auto;">
       <form class="form" action="{% url 'accounts:profile_update' %}" method="post">
         {% for field in form %}
@@ -15,18 +14,20 @@
           {{ field }}
         {% else %}
           {% if field.name == 'institution' %}
-            <label for="{{ form.instituation.auto_id }}">Institution</label>
+            <label for="{{ form.institution.auto_id }}">Institution</label>
               <p>
                 We can help you with your integration once we know where you teach.
               </p>
             {{ form.institution }}
-          {% else %}
+          {% elif field.name == 'what_do_you_teach'%}
+            <label for="{{ form.what_do_you_teach.auto_id }}">What do you teach?</label>
             {{ field }}
           {% endif %}
         {% endif %}
         {% endfor %}
         {% csrf_token %}
-        <input type="submit" value="Sign Up" class=" ">
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        <input type="submit" value="Continue" class=" ">
       </form>
     </main>
   </div>

@@ -1,5 +1,5 @@
+import waffle
 from django.contrib import messages
-from django.contrib.auth.hashers import make_password
 from django.contrib.messages.api import add_message
 from django.db.models import Q
 from django.conf import settings
@@ -7,19 +7,20 @@ from django.http.response import HttpResponseRedirect
 from django.http.response import Http404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_complete
-from social_django.utils import psa
+from social_django.utils import psa, load_backend, load_strategy
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME
+from django.contrib.auth import logout, login, REDIRECT_FIELD_NAME, authenticate
 
-from social_core.backends.utils import load_backends
+from social_core.backends.utils import load_backends, get_backend
 from social_django.views import _do_login
 from social_django.views import complete as social_complete
 from social_core.exceptions import AuthMissingParameter
 from accounts.models import Profile, Instructor
+from core.common.utils import get_onboarding_percentage
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
@@ -68,20 +69,20 @@ def validation_sent(request):
     )
 
 
-def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/', login_form_cls=EmailLoginForm):
+def custom_login(request, template_name='psa/custom_login.html', next_page='/ctms/', login_form_cls=EmailLoginForm):
     """
     Custom login to integrate social auth and default login.
     """
-    username = password = ''
+    # Anyway we need checking this before defining next_page
+
+    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    if request.user.is_authenticated() and not request.user.is_anonymous():
+        return redirect(next_page)
     u_hash_sess = request.session.get('u_hash')
-    logout(request)
+    # logout(request)
     if u_hash_sess:
         request.session['u_hash'] = u_hash_sess
 
-    if not next_page.startswith('/'):
-        next_page = reverse(next_page)
-    if request.method == 'GET' and 'next' in request.GET:
-        next_page = request.GET['next']
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
     if request.POST:
@@ -91,10 +92,11 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ct/
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    if request.POST.get('u_hash') and request.POST['u_hash'] == u_hash_sess:
-                        del request.session['u_hash']
-                        return redirect('ctms:shared_courses')
-                    return redirect(request.POST.get('next', next_page))
+                    if next_page == '/ctms/' and \
+                       waffle.switch_is_active('ctms_onboarding_enabled') and \
+                       get_onboarding_percentage(user.id) != 100:
+                        return redirect('ctms:onboarding')
+                    return redirect(next_page)
                 else:
                     return redirect('inactive-user-error')
         messages.error(request, "We could not authenticate you, please correct errors below.")
@@ -117,13 +119,11 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     if u_hash and u_hash == u_hash_sess:
         # if invited tester join course - create user immediately without confirmation email.
         data = request.POST.dict().copy()
-        pw = make_password(request.POST.get('password'))
-        data['password'] = pw
         user = request.backend.strategy.create_user(**data)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
+        user = authenticate(username=user.username, password=data.get('password'))
         login(request, user)
         request.session['u_hash'] = u_hash
-
     response = do_complete(
         request.backend, _do_login, request.user,
         redirect_name=REDIRECT_FIELD_NAME, *args, **kwargs)
@@ -149,21 +149,19 @@ def signup(request, next_page=None):
     """
     This function handles custom login to integrate social auth and default login.
     """
-    u_hash =request.POST.get('u_hash')
+    u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-
-    logout(request)
+    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    if request.user.is_authenticated() and not request.user.is_anonymous():
+        return redirect(next_page)
+    request.session['u_hash'] = u_hash_sess
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
         # replacenexturl with shared_courses page url
-        next_page = reverse('ctms:shared_courses')
         request.session['next'] = next_page
         post = request.POST.copy()
         post['next'] = next_page
         request.POST = post
-    else:
-        next_page = request.POST.get('next') or request.GET.get('next') or next_page
-
     form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
@@ -265,6 +263,18 @@ def complete(request, *args, **kwargs):
 
     if form.is_valid() or 'verification_code' in request.GET:
         try:
+            # logout(request)
+            code = CustomCode.objects.filter(code=request.GET.get('verification_code')).first()
+            if code:
+                strategy = load_strategy(request)
+
+                user = strategy.create_user(
+                    email=code.email,
+                    first_name=code.first_name,
+                    last_name=code.last_name,
+                    password=code.password
+                )
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             resp = social_complete(request, 'email', *args, **kwargs)
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
                 Instructor.objects.get_or_create(user=request.user)

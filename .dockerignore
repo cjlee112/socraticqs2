@@ -1,0 +1,7 @@
+**/*
+!requirements*
+!mysite/draw_svg
+mysite/draw_svg/node_modules
+mysite/draw_svg/build
+!mysite/lms/static/js
+!mysite/lms/static/css

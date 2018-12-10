@@ -1,6 +1,9 @@
-FROM ubuntu:14.04
+FROM python:2.7-slim
+LABEL maintainer="cmltaWt0@gmail.com"
 
-RUN apt-get -y update && apt-get install -y \
+RUN apt-get -y update && \
+    apt-get install -y \
+    wget \
     pandoc \
     python2.7 \
     python-pip \
@@ -11,8 +14,6 @@ RUN apt-get -y update && apt-get install -y \
     python-dev \
     zlib1g-dev \
     phantomjs \
-    wget \
-    make \
     && rm -rf /var/lib/apt/lists/*
 
 # install latest nodejs

@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.contrib.auth.views import password_reset_confirm, password_reset_complete
 from accounts.forms import CustomPasswordResetForm
@@ -7,8 +7,7 @@ from accounts.views import custom_password_reset, custom_password_reset_done, re
 from .views import DeleteAccountView, AccountSettingsView, ProfileUpdateView
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^delete/$', DeleteAccountView.as_view(), name='delete'),
     url(r'^account_deleted/$', TemplateView.as_view(template_name='accounts/account_deleted.html'), name='deleted'),
     url(r'^password_reset/$', custom_password_reset, {
@@ -38,4 +37,4 @@ urlpatterns = patterns(
     url(r'^profile_update/$', ProfileUpdateView.as_view(), name='profile_update'),
 
     url(r'^$', AccountSettingsView.as_view(), name='settings'),
-)
+]

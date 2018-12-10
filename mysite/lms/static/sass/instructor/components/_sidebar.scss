@@ -20,6 +20,7 @@
     background: #1B172F;
     border-bottom: 1px solid #2F2B43;
     height: 61px;
+    padding: 0 15px 0 15px;
 
     a {
       float: left;
@@ -33,14 +34,14 @@
       }
     }
 
-    .sidebar__logo {
-      display: block;
-      padding: 18px 9px 18px 24px;
+    .sidebar__link-with-progress {
+      position: relative;
 
-      img {
-        display: block;
-        width: 24px;
-        height: 24px;
+      .progress-line {
+        position: absolute;
+        bottom: 12px;
+        left: 9px;
+        width: calc(100% - 18px);
       }
     }
   }

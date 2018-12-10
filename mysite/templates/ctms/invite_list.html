@@ -9,22 +9,23 @@
   <div class="card">
     <header class="card__topbar">
       <!-- TODO: Add course name -->
-      <h1>{{ course.title }}</h1>
+      <h1>{{ courselet.unit.title }}</h1>
     </header>
 
-    <!-- TODO: Add real links -->
-    <nav class="card__nav">
+  <nav class="card__nav">
       <ul>
         <li>
-          <a href="{% url 'ctms:course_view' pk=course.id %}">Courselets</a>
+          <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courselet.id %}">Threads</a>
         </li>
 
         <li>
-          <a href="{% url 'ctms:course_invite' pk=course.id %}" class="card__nav-active">Share</a>
+          <a href="{% url 'ctms:courselet_preview' course_pk=course.id pk=courselet.id %}" target="_blank">Preview</a>
         </li>
-
         <li>
-          <a href="{% url 'ctms:course_settings' pk=course.id %}">Settings</a>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}">Settings</a>
+        </li>
+        <li>
+          <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="card__nav-active">Share</a>
         </li>
       </ul>
     </nav>
@@ -38,13 +39,13 @@
       <nav class="card__nav">
         <ul>
           <li>
-            <a href="{% url 'ctms:course_invite_student' pk=course.id %}" class="{% block invite_student_tab_cls %}{% endblock %}">
+            <a href="{% url 'ctms:courselet_invite_student' pk=course.id courselet_pk=courselet.id %}" class="{% block invite_student_tab_cls %}{% endblock %}">
               Invite Students
             </a>
           </li>
 
           <li>
-            <a href="{% url 'ctms:course_invite' pk=course.id %}" class="{% block invite_tester_tab_cls %}{% endblock %}">
+            <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="{% block invite_tester_tab_cls %}{% endblock %}">
               Invite Testers
             </a>
           </li>
@@ -57,7 +58,13 @@
       <p>TODO: Add a description here.</p>
       {% endblock %}
       {% block invitation_content %}
-          <form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">
+
+          {% comment %}
+              <div class="invite-courselets">
+                <input type="button" value="Invite an Expert" class="invite__submit__form__" id="send_to_courselets" data-courselets-email="{{ courselets_email }}">
+              </div>
+          {% endcomment %}
+          <form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">
             {% csrf_token %}
 
             <div class="input-with-button">
@@ -84,10 +91,11 @@
       {% endwith %}
       {% endblock %}
     </main>
+
     <!--<main class="card__content">-->
       <!--<p>How to invite students... Maecenas sed diam eget risus varius blandit sit amet non magna. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sed diam eget risus varius blandit.</p>-->
 
-      <!--<form class="form" action="{% url 'ctms:course_invite' pk=course.id %}" method="POST">-->
+      <!--<form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">-->
         <!--{% csrf_token %}-->
 
         <!--<div class="input-with-button">-->

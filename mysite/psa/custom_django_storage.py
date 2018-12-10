@@ -20,6 +20,7 @@ class CustomCode(Code):
     last_name = models.CharField(max_length=255, null=True)
 
     password = models.CharField(max_length=255, null=True)
+    next_page = models.CharField(max_length=255, null=True)
 
 
 class CustomDjangoStorage(DjangoStorage):

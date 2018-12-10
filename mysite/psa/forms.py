@@ -26,10 +26,9 @@ class SignUpForm(forms.Form):
     email_confirmation = forms.EmailField()
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
-    institution = forms.CharField(help_text='We can help you with integration once we know where you teach.')
     password = forms.CharField(
         widget=forms.PasswordInput(), min_length=6,
-        help_text='Create a password that at least six chars length.'
+        help_text='Choose a password that\'s at least six characters long.'
         # validators=[password_validator]
     )
 
@@ -82,7 +81,6 @@ class EmailLoginForm(forms.Form):
                 user = sec_mail.user
         if user:
             username = user.username
-
         user = authenticate(username=username, password=self.cleaned_data.get('password'))
         if user and user.is_active:
             # create instructor if not exist

@@ -9,6 +9,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from django.db import models
 from accounts.models import Instructor
+from chat.models import EnrollUnitCode
 
 from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
 from ctms.forms import EditUnitForm
@@ -25,10 +26,12 @@ class MyTestCase(TestCase):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
 
-        self.instructor = Instructor.objects.create(user=self.user)
+        self.instructor = Instructor.objects.create(user=self.user, institution='institute',
+                                                    what_do_you_teach='something')
 
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
-        self.instructor2 = Instructor.objects.create(user=self.user2)
+        self.instructor2 = Instructor.objects.create(user=self.user2, institution='institute',
+                                                     what_do_you_teach='something')
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -53,7 +56,6 @@ class MyTestCase(TestCase):
             treeID=self.lesson.id
         )
         self.unitlesson.save()
-
 
         resp1 = Response(
             unitLesson=self.unitlesson,
@@ -197,8 +199,6 @@ class MyTestCase(TestCase):
                     self.assertEqual(response.status_code, 403)
                 else:
                     self.assertEqual(response.status_code, 403)
-
-
             else:
                 response = client_method(self.url)
                 self.assertEqual(response.status_code, 200)
@@ -208,10 +208,12 @@ class MyCoursesTests(MyTestCase):
     def setUp(self):
         self.username, self.password = 'test', 'test'
         self.user = User.objects.create_user('test', 'test@test.com', 'test')
-        self.instructor = Instructor.objects.create(user=self.user)
+        self.instructor = Instructor.objects.create(user=self.user, institution='institute',
+                                                    what_do_you_teach='something')
 
         self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
-        self.instructor2 = Instructor.objects.create(user=self.user2)
+        self.instructor2 = Instructor.objects.create(user=self.user2, institution='institution',
+                                                     what_do_you_teach='something')
 
         self.unit = Unit(title='Test title', addedBy=self.user)
         self.unit.save()
@@ -255,12 +257,13 @@ class MyCoursesTests(MyTestCase):
         self.course.addedBy = self.user2
         self.course.save()
         # create shared course
-        shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester')
+        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
+        shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester', enroll_unit_code)
         response = self.client.get(self.url, follow=True)
         # should return shared courses
         self.assertRedirects(response, reverse('ctms:shared_courses'))
         self.assertIn('shared_courses', response.context)
-        self.assertTrue(shared_course in response.context['shared_courses'])
+        self.assertTrue(shared_course.course.title in response.context['shared_courses'])
 
     def my_courses_show_create_course_form(self):
         self.course.delete()
@@ -313,7 +316,7 @@ class MyCoursesTests(MyTestCase):
 
     def post_invalid_create_course_form_to_create_course_view(self):
         self.url = reverse('ctms:create_course')
-        response = self.post_invalid_create_course_form()
+        self.post_invalid_create_course_form()
 
 
 class UpdateCourseViewTests(MyTestCase):
@@ -348,14 +351,14 @@ class DeleteCourseViewTest(MyTestCase):
     def anonymous_post(self):
         self.client.logout()
         cnt = self.get_my_courses().count()
-        response = self.client.post(self.url)
+        self.client.post(self.url)
         self.assertEqual(cnt, self.get_my_courses().count())
 
     def delete_not_mine_course(self):
         self.course.addedBy = self.user2
         self.course.save()
         cnt = self.get_my_courses().count()
-        response = self.client.delete(self.url)
+        self.client.delete(self.url)
         self.assertEqual(cnt, self.get_my_courses().count())
 
     def test_delete_not_exist_pk(self):
@@ -367,19 +370,55 @@ class DeleteCourseViewTest(MyTestCase):
 class SharedCoursesListViewTests(MyTestCase):
     def setUp(self):
         super(SharedCoursesListViewTests, self).setUp()
-        self.student_shared_course = Invite.create_new(
-            invite_type='student',
-            commit=True,
-            instructor=self.instructor2,
-            email=self.user.email,
-            course=self.course,
+        self.unit2 = Unit(title='Test title2', addedBy=self.user)
+        self.unit2.save()
+
+        self.course2 = Course(title='Test title2',
+                              description='test description2',
+                              access='Public2',
+                              enrollCode='1112',
+                              lockout='1222',
+                              addedBy=self.user)
+        self.course2.save()
+
+        self.courseunit2 = CourseUnit(
+            unit=self.unit2, course=self.course,
+            order=0, addedBy=self.user, releaseTime=timezone.now()
         )
+        self.courseunit2.save()
+
+        self.courseunit3 = CourseUnit(
+            unit=self.unit, course=self.course2,
+            order=0, addedBy=self.user, releaseTime=timezone.now()
+        )
+        self.courseunit3.save()
+
+        enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
+        enroll_unit_code2 = EnrollUnitCode.get_code(self.courseunit2, give_instance=True)
+        enroll_unit_code3 = EnrollUnitCode.get_code(self.courseunit3, give_instance=True)
         self.tester_shared_course = Invite.create_new(
             invite_type='tester',
             commit=True,
             instructor=self.instructor2,
             email=self.user.email,
             course=self.course,
+            enroll_unit_code=enroll_unit_code
+        )
+        self.tester_shared_course2 = Invite.create_new(
+            invite_type='tester',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course,
+            enroll_unit_code=enroll_unit_code2
+        )
+        self.tester_shared_course3 = Invite.create_new(
+            invite_type='tester',
+            commit=True,
+            instructor=self.instructor2,
+            email=self.user.email,
+            course=self.course2,
+            enroll_unit_code=enroll_unit_code3
         )
         self.url = reverse('ctms:shared_courses')
 
@@ -388,8 +427,16 @@ class SharedCoursesListViewTests(MyTestCase):
 
     def test_shared_courses_list(self):
         response = self.client.get(self.url)
-        self.assertIn(self.student_shared_course, response.context['shared_courses'])
-        self.assertIn(self.tester_shared_course, response.context['shared_courses'])
+
+        self.assertEquals(
+            reverse('ctms:shared_courses'),
+            response.context['shared_courses'][self.course.title]['link']
+        )
+        self.assertEquals(
+            reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course3.code}),
+            response.context['shared_courses'][self.course2.title]['link']
+        )
+
 
 
     def test_join_course(self):
@@ -397,7 +444,7 @@ class SharedCoursesListViewTests(MyTestCase):
         response = self.client.get(url)
         self.assertRedirects(
             response,
-            reverse('lms:tester_course_view', kwargs={'course_id': self.tester_shared_course.course.pk})
+            reverse('chat:tester_chat_enroll', kwargs={'enroll_key': self.tester_shared_course.enroll_unit_code.enrollCode})
         )
         invite = self.get_invite_by_id(self.tester_shared_course.id)
         self.assertEqual(invite.status, 'joined')
@@ -432,7 +479,6 @@ class SharedCoursesListViewTests(MyTestCase):
         self.assertTrue(isinstance(response.context['form'], EmailLoginForm))
         self.assertEqual(response.context['form'].initial['email'], invite.email)
         self.assertIn('u_hash', response.context['form'].initial)
-
 
     def student_join_course(self):
         url = reverse('ctms:tester_join_course', kwargs={'code': self.student_shared_course.code})
@@ -632,7 +678,7 @@ class CreateUnitViewTests(MyTestCase):
                 'course_pk': self.get_test_course().id,
                 'courslet_pk': self.get_test_courseunit().id,
                 'pk': last_ul.id
-        })
+            })
         assert last_ul.lesson.kind == Lesson.ORCT_QUESTION
         self.assertRedirects(response, success_url)
         self.assertNotEqual(lessons_cnt, new_lessons_cnt)
@@ -723,7 +769,8 @@ class EditUnitViewTests(MyTestCase):
         new_counts = self.get_model_counts()
 
         if kind == EditUnitForm.KIND_CHOICES[1][0]:  # ORCT
-            self.validate_model_counts(counts, new_counts, must_equal=False) #  must not be equal because we added Answer
+            # must not be equal because we added Answer
+            self.validate_model_counts(counts, new_counts, must_equal=False)
         else:
             self.validate_model_counts(counts, new_counts,
                                        must_equal=True)  # must not be equal because we added Answer
@@ -900,6 +947,7 @@ class ResponseViewTests(MyTestCase):
         response = self.get_page()
         self.check_context_keys(response)
 
+
 @ddt
 class CoursletSettingsViewTests(MyTestCase):
     models_to_check = Unit
@@ -927,7 +975,6 @@ class CoursletSettingsViewTests(MyTestCase):
         (False, {'title': ''})
     )
     def test_post_data(self, is_valid, post_data):
-        # import ipdb; ipdb.set_trace()
         counts = self.get_model_counts()
         response = self.client.post(self.url, post_data, follow=False)
         new_counts = self.get_model_counts()
@@ -937,11 +984,11 @@ class CoursletSettingsViewTests(MyTestCase):
             print response.context['form'].errors
 
         if is_valid:
-            url = reverse('ctms:courslet_view', kwargs=self.kwargs)
+            url = reverse('ctms:courselet_invite_student', kwargs={'pk': self.kwargs['course_pk'],
+                                                                   'courselet_pk': self.kwargs['pk']})
             self.assertRedirects(response, url)
             response = self.client.post(self.url, post_data, follow=True)
-            self.context_should_contain_keys = ('u_lessons', 'course_pk', 'pk')
-
+            self.context_should_contain_keys = ('invite_tester_form', 'courselet', 'course')
 
         self.check_context_keys(response)
 
@@ -996,10 +1043,11 @@ class DeleteUnitViewTests(MyTestCase):
         response = self.post_valid_data(method='delete')
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts)
-        url = reverse('ctms:courslet_view', kwargs={
-                'course_pk': self.get_test_course().id,
-                'pk': self.get_test_courseunit().id
-        })
+        url = reverse('ctms:courslet_view',
+                      kwargs={
+                          'course_pk': self.get_test_course().id,
+                          'pk': self.get_test_courseunit().id
+                      })
         self.assertRedirects(response, url)
 
 

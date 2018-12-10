@@ -28,7 +28,7 @@ from ..models import Chat
 from ..fsm_plugin.chat import get_specs, END as CHAT_END
 from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
-from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, InitializeLiveSession, CheckChatInitialView
+from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
 
 
 class CustomTestCase(TestCase):
@@ -72,7 +72,9 @@ class CustomTestCase(TestCase):
         # TODO remove this later
         self.unit_dummy = Unit(title='Test title', addedBy=self.user)
         self.unit_dummy.save()
-        lesson_dummy = Lesson(title='Hope you\'ve overcame the misconception', text=u'Hope you\'ve overcame the misconception', addedBy=self.user, url='/test/url/')
+        lesson_dummy = Lesson(title='Hope you\'ve overcame the misconception',
+                              text=u'Hope you\'ve overcame the misconception',
+                              addedBy=self.user, url='/test/url/')
         lesson_dummy.save()
         self.unitlesson_dummy = UnitLesson(
             unit=self.unit_dummy, lesson=lesson_dummy, addedBy=self.user, treeID=lesson_dummy.id
@@ -150,7 +152,6 @@ class MainChatViewTests(CustomTestCase):
             ),
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        # import ipdb; ipdb.set_trace()
         json_content = json.loads(response.content)
         chat_id = json_content['id']
 
@@ -200,8 +201,7 @@ class MainChatViewTests(CustomTestCase):
         )
         self.assertTrue(response.status_code == 404)
 
-        json_content = json.loads(response.content)
-        chat_id = json_content.get('id')
+        json.loads(response.content)
 
         response = self.client.get(
             reverse('chat:chat_enroll', args=('nonexistentenrollcode', )), follow=True
@@ -284,7 +284,6 @@ class MainChatViewTests(CustomTestCase):
         self.assertTrue(response.status_code == 200)
         self.assertTrue(bool(json_content['id']))
         self.assertTrue(bool(json_content['session']))
-
 
     # @patch('chat.views.ChatInitialView.next_handler.start_point', return_value=Mock())
     @patch('chat.api.InitNewChat.get_view')
@@ -725,7 +724,6 @@ class MessagesViewTests(CustomTestCase):
 
         next_url = json_content['input']['url']
         msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
-
 
         # TODO select error model 80 after changing the flow
         # {"selected": {msg_id: {"errorModel": ["80"]}}
@@ -1312,7 +1310,7 @@ class ProgressAPIViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         chat_id = json_content['id']
 
-        response  = self.client.get(
+        response = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
@@ -1666,7 +1664,7 @@ class ChatHistorySerializerTests(CustomTestCase):
         )
         json_content = json.loads(response.content)
         chat_id = json_content['id']
-        response  = self.client.get(
+        response = self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
 
@@ -1740,7 +1738,7 @@ class TestChatGetBackUrls(CustomTestCase):
         (ChatInitialView, "Course",
          lambda self: reverse(
              'lms:course_view',
-             kwargs={'course_id':self.course.id})
+             kwargs={'course_id': self.course.id})
          ),
         (CourseletPreviewView, "Return",
          lambda self: reverse(

@@ -1,6 +1,9 @@
-FROM ubuntu:14.04
+FROM python:2.7-slim
+LABEL maintainer="cmltaWt0@gmail.com"
 
-RUN apt-get -y update && apt-get install -y \
+RUN apt-get -y update && \
+    apt-get install -y \
+    wget \
     pandoc \
     python2.7 \
     python-pip \
@@ -13,14 +16,13 @@ RUN apt-get -y update && apt-get install -y \
     phantomjs \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install --ignore-installed -U -r /requirements.txt
+RUN pip install --ignore-installed -U -r /requirements/dev.txt
 RUN pip install --ignore-installed -U -r /requirements/prod.txt
 
 ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /courselets
-WORKDIR /courselets/mysite
+RUN mkdir /app
+WORKDIR /app/mysite

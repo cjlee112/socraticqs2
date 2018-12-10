@@ -20,11 +20,10 @@ Build:
   tags:
     - docker
   script:
-    - mv mysite/mysite/settings/local_example.py mysite/mysite/settings/local.py
-    - mv fab_settings.py.example fab_settings.py
     - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
     - gunzip GeoLiteCity.dat.gz
     - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
+    - cp .circleci/.dockerignore ./
     - docker build -f Dockerfile.CI -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker push $DOCKER_IMG_NAME:$CI_COMMIT_SHA
@@ -74,13 +73,12 @@ Deploy Dev:
     - python manage.py fsm_deploy
     - cd draw_svg/
     - npm install --save-dev
-    - npm run build && npm run build:copy
-    - yarn build && yarn build:copy
+    - npm run build && npm run build:copy-local
+    - yarn build && yarn build:copy-local
     - cd ..
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart devgunicorn
     - sudo supervisorctl restart devcelery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n@redilonka (・ω・)", "link_names":1}'
 
 Deploy Stage:
   stage: deploy
@@ -102,10 +100,9 @@ Deploy Stage:
     - python manage.py fsm_deploy
     - cd draw_svg/
     - npm install --save-dev
-    - npm run build && npm run build:copy
-    - yarn build && yarn build:copy
+    - npm run build && npm run build:copy-local
+    - yarn build && yarn build:copy-local
     - cd ..
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart gunicorn
     - sudo supervisorctl restart celery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
