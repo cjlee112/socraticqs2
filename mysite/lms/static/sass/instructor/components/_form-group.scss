@@ -4,6 +4,10 @@
   &:first-of-type {
     margin-top: 0;
   }
+
+  .radio-list {
+    margin-bottom: -6px;
+  }
 }
 
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
