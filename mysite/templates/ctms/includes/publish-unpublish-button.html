@@ -1,8 +1,5 @@
 <form method="post" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=courselet_pk %}" class="publish_unpublish">
     {% csrf_token %}
     <input type="hidden" name="task" value="{% if courselet.releaseTime %}unrelease{% else %}release{% endif %}">
-    <input type="submit"
-       class="button button--primary"
-       value="{% if courselet.releaseTime %}Unpublish{% else %}Publish{% endif %}"
-    >
+    <input type="submit" class="" value="{% if courselet.releaseTime %}Unpublish Courselet{% else %}Publish Courselet{% endif %}">
 </form>

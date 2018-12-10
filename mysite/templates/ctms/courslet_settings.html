@@ -17,10 +17,11 @@
         </li>
 
         <li>
-          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
-        </li>
-          <li>
           <a href="{% url 'ctms:courselet_invite' pk=course_pk courselet_pk=pk %}" class="">Share</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
         </li>
       </ul>
     </nav>

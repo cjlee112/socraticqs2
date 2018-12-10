@@ -6,55 +6,82 @@
 {% endblock %}
 
 {% block invite_tester_tab_cls %}{% endblock %}
-
 {% block invite_student_tab_cls %}card__nav-active{% endblock %}
 
 {% block how_to %}
   {% switch "ctms_invite_students" %}
-      {% if enroll_code %}
-          <p>Please copy the URL below to invite students to join the course.</p>
+    <h1>Invite Students</h1>
+
+    <p>
+      You can invite students to work on this courselet by either sharing a
+      simple Enrollment URL or integrate with your e-learning platform using LTI.
+
+      {% if courselet.releaseTime %}
+        This courselet has been published, and you can unpublish it under <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=courselet.id %}">Settings</a> if you
+        don’t want your students to have access to it any longer.
       {% endif %}
+    </p>
   {% else %}
     <p>Coming soon...</p>
   {% endswitch %}
 {% endblock %}
 
 {% block invitation_content %}
-  {% switch "ctms_invite_students" %}
-    {% if enroll_code %}
-      <div class="input-with-button">
-        <input
-          id="enroll_code"
-          type="text"
-          maxlength="254"
-          value="{{ domain }}/chat/enrollcode/{{ enroll_code }}"
-          readonly="readonly"
-          >
-        <button id="copy_enroll_code" class="btn">Copy</button>
-      </div>
-    {% else %}
-      <p>Please create a courselet for an enroll code to be generated.</p>
-    {% endif %}
-
-  {% endswitch %}
-{% endblock %}
-
-{% block invites_list %}
+  {% if courselet.releaseTime %}
     {% switch "ctms_invite_students" %}
-        <div class="input-with-button">
-            <label for="lti_url">Copy course URL</label>
-                <p>Use this URL to launch course through LTI</p>
-                <input readonly class="textinput textInput form-control"
-                       id="id_title" maxlength="200"
-                       name="lti_url" type="text"
-                       value="{{ domain }}/lti{% url 'ct:study_unit' courselet.course.id courselet.id %}">
+      {% if enroll_code %}
+        <div class="share-group">
+          <label>Enrollment URL</label>
+          <p>
+            Simply share this URL with your students. They'll be asked to
+            create an account or log in before we redirect them to this courselet.
+          </p>
 
+          <div class="input-with-button">
+            <input
+              id="enroll_code"
+              type="text"
+              maxlength="254"
+              value="{{ domain }}/chat/enrollcode/{{ enroll_code }}"
+              readonly="readonly"
+              >
+            <button id="copy_enroll_code" class="button">Copy</button>
+          </div>
         </div>
-    {% endswitch %}
+      {% endif %}
 
-    <!-- Publish/Unpublish -->
-      <div>
-          {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=courselet.id course_pk=courselet.course.id %}
+      <div class="share-group">
+        <label>LTI URL</label>
+        <p>
+          It’s easy to connect Courselets with your e-learning platform if it supports LTI,
+          just follow the steps in <a href="https://intercom.help/courselets/getting-started/how-to-add-a-courselet-as-an-assignment-in-your-universitys-course-management-system">this guide</a>.
+          Share the URL below with your students once you've set up the LTI integration.
+          They will automatically be logged in and redirected to this courselet.
+        </p>
 
+        <div class="input-with-button">
+          <input
+            id="lti_url"
+            type="text"
+            maxlength="200"
+            name="lti_url"
+            value="{{ domain }}/lti{% url 'ct:study_unit' courselet.course.id courselet.id %}"
+            readonly="readonly"
+            >
+          <button id="copy_lti_url" class="button">Copy</button>
+        </div>
       </div>
+    {% endswitch %}
+  {% else %}
+    <div class="publish-warning">
+      <div class="alert alert-warning">
+        <h3>This courselet has not been published yet</h3>
+        <p>You need to publish the courselet before you can invite students.</p>
+
+        {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=courselet.id course_pk=courselet.course.id %}
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}
+
+{% block invites_list %} {% endblock %}

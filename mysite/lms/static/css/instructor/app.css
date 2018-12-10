@@ -481,6 +481,12 @@ a.sidebar__add {
   padding: 48px 24px; }
   .card__content > *:first-child {
     margin-top: -12px; }
+  .card__content > h1:first-child {
+    margin-top: -9px; }
+  .card__content h1 + p {
+    margin-top: 15px; }
+  .card__content p {
+    max-width: 600px; }
   .card__content .alert {
     padding: 12px 24px; }
   .card__content .alert-info a {
@@ -1109,5 +1115,41 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .fancybox-button {
   background: transparent !important; }
+
+.share-group {
+  margin: 48px 0 0 0; }
+  .share-group label {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-weight: normal;
+    color: #000; }
+  .share-group p {
+    margin: 12px 0 0 0; }
+  .share-group .input-with-button {
+    margin: 9px 0 0 0;
+    max-width: 600px; }
+    .share-group .input-with-button input {
+      margin: 0; }
+
+.share-group + .share-group {
+  margin-top: 54px; }
+
+.publish-warning {
+  margin: 28px 0 0 0;
+  max-width: 600px; }
+  .publish-warning .alert {
+    padding: 31px 36px 36px 36px; }
+  .publish-warning h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #4d3a19;
+    margin: 0; }
+  .publish-warning p {
+    margin: 0;
+    padding: 0; }
+  .publish-warning input[type=submit] {
+    float: none;
+    margin: 17px 0 0 0; }
 
 /*# sourceMappingURL=app.css.map */
