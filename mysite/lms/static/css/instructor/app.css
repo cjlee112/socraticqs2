@@ -832,6 +832,10 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none; }
 
+.form-group__action input[type=submit] {
+  float: none;
+  margin: 18px 0 0 0; }
+
 .radio-list ul {
   margin: 0;
   padding: 0;
@@ -1125,9 +1129,9 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     font-weight: normal;
     color: #000; }
   .share-group p {
-    margin: 12px 0 0 0; }
+    margin: 6px 0 0 0; }
   .share-group .input-with-button {
-    margin: 9px 0 0 0;
+    margin: 15px 0 0 0;
     max-width: 600px; }
     .share-group .input-with-button input {
       margin: 0; }
@@ -1146,7 +1150,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     color: #4d3a19;
     margin: 0; }
   .publish-warning p {
-    margin: 0;
+    margin: 6px 0 0 0;
     padding: 0; }
   .publish-warning input[type=submit] {
     float: none;

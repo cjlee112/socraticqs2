@@ -9,3 +9,10 @@
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none;
 }
+
+.form-group__action {
+  input[type=submit] {
+    float: none;
+    margin: 18px 0 0 0;
+  }
+}
