@@ -52,7 +52,7 @@
       <div class="page__messages">
         {% for message in messages %}
         <div class="alert alert-{%if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-          {{ message }}
+          {{ message|safe }}
         </div>
         {% endfor %}
         <!-- TODO: Add notifications here -->
