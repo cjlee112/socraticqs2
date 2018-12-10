@@ -1,15 +1,19 @@
 {% load static %}
 {% load media %}
-<div class="image-upload-container">
-    <img id="image-{{ id }}" src="{% media_prefix value %}" alt=""
-         class="image-holder js-image-holder"><br>
+<div class="image-upload">
     {% if value %}
-        <div class="image-clear">
-            <input id="{{ name }}-clear_id" name="{{ name }}-clear" type="checkbox">
-            <label for="{{ name }}-clear_id">Check if you want to delete image</label>
-        </div>
-    {% endif %}
-    <button type="button" class=" btn btn-success js-upload-image" data-id="{{ id }}">Choose image</button>
+        <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Replace Image</button>
 
+        <div class="image-clear">
+            <label for="{{ name }}-clear_id">
+              <input id="{{ name }}-clear_id" name="{{ name }}-clear" type="checkbox">
+              Check this and save the thread to delete this image
+          </label>
+        </div>
+    {% else %}
+      <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Upload an Image</button>
+    {% endif %}
+
+    <img id="image-{{ id }}" src="{% media_prefix value %}" alt="" class="image-holder js-image-holder">
     <input type="file" class="hidden js-upload-input" id="input-{{ id }}" data-id="{{ id }}" name="{{ name }}">
 </div>

@@ -2,6 +2,16 @@
 
 }
 
+.expandable--form-description {
+  > p {
+    margin: 0;
+  }
+
+  .expandable__content p {
+    margin: 0;
+  }
+}
+
 .expandable__toggle {
   cursor: pointer;
 }
