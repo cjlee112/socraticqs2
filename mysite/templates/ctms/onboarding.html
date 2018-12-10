@@ -31,7 +31,7 @@
 
 
       <!-- view_introduction -->
-      <div class="get-started__step get-started__step--open" data-step-id="view_introduction">
+      <div class="get-started__step{% if view_introduction.done %} get-started__step--done{% endif %}" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>1.Watch our introduction to Courselets</h2>
@@ -59,7 +59,7 @@
 
 
       <!-- test_courselet -->
-      <div class="get-started__step" data-step-id="instructor_intro">
+      <div class="get-started__step{% if test_courselet.done %} get-started__step--done{% endif %}" data-step-id="test_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>2. Test a courselet</h2>
@@ -79,7 +79,7 @@
               The courselet will open in a new tab. Simply close the tab when you’re done to return to this page.
             </p>
 
-            <a data-complete-step="instructor_intro" href="https://www.courselets.org/chat/enrollcode/bd85034b6f274458af7cea0c0cd2c278/" class="button button--primary" target="_blank">
+            <a data-complete-step="test_courselet" href="{{ enroll_url }}" class="button button--primary" target="_blank">
               Test a Courselet
             </a>
           </div>
@@ -88,7 +88,7 @@
 
 
       <!-- create_course -->
-      <div class="get-started__step" data-step-id="create_course">
+      <div class="get-started__step{% if create_course.done %} get-started__step--done{% endif %}" data-step-id="create_course">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>3. Create your first course</h2>
@@ -105,9 +105,8 @@
         </div>
       </div>
 
-
       <!-- create_courselet -->
-      <div class="get-started__step" data-step-id="create_courselet">
+      <div class="get-started__step{% if create_courselet.done %} get-started__step--done{% endif %}" data-step-id="create_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>4. Create a courselet</h2>
@@ -134,7 +133,7 @@
 
 
       <!-- create_thread -->
-      <div class="get-started__step" data-step-id="create_thread">
+      <div class="get-started__step{% if create_thread.done %} get-started__step--done{% endif %}" data-step-id="create_thread">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>5. Add a thread</h2>
@@ -146,22 +145,20 @@
           <div class="onboarding-content">
             {% include 'ctms/includes/onboarding/threads.html' %}
 
-            {% comment %}
-              TODO Check if the user has a courselet
+            {% if users_course.id and users_courselet.id %}
                 <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Add a Thread</a>
-              else
+            {% else %}
                 <div class="alert alert-warning">
                   You need to create a courselet before you can add a thread.
                 </div>
-              endif
-            {% endcomment %}
+            {% endif %}
           </div>
         </div>
       </div>
 
 
       <!-- preview_courselet -->
-      <div id="preview" class="get-started__step" data-step-id="preview_courselet">
+      <div id="preview" class="get-started__step{% if preview_courselet.done %} get-started__step--done{% endif %}" data-step-id="preview_courselet">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>6. Preview your courselet</h2>
@@ -181,24 +178,23 @@
               “Preview” in your sidebar at any time to test your courselet again.
             </p>
 
-            {% comment %}
-              TODO Check if the user has created a thread
-                <a data-complete-step="preview_courselet" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="button button--primary" target="_blank">
+            {% if users_course.id and users_courselet.id %}
+                <a data-complete-step="preview_courselet" href="{% url 'ctms:courselet_preview' course_pk=users_course.id pk=users_courselet.id %}" class="button button--primary" target="_blank">
                   Preview {{ users_courselet.title }}
                 </a>
-              else
+            {% else %}
                 <div class="alert alert-warning">
                   You need to add a thread before you preview your courselet.
                 </div>
-              endif
-            {% endcomment %}
+            {% endif %}
           </div>
         </div>
       </div>
 
 
       <!-- next_step -->
-      <div class="get-started__step" data-step-id="next_steps" data-redirect-to-after-done="TOOD Add url to the threads page with success message">
+      <div class="get-started__step{% if next_steps.done %} get-started__step--done{% endif %}" data-step-id="next_steps"
+           data-redirect-to-after-done="{% if users_course.id and users_courselet.id %}{% url 'ctms:courslet_view' course_pk=users_course.id pk=users_courselet.id %}?message=1{% else %}#{% endif %}">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>7. Learn more about your next steps</h2>
@@ -328,6 +324,8 @@
           }
         }
       });
+      // Open first unresolved step
+      $('.get-started__step').not('.get-started__step--done').first().addClass('get-started__step--open');
     });
   </script>
 {% endblock %}

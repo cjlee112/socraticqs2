@@ -1654,4 +1654,5 @@ def onboarding_unit_created(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Lesson)
 def onboarding_lesson_created(sender, instance, **kwargs):
-    update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)
+    if instance.kind == Lesson.ANSWER:
+        update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)
