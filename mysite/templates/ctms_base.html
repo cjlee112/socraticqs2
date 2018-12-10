@@ -192,7 +192,15 @@
           e.preventDefault();
           document.getElementById("enroll_code").select();
           document.execCommand("copy");
-          $.notify("Copied the enroll code to clipboard.", "info");
+          $.notify("The Enrollment URL has been copied to the clipboard.", "info");
+        });
+
+        // Copy the LTI code (invite students)
+        $('#copy_lti_url').on('click', function(e){
+          e.preventDefault();
+          document.getElementById("lti_url").select();
+          document.execCommand("copy");
+          $.notify("The LTI URL has been copied to the clipboard.", "info");
         });
 
         $('#send_to_courselets').click(function(event) {

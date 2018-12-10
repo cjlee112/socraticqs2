@@ -1,0 +1,25 @@
+.publish-warning {
+  margin: 28px 0 0 0;
+  max-width: 600px;
+
+  .alert {
+    padding: 31px 36px 36px 36px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #4d3a19;
+    margin: 0;
+  }
+
+  p {
+    margin: 6px 0 0 0;
+    padding: 0;
+  }
+
+  input[type=submit] {
+    float: none;
+    margin: 17px 0 0 0;
+  }
+}

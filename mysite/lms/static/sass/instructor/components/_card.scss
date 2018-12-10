@@ -119,7 +119,19 @@
   padding: 48px 24px;
 
   > *:first-child {
-    margin-top: -12px;;
+    margin-top: -12px;
+  }
+
+  > h1:first-child {
+    margin-top: -9px;
+  }
+
+  h1 + p {
+    margin-top: 15px;
+  }
+
+  p {
+    max-width: 600px;
   }
 
   .alert {
