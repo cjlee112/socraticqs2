@@ -1768,3 +1768,197 @@ class TestChatGetBackUrls(CustomTestCase):
         valid_url = url_callable(self)
         self.assertEqual(name, valid_name)
         self.assertEqual(url, valid_url)
+
+
+class MultipleChoiceTests(CustomTestCase):
+    """
+    Tests for the Multiple Choice question in the chat.
+
+    Checks:
+    - ASCII error
+    - Formative flow
+    - Concept inventiory flow
+    - True multiple selection flow [there is no correct choice]
+    """
+    def setUp(self):
+        super(MultipleChoiceTests, self).setUp()
+        self.enroll_code = EnrollUnitCode.get_code(self.courseunit)
+        lesson = self.unitlesson.lesson
+        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\n'+\
+                        u'потому что потому\r\n() три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.sub_kind = "choices"
+        lesson.kind = "orct"
+        lesson.addedBy = self.user
+        lesson.save()
+
+        lesson2 = Lesson(title='title2', text=u'два', kind='answer', addedBy=self.user)
+        lesson2.save()
+
+        self.unitlesson2 = UnitLesson(
+            unit=self.unit, kind=UnitLesson.ANSWERS, lesson=lesson2, addedBy=self.user, treeID=lesson2.id,
+            parent=self.unitlesson
+        )
+        self.unitlesson2.save()
+
+        lesson3 = Lesson(title='title3', text=u'1', kind='orct', addedBy=self.user)
+        lesson3.save()
+
+        self.unitlesson3 = UnitLesson(
+            unit=self.unit, order=1, lesson=lesson3, addedBy=self.user, treeID=lesson3.id
+        )
+        self.unitlesson3.save()
+        self.client.login(username='test', password='test')
+        response = self.client.get(
+            reverse(
+                'chat:init_chat_api',
+                kwargs={
+                    'enroll_key': self.enroll_code,
+                    'chat_id': 0
+                }
+            ),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        json_content = json.loads(response.content)
+        self.chat_id = json_content['id']
+        self.assertNotIsInstance(response, HttpResponseNotFound)
+
+        response = self.client.get(
+            reverse('chat:chat_enroll', args=(self.enroll_code, self.chat_id)), follow=True
+        )
+
+    def get_history(self):
+        response = self.client.get(
+            reverse('chat:history'), {'chat_id': self.chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+
+        self.assertEquals(json_content['input']['subType'], 'choices')
+        next_url = json_content['input']['url']
+        return json_content, next_url
+
+    def post_answer(self, json_content, next_url, choices):
+        message_id = json_content['input']['includeSelectedValuesFromMessages']
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"options": 1, "selected": {message_id[0]: {"choices": choices}}, "chat_id": self.chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        response = self.client.get(
+            next_url, {'chat_id': self.chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        self.assertIsNotNone(json_content['input']['options'])
+        self.assertEquals(len(json_content['addMessages']), 2)
+        return json_content, next_url
+
+    def confidence_answer(self, json_content, next_url):
+        conf = json_content['input']['options'][2]['value']
+        conf_text = json_content['input']['options'][2]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": conf, "chat_id": self.chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+
+        response = self.client.get(
+            next_url, {'chat_id': self.chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        return json_content, next_url
+
+    def get_and_check_next_question(self, json_content, next_url):
+        response = self.client.get(
+            next_url, {'chat_id': self.chat_id}, follow=True
+        )
+        self.assertEquals(response.status_code, 200)
+
+    def test_ascii_valid(self):
+        lesson = self.unitlesson.lesson
+        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.save()
+
+        json_content, next_url = self.get_history()
+        json_content, next_url = self.post_answer(json_content, next_url, [1])
+        json_content, next_url = self.confidence_answer(json_content, next_url)
+
+        answer_msg = u"You got it right, the correct answer is: два"
+        explanation_msg = u"потому что потому"
+        self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
+        self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
+        self.assertIn('breakpoint', json_content['addMessages'][2]['type'])
+
+        self.get_and_check_next_question(json_content, next_url)
+
+    def test_ascii_invalid(self):
+        lesson = self.unitlesson.lesson
+        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.save()
+
+        json_content, next_url = self.get_history()
+        json_content, next_url = self.post_answer(json_content, next_url, [0])
+        json_content, next_url = self.confidence_answer(json_content, next_url)
+
+        answer_msg = u"The correct answer is: два"
+        explanation_msg = u"потому что потому"
+        self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
+        self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
+
+        answer_msg = u"You selected: один"
+        self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
+        self.assertIn('breakpoint', json_content['addMessages'][3]['type'])
+
+        self.get_and_check_next_question(json_content, next_url)
+
+    def test_ascii_void_valid(self):
+        lesson = self.unitlesson.lesson
+        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n() два\r\nпотому что потому\r\n()'+\
+                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.save()
+
+        json_content, next_url = self.get_history()
+        json_content, next_url = self.post_answer(json_content, next_url, [])
+        json_content, next_url = self.confidence_answer(json_content, next_url)
+
+        answer_msg = u"You got it right, the correct answer is: " + self.unitlesson2.lesson.title
+        explanation_msg = self.unitlesson2.lesson.text
+        self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
+        self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
+        self.assertIn('breakpoint', json_content['addMessages'][2]['type'])
+
+        self.get_and_check_next_question(json_content, next_url)
+
+    def test_ascii_void_invalid(self):
+        lesson = self.unitlesson.lesson
+        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.save()
+
+        json_content, next_url = self.get_history()
+        json_content, next_url = self.post_answer(json_content, next_url, [])
+        json_content, next_url = self.confidence_answer(json_content, next_url)
+
+        answer_msg = u"The correct answer is: два"
+        explanation_msg = u"потому что потому"
+        self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
+        self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
+        self.assertIn('breakpoint', json_content['addMessages'][3]['type'])
+
+        answer_msg = u"You selected: Nothing"
+        self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
+
+        self.get_and_check_next_question(json_content, next_url)

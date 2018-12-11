@@ -43,7 +43,6 @@
   p {
     color: $color-text-primary;
     margin: 9px 0 0 0;
-    max-width: 600px;
   }
 }
 
@@ -128,10 +127,6 @@
 
   h1 + p {
     margin-top: 15px;
-  }
-
-  p {
-    max-width: 600px;
   }
 
   .alert {
@@ -244,4 +239,8 @@
   .card__notice {
     padding: 23px 60px;
   }
+}
+
+@media (min-width: 1388px) {
+
 }
