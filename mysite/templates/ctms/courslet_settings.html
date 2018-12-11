@@ -27,16 +27,7 @@
     </nav>
 
     <main class="card__content">
-      <div>
-      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
-        {% csrf_token %}
-
-        <div class="form-group">
-          <label for="name">Courselet Name</label>
-          <p>You can change the name of your courselet here.</p>
-          {{ form.title }}
-        </div>
-
+      <div class="card__centered">
         <div class="form-group">
           <label>Publish Settings</label>
           <p>
@@ -52,21 +43,30 @@
           </div>
         </div>
 
+        <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
+          {% csrf_token %}
 
-        <br>
-        Show Concepts in the Chat start page? {{ form.is_show_will_learn }}
-        <!-- TODO: Replace label, description and input with real form
-          {{ form.as_p }}
-        -->
+          <div class="form-group form-group--not-first">
+            <label for="name">Courselet Name</label>
+            <p>You can change the name of your courselet here.</p>
+            {{ form.title }}
+          </div>
 
-        <input type="submit" value="Save">
-      </form>
+          <br>
+          Show Concepts in the Chat start page? {{ form.is_show_will_learn }}
+          <!-- TODO: Replace label, description and input with real form
+            {{ form.as_p }}
+          -->
 
-      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
-        {% csrf_token %}
+          <input type="submit" value="Save">
+        </form>
 
-        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
-      </form>
+        <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+          {% csrf_token %}
+
+          <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+        </form>
+      </div>
     </main>
   </div>
   </div>

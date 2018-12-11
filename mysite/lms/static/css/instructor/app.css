@@ -496,6 +496,10 @@ a.sidebar__add {
     .card__content .alert-info a:hover, .card__content .alert-info a:focus, .card__content .alert-info a:active {
       text-decoration: none; }
 
+.card__centered {
+  max-width: 600px;
+  margin: 0 auto; }
+
 .card__empty-state h3 {
   margin: 4px 0 0 0; }
 .card__empty-state .onboarding-content {
@@ -558,6 +562,14 @@ a.sidebar__add {
 
   .card__notice {
     padding: 23px 60px; } }
+@media (min-width: 1388px) {
+  .card {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto; }
+
+  .card__centered .card__delete .button, .card__centered .card__delete input[type=submit], .card__centered .card__delete input[type=submit].button {
+    left: 180px; } }
 .avatar {
   display: inline-block;
   width: 30px;
@@ -835,9 +847,14 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     margin-top: 0; }
   .form-group .radio-list {
     margin-bottom: -6px; }
+  .form-group input, .form-group textarea {
+    max-width: 600px; }
 
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none; }
+
+.form-group--not-first:first-of-type {
+  margin: 36px 0 0 0; }
 
 .form-group__action input[type=submit] {
   float: none;

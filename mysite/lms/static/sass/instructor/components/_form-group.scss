@@ -8,10 +8,18 @@
   .radio-list {
     margin-bottom: -6px;
   }
+
+  input, textarea {
+    max-width: 600px;
+  }
 }
 
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none;
+}
+
+.form-group--not-first:first-of-type {
+  margin: 36px 0 0 0;
 }
 
 .form-group__action {

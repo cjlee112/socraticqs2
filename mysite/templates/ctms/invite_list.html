@@ -55,17 +55,19 @@
     </section>
 
     <main class="card__content">
-      {% block how_to %} {% endblock %}
+      <div class="card__centered">
+        {% block how_to %} {% endblock %}
 
-      {% block invitation_content %} {% endblock %}
+        {% block invitation_content %} {% endblock %}
 
-      {% block invites_list %}
-        {% with 'Tester' as list_name %}
-          {% with invites.testers as objects %}
-            {% include 'ctms/includes/invites_list.html' %}
+        {% block invites_list %}
+          {% with 'Tester' as list_name %}
+            {% with invites.testers as objects %}
+              {% include 'ctms/includes/invites_list.html' %}
+            {% endwith %}
           {% endwith %}
-        {% endwith %}
-      {% endblock %}
+        {% endblock %}
+      </div>
     </main>
 
     <!--<main class="card__content">-->
