@@ -43,7 +43,6 @@
   p {
     color: $color-text-primary;
     margin: 9px 0 0 0;
-    max-width: 600px;
   }
 }
 
@@ -130,10 +129,6 @@
     margin-top: 15px;
   }
 
-  p {
-    max-width: 600px;
-  }
-
   .alert {
     padding: 12px 24px;
   }
@@ -149,11 +144,6 @@
       }
     }
   }
-}
-
-.card__centered {
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .card__empty-state {
@@ -252,15 +242,5 @@
 }
 
 @media (min-width: 1388px) {
-  .card {
-    max-width: 960px;
-    margin-left: auto;
-    margin-right: auto;
-  }
 
-  .card__centered .card__delete {
-    .button, input[type=submit], input[type=submit].button {
-      left: 180px;
-    }
-  }
 }

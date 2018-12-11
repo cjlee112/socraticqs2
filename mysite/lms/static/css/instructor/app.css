@@ -112,8 +112,7 @@ label {
 
 label + p {
   color: #333;
-  margin: 0;
-  max-width: 600px; }
+  margin: 0; }
 
 input[type=text], input[type=password], input[type=email], textarea {
   display: block;
@@ -422,8 +421,7 @@ a.sidebar__add {
   padding: 39px 24px 35px 24px; }
   .card__topbar.card__topbar--with-description p {
     color: #333;
-    margin: 9px 0 0 0;
-    max-width: 600px; }
+    margin: 9px 0 0 0; }
 
 .card__nav {
   border-bottom: 1px solid #DDE2E6;
@@ -485,8 +483,6 @@ a.sidebar__add {
     margin-top: -9px; }
   .card__content h1 + p {
     margin-top: 15px; }
-  .card__content p {
-    max-width: 600px; }
   .card__content .alert {
     padding: 12px 24px; }
   .card__content .alert-info a {
@@ -495,10 +491,6 @@ a.sidebar__add {
     text-decoration: underline; }
     .card__content .alert-info a:hover, .card__content .alert-info a:focus, .card__content .alert-info a:active {
       text-decoration: none; }
-
-.card__centered {
-  max-width: 600px;
-  margin: 0 auto; }
 
 .card__empty-state h3 {
   margin: 4px 0 0 0; }
@@ -562,14 +554,6 @@ a.sidebar__add {
 
   .card__notice {
     padding: 23px 60px; } }
-@media (min-width: 1388px) {
-  .card {
-    max-width: 960px;
-    margin-left: auto;
-    margin-right: auto; }
-
-  .card__centered .card__delete .button, .card__centered .card__delete input[type=submit], .card__centered .card__delete input[type=submit].button {
-    left: 180px; } }
 .avatar {
   display: inline-block;
   width: 30px;
@@ -847,8 +831,6 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     margin-top: 0; }
   .form-group .radio-list {
     margin-bottom: -6px; }
-  .form-group input, .form-group textarea {
-    max-width: 600px; }
 
 .form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
   display: none; }
@@ -1147,8 +1129,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .line-list {
   list-style: none;
   margin: 12px 0 0 0;
-  padding: 0;
-  max-width: 600px; }
+  padding: 0; }
   .line-list li {
     background: url(../../img/instructor/line-list.svg) no-repeat 0 11px;
     padding: 0 0 0 20px; }
@@ -1178,8 +1159,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   .share-group p {
     margin: 6px 0 0 0; }
   .share-group .input-with-button {
-    margin: 15px 0 0 0;
-    max-width: 600px; }
+    margin: 15px 0 0 0; }
     .share-group .input-with-button input {
       margin: 0; }
 
@@ -1187,8 +1167,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   margin-top: 54px; }
 
 .publish-warning {
-  margin: 28px 0 0 0;
-  max-width: 600px; }
+  margin: 28px 0 0 0; }
   .publish-warning .alert {
     padding: 31px 36px 36px 36px; }
   .publish-warning h3 {
