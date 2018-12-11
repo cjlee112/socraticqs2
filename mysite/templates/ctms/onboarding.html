@@ -36,7 +36,7 @@
           <div class="get-started__step-status"></div>
           <h2>1.Watch our introduction to Courselets</h2>
 
-          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">Hide</a>
+          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
 
         <div class="get-started__step-content">
@@ -266,7 +266,7 @@
       $('[data-complete-step]').on('click', function(e) {
         // Get the step name and element
         var stepName = $(e.currentTarget).data('complete-step');
-        var $step = $('.get-started__step[data-step-id='+ stepName +']')
+        var $step = $('.get-started__step[data-step-id='+ stepName +']');
         var data = {};
         data[stepName] = true;
 
@@ -295,9 +295,9 @@
           // Update the progress bars
           var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
           var newProgressPercentage = Math.floor(newProgress * 100);
-          progressCircle.set(newProgress)
-          $('.get-started__progress-text').html(newProgressPercentage)
-          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'})
+          progressCircle.set(newProgress);
+          $('.get-started__progress-text').html(newProgressPercentage);
+          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'});
 
           // Hide open steps
           $('.get-started__step').removeClass('get-started__step--open');
@@ -315,7 +315,7 @@
       // Redirect when the user closes the final video
       $("[data-fancybox]").fancybox({
         afterClose: function( instance, slide ) {
-          var steps = $('.get-started__step').length
+          var steps = $('.get-started__step').length;
           var done = $('.get-started__step--done').length;
           var redirectTo = $('[data-redirect-to-after-done]').data('redirect-to-after-done');
 
@@ -325,7 +325,7 @@
         }
       });
       // Open first unresolved step
-      $('.get-started__step').not('.get-started__step--done').first().addClass('get-started__step--open');
+      $('.get-started__step').not('.get-started__step--done').first().addClass('get-started__step--open').find('.get-started__step-toggle').html('Hide');;
     });
   </script>
 {% endblock %}
