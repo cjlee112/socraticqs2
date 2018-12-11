@@ -30,191 +30,189 @@ Courselet
   {% endif %}
 
   <main class="card__content">
-    <div class="card__centered">
-      <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}"
-            method="POST" enctype="multipart/form-data" id="unitEditForm">
-        <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}"
+          method="POST" enctype="multipart/form-data" id="unitEditForm">
+      <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
 
-        {% csrf_token %}
+      {% csrf_token %}
 
-        {{ errors_formset.management_form }}
+      {{ errors_formset.management_form }}
 
-          <!-- Name -->
-          <div class="form-group">
-            <label for="{{ form.title.auto_id }}">Thread Name</label>
+        <!-- Name -->
+        <div class="form-group">
+          <label for="{{ form.title.auto_id }}">Thread Name</label>
 
-            <div class="expandable expandable--form-description">
+          <div class="expandable expandable--form-description">
+            <p>
+              Choose a name that's short and distinct. <a class="expandable__toggle" href="#">Read more</a>
+            </p>
+
+            <div class="expandable__content">
               <p>
-                Choose a name that's short and distinct. <a class="expandable__toggle" href="#">Read more</a>
+                Choose a name that's short – a few words – and distinct – that helps students easily recognize this question within the list shown in the sidebar. For example, if your courselet presented questions about probability, and this question was the only one that featured trains (as an example), you could name it something like "Two Trains". Don't try to make the name a summary of what the question's asking -- that will be too long.
               </p>
-
-              <div class="expandable__content">
-                <p>
-                  Choose a name that's short – a few words – and distinct – that helps students easily recognize this question within the list shown in the sidebar. For example, if your courselet presented questions about probability, and this question was the only one that featured trains (as an example), you could name it something like "Two Trains". Don't try to make the name a summary of what the question's asking -- that will be too long.
-                </p>
-              </div>
             </div>
-
-            {{ form.title }}
-            {% if form.title.errors %}
-              {{ form.title.errors }}
-            {% endif %}
-            <!-- <input type="text"> -->
           </div>
 
+          {{ form.title }}
+          {% if form.title.errors %}
+            {{ form.title.errors }}
+          {% endif %}
+          <!-- <input type="text"> -->
+        </div>
 
 
-          <!-- Unit type -->
-          <div class="form-group">
-            <label for="{{ form.unit_type.auto_id }}">Thread Type</label>
 
-            <p>{{ form.unit_type.help_text }}</p>
+        <!-- Unit type -->
+        <div class="form-group">
+          <label for="{{ form.unit_type.auto_id }}">Thread Type</label>
 
-            <div class="radio-list">
-              {{ form.unit_type }}
-            </div>
-            {% if form.unit_type.errors %}
-              {{ form.unit_type.errors }}
-            {% endif %}
+          <p>{{ form.unit_type.help_text }}</p>
+
+          <div class="radio-list">
+            {{ form.unit_type }}
           </div>
+          {% if form.unit_type.errors %}
+            {{ form.unit_type.errors }}
+          {% endif %}
+        </div>
 
 
 
-          <!-- Introduction -->
-          <div class="form-group form-group--introduction">
-            <label for="{{ form.text.auto_id }}">Introduction</label>
+        <!-- Introduction -->
+        <div class="form-group form-group--introduction">
+          <label for="{{ form.text.auto_id }}">Introduction</label>
 
-            <p>
-              Write your introduction here. You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text.
-            </p>
-          </div>
+          <p>
+            Write your introduction here. You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text.
+          </p>
+        </div>
 
 
 
-          <!-- Question -->
-          <div class="form-group form-group--question">
-            <label for="{{ form.text.auto_id }}">Question</label>
+        <!-- Question -->
+        <div class="form-group form-group--question">
+          <label for="{{ form.text.auto_id }}">Question</label>
 
-            <p>
-              You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your question:
-            </p>
+          <p>
+            You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your question:
+          </p>
 
-            <ul class="line-list">
-              <li>Take a real-world situation that's representative of how you think students should be able to apply a concept you've taught, but different from examples you've already shown them how to solve.</li>
-              <li>Focus your question small enough that students only need to think about that one concept.</li>
-              <li>Difficulty: thinking about that concept should lead pretty directly to the answer, without requiring other skills such as solving equations, but it should not be guessable.  In general, about 1/3 to 2/3 of your students should be able to do it.</li>
-              <li>Ask for a definite, specific answer, so that it's easy for students to self-assess whether their answer is right, by comparison with your answer.</li>
-              <li>Also ask students to briefly explain their reasoning for how they arrived at their answer, so that you'll be able to discover underlying misconceptions directly from students' responses.</li>
-              <li>Keep your question SHORT, like a real chat conversation.  If it seems too long, use various ways to split it into smaller pieces: background explanations should be moved to a separate Introduction thread; state your question briefly, even if you're concerned some students may need additional clarifications: provide those separately in an embedded audio or video clip.</li>
-            </ul>
-          </div>
+          <ul class="line-list">
+            <li>Take a real-world situation that's representative of how you think students should be able to apply a concept you've taught, but different from examples you've already shown them how to solve.</li>
+            <li>Focus your question small enough that students only need to think about that one concept.</li>
+            <li>Difficulty: thinking about that concept should lead pretty directly to the answer, without requiring other skills such as solving equations, but it should not be guessable.  In general, about 1/3 to 2/3 of your students should be able to do it.</li>
+            <li>Ask for a definite, specific answer, so that it's easy for students to self-assess whether their answer is right, by comparison with your answer.</li>
+            <li>Also ask students to briefly explain their reasoning for how they arrived at their answer, so that you'll be able to discover underlying misconceptions directly from students' responses.</li>
+            <li>Keep your question SHORT, like a real chat conversation.  If it seems too long, use various ways to split it into smaller pieces: background explanations should be moved to a separate Introduction thread; state your question briefly, even if you're concerned some students may need additional clarifications: provide those separately in an embedded audio or video clip.</li>
+          </ul>
+        </div>
 
-          {{ form.text }}
-          {% if form.text.errors %}
-            {{ form.text.errors }}
+        {{ form.text }}
+        {% if form.text.errors %}
+          {{ form.text.errors }}
+        {% endif %}
+
+        {{ form.attachment }}
+        {% if form.attachment.errors %}
+            {{ form.attachment.errors }}
           {% endif %}
 
-          {{ form.attachment }}
-          {% if form.attachment.errors %}
-              {{ form.attachment.errors }}
-            {% endif %}
+        <!-- Answer -->
+        <div class="form-group form-group--answer">
+          <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
 
-          <!-- Answer -->
-          <div class="form-group form-group--answer">
-            <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
+          <p>
+            You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your answer:
+          </p>
 
-            <p>
-              You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your answer:
-            </p>
+          <ul class="line-list">
+            <li>First provide a clear, brief statement of the definite, specific answer, so students can easily see whether their own answer was right.</li>
+            <li>Then give a brief explanation of the logic showing how the concept leads to this conclusion, so that students get a second chance to see whether their thinking was correct.</li>
+            <li>Don't warn about potential wrong ways of thinking; save that for the Error Models (see below).</li>
+            <li>Keep your answer brief by only including the core points sufficient for most students.</li>
+            <li>For students who need additional explanations, provide those separately in an embedded audio or video clip.</li>
+          </ul>
 
-            <ul class="line-list">
-              <li>First provide a clear, brief statement of the definite, specific answer, so students can easily see whether their own answer was right.</li>
-              <li>Then give a brief explanation of the logic showing how the concept leads to this conclusion, so that students get a second chance to see whether their thinking was correct.</li>
-              <li>Don't warn about potential wrong ways of thinking; save that for the Error Models (see below).</li>
-              <li>Keep your answer brief by only including the core points sufficient for most students.</li>
-              <li>For students who need additional explanations, provide those separately in an embedded audio or video clip.</li>
-            </ul>
+          {{ answer_form.answer }}
+          {% if answer_form.answer.errors %}
+            {{ answer_form.answer.errors }}
+          {% endif %}
 
-            {{ answer_form.answer }}
-            {% if answer_form.answer.errors %}
-              {{ answer_form.answer.errors }}
-            {% endif %}
-
-            {{ answer_form.attachment }}
-            {% if answer_form.attachment.errors %}
-              {{ answer_form.attachment.errors }}
-            {% endif %}
-          </div>
+          {{ answer_form.attachment }}
+          {% if answer_form.attachment.errors %}
+            {{ answer_form.attachment.errors }}
+          {% endif %}
+        </div>
 
 
 
-          <!-- Error models -->
-          <div class="form-group form-group--error-models">
-            <label>Error Models <span>– Optional</span></label>
+        <!-- Error models -->
+        <div class="form-group form-group--error-models">
+          <label>Error Models <span>– Optional</span></label>
 
-            <p>
-              An error model explains a common misconception. You would generally create these based on
-              answers, but you can also use errors that you already know that your students make. Your students will see these
-              error models when they self assess, and it will help understand why they made this error.
-              Some things to keep in mind:
-            </p>
+          <p>
+            An error model explains a common misconception. You would generally create these based on
+            answers, but you can also use errors that you already know that your students make. Your students will see these
+            error models when they self assess, and it will help understand why they made this error.
+            Some things to keep in mind:
+          </p>
 
-            <ul class="line-list">
-              <li>Write a one-sentence statement of this point-of-view in the form "I thought...", as its title, e.g. "I thought all that glitters is gold."</li>
-              <li>Explain the misconception: outline the thought process that produces this point of view, and point out exactly where exactly it goes wrong vs. the correct understanding.</li>
-              <li>Identify precisely what the student must change, to use this concept correctly.</li>
-              <li>For students who need additional explanations (e.g. a counter-example where this belief leads to an obviously absurd conclusion), provide those separately in an embedded audio or video clip.</li>
-            </ul>
+          <ul class="line-list">
+            <li>Write a one-sentence statement of this point-of-view in the form "I thought...", as its title, e.g. "I thought all that glitters is gold."</li>
+            <li>Explain the misconception: outline the thought process that produces this point of view, and point out exactly where exactly it goes wrong vs. the correct understanding.</li>
+            <li>Identify precisely what the student must change, to use this concept correctly.</li>
+            <li>For students who need additional explanations (e.g. a counter-example where this belief leads to an obviously absurd conclusion), provide those separately in an embedded audio or video clip.</li>
+          </ul>
 
-            {% if errors_formset %}
-              <div class="error-models-form">
+          {% if errors_formset %}
+            <div class="error-models-form">
 
-                <div class="error-models-form__items">
-                  {% for item_form in errors_formset %}
-                    <div id="item-{{ forloop.counter0 }}">
-                      <!--{#{ item_form.as_p }#}-->
-                      {% for field in item_form %}
-                        {% if field.is_hidden %}
-                          {{ field }}
-                        {% else %}
-                          <label for="{{ field.auto_id }}">{{ field.label }}</label>
-                          {{ field }}
-                          {% if field.errors %}
-                            {{ field.errors }}
-                          {% endif %}
+              <div class="error-models-form__items">
+                {% for item_form in errors_formset %}
+                  <div id="item-{{ forloop.counter0 }}">
+                    <!--{#{ item_form.as_p }#}-->
+                    {% for field in item_form %}
+                      {% if field.is_hidden %}
+                        {{ field }}
+                      {% else %}
+                        <label for="{{ field.auto_id }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                          {{ field.errors }}
                         {% endif %}
-                      {% endfor %}
-                      {# <!-- or for crispy forms --> {% crispy item_form %} #}
-                      <a href="#" class="error-models-form__remove">Remove error model</a>
-
-                      {% if course_pk and courslet and item_form.ul_id.value %}
-                        <div class="alert alert-info">
-                          <a class="edit-resolutions" href="{% url 'ct:resolutions' course_id=course_pk unit_id=courslet.unit.id ul_id=item_form.ul_id.value %}">Switch to the old Instructor UI</a> if you want to add resolutions.
-                        </div>
                       {% endif %}
-                    </div>
-                  {% endfor %}
-                </div>
+                    {% endfor %}
+                    {# <!-- or for crispy forms --> {% crispy item_form %} #}
+                    <a href="#" class="error-models-form__remove">Remove error model</a>
 
-                <a href="#" class="button error-models-form__add">Add Error Model</a>
+                    {% if course_pk and courslet and item_form.ul_id.value %}
+                      <div class="alert alert-info">
+                        <a class="edit-resolutions" href="{% url 'ct:resolutions' course_id=course_pk unit_id=courslet.unit.id ul_id=item_form.ul_id.value %}">Switch to the old Instructor UI</a> if you want to add resolutions.
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
               </div>
-            {% endif %}
-          </div>
 
-          <!-- Add unit aborts from the legacy interface -->
-          <div class="form-group form-group--unit-aborts">
-            <label>Abort Thread</label>
-            <p>
-              Enabling this will allow your students to skip directly to the error models without submitting an answer.
-            </p>
+              <a href="#" class="button error-models-form__add">Add Error Model</a>
+            </div>
+          {% endif %}
+        </div>
 
-            {{ form.add_unit_aborts }}
-          </div>
+        <!-- Add unit aborts from the legacy interface -->
+        <div class="form-group form-group--unit-aborts">
+          <label>Abort Thread</label>
+          <p>
+            Enabling this will allow your students to skip directly to the error models without submitting an answer.
+          </p>
 
-        <!-- Submit -->
-        <input type="submit" value="Save">
-      </form>
-    </div>
+          {{ form.add_unit_aborts }}
+        </div>
+
+      <!-- Submit -->
+      <input type="submit" value="Save">
+    </form>
   </main>
 </div>
 {% endblock %}
