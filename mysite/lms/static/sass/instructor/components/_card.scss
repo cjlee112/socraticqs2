@@ -38,10 +38,11 @@
 
 .card__topbar.card__topbar--with-description {
   height: auto;
+  padding: 39px 24px 35px 24px;
 
   p {
     color: $color-text-primary;
-    margin: 18px 0 0 0;
+    margin: 9px 0 0 0;
     max-width: 600px;
   }
 }
@@ -118,7 +119,19 @@
   padding: 48px 24px;
 
   > *:first-child {
-    margin-top: -12px;;
+    margin-top: -12px;
+  }
+
+  > h1:first-child {
+    margin-top: -9px;
+  }
+
+  h1 + p {
+    margin-top: 15px;
+  }
+
+  p {
+    max-width: 600px;
   }
 
   .alert {
@@ -143,12 +156,8 @@
     margin: 4px 0 0 0;
   }
 
-  p {
-    margin: 15px 0 0 0;
-  }
-
-  .button {
-    margin: 27px 0 0 0;
+  .onboarding-content{
+    margin-top: 13px;
   }
 }
 
@@ -183,7 +192,7 @@
   }
 
   .card__topbar.card__topbar--with-description {
-    padding-right: 60px;
+    padding: 39px 60px 35px 60px;
   }
 
   .card__nav {

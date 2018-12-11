@@ -221,16 +221,6 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 
         }
 
-    def get(self, request, *args, **kwargs):
-        my_courses = self.get_my_courses()
-        if not my_courses and not self.request.user.invite_set.all():
-            # no my_courses and no shared courses
-            return redirect('ctms:create_course')
-        if not my_courses and self.request.user.invite_set.all():
-            # no my_courses and present more that zero shared course
-            return redirect('ctms:shared_courses')
-        return super(MyCoursesView, self).get(request, *args, **kwargs)
-
     def post(self, request):
         form = CourseForm(request.POST)
         if form.is_valid():
@@ -414,6 +404,21 @@ class CoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         })
         kwargs.update(self.kwargs)
         return kwargs
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('message'):
+            message = """
+            <p>
+              <b>You've completed the "Get Started" tutorial</b> <br> 
+              We hope that you feel ready to continue working on your courselet. 
+              You can edit or add new threads on this page. 
+              Remember that you can ask us anything in the chat in your lower right corner. 
+              Thanks again for trying out Courselets, we're excited see what you'll create!
+            </p>
+            """
+            messages.add_message(self.request, messages.SUCCESS, message)
+            return HttpResponseRedirect(request.path)
+        return super(CoursletView, self).get(request, args, kwargs)
 
 
 class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
@@ -795,6 +800,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
         formset = self.get_formset()
 
         answer_required = self.request.POST['unit_type'] == Lesson.ORCT_QUESTION
+        answer_form_is_valid = False
         if answer_required:
             answer_form_is_valid = answer_form.is_valid()
 
@@ -823,6 +829,11 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
         if not has_error:
             cache.delete(memoize.cache_key('get_units_by_courselet', self.get_courslet()))
+            # need to check only Lesson: Answer
+            if Lesson.objects.filter(
+                    addedBy=self.request.user, kind=Lesson.ANSWER).count() == 1:
+                return HttpResponseRedirect('{}#preview'.format(reverse('ctms:onboarding')))
+
             return HttpResponseRedirect(self.get_success_url())
 
         context = {
@@ -1213,7 +1224,10 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Onboarding, self).get_context_data(**kwargs)
         users_course = Course.objects.filter(addedBy=self.request.user).last()
-        users_courselet = Unit.objects.filter(addedBy=self.request.user).last()
+        users_courselet = CourseUnit.objects.filter(
+            addedBy=self.request.user,
+            course=users_course
+        ).last()
         users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
         course = Course.objects.filter(id=introduction_course_id).first()
@@ -1232,13 +1246,10 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             enroll_url=enroll_url
         ))
         status = get_onboarding_status_with_settings(self.request.user.id)
-        steps = [
-            (key, status.get(key, {}).get('done', False), status.get(key, {}).get('settings', {}))
-            for key in get_onboarding_steps()
-        ]
-        context.update({
-            'steps': steps,
-        })
+        steps = {
+            key: status.get(key) for key in get_onboarding_steps()
+        }
+        context.update(**steps)
         return context
 
     def get(self, request, *args, **kwargs):

@@ -27,7 +27,7 @@
         {% csrf_token %}
 
         <label for="title">Course Name</label>
-        <p>Give your course a descriptive name.</p>
+        <p>You can change the name of your course here.</p>
         {{ form.title }}
         {% if form.title.errors %}
           {{ form.title.errors }}

@@ -1,0 +1,19 @@
+// Overrides jquery.fancybox.css
+
+.fancybox-bg {
+  background: #000 !important;
+}
+
+.fancybox-is-open .fancybox-bg {
+  opacity: .75 !important;
+}
+
+.fancybox-content {
+  box-shadow: 0 0 50px 20px rgba(0,0,0,0.2) !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+}
+
+.fancybox-button {
+  background: transparent !important;
+}

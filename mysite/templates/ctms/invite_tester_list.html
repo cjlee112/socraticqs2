@@ -4,14 +4,35 @@
   Share {{ object.title }}
 {% endblock %}
 
+{% block invite_tester_tab_cls %}card__nav-active{% endblock %}
+{% block invite_student_tab_cls %}{% endblock %}
+
 {% block how_to %}
-  <p>Please enter a single email address for sending invitation.</p>
+  <h1>Invite Testers</h1>
+  <p>Testers can test your courselet, even before it has been published. Simply enter your tester’s email address below, and we’ll send them directly to this courselet. Once you’re ready to share your courselet with students, you’ll find additional options under <a href="{% url 'ctms:courselet_invite_student' pk=course.id courselet_pk=courselet.id %}">Invite Students</a>.</p>
 {% endblock %}
 
+{% block invitation_content %}
+  <form class="form" action="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" method="POST">
+    {% csrf_token %}
 
-{% block invite_tester_tab_cls %}card__nav-active{% endblock %}
+    <div class="share-group">
+      <label for="email">Email Address</label>
 
-{% block invite_student_tab_cls %}{% endblock %}
+      <div class="input-with-button">
+        {% block invite_form %}
+          {% for field in  invite_tester_form %}
+            {{ field }}
+          {% endfor %}
+
+          <input type="submit" value="Invite" class="invite__submit__form__"
+          data-success-msg="The invitation has been sent."
+          data-fail-msg="We could not send the invitation. Please try again later.">
+        {% endblock %}
+      </div>
+    </div>
+  </form>
+{% endblock %}
 
 {% block invites_list %}
   {% with 'Tester' as list_name %}

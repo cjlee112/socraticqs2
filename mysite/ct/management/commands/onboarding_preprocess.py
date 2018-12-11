@@ -14,13 +14,13 @@ class Command(BaseCommand):
     help = 'Onboarding preprocessing'
 
     def handle(self, *args, **options):
-        for instructor in Instructor.objects.all():
+        try:
+            course = Course.objects.get(id=settings.ONBOARDING_INTRODUCTION_COURSE_ID)
+        except Course.DoesNotExist:
+            print("Onboarding course is not provided")
+            return
 
-            try:
-                course = Course.objects.get(id=settings.ONBOARDING_INTRODUCTION_COURSE_ID)
-            except Course.DoesNotExist:
-                print("Onboarding course is not provided")
-                return
+        for instructor in Instructor.objects.all():
 
             chat_exists = Chat.objects.filter(
                 user=instructor.user,
@@ -42,12 +42,8 @@ class Command(BaseCommand):
 
             # if instructor has created a create_thread
 
-            if Lesson.objects.filter(addedBy=instructor.user).exists():
+            if Lesson.objects.filter(addedBy=instructor.user, kind=Lesson.ANSWER).exists():
                 update_onboarding_step(onboarding.STEP_5, instructor.user_id)
-
-            # if he has created invite_somebody
-            if Invite.objects.filter(instructor=instructor).exists():
-                update_onboarding_step(onboarding.STEP_8, instructor.user_id)
 
             enroll_unit_code_exists = EnrollUnitCode.objects.filter(
                 courseUnit__course__addedBy=instructor.user,

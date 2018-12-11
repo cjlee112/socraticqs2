@@ -17,10 +17,11 @@
         </li>
 
         <li>
-          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
-        </li>
-          <li>
           <a href="{% url 'ctms:courselet_invite' pk=course_pk courselet_pk=pk %}" class="">Share</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" class="card__nav-active">Settings</a>
         </li>
       </ul>
     </nav>
@@ -30,9 +31,28 @@
       <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
         {% csrf_token %}
 
-        <label for="name">Courselet Name</label>
-        <p>Give your courselet a descriptive name.</p>
-        {{ form.title }}
+        <div class="form-group">
+          <label for="name">Courselet Name</label>
+          <p>You can change the name of your courselet here.</p>
+          {{ form.title }}
+        </div>
+
+        <div class="form-group">
+          <label>Publish Settings</label>
+          <p>
+            {% if courslet.releaseTime %}
+              Your courselet is published. Click on the button below if you want to unpublish it.
+            {% else %}
+              Your courselet has not been published yet. Click on the button below to publish it.
+            {% endif %}
+          </p>
+
+          <div class="form-group__action">
+            {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=pk course_pk=course_pk courselet=courslet %}
+          </div>
+        </div>
+
+
         <br>
         Show Concepts in the Chat start page? {{ form.is_show_will_learn }}
         <!-- TODO: Replace label, description and input with real form
@@ -41,16 +61,12 @@
 
         <input type="submit" value="Save">
       </form>
-      <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
-      <div>
-          <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
-            {% csrf_token %}
 
-            <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
-          </form>
-      {% include 'ctms/includes/publish-unpublish-button.html' with courselet_pk=pk course_pk=course_pk courselet=courslet %}
-      </div>
-      <div>
+      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+      </form>
     </main>
   </div>
   </div>

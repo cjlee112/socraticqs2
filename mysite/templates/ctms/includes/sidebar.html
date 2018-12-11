@@ -81,7 +81,7 @@
 
           <!-- TODO: This should always be visible if the user has a course and this if should not be necessary -->
           {% if sidebar.course %}
-            <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create Courselet</a>
+            <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create a Courselet</a>
           {% endif %}
         </section>
 
@@ -102,7 +102,7 @@
 
             <ul class="dropdown-menu" aria-labelledby="dropdown-courselets">
               <li>
-                <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create courselet</a>
+                <a href="{% url 'ctms:courslet_create' course_pk=sidebar.course.id %}">Create a courselet</a>
               </li>
               {% for courslet in sidebar.course_courslets %}
                 <li>
@@ -123,7 +123,7 @@
                 </li>
 
                 <li>
-                  <a target="_blank" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" target="_blank">Preview</a>
+                  <a data-complete-step="preview_courselet" target="_blank" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" target="_blank">Preview</a>
                 </li>
 
                 <li>

@@ -42,15 +42,14 @@ Courselet
         <div class="form-group">
           <label for="{{ form.title.auto_id }}">Thread Name</label>
 
-          <p>
-            Give your thread a descriptive name. This will show up as a thread in your students sidebar.
-          </p>
-          <div class="expandable">
-            <a class="expandable__toggle" href="#">How to name a thread</a>
+          <div class="expandable expandable--form-description">
+            <p>
+              Choose a name that's short and distinct. <a class="expandable__toggle" href="#">Read more</a>
+            </p>
 
             <div class="expandable__content">
-              <p style="margin-top: 12px; padding-left: 24px; color: #7F7F7F">
-                <b>Choose a name that's short</b> -- a few words -- and <b>distinct</b> -- that helps students easily recognize this question within the list shown in the sidebar.  For example, if your courselet presented questions about probability, and this question was the only one that featured trains (as an example), you could name it something like "Two Trains".  Don't try to make the name a summary of what the question's asking -- that will be too long.
+              <p>
+                Choose a name that's short – a few words – and distinct – that helps students easily recognize this question within the list shown in the sidebar. For example, if your courselet presented questions about probability, and this question was the only one that featured trains (as an example), you could name it something like "Two Trains". Don't try to make the name a summary of what the question's asking -- that will be too long.
               </p>
             </div>
           </div>
@@ -80,23 +79,13 @@ Courselet
 
 
 
-        <!-- TODO: Introduction and question should be separate inputs, form.text is currently displayed twice -->
         <!-- Introduction -->
         <div class="form-group form-group--introduction">
           <label for="{{ form.text.auto_id }}">Introduction</label>
 
           <p>
             Write your introduction here. You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text.
-
-            <span class="expandable">
-              <a class="expandable__toggle" href="#">How to write a good introduction</a>
-
-              <span class="expandable__content">
-                <br> Add a longer description here.
-              </span>
-            </span>
           </p>
-
         </div>
 
 
@@ -106,23 +95,17 @@ Courselet
           <label for="{{ form.text.auto_id }}">Question</label>
 
           <p>
-            Write your question here. You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text.
+            You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your question:
           </p>
-          <div class="expandable">
-            <a class="expandable__toggle" href="#"><span>How to write a good question</a></span>
 
-            <div class="expandable__content">
-              <ul style="margin-top: 12px; padding-left: 24px; color: #7F7F7F">
-                <li><b>Take a real-world situation</b> that's representative of how you think students should be able to apply a concept you've taught, but different from examples you've already shown them how to solve.</li>
-                <li><b>Focus your question</b> small enough that students only need to think about that one concept.</li>
-                <li><b>Difficulty:</b> thinking about that concept should lead pretty directly to the answer, without requiring other skills such as solving equations, but it should not be guessable.  In general, about 1/3 to 2/3 of your students should be able to do it.</li>
-                <li><b>Ask for a definite, specific answer</b>, so that it's easy for students to self-assess whether their answer is right, by comparison with your answer.</li>
-                <li><b>Also ask students to briefly explain their reasoning</b> for how they arrived at their answer, so that you'll be able to discover underlying misconceptions directly from students' responses.</li>
-                <li><b>Keep your question SHORT, like a real chat</b> conversation.  If it seems too long, use various ways to split it into smaller pieces: <b>background explanations</b> should be moved to a separate Introduction thread; <b>state your question briefly</b>, even if you're concerned some students may need <b>additional clarifications:</b> provide those separately in an embedded audio or video clip.</li>
-              </ul>
-            </div>
-          </div>
-
+          <ul class="line-list">
+            <li>Take a real-world situation that's representative of how you think students should be able to apply a concept you've taught, but different from examples you've already shown them how to solve.</li>
+            <li>Focus your question small enough that students only need to think about that one concept.</li>
+            <li>Difficulty: thinking about that concept should lead pretty directly to the answer, without requiring other skills such as solving equations, but it should not be guessable.  In general, about 1/3 to 2/3 of your students should be able to do it.</li>
+            <li>Ask for a definite, specific answer, so that it's easy for students to self-assess whether their answer is right, by comparison with your answer.</li>
+            <li>Also ask students to briefly explain their reasoning for how they arrived at their answer, so that you'll be able to discover underlying misconceptions directly from students' responses.</li>
+            <li>Keep your question SHORT, like a real chat conversation.  If it seems too long, use various ways to split it into smaller pieces: background explanations should be moved to a separate Introduction thread; state your question briefly, even if you're concerned some students may need additional clarifications: provide those separately in an embedded audio or video clip.</li>
+          </ul>
         </div>
 
         {{ form.text }}
@@ -140,21 +123,17 @@ Courselet
           <label for="{{ answer_form.answer.auto_id }}">{{ answer_form.answer.label }}</label>
 
           <p>
-            Write your answer here. You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text.
+            You can use <a href="http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html" target="_blank">ReStructuredText</a> to format your text. Here are some things to keep in mind when writing your answer:
           </p>
-          <div class="expandable">
-            <a class="expandable__toggle" href="#"><span>How to write a good answer</a></span>
 
-            <div class="expandable__content">
-              <ul style="margin-top: 12px; padding-left: 24px; color: #7F7F7F">
-                <li><b>First provide a clear, brief statement</b> of the definite, specific answer, so students can easily see whether their own answer was right.</li>
-                <li><b>Then give a brief explanation</b> of the logic showing how the concept leads to this conclusion, so that students get a second chance to see whether their thinking was correct.</li>
-                <li><b>Don't warn about potential wrong ways</b> of thinking; save that for the Error Models (see below).</li>
-                <li><b>Keep your answer brief</b> by only including the core points sufficient for most students.</li>
-                <li><b>For students who need additional explanations</b>, provide those separately in an embedded audio or video clip.</li>
-              </ul>
-            </div>
-          </div>
+          <ul class="line-list">
+            <li>First provide a clear, brief statement of the definite, specific answer, so students can easily see whether their own answer was right.</li>
+            <li>Then give a brief explanation of the logic showing how the concept leads to this conclusion, so that students get a second chance to see whether their thinking was correct.</li>
+            <li>Don't warn about potential wrong ways of thinking; save that for the Error Models (see below).</li>
+            <li>Keep your answer brief by only including the core points sufficient for most students.</li>
+            <li>For students who need additional explanations, provide those separately in an embedded audio or video clip.</li>
+          </ul>
+
           {{ answer_form.answer }}
           {% if answer_form.answer.errors %}
             {{ answer_form.answer.errors }}
@@ -170,23 +149,21 @@ Courselet
 
         <!-- Error models -->
         <div class="form-group form-group--error-models">
-          <label>Error Models <span>– optional</span></label>
+          <label>Error Models <span>– Optional</span></label>
 
           <p>
-            An error model explains a common misconception. Your students can select error models when they self-assess.
+            An error model explains a common misconception. You would generally create these based on
+            answers, but you can also use errors that you already know that your students make. Your students will see these
+            error models when they self assess, and it will help understand why they made this error.
+            Some things to keep in mind:
           </p>
-          <div class="expandable">
-            <a class="expandable__toggle" href="#"><span>How to write a good error model</a></span>
 
-            <div class="expandable__content">
-              <ul style="margin-top: 12px; padding-left: 24px; color: #7F7F7F">
-                <li><b>Write a one-sentence statement</b> of this point-of-view in the form "I thought...", as its title, e.g. "I thought all that glitters is gold."</li>
-                <li><b>Explain the misconception:</b> outline the thought process that produces this point of view, and point out exactly where exactly it goes wrong vs. the correct understanding.</li>
-                <li><b>Identify precisely what the student must change</b>, to use this concept correctly.</li>
-                <li><b>For students who need additional explanations</b> (e.g. a counter-example where this belief leads to an obviously absurd conclusion), provide those separately in an embedded audio or video clip.</li>
-              </ul>
-            </div>
-          </div>
+          <ul class="line-list">
+            <li>Write a one-sentence statement of this point-of-view in the form "I thought...", as its title, e.g. "I thought all that glitters is gold."</li>
+            <li>Explain the misconception: outline the thought process that produces this point of view, and point out exactly where exactly it goes wrong vs. the correct understanding.</li>
+            <li>Identify precisely what the student must change, to use this concept correctly.</li>
+            <li>For students who need additional explanations (e.g. a counter-example where this belief leads to an obviously absurd conclusion), provide those separately in an embedded audio or video clip.</li>
+          </ul>
 
           {% if errors_formset %}
             <div class="error-models-form">
@@ -225,10 +202,11 @@ Courselet
 
         <!-- Add unit aborts from the legacy interface -->
         <div class="form-group form-group--unit-aborts">
-          <label>Add unit aborts </label>
+          <label>Abort Thread</label>
           <p>
-            Enabling unit aborts provides your students with possibility to see general misconceptions.
+            Enabling this will allow your students to skip directly to the error models without submitting an answer.
           </p>
+
           {{ form.add_unit_aborts }}
         </div>
 

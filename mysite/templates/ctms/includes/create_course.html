@@ -1,25 +1,14 @@
 <div class="card">
-  {% if user.course_set.exists %}
-    <header class="card__topbar card__topbar--with-description">
-      <h1>Create a New Course</h1>
-      <p>
-        A course is a collection of courselets. If a course was a textbook, the courselets would be the chapters. Let’s create a new course below.
-      </p>
-    </header>
-  {% else %}
-
   <header class="card__topbar card__topbar--with-description">
-    <h1>Welcome to Courselets, {{ user.first_name }}</h1>
+    <h1>Create a New Course</h1>
     <p>
-      Our platform will help you build automated chats – courselets – where your chatbot and students engage in one-on-one tutoring. Each courselet helps students understand one or a few important concepts. A course is a collection of courselets. If a course was a textbook, the courselets would be the chapters. Let’s create your first course to get started.
+      Let’s start by giving your course a name.
     </p>
   </header>
-  {% endif %}
 
   <main class="card__content">
     <form method="POST" action="{% url 'ctms:create_course' %}">
       <label for="name">Course Name</label>
-      <p>Your students will see this, so give your course a descriptive name.</p>
 
       {{ form.title }}
       {{ form.title.errors }}
