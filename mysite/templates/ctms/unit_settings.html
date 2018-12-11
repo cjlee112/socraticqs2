@@ -24,15 +24,17 @@
   </nav>
 
   <main class="card__content">
-    <form method="post" action="">
-      {% csrf_token %}
-      {% crispy role_form %}
-    </form>
+    <div class="card__centered">
+      <form method="post" action="">
+        {% csrf_token %}
+        {% crispy role_form %}
+      </form>
 
-    <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
-      {% csrf_token %}
-      <input type="submit" class="button pull-left button--delete" style="position: inherit; margin-top: 30px;" value="Remove Thread" data-confirm-text="Do you really want to remove this thread?">
-    </form>
+      <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
+        {% csrf_token %}
+        <input type="submit" class="button pull-left button--delete" style="position: inherit; margin-top: 30px;" value="Remove Thread" data-confirm-text="Do you really want to remove this thread?">
+      </form>
+    </div>
   </main>
 </div>
 <style>

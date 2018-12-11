@@ -34,7 +34,7 @@
       <div class="get-started__step{% if view_introduction.done %} get-started__step--done{% endif %}" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>1.Watch our introduction to Courselets</h2>
+          <h2>1. Watch our introduction to Courselets</h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -194,7 +194,9 @@
 
       <!-- next_step -->
       <div class="get-started__step{% if next_steps.done %} get-started__step--done{% endif %}" data-step-id="next_steps"
-           data-redirect-to-after-done="{% if users_course.id and users_courselet.id %}{% url 'ctms:courslet_view' course_pk=users_course.id pk=users_courselet.id %}?message=1{% else %}#{% endif %}">
+        {% if not next_steps.done %}
+          data-redirect-to-after-done="{% if users_course.id and users_courselet.id %}{% url 'ctms:courslet_view' course_pk=users_course.id pk=users_courselet.id %}?message=1{% else %}#{% endif %}"
+        {% endif %}>
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>7. Learn more about your next steps</h2>
@@ -319,7 +321,7 @@
           var done = $('.get-started__step--done').length;
           var redirectTo = $('[data-redirect-to-after-done]').data('redirect-to-after-done');
 
-          if(steps == done) {
+          if(steps == done && redirectTo) {
             window.location.href = redirectTo;
           }
         }
