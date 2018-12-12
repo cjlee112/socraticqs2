@@ -178,7 +178,7 @@
               “Preview” in your sidebar at any time to test your courselet again.
             </p>
 
-            {% if users_course.id and users_courselet.id %}
+            {% if users_course.id and users_courselet.id and users_thread.id %}
                 <a data-complete-step="preview_courselet" href="{% url 'ctms:courselet_preview' course_pk=users_course.id pk=users_courselet.id %}" class="button button--primary" target="_blank">
                   Preview {{ users_courselet.title }}
                 </a>
