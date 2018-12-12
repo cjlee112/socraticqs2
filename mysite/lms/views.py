@@ -113,9 +113,18 @@ class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
     def get_courselets(self, request, course):
         # User can see courselets only by getting here from the Shared Courses page
         invites = Invite.objects.filter(user=self.request.user, course=course, status='joined', type='tester')
+        courselets = []
         if invites:
-            return (
-                (
+            for invite in invites:
+                # backward compability for old Invites
+                if not invite.enroll_unit_code:
+                    first_courselet = course.courseunit_set.all().first()
+                    if not first_courselet:
+                        continue
+                    invite.enroll_unit_code = EnrollUnitCode.get_code(first_courselet, give_instance=True)
+                    invite.save()
+
+                courselet = (
                     invite.enroll_unit_code.courseUnit,
                     EnrollUnitCode.get_code(invite.enroll_unit_code.courseUnit, isTest=True),
                     len(invite.enroll_unit_code.courseUnit.unit.get_exercises()),
@@ -128,6 +137,6 @@ class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
                         is_preview=False
                     ).first()
                 )
-                for invite in invites
-            )
+                courselets.append(courselet)
+            return courselets
         raise Http404('Message')
