@@ -74,18 +74,6 @@ class Invite(models.Model):
     @classmethod
     def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code):
         user = Invite.search_user_by_email(email)
-        try:
-            old_invite = Invite.get_by_user_or_404(
-                user=user,
-                type=invite_type,
-                course=course,
-                instructor=instructor,
-                enroll_unit_code=enroll_unit_code
-            )
-            if old_invite:
-                return old_invite
-        except Http404:
-            pass
         code = Invite(
             instructor=instructor,
             user=user,
@@ -147,6 +135,7 @@ class Invite(models.Model):
     def get_absolute_url(self):
         return reverse('ctms:tester_join_course', kwargs={'code': self.code})
 
+    # TODO: refactor it ASAP, it may result in errors in certain cases
     @staticmethod
     def get_by_user_or_404(user, **kwargs):
         '''

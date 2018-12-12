@@ -115,7 +115,7 @@
           </div>
 
           <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
-          {% if sidebar.courslet %}
+          {% if sidebar.courslet and sidebar.courslet in sidebar.course_courslets %}
             <nav class="sidebar__actions">
               <ul>
                 <li>

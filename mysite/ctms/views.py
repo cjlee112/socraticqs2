@@ -1254,7 +1254,7 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             addedBy=self.request.user,
             course=users_course
         ).last()
-        users_thread = Lesson.objects.filter(addedBy=self.request.user).last()
+        users_thread = Lesson.objects.filter(addedBy=self.request.user, kind=Lesson.ANSWER).last()
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
         course = Course.objects.filter(id=introduction_course_id).first()
         enroll_unit_code = EnrollUnitCode.objects.filter(
