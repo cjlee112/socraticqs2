@@ -258,7 +258,7 @@ class ProfileUpdateTests(TestCase):
             'what_do_you_teach': 'something',
             'user': self.user.id
         }, follow=True)
-        self.assertRedirects(response, reverse('ctms:create_course'))
+        self.assertRedirects(response, reverse('ctms:my_courses'))
         self.assertEqual(self.get_user().instructor.institution, inst_name)
 
 
