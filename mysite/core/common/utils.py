@@ -151,62 +151,29 @@ def get_onboarding_status_with_settings(user_id):
     Example:
     {
         "instructor_intro": {
-            "done": true,
-            "settings": {
-                "html": "",
-                "description": "",
-                "title": ""
-            }
+            "done": true
         },
         "create_course": {
-            "done": true,
-            "settings": {
-                "html": "",
-                "description": "",
-                "title": ""
-            }
+            "done": true
         },
         "create_courselet": {
-            "done": false,
-            "settings": {
-                "html": "",
-                "description": "",
-                "title": ""
-            }
+            "done": false
         },
         "review_answers": {
-            "done": true,
-            "settings": {
-                "html": "<p>Title</p>",
-                "description": "Here is some description",
-                "title": "Title"
-            }
+            "done": true
         },
         "invite_somebody": {
-            "done": true,
-            "settings": {
-                "html": "",
-                "description": "",
-                "title": ""
-            }
+            "done": true
         },
         "create_thread": {
-            "done": false,
-            "settings": {
-                "html": "",
-                "description": "",
-                "title": ""
-            }
+            "done": false
         }
     }
     """
     onboarding_status = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, {'_id': 0, 'user_id': 0}) or {}
-    data = {}
 
-    for step in get_onboarding_steps():
-        data[step] = {
-            'done': onboarding_status.get(step, False)
-        }
-    return data
-
-
+    return {
+        step: {
+            'done': onboarding_status.get(step, False)}
+        for step in get_onboarding_steps()
+    }

@@ -24,12 +24,13 @@ class MyTestCase(TestCase):
 
     def setUp(self):
         self.username, self.password = 'test', 'test'
-        self.user = User.objects.create_user('test', 'test@test.com', 'test')
+        self.user = User.objects.create_user(self.username, 'test@test.com', self.password)
 
         self.instructor = Instructor.objects.create(user=self.user, institution='institute',
                                                     what_do_you_teach='something')
 
-        self.user2 = User.objects.create_user('test1', 'test1@test.com', 'test')
+        self.username2, self.password2 = 'test1', 'test'
+        self.user2 = User.objects.create_user(self.username2, 'test1@test.com', self.password2)
         self.instructor2 = Instructor.objects.create(user=self.user2, institution='institute',
                                                      what_do_you_teach='something')
 
@@ -57,7 +58,7 @@ class MyTestCase(TestCase):
         )
         self.unitlesson.save()
 
-        resp1 = Response(
+        self.resp1 = Response(
             unitLesson=self.unitlesson,
             kind=Response.ORCT_RESPONSE,
             lesson=self.lesson,
@@ -67,9 +68,9 @@ class MyTestCase(TestCase):
             status=NEED_HELP_STATUS,
             selfeval=Response.DIFFERENT
         )
-        resp1.save()
+        self.resp1.save()
 
-        resp2 = Response(
+        self.resp2 = Response(
             unitLesson=self.unitlesson,
             kind=Response.ORCT_RESPONSE,
             lesson=self.lesson,
@@ -79,7 +80,7 @@ class MyTestCase(TestCase):
             status=NEED_HELP_STATUS,
             selfeval=Response.DIFFERENT
         )
-        resp2.save()
+        self.resp2.save()
         self.default_data = {}
 
         self.client.login(username=self.username, password=self.password)
@@ -259,10 +260,10 @@ class MyCoursesTests(MyTestCase):
         # create shared course
         enroll_unit_code = EnrollUnitCode.get_code(self.courseunit, give_instance=True)
         shared_course = Invite.create_new(True, self.course, self.instructor2, self.user.email, 'tester', enroll_unit_code)
-        response = self.client.get(self.url, follow=True)
+        response = self.client.get(reverse('ctms:shared_courses'))
         # should return shared courses
-        self.assertRedirects(response, reverse('ctms:shared_courses'))
         self.assertIn('shared_courses', response.context)
+        self.assertNotEqual(len(response.context['shared_courses']), 0)
         self.assertTrue(shared_course.course.title in response.context['shared_courses'])
 
     def my_courses_show_create_course_form(self):
@@ -731,6 +732,12 @@ class EditUnitViewTests(MyTestCase):
             'form-0-text': '',
         }
 
+        # creating the new Lessons of kind 'answer' to avoid redirecting to the Get Started page
+        lesson = Lesson(title='title', text='text', addedBy=self.user, kind=Lesson.ANSWER)
+        lesson2 = Lesson(title='title', text='text', addedBy=self.user, kind=Lesson.ANSWER)
+        lesson.save()
+        lesson2.save()
+
     def test_get_page(self):
         counts = self.get_model_counts()
         response = self.get_page()
@@ -741,9 +748,9 @@ class EditUnitViewTests(MyTestCase):
 
     @unpack
     @data(
-        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title', 'tests/files/raccoon.jpg'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'tests/files/image.svg', 'ORCT Answer'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text w/o image', 'Some ORCT title w/o image', '', 'ORCT Answer'),
+        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'tests/files/raccoon.jpg'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', 'Some ORCT title', 'tests/files/image.svg', 'ORCT Answer'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text w/o image', 'Some ORCT title w/o image', '', 'ORCT Answer'),
     )
     def test_post_valid_data(self, kind, text, title, attachment, answer=''):
         counts = self.get_model_counts()
@@ -768,7 +775,7 @@ class EditUnitViewTests(MyTestCase):
 
         new_counts = self.get_model_counts()
 
-        if kind == EditUnitForm.KIND_CHOICES[1][0]:  # ORCT
+        if kind == EditUnitForm.KIND_CHOICES[0][0]:  # ORCT
             # must not be equal because we added Answer
             self.validate_model_counts(counts, new_counts, must_equal=False)
         else:
@@ -820,8 +827,8 @@ class EditUnitViewTests(MyTestCase):
 
     @unpack
     @data(
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'Text', 'EM title', 'EM text'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer',
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title', 'Text', 'EM title', 'EM text'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer',
          'EM title', 'EM text'),
     )
     def test_create_error_model(self, kind, title, text, answer, em_title, em_text):
@@ -848,8 +855,8 @@ class EditUnitViewTests(MyTestCase):
 
     @unpack
     @data(
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some text is here...', 'Some new title', 'Text', '', 'EM text'),
-        (EditUnitForm.KIND_CHOICES[1][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer', 'EM title',
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some text is here...', 'Some new title', 'Text', '', 'EM text'),
+        (EditUnitForm.KIND_CHOICES[0][0], 'Some New ORCT text is here...', 'Some ORCT title', 'ORCT Answer', 'EM title',
          ''),
     )
     def test_create_error_model_negative(self, kind, title, text, answer, em_title, em_text):

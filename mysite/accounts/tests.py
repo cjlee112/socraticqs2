@@ -124,10 +124,10 @@ class AccountSettingsTests(TestCase):
             'errors': {
                 'password': u'Should be equal to confirm password field.',
                 'confirm_password': u'Should be equal to password field.',
+                '__all__': 'Password and Confirm password fields doesn\'t match.'
             }
         }
     )
-
     def test_post_invalid_current_password_change(self, data, errors):
         response = self.client.get(self.url)
         self.assertEqual(type(response.context['password_form']), ChangePasswordForm)
@@ -258,8 +258,9 @@ class ProfileUpdateTests(TestCase):
             'what_do_you_teach': 'something',
             'user': self.user.id
         }, follow=True)
-        self.assertRedirects(response, reverse('ctms:create_course'))
+        self.assertRedirects(response, reverse('ctms:my_courses'))
         self.assertEqual(self.get_user().instructor.institution, inst_name)
+
 
 @ddt
 class PasswordResetTest(TestCase):
@@ -287,3 +288,9 @@ class PasswordResetTest(TestCase):
             self.assertRedirects(response, reverse('accounts:password_reset_done'))
             self.assertEqual(response.context['anonym_user_email'], user.email)
             mock_send_message.assert_called_once()
+
+    def test_password_reset_invalid_email(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'Email address')
+        post_resp = self.client.post(self.url, {'email': 'email1@exanple.com'})
+        self.assertContains(post_resp, 'No registered account with such email.')
