@@ -1161,7 +1161,7 @@ class ResponseManager(models.Manager):
     # return ONLY valuable responses
     def get_queryset(self, **kwargs):
         return super(ResponseManager, self).get_queryset().filter(
-            is_test=False, is_preview=False, **kwargs
+            is_preview=False, **kwargs
         )
 
     def get_all_responses_queryset(self, **kwargs):
