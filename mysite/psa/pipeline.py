@@ -2,23 +2,26 @@
 
 custom_mail_validation - > implement code obj inspect
 """
+from datetime import datetime
+import time
+import waffle
+
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from django.contrib.auth import login, logout
-# from django.core.mail import send_mail
 from django.conf import settings
-from django.db import IntegrityError
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
-import time
-from datetime import datetime
+from django.db import IntegrityError
+from django.shortcuts import reverse
 
-from social_core.pipeline.partial import partial
+from social_core.backends.utils import load_backends
 from social_core.exceptions import (InvalidEmail,
                                AuthException,
                                AuthAlreadyAssociated)
-from social_core.backends.utils import load_backends
 from social_django.models import UserSocialAuth
+from social_core.pipeline.partial import partial
 
+from core.common.utils import get_onboarding_percentage
 from psa.models import AnonymEmail, SecondaryEmail
 
 
@@ -247,6 +250,12 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
     """
     Create UserSocialAuth.
     """
+    #  When user logs in check onboarding settings and change `next` parameter depending on it
+    if not kwargs.get('is_new'):
+        if backend.strategy.session_get('next') == '/ctms/' and \
+                waffle.switch_is_active('ctms_onboarding_enabled') and \
+                get_onboarding_percentage(user.id) != 100:
+            backend.strategy.session_set('next', reverse('ctms:onboarding'))
     email = details.get('email')
     if user and force_update:
         if not social:
