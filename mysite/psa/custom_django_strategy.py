@@ -40,7 +40,6 @@ class CustomDjangoStrategy(DjangoStrategy):
             if not data['password']:
                 del data['password']
             user = self.storage.user.create_user(**data)
-            user.set_unusable_password()
             return user
         else:
             username += '_'
@@ -63,7 +62,6 @@ class CustomDjangoStrategy(DjangoStrategy):
             data = kwargs
         else:
             data = self.get_data_from_code(**kwargs)
-
         username = data.pop('username', None)
         if not username:
             username = data.get('email', '').split('@')[0]
