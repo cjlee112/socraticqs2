@@ -446,7 +446,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.chat = chat
                 opt_data = self.request.data.get('option')
                 resp = message.content
-                if chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
+                if chat.state and chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
                     resp.confidence = opt_data
                     text = resp.get_confidence_display()
                 else:
