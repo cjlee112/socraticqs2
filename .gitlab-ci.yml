@@ -92,6 +92,7 @@ Deploy Stage:
     - cd /home/wwwapps/socraticqs2/
     - git checkout master
     - git pull
+    - source /home/wwwapps/_ve_socraticqs3/bin/activate
     - pip install --ignore-installed -U -r requirements.txt
     - pip install --ignore-installed -U -r requirements/prod.txt
     - cd mysite/
