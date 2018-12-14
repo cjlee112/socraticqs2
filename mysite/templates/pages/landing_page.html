@@ -35,24 +35,13 @@
                 </button>
                 <a class="navbar-brand" href="/">Courselets.org</a>
               </div>
-              {% if request.user.is_authenticated %}
+              {% if not request.user.is_authenticated %}
               <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav" style="float: right;">
                   <li class="child sibling">
-                    <a href="/ct/">Courses Dashboard</a>
+                    <a href="{% url 'signup' %}">Register</a>
                   </li>
-                  {% show_menu  0 1 100 100 %}
-
-                  <li class="child sibling">
-
-                    <a href="{% url 'ct:person_profile' user_id=request.user.id %}">Profile</a>
-
-                  </li>
-
                 </ul>
-              </div>
-              {% else %}
-              <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav" style="float: right;">
                   <li class="child sibling">
                     <a href="{% url 'new_login' %}">Login</a>
