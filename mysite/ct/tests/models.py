@@ -1316,13 +1316,13 @@ class ResponseManagerTest(TestCase):
     def test_has_no_test_responses(self):
         responses = Response.objects.all()
         has_test = any(i.is_test for i in responses)
-        # should be False
-        self.assertFalse(has_test)
+        # should be True - we add test answers to the default query
+        self.assertTrue(has_test)
 
     def test_filter_by_is_test__response_is_empty(self):
         responses = Response.objects.filter(is_test=True)
-        # should be empty
-        self.assertFalse(bool(list(responses)))
+        # should be not empty
+        self.assertTrue(bool(list(responses)))
 
     def test_test_responses_method(self):
         responses = Response.objects.test_responses()
