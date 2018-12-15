@@ -112,7 +112,8 @@ class LMSTesterCourseView(NewLoginRequiredMixin, CourseView):
 
     def get_courselets(self, request, course):
         # User can see courselets only by getting here from the Shared Courses page
-        invites = Invite.objects.filter(user=self.request.user, course=course, status='joined', type='tester')
+        # TODO: Cover this
+        invites = Invite.objects.filter(user=self.request.user, course=course, status='joined', type='tester').distinct('enroll_unit_code__courseUnit') # pragma: no cover
         courselets = []
         if invites:
             for invite in invites:

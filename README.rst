@@ -78,6 +78,15 @@ There is a helper that creates a tag for you:
     make version VERSION=vX.X.X
 
 
+    Onboarding settings
+-------------------
+
+Switches
+::
+
+    ctms_onboarding_enabled set to Active in admin page /admin/waffle/switch/
+
+
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 
 

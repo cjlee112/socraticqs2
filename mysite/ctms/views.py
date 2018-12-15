@@ -129,6 +129,7 @@ class CourseCoursletUnitMixin(View):
         if cached:
             return cached
         # UnitLesson
+        # TODO: Cover this by tests
         courslet_units = courselet.unit.unitlesson_set.filter(
             kind=UnitLesson.COMPONENT,
             order__isnull=False
@@ -137,12 +138,12 @@ class CourseCoursletUnitMixin(View):
         ).annotate(
             responses_count=models.Sum(
                 models.Case(
-                    models.When(models.Q(response__is_test=False, response__is_preview=False), then=1),
+                    models.When(models.Q(response__is_preview=False), then=1),
                     default=0,
                     output_field=models.IntegerField()
                 )
             )
-        )
+        ) # pragma: no cover
         for unit in courslet_units:
             unit.url = reverse(
                 'ctms:unit_edit',
@@ -1049,8 +1050,9 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
             courselet = CourseUnit.objects.get(id=courselet_pk)
         else:
             courselet = CourseUnit.objects.filter(course=course).first()
+        # TODO: Cover this
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(
-            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True))
+            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True, isTest=True)) # pragma: no cover
         kwargs['invite_tester_form'] = self.form_class(
             initial={
                 'type': 'tester',
@@ -1073,7 +1075,8 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         kwargs = super(InvitesListView, self).get_form_kwargs()
         kwargs['course'] = self.get_course()
         kwargs['instructor'] = self.request.user.instructor
-        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True)
+        # TODO: Cover this
+        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True, isTest=True) # pragma: no cover
         return kwargs
 
     def get_initial(self):
