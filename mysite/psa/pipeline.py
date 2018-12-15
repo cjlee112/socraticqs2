@@ -6,20 +6,20 @@ from datetime import datetime
 import time
 import waffle
 
-from django.template import RequestContext
-from django.shortcuts import render_to_response
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.shortcuts import reverse
+from django.shortcuts import reverse, render_to_response
+
+from sekizai.context import SekizaiContext
 
 from social_core.backends.utils import load_backends
 from social_core.exceptions import (InvalidEmail,
                                AuthException,
                                AuthAlreadyAssociated)
-from social_django.models import UserSocialAuth
 from social_core.pipeline.partial import partial
+from social_django.models import UserSocialAuth
 
 from core.common.utils import get_onboarding_percentage
 from psa.models import AnonymEmail, SecondaryEmail
@@ -194,10 +194,10 @@ def validated_user_details(strategy, backend, details, user=None, *args, **kwarg
                 backend,
                 'You interrupted merge process.'
             )
-        elif (not user.get_full_name() == social.user.get_full_name() and
+        elif (user.get_full_name() != social.user.get_full_name() and
               not strategy.request.POST.get('confirm') and
-              not user.email == social.user.email):
-            return render_to_response('ct/person.html', {
+              user.email != social.user.email):
+            return render_to_response('ct/person.html', SekizaiContext({
                 'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS),
                 'request': strategy.request,
                 'next': strategy.request.POST.get('next') or '',
@@ -205,7 +205,7 @@ def validated_user_details(strategy, backend, details, user=None, *args, **kwarg
                 'own_name': user.get_full_name(),
                 'person': user,
                 'merge_confirm': True
-            }, RequestContext(strategy.request))
+            }))
         elif (user.get_full_name() == social.user.get_full_name() or
               confirm and confirm == 'yes' or user.email == social.user.email):
             union_merge(social.user, user)
