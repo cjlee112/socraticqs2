@@ -47,9 +47,8 @@ class SignUpForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        already_exists_exc = forms.ValidationError('This email is already registered in the system.')
-        if User.objects.filter(email=email) or CustomCode.objects.filter(email=email, verified=True):
-            raise already_exists_exc
+        if User.objects.filter(email=self.cleaned_data['email']):
+            raise forms.ValidationError('This email is already registered in the system.')
         return email
 
 
