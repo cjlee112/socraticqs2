@@ -263,18 +263,6 @@ def complete(request, *args, **kwargs):
 
     if form.is_valid() or 'verification_code' in request.GET:
         try:
-            # logout(request)
-            code = CustomCode.objects.filter(code=request.GET.get('verification_code')).first()
-            if code:
-                strategy = load_strategy(request)
-
-                user = strategy.create_user(
-                    email=code.email,
-                    first_name=code.first_name,
-                    last_name=code.last_name,
-                    password=code.password
-                )
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             resp = social_complete(request, 'email', *args, **kwargs)
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
                 Instructor.objects.get_or_create(user=request.user)

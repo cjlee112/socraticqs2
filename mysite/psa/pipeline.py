@@ -83,8 +83,8 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
             code = backend.strategy.storage.code.get_code(data['verification_code'])
             # This is very straightforward method
             # TODO Need to check current user to avoid unnecessary check
-            if code.email:
-                user_from_code = User.objects.filter(email=code.email).first()
+            if code.user_id:
+                user_from_code = User.objects.filter(id=code.user_id).first()
                 if user_from_code:
                     user = user_from_code
                     _next = code.next_page or backend.strategy.request.session.get('next')
@@ -92,7 +92,7 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
                     backend.strategy.session_set('next', _next)
-                    return {'user': user, 'force_update': force_update}
+                    return {'user': user, 'force_update': code.force_update or force_update}
         else:
             if user and user.groups.filter(name='Temporary').exists():
                 AnonymEmail.objects.get_or_create(
