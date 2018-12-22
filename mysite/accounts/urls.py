@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.contrib.auth.views import password_reset_confirm, password_reset_complete
-from accounts.forms import CustomPasswordResetForm
+from accounts.forms import CustomPasswordResetForm, CustomSetPasswordForm
 from accounts.views import custom_password_reset, custom_password_reset_done, resend_email_confirmation_link
 
 from .views import DeleteAccountView, AccountSettingsView, ProfileUpdateView
@@ -26,7 +26,8 @@ urlpatterns = [
         password_reset_confirm,
         {
             'post_reset_redirect': 'accounts:password_reset_complete',
-            'template_name': 'accounts/password_reset_confirm.html'
+            'template_name': 'accounts/password_reset_confirm.html',
+            'set_password_form': CustomSetPasswordForm
         },
         name='password_reset_confirm'),
 
