@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.core.validators import MinLengthValidator
 from django.db.models import Q
 from django.contrib.auth.models import User
 from social_django.views import complete
@@ -173,8 +174,12 @@ class CustomPasswordResetForm(PasswordResetForm):
     """
 
     def clean_email(self):
-        if not User.objects.filter(email=self.cleaned_data['email']):
+        user = User.objects.filter(email=self.cleaned_data['email']).first()
+        if not user:
             raise forms.ValidationError('No registered account with such email.')
+        if not user.has_usable_password():
+            raise forms.ValidationError(
+                'User with this email does not have password, more likely you registered via social network')
         return self.cleaned_data['email']
 
 
@@ -193,3 +198,11 @@ class SocialForm(forms.ModelForm):
             'user': forms.HiddenInput(),
 
         }
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+
+    def __init__(self, user, *args, **kwargs):
+        super(CustomSetPasswordForm, self).__init__(user, *args, **kwargs)
+        self.fields['new_password1'].validators.append(MinLengthValidator(6))
+        self.fields['new_password2'].validators.append(MinLengthValidator(6))
