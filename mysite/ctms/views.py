@@ -1067,7 +1067,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
 
         kwargs['courselet'] = courselet
         kwargs['course'] = course
-        kwargs['domain'] = 'https://{0}'.format(Site.objects.get_current().domain)
+        kwargs['domain'] = '{0}://{1}'.format(self.request.scheme, Site.objects.get_current().domain)
         kwargs['courselets_email'] = settings.COURSELETS_EMAIL
         return kwargs
 

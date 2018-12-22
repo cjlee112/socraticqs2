@@ -7,6 +7,7 @@ import time
 import waffle
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -21,7 +22,7 @@ from social_core.exceptions import (InvalidEmail,
 from social_core.pipeline.partial import partial
 from social_django.models import UserSocialAuth
 
-from core.common.utils import get_onboarding_percentage
+from core.common.utils import get_onboarding_percentage, get_redirect_url
 from psa.models import AnonymEmail, SecondaryEmail
 
 
@@ -91,6 +92,8 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
                     logout(backend.strategy.request)
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
+                    if _next == reverse('accounts:settings'):
+                        messages.add_message(backend.strategy.request, messages.SUCCESS, 'Email has been successfully updated')
                     backend.strategy.session_set('next', _next)
                     return {'user': user, 'force_update': code.force_update or force_update}
         else:
@@ -250,12 +253,15 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
     """
     Create UserSocialAuth.
     """
-    #  When user logs in check onboarding settings and change `next` parameter depending on it
-    if not kwargs.get('is_new'):
-        if backend.strategy.session_get('next') == '/ctms/' and \
-                waffle.switch_is_active('ctms_onboarding_enabled') and \
-                get_onboarding_percentage(user.id) != 100:
-            backend.strategy.session_set('next', reverse('ctms:onboarding'))
+    redirect_url = backend.strategy.session_get('next') or kwargs.get('response', {}).get('next') or kwargs.get('next')
+    # one more mega analysis to where should we redirect a user
+    if redirect_url:
+        backend.strategy.session_set('next', redirect_url)
+    elif kwargs.get('is_new'):
+        backend.strategy.session_set('next', reverse('ctms:onboarding'))
+    else:
+        backend.strategy.session_set('next', get_redirect_url(user))
+
     email = details.get('email')
     if user and force_update:
         if not social:
@@ -268,6 +274,7 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
                     raise
         user.email = email
         user.save()
+
         return {
             'social': social,
             'user': social.user,

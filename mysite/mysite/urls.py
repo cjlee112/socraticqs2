@@ -27,13 +27,9 @@ urlpatterns = [
     url(r'^lms/', include('lms.urls', namespace='lms')),
 
     # Login / logout.
-    url(r'^login/$', custom_login,
-        {
-            'next_page': '/ctms/',
-            'login_form_cls': UsernameLoginForm
-        }, name='login'),
+    url(r'^login/$', custom_login, {'login_form_cls': UsernameLoginForm}, name='login'),
     url(r'^inactive-user/$', inactive_user_error, name="inactive-user-error"),
-    url(r'^signup/$', signup, {'next_page': '/ctms/onboarding/'}, name='signup'),
+    url(r'^signup/$', signup, name='signup'),
     url(r'^new_login/$', custom_login,
         {
             'template_name': 'psa/new_custom_login.html',

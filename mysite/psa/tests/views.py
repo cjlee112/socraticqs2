@@ -92,8 +92,8 @@ class ViewsUnitTest(TestCase):
         credentials = {'username': 'test',
                        'password': 'test'}
         response = self.client.post('/login/', data=credentials, follow=True)
-        self.assertRedirects(response, expected_url='{}?next=/ctms/'.format(reverse('accounts:profile_update')))
-        self.assertTemplateUsed(response, template_name='accounts/profile_edit.html')
+        self.assertRedirects(response, expected_url=reverse('ct:home'))
+        self.assertTemplateUsed(response, template_name='ct/index.html')
 
     def test_login_by_email(self):
         user = User(username='test', email='test@test.cc')
@@ -867,7 +867,7 @@ class SignupTest(TestCase):
         self.assertEqual(int(self.client.session['_auth_user_id']), new_user.pk)
         self.assertEqual(CustomCode.objects.count(), 0)
         self.assertEqual(User.objects.count(), 1)
-        self.assertEqual(Instructor.objects.count(), 1)
+        self.assertEqual(Instructor.objects.count(), 0)
 
     def test_post_signup_form_invalid(self):
         response = self.client.post(

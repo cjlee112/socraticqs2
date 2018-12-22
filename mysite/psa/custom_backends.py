@@ -32,6 +32,7 @@ class EmailAuth(LegacyAuth):
                 self.data.update({'email': email})
                 if code_object.next_page:
                     self.data['next'] = code_object.next_page
+                    self.strategy.session_set('next', code_object.next_page)
             else:
                 raise AuthMissingParameter(self, self.ID_KEY)
         kwargs.update({'response': self.data, 'backend': self})

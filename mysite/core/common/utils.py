@@ -3,9 +3,12 @@ Various utilities.
 """
 import functools
 
+import waffle
+
 from django.dispatch import receiver
 from django.conf import settings
 from django.core.mail import send_mail
+from django.shortcuts import reverse
 from django.template import loader, Context
 
 from core.common.mongo import c_onboarding_status, c_onboarding_settings
@@ -177,3 +180,59 @@ def get_onboarding_status_with_settings(user_id):
             'done': onboarding_status.get(step, False)}
         for step in get_onboarding_steps()
     }
+
+
+def get_redirect_url(user):
+    """
+    Analyse user and redirect:
+        Instructor:
+            onboarding is disabled - to /ctms/
+            onboarding is enabled  and not achieved needed percent - to /ctms/onboarding/
+            onboarding is enabled  and achieved needed percent - to /ctms/
+
+        Student:
+            Depends on type of chat student took part of and redirect to:
+                /lms/courses/<course_id> or /lms/tester/courses/<course_pk>
+            If user doesn't have any chat:
+                look at user's role and get lms type whether from invite or course of role
+    Arguments:
+        user (obj): User model of django.contrib.auth.models
+
+    Return:
+        redirect_url (str)
+    """
+    from chat.models import Chat
+    from ct.models import Role
+
+    redirect_url = reverse('ct:home')  # default
+    if not user:
+        return
+    if getattr(user, 'instructor', None):
+        if waffle.switch_is_active('ctms_onboarding_enabled') and  \
+                get_onboarding_percentage(user.id) < settings.ONBOARDING_PERCENTAGE_DONE:
+            redirect_url = reverse('ctms:onboarding')
+        else:
+            redirect_url = reverse('ctms:my_courses')
+    else:
+        chat = Chat.objects.filter(user=user).order_by('-timestamp').first()
+        if chat:
+            view_identificator = ''
+            if chat.is_test:
+                view_identificator = 'tester_'
+            course = chat.enroll_code.courseUnit.course
+            redirect_url = reverse(
+                'lms:{}course_view'.format(view_identificator),
+                kwargs={'course_id': course.id}
+            )
+        else:
+            view_identificator = ''
+            role = user.role_set.filter(role__in=[Role.ENROLLED, Role.SELFSTUDY]).last()
+            if role:
+                last_invite = role.course.invite_set.filter(status='joined', user=user, type='tester').last()
+                if last_invite:
+                    view_identificator = 'tester_'
+                redirect_url = reverse(
+                    'lms:{}course_view'.format(view_identificator),
+                    kwargs={'course_id': role.course.id}
+                )
+    return redirect_url

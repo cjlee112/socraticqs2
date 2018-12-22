@@ -1,4 +1,5 @@
 {% load sekizai_tags static %}
+{% load build_url_utils %}
 
 {% if not instance.hidden %}
 <!-- Hero -->
@@ -7,7 +8,7 @@
     <div class="container">
       <h1>{{ instance.title }}</h1>
       {{ instance.description|safe }}
-      <a href="{% if user.is_authenticated %}/ctms/{% else %}{{ instance.link_button }}{% endif %}" class="btn im-interested btn-large">{{ instance.text_button }}</a>
+      <a href="{% if user.is_authenticated %}{% build_redirect_url user %}{% else %}{{ instance.link_button }}{% endif %}" class="btn im-interested btn-large">{{ instance.text_button }}</a>
     </div>
   </div>
 </header>

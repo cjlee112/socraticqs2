@@ -1,7 +1,13 @@
 {% load cms_tags sekizai_tags static menu_tags %}
+{% load build_url_utils %}
 
 <!doctype html>
     <head>
+        {% if user.is_authenticated %}
+        <script type="text/javascript">
+            window.location = "{% build_redirect_url user %}";
+        </script>
+        {% endif %}
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>Courselets</title>

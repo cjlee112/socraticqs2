@@ -34,17 +34,16 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         try:
             return self.request.user.instructor
         except Instructor.DoesNotExist:
-            return
+            return Instructor(user=self.request.user)
 
     def get_password_form_cls(self):
         return ChangePasswordForm if self.request.user.has_usable_password() else CreatePasswordForm
 
     def get(self, request):
-        instructor = self.get_instructor()
         return self.render_to_response(
             dict(
                 user_form=UserForm(instance=request.user),
-                instructor_form=InstructorForm(instance=instructor),
+                instructor_form=InstructorForm(instance=self.get_instructor()),
                 password_form=self.get_password_form_cls()(instance=request.user),
                 delete_account_form=DeleteAccountForm(instance=request.user),
                 email_form=ChangeEmailForm(initial={'email': request.user.email}),
