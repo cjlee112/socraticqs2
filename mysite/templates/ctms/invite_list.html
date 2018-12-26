@@ -18,10 +18,16 @@
           <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courselet.id %}">Threads</a>
         </li>
 
+        {% if u_lessons %}
         <li>
           <a href="{% url 'ctms:courselet_preview' course_pk=course.id pk=courselet.id %}" target="_blank">Preview</a>
         </li>
-
+        {% else %}
+        <li>
+          <a href="#">Preview</a>
+        </li>
+        {% endif %}
+        
         <li>
           <a href="{% url 'ctms:courselet_invite' pk=course.id courselet_pk=courselet.id %}" class="card__nav-active">Share</a>
         </li>

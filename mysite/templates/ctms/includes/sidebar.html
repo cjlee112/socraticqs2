@@ -121,11 +121,15 @@
                 <li>
                   <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_view' %}sidebar__actions__active{% endif %}">Threads</a>
                 </li>
-
+                {% if sidebar.courslet_units %}
                 <li>
                   <a data-complete-step="preview_courselet" target="_blank" href="{% url 'ctms:courselet_preview' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" target="_blank">Preview</a>
                 </li>
-
+                {% else %}
+                <li>
+                  <a href="#">Preview</a>
+                </li>
+                {% endif %}
                 <li>
                   <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
                 </li>
