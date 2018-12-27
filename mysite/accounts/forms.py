@@ -85,8 +85,8 @@ class CreatePasswordForm(forms.ModelForm):
     """This form will be used in case when user has no password and wants to create it."""
 
     form_id = forms.CharField(max_length=255, initial='password_form', widget=forms.HiddenInput())
-    confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput())
-    password = forms.CharField(max_length=255, widget=forms.PasswordInput())
+    confirm_password = forms.CharField(max_length=255, widget=forms.PasswordInput(), validators=[MinLengthValidator(6)])
+    password = forms.CharField(max_length=255, widget=forms.PasswordInput(), validators=[MinLengthValidator(6)])
 
     def clean(self):
         data = self.cleaned_data

@@ -73,11 +73,11 @@ class AccountSettingsTests(TestCase):
         response = self.client.get(self.url, follow=True)
         self.assertIsInstance(response.context['password_form'], CreatePasswordForm)
 
-        data = {'confirm_password': '1234', 'password': '1234', 'form_id': 'password_form'}
+        data = {'confirm_password': '1234567', 'password': '1234567', 'form_id': 'password_form'}
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, self.url)
 
-        can_login = self.client.login(username='username', password='1234')
+        can_login = self.client.login(username='username', password='1234567')
         self.assertTrue(can_login)
 
     def test_post_valid_password_change(self):
@@ -92,13 +92,13 @@ class AccountSettingsTests(TestCase):
 
         data = {
             'current_password': '123',
-            'confirm_password': '1234',
-            'password': '1234',
+            'confirm_password': '1234567',
+            'password': '1234567',
             'form_id': 'password_form'
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, self.url)
-        can_login = self.client.login(username='username', password='1234')
+        can_login = self.client.login(username='username', password='1234567')
         self.assertTrue(can_login)
 
     @unpack
@@ -106,8 +106,8 @@ class AccountSettingsTests(TestCase):
         {
             'data': {
                 'current_password': '123123123',  # not correct current password
-                'confirm_password': '1234',
-                'password': '1234',
+                'confirm_password': '1234567',
+                'password': '1234567',
                 'form_id': 'password_form'
             },
             'errors': {
@@ -116,9 +116,9 @@ class AccountSettingsTests(TestCase):
         },
         {
             'data': {
-                'current_password': '123',  # not correct current password
-                'confirm_password': '1234',
-                'password': '12341',
+                'current_password': '123',  # correct current password
+                'confirm_password': '1234567',
+                'password': '12345678',
                 'form_id': 'password_form'
             },
             'errors': {
@@ -143,8 +143,9 @@ class AccountSettingsTests(TestCase):
                     error,
                     response.context['password_form'].errors.get(field, [])
                 )
-        can_login = self.client.login(username='username', password='1234')
-        self.assertFalse(can_login)
+        can_login = self.client.login(username='username', password='123')
+        # We didn't change the password
+        self.assertTrue(can_login)
 
     @mock.patch('ctms.views.get_onboarding_percentage')
     def test_post_valid_email_change(self, onboarding_percentage):
