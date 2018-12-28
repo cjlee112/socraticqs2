@@ -458,6 +458,8 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
 
     def get_context_data(self, **kwargs):
         context = super(CreateCoursletView, self).get_context_data(**kwargs)
+        if not self.get_course():
+            raise Http404()
         context.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
@@ -494,6 +496,8 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         return self.model.objects.filter(addedBy=self.request.user)
 
     def get_context_data(self, **kwargs):
+        if not self.get_courslet() or not self.get_course():
+            raise Http404()
         super(UnitView, self).get_context_data(**kwargs)
         course = self.get_course()
         courslet = self.get_courslet()
@@ -571,6 +575,8 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
 
     def get_context_data(self, **kwargs):
         context = super(CreateUnitView, self).get_context_data(**kwargs)
+        if not self.get_courslet() or not self.get_course():
+            raise Http404()
         context.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
@@ -785,6 +791,8 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
         raise Http404()
 
     def get_context_data(self, **kwargs):
+        if not self.get_courslet() or not self.get_course():
+            raise Http404()
         kw = super(UnitSettingsView, self).get_context_data(**kwargs)
         kw.update(self.kwargs)
         ul = self.get_unit_lesson()
@@ -987,6 +995,8 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
     def get_context_data(self, **kwargs):
         context = super(CreateEditUnitView, self).get_context_data(**kwargs)
+        if not self.get_courslet() or not self.get_course():
+            raise Http404()
         context.update({
             'course': self.get_course(),
             'courslet': self.get_courslet(),
