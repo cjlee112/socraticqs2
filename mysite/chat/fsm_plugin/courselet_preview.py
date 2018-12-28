@@ -48,6 +48,10 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
             fsmStack.next_point.content.lesson.add_unit_aborts and
             fsmStack.next_point.content.unitLesson.unit.get_aborts()):
             return fsm.get_node('ERRORS')
+        else:
+            resp = fsmStack.next_point.content
+            resp.status = 'help'
+            resp.save()
 
     return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
