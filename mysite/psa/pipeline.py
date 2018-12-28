@@ -274,7 +274,7 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
                     raise
         user.email = email
         user.save()
-
+        user.invite_set.all().update(email=email)
         return {
             'social': social,
             'user': social.user,
