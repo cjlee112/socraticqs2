@@ -126,7 +126,7 @@ class TaskForm(forms.Form):
 
 class LessonRoleForm(forms.Form):
     role = forms.ChoiceField(choices=UnitLesson.ROLE_CHOICES,
-                             label='Role of this lesson in this courselet:')
+                             label='Role of this thread in this courselet:')
     def __init__(self, initial=UnitLesson.LESSON_ROLE, *args, **kwargs):
         super(LessonRoleForm, self).__init__(*args, **kwargs)
         self.fields['role'].initial = initial

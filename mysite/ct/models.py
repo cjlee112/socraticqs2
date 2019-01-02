@@ -656,7 +656,7 @@ class UnitLesson(models.Model):
     LESSON_ROLE = 'lesson'
     RESOURCE_ROLE = 'resource'
     ROLE_CHOICES = (
-        (LESSON_ROLE, "Show this lesson to all students as part of the courselet's main lesson sequence"),
+        (LESSON_ROLE, "Show this thread to all students as part of the courselet's main lesson sequence"),
         (RESOURCE_ROLE, "Just list this as a follow-up study resource")
     )
     unit = models.ForeignKey('Unit')
