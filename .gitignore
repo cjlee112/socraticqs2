@@ -82,8 +82,6 @@ mysite/media/
 # SASS
 .sass-cache
 
-*.dat
-
 *journal*
 
 .pytest_cache
