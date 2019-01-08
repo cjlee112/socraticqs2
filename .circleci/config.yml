@@ -40,14 +40,6 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      - run:
-            name: Prepare environment
-            command: |
-              wget -c http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-              echo Dowloaded DB
-              gunzip GeoLiteCity.dat.gz
-              mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
-
       # run tests!
       - run:
           name: Run tests

@@ -20,9 +20,6 @@ Build:
   tags:
     - docker
   script:
-    - wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-    - gunzip GeoLiteCity.dat.gz
-    - mv GeoLiteCity.dat mysite/GeoLiteCityLocal.dat
     - cp .circleci/.dockerignore ./
     - docker build -f Dockerfile.CI -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD

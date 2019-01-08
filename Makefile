@@ -30,7 +30,7 @@ start:
 debug:
 	docker-compose -f dev.yml run --service-ports dev_app
 
-build: .build .prepare-geo .migrate .load-fixtures .fsm-deploy .react
+build: .build .migrate .load-fixtures .fsm-deploy .react
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	make .static
 endif
