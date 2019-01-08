@@ -81,9 +81,6 @@ class EmailLoginForm(forms.Form):
         if user:
             username = user.username
         user = authenticate(username=username, password=self.cleaned_data.get('password'))
-        if user and user.is_active:
-            # create instructor if not exist
-            Instructor.objects.get_or_create(user=user)
         return user
 
 

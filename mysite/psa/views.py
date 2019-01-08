@@ -20,7 +20,7 @@ from social_django.views import _do_login
 from social_django.views import complete as social_complete
 from social_core.exceptions import AuthMissingParameter
 from accounts.models import Profile, Instructor
-from core.common.utils import get_onboarding_percentage
+from core.common.utils import get_onboarding_percentage, get_redirect_url
 from psa.custom_django_storage import CustomCode
 
 from psa.utils import render_to
@@ -69,22 +69,26 @@ def validation_sent(request):
     )
 
 
-def custom_login(request, template_name='psa/custom_login.html', next_page='/ctms/', login_form_cls=EmailLoginForm):
+def custom_login(request, template_name='psa/custom_login.html', login_form_cls=EmailLoginForm):
     """
     Custom login to integrate social auth and default login.
     """
     # Anyway we need checking this before defining next_page
 
-    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    next_page = request.POST.get('next') or request.GET.get('next')
     if request.user.is_authenticated() and not request.user.is_anonymous():
-        return redirect(next_page)
+        return redirect(next_page or get_redirect_url(request.user))
     u_hash_sess = request.session.get('u_hash')
     # logout(request)
     if u_hash_sess:
         request.session['u_hash'] = u_hash_sess
 
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
-    form_initial = {'next': next_page, 'u_hash': request.POST.get('u_hash')}
+    form_initial = {'u_hash': request.POST.get('u_hash')}
+    if next_page:
+        form_initial.update({
+            'next': next_page
+        })
     if request.POST:
         form = login_form_cls(request.POST, initial=form_initial)
         if form.is_valid():
@@ -92,18 +96,15 @@ def custom_login(request, template_name='psa/custom_login.html', next_page='/ctm
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    if next_page == '/ctms/' and \
-                       waffle.switch_is_active('ctms_onboarding_enabled') and \
-                       get_onboarding_percentage(user.id) != 100:
-                        return redirect('ctms:onboarding')
-                    return redirect(next_page)
+                    return redirect(next_page or get_redirect_url(user))
                 else:
                     return redirect('inactive-user-error')
         messages.error(request, "We could not authenticate you, please correct errors below.")
     else:
         form = login_form_cls(initial=form_initial)
     kwargs['form'] = form
-    kwargs['next'] = next_page
+    if next_page:
+        kwargs['next'] = next_page
     return render(
         request,
         template_name,
@@ -145,28 +146,28 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
     return response
 
 
-def signup(request, next_page=None):
+def signup(request):
     """
     This function handles custom login to integrate social auth and default login.
     """
+    default_next_page = reverse('ctms:onboarding')
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
-    next_page = request.POST.get('next') or request.GET.get('next') or next_page
+    next_page = request.POST.get('next') or request.GET.get('next')
     if request.user.is_authenticated() and not request.user.is_anonymous():
-        return redirect(next_page)
-    request.session['u_hash'] = u_hash_sess
+        return redirect(next_page or get_redirect_url(request.user))
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
         # replacenexturl with shared_courses page url
-        request.session['next'] = next_page
-        post = request.POST.copy()
-        post['next'] = next_page
-        request.POST = post
+        if next_page:
+            request.session['next'] = next_page
     form = SignUpForm(initial={'next': next_page, 'u_hash': u_hash})
     kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
     if request.POST:
-        form = SignUpForm(request.POST)
-        # params = request.POST
+        data = request.POST.copy()
+        data['next'] = next_page if next_page else default_next_page
+        form = SignUpForm(data)
+        request.POST = data
         if form.is_valid():
             response = custom_complete(request, 'email', u_hash=u_hash, u_hash_sess=u_hash_sess)
             return response
@@ -255,7 +256,6 @@ def complete(request, *args, **kwargs):
                 'first_name': '',
                 'last_name': '',
                 'institution': '',
-                REDIRECT_FIELD_NAME: reverse('ctms:my_courses'),
             })
             request.POST = post_data
     else:
@@ -265,7 +265,6 @@ def complete(request, *args, **kwargs):
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
-                Instructor.objects.get_or_create(user=request.user)
                 Profile.check_tz(request)
             return resp
         except AuthMissingParameter:

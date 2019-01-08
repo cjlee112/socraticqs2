@@ -146,7 +146,6 @@ class AccountSettingsTests(TestCase):
         can_login = self.client.login(username='username', password='1234')
         self.assertFalse(can_login)
 
-
     @mock.patch('ctms.views.get_onboarding_percentage')
     def test_post_valid_email_change(self, onboarding_percentage):
         onboarding_percentage.return_value = 100
@@ -166,7 +165,7 @@ class AccountSettingsTests(TestCase):
             "/complete/email/?verification_code={}".format(cc.code),
             follow=True
         )
-        self.assertRedirects(response, '{}?next=/ctms/'.format(reverse('accounts:profile_update')), target_status_code=200)
+        self.assertRedirects(response, reverse('accounts:settings'), target_status_code=200)
 
     def test_delete_account_post_valid_data(self):
         data = {'confirm_delete_account': True, 'form_id': 'delete_account_form'}

@@ -13,7 +13,7 @@
       </form>
     {% endif %}
     {% else %}
-      <a class="button button--small" href="{% url "social:begin" backend=name %}?next={{ next }}">
+      <a class="button button--small" href="{% url "social:begin" backend=name %}{% if next %}?next={{ next }}{% endif %}">
         {{ backend|backend_name }}
       </a>
     {% endif %}

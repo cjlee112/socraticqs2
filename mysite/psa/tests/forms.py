@@ -148,7 +148,7 @@ class EmailLoginFormTest(BaseFormMixin, TestCase):
         self.assertTrue(form.is_valid())
         user = form.get_user()
         self.assertEqual(user.email, self.valid_test_data[0]['email'])
-        self.assertIsNotNone(Instructor.objects.filter(user=user).first())
+        self.assertIsNone(Instructor.objects.filter(user=user).first())
 
 
 @pytest.mark.django_db

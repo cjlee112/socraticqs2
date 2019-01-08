@@ -1,4 +1,5 @@
 """Custom Strategy to implement handling user_id attr in Code object"""
+from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
@@ -19,7 +20,7 @@ class CustomDjangoStrategy(DjangoStrategy):
         'password'
     )
 
-    data_from_code_fields = user_needed_fields + ('institution',)
+    data_from_code_fields = user_needed_fields
 
     def check_username_and_create_user(self, username, **kwargs):
         already_exists = User.objects.filter(
@@ -67,10 +68,6 @@ class CustomDjangoStrategy(DjangoStrategy):
             username = data.get('email', '').split('@')[0]
 
         user = self.check_username_and_create_user(username, **data)
-        Instructor.objects.create(
-            user=user,
-            institution=data.get('institution', '') if data.get('institution', '') is not None else '',
-        )
         return user
 
     def send_email_validation(self, backend, email, force_update=False, partial_token=None):
@@ -84,6 +81,12 @@ class CustomDjangoStrategy(DjangoStrategy):
         user = self.request.user
         # store user data in code. We will use it after confirmation email link click.
         fields_to_store = ('first_name', 'last_name', 'password', 'next')
+        if force_update:
+            # when users change their email they should be redirected to page they come from
+            # now it is /accounts/ url
+            post_data = self.request.POST.copy()
+            post_data['next'] = post_data.get('next', self.request.path)
+            self.request.POST = post_data
         for field in fields_to_store:
             f_val = self.request.POST.get(field)
             # hack: to not override built-in func `next` in model, it is saved under 'next_page' filedname
