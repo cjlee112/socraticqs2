@@ -577,6 +577,14 @@ class CreateCoursletViewTests(MyTestCase):
                 'course_pk': self.course.id,
         })
 
+    def test_invalid_get_create_courselet_view(self):
+        self.url = reverse(
+            'ctms:courslet_create', kwargs={
+                'course_pk': 9999,
+        })
+        response = self.get_page()
+        self.assertEqual(response.status_code, 404)
+
     def test_post_valid_data(self):
         courslets_in_course = CourseUnit.objects.filter(
             course=self.course
@@ -632,6 +640,17 @@ class UnitViewTests(MyTestCase):
             list(self.get_test_responses().order_by('id')),
         )
 
+    def test_invalid_unit_view(self):
+        self.url = reverse(
+            'ctms:unit_view', kwargs={
+                'course_pk': 99999,
+                'courslet_pk': 999,
+                'pk': 999
+            }
+        )
+        response = self.get_page()
+        self.assertEqual(response.status_code, 404)
+
 
 class CreateUnitViewTests(MyTestCase):
     def setUp(self):
@@ -653,6 +672,17 @@ class CreateUnitViewTests(MyTestCase):
             'form-0-title': '',
             'form-0-text': '',
         }
+
+    def test_invalid_unit_create(self):
+        self.url = reverse(
+            'ctms:unit_create',
+            kwargs={
+                'course_pk': 999,
+                'courslet_pk': 999,
+            }
+        )
+        response = self.get_page()
+        self.assertEqual(response.status_code, 404)
 
     def test_get_page(self):
         response = self.get_page()
@@ -684,6 +714,17 @@ class CreateUnitViewTests(MyTestCase):
         self.assertRedirects(response, success_url)
         self.assertNotEqual(lessons_cnt, new_lessons_cnt)
         self.assertNotEqual(unit_lsn_cnt, new_unit_lsn_cnt)
+
+    def test_invalid_unit_edit(self):
+        self.url = reverse(
+            'ctms:unit_edit', kwargs={
+                'course_pk': 99999,
+                'courslet_pk': 999,
+                'pk': 999
+            }
+        )
+        response = self.get_page()
+        self.assertEqual(response.status_code, 404)
 
     def test_post_invalid_data(self):
         data = {
