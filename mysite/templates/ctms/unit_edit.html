@@ -272,6 +272,7 @@ Courselet
         var count = $('.error-models-form__items').children().length;
         var tmplMarkup = $('#item-template').html();
         var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
+        var idElement = '#item-' + count
         $('.error-models-form__items').append(compiledTmpl);
 
         // Update form count
@@ -279,7 +280,7 @@ Courselet
 
         // Animate scroll to the new form
         $('html, body').animate({
-          scrollTop: $('.error-models-form__items div:last-of-type').offset().top - 84
+          scrollTop: $('.error-models-form__items '+idElement).offset().top - 84
         }, 800);
       });
 
