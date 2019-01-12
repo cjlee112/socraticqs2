@@ -76,7 +76,7 @@ Deploy Dev:
     - python manage.py collectstatic --noinput
     - sudo supervisorctl restart devgunicorn
     - sudo supervisorctl restart devcelery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n@redilonka (・ω・)", "link_names":1}
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n@redilonka (・ω・)", "link_names":1}'
 
 Deploy Stage:
   stage: deploy
