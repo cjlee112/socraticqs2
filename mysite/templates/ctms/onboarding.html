@@ -11,7 +11,12 @@
       <h1>Get Started</h1>
 
       <p>
-        We’re so happy you’ve decided to test Courselets, {{ user.first_name }}.
+        We’re so happy you’ve decided to test Courselets, 
+        {% if user.first_name %}
+        {{ user.first_name }}
+        {% else %}
+        {{ user.username }}
+        {% endif %}.
         This guide will help you get started, and you can return to it at any time by clicking on “Get Started” in your sidebar.
         If you have any questions or feedback, please open the chat in your lower right corner and send us a message.
       </p>
