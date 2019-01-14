@@ -3,7 +3,7 @@
 
 <!doctype html>
     <head>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not user.is_staff %}
         <script type="text/javascript">
             window.location = "{% build_redirect_url user %}";
         </script>
