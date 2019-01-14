@@ -11,7 +11,7 @@ from django.db import models
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
 
-from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS
+from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS, SubKindMixin
 from ctms.forms import EditUnitForm
 from ctms.models import Invite
 from psa.forms import EmailLoginForm, SignUpForm
@@ -778,6 +778,47 @@ class EditUnitViewTests(MyTestCase):
         lesson2 = Lesson(title='title', text='text', addedBy=self.user, kind=Lesson.ANSWER)
         lesson.save()
         lesson2.save()
+
+    @data(
+        SubKindMixin.MULTIPLE_CHOICES,
+        SubKindMixin.NUMBERS,
+        SubKindMixin.EQUATION,
+        SubKindMixin.CANVAS,
+    )
+    def test_lesson_type_introduction_sub_kind_MC(self, sub_kind):
+        self.lesson.kind=Lesson.ORCT_QUESTION
+        self.lesson.sub_kind=sub_kind
+        self.lesson.save()
+
+        lesson_id = self.lesson.id
+        lesson = Lesson.objects.get(id=lesson_id)
+
+        self.assertEqual(lesson.kind, Lesson.ORCT_QUESTION)
+        self.assertEqual(lesson.text, 'text')
+        self.assertEqual(lesson.sub_kind, sub_kind)
+
+        self.url = reverse(
+            'ctms:unit_edit',
+            kwargs={
+                'course_pk': self.get_test_course().id,
+                'courslet_pk': self.get_test_courseunit().id,
+                'pk': lesson_id,
+            }
+        )
+        data = {
+            'unit_type': Lesson.EXPLANATION,
+            'text': 'text',
+            'title': 'title',
+        }
+
+        response = self.post_valid_data(data)
+        lesson = Lesson.objects.get(id=lesson_id)
+
+        self.assertEqual(lesson.text, 'text')
+        self.assertEqual(lesson.kind, Lesson.EXPLANATION)
+        self.assertEqual(lesson.title, 'title')
+        self.assertEqual(lesson.sub_kind, None)
+
 
     def test_get_page(self):
         counts = self.get_model_counts()
