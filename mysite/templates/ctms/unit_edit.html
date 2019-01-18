@@ -202,12 +202,13 @@ Courselet
 
         <!-- Add unit aborts from the legacy interface -->
         <div class="form-group form-group--unit-aborts">
-          <label>Abort Thread</label>
-          <p>
-            Enabling this will allow your students to skip directly to the error models without submitting an answer.
-          </p>
-
-          {{ form.add_unit_aborts }}
+            <div style="float: left">
+            {{ form.add_unit_aborts }}
+            </div>
+            <div style="margin-left: 1%; float: left">
+               Offer help for meta-blindspots
+                <br><a href="https://intercom.help/courselets/getting-started/what-are-meta-blindspots">What are meta-blindspots?</a>
+            </div>
         </div>
 
       <!-- Submit -->
