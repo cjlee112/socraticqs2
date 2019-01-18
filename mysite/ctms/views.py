@@ -668,6 +668,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         context.update(self.kwargs)
         courslet = self.get_courslet()
         context.update({
+            'u_lessons': self.get_units_by_courselet(courslet),
             'course': self.get_course(),
             'courslet': courslet,
             'domain': 'https://{0}'.format(Site.objects.get_current().domain),
@@ -1069,6 +1070,9 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
                 'course': self.get_course(),
             }
         )
+        kwargs.update({
+            'u_lessons': self.get_units_by_courselet(courselet)
+        })
         if waffle.switch_is_active('ctms_invite_students'):
             # We no longer need a form
             # kwargs['invite_student_form'] = self.form_class(initial={'type': 'student', 'course': self.get_course()})
