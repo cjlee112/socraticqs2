@@ -205,6 +205,37 @@ class MyTestCase(TestCase):
                 self.assertEqual(response.status_code, 200)
 
 
+class OnboardingTests(MyTestCase):
+
+    def setUp(self):
+        super(OnboardingTests, self).setUp()
+        self.enroll_unit_code = EnrollUnitCode.get_code(self.courseunit)
+        self.url = reverse('ctms:onboarding')
+
+    @mock.patch('ctms.views.get_onboarding_setting')
+    @mock.patch('ctms.views.settings')
+    @mock.patch('ctms.views.waffle')
+    def test_onboarding(self, waffle_mock, settings_mock, get_onboarding_setting):
+        waffle_mock.switch_is_active.return_value = True
+        settings_mock.ONBOARDING_INTRODUCTION_COURSELET_ID = self.courseunit.id
+        get_onboarding_setting.return_value = self.course.id
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['enroll_url'], '/chat/enrollcode/' + self.enroll_unit_code)
+        self.assertEqual(response.context['introduction_course'], self.course)
+        self.assertEqual(response.context['users_course'], self.course)
+        self.assertEqual(response.context['users_courselet'], self.courseunit)
+        self.assertEqual(response.context['users_thread'], None)
+        self.assertEqual(response.status_code, 200)
+        #for non - existent courselet, course
+        settings_mock.ONBOARDING_INTRODUCTION_COURSELET_ID = 999
+        get_onboarding_setting.return_value = 999
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['introduction_course'], None)
+        self.assertEqual(response.context['enroll_url'], '#')
+
+
 class MyCoursesTests(MyTestCase):
     def setUp(self):
         self.username, self.password = 'test', 'test'
