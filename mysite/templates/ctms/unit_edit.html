@@ -195,7 +195,7 @@ Courselet
                 {% endfor %}
               </div>
 
-              <a href="#" class="button error-models-form__add">Add Error Model</a>
+              <a href="#" class="button error-models-form__add">Start writing a new (blank) Error Model</a>
             </div>
           {% endif %}
         </div>
@@ -272,7 +272,8 @@ Courselet
         var count = $('.error-models-form__items').children().length;
         var tmplMarkup = $('#item-template').html();
         var compiledTmpl = tmplMarkup.replace(/__prefix__/g, count);
-        var idElement = '#item-' + count
+        var idElement = '#item-' + count;
+        var focusElement = 'input#id_form-' + count + '-title.ignore';
         $('.error-models-form__items').append(compiledTmpl);
 
         // Update form count
@@ -282,6 +283,7 @@ Courselet
         $('html, body').animate({
           scrollTop: $('.error-models-form__items '+idElement).offset().top - 84
         }, 800);
+        $(focusElement).focus();
       });
 
       $('.error-models-form__remove').on('click', function(e) {
