@@ -219,8 +219,18 @@ class ASSESS(object):
     understand this concept now. """
 
     edges = (
+            dict(name='next', toNode='ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
+        )
+
+
+class ASSESS_QUESTION_MESSAGE(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Assess your answer'
+    edges = (
             dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
         )
+    help = 'How close was your answer to the one shown here?'
 
 
 class GET_ASSESS(object):
@@ -296,6 +306,7 @@ def get_specs():
             GET_CONFIDENCE,
             WAIT_ASSESS,
             ASSESS,
+            ASSESS_QUESTION_MESSAGE,
             GET_ASSESS,
             GRADING,
             ERRORS,

@@ -400,7 +400,7 @@ class Message(models.Model):
                             (self.content.lesson.title, self.content.lesson.text)
                         )
                     )
-                elif self.input_type == 'options' and self.text: # and not self.content.lesson.sub_kind:
+                elif self.input_type == 'options' and self.text:  # and not self.content.lesson.sub_kind:
                     html = STATUS_OPTIONS[self.text]
                 elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
                     # render unitlesson (question) - answer

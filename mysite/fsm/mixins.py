@@ -520,12 +520,13 @@ class ChatMixin(object):
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
-        if self.node_name_is_one_of('END', 'IF_RESOURCES'):
+        if self.node_name_is_one_of('END', 'IF_RESOURCES', 'NEED_HELP_MESSAGE', 'ASSESS_QUESTION_MESSAGE'):
             if not self.help:
                 text = self.get_help(chat.state, request=None)
             else:
                 text = self.help
             message = Message.objects.create(
+                            response_to_check=message.response_to_check,
                             chat=chat,
                             owner=chat.user,
                             text=text,

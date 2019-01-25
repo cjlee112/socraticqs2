@@ -616,7 +616,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEquals(len(json_content['addMessages']), 3)
 
         response = self.client.put(
             next_url,
@@ -841,17 +841,6 @@ class MessagesViewTests(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-
-        response = self.client.put(
-            next_url,
-            data=json.dumps({"option": 1, "chat_id": chat_id}),
-            content_type='application/json',
-            follow=True
-        )
-
-        json_content = json.loads(response.content)
-        next_url = json_content['input']['url']
-
         self.assertEquals(
             json_content['addMessages'][0]['html'],
             '<dl>\n<dt><strong>Re: Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
@@ -1123,9 +1112,8 @@ class NumbersTest(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEquals(len(json_content['addMessages']), 3)
 
         response = self.client.put(
             next_url,
