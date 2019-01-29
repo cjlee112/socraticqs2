@@ -12,6 +12,7 @@ from mock import Mock, patch
 from ddt import data, unpack, ddt
 
 from ct.models import *
+from ct.templatetags.ct_extras import md2html
 from ct.sourcedb_plugin.wikipedia_plugin import LessonDoc
 
 
@@ -423,6 +424,19 @@ class LessonTest(TestCase):
         self.assertEqual(lesson.get_choice_title(index), title)
         self.assertEqual(lesson.get_choice_description(index), description)
 
+    def test_lesson_choice_description_with_math_markering(self):
+        text = 'ex/\r\n[choices]\r\n() true\r\nSome explanation text\r\n(*) false'\
+               '\r\n.. math:: p(H) = \frac{|H \cap S|}{|S|}\r\n() +-\r\n.. math:: p(H) = \frac{|H \cap S|}{|S|}'
+        lesson = Lesson(title='ugh', addedBy=self.user, text=text)
+
+        self.assertEqual(
+            lesson.get_choice_description(0).strip(),
+            'Some explanation text\r\n'.strip()
+        )
+        self.assertEqual(
+            lesson.get_choice_description(1).strip(),
+            md2html('.. math:: p(H) = \frac{|H \cap S|}{|S|}\r\n').strip()
+        )
 
 
 class ConceptLinkTest(TestCase):

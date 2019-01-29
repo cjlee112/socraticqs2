@@ -2,19 +2,20 @@ import re
 import logging
 from copy import copy
 
-from django.core.validators import RegexValidator
-from django.db import models
 from django.contrib.auth.models import User
-from django.template.loader import render_to_string
-from django.utils import timezone
+from django.core.validators import RegexValidator
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.db.models import Q, Count, Max
-
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+
 from core.common import onboarding
 from core.common.utils import update_onboarding_step
+from ct.templatetags.ct_extras import md2html
 
 
 not_only_spaces_validator = RegexValidator(
@@ -360,7 +361,8 @@ class Lesson(models.Model, SubKindMixin):
                     choices.append(listed[i])
                     choice_index += 1
                 elif with_description:
-                    choice_description.append((choice_index, listed[i]))
+                    desc = md2html(listed[i]) if '.. math::' in listed[i] else listed[i]
+                    choice_description.append((choice_index, desc))
         if with_description:
             # The structure of choices with description - [(choice, description), (choice, description)]
             _choices = []
