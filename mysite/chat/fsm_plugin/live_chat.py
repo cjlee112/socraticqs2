@@ -27,7 +27,13 @@ def assess_edge(self, edge, fsmStack, request, **kwargs):
             fsmStack.state.unitLesson = fsmStack.state.linkState.unitLesson
             fsmStack.state.save()
             return fsm.get_node('TITLE')
-    else:
+    else:  # pragma: no cover
+        if not fsmStack.next_point.response_to_check.selfeval:
+            return edge.toNode
+        if fsmStack.next_point.response_to_check.selfeval != 'correct':
+            return fsm.get_node('INCORRECT_ANSWER')
+        elif fsmStack.next_point.response_to_check.selfeval == 'correct':
+            return fsm.get_node('CORRECT_ANSWER')
         return edge.toNode  # go to assessment
 
 
@@ -79,6 +85,52 @@ def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
     return wrapp
 
 
+class INCORRECT_ANSWER(object):  # pragma: no cover
+    title = 'Show correct answer for Multiple Choices'
+    edges = (
+            dict(name='next', toNode='INCORRECT_CHOICE', title='Assess yourself'),
+        )
+
+
+class INCORRECT_CHOICE(object):  # pragma: no cover
+    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        fsm = edge.fromNode.fsm
+        if (fsmStack.next_point.response_to_check.unitLesson.get_errors() or
+            fsmStack.next_point.response_to_check.lesson.add_unit_aborts and
+            fsmStack.next_point.response_to_check.unitLesson.unit.get_aborts()):
+            return fsm.get_node('ERRORS')
+        else:
+            unitStatus = fsmStack.state.get_data_attr('unitStatus')
+
+            nextUL = unitStatus.start_next_lesson()
+            if not nextUL:  # pragma: no cover
+                unit = fsmStack.state.get_data_attr('unit')
+                if unit.unitlesson_set.filter(
+                    kind=UnitLesson.COMPONENT, order__isnull=True
+                ).exists():
+                    return fsm.get_node('IF_RESOURCES')
+                else:
+                    return fsm.get_node('END')
+            else:  # just a lesson to read
+                fsmStack.state.unitLesson = nextUL
+                return fsm.get_node('TITLE')
+
+    title = 'Show incorrect choice for Multiple Choices'
+    edges = (
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
+
+
+class CORRECT_ANSWER(object):  # pragma: no cover
+    title = 'Show correct answer for Multiple Choices'
+    edges = (
+            dict(name='next', toNode='WAIT_ASK', title='Assess yourself'),
+        )
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCLE"])(
+        lambda self, edge, *args, **kwargs: edge.toNode
+    )
+
+
 class START(object):
     """
     In this activity you will answer questions
@@ -127,6 +179,7 @@ class TITLE(object):
     edges = (
         dict(name='next', toNode='ASK', title='View Next Lesson'),
     )
+
 
 class ASK(object):
     """
@@ -270,6 +323,7 @@ class GET_ERRORS(object):
         lambda self, edge, *args, **kwargs: edge.toNode
     )
 
+
 class END(object):
     # node specification data goes here
     path = 'ct:unit_tasks_student'
@@ -294,6 +348,9 @@ def get_specs():
             GET_ANSWER,
             CONFIDENCE,
             GET_CONFIDENCE,
+            CORRECT_ANSWER,
+            INCORRECT_ANSWER,
+            INCORRECT_CHOICE,
             WAIT_ASSESS,
             ASSESS,
             GET_ASSESS,

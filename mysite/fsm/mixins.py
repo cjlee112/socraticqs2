@@ -331,7 +331,7 @@ class ChatMixin(object):
             message = Message(**_data)
             message.save()
         if self.node_name_is_one_of('CORRECT_ANSWER'):
-            lesson = message.content.unitLesson.lesson
+            lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
             if correct_choices:
                 correct_title = lesson.get_choice_title(correct_choices[0][0])
@@ -354,7 +354,7 @@ class ChatMixin(object):
                 .format(correct_title, correct_description)
             )
         if self.node_name_is_one_of('INCORRECT_ANSWER'):
-            lesson = message.content.unitLesson.lesson
+            lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
             if correct_choices:
                 correct_title = lesson.get_choice_title(correct_choices[0][0])
@@ -366,8 +366,8 @@ class ChatMixin(object):
             message = Message.objects.create(
                 owner=chat.user,
                 chat=chat,
-                lesson_to_answer=message.content.unitLesson,
-                response_to_check=current,
+                lesson_to_answer=message.response_to_check.unitLesson if chat.is_live else message.content.unitLesson,
+                response_to_check=message.response_to_check if chat.is_live else current,
                 kind='message',
                 input_type='custom',
                 is_additional=is_additional,
@@ -442,7 +442,7 @@ class ChatMixin(object):
         if self.node_name_is_one_of('GET_ASSESS'):
             _data = dict(
                 contenttype='response',
-                content_id=message.response_to_check.id,
+                content_id=message.response_to_check.id if message.response_to_check else None,
                 input_type='options',
                 chat=chat,
                 owner=chat.user,
