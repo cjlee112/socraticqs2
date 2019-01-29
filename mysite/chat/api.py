@@ -567,8 +567,10 @@ class ProgressView(ValidateMixin, generics.RetrieveAPIView):
 
         serializer_data = serializer.data
         course_id = serializer.instance.get_course_unit().course.id
+        courselet_id = serializer.instance.get_course_unit().id
         # onboarding checking
         if course_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID) and \
+            courselet_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSELET_ID) and \
                 serializer_data.get('progress', 0) * 100 >= 70:
             update_onboarding_step(onboarding.STEP_2, self.request.user.id)
         return Response(serializer_data)

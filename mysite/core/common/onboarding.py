@@ -10,6 +10,7 @@ STEP_7 = 'next_steps'
 # settings
 
 INTRODUCTION_COURSE_ID = 'introduction_course_id'
+INTRODUCTION_COURSELET_ID = 'introduction_courselet_id'
 VIEW_INTRODUCTION = STEP_1
 INTRODUCTION_INTRO = STEP_2
 CREATE_COURSE = STEP_3
