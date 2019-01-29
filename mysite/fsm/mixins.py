@@ -549,7 +549,7 @@ class ChatMixin(object):
                             chat=chat,
                             owner=chat.user,
                             text=''''''
-                            '''Here are the most common blindspots people reported when comparing their answer vs.'''
+                            '''Here are the most common blindspots people reported when comparing their answer vs. '''
                             '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
                             kind='message',
                             input_type='custom',
