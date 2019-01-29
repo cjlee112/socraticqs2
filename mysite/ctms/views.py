@@ -1279,7 +1279,7 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         users_thread = Lesson.objects.filter(addedBy=self.request.user, kind=Lesson.ANSWER).last()
 
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
-        introduction_courselet_id = settings.ONBOARDING_INTRODUCTION_COURSELET_ID
+        introduction_courselet_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSELET_ID)
 
         course = Course.objects.filter(id=introduction_course_id).first()
         enroll_unit_code = EnrollUnitCode.objects.filter(
@@ -1287,7 +1287,8 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             isLive=False, isPreview=False, isTest=False
         ).first()
         if not enroll_unit_code:
-            logger.warning('value: ONBOARDING_INTRODUCTION_COURSELET_ID = {} for courselet - not found!'.format(introduction_courselet_id))
+            logger.warning('value: ONBOARDING_INTRODUCTION_COURSELET_ID = {} for courselet - not found!'.format(
+                introduction_courselet_id))
         enroll_url = '/chat/enrollcode/{}'.format(
             enroll_unit_code.enrollCode or EnrollUnitCode.get_code(enroll_unit_code.courseUnit)
         ) if enroll_unit_code else '#'
