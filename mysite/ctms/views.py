@@ -1,5 +1,7 @@
 import waffle
 import json
+import logging
+
 from uuid import uuid4
 
 from django.contrib.sites.models import Site
@@ -43,6 +45,9 @@ from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+
+logger = logging.getLogger(__name__)
+
 
 memoize = Memoize()
 
@@ -1272,12 +1277,17 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
             course=users_course
         ).last()
         users_thread = Lesson.objects.filter(addedBy=self.request.user, kind=Lesson.ANSWER).last()
+
         introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
+        introduction_courselet_id = settings.ONBOARDING_INTRODUCTION_COURSELET_ID
+
         course = Course.objects.filter(id=introduction_course_id).first()
         enroll_unit_code = EnrollUnitCode.objects.filter(
-            courseUnit__course_id=introduction_course_id,
+            courseUnit=introduction_courselet_id,
             isLive=False, isPreview=False, isTest=False
         ).first()
+        if not enroll_unit_code:
+            logger.warning('value: ONBOARDING_INTRODUCTION_COURSELET_ID = {} for courselet - not found!'.format(introduction_courselet_id))
         enroll_url = '/chat/enrollcode/{}'.format(
             enroll_unit_code.enrollCode or EnrollUnitCode.get_code(enroll_unit_code.courseUnit)
         ) if enroll_unit_code else '#'
