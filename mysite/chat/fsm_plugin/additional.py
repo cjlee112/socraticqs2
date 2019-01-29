@@ -3,12 +3,25 @@ from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STA
 from ..models import Message
 
 
+def check_status(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    fsm = edge.fromNode.fsm
+    additionals = Message.objects.filter(
+        is_additional=True,
+        chat=fsmStack,
+        timestamp__isnull=True
+    )
+    if not additionals:
+        return fsm.get_node('END')
+    if fsmStack.next_point.student_error.status == NEED_HELP_STATUS:
+        return fsm.get_node('NEED_HELP_MESSAGE')
+    return fsm.get_node('STUDENTERROR')
+
+
 def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).
     """
     fsm = edge.fromNode.fsm
-
     if fsmStack.next_point.student_error.status == NEED_HELP_STATUS:
         additionals = Message.objects.filter(is_additional=True,
                                              chat=fsmStack,
@@ -50,6 +63,16 @@ def get_lesson_url(self, node, state, request, **kwargs):
     return ul.get_study_url(course.pk)
 
 
+class NEED_HELP_MESSAGE(object):
+    get_path = get_lesson_url
+    next_edge = next_additional_lesson
+    title = 'Additional message'
+    edges = (
+        dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
+    )
+    help = 'We will try to provide more explanation for this.'
+
+
 class START(object):
     """
     Initialize data for viewing a courselet, and go immediately
@@ -61,7 +84,6 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
-
 
         try:  # use unitStatus if provided
             unitStatus = fsmStack.state.get_data_attr('unitStatus')
@@ -77,7 +99,7 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='START_MESSAGE', title='View Next Lesson'),
+            dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
         )
 
 
@@ -107,18 +129,19 @@ class RESOLVE(object):
             dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
         )
 
+
 class MESSAGE_NODE(object):
-        get_path = get_lesson_url
-        # node specification data goes here
-        title = 'How well do you feel you understand this blindspot now? If you need more clarifications, tell us.'
-        edges = (
-            dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
-        )
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'How well do you feel you understand this blindspot now? If you need more clarifications, tell us.'
+    edges = (
+        dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
+    )
 
 
 class GET_RESOLVE(object):
     get_path = get_lesson_url
-    next_edge = next_additional_lesson
+    next_edge = check_status
 
     # node specification data goes here
     title = 'It is time to answer'
@@ -136,7 +159,7 @@ class END(object):
         return unitStatus.unit.get_study_url(request.path)
     # node specification data goes here
     title = 'Additional lessons completed'
-    help = '''You've finished resolving previous Unit.'''
+    help = '''OK, let's continue.'''
 
 
 def get_specs():
@@ -148,6 +171,6 @@ def get_specs():
         name='additional',
         hideTabs=True,
         title='Take the courselet core lessons',
-        pluginNodes=[START, START_MESSAGE, STUDENTERROR, RESOLVE, MESSAGE_NODE, GET_RESOLVE, END],
+        pluginNodes=[START, START_MESSAGE, STUDENTERROR, RESOLVE, MESSAGE_NODE, NEED_HELP_MESSAGE, GET_RESOLVE, END],
     )
     return (spec,)

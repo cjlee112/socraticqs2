@@ -44,7 +44,8 @@ class GroupMessageMixin(object):
                     Lesson.EXPLANATION,
                     Lesson.BASE_EXPLANATION,
                     Lesson.ORCT_QUESTION,
-                    'abort')
+                    'abort'),
+        'answers': ('message',)
     }
 
     def group_filter(self, message, next_message=None):
@@ -102,7 +103,6 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                        chat=chat,
                                        kind='abort',
                                        timestamp__isnull=True)
-
         if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
             self.pop_state(chat)
         if helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):

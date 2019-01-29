@@ -48,8 +48,8 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
 
     if fsmStack.next_point.content.selfeval != 'correct':
         if (fsmStack.next_point.content.unitLesson.get_errors() or
-            fsmStack.next_point.content.lesson.add_unit_aborts and
-            fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+                fsmStack.next_point.content.lesson.add_unit_aborts and
+                fsmStack.next_point.content.unitLesson.unit.get_aborts()):
             return fsm.get_node('ERRORS')
         else:
             resp = fsmStack.next_point.content
@@ -266,9 +266,18 @@ class ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+            dict(name='next', toNode='ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
         )
 
+
+class ASSESS_QUESTION_MESSAGE(object):
+    get_path = get_lesson_url
+    # node specification data goes here
+    title = 'Assess your answer'
+    edges = (
+            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+        )
+    help = 'How close was your answer to the one shown here?'
 
 class GET_ASSESS(object):
     get_path = get_lesson_url
@@ -357,6 +366,7 @@ def get_specs():
             INCORRECT_ANSWER,
             INCORRECT_CHOICE,
             ASSESS,
+            ASSESS_QUESTION_MESSAGE,
             GET_ASSESS,
             GRADING,
             ERRORS,
