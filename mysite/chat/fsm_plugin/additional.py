@@ -68,7 +68,7 @@ class NEED_HELP_MESSAGE(object):
     next_edge = next_additional_lesson
     title = 'Additional message'
     edges = (
-        dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
+        dict(name='next', toNode='RESOLVE', title='Go to self-assessment'),
     )
     help = 'We will try to provide more explanation for this.'
 
