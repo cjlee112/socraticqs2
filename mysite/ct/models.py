@@ -338,6 +338,11 @@ class Lesson(models.Model, SubKindMixin):
                    'enable_auto_grading',
                    )
 
+    def save(self):
+        if self.kind == Lesson.EXPLANATION:
+            self.sub_kind = None
+        return super(Lesson, self).save()
+
     def get_choices(self, with_description=False):
         """Parse self.text and try to find choices.
 
