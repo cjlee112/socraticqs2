@@ -21,6 +21,9 @@ else
 	APP = dev_app
 endif
 
+sh:
+	docker-compose -f $(DOCKERFILE_PATH) run $(APP) bash
+
 run:
 	docker-compose -f $(DOCKERFILE_PATH) up
 
@@ -40,32 +43,26 @@ endif
 
 .migrate:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			python manage.py migrate \
-			--settings=mysite.settings.docker
+			python manage.py migrate
 
 .fsm-deploy:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			python manage.py fsm_deploy \
-			--settings=mysite.settings.docker
+			python manage.py fsm_deploy
 
 .load-fixtures:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			python manage.py loaddata dumpdata/debug-wo-fsm.json \
-			--settings=mysite.settings.docker
+			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
 .init-data:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			python manage.py flush \
-			--settings=mysite.settings.docker
+			python manage.py flush
 
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
-			python manage.py loaddata dumpdata/debug-wo-fsm.json \
-			--settings=mysite.settings.docker
+			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
 .static: .node
 	docker-compose -f $(DOCKERFILE_PATH) run --no-deps $(APP) \
-			python manage.py collectstatic --noinput \
-			--settings=mysite.settings.docker
+			python manage.py collectstatic --noinput
 
 .react:
 	docker-compose -f $(DOCKERFILE_PATH) run react
