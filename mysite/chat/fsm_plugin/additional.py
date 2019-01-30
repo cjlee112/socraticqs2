@@ -3,20 +3,6 @@ from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STA
 from ..models import Message
 
 
-def check_status(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    fsm = edge.fromNode.fsm
-    additionals = Message.objects.filter(
-        is_additional=True,
-        chat=fsmStack,
-        timestamp__isnull=True
-    )
-    if not additionals:
-        return fsm.get_node('END')
-    if fsmStack.next_point.student_error.status == NEED_HELP_STATUS:
-        return fsm.get_node('NEED_HELP_MESSAGE')
-    return fsm.get_node('STUDENTERROR')
-
-
 def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).
@@ -41,6 +27,8 @@ def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kw
             return fsm.get_node('STUDENTERROR')
     else:
         return fsm.get_node('END')
+    if fsmStack.next_point.student_error.status == NEED_HELP_STATUS:  # pragma: no cover
+        return fsm.get_node('NEED_HELP_MESSAGE')
     return edge.toNode
 
 
@@ -65,10 +53,10 @@ def get_lesson_url(self, node, state, request, **kwargs):
 
 class NEED_HELP_MESSAGE(object):
     get_path = get_lesson_url
-    next_edge = next_additional_lesson
+
     title = 'Additional message'
     edges = (
-        dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
+        dict(name='next', toNode='RESOLVE', title='Go to self-assessment'),
     )
     help = 'We will try to provide more explanation for this.'
 
@@ -141,7 +129,7 @@ class MESSAGE_NODE(object):
 
 class GET_RESOLVE(object):
     get_path = get_lesson_url
-    next_edge = check_status
+    next_edge = next_additional_lesson
 
     # node specification data goes here
     title = 'It is time to answer'
