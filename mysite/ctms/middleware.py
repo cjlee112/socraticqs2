@@ -28,6 +28,25 @@ NAME_MODEL_MAPPING = {
     'CourseUnit': CourseUnit
 }
 
+ALLOWED_MODEL_FILTERS_MAPPING = {
+    Course: ['addedBy']
+}
+
+
+def get_model_filter(model, kwargs):
+    """
+    Add filter params to appropriate model if any
+        Arguments:
+            model (object): Model object
+            kwargs (dict): key, value to be added to the model filtering
+
+    """
+    filter_dict = {}
+    for field in ALLOWED_MODEL_FILTERS_MAPPING.get(model, []):
+        if kwargs.get(field):
+            filter_dict[field] = kwargs.get(field)
+    return filter_dict
+
 
 class SideBarUtils(object):
     '''
@@ -78,7 +97,10 @@ class SideBarUtils(object):
         :return:
         '''
         for model, pk in model_ids.items():
-            yield (MODEL_NAMES_MAPPING[model], model.objects.filter(id=pk).first())
+            filter_data = {'id': pk}
+            if self.request.user.is_authenticated():
+                filter_data.update(get_model_filter(model, {'addedBy': self.request.user}))
+            yield (MODEL_NAMES_MAPPING[model], model.objects.filter(**filter_data).first())
 
     def _reverse(self, name, kwargs=None):
         namespace = getattr(settings, 'CTMS_URL_NAMESPACE', 'ctms')
@@ -174,6 +196,7 @@ class SideBarUtils(object):
 class SideBarMiddleware(SideBarUtils):
     def process_view(self, request, view_func, view_args, view_kwargs):
         # urls = self._get_urls(request)
+        self.request = request
         current_url = resolve(request.path_info).url_name
         if request.path.startswith('/ctms/') and reverse('accounts:profile_update') != request.path and \
                 request.path != reverse('ctms:email_sent') and '/ctms/invites/' not in request.path:
