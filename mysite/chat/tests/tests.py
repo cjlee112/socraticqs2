@@ -873,7 +873,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(len(json_content['addMessages']), 4)
+        self.assertEquals(len(json_content['addMessages']), 5)
         self.assertEquals(json_content['addMessages'][0]['html'], status_msg)
 
     def test_preview_forbidden(self):
