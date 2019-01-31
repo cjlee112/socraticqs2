@@ -25,3 +25,25 @@
     {% endwith %}
 {% endif %}
 {% endblock %}
+
+{% block js %}
+<script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+    // Add listeners once the DOM is ready
+    $(function(){
+      // Redirect when the user closes the final video
+      $("[data-fancybox]").fancybox({
+        afterShow: function() {
+          var iframe = $(".fancybox-iframe");
+          var player = new Vimeo.Player(iframe);
+          player.on('ended', function() {
+            if ( document.fullscreen ) {
+              document.exitFullscreen();
+            }
+            parent.$.fancybox.close();
+          });
+        }
+      });
+    });
+  </script>
+{% endblock %}
