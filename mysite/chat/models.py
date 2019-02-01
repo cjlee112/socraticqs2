@@ -469,7 +469,7 @@ class Message(models.Model):
         return html
 
     def get_name(self):
-        name = "Kris Lee"
+        name = self.chat.instructor.get_full_name() or self.chat.instructor.username
         if self.content_id and self.content:
             if self.contenttype == 'response':
                 name = self.content.author.get_full_name() or self.content.author.username
