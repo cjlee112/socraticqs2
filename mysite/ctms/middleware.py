@@ -29,7 +29,8 @@ NAME_MODEL_MAPPING = {
 }
 
 ALLOWED_MODEL_FILTERS_MAPPING = {
-    Course: ['addedBy']
+    Course: ['addedBy'],
+    CourseUnit: ['addedBy']
 }
 
 
