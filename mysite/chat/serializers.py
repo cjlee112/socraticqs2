@@ -19,6 +19,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     html = serializers.CharField(source='get_html', read_only=True)
     name = serializers.CharField(source='get_name', read_only=True)
     avatar = serializers.SerializerMethodField()
+    initials = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -28,7 +29,8 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             'name',
             'userMessage',
             'avatar',
-            'html'
+            'html',
+            'initials'
         )
 
     def get_avatar(self, obj):
@@ -37,6 +39,14 @@ class InternalMessageSerializer(serializers.ModelSerializer):
                 return obj.chat.instructor.instructor.icon_url
             except Instructor.DoesNotExist:
                 pass
+
+    def get_initials(self, obj):
+        if not obj.userMessage:
+            if obj.chat.instructor.first_name and obj.chat.instructor.last_name:
+                return u'{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0])
+            else:
+                return  # Myabe need to add here something like "PR" (professor)?
+        return 'ME'
 
 
 class InputSerializer(serializers.Serializer):

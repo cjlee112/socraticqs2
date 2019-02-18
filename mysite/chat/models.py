@@ -261,6 +261,9 @@ class Message(models.Model):
             for i, c in self.content.lesson.get_choices():
                 if i in selected:
                     my_choices.append(choices_template.format(c.split(' ', 1)[1]))  # pragma: no cover
+            if not my_choices:  # in this case we set userMessage to false
+                self.userMessage = False
+                self.save()
             return ''.join(my_choices) if my_choices else "You've chosen nothing"  # pragma: no cover
         else:
             return self.render_choices([], [])

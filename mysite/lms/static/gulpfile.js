@@ -23,7 +23,7 @@ var replace = require('gulp-replace');
 // http://handlebarsjs.com/precompilation.html
 // https://www.npmjs.com/package/gulp-handlebars
 gulp.task('precompile-templates', function(){
-  return gulp.src('src/js/views/*.hbs')
+  return gulp.src('js/chat/views/*.hbs')
     .pipe(handlebars({
       handlebars: require('handlebars')
     }))
@@ -34,12 +34,12 @@ gulp.task('precompile-templates', function(){
     }))
     .pipe(concat('compiled.templates.js'))
     .pipe(insert.prepend('/** @file Creates the CUI.templates namespace and defines all templates. */ \n var CUI = CUI || {}; \n /** Contains Handlebars view templates \n * @namespace */ \n CUI.views = CUI.views || {}; \n'))
-    .pipe(gulp.dest('src/js/views'));
+    .pipe(gulp.dest('js/chat/views'));
 });
 
 // Compile sass
 gulp.task('compile-sass', function(){
-  return gulp.src('sass/app.scss')
+  return gulp.src('sass/**/app.scss')
     .pipe(maps.init())
     .pipe(sass())
     .pipe(maps.write('./'))

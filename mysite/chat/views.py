@@ -286,12 +286,9 @@ class ChatInitialView(LoginRequiredMixin, View):
         will_learn, need_to_know = self.get_will_learn_need_know(unit, courseUnit)
 
         try:
-            instructor_icon = (
-                courseUnit.course.addedBy.instructor.icon_url or
-                static('img/student/avatar-teacher.jpg')
-            )
+            instructor_icon = courseUnit.course.addedBy.instructor.icon_url
         except AttributeError:
-            instructor_icon = static('img/student/avatar-teacher.jpg')
+            instructor_icon = ''
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
@@ -593,12 +590,9 @@ class InitializeLiveSession(ChatInitialView):
         will_learn, need_to_know = self.get_will_learn_need_know(unit, course_unit)
 
         try:
-            instructor_icon = (
-                course_unit.course.addedBy.instructor.icon_url or
-                static('img/student/avatar-teacher.jpg')
-            )
+            instructor_icon = course_unit.course.addedBy.instructor.icon_url
         except AttributeError:
-            instructor_icon = static('img/student/avatar-teacher.jpg')
+            instructor_icon = ''
 
         return render(
             request,

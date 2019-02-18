@@ -247,11 +247,13 @@ input[type=submit] {
     display: table; }
   .sidebar__actions ul:after {
     clear: both; }
+
 .sidebar__actions li {
   float: left;
   margin-left: 12px; }
   .sidebar__actions li:first-child {
     margin-left: 0; }
+
 .sidebar__actions a {
   position: relative;
   display: block;
@@ -278,8 +280,10 @@ input[type=submit] {
   margin: 0 0 0 0;
   padding: 0;
   list-style: none; }
+
 .sidebar__units li {
   display: block; }
+
 .sidebar__units a {
   white-space: nowrap;
   overflow: hidden;
@@ -316,6 +320,7 @@ a.sidebar__add {
   margin: 0;
   padding-right: 12px;
   color: #8C8A98; }
+
 .sidebar__empty a {
   display: block;
   color: #B1B0B9;
@@ -330,6 +335,7 @@ a.sidebar__add {
     width: 308px; }
     .sidebar header {
       width: 308px; } }
+
 .page {
   padding-top: 61px;
   padding-bottom: 24px; }
@@ -375,19 +381,17 @@ a.sidebar__add {
     padding-top: 0;
     padding-left: 308px;
     padding-bottom: 60px; }
-
   .page__topbar {
     position: relative; }
-
   .page__topbar-inner {
     border-radius: 5px 0 0 0; }
-
   .page__account {
     float: right;
     padding-left: 0;
     padding-right: 72px; }
     .page__account span {
       display: block; } }
+
 .card {
   position: relative;
   background: #fff;
@@ -494,6 +498,7 @@ a.sidebar__add {
 
 .card__empty-state h3 {
   margin: 4px 0 0 0; }
+
 .card__empty-state .onboarding-content {
   margin-top: 13px; }
 
@@ -515,13 +520,10 @@ a.sidebar__add {
     border-radius: 4px;
     border-left: 1px solid #DDE2E6;
     border-right: 1px solid #DDE2E6; }
-
   .card__topbar {
     padding: 36px 400px 36px 60px; }
-
   .card__topbar.card__topbar--with-description {
     padding: 39px 60px 35px 60px; }
-
   .card__nav {
     position: absolute;
     top: 0;
@@ -533,7 +535,6 @@ a.sidebar__add {
     .card__nav a {
       padding-top: 39px;
       padding-bottom: 33px; }
-
   .card__sub .card__topbar {
     padding: 18px 24px 18px 60px; }
   .card__sub .card__nav {
@@ -541,19 +542,17 @@ a.sidebar__add {
     .card__sub .card__nav a {
       padding-top: 19px;
       padding-bottom: 17px; }
-
   .card__content {
     padding: 60px;
     min-height: 168px; }
-
   .card__delete .button, .card__delete input[type=submit], .card__delete input[type=submit].button {
     position: absolute;
     bottom: 60px;
     left: 60px;
     margin: 0; }
-
   .card__notice {
     padding: 23px 60px; } }
+
 .avatar {
   display: inline-block;
   width: 30px;
@@ -588,12 +587,14 @@ a.sidebar__add {
   background: #B1B0B9;
   transform: rotate(45deg);
   top: 30px; }
+
 .hamburger--active:after {
   transform: rotate(-45deg); }
 
 @media (min-width: 1024px) {
   .hamburger {
     display: none; } }
+
 .button, input[type=submit].button {
   display: inline-block;
   width: auto;
@@ -652,6 +653,7 @@ a.sidebar__add {
 
 h1 span, h2 span, h3 span, h4 span, h5 span, h6 span {
   display: block; }
+
 h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   margin-top: 24px; }
 
@@ -662,6 +664,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     float: right;
     margin-top: -9px;
     margin-left: 18px; } }
+
 .user-info {
   position: relative;
   padding: 6px 0 0 48px;
@@ -763,11 +766,11 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 @media (min-width: 768px) {
   .auth-card__social-options {
     text-align: center; }
-
   .auth-card__actions input[type=submit] {
     float: right;
     display: inline-block;
     width: auto; } }
+
 @media (min-width: 1024px) {
   .auth-card {
     margin-top: 59px;
@@ -775,6 +778,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     border-radius: 4px;
     border-left: 1px solid #DDE2E6;
     border-right: 1px solid #DDE2E6; } }
+
 .answer .user-info {
   margin-top: 15px; }
 
@@ -803,6 +807,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 @media (min-width: 1024px) {
   .alert {
     padding: 12px 60px; } }
+
 .errorlist {
   color: #a94442;
   background: #f2dede;
@@ -816,6 +821,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .expandable--form-description > p {
   margin: 0; }
+
 .expandable--form-description .expandable__content p {
   margin: 0; }
 
@@ -846,14 +852,18 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   margin: 0;
   padding: 0;
   list-style: 0; }
+
 .radio-list li {
   display: inline-block;
   margin-top: 6px; }
+
 .radio-list li + li {
   margin-left: 24px; }
+
 .radio-list label {
   cursor: pointer;
   font-weight: 400; }
+
 .radio-list input[type=radio] {
   margin-right: 6px; }
 
@@ -947,6 +957,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 .get-started__step--open h2 {
   font-weight: 600; }
+
 .get-started__step--open .get-started__step-content {
   display: block; }
 
@@ -987,42 +998,43 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     position: relative; }
     .get-started__intro .progress-line {
       display: none; }
-
   .get-started__progress-circle {
     display: block; }
-
   .get-started__step-header {
     padding: 30px 144px 29px 108px; }
-
   .get-started__step-status {
     left: 60px; }
-
   .get-started__step-content {
     padding: 0 60px 36px 108px; }
-
   .get-started__step-toggle {
     position: absolute;
     top: 23px;
     right: 60px;
     margin: 0; }
-
   .get-started__step--open .get-started__step-header {
     padding-bottom: 12px; } }
+
 @media (min-width: 1080px) {
   .get-started__progress-circle {
     top: 83px; } }
+
 @media (min-width: 1172px) {
   .get-started__progress-circle {
     top: 59px; } }
+
 .onboarding-content > p {
   margin: 0;
   max-width: 480px; }
+
 .onboarding-content > p + p {
   margin: 12px 0 0 0; }
+
 .onboarding-content .button {
   margin-top: 17px; }
+
 .onboarding-content .video-link + .button {
   margin-top: 24px; }
+
 .onboarding-content .alert {
   padding: 11px 24px;
   margin: 24px 0 0 0;
@@ -1083,11 +1095,11 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     padding: 31px 24px 17px 168px; }
     .video-link h3 {
       margin: 0; }
-
   .video-link__image {
     position: absolute;
     top: 24px;
     left: 24px; } }
+
 .progress-line {
   position: relative;
   display: block;
@@ -1141,10 +1153,13 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   margin: 12px 0 0 0;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.12), 0 25px 50px -25px rgba(0, 0, 0, 0.2);
   border-radius: 5px; }
+
 .image-upload .image-clear {
   margin: 12px 0 0 0; }
+
 .image-upload .button {
   margin: 12px 0 0 0; }
+
 .image-upload label {
   font-weight: normal; }
 

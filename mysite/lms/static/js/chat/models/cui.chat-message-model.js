@@ -58,7 +58,21 @@ CUI.ChatMessageModel = function(data){
    * @type {string}
    * @public
    */
-  this.avatar = data.avatar || this._getDefaultAvatar();
+  this.avatar = data.avatar;
+
+   /**
+   * A url to a default avatar displayed next to the message.
+   * @type {string}
+   * @public
+   */
+  this.defaultAvatar = this._getDefaultAvatar();
+
+  /**
+   * Initials to be displayed next to the message.
+   * @type {string}
+   * @public
+   */
+  this.initials = data.initials;
 
   /**
    * An optional array of overflow options.

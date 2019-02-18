@@ -1,8 +1,13 @@
 <div class="chat-message chat-message-text {{#if userMessage}} chat-message-user {{/if}}" data-message-id="{{id}}">
   <div class="chat-container">
     <div class="inner">
+      {{#if avatar }}
       <img src="{{avatar}}" alt="{{name}}" class="chat-avatar">
-
+      {{else if initials}}
+      <div class="chat-avatar {{#if userMessage}} chat-avatar--student-initials {{else}} chat-avatar--instructor-initials {{/if}}">{{initials}}</div>
+      {{else}}
+      <img src="{{defaultAvatar}}" alt="{{name}}" class="chat-avatar">
+      {{/if}}
       <div class="chat-bubble">
         {{{html}}}
 
