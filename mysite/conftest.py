@@ -1,4 +1,5 @@
 import os
+import random
 from collections import namedtuple
 from tempfile import TemporaryFile
 
@@ -225,3 +226,12 @@ def message_parametrized(chat, user, unit_lesson_parametrized):
         lesson_to_answer=unit_lesson_parametrized,
     )
 
+
+@pytest.fixture(scope='function')
+def unique_instructor():
+    # Create User and hope there is no user with such id
+    # This is hack for mongo onboarding issue
+    instructor = User(username='test_instructor', id=random.randint(9999, 999999))
+    instructor.save()
+    yield instructor
+    instructor.delete()
