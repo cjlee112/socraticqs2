@@ -330,6 +330,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             request,
             self.template_name,
             {
+                'chat_sessions_exists': len(chat_sessions),  # mark for frontend
                 'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'chat': chat,
                 'chat_id': i_chat_id,

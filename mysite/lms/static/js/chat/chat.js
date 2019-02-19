@@ -103,4 +103,12 @@ $(window).on('load', function(){
   timeline.from($title, 0.8, {y: +40, ease: Sine.easeInOut, force3D: 'auto', clearProps: 'transform'}, 1);
   timeline.from($course, 1, {y: +40, ease: Sine.easeInOut, force3D: 'auto', clearProps: 'transform'}, 1);
   timeline.from($about, 1.2, {y: +40, ease: Sine.easeInOut, force3D: 'auto', clearProps: 'transform'}, 1);
+
+  // start session in case there are no chat sessions
+  if (!chatSessions) {
+    setTimeout(() => {
+      console.log(chatSessions);  
+      $('.chat-start-session').click();
+    }, 1000);
+  } 
 });

@@ -144,7 +144,11 @@ Courselets
                   {% endif %}
 
                     <li>
-                      <a class="chat-start-session unit-links__new" href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" data-chat-id="0">
+                      <!-- Not necessary show this button where there are no chat sessions -->
+                      <a class="chat-start-session unit-links__new" 
+                        href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/" 
+                        data-chat-id="0"
+                        {% if not chat_sessions %}style="display:none;"{% endif %}>
                         <h3>New Chat Session</h3>
                       </a>
                     </li>
@@ -157,7 +161,8 @@ Courselets
         {% elif chat_id %}
           <div class="chat__start">
             <div class="container">
-              <button class="chat-start-session" data-chat-id="{{ chat_id }}">
+              <!-- Not necessary show this button where there are no chat sessions -->
+              <button class="chat-start-session" data-chat-id="{{ chat_id }}" {% if not chat_sessions %}style="display:none;"{% endif %}>
                 {% if fsmstate %}Let's Get Started!{% else %}View History{%endif%}</button>
               </button>
             </div>
@@ -256,6 +261,7 @@ Courselets
 {% block js %}
   <!-- Chat config -->
   <script>
+    var chatSessions = {{ chat_sessions_exists|default:0 }};
     var CUI = CUI || {};
     CUI.config = CUI.config || {};
 
