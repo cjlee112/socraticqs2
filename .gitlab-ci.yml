@@ -105,3 +105,4 @@ Deploy Stage:
     - sudo supervisorctl restart gunicorn
     - sudo supervisorctl restart celery
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
+    - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@here", "link_names":1}'
