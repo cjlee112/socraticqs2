@@ -43,7 +43,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     def get_initials(self, obj):
         if not obj.userMessage:
             if obj.chat.instructor.first_name and obj.chat.instructor.last_name:
-                return u'{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0])
+                return u'{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0]).upper()
             else:
                 return  # Myabe need to add here something like "PR" (professor)?
         return 'ME'
