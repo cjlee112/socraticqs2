@@ -1,5 +1,6 @@
 {% load cms_tags sekizai_tags %}
 {% load static %}
+{% load intercom %}
 
 <!DOCTYPE html>
 <html lang="en" style="height: 100%;">
@@ -34,5 +35,6 @@
     {% block base_content %}{% endblock %}
     {% block body %}{% endblock %}
     {% render_block "js" %}
+    {% if '/teach/' in request.path %}{% intercom_tag %}{% endif %}
   </body>
 </html>

@@ -21,3 +21,5 @@ EMAIL_PORT = 587
 EMAIL_FROM = ''
 
 DB_DATA = '{}:test_data'.format(os.getpid())
+
+IN_TESTING = True

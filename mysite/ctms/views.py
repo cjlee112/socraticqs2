@@ -1,6 +1,7 @@
 import waffle
 import json
 import logging
+import time
 
 from uuid import uuid4
 
@@ -27,7 +28,7 @@ from accounts.models import Instructor
 
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
-    get_onboarding_setting, get_onboarding_status_with_settings
+    get_onboarding_setting, get_onboarding_status_with_settings, create_intercom_event
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -47,8 +48,6 @@ from .utils import Memoize
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 logger = logging.getLogger(__name__)
-
-
 memoize = Memoize()
 
 
@@ -691,6 +690,12 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         if task:
             cu = self.get_courslet()
             if task == 'release':
+                create_intercom_event(
+                    event_name='courselet-published',
+                    created_at=int(time.mktime(time.localtime())),
+                    email=cu.addedBy.email,
+                    metadata={'courselet': cu.unit.title}
+                )
                 cu.releaseTime = timezone.now()
             if task == 'unrelease':
                 cu.releaseTime = None

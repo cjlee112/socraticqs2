@@ -1,4 +1,5 @@
 import re
+import time
 from uuid import uuid4
 
 from django.db import models
@@ -16,10 +17,8 @@ from django.template import loader, Context
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
 from core.common import onboarding
-from core.common.utils import update_onboarding_step
+from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.models import Course
-
-
 
 
 STATUS_CHOICES = (
@@ -118,6 +117,12 @@ class Invite(models.Model):
                 settings.EMAIL_FROM,
                 [self.email],
                 fail_silently=False
+            )
+            create_intercom_event(
+                event_name='invitation-sent',
+                created_at=int(time.mktime(time.localtime())),
+                email=self.instructor.user.email,
+                metadata={'tester': self.email}
             )
             return {
                 'success': True,

@@ -1,3 +1,5 @@
+import time
+
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
@@ -10,7 +12,7 @@ from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
-from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings
+from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
 
@@ -137,6 +139,18 @@ class OnboardingStatus(APIView):
             k: bool(v) for k, v in steps_to_update.items() if k in get_onboarding_steps()
         }
         if to_update and request.user.id:
+            projection = {k: 1 for k, v in to_update.items()}
+            projection['_id'] = 0
+            passed_steps = c_onboarding_status().find({onboarding.USER_ID: user_id}, projection)
+            passed_steps = passed_steps[0] if passed_steps else {}
+            for step in to_update:
+                if to_update[step] and not passed_steps.get(step):
+                    create_intercom_event(
+                        event_name='step-completed',
+                        created_at=int(time.mktime(time.localtime())),
+                        email=request.user.email,
+                        metadata={'step': step}
+                    )
             c_onboarding_status().update_one({onboarding.USER_ID: user_id}, {'$set': to_update}, upsert=True)
             return RestResponse({'status': 'Ok'}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)

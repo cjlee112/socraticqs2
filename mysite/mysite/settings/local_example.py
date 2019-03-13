@@ -56,5 +56,11 @@ AWS_SECRET_ACCESS_KEY = ''
 AWS_SES_REGION_NAME = ''
 AWS_SES_REGION_ENDPOINT = ''
 
+# Intercom settings
+INTERCOM_APPID = ''
+INTERCOM_SECURE_KEY = ''
+INTERCOM_ACCESS_TOKEN = ''
+
+
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'

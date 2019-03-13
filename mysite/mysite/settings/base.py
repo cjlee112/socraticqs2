@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'crispy_forms',
+    'core',
     'ct',
     'ctms',
     'fsm',
@@ -181,7 +182,10 @@ INSTALLED_APPS = (
 
     # bower requirements
     'djangobower',
-    'storages'
+    'storages',
+
+    # Intercom
+    'django_intercom',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -499,3 +503,9 @@ ONBOARDING_INTRODUCTION_COURSELET_ID = 1
 ONBOARDING_PERCENTAGE_DONE = 100
 
 COURSELETS_EMAIL = 'info@courselets.org'
+
+
+# Intercom settings
+INTERCOM_APPID = ''
+INTERCOM_SECURE_KEY = ''
+INTERCOM_ACCESS_TOKEN = ''

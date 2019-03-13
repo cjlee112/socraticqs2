@@ -1,18 +1,34 @@
 """
 Various utilities.
 """
+import time
 import functools
 
 import waffle
 
 from django.dispatch import receiver
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import reverse
 from django.template import loader, Context
 
 from core.common.mongo import c_onboarding_status, c_onboarding_settings
 from core.common import onboarding
+from core.tasks import intercom_event
+
+
+def create_intercom_event(event_name, created_at, email, metadata):
+    """
+    params:
+      event_name: string
+      created_at: int
+      email: string
+      metadata: dict
+    """
+    if getattr(settings, 'IN_TESTING', None):
+        return
+    intercom_event.apply_async(args=(event_name, created_at, email, metadata))
 
 
 def send_email(context_data, from_email, to_email, template_subject, template_text):
@@ -100,6 +116,14 @@ def update_onboarding_step(step, user_id):
         c_onboarding_status().update_one(find_crit, {'$set': {
             step: True
         }}, upsert=True)
+        user = User.objects.filter(id=user_id).first()
+        if user:
+            create_intercom_event(
+                event_name='step-completed',
+                created_at=int(time.mktime(time.localtime())),
+                email=user.email,
+                metadata={'step': step}
+            )
 
 
 ONBOARDING_STEPS_DEFAULT_TEMPLATE = {

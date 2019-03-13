@@ -1,4 +1,5 @@
 import re
+import time
 import logging
 from copy import copy
 
@@ -14,7 +15,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from core.common import onboarding
-from core.common.utils import update_onboarding_step
+from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.templatetags.ct_extras import md2html
 
 
@@ -1660,6 +1661,14 @@ def onboarding_unit_created(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Lesson)
-def onboarding_lesson_created(sender, instance, **kwargs):
+def onboarding_lesson_created(sender, instance, created, **kwargs):
     if instance.kind in (Lesson.ANSWER, Lesson.BASE_EXPLANATION, Lesson.EXPLANATION):
         update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)
+    if created and instance.kind == Lesson.ORCT_QUESTION:
+        orct_count = Lesson.objects.filter(addedBy=instance.addedBy, kind=Lesson.ORCT_QUESTION).count()
+        create_intercom_event(
+            event_name='orct-created',
+            created_at=int(time.mktime(time.localtime())),
+            email=instance.addedBy.email,
+            metadata={'ORCT written': orct_count}
+        )
