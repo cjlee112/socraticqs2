@@ -1,5 +1,5 @@
 {% load cms_tags sekizai_tags static menu_tags %}
-{% load build_url_utils %}
+{% load build_url_utils intercom %}
 
 <!doctype html>
     <head>
@@ -101,5 +101,6 @@
         <!-- Google Analytics -->
         {% include "google-analytics.html" %}
         {% render_block "js" %}
+        {% intercom_tag %}
     </body>
 </html>
