@@ -46,7 +46,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
                 return u'{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0]).upper()
             else:
                 return  # Myabe need to add here something like "PR" (professor)?
-        return 'ME'
+        return 'me'
 
 
 class InputSerializer(serializers.Serializer):
