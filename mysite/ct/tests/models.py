@@ -763,7 +763,7 @@ class UnitLessonTest(TestCase):
         unit_lesson.save_resolution(lesson)
         lesson.save_root.assert_called_once_with(self.lesson.concept, ConceptLink.RESOLVES)
         create_from_lesson.assert_called_once_with(
-            lesson, self.unit, kind=UnitLesson.RESOLVES, parent=unit_lesson
+            lesson, self.unit, kind=UnitLesson.RESOLVES, parent=unit_lesson, addAnswer=True
         )
 
     @patch('ct.models.UnitLesson.unitlesson_set')
