@@ -1439,8 +1439,18 @@ def resolutions(request, course_id, unit_id, ul_id):
                  createULFunc=create_resolution_ul,
                  selectULFunc=link_resolution_ul, parentUL=ul)
     if isinstance(r, UnitLesson):
-        red = pageData.fsm_redirect(request, 'create_Resolution',
-                                    defaultURL=None, unitLesson=r)
+        if r.lesson.kind == Lesson.ORCT_QUESTION:
+            if getattr(r, '_answer', None): # redirect to edit empty answer
+                defaultURL = reverse('ct:edit_lesson',
+                                     args=(course_id, unit_id, r._answer.id,))
+                red = pageData.fsm_redirect(request, 'create_UnitLesson', defaultURL,
+                                    unitLesson=r)
+            else:
+                red = pageData.fsm_redirect(request, 'create_Resolution',
+                                        defaultURL=None, unitLesson=r)
+        else:
+            red = pageData.fsm_redirect(request, 'create_Resolution',
+                                        defaultURL=None, unitLesson=r)
         if red: # let FSM redirect us if desired
             return red
         if r not in lessonTable:

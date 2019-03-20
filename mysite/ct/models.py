@@ -877,7 +877,8 @@ class UnitLesson(models.Model):
         lesson.save_root(self.lesson.concept,
                          ConceptLink.RESOLVES)  # link as resolution
         return self.__class__.create_from_lesson(lesson, self.unit,
-                                                 kind=UnitLesson.RESOLVES, parent=self)
+                                                 kind=UnitLesson.RESOLVES, parent=self,
+                                                 addAnswer=True)
 
     def copy_resolution(self, ul, addedBy):
         'copy existing UL as resolution for this error model UL'
