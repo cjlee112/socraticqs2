@@ -60,8 +60,8 @@ Deploy Dev:
     - development
   script:
     - cd /home/wwwapps/dev/socraticqs2/
-    - git fetch
-    - git reset --hard origin/development
+    - git checkout development
+    - git pull
     - source /home/wwwapps/dev/_ve_socraticqs2/bin/activate
     - pip install --ignore-installed -U -r requirements.txt
     - pip install --ignore-installed -U -r requirements/prod.txt
@@ -88,8 +88,8 @@ Deploy Stage:
     - master
   script:
     - cd /home/wwwapps/socraticqs2/
-    - git fetch
-    - git reset --hard origin/master
+    - git checkout master
+    - git pull
     - source /home/wwwapps/_ve_socraticqs3/bin/activate
     - pip install --ignore-installed -U -r requirements.txt
     - pip install --ignore-installed -U -r requirements/prod.txt
