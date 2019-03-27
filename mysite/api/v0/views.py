@@ -141,8 +141,7 @@ class OnboardingStatus(APIView):
         if to_update and request.user.id:
             projection = {k: 1 for k, v in to_update.items()}
             projection['_id'] = 0
-            passed_steps = c_onboarding_status().find({onboarding.USER_ID: user_id}, projection)
-            passed_steps = passed_steps[0] if passed_steps else {}
+            passed_steps = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, projection) or {}
             for step in to_update:
                 if to_update[step] and not passed_steps.get(step):
                     create_intercom_event(
