@@ -281,10 +281,11 @@ class Message(models.Model):
     def should_ask_confidence(self):
         """Use this method to check whether this FSM should ask for CONFIDENCE."""
         if self.chat.state:
-            return 'CONFIDENCE' in [
+            fsm_nodes = [
                 i['name']
                 for i in self.chat.state.fsmNode.fsm.fsmnode_set.all().values('name')
             ]
+            return 'CONFIDENCE' in fsm_nodes or 'ADDITIONAL_CONFIDENCE' in fsm_nodes
         return False
 
     def get_options(self):
@@ -300,7 +301,11 @@ class Message(models.Model):
             if next_point.kind == 'button':
                 options = [CONTINUE_BTN]
             elif (next_point.contenttype == 'unitlesson' and
-                  next_point.content.lesson.sub_kind != 'choices'):
+                  next_point.content.lesson.sub_kind != 'choices') or (
+                      next_point.contenttype == 'unitlesson' and
+                      next_point.content.lesson.sub_kind == 'choices' and
+                      self.chat.state.fsmNode.fsm.name == 'additional'
+                  ):
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif (next_point.contenttype == 'response'
                   and next_point.lesson_to_answer
@@ -407,7 +412,7 @@ class Message(models.Model):
                     html = STATUS_OPTIONS[self.text]
                 elif self.content.lesson.sub_kind and self.content.lesson.sub_kind == Lesson.MULTIPLE_CHOICES:
                     # render unitlesson (question) - answer
-                    if self.content.kind == 'part':
+                    if self.content.kind in ('part', 'resol'):
                         html = mark_safe(
                             md2html(
                                 self.content.lesson.get_choices_wrap_text()
@@ -599,3 +604,4 @@ class UnitError(models.Model):
 class ChatDivider(models.Model):
     text = models.CharField(max_length=200)
     unitlesson = models.ForeignKey(UnitLesson, null=True)
+        

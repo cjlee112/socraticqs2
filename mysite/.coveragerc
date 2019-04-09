@@ -23,3 +23,4 @@ omit =
     api/urls.py
     api/v0/urls.py
     chat/urls.py
+    fsm/mixins.py

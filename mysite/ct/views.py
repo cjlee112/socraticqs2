@@ -1315,6 +1315,13 @@ def edit_lesson(request, course_id, unit_id, ul_id):
                     titleform.save(commit=False)
                     ul.checkin(lesson)
                     defaultURL = get_object_url(request.path, ul)
+                    if (request.POST.get('kind') == Lesson.ORCT_QUESTION and
+                        not UnitLesson.objects.filter(unit=ul.unit, parent=ul, kind=UnitLesson.ANSWERS)):
+                        answer = Lesson(title='Answer', text='write an answer',
+                            addedBy=lesson.addedBy, kind=Lesson.ANSWER)
+                        answer.save_root()
+                        UnitLesson.create_from_lesson(answer, ul.unit,
+                                                  kind=UnitLesson.ANSWERS, parent=ul)
                     return pageData.fsm_redirect(request, 'update_UnitLesson',
                                                  defaultURL, unitLesson=ul)
             elif request.POST.get('task') == 'delete':

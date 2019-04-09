@@ -193,7 +193,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         activity = chat.state and chat.state.activity
 
         is_in_node = lambda node: message.chat.state.fsmNode.name == node
-
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
@@ -325,7 +324,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp.text = text
             resp.is_trial = chat.is_trial
             resp.save()
-
             if not message.timestamp:
                 message.content_id = resp.id
                 chat.next_point = message
@@ -338,9 +336,12 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         message_is_response = message.contenttype == 'response'
         lesson_has_sub_kind = message.lesson_to_answer and message.lesson_to_answer.sub_kind
         content_is_not_additional = not message.content and not message.is_additional
-
         mc_selfeval = None
-        if message_is_response and lesson_has_sub_kind and content_is_not_additional:
+        is_orct_additional = message.content and message.is_additional and message.lesson_to_answer and message.lesson_to_answer.kind == 'orct'
+        if (message_is_response and lesson_has_sub_kind and content_is_not_additional) or (
+                message_is_response and message.lesson_to_answer and \
+                message.lesson_to_answer.sub_kind == 'choices' and not content_is_not_additional
+                 ):
             resp_text = ''
             if message.lesson_to_answer.sub_kind == Lesson.MULTIPLE_CHOICES:
                 selected_items = self.request.data.get('selected')
@@ -446,7 +447,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.chat = chat
                 opt_data = self.request.data.get('option')
                 resp = message.content
-                if chat.state and chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE'):
+                if chat.state and chat.state.fsmNode.node_name_is_one_of('GET_CONFIDENCE', 'ADDITIONAL_GET_CONFIDENCE'):
                     resp.confidence = opt_data
                     text = resp.get_confidence_display()
                 else:

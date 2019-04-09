@@ -47,7 +47,7 @@ class SubKindMixin(object):
     def is_canvas(self):
         try:
             unit_lesson = self.unitlesson_set.first()
-            return unit_lesson.parent.sub_kind == self.CANVAS
+            return unit_lesson.sub_kind == self.CANVAS
         except AttributeError:
             pass
         return self.sub_kind == self.CANVAS

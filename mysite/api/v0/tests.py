@@ -141,7 +141,6 @@ class ApiAccessMixinTest(object):
     def test_permissions_not_instructor_disallowed(self):
         self.client.login(username=self.username2, password=self.password2)
         response = self.client.get(reverse(self.namespace, kwargs={'course_id': self.course.id}))
-        # import pdb;pdb.set_trace()
         self.assertEqual(response.status_code, 403)
 
     def test_permissions_user_not_authenticated(self):
@@ -160,7 +159,6 @@ class TestResponseViewSet(ApiAccessMixinTest, MyTestCase):
 
     def test_serializer_author_name(self):
         response = self.client.get(reverse(self.namespace, kwargs={'course_id': self.course.id}))
-        # import pdb;pdb.set_trace()
         self.assertEqual(
             json.loads(response.content)[0].get('author_name'),
             self.user.get_full_name() or self.user.username

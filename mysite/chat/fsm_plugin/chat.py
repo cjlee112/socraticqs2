@@ -7,7 +7,6 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     fsm = edge.fromNode.fsm
     unitStatus = fsmStack.state.get_data_attr('unitStatus')
-
     if useCurrent:
         nextUL = unitStatus.get_lesson()
         return edge.toNode

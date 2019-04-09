@@ -210,16 +210,15 @@ class ChatMixin(object):
                 'content_id': next_lesson.id,
                 'chat': chat,
                 'owner': chat.user,
-                'input_type': 'custom', # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+                'input_type': 'custom',  # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
                 'kind': next_lesson.lesson.kind,  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
                 'is_additional': is_additional
             }
             if not self.fsm.fsm_name_is_one_of('live_chat'):
-                message = Message.objects.get_or_create(**_data)[0]
+                message, created = Message.objects.get_or_create(**_data)
             else:
                 message = Message(**_data)
                 message.save()
-
             find_crit = {
                 "stack_id": stack_pattern
             }
@@ -236,6 +235,46 @@ class ChatMixin(object):
                     request.session[stack_pattern].append(next_lesson.id)
             else:
                 request.session[stack_pattern] = [next_lesson.id]
+        
+        if self.name == 'ADDITIONAL_ASK':
+            SUB_KIND_TO_KIND_MAP = {
+                'choices': 'button',
+            }
+            SUBKIND_TO_INPUT_TYPE_MAP = {
+                'choices': 'options',
+            }
+            sub_kind = next_lesson.lesson.sub_kind
+            _data = {
+                'contenttype': 'unitlesson',
+                'content_id': next_lesson.id,
+                'chat': chat,
+                'owner': chat.user,
+                'input_type': 'custom',  # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+                'kind': 'message',  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
+                'is_additional': is_additional
+            }
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
+                message, created = Message.objects.get_or_create(**_data)
+            else:
+                message = Message(**_data)
+                message.save()
+            find_crit = {
+                "stack_id": stack_pattern
+            }
+            c_chat_stack().update_one(
+                find_crit,
+                {"$push": {"stack": next_lesson.id}},
+                upsert=True)
+            # Fallback method to pass ul_id's throught messages
+            if request.session.get(stack_pattern):
+                if isinstance(request.session[stack_pattern], list):
+                    request.session[stack_pattern].append(next_lesson.id)
+                else:
+                    request.session[stack_pattern] = [request.session[stack_pattern]]
+                    request.session[stack_pattern].append(next_lesson.id)
+            else:
+                request.session[stack_pattern] = [next_lesson.id]
+
         if self.node_name_is_one_of('ABORTS'):
             message = Message.objects.create(
                 owner=chat.user,
@@ -296,6 +335,50 @@ class ChatMixin(object):
             else:
                 message = Message(**_data)
                 message.save()
+        
+        if self.node_name_is_one_of('ADDITIONAL_GET_ANSWER'):
+            find_crit = {
+                "stack_id": stack_pattern
+            }
+            stack = None
+            try:
+                document = c_chat_stack().find_and_modify(
+                    query=find_crit,
+                    update={"$pop": {"stack": 1}})
+                stack = document.get('stack', [])
+            except ConnectionFailure:
+                pass
+            if request.session.get(stack_pattern):
+                if isinstance(request.session[stack_pattern], list):
+                    fallback_ul_id = request.session[stack_pattern].pop()
+                elif isinstance(request.session[stack_pattern], int):
+                    fallback_ul_id = request.session[stack_pattern]
+                else:
+                    fallback_ul_id = current.id
+            unit_lesson_id = stack.pop() if stack else fallback_ul_id
+            lesson_to_answer = UnitLesson.objects.filter(id=unit_lesson_id).first()
+            _data = {
+                'contenttype': 'response',
+                'input_type': 'text',
+                'lesson_to_answer': lesson_to_answer,
+                'chat': chat,
+                'owner': chat.user,
+                'kind': 'response',
+                'userMessage': True,
+                'is_additional': is_additional
+            }
+            if lesson_to_answer.lesson.sub_kind == 'choices':
+                _data.update(dict(
+                    input_type='options',
+
+                ))
+
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
+                message = Message.objects.get_or_create(**_data)[0]
+            else:
+                message = Message(**_data)
+                message.save()
+
         if self.node_name_is_one_of('CONFIDENCE'):
             # current here is Response instance
             if isinstance(current, Response):
@@ -316,6 +399,28 @@ class ChatMixin(object):
                 owner=chat.user,
                 kind=answer.kind,
                 is_additional=is_additional)
+        
+        if self.node_name_is_one_of('ADDITIONAL_CONFIDENCE'):
+            # current here is Response instance
+            if isinstance(current, Response):
+                response_to_chk = current
+                answer = current.unitLesson.get_answers().first()
+            else:
+                response_to_chk = message.response_to_check
+                if not message.lesson_to_answer:
+                    answer = message.response_to_check.unitLesson.get_answers().first()
+                else:
+                    answer = message.lesson_to_answer.get_answers().first()
+            message = Message.objects.create(  # get_or_create
+                contenttype='unitlesson',
+                response_to_check=response_to_chk,
+                input_type='custom',
+                text=self.title,
+                chat=chat,
+                owner=chat.user,
+                kind=answer.kind,
+                is_additional=is_additional)
+
         if self.node_name_is_one_of('GET_CONFIDENCE'):
             _data = dict(
                 contenttype='response',
@@ -330,6 +435,22 @@ class ChatMixin(object):
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
+        
+        if self.node_name_is_one_of('ADDITIONAL_GET_CONFIDENCE'):
+            _data = dict(
+                contenttype='response',
+                content_id=message.response_to_check.id,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional,
+            )
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
+            message = Message(**_data)
+            message.save()
+
         if self.node_name_is_one_of('CORRECT_ANSWER'):
             lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
@@ -353,6 +474,31 @@ class ChatMixin(object):
                 """
                 .format(correct_title, correct_description)
             )
+        
+        if self.node_name_is_one_of('ADDITIONAL_CORRECT_ANSWER'):
+            lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>You got it right, the correct answer is: {}</b>
+                    <br>
+                    {}
+                """
+                .format(correct_title, correct_description)
+            )
+
         if self.node_name_is_one_of('INCORRECT_ANSWER'):
             lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
@@ -378,6 +524,33 @@ class ChatMixin(object):
                 """
                 .format(correct_title, correct_description)
             )
+        
+        if self.node_name_is_one_of('ADDITIONAL_INCORRECT_ANSWER'):
+            lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
+            correct_choices = lesson.get_correct_choices()
+            if correct_choices:
+                correct_title = lesson.get_choice_title(correct_choices[0][0])
+                correct_description = lesson.get_choice_description(correct_choices[0][0])
+            else:
+                answer = message.content.unitLesson.get_answers().first()
+                correct_title = answer.lesson.title if answer else 'Answer title'
+                correct_description = mark_safe(md2html(answer.lesson.text)) if answer else 'Answer description'
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                lesson_to_answer=message.response_to_check.unitLesson if chat.is_live else message.content.unitLesson,
+                response_to_check=message.response_to_check if chat.is_live else current,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>The correct answer is: {}</b>
+                    <br>
+                    {}
+                """
+                .format(correct_title, correct_description)
+            )
+
         if self.node_name_is_one_of('INCORRECT_CHOICE'):
             lesson = message.lesson_to_answer.lesson
             selected = [int(i) for i in message.response_to_check.text.split('[selected_choices] ')[1].split()]
@@ -404,6 +577,34 @@ class ChatMixin(object):
                     incorrect_description
                 )
             )
+        
+        if self.node_name_is_one_of('ADDITIONAL_INCORRECT_CHOICE'):
+            lesson = message.lesson_to_answer.lesson
+            selected = [int(i) for i in message.response_to_check.text.split('[selected_choices] ')[1].split()]
+            incorrect_description = lesson.get_choice_description(selected[0]) if selected else ''
+            my_choices = []
+            for i, c in message.response_to_check.lesson.get_choices():
+                if i in selected:
+                    my_choices.append(c.split(' ', 1)[1])
+            if not my_choices:
+                my_choices.append('Nothing')
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text="""
+                    <b>You selected: {}</b>
+                    <br>
+                    {}
+                """
+                .format(
+                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(['<h3>{}</h3>'.format(_) for _ in my_choices]),
+                    incorrect_description
+                )
+            )
+
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
         if self.node_name_is_one_of("WAIT_ASSESS"):
             if isinstance(current, Response):
@@ -439,6 +640,28 @@ class ChatMixin(object):
                 owner=chat.user,
                 kind=answer.kind,
                 is_additional=is_additional)[0]
+
+        if self.node_name_is_one_of('ADDITIONAL_ASSESS'):
+            # current here is Response instance
+            if isinstance(current, Response):
+                response_to_chk = current
+                answer = current.unitLesson.get_answers().first()
+            else:
+                response_to_chk = message.response_to_check
+                if not message.lesson_to_answer:
+                    answer = message.response_to_check.unitLesson.get_answers().first()
+                else:
+                    answer = message.lesson_to_answer.get_answers().first()
+            message = Message.objects.get_or_create(
+                contenttype='unitlesson',
+                response_to_check=response_to_chk,
+                input_type='custom',
+                content_id=answer.id,
+                chat=chat,
+                owner=chat.user,
+                kind=answer.kind,
+                is_additional=is_additional)[0]
+
         if self.node_name_is_one_of('GET_ASSESS'):
             _data = dict(
                 contenttype='response',
@@ -454,7 +677,39 @@ class ChatMixin(object):
             message = Message(**_data)
             message.save()
 
+        if self.node_name_is_one_of('ADDITIONAL_GET_ASSESS'):
+            _data = dict(
+                contenttype='response',
+                content_id=message.response_to_check.id if message.response_to_check else None,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional
+            )
+            # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
+            message = Message(**_data)
+            message.save()
+
         if self.node_name_is_one_of('GRADING'):
+            GraderClass = GRADERS.get(message.content.unitLesson.lesson.sub_kind)
+            if GraderClass:
+                grader = GraderClass(message.content.unitLesson, message.content)
+                # grade method must be called to actually do the work
+                grader.grade
+                text = 'Your answer is {}!'.format(grader.message)
+            else:
+                text = "No such grader! Grading could not be applied."
+            message = Message.objects.create(
+                owner=chat.user,
+                chat=chat,
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional,
+                text=text
+            )
+        if self.node_name_is_one_of('ADDITIONAL_GRADING'):
             GraderClass = GRADERS.get(message.content.unitLesson.lesson.sub_kind)
             if GraderClass:
                 grader = GraderClass(message.content.unitLesson, message.content)
@@ -491,16 +746,49 @@ class ChatMixin(object):
                             input_type='options',
                             kind='button',
                             is_additional=True)[0]
+            c_chat_stack().update_one(
+                {"stack_id": stack_pattern},
+                {"$set": {"additional_stack": {
+                    "em_id": resolve_message.student_error.errorModel.id,
+                    "student_error_id": resolve_message.student_error.id
+                }}},
+                upsert=True)
         if self.node_name_is_one_of('RESOLVE'):
-            message = Message.objects.filter(
-                            contenttype='unitlesson',
-                            content_id=next_lesson.id,
-                            chat=chat,
-                            owner=chat.user,
-                            input_type='custom',
-                            kind='message',
-                            timestamp__isnull=True,
-                            is_additional=True).first()
+            SUB_KIND_TO_KIND_MAP = {
+                'choices': 'button',
+            }
+            SUBKIND_TO_INPUT_TYPE_MAP = {
+                'choices': 'options',
+            }
+            sub_kind = next_lesson.lesson.sub_kind
+            _data = {
+                'contenttype': 'unitlesson',
+                'content_id': next_lesson.id,
+                'chat': chat,
+                'owner': chat.user,
+                'input_type': 'custom',  # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+                'kind': 'message',  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
+                'is_additional': is_additional
+            }
+            if not self.fsm.fsm_name_is_one_of('live_chat'):
+                message, created = Message.objects.get_or_create(**_data)
+            else:
+                message = Message(**_data)
+                message.save()
+            if next_lesson.lesson.kind == 'orct':
+                c_chat_stack().update_one(
+                    {"stack_id": stack_pattern},
+                    {"$push": {"stack": next_lesson.id}},
+                    upsert=True)
+                # Fallback method to pass ul_id's throught messages
+                if request.session.get(stack_pattern):
+                    if isinstance(request.session[stack_pattern], list):
+                        request.session[stack_pattern].append(next_lesson.id)
+                    else:
+                        request.session[stack_pattern] = [request.session[stack_pattern]]
+                        request.session[stack_pattern].append(next_lesson.id)
+                else:
+                    request.session[stack_pattern] = [next_lesson.id]
         if self.node_name_is_one_of('HELP_RESOLVE'):
             message = Message.objects.get_or_create(
                             contenttype='unitlesson',
@@ -512,15 +800,37 @@ class ChatMixin(object):
                             timestamp__isnull=True,
                             is_additional=True)[0]
         if self.node_name_is_one_of('MESSAGE_NODE'):
+            additional_info = c_chat_stack().find_one(
+                {"stack_id": stack_pattern}, {"additional_stack": 1, "_id": 0}).get("additional_stack")
+            student_error_id, em_id = additional_info.get('student_error_id'), additional_info.get('em_id')
             message = Message.objects.get_or_create(
                             chat=chat,
                             owner=chat.user,
                             text=chat.state.fsmNode.title,
-                            student_error=message.student_error,
+                            student_error=StudentError.objects.filter(id=student_error_id).first(),
                             input_type='custom',
                             kind='message',
                             is_additional=True)[0]
-        if self.node_name_is_one_of('END', 'IF_RESOURCES', 'NEED_HELP_MESSAGE', 'ASSESS_QUESTION_MESSAGE'):
+        if self.node_name_is_one_of(
+            'END', 
+            'IF_RESOURCES', 
+            'NEED_HELP_MESSAGE', 
+            'ASSESS_QUESTION_MESSAGE',
+            'ADDITIONAL_ASSESS_QUESTION_MESSAGE'):
+            if not self.help:   
+                text = self.get_help(chat.state, request=None)
+            else:
+                text = self.help
+            message = Message.objects.create(
+                            response_to_check=message.response_to_check,
+                            chat=chat,
+                            owner=chat.user,
+                            text=text,
+                            input_type='custom',
+                            kind='message',
+                            is_additional=True)
+        
+        if self.node_name_is_one_of('GREAT_MESSAGE', 'HOPENESS_MESSAGE', 'ORCT_LETS_START_MESSAGE'):
             if not self.help:
                 text = self.get_help(chat.state, request=None)
             else:
