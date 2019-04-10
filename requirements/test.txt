@@ -1,10 +1,11 @@
 -r base.txt
 
 pytest==3.7.3
+pluggy==0.8.0
 pytest-mock
 pytest-django
 pytest-cov==2.5.1
-pytest-xdist
+pytest-xdist==1.25.0
 pytest-selenium
 docker-py
 ddt
