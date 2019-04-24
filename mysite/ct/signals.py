@@ -7,7 +7,7 @@ from django.db.models.signals import post_save
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-from .models import Response
+from .models import Response, UnitLesson
 from .ct_util import get_middle_indexes
 
 from core.common.mongo import c_milestone_orct
@@ -21,7 +21,8 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
     # TODO: add check that Response has a text, as an obj can be created before a student submits
     # TODO: exclude self eval submissions other than a response submission (e.g. "just guessing")
 
-    if instance.kind == Response.ORCT_RESPONSE and not instance.is_test and not instance.is_preview:
+    if (instance.kind == Response.ORCT_RESPONSE and not
+            (instance.unitLesson.kind == UnitLesson.RESOLVES or instance.is_test or instance.is_preview)):
         course = instance.course
         course_id = course.id if course else None
         instructors = course.get_users(role="prof")
