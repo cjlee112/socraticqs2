@@ -24,11 +24,12 @@ from ct.models import (
 from ct.templatetags.ct_extras import md2html
 from chat.models import Message, ChatDivider, UnitError
 from grading.base_grader import GRADERS
-from core.common.mongo import c_chat_stack
+from core.common.mongo import c_chat_stack, c_chat_context, c_faq_data
 
 
 WAIT_NODES_REGS = [r"^WAIT_(?!ASSESS$).*$", r"^RECYCLE$"]
 QUESTION_STACK_PATTERN = 'question_stack:uid:{}:chat_id:{}'
+FAQ_RESPONSE_STACK_PATTERN = 'faq_response__stack:uid:{}:chat_id:{}'
 
 
 def is_wait_node(name):
@@ -171,6 +172,7 @@ class ChatMixin(object):
 
     def get_message(self, chat, request, current=None, message=None):
         stack_pattern = QUESTION_STACK_PATTERN.format(request.user.id, chat.id)
+        faq_response_pattern = QUESTION_STACK_PATTERN.format(request.user.id, chat.id)
         is_additional = chat.state.fsmNode.fsm.fsm_name_is_one_of('additional', 'resource')
         next_lesson = chat.state.unitLesson
         if self.node_name_is_one_of('LESSON'):
@@ -235,7 +237,7 @@ class ChatMixin(object):
                     request.session[stack_pattern].append(next_lesson.id)
             else:
                 request.session[stack_pattern] = [next_lesson.id]
-        
+
         if self.name == 'ADDITIONAL_ASK':
             SUB_KIND_TO_KIND_MAP = {
                 'choices': 'button',
@@ -286,13 +288,13 @@ class ChatMixin(object):
             )
         if self.node_name_is_one_of('GET_ABORTS'):
             message = Message.objects.get_or_create(
-                            contenttype='NoneType',
-                            kind='abort',
-                            input_type='options',
-                            chat=chat,
-                            owner=chat.user,
-                            userMessage=False,
-                            is_additional=is_additional)[0]
+                contenttype='NoneType',
+                kind='abort',
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional)[0]
         if self.node_name_is_one_of('GET_ANSWER'):
             find_crit = {
                 "stack_id": stack_pattern
@@ -335,7 +337,7 @@ class ChatMixin(object):
             else:
                 message = Message(**_data)
                 message.save()
-        
+
         if self.node_name_is_one_of('ADDITIONAL_GET_ANSWER'):
             find_crit = {
                 "stack_id": stack_pattern
@@ -399,7 +401,7 @@ class ChatMixin(object):
                 owner=chat.user,
                 kind=answer.kind,
                 is_additional=is_additional)
-        
+
         if self.node_name_is_one_of('ADDITIONAL_CONFIDENCE'):
             # current here is Response instance
             if isinstance(current, Response):
@@ -435,7 +437,7 @@ class ChatMixin(object):
             # here was Message.objects.create for all fsm's except live_chat. for live_chat fsm here was get_or_create
             message = Message(**_data)
             message.save()
-        
+
         if self.node_name_is_one_of('ADDITIONAL_GET_CONFIDENCE'):
             _data = dict(
                 contenttype='response',
@@ -474,7 +476,7 @@ class ChatMixin(object):
                 """
                 .format(correct_title, correct_description)
             )
-        
+
         if self.node_name_is_one_of('ADDITIONAL_CORRECT_ANSWER'):
             lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
@@ -524,7 +526,7 @@ class ChatMixin(object):
                 """
                 .format(correct_title, correct_description)
             )
-        
+
         if self.node_name_is_one_of('ADDITIONAL_INCORRECT_ANSWER'):
             lesson = message.response_to_check.unitLesson.lesson if chat.is_live else message.content.unitLesson.lesson
             correct_choices = lesson.get_correct_choices()
@@ -577,7 +579,7 @@ class ChatMixin(object):
                     incorrect_description
                 )
             )
-        
+
         if self.node_name_is_one_of('ADDITIONAL_INCORRECT_CHOICE'):
             lesson = message.lesson_to_answer.lesson
             selected = [int(i) for i in message.response_to_check.text.split('[selected_choices] ')[1].split()]
@@ -729,23 +731,23 @@ class ChatMixin(object):
 
         if self.node_name_is_one_of('STUDENTERROR'):
             resolve_message = Message.objects.filter(
-                            contenttype='unitlesson',
-                            content_id=next_lesson.id,
-                            chat=chat,
-                            owner=chat.user,
-                            input_type='custom',
-                            kind='message',
-                            timestamp__isnull=True,
-                            is_additional=True).first()
+                contenttype='unitlesson',
+                content_id=next_lesson.id,
+                chat=chat,
+                owner=chat.user,
+                input_type='custom',
+                kind='message',
+                timestamp__isnull=True,
+                is_additional=True).first()
             message = Message.objects.get_or_create(
-                            contenttype='unitlesson',
-                            content_id=resolve_message.student_error.errorModel.id,
-                            chat=chat,
-                            owner=chat.user,
-                            student_error=resolve_message.student_error,
-                            input_type='options',
-                            kind='button',
-                            is_additional=True)[0]
+                contenttype='unitlesson',
+                content_id=resolve_message.student_error.errorModel.id,
+                chat=chat,
+                owner=chat.user,
+                student_error=resolve_message.student_error,
+                input_type='options',
+                kind='button',
+                is_additional=True)[0]
             c_chat_stack().update_one(
                 {"stack_id": stack_pattern},
                 {"$set": {"additional_stack": {
@@ -771,7 +773,11 @@ class ChatMixin(object):
                 'is_additional': is_additional
             }
             if not self.fsm.fsm_name_is_one_of('live_chat'):
-                message, created = Message.objects.get_or_create(**_data)
+                filter_data = _data.copy()
+                filter_data.update({'timestamp__isnull': True})
+                message = Message.objects.filter(**filter_data).first()
+                if not message:
+                    message = Message.objects.create(_data)
             else:
                 message = Message(**_data)
                 message.save()
@@ -791,26 +797,26 @@ class ChatMixin(object):
                     request.session[stack_pattern] = [next_lesson.id]
         if self.node_name_is_one_of('HELP_RESOLVE'):
             message = Message.objects.get_or_create(
-                            contenttype='unitlesson',
-                            content_id=next_lesson.id,
-                            chat=chat,
-                            owner=chat.user,
-                            input_type='options',
-                            kind='button',
-                            timestamp__isnull=True,
-                            is_additional=True)[0]
+                contenttype='unitlesson',
+                content_id=next_lesson.id,
+                chat=chat,
+                owner=chat.user,
+                input_type='options',
+                kind='button',
+                timestamp__isnull=True,
+                is_additional=True)[0]
         if self.node_name_is_one_of('MESSAGE_NODE'):
             additional_info = c_chat_stack().find_one(
                 {"stack_id": stack_pattern}, {"additional_stack": 1, "_id": 0}).get("additional_stack")
             student_error_id, em_id = additional_info.get('student_error_id'), additional_info.get('em_id')
             message = Message.objects.get_or_create(
-                            chat=chat,
-                            owner=chat.user,
-                            text=chat.state.fsmNode.title,
-                            student_error=StudentError.objects.filter(id=student_error_id).first(),
-                            input_type='custom',
-                            kind='message',
-                            is_additional=True)[0]
+                chat=chat,
+                owner=chat.user,
+                text=chat.state.fsmNode.title,
+                student_error=StudentError.objects.filter(id=student_error_id).first(),
+                input_type='custom',
+                kind='message',
+                is_additional=True)[0]
         if self.node_name_is_one_of(
             'END', 
             'IF_RESOURCES', 
@@ -822,92 +828,101 @@ class ChatMixin(object):
             else:
                 text = self.help
             message = Message.objects.create(
-                            response_to_check=message.response_to_check,
-                            chat=chat,
-                            owner=chat.user,
-                            text=text,
-                            input_type='custom',
-                            kind='message',
-                            is_additional=True)
-        
+                response_to_check=message.response_to_check,
+                chat=chat,
+                owner=chat.user,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=True)
         if self.node_name_is_one_of('GREAT_MESSAGE', 'HOPENESS_MESSAGE', 'ORCT_LETS_START_MESSAGE'):
             if not self.help:
                 text = self.get_help(chat.state, request=None)
             else:
                 text = self.help
             message = Message.objects.create(
-                            response_to_check=message.response_to_check,
-                            chat=chat,
-                            owner=chat.user,
-                            text=text,
-                            input_type='custom',
-                            kind='message',
-                            is_additional=True)
+                response_to_check=message.response_to_check,
+                chat=chat,
+                owner=chat.user,
+                text=text,
+                input_type='custom',
+                kind='message',
+                is_additional=True)
         if self.node_name_is_one_of('GET_RESOLVE'):
-                message = Message.objects.create(
-                            contenttype='unitlesson',
-                            content_id=next_lesson.id,
-                            input_type='options',
-                            chat=chat,
-                            owner=chat.user,
-                            student_error=message.student_error,
-                            kind='response',
-                            userMessage=True,
-                            is_additional=is_additional)
+            message = Message.objects.create(
+                contenttype='unitlesson',
+                content_id=next_lesson.id,
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                student_error=message.student_error,
+                kind='response',
+                userMessage=True,
+                is_additional=is_additional)
         if self.node_name_is_one_of('ERRORS'):
             message = Message.objects.get_or_create(
-                            chat=chat,
-                            owner=chat.user,
-                            text=''''''
-                            '''Here are the most common blindspots people reported when comparing their answer vs. '''
-                            '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
-                            kind='message',
-                            input_type='custom',
-                            is_additional=is_additional)[0]
+                chat=chat,
+                owner=chat.user,
+                text=''''''
+                '''Here are the most common blindspots people reported when comparing their answer vs. '''
+                '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
+                kind='message',
+                input_type='custom',
+                is_additional=is_additional)[0]
         if self.node_name_is_one_of('GET_ERRORS'):
             uniterror = UnitError.get_by_message(message)
             message = Message.objects.get_or_create(
-                            contenttype='uniterror',
-                            content_id=uniterror.id,
-                            input_type='options',
-                            chat=chat,
-                            kind='uniterror',
-                            owner=chat.user,
-                            userMessage=False,
-                            is_additional=is_additional)[0]
+                contenttype='uniterror',
+                content_id=uniterror.id,
+                input_type='options',
+                chat=chat,
+                kind='uniterror',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional)[0]
+        if self.node_name_is_one_of('SHOW_FAQS'):
+            message, _ = Message.objects.get_or_create(
+                contenttype='unitlesson',
+                content_id=next_lesson.id,
+                input_type='options',
+                chat=chat,
+                kind='faqs',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional)  
         if self.node_name_is_one_of('TITLE'):
             divider = ChatDivider(text=next_lesson.lesson.title,
                                   unitlesson=next_lesson)
             divider.save()
             message = Message.objects.get_or_create(
-                            contenttype='chatdivider',
-                            content_id=divider.id,
-                            input_type='custom',
-                            type='breakpoint',
-                            chat=chat,
-                            owner=chat.user,
-                            kind='message',
-                            is_additional=is_additional)[0]
-        if self.node_name_is_one_of('START_MESSAGE'):
+                contenttype='chatdivider',
+                content_id=divider.id,
+                input_type='custom',
+                type='breakpoint',
+                chat=chat,
+                owner=chat.user,
+                kind='message',
+                is_additional=is_additional)[0]
+        if self.node_name_is_one_of('START_MESSAGE',):
             message = Message.objects.create(
-                            input_type='options',
-                            text=self.title,
-                            chat=chat,
-                            owner=chat.user,
-                            kind='button',
-                            is_additional=is_additional)
+                input_type='options',
+                text=self.title,
+                chat=chat,
+                owner=chat.user,
+                kind='button',
+                is_additional=is_additional)
         if self.node_name_is_one_of('DIVIDER'):
             divider = ChatDivider(text=self.title)
             divider.save()
             message = Message.objects.get_or_create(
-                            contenttype='chatdivider',
-                            content_id=divider.id,
-                            input_type='custom',
-                            type='breakpoint',
-                            chat=chat,
-                            owner=chat.user,
-                            kind='message',
-                            is_additional=is_additional)[0]
+                contenttype='chatdivider',
+                content_id=divider.id,
+                input_type='custom',
+                type='breakpoint',
+                chat=chat,
+                owner=chat.user,
+                kind='message',
+                is_additional=is_additional)[0]
 
         if self.node_name_is_one_of('START') and self.fsm.fsm_name_is_one_of('live_chat'):
             message = Message.objects.get_or_create(
@@ -990,7 +1005,7 @@ class ChatMixin(object):
                 _data['contenttype'] = 'unitlesson'
             message = Message.objects.create(**_data)
 
-        if self.name in ('WELL_DONE',):
+        if self.name in ('WELL_DONE', 'ASK_NEW_FAQ', 'GET_NEW_FAQ'):
             text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
             _data = dict(
                 chat=chat,
@@ -1004,6 +1019,226 @@ class ChatMixin(object):
             if message and message.content_id:
                 _data['content_id'] = message.content_id
                 _data['contenttype'] = 'unitlesson'
+            message = Message.objects.create(**_data)
+
+        if self.name in ('ADDING_FAQ',):
+            ul_id = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+            unitLesson = UnitLesson.objects.filter(id=ul_id).first()
+            faq_response = Response.objects.create(
+                unitLesson=unitLesson,
+                lesson=unitLesson.lesson,
+                kind=Response.STUDENT_QUESTION,
+                course=self.load_json_id_dict(chat.state.data).get('course'),
+                is_preview=chat.enroll_code.isPreview,
+                is_test=chat.enroll_code.isTest,
+                author=chat.user,
+                needsEval=True)
+            c_chat_stack().update_one(
+                {"stack_id": faq_response_pattern},
+                {"$push": {"stack": faq_response.id}},
+                upsert=True)
+            _data = dict(
+                chat=chat,
+                text=self.title,
+                input_type='options',
+                kind='button',
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in (
+            'NEW_FAQ_TITLE',
+        ):
+            ul_id = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+            unitLesson = UnitLesson.objects.filter(id=ul_id).first()
+            faq_response = Response.objects.create(
+                unitLesson=unitLesson,
+                lesson=unitLesson.lesson,
+                kind=Response.STUDENT_QUESTION,
+                course=self.load_json_id_dict(chat.state.data).get('course'),
+                is_preview=chat.enroll_code.isPreview,
+                is_test=chat.enroll_code.isTest,
+                author=chat.user,
+                needsEval=True)
+            c_chat_stack().update_one(
+                {"stack_id": faq_response_pattern},
+                {"$push": {"stack": faq_response.id}},
+                upsert=True)
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                text=self.title,
+                input_type='custom',
+                kind='message',
+                userMessage=False,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in (
+            'ASK_NEW_FAQ',
+        ):
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                text=self.title,
+                input_type='custom',
+                kind='message',
+                userMessage=False,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('WILL_TRY_MESSAGE', 'FUCK', 'MSG_FOR_INQUIRY',
+                         'WILL_TRY_MESSAGE_2', 'SELECT_NEXT_FAQ', 'WILL_TRY_MESSAGE_3',
+                         'SHOW_FAQ_ANSWERS', 'INTRO_MSG'):
+            text = None
+            if self.name == 'SHOW_FAQ_ANSWERS':
+                ul_id = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+                actual_faq_id = c_chat_context().find_one(
+                    {"chat_id": chat.id}).get('actual_faq_id', None)
+                faq_answers = c_faq_data().find_one(
+                    {
+                        "chat_id": chat.id,
+                        "ul_id": ul_id,
+                        "faqs.{}.answers.done".format(actual_faq_id): False}
+                ).get('faqs').get(actual_faq_id).get('answers')
+                for i in faq_answers:
+                    if not i.get('done'):
+                        answer = Response.objects.filter(id=i.get('answer_id')).first()
+                        text = "<b>{}</b><br>{}".format(answer.title, answer.text) if answer else None
+                        c_faq_data().update_one(
+                            {
+                                "chat_id": chat.id,
+                                "ul_id": ul_id,
+                                "faqs.{}.answers.answer_id".format(actual_faq_id): i.get('answer_id')
+
+                            },
+                            {"$set": {"faqs.{}.answers.$.done".format(actual_faq_id): True}}
+                        )
+                        break
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                text=text or self.title,
+                input_type='custom',
+                kind='message',
+                userMessage=False,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+
+        if self.name in (
+            'NEW_FAQ_DESCRIPTION', 'ASK_FOR_FAQ_ANSWER', 'ASK_UNDERSTANDING', 'FAQ'
+        ):
+            _data = dict(
+                chat=chat,
+                owner=chat.user,
+                text=self.title,
+                input_type='custom',
+                kind='message',
+                userMessage=False,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+
+        if self.name in ('GET_NEW_FAQ_TITLE', 'GET_NEW_FAQ_DESCRIPTION'):
+            if self.name == 'GET_NEW_FAQ_TITLE':
+                try:
+                    faq_response_id = c_chat_stack().find_one({"stack_id": faq_response_pattern}).get('stack')[-1]
+                except IndexError:
+                    faq_response_id = None
+            else:
+                document = c_chat_stack().find_and_modify(
+                    query={"stack_id": faq_response_pattern},
+                    update={"$pop": {"stack": 1}})
+                stack = document.get('stack', [])
+                faq_response_id = stack.pop() if stack else None
+
+            _data = dict(
+                contenttype='response',
+                content_id=faq_response_id,
+                chat=chat,
+                input_type='text',
+                kind='response',
+                sub_kind='add_faq',
+                owner=chat.user,
+                userMessage=True,
+                is_additional=is_additional
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('GET_NEW_FAQ',):
+            _data = dict(
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='add_faq',
+                sub_kind='add_faq',
+                userMessage=True,
+                is_additional=is_additional,
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('GET_FOR_FAQ_ANSWER',):
+            _data = dict(
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                kind='get_faq_answer',
+                sub_kind='get_faq_answer',
+                userMessage=True,
+                is_additional=is_additional,
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('SHOW_FAQ_BY_ONE',):
+            ul_id = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+            try:
+                faqs = c_faq_data().find_one(
+                    {"chat_id": chat.id, "ul_id": ul_id}).get('faqs', {})
+                faq_id = None
+                for key, value in faqs.items():
+                    if not value.get('status').get('done', False):
+                        faq_id = key
+                        break
+            except IndexError:
+                faq_id = None
+
+            if faq_id:
+                c_faq_data().update_one(
+                    {"chat_id": chat.id, "ul_id": ul_id},
+                    {"$set": {"faqs.{}.status.done".format(faq_id): True}})
+                c_chat_context().update_one(
+                    {"chat_id": chat.id},
+                    {"$set": {"actual_faq_id": faq_id}},
+                    upsert=True
+                )
+            _data = dict(
+                contenttype='response',
+                content_id=int(faq_id),
+                kind='response',
+                sub_kind='faq',
+                chat=chat,
+                owner=chat.user,
+                userMessage=False,
+                is_additional=is_additional,
+            )
+            message = Message.objects.create(**_data)
+
+        if self.name in ('GET_UNDERSTANDING',):
+            _data = dict(
+                kind='ask_faq_understanding',
+                input_type='options',
+                chat=chat,
+                owner=chat.user,
+                userMessage=True,
+                is_additional=is_additional,
+            )
             message = Message.objects.create(**_data)
 
         # wait for RECYCLE node and  any node starting from WAIT_ except WAIT_ASSESS

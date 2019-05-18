@@ -5,7 +5,8 @@ from django.utils import timezone
 
 from .models import Message
 from fsm.fsm_base import FSMStack
-from ct.models import Lesson
+from ct.models import Lesson, UnitLesson
+from core.common.mongo import c_chat_context
 
 
 class ProgressHandler(object):
@@ -44,8 +45,13 @@ class GroupMessageMixin(object):
                     Lesson.EXPLANATION,
                     Lesson.BASE_EXPLANATION,
                     Lesson.ORCT_QUESTION,
-                    'abort'),
-        'answers': ('message',)
+                    'abort',
+                    'faqs'
+                    ),
+        'answers': ('message',),
+        'add_faq': ('message', 'button'),
+        'get_faq_answer': ('message', 'response'),
+        'ask_faq_understanding': ('message', 'response')
     }
 
     def group_filter(self, message, next_message=None):
@@ -54,7 +60,8 @@ class GroupMessageMixin(object):
         """
         if not next_message:
             return False
-        elif next_message.kind in self.available_steps.get(message.kind, []):
+        elif next_message.kind in self.available_steps.get(message.kind, []) or \
+                (message.kind == 'message' and next_message.sub_kind == 'faq'):
             next_message.timestamp = timezone.now()
             next_message.save()
             return True
@@ -104,8 +111,22 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                                        kind='abort',
                                        timestamp__isnull=True)
         if chat.state and chat.state.fsmNode.node_name_is_one_of('END'):
-            self.pop_state(chat)
-        if helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
+            if chat.state.fsmNode.fsm.fsm_name_is_one_of('faq'):
+                self.pop_state(chat)
+                edge = chat.state.fsmNode.outgoing.get(name='next')
+                chat.state.fsmNode = edge.transition(chat, request)
+                chat.state.save()
+                next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+            else:
+                self.pop_state(chat)
+
+        if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ'):
+            chat_context = c_chat_context().find_one({'chat_id': chat.id})
+            self.push_state(chat, request, 'faq', {
+                'unitlesson': UnitLesson.objects.filter(id=chat_context.get('actual_ul_id')).first(),
+                'chat': chat})
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+        elif helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
             unitlesson = helps.first().content
             self.push_state(chat, request, 'help', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
@@ -117,10 +138,17 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             self.push_state(chat, request, 'resource', {'unitlesson': current})
             next_point = chat.state.fsmNode.get_message(chat, request)
         elif chat.state:
-            edge = chat.state.fsmNode.outgoing.get(name='next')
-            chat.state.fsmNode = edge.transition(chat, request)
-            chat.state.save()
-            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+            if not next_point:
+                if not chat.state.fsmNode.node_name_is_one_of('END'):
+                    edge = chat.state.fsmNode.outgoing.get(name='next')
+                    chat.state.fsmNode = edge.transition(chat, request)
+                    chat.state.save()
+                if not chat.state.fsmNode.node_name_is_one_of('FAQ'):
+                    next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+                else:
+                    next_point = self.next_point(
+                        current=current, chat=chat, message=message, request=request
+                    )
         else:
             return None
 
@@ -131,7 +159,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         group = True
         while group:
             if self.group_filter(message, next_point):
-                if next_point.input_type in ['text', 'options']:
+                if next_point.input_type in ['text', 'options'] and next_point.sub_kind != 'faq':
                     break
                 next_point = self.next_point(
                     current=next_point.content, chat=chat, message=next_point, request=request

@@ -14,7 +14,9 @@ from .models import (
     Course,
     CourseUnit,
     Role,
-    Liked
+    Liked,
+    FAQ,
+    InquiryCount
 )
 
 
@@ -24,7 +26,9 @@ MODELS = (
     ConceptLink,
     Unit,
     Course,
-    CourseUnit
+    CourseUnit,
+    FAQ,
+    InquiryCount
 )
 
 @admin.register(UnitLesson)

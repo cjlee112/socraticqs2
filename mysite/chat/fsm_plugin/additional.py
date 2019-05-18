@@ -1,5 +1,5 @@
-from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS, StudentError, Lesson
-
+from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS, Lesson
+from core.common.mongo import c_chat_context
 from ..models import Message
 
 
@@ -25,6 +25,11 @@ def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kw
                                              chat=fsmStack,
                                              timestamp__isnull=True)
     elif _status in [NEED_REVIEW_STATUS, DONE_STATUS]:
+        if _status == DONE_STATUS:
+            c_chat_context().update_one(
+                {"chat_id": fsmStack.id},
+                {"$set": {"need_faqs": False}}
+            )
         Message.objects.filter(student_error=fsmStack.next_point.student_error,
                                is_additional=True,
                                chat=fsmStack,

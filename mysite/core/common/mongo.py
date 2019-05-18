@@ -13,6 +13,8 @@ COLLECTION_CHAT_STACK = 'chat_stack'
 COLLECTION_MILESTONE_ORCT = 'milestone_students_orct'
 COLLECTION_ONBOARDING_STATUS = 'onboarding_status'
 COLLECTION_ONBOARDING_SETTINGS = 'onboarding_settings'
+COLLECTION_FAQ_DATA = 'faq_data'
+COLLECTION_CHAT_CONTEXT = 'chat_context'
 
 
 class Singleton(object):
@@ -71,6 +73,14 @@ def c_onboarding_status(use_secondary=False):
 
 def c_onboarding_settings(use_secondary=False):
     return mongo_data_database(use_secondary=use_secondary)[COLLECTION_ONBOARDING_SETTINGS]
+
+
+def c_faq_data(use_secondary=False):
+    return mongo_data_database(use_secondary=use_secondary)[COLLECTION_FAQ_DATA]
+
+
+def c_chat_context(use_secondary=False):
+    return mongo_data_database(use_secondary=use_secondary)[COLLECTION_CHAT_CONTEXT]
 
 
 def do_health(use_secondary=False):

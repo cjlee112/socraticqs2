@@ -118,6 +118,9 @@ class MessageSerializer(serializers.ModelSerializer):
                     sub_kind = 'equation'
                 elif i.content.lesson.sub_kind == 'canvas':
                     sub_kind = 'canvas'
+            # Add UnitLesson id for JS to check during selection validation
+            if i.contenttype == 'unitlesson' and i.kind == 'faqs':
+                incl_msg.append(i.id)
 
         input_data = {
             'type': obj.get_next_input_type(),
@@ -180,6 +183,9 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                     sub_kind = 'equation'
                 elif msg.content.lesson.sub_kind == 'canvas':
                     sub_kind = 'canvas'
+            # Add UnitLesson id for JS to check during selection validation
+            if msg.contenttype == 'unitlesson' and msg.kind == 'faqs':
+                incl_msg.append(msg.id)
 
         input_data = {
             # obj - is the last item from loop
@@ -272,7 +278,7 @@ class LessonSerializer(serializers.ModelSerializer):
                     return False
             if check_fsm_name('chat'):
                 return lesson_order < chat.state.unitLesson.order
-            if check_fsm_name('additional'):
+            if check_fsm_name('additional') or check_fsm_name('faq'):
                 return lesson_order < chat.state.parentState.unitLesson.order
             else:
                 return True

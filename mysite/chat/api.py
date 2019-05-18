@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from core.common import onboarding
+from core.common.mongo import c_faq_data
 from core.common.utils import get_onboarding_setting, update_onboarding_step
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
@@ -92,6 +93,7 @@ class ValidateMixin(object):
 
 
 is_chat_add_lesson = lambda msg: msg.chat.state and msg.chat.state.fsmNode.fsm.name == 'chat_add_lesson'
+is_chat_add_faq = lambda msg: msg.chat.state and msg.chat.state.fsmNode.fsm.name == 'faq'
 
 
 @injections.has
@@ -131,7 +133,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
         next_point = chat.next_point
-
         if is_chat_add_lesson(message) and message.content_id and next_point == message:
             return self.roll_fsm_forward(chat, message)
         if (
@@ -139,14 +140,16 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             message.content_id and
             next_point == message
         ):
-            return self.roll_fsm_forward(chat, message)
-
+            return self.roll_fsm_forward(chat, message)   
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
             return Response(serializer.data)
 
+        if message and message.kind == 'add_faq' and message.sub_kind == 'add_faq':
+            return self.roll_fsm_forward(chat, message)
+
         # Important for resolving additional messages
-        if message and message.kind != 'button':
+        if message and message.kind not in ('button', 'faqs'):
             if not (not 'additional' in chat.state.fsmNode.funcName and
                     message.kind == 'response'):
                 # Set next message for user
@@ -158,6 +161,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 )
                 chat.save()
                 message.chat = chat
+
+        if message and message.kind == 'faqs':
+            message.timestamp = timezone.now()
+            message.save()
 
         serializer = self.get_serializer(message)
         return Response(serializer.data)
@@ -196,6 +203,12 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
             return
+
+        if is_chat_add_faq(message) and is_in_node('GET_NEW_FAQ'):
+            message.text = self.request.data.get('option', 'no')
+            message.save()
+            chat.last_modify_timestamp = timezone.now()
+            chat.save()
 
         # Chat add unit lesson
         if is_chat_add_lesson(message):
@@ -293,7 +306,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 message.text = self.request.data.get('option')
                 message.save()
 
-        if message.input_type == 'text' and not is_chat_add_lesson(message):
+        if message.input_type == 'text' and not is_chat_add_lesson(message) and not message.sub_kind == 'add_faq':
             message.chat = chat
             text = self.request.data.get('text')
 
@@ -396,6 +409,23 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 serializer.save()
             return
+        if (is_in_node('GET_NEW_FAQ_TITLE') or is_in_node('GET_NEW_FAQ_DESCRIPTION')) \
+                and message_is_response and message.sub_kind == 'add_faq':
+            text = self.request.data.get('text')
+            faq_request = message.content
+            if is_in_node('GET_NEW_FAQ_TITLE'):
+                faq_request.title = text
+            else:
+                faq_request.text = text
+            faq_request.save()
+            message.text = text
+            message.save()
+        if is_in_node('GET_FOR_FAQ_ANSWER'):
+            message.text = self.request.data.get('option', 'help')
+            message.save()
+        if is_in_node('GET_UNDERSTANDING'):
+            message.text = self.request.data.get('option', 'no')
+            message.save()
         if message.input_type == 'options' and message.kind != 'button':
             if (
                 message.contenttype == 'uniterror' and
@@ -413,6 +443,38 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 uniterror.save_response(user=self.request.user, response_list=selected)
                 if not message.chat.is_live:
                     get_additional_messages(uniterror.response, chat)
+                chat.next_point = self.next_handler.next_point(
+                    current=message.content,
+                    chat=chat,
+                    message=message,
+                    request=self.request
+                )
+                chat.last_modify_timestamp = timezone.now()
+                chat.save()
+                serializer.save(chat=chat)
+            elif (message.kind == 'add_faq' and message.sub_kind == 'add_faq') or \
+                 (message.kind == 'get_faq_answer' and message.sub_kind == 'get_faq_answer') or \
+                 (message.kind == 'ask_faq_understanding'):
+                pass
+            elif (
+                message.contenttype == 'unitlesson' and message.kind == 'faqs' and
+                'selected' in self.request.data
+            ):
+                message.chat = chat
+                try:
+                    selected = self.request.data.get(
+                        'selected'
+                    )[str(message.id)]['faqModel']
+                except KeyError:
+                    selected = []
+
+                if selected:
+                    c_faq_data().update_one(
+                        {"chat_id": chat.id, "ul_id": message.content.id},
+                        {"$set": {
+                            "faqs": {str(faq_id): {'status': {"done": False}} for faq_id in selected}
+                        }}
+                    )
                 chat.next_point = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,

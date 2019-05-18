@@ -6,13 +6,16 @@ from itertools import starmap
 import datetime
 
 from django.db import models
-from django.utils import timezone
+from django.db.models import Q
+from django.db.models import Count
+from django.utils.text import Truncator
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from core.common import onboarding
+from core.common.mongo import c_faq_data
 from core.common.utils import update_onboarding_step
 from .utils import enroll_generator
 from ct.models import (
@@ -53,13 +56,22 @@ KIND_CHOICES = (
     (Lesson.ORCT_QUESTION, Lesson.ORCT_QUESTION),
     (Lesson.ANSWER, Lesson.ANSWER),
     (Lesson.ERROR_MODEL, Lesson.ERROR_MODEL),
+    ('ask_faq_understanding', 'ask_faq_understanding'),
     ('chatdivider', 'chatdivider'),
     ('uniterror', 'uniterror'),
     ('response', 'response'),
+    ('add_faq', 'add_faq'),
     ('message', 'message'),
     ('button', 'button'),
-    ('abort', 'abort')
+    ('abort', 'abort'),
+    ('faqs', 'faqs'),
+    ('faq', 'faq'),
 )
+
+SUB_KIND_CHOICES = (
+    ('add_faq', 'add_faq'),
+)
+
 
 EVAL_OPTIONS = {
     'close': 'It was very close',
@@ -157,6 +169,7 @@ class Message(models.Model):
     owner = models.ForeignKey(User, null=True)
     is_additional = models.BooleanField(default=False)
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
+    sub_kind = models.CharField(max_length=32, choices=SUB_KIND_CHOICES, null=True)
     userMessage = models.BooleanField(default=False)
 
     class Meta:
@@ -298,8 +311,13 @@ class Message(models.Model):
         ):
             if self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
                 return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
-            if next_point.kind == 'button':
+            if next_point.sub_kind in ('add_faq', 'get_faq_answer'):
+                return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
+            # We need Continue buttom for FAQ
+            if next_point.kind in ('button', 'faqs'):
                 options = [CONTINUE_BTN]
+            elif next_point.kind == 'ask_faq_understanding':
+                options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
             elif (next_point.contenttype == 'unitlesson' and
                   next_point.content.lesson.sub_kind != 'choices') or (
                       next_point.contenttype == 'unitlesson' and
@@ -344,6 +362,11 @@ class Message(models.Model):
         return stripped_text
 
     def get_html(self):
+        if self.kind in ('get_faq_answer',) or \
+            (self.kind == 'add_faq' and self.input_type == 'options'):
+            return self.text.capitalize() + '!' if self.text else 'No!'
+        if self.kind in ('ask_faq_understanding',):
+            return STATUS_OPTIONS.get(self.text, 'Still confused, need help')
         if self.kind == 'abort':
             return self.get_aborts()
         html = self.text
@@ -355,6 +378,9 @@ class Message(models.Model):
         if self.content_id:
             if self.contenttype == 'chatdivider':
                 html = self.content.text
+            elif self.contenttype == 'response' and self.sub_kind == 'faq':
+                html = '<b>' + self.content.title + '</b><br>' + self.content.text \
+                    if self.content.title else self.content.text
             elif self.contenttype == 'response':
                 sub_kind = self.content.sub_kind
                 if sub_kind and sub_kind == Lesson.MULTIPLE_CHOICES and not self.content.confidence:
@@ -368,12 +394,14 @@ class Message(models.Model):
                     if self.input_type == 'options':
                         html = self.render_my_choices()
                         return html
-
                 if self.input_type == 'text':
-                    html = mark_safe(md2html(self.content.text))
-                    if self.content.attachment:
-                        # display svg inline
-                        html += mark_safe(self.content.get_html())
+                    if self.sub_kind == 'add_faq':
+                        html = self.text
+                    else:
+                        html = mark_safe(md2html(self.content.text))
+                        if self.content.attachment:
+                            # display svg inline
+                            html += mark_safe(self.content.get_html())
                 else:
                     CONF_CHOICES = dict(Response.CONF_CHOICES)
                     is_chat_fsm = (
@@ -401,7 +429,10 @@ class Message(models.Model):
                             )
                         )
             elif self.contenttype == 'unitlesson':
-                if self.content.kind == UnitLesson.MISUNDERSTANDS:
+                # Get FAQ for the UnitLesson
+                if self.kind == 'faqs':
+                    html = self.get_faqs()
+                elif self.content.kind == UnitLesson.MISUNDERSTANDS:
                     html = mark_safe(
                         md2html(
                             '**Re: %s** \n %s' %
@@ -513,6 +544,38 @@ class Message(models.Model):
             aborts or '<li><h3>There are no aborts to display.</h3></li>'
         )
 
+    def get_faqs(self):
+        faqs = None
+        faq_list = self.content.response_set.filter(
+            ~Q(author=self.owner),
+            kind=Response.STUDENT_QUESTION,
+            is_preview=False,
+            is_test=False
+        ).exclude(title__isnull=True).exclude(title__exact='')\
+            .annotate(num_inquiry=Count('inquirycount')).order_by('-num_inquiry')
+        if faq_list:
+            checked_faqs = c_faq_data().find_one(
+                {'chat_id': self.chat.id, "ul_id": self.content_id},
+                {'faqs': 1, '_id': 0}
+            )
+            faq_str = (
+                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="faqModel" '
+                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+            )
+            faqs = reduce(
+                lambda x, y: x+y, map(
+                    lambda x: faq_str.format(
+                        'chat-selectable-selected' if str(x.id) in checked_faqs.get('faqs', {}).keys() else '',
+                        x.id,
+                        x.title if x.title else Truncator(x.text).words(72, truncate=' ...')
+                    ),
+                    faq_list
+                )
+            )
+        return u'<ul class="chat-select-list">{}</ul>'.format(
+            faqs or '<li><h3>There are no faqs to display.</h3></li>'
+        )
+
 
 class EnrollUnitCode(models.Model):
     """
@@ -603,5 +666,4 @@ class UnitError(models.Model):
 
 class ChatDivider(models.Model):
     text = models.CharField(max_length=200)
-    unitlesson = models.ForeignKey(UnitLesson, null=True)
-        
+    unitlesson = models.ForeignKey(UnitLesson, null=True) 

@@ -14,7 +14,7 @@ class FSMStack(object):
     """
     Main interface to our current FSM if any.
     """
-    CHAT_NAMES = ('chat', 'additional', 'courselet_preview')
+    CHAT_NAMES = ('chat', 'additional', 'courselet_preview', 'faq')
 
     def __init__(self, request, **kwargs):
         try:

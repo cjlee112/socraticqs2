@@ -1402,7 +1402,12 @@ class InquiryCount(models.Model):
     'record users who have the same question'
     response = models.ForeignKey(Response)
     addedBy = models.ForeignKey(User)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES,
+                              blank=False, null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+
+    def __str__(self):
+        return u'{} {} {}'.format(self.response.title, self.addedBy, self.status)
 
 
 class Liked(models.Model):

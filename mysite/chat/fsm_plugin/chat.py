@@ -1,4 +1,32 @@
-from ct.models import UnitStatus, UnitLesson, Lesson, Response
+from core.common.mongo import c_chat_context
+from ct.models import UnitStatus, UnitLesson, Lesson
+
+
+def next_lesson_after_errors(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+    """
+    Edge method that moves us to right state for next lesson (or END).
+    """
+    fsm = edge.fromNode.fsm
+    if c_chat_context().find_one({"chat_id": fsmStack.id}).get('need_faqs'):
+        return fsm.get_node('FAQ')
+    unitStatus = fsmStack.state.get_data_attr('unitStatus')
+    if useCurrent:
+        nextUL = unitStatus.get_lesson()
+        return edge.toNode
+    else:
+        nextUL = unitStatus.start_next_lesson()
+    if not nextUL:
+        unit = fsmStack.state.get_data_attr('unit')
+        if unit.unitlesson_set.filter(
+            kind=UnitLesson.COMPONENT, order__isnull=True
+        ).exists():
+            return fsm.get_node('IF_RESOURCES')
+        else:
+            return fsm.get_node('END')
+    else:  # just a lesson to read
+        fsmStack.state.unitLesson = nextUL
+
+        return edge.toNode
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -33,6 +61,18 @@ def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **k
     fsm = edge.fromNode.fsm
     unitStatus = fsmStack.state.get_data_attr('unitStatus')
     nextUL = unitStatus.get_lesson()
+    answer = nextUL.get_answers().first()
+    # Update chat context
+    # Don't ask
+    chat = fsmStack
+    c_chat_context().update_one(
+        {"chat_id": chat.id},
+        {"$set": {
+            "actual_ul_id": answer.id if answer else nextUL.id,
+            "need_faqs": False
+        }},
+        upsert=True
+    )
     if nextUL.is_question():
         return fsm.get_node(name='ASK')
     else:  # just a lesson to read
@@ -49,11 +89,17 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
         if (fsmStack.next_point.content.unitLesson.get_errors() or
                 fsmStack.next_point.content.lesson.add_unit_aborts and
                 fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+            c_chat_context().update_one(
+                {"chat_id": fsmStack.id},
+                {"$set": {"need_faqs": True}},
+                upsert=True
+            )
             return fsm.get_node('ERRORS')
         else:
             resp = fsmStack.next_point.content
             resp.status = 'help'
             resp.save()
+            return fsm.get_node('FAQ')
 
     return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
@@ -95,8 +141,8 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='TITLE', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
 
 
 class TITLE(object):
@@ -121,8 +167,8 @@ class LESSON(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='TITLE', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
 
 
 class ASK(object):
@@ -130,8 +176,8 @@ class ASK(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
-        )
+        dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+    )
 
 
 class GET_ANSWER(object):
@@ -161,8 +207,8 @@ class GET_ANSWER(object):
 
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
-        )
+        dict(name='next', toNode='CONFIDENCE', title='Go to confidence'),
+    )
 
 
 class CONFIDENCE(object):
@@ -191,7 +237,7 @@ class GET_CONFIDENCE(object):
             return fsm.get_node('CORRECT_ANSWER')
         else:
             return edge.toNode
-        
+
         return edge.toNode
 
     title = 'Choose confidence'
@@ -220,39 +266,31 @@ class CORRECT_ANSWER(object):
 
     title = 'Show correct answer for Multiple Choices'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
 
 
 class INCORRECT_ANSWER(object):
     title = 'Show correct answer for Multiple Choices'
     edges = (
-            dict(name='next', toNode='INCORRECT_CHOICE', title='Assess yourself'),
-        )
+        dict(name='next', toNode='INCORRECT_CHOICE', title='Assess yourself'),
+    )
 
 
 class INCORRECT_CHOICE(object):
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         if (fsmStack.next_point.content.unitLesson.get_errors() or
-            fsmStack.next_point.content.lesson.add_unit_aborts and
-            fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+                fsmStack.next_point.content.lesson.add_unit_aborts and
+                fsmStack.next_point.content.unitLesson.unit.get_aborts()):
+            c_chat_context().update_one(
+                {"chat_id": fsmStack.id},
+                {"$set": {"need_faqs": True}},
+                upsert=True
+            )
             return fsm.get_node('ERRORS')
         else:
-            unitStatus = fsmStack.state.get_data_attr('unitStatus')
-
-            nextUL = unitStatus.start_next_lesson()
-            if not nextUL:  # pragma: no cover
-                unit = fsmStack.state.get_data_attr('unit')
-                if unit.unitlesson_set.filter(
-                    kind=UnitLesson.COMPONENT, order__isnull=True
-                ).exists():
-                    return fsm.get_node('IF_RESOURCES') 
-                else:
-                    return fsm.get_node('END')
-            else:  # just a lesson to read
-                fsmStack.state.unitLesson = nextUL
-                return fsm.get_node('TITLE')
+            return fsm.get_node('FAQ')
 
     title = 'Show incorrect choice for Multiple Choices'
     edges = (
@@ -265,8 +303,8 @@ class ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
-        )
+        dict(name='next', toNode='ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
+    )
 
 
 class ASSESS_QUESTION_MESSAGE(object):
@@ -274,9 +312,10 @@ class ASSESS_QUESTION_MESSAGE(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
     help = 'How close was your answer to the one shown here?'
+
 
 class GET_ASSESS(object):
     get_path = get_lesson_url
@@ -284,8 +323,8 @@ class GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='TITLE', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
 
 
 class GRADING(object):
@@ -297,23 +336,24 @@ class GRADING(object):
         dict(name='next', toNode='TITLE', title='View Next Lesson'),
     )
 
+
 class ERRORS(object):
     get_path = get_lesson_url
     # node specification data goes here
     title = 'Error options'
     edges = (
-            dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
-        )
+        dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
+    )
 
 
 class GET_ERRORS(object):
     get_path = get_lesson_url
-    next_edge = next_lesson
+    next_edge = next_lesson_after_errors
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='TITLE', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
+    )
 
 
 class IF_RESOURCES(object):
@@ -323,6 +363,15 @@ class IF_RESOURCES(object):
     title = 'Courselet core lessons completed'
     edges = (
         dict(name='next', toNode='END', title='View Next Lesson'),
+    )
+
+
+class FAQ(object):
+    title = 'FAQ'
+    next_edge = next_lesson
+
+    edges = (
+        dict(name='next', toNode='TITLE', title='View Next Lesson'),
     )
 
 
@@ -371,6 +420,7 @@ def get_specs():
             ERRORS,
             GET_ERRORS,
             IF_RESOURCES,
+            FAQ,
             END
         ],
 
