@@ -68,6 +68,16 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
     # return next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs)
 
 
+def next_incorrect_choice_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        fsm = edge.fromNode.fsm
+        if (fsmStack.next_point.response_to_check.unitLesson.get_errors() or
+            fsmStack.next_point.response_to_check.lesson.add_unit_aborts and
+            fsmStack.next_point.response_to_check.unitLesson.unit.get_aborts()):
+            return fsm.get_node('ERRORS')
+        else:
+            return edge.toNode
+
+
 def next_edge_teacher_coherent(nodes, fail_node='WAIT_ASK'):
     def wrapp(func):
         def wrapper(self, edge, fsmStack, request, **kwargs):
@@ -93,31 +103,11 @@ class INCORRECT_ANSWER(object):  # pragma: no cover
 
 
 class INCORRECT_CHOICE(object):  # pragma: no cover
-    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-        fsm = edge.fromNode.fsm
-        if (fsmStack.next_point.response_to_check.unitLesson.get_errors() or
-            fsmStack.next_point.response_to_check.lesson.add_unit_aborts and
-            fsmStack.next_point.response_to_check.unitLesson.unit.get_aborts()):
-            return fsm.get_node('ERRORS')
-        else:
-            unitStatus = fsmStack.state.get_data_attr('unitStatus')
-
-            nextUL = unitStatus.start_next_lesson()
-            if not nextUL:  # pragma: no cover
-                unit = fsmStack.state.get_data_attr('unit')
-                if unit.unitlesson_set.filter(
-                    kind=UnitLesson.COMPONENT, order__isnull=True
-                ).exists():
-                    return fsm.get_node('IF_RESOURCES')
-                else:
-                    return fsm.get_node('END')
-            else:  # just a lesson to read
-                fsmStack.state.unitLesson = nextUL
-                return fsm.get_node('TITLE')
-
     title = 'Show incorrect choice for Multiple Choices'
+    next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCYLE"])(next_incorrect_choice_edge)
+
     edges = (
-        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+        dict(name='next', toNode='WAIT_ASK', title='Assess yourself'),
     )
 
 

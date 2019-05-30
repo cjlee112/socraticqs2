@@ -24,3 +24,4 @@ omit =
     api/v0/urls.py
     chat/urls.py
     fsm/mixins.py
+    chat/fsm_plugin/live_chat.py
