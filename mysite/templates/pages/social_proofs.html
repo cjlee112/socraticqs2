@@ -1,0 +1,12 @@
+{% load cms_tags %}
+
+<div class="container-proofs">
+  <h2 class="block-title">More than 17,000 companies are using Intercom to achieve their goals</h2>
+  <div class="block-companies">
+    {% with more_proofs_link=instance.more_proofs_link post_description=instance.post_description %}
+    {% for plugin in instance.child_plugin_instances %}
+      {% render_plugin plugin %}
+    {% endfor %}
+    {% endwith %}
+  </div>
+</div>

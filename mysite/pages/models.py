@@ -89,6 +89,42 @@ class ChildPersonalGuidesPlugin(AbstractPlugin):
     description = fields.HTMLField()
 
 
+class SocialProofsPlugin(AbstractPlugin):
+    """
+    Plugin for Social Proofs block.
+    """
+    title = models.CharField(max_length=200, blank=True)
+    post_description = fields.HTMLField()
+    more_proofs_link = models.URLField(null=True, blank=True)
+
+
+class ProofPlugin(AbstractPlugin):
+    """
+    Plugin for proof.
+    """
+    proof_icon = FilerImageField(related_name="proof_icon", blank=True, null=True)
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField()
+
+
+class KeyNotesSetPlugin(AbstractPlugin):
+    """
+    Plugin for KeyNotes block.
+    """
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField()
+
+
+class KeyNotePlugin(AbstractPlugin):
+    """
+    Plugin for KeyNote.
+    """
+    button_text = models.CharField(max_length=200, blank=True)
+    uid = models.SlugField(max_length=8, blank=False, unique=True)
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField()
+
+
 class ParentPersonalGuidesPlugin(AbstractPlugin):
     """
     Parent plugin for Personal Guides.

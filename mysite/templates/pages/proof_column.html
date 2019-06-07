@@ -1,0 +1,13 @@
+{% load cms_tags %}
+
+{% if not instance.hidden %}
+
+<div class="{% if instance.position == 0 %}long-column{% else %}short-column{% endif %}">
+
+    {% with position=instance.position %}
+    {% for plugin in instance.child_plugin_instances %}
+      {% render_plugin plugin %}
+    {% endfor %}
+    {% endwith %}
+</div>
+{% endif %}

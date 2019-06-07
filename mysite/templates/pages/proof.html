@@ -1,0 +1,15 @@
+{% load cms_tags media %}
+
+{% if not instance.hidden %}
+<div class="company-single">
+  <div class="company-logo"><img src="{% media_prefix instance.proof_icon %}" alt=""></div>
+  <div class="company-text">
+    <p><b>{{ instance.title }}</b></p>
+    {{ instance.description }}
+    {{ instance.parent.parent. }}
+    {% if position == 0 %}
+    <p><a href="{{ more_proofs_link }}" target="_blank">{{ post_description }}</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

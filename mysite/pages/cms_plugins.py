@@ -25,6 +25,10 @@ from pages.models import (
     DetailsQuotePlugin,
     SlideShareItemPlugin,
     SlideSharePlugin,
+    SocialProofsPlugin,
+    ProofPlugin,
+    KeyNotesSetPlugin,
+    KeyNotePlugin,
     BecomeInstructorPlugin as BecomeInstructorPluginModel,
 )
 
@@ -224,6 +228,38 @@ class SplitTwoColumns(CMSPluginBase):
     allow_children = True
 
 
+class SocialProofs(CMSPluginBase):
+    model = SocialProofsPlugin
+    render_template = 'pages/social_proofs.html'
+    allow_children = True
+    child_classes = ['ProofColumn']
+
+
+class ProofColumn(CMSPluginBase):
+    render_template = 'pages/proof_column.html'
+    allow_children = True
+    child_classes = ['Proof']
+
+
+class Proof(CMSPluginBase):
+    model = ProofPlugin
+    render_template = 'pages/proof.html'
+    allow_children = False
+
+
+class KeyNotesSet(CMSPluginBase):
+    model = KeyNotesSetPlugin
+    render_template = 'pages/keynotes_set.html'
+    allow_children = True
+    child_classes = ['KeyNote']
+
+
+class KeyNote(CMSPluginBase):
+    model = KeyNotePlugin
+    render_template = 'pages/keynote.html'
+    allow_children = False
+
+
 class SplitThreeColumns(CMSPluginBase):
     render_template = 'pages/split_three_cols.html'
     allow_children = True
@@ -269,3 +305,8 @@ plugin_pool.register_plugin(SlideSharePagePlugin)
 plugin_pool.register_plugin(InlineSlideSharePagePlugin)
 plugin_pool.register_plugin(SplitTwoColumns)
 plugin_pool.register_plugin(SplitThreeColumns)
+plugin_pool.register_plugin(SocialProofs)
+plugin_pool.register_plugin(ProofColumn)
+plugin_pool.register_plugin(Proof)
+plugin_pool.register_plugin(KeyNotesSet)
+plugin_pool.register_plugin(KeyNote)

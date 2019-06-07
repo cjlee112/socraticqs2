@@ -10,6 +10,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000 --settings=mysite.settings.docker
     volumes:
       - .:/app
+      - vscode-server-insiders:/root/.vscode-server-insiders/
     ports:
       - "8000:8000"
     links:
@@ -68,3 +69,4 @@ services:
 volumes:
   dev_cr_db:
   dev_cr_mongo:
+  vscode-server-insiders:

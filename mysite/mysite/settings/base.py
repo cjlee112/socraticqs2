@@ -146,6 +146,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'djangocms_admin_style',
+    'djangocms_column',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -421,10 +422,16 @@ CMS_PLACEHOLDER_CONF = {
         },
     },
     'langing_page_placeholder': {
-        'plugins': ['LandingPagePlugin']
+        'plugins': ['LandingPagePlugin', 'MultiColumn']
+    },
+    'landing_page_social_proofs_placeholder': {
+        'plugins': ['SocialProofs']
+    },
+    'landing_page_key_notes': {
+        'plugins': ['KeyNotesSet']
     },
     'landing_page_active_learning_placeholder': {
-        'plugins': ['ActiveLearningRatesPagePlugin']
+        'plugins': ['ActiveLearningRatesPagePlugin', 'MultiColumn']
     },
     'landing_page_list_placeholder': {
         'plugins': ['ListPagePlugin']

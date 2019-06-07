@@ -1,0 +1,80 @@
+/*# Social proofs */
+.company-text a {
+	color: #007bc6;
+}
+
+.container-proofs {
+	padding: 100px 20px;
+}
+
+.block-title {
+	color: #0078c6;
+	font-weight: 300;
+	text-align: center;
+	font-size: 35px;
+	margin: 10px auto 40px;
+	max-width: 600px;
+}
+
+.block-companies {
+	display: flex;
+}
+
+.long-column {
+	width: 70%;
+	box-sizing: border-box;
+	padding-right: 50px;
+}
+
+.short-column {
+	width: 30%;
+}
+
+.company-single {
+	margin-bottom: 40px;
+}
+
+.company-logo {
+	max-width: 200px;
+	margin-bottom: 15px;
+}
+
+.company-logo img {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+}
+
+.company-text {
+	font-size: 16px;
+}
+
+.company-text p {
+	margin-bottom: 15px;
+	color: #6f7477;
+	font-weight: 300;
+}
+
+.long-column .company-text {
+	font-size: 22px;
+}
+
+.short-column .company-text {
+	font-size: 16px;
+}
+
+@media screen and (max-width: 991px) {
+	.block-companies {
+		display: block;
+	}
+
+	.long-column {
+		padding: 0;
+	}
+	
+	.long-column,
+	.short-column {
+		width: 100%;
+	}
+}
+

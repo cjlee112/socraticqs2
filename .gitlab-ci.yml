@@ -37,11 +37,12 @@ Python tests:
   tags:
     - docker
   script:
-    - docker run -d --name mongo -p 27017:27017 mongo:latest
+    - sh gitlab.sh
     - docker run --link mongo:mongo $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
+    - sh gitlab_stop.sh
 
 Check code quality:
-  stage: test
+  stage: test 
   tags:
     - docker
   script:
