@@ -30,6 +30,9 @@ run:
 start:
 	docker-compose -f $(DOCKERFILE_PATH) start
 
+restart:
+	docker-compose -f $(DOCKERFILE_PATH) restart
+
 debug:
 	docker-compose -f dev.yml run --service-ports dev_app
 

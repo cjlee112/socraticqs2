@@ -1,5 +1,5 @@
 gunicorn==19.9.0
-psycopg2-binary==2.8.2
+psycopg2-binary==2.7.7
 django-storages==1.6.5
 boto3==1.9.39
 boto==2.49.0

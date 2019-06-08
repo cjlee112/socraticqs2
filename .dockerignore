@@ -1,7 +1,4 @@
-**/*
-!requirements*
-!mysite/draw_svg
+**/node_modules
+**/bower_components
 mysite/draw_svg/node_modules
 mysite/draw_svg/build
-!mysite/lms/static/js
-!mysite/lms/static/css

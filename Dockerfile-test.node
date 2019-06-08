@@ -1,0 +1,13 @@
+FROM node:8
+
+WORKDIR /tmp
+COPY . .
+
+
+WORKDIR /tmp/mysite/draw_svg
+
+RUN npm install && npm rebuild node-sass
+
+RUN echo "CI=true yarn test" > entrypoint.sh
+
+ENTRYPOINT ["sh", "entrypoint.sh"]

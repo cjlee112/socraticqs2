@@ -13,6 +13,7 @@ before_script:
 stages:
   - build
   - test
+  - tag
   - deploy
 
 Build:
@@ -20,8 +21,7 @@ Build:
   tags:
     - docker
   script:
-    - cp .circleci/.dockerignore ./
-    - docker build -f Dockerfile.CI -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
+    - docker build -f Dockerfile -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker push $DOCKER_IMG_NAME:$CI_COMMIT_SHA
 
@@ -30,7 +30,7 @@ JavaScript tests:
   tags:
     - docker
   script:
-    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA bash -c "cd draw_svg && yarn install && CI=true yarn test"
+    - docker build -f Dockerfile-test.node -t node-test:$CI_COMMIT_SHA . && docker run node-test:$CI_COMMIT_SHA
 
 Python tests:
   stage: test
@@ -48,6 +48,34 @@ Check code quality:
   script:
     - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make quality
 
+Tag tested development image:
+  stage: tag
+  tags:
+    - docker
+  only:
+    - development
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -f Dockerfile.celery -t maxsocl/cr.celery:development .
+    - docker push maxsocl/cr.celery:development
+    - docker pull $DOCKER_IMG_NAME:$CI_COMMIT_SHA
+    - docker tag $DOCKER_IMG_NAME:$CI_COMMIT_SHA maxsocl/courselets:development
+    - docker push maxsocl/courselets:development
+
+Tag tested staging image:
+  stage: tag
+  tags:
+    - docker
+  only:
+    - master
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -f Dockerfile.celery -t maxsocl/cr.celery:master .
+    - docker push maxsocl/cr.celery:master
+    - docker pull $DOCKER_IMG_NAME:$CI_COMMIT_SHA
+    - docker tag $DOCKER_IMG_NAME:$CI_COMMIT_SHA maxsocl/courselets:master
+    - docker push maxsocl/courselets:master
+
 Deploy Dev:
   stage: deploy
   tags:
@@ -63,21 +91,11 @@ Deploy Dev:
     - cd /home/wwwapps/dev/socraticqs2/
     - git checkout development
     - git pull
-    - source /home/wwwapps/dev/_ve_socraticqs2/bin/activate
-    - pip install --ignore-installed -U -r requirements.txt
-    - pip install --ignore-installed -U -r requirements/prod.txt
-    - cd mysite/
-    - python manage.py migrate
-    - python manage.py fsm_deploy
-    - cd draw_svg/
-    - npm install --save-dev
-    - npm run build && npm run build:copy-local
-    - yarn build && yarn build:copy-local
-    - cd ..
-    - python manage.py collectstatic --noinput
-    - sudo supervisorctl restart devgunicorn
-    - sudo supervisorctl restart devcelery
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n@redilonka (・ω・)", "link_names":1}'
+    - docker-compose -f dev.yml pull dev_app
+    - docker-compose -f dev.yml pull dev_celery
+    - docker-compose -f dev.yml up -d dev_app
+    - docker ps
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
 Deploy Stage:
   stage: deploy
