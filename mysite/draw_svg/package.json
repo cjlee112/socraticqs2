@@ -28,6 +28,7 @@
     "start": "npm-run-all -p watch-css start-js",
     "build-js": "react-scripts build",
     "build": "npm-run-all build-css build-js",
+    "build:copy-local": "cp -R build/static/js/*.js ../lms/static/js/draw_svg.js && cp -R build/static/css/*.css ../lms/static/css/draw_svg.css",
     "build:copy-prebuild": "cp -R build/static/js/*.js /draw_svg.js && cp -R build/static/css/*.css /draw_svg.css",
     "build:copy": "cp -R build/static/js/*.js /app/mysite/lms/static/js/draw_svg.js && cp -R build/static/css/*.css /app/mysite/lms/static/css/draw_svg.css",
     "test": "react-scripts test --env=jsdom",
