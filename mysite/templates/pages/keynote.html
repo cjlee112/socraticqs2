@@ -1,17 +1,16 @@
 {% load cms_tags %}
 
 {% if not instance.hidden %}
-<div class="card">
-    <div class="card-header" id="heading{{ instance.title }}">
-      <h2 class="mb-0">
-        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse{{ instance.title }}" aria-expanded="true" aria-controls="collapse{{ instance.title }}">
-          {{ instance.button_text }}
-        </button>
-        {{ instance.title }}
+<div class="card panel">
+    <div class="card-header" role="tab" id="heading{{ instance.uid }}">
+      <h2>
+        <a data-toggle="collapse" data-parent="#accordionExample" href="#collapse{{ instance.uid }}" aria-expanded="false" aria-controls="collapse{{ instance.uid }}">
+          <span class="btn btn-link">{{ instance.button_text }}</span> {{ instance.title }}
+        </a>
       </h2>
     </div>
 
-    <div id="collapse{{ instance.title }}" class="collapse show" aria-labelledby="heading{{ instance.title }}" data-parent="#accordionExample">
+    <div id="collapse{{ instance.uid }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ instance.uid }}" data-parent="#accordionExample">
       <div class="card-body">
         {{ instance.description }}
       </div>

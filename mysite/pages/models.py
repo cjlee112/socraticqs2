@@ -120,7 +120,7 @@ class KeyNotePlugin(AbstractPlugin):
     Plugin for KeyNote.
     """
     button_text = models.CharField(max_length=200, blank=True)
-    uid = models.SlugField(max_length=8, blank=False, unique=True)
+    uid = models.SlugField(max_length=8, blank=False)
     title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField()
 

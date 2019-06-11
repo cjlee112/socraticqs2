@@ -78,3 +78,72 @@
 	}
 }
 
+/* Accordion */
+
+.keynotes-accordion {
+	padding-top: 110px;
+	padding-bottom: 110px;
+}
+
+.keynotes-accordion .panel {
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.keynotes-accordion .card-header a {
+	display: flex;
+	align-items: center;
+	color: #777;
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.keynotes-accordion .card-header a:hover,
+.keynotes-accordion .card-header a:focus,
+.keynotes-accordion .card-header a[aria-expanded="true"] {
+	text-decoration: none;
+	cursor: pointer;
+	color: #4d4d4d;
+}
+
+.keynotes-accordion .card-header a[aria-expanded="true"] .btn,
+.keynotes-accordion .card-header a:hover .btn {
+	background: #307fe2;
+}
+
+.keynotes-accordion .btn-link {
+	margin: 0 20px 0 0;
+	text-align: center;
+	width: 200px;
+	height: auto;
+	white-space: inherit;
+	word-break: break-word;
+	text-transform: uppercase;
+	font-size: 18px;
+	font-weight: 700;
+	border-radius: 3px;
+}
+
+.keynotes-accordion .card-body {
+	margin-top: 20px;
+	font-size: 16px;
+}
+
+@media screen and (max-width: 991px) {
+	.keynotes-accordion {
+		padding-top: 70px;
+		padding-bottom: 70px;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.keynotes-accordion .btn-link {
+		margin-right: 0;
+		width: 100%;
+	}
+
+	.keynotes-accordion .card-header a {
+		flex-direction: column;
+	}
+}
