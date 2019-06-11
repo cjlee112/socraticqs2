@@ -37,9 +37,9 @@ Python tests:
   tags:
     - docker
   script:
-    - sh gitlab.sh
+    - docker start mongo || docker run -d --name mongo -p 27017:27017 mongo:latest
     - docker run --link mongo:mongo $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
-    - sh gitlab_stop.sh
+    - docker stop mongo
 
 Check code quality:
   stage: test 
@@ -89,11 +89,13 @@ Deploy Dev:
     - development
   script:
     - cd /home/wwwapps/dev/socraticqs2/
-    - git checkout development
-    - git pull
+    - git fetch
+    - git reset --hard origin/development
     - docker-compose -f dev.yml pull dev_app
     - docker-compose -f dev.yml pull dev_celery
     - docker-compose -f dev.yml up -d dev_app
+    - make .migrate
+    - make .fsm-deploy
     - docker ps
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
