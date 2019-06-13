@@ -94,8 +94,8 @@ Deploy Dev:
     - docker-compose -f dev.yml pull dev_app
     - docker-compose -f dev.yml pull dev_celery
     - docker-compose -f dev.yml up -d dev_app
-    - make .migrate
-    - make .fsm-deploy
+    - make .migrate env=dev
+    - make .fsm-deploy env=dev
     - docker ps
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 

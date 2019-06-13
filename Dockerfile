@@ -19,8 +19,7 @@ RUN apt-get -y update && \
     apt-get install -y \
     wget \
     pandoc \
-    python2.7 \
-    python-pip \
+    make \
     git \
     libpq-dev \
     libxml2-dev \

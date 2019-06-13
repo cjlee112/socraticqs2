@@ -33,6 +33,5 @@ RUN { \
 ENV CELERY_BROKER_URL amqp://guest@rabbit
 
 USER user
-COPY . /home/user/app/
 WORKDIR /home/user/app/mysite
 CMD ["celery", "worker"]

@@ -1,5 +1,6 @@
 env :=
 
+LOCAL_ENV := local
 DEV_ENV := dev
 STAGE_ENV := stage
 PROD_ENV := prod
@@ -16,16 +17,22 @@ ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	APP = app
 	export NGINX_HOST
 	export NGINX_PORT
-else
+endif
+
+ifneq ($(filter $(env),$(DEV_ENV)),)
 	DOCKERFILE_PATH := dev.yml
 	APP = dev_app
+else
+	DOCKERFILE_PATH := docker-compose.yml
+	APP = local_app
 endif
+
 
 sh:
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) bash
 
 run:
-	docker-compose -f $(DOCKERFILE_PATH) up
+	docker-compose -f $(DOCKERFILE_PATH) up -d
 
 start:
 	docker-compose -f $(DOCKERFILE_PATH) start
@@ -34,11 +41,14 @@ restart:
 	docker-compose -f $(DOCKERFILE_PATH) restart
 
 debug:
-	docker-compose -f dev.yml run --service-ports dev_app
+	docker-compose -f $(DOCKERFILE_PATH) run --service-ports $(APP)
 
-build: .build .migrate .load-fixtures .fsm-deploy .react
+build: .build .migrate .load-fixtures .fsm-deploy
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	make .static
+endif
+ifneq ($(filter $(env),$(LOCAL_ENV)),)
+	make .react
 endif
 
 .build:
@@ -63,7 +73,7 @@ endif
 	docker-compose -f $(DOCKERFILE_PATH) run $(APP) \
 			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
-.static: .node
+.static:
 	docker-compose -f $(DOCKERFILE_PATH) run --no-deps $(APP) \
 			python manage.py collectstatic --noinput
 

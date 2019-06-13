@@ -2,7 +2,7 @@ version: '3'
 services:
   dev_app:
     container_name: dev_cr_app
-    env_file: ./envs/local.env
+    env_file: ./envs/dev.env
     image: maxsocl/courselets:development
     command: python manage.py runserver 0.0.0.0:8080 --settings=mysite.settings.docker
     volumes:
@@ -18,7 +18,7 @@ services:
   dev_postgres:
     container_name: dev_cr_postgres
     image: postgres:9.6
-    env_file: ./envs/local.env
+    env_file: ./envs/dev.env
     volumes:
       - dev_cr_db:/var/lib/postgresql/data/
 
@@ -37,8 +37,8 @@ services:
   dev_celery:
     container_name: dev_cr_celery
     image: maxsocl/cr.celery:development
-    command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
-    env_file: ./envs/local.env
+    command: celery worker -A mysite --loglevel=INFO -B
+    env_file: ./envs/dev.env
     links:
       - dev_rabbit
       - dev_redis
@@ -50,13 +50,6 @@ services:
   dev_redis:
     container_name: dev_cr_redis
     image: redis:latest
-  
-  react:
-    build:
-      context: .
-      dockerfile: Dockerfile.node
-    volumes:
-      - ./:/app
 
 volumes:
   dev_cr_db:

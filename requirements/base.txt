@@ -15,7 +15,7 @@ django-crispy-forms==1.6.1
 # LTI python implementation
 git+https://github.com/mitodl/ims_lti_py.git@d96a6201cf3b63b9e1b33780ef5e29bc65242ceb
 
-lxml==3.4.4
+lxml==4.3.4
 
 oauth2==1.9.0.post1
 pypandoc==1.4

@@ -1,0 +1,67 @@
+version: '3'
+services:
+  local_app:
+    container_name: local_cr_app
+    env_file: ./envs/local.env
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    command: python manage.py runserver 0.0.0.0:8080 --settings=mysite.settings.docker
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    links:
+      - local_postgres
+      - local_mongo
+      - local_memcached
+      - local_celery
+
+  local_postgres:
+    container_name: local_cr_postgres
+    image: postgres:9.6
+    env_file: ./envs/local.env
+    volumes:
+      - local_cr_db:/var/lib/postgresql/data/
+
+  local_mongo:
+    container_name: local_cr_mongo
+    image: mongo:latest
+    expose:
+      - "27017"
+    volumes:
+      - local_cr_mongo:/data/db
+  
+  local_memcached:
+    container_name: local_cr_memcached
+    image: memcached:latest
+  
+  local_celery:
+    container_name: local_cr_celery
+    build:
+      context: .
+      dockerfile: Dockerfile.celery.local
+    command: celery worker -A mysite --loglevel=INFO -B
+    env_file: ./envs/local.env
+    links:
+      - local_rabbit
+      - local_redis
+
+  local_rabbit:
+    container_name: local_cr_rabbit
+    image: rabbitmq:latest
+  
+  local_redis:
+    container_name: local_cr_redis
+    image: redis:latest
+  
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    volumes:
+      - .:/app
+
+volumes:
+  local_cr_db:
+  local_cr_mongo:

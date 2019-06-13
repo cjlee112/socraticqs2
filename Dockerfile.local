@@ -18,12 +18,10 @@ RUN apt-get -y update && \
 COPY requirements ./requirements
 
 RUN pip install --upgrade pip setuptools
-RUN pip install --ignore-installed -U -r /requirements/base.txt
+RUN pip install --ignore-installed -U -r /requirements/dev.txt
 RUN pip install --ignore-installed -U -r /requirements/prod.txt
 
 ENV PYTHONUNBUFFERED 1
 
 RUN mkdir /app
 WORKDIR /app/mysite
-
-EXPOSE 9000
