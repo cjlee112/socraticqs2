@@ -15,6 +15,7 @@ stages:
   - test
   - tag
   - deploy
+  - smoke
 
 Build:
   stage: build
@@ -98,6 +99,13 @@ Deploy Dev:
     - make .fsm-deploy env=dev
     - docker ps
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
+
+Run layout tests:
+  stage: smoke 
+  tags:
+    - docker
+  script:
+    - docker run maxsocl/backstop:development
 
 Deploy Stage:
   stage: deploy
