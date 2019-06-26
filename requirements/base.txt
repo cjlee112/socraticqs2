@@ -32,6 +32,7 @@ python-memcached==1.58
 injections==0.2.2
 djangorestframework==3.6.4
 django-waffle==0.15.0
+django_intercom
 
 pandas==0.19.2
 unicodecsv==0.14.1

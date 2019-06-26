@@ -20,3 +20,4 @@ django_coverage_plugin==1.6.0
 pycodestyle
 diff-cover
 pytest-metadata==1.5.1
+pylint

@@ -15,12 +15,13 @@ backup:
 coverage:
 	export DJANGO_SETTINGS_MODULE=mysite.settings.test && pytest
 	coverage xml
-	diff-cover coverage.xml --fail-under=60
+# 	diff-cover coverage.xml --fail-under=60
 
 
 quality:
-	diff-quality --violations=pycodestyle --fail-under=80 --compare-branch=HEAD~1
-	diff-quality --violations=pylint --fail-under=80 --compare-branch=HEAD~1
+	echo "TODO: fix this and find out how to use with gitlab"
+# 	diff-quality --violations=pycodestyle --fail-under=80 --compare-branch=HEAD~1
+# 	diff-quality --violations=pylint --fail-under=80 --compare-branch=HEAD~1
 
 run:
 	python manage.py runserver 0.0.0.0:8000 --settings=mysite.settings.docker

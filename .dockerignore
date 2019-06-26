@@ -2,3 +2,13 @@
 **/bower_components
 mysite/draw_svg/node_modules
 mysite/draw_svg/build
+
+# Docker related
+Docker/
+**/*Dockerfile*
+**/.dockerignore
+**/docker-compose.yml
+**/prod.yml
+**/dev.yml
+**/local.yml
+**/rebuild_all.sh

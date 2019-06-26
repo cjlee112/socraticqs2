@@ -3,10 +3,14 @@ services:
   dev_app:
     container_name: dev_cr_app
     env_file: ./envs/dev.env
-    image: maxsocl/courselets:development
-    command: python manage.py runserver 0.0.0.0:8080 --settings=mysite.settings.docker
+    # image: maxsocl/courselets:development
+    # image: registry-gitlab.raccoongang.com/cmltawt0/socraticqs2:default
+    image: ${DOCKER_REGISTRY}:courselets-dev
+    command: ["dev"]
     volumes:
-      - ${PWD}/mysite/mysite/settings/local.py:/app/mysite/mysite/settings/local.py
+      # file should exist on host (even if empty) or docker will create a directory instead
+      - ${PWD}/mysite/mysite/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
+      - ${PWD}/logs:/home/courselets/app/logs
     ports:
       - "8080:8080"
     links:
@@ -14,6 +18,8 @@ services:
       - dev_mongo
       - dev_memcached
       - dev_celery
+    environment:
+      - DOCKER_REGISTRY
 
   dev_postgres:
     container_name: dev_cr_postgres
@@ -29,16 +35,24 @@ services:
       - "27017"
     volumes:
       - dev_cr_mongo:/data/db
-  
+
   dev_memcached:
     container_name: dev_cr_memcached
     image: memcached:latest
-  
+
   dev_celery:
+    environment:
+      - DOCKER_REGISTRY
+      - CELERY_BROKER_URL=amqp://guest@dev_rabbit
     container_name: dev_cr_celery
-    image: maxsocl/cr.celery:development
+    # user: courselets
+    # image: maxsocl/cr.celery:development
+    # image: registry-gitlab.raccoongang.com/cmltawt0/socraticqs2:celery
+    image: ${DOCKER_REGISTRY}:courselets-dev
     command: celery worker -A mysite --loglevel=INFO -B
     env_file: ./envs/dev.env
+    volumes:
+      - .:/home/courselets/app
     links:
       - dev_rabbit
       - dev_redis

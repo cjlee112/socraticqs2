@@ -1,82 +1,132 @@
-image: docker:latest
-
 variables:
-  DOCKER_DRIVER: overlay2
-
-services:
-- docker:dind
+  REGISTRY: registry-gitlab.raccoongang.com/cmltawt0/socraticqs2
 
 before_script:
-- docker info
-- docker ps
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
 stages:
+  - pre-build
   - build
   - test
   - tag
   - deploy
   - smoke
 
-Build:
+Build static:
+  stage: pre-build
+  tags:
+    - dind
+  script:
+    - docker build 
+      -t $REGISTRY:static-$CI_COMMIT_SHORT_SHA 
+      -f Docker/Dockerfile.static .
+
+Build base:
+  stage: pre-build
+  tags:
+    - dind
+  script:
+    - docker build 
+      -t $REGISTRY:base-$CI_COMMIT_SHORT_SHA 
+      -f Docker/Dockerfile .
+
+Build Prod:
   stage: build
   tags:
-    - docker
+    - dind
+  only:
+    - master
   script:
-    - docker build -f Dockerfile -t $DOCKER_IMG_NAME:$CI_COMMIT_SHA .
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - docker push $DOCKER_IMG_NAME:$CI_COMMIT_SHA
+    - docker build 
+      --force-rm 
+      -t $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA 
+      -f Docker/Dockerfile.prod
+      --build-arg REGISTRY=$REGISTRY 
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+      --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
+
+Build Test:
+  stage: build
+  tags:
+    - dind
+  script:
+    - docker build 
+      -t $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
+      -f Docker/Dockerfile.test 
+      --build-arg REGISTRY=$REGISTRY 
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+      --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
+
+Build Dev:
+  stage: build
+  tags:
+    - dind
+  only:
+    - development
+  script:
+    - docker build 
+      -t $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA 
+      -f Docker/Dockerfile.dev 
+      --build-arg REGISTRY=$REGISTRY 
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+      --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 JavaScript tests:
   stage: test
   tags:
-    - docker
+    - dind
   script:
-    - docker build -f Dockerfile-test.node -t node-test:$CI_COMMIT_SHA . && docker run node-test:$CI_COMMIT_SHA
+    - docker build -f Docker/Dockerfile-test.node -t node-test:$CI_COMMIT_SHORT_SHA .
+    - docker run node-test:$CI_COMMIT_SHORT_SHA
 
 Python tests:
+  variables:
+    GIT_STRATEGY: none
   stage: test
   tags:
-    - docker
+    - dind
   script:
-    - docker run -d --name mongo -p 27017:27017 mongo:latest
-    - docker run --link mongo:mongo $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
+    - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:latest
+    - docker run
+      --volume ${PWD}/logs:/home/courselets/app/logs
+      --volume ${PWD}/.git:/home/courselets/app/.git
+      --rm 
+      --link mongo_$CI_COMMIT_SHORT_SHA:mongo 
+      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
+      make coverage
   after_script:
-    - docker rm -f mongo
+    - docker rm -f mongo_$CI_COMMIT_SHORT_SHA || true
 
 Check code quality:
   stage: test 
   tags:
-    - docker
+    - dind
   script:
-    - docker run $DOCKER_IMG_NAME:$CI_COMMIT_SHA make quality
+    # .git volume requires for diff-quality. And it does not work :-\
+    - docker run 
+      --volume ${PWD}/.git:/home/courselets/app/.git 
+      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
+      make quality
 
-Tag tested development image:
+Tag latest courselets-dev image:
   stage: tag
   tags:
-    - docker
+    - dind
   only:
     - development
   script:
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - docker build -f Dockerfile.celery -t maxsocl/cr.celery:development .
-    - docker push maxsocl/cr.celery:development
-    - docker pull $DOCKER_IMG_NAME:$CI_COMMIT_SHA
-    - docker tag $DOCKER_IMG_NAME:$CI_COMMIT_SHA maxsocl/courselets:development
-    - docker push maxsocl/courselets:development
+    - docker tag $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA $REGISTRY/courselets-dev
+    - docker push $REGISTRY/courselets-dev
 
-Tag tested staging image:
+Tag latest courselets image:
   stage: tag
   tags:
-    - docker
+    - dind
   only:
     - master
   script:
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - docker build -f Dockerfile.celery -t maxsocl/cr.celery:master .
-    - docker push maxsocl/cr.celery:master
-    - docker pull $DOCKER_IMG_NAME:$CI_COMMIT_SHA
-    - docker tag $DOCKER_IMG_NAME:$CI_COMMIT_SHA maxsocl/courselets:master
-    - docker push maxsocl/courselets:master
+    - docker tag $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA $REGISTRY/courselets
+    - docker push $REGISTRY/courselets
 
 Deploy Dev:
   stage: deploy
@@ -87,24 +137,22 @@ Deploy Dev:
   environment:
     name: development
     url: https://dev.courselets.org
+  variables:
+    DOCKER_REGISTRY: $REGISTRY
   only:
     - development
   script:
-    - cd /home/wwwapps/dev/socraticqs2/
-    - git fetch
-    - git reset --hard origin/development
-    - docker-compose -f dev.yml pull dev_app
-    - docker-compose -f dev.yml pull dev_celery
+    - docker pull ${DOCKER_REGISTRY}/courselets-dev
     - docker-compose -f dev.yml up -d dev_app
-    - make .migrate env=dev
-    - make .fsm-deploy env=dev
+    - docker-compose -f dev.yml run --rm dev_app migrate
+    - docker-compose -f dev.yml run --rm dev_app fsm-deploy
     - docker ps
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
 Run layout tests:
   stage: smoke 
   tags:
-    - docker
+    - dind
   only:
     - development
     - master
@@ -117,25 +165,15 @@ Deploy Stage:
     - stage
     - deploy
     - ssh
+  when: manual
   only:
     - master
+  variables:
+    DOCKER_REGISTRY: $REGISTRY
   script:
-    - cd /home/wwwapps/socraticqs2/
-    - git checkout master
-    - git pull
-    - source /home/wwwapps/_ve_socraticqs3/bin/activate
-    - pip install --ignore-installed -U -r requirements.txt
-    - pip install --ignore-installed -U -r requirements/prod.txt
-    - cd mysite/
-    - python manage.py migrate
-    - python manage.py fsm_deploy
-    - cd draw_svg/
-    - npm install --save-dev
-    - npm run build && npm run build:copy-local
-    - yarn build && yarn build:copy-local
-    - cd ..
-    - python manage.py collectstatic --noinput
-    - sudo supervisorctl restart gunicorn
-    - sudo supervisorctl restart celery
+    - docker-compose -f prod.yml up -d app
+    - docker-compose -f prod.yml run --rm app migrate
+    - docker-compose -f prod.yml run --rm app fsm-deploy
+    - docker-compose -f prod.yml run --rm app static
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
     - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@here", "link_names":1}'

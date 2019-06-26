@@ -1,0 +1,12 @@
+FROM node:8
+
+COPY mysite/draw_svg /tmp/mysite/draw_svg
+COPY mysite/frontend /tmp/mysite/frontend
+
+WORKDIR /tmp/mysite/draw_svg
+
+RUN npm install && npm rebuild node-sass
+RUN yarn build && yarn build:copy-prebuild
+
+WORKDIR /tmp/mysite/frontend
+RUN yarn

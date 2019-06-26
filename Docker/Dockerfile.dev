@@ -1,0 +1,31 @@
+ARG REGISTRY=local/courselets
+ARG TAG=base-latest
+# ARG STATIC_REG=local/static
+ARG STATIC_TAG=static-latest
+
+FROM $REGISTRY:$STATIC_TAG as static
+
+
+FROM $REGISTRY:$TAG
+
+RUN apt-get -y update && \
+	apt-get install -y \
+	libpq-dev \
+	libxml2-dev \
+	libxslt1-dev \
+	make \
+	phantomjs \
+	python-dev \
+	wget \
+	zlib1g-dev \
+	&& rm -rf /var/lib/apt/lists/*
+RUN pip install --ignore-installed -U -r /requirements/dev.txt
+
+USER courselets
+
+ADD mysite /home/courselets/app/mysite
+COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
+COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
+COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
+
+CMD ["dev"]
