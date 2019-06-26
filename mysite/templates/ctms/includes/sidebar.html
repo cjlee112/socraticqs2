@@ -5,7 +5,8 @@
   <header>
     <a href="{% url 'ctms:my_courses' %}">Courses</a>
 
-    <a href="https://intercom.help/courselets" target="_blank" rel="noopener noreferrer">Help Center</a>
+    {% comment %} <a href="https://intercom.help/courselets" target="_blank" rel="noopener noreferrer">Help Center</a> {% endcomment %}
+    <a href="/help-center">Help Center</a>
 
     {% switch "ctms_onboarding_enabled" %}
       <a href="{% url 'ctms:onboarding' %}" class="sidebar__link-with-progress">

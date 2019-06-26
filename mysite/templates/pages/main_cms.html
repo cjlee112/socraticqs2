@@ -1,0 +1,386 @@
+
+
+{% load staticfiles intercom %}
+{% load cms_tags sekizai_tags %}
+{% load static %}
+{% load staticfiles %}
+{% load intercom %}
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Courselets{% endblock %}</title>
+        <meta name="description" content="{% block description %}Write your own exercises using our fast, effective Open Response Concept Testing methodology.{% endblock %}">
+        <link rel="icon" href="{% static "img/instructor/favicon.png" %}">
+
+        <!-- Added from the ctms_base-->
+        <link rel="stylesheet" href="//fast.fonts.net/cssapi/295027bc-49f8-4267-859a-8e5aea9f11b6.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/css/perfect-scrollbar.css">
+      
+
+        <!-- Custom stylesheet for help_center-->
+        <!-- <link rel="stylesheet" href="{% static "pages/css/help_center.css" %}"> -->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+        <script src="{% static "js/instructor/progressbar.min.js" %}"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+        <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/jquery-ui.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+ 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+        <script src="{% static "js/instructor/jquery.fancybox.min.js" %}"></script>
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/js/perfect-scrollbar.jquery.min.js"></script>
+        <link rel="stylesheet" href="//fast.fonts.net/cssapi/295027bc-49f8-4267-859a-8e5aea9f11b6.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.16/css/perfect-scrollbar.css">
+        <link rel="stylesheet" href="{% static "css/instructor/app.css" %}">
+        <link rel="stylesheet" href="{% static "css/instructor/jquery.fancybox.css" %}">
+
+        {% render_block "css" %}
+
+        <!-- Latest compiled and minified JavaScript -->
+        {% block head %}{% endblock %}
+        {% include "google-analytics.html" %}
+    </head>
+    <body style=" min-height: 100%; position: relative;">
+    
+    {% cms_toolbar %}
+    {% block base_content %}{% endblock %}
+    {% if '/teach/' in request.path %}{% intercom_tag %}{% endif %}
+
+
+    <!-- Added from the ctms_base-->
+
+    {% include "ctms/includes/sidebar.html" %}
+    {% render_block "js" %}
+    <a href="#sidebar" class="hamburger" aria-expanded="false" aria-controls="sidebar"><span class="sr-only">Toggle navigation</span></a>
+
+    <div class="page">
+      <header class="page__topbar">
+        <div class="page__topbar-inner">
+          {% if user and user.is_authenticated %}
+            <a class="page__account" href={% url "accounts:settings" %}>
+              <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt={% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %} class="avatar">
+
+              <span>
+                {% if user.first_name %}
+                    {{ user.first_name }}
+                {% else %}
+                    {{ user.username }}
+                {% endif %}
+              </span>
+            </a>
+          {% else %}
+            <a class="page__account" href={% url "new_login" %}>
+              <span>Sign in</span>
+            </a>
+          {% endif %}
+        </div>
+        </header>
+
+
+        {% if messages %}
+      <div class="page__messages">
+        {% for message in messages %}
+        <div class="alert alert-{%if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+          {{ message|safe }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+
+    </div>
+
+   <!-- TODO: Move this to an external js file -->
+    {% block js %}
+    {% endblock %}
+
+    <script>
+ // Add listeners once DOM is ready
+ $(function(){
+        // Mobile navigation
+        $('.hamburger').on('click', function(e){
+          e.preventDefault();
+          var sidebarSelector = $(this).attr('href');
+
+          $(this).toggleClass('hamburger--active');
+          $(sidebarSelector).stop().fadeToggle();
+        });
+
+        // Confirm on delete buttons
+        $('.button--delete').on('click', function(e) {
+          var text = $(this).data('confirm-text') || 'Are you sure?';
+
+          if(!window.confirm(text)) {
+            e.preventDefault();
+          }
+        });
+
+        // Expandable content
+        $('.expandable__toggle').on('click', function(e) {
+          e.preventDefault();
+          var $toggle = $(e.currentTarget);
+          var $content = $toggle.closest('.expandable').find('.expandable__content');
+          var text = $toggle.html();
+
+          // Toggle visibility
+          $content.toggle();
+
+          // Toggle text (only if it contains read more/less)
+          if(text == 'Read more') {
+            $toggle.html('Read less');
+          } else if(text == 'Read less') {
+            $toggle.html('Read more');
+          }
+        });
+
+        $('.link__post__data').on('click', function(e) {
+          var csrftoken = getCookie('csrftoken');
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          if(linkData['href']){
+            $.post(
+              linkData['href'],
+              {"csrfmiddlewaretoken": csrftoken},
+              function(data) {
+                if(scs_callback){
+                  $.globalEval(scs_callback);
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              }).fail(function() {
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              });
+          }
+          e.preventDefault();
+        });
+
+        $('.invite__submit__form').on('click', function(e) {
+          var linkData = $(this).data();
+          var scs_callback = linkData.onSuccessCallback;
+          var fl_callback = linkData.onFailCallback;
+          var my_form = $(this).closest('form');
+          var action_url = my_form.attr('action');
+          if(action_url) {
+            $.post(
+              action_url,
+              my_form.serialize(),
+              function(data) {
+                if(data.success) {
+                  if(scs_callback){
+                    $.globalEval(scs_callback);
+                  }
+                }
+                alert(linkData['successMsg'] || "Succeeded!");
+              },
+              'json').fail(function(){
+                if(fl_callback){
+                  $.globalEval(fl_callback);
+                }
+                alert(linkData['failMsg'] || "Failed!");
+              })
+          }
+          e.preventDefault();
+        })
+
+        // Custom scrollbar in sidebar
+        $('.sidebar__scroll-container').perfectScrollbar();
+
+        // Copy the enroll code (invite students)
+        $('#copy_enroll_code').on('click', function(e){
+          e.preventDefault();
+          document.getElementById("enroll_code").select();
+          document.execCommand("copy");
+          $.notify("The Enrollment URL has been copied to the clipboard.", "info");
+        });
+
+        // Copy the LTI code (invite students)
+        $('#copy_lti_url').on('click', function(e){
+          e.preventDefault();
+          document.getElementById("lti_url").select();
+          document.execCommand("copy");
+          $.notify("The LTI URL has been copied to the clipboard.", "info");
+        });
+
+        $('#send_to_courselets').click(function(event) {
+          let button = $(event.currentTarget);
+          let email = button.data('courselets-email');
+          $('#id_email').val(email);
+          button.parent().next('form').find('input[type=submit]').click();
+        });
+      });
+
+      // Cookies
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+    <script src="https://player.vimeo.com/api/player.js"></script>
+    <script>
+      // Add listeners once the DOM is ready
+      $(function(){
+
+  
+        // Get started accordion
+        $('.get-started__step-toggle').on('click', function(e) {
+          e.preventDefault();
+  
+          // Save a reference to the button
+          var $button = $(e.currentTarget);
+  
+          // Find the parent step
+          var $step = $button.closest('.get-started__step');
+  
+          // Close if the step is open
+          if($step.hasClass('get-started__step--open')) {
+            $button.html('View');
+            $step.removeClass('get-started__step--open');
+  
+          // Otherwise open it
+          } else {
+            $button.html('Hide');
+            $step.addClass('get-started__step--open');
+          }
+        })
+  
+        // Complete get started steps
+        $('[data-complete-step]').on('click', function(e) {
+          // Get the step name and element
+          var stepName = $(e.currentTarget).data('complete-step');
+          var $step = $('.get-started__step[data-step-id='+ stepName +']');
+          var data = {};
+          data[stepName] = true;
+  
+          // Send an ajax request to save the update
+          this.updateCartXhr = $.ajax({
+            headers: {
+              "X-CSRFToken": getCookie('csrftoken')
+            },
+            cache: false,
+            context: this,
+            data: data,
+            dataType: 'json',
+            method: 'PUT',
+            url: '/api/v0/onboarding-status/'
+          })
+          .done( function(response) { })
+          .fail( function(error) {
+            alert('Something went wrong. Please refresh the page and try again.');
+          });
+  
+          // Update the status checkbox
+          $step.addClass('get-started__step--done');
+  
+          // Delay updates for 1 second (let e.g. video overlays animate in first)
+          setTimeout(function() {
+            // Update the progress bars
+            var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
+            var newProgressPercentage = Math.floor(newProgress * 100);
+            progressCircle.set(newProgress);
+            $('.get-started__progress-text').html(newProgressPercentage);
+            $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'});
+  
+            // Hide open steps
+            $('.get-started__step').removeClass('get-started__step--open');
+            $('.get-started__step-toggle').html('View');
+  
+            // Find next incomplete step
+            var $nextStep = $('.get-started__step').not('.get-started__step--done').first();
+  
+            // Open the next step if one exists
+            $nextStep.addClass('get-started__step--open');
+            $nextStep.find('.get-started__step-toggle').html('Hide');
+          }, 1000)
+        });
+  
+        // Redirect when the user closes the final video
+        $("[data-fancybox]").fancybox({
+          afterClose: function( instance, slide ) {
+            var steps = $('.get-started__step').length;
+            var done = $('.get-started__step--done').length;
+            var redirectTo = $('[data-redirect-to-after-done]').data('redirect-to-after-done');
+  
+            if(steps == done && redirectTo) {
+              window.location.href = redirectTo;
+            }
+          },
+          afterShow: function() {
+            var iframe = $(".fancybox-iframe");
+            var player = new Vimeo.Player(iframe);
+            player.on('ended', function() {
+              if ( document.fullscreen ) {
+                document.exitFullscreen();
+              }
+              parent.$.fancybox.close();
+            });
+          }
+        });
+        // Open first unresolved step
+        $('.get-started__step').not('.get-started__step--done').first().addClass('get-started__step--open').find('.get-started__step-toggle').html('Hide');;
+      });
+    </script>
+    {# this csrf_token needed for ajax requests #}
+    {% csrf_token %}
+
+    {% if sidebar.course and sidebar.courslet %}
+    <script>
+        $(function() {
+            var originalOrder = $('.sortable li').map(function(i) { return this.id; }).get();
+            $('.sortable').sortable({
+                update: function (event, ui) {
+                    var newOrder = $('.sortable').sortable("toArray");
+                    if (newOrder != originalOrder) {
+                        $.post(
+                            "{% url 'ctms:courslet_reorder' course_pk=sidebar.course.pk courslet_pk=sidebar.courslet.pk %}",
+                            {
+                                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                                data: JSON.stringify({'ordered_ids': newOrder})
+                            },
+                            function(resp) {
+                                if (!resp.error) {
+                                    // $.notify(resp.msg);
+                                    // $('.sortable').effect("pulsate", 1000);
+                                    window.location.reload();
+                                } else {
+                                    $.notify('Something went wrong! <br>' + resp.error);
+                                }
+
+                            }
+                        )
+                    }
+                }
+            }).disableSelection();
+        });
+
+    </script>
+    {% endif %}
+    {% intercom_tag %}
+    </body>
+</html>

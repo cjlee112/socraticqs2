@@ -247,3 +247,16 @@ class BecomeInstructorPlugin(AbstractPlugin):
     error_name = models.CharField(max_length=200, blank=True)
     agreement_text = models.TextField(blank=True)
 
+
+class HelpCenterModel(AbstractPlugin):
+    title = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    link_text = models.CharField(max_length=200)
+    link_url = models.URLField()
+
+
+class IntercomArticleModel(AbstractPlugin):
+    title = models.CharField(max_length=200, blank=True)
+    short_description = models.TextField(blank=True)
+    link_text = models.CharField(max_length=200)
+    link_url = models.URLField()

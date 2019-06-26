@@ -1,0 +1,21 @@
+{% load cms_tags %}
+
+{% block content %}
+
+<header class="get-started__intro">
+    <h1>{{ instance.title }}</h1>
+
+    <p>
+      {{ instance.description }}
+    </p>
+
+    <a href="{{ instance.link_url }}" class="button button--primary">{{ instance.link_text }}</a>
+  </header>
+
+  <div class="get-started__steps">
+    {% for plugin in instance.child_plugin_instances %}
+      {% render_plugin plugin %}
+    {% endfor %}
+  </div>
+
+{% endblock %}

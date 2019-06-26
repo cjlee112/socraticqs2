@@ -13,6 +13,8 @@ CMS_TEMPLATES = (
     ('pages/landing_page.html', 'Landing Page'),
     ('pages/faq_page.html', 'FAQ Page'),
     ('pages/become_instructor.html', 'Become Instructor'),
+    ('pages/help_center.html', 'Help Center'),
+
 )
 
 # Set databases_name

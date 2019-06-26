@@ -29,6 +29,8 @@ from pages.models import (
     ProofPlugin,
     KeyNotesSetPlugin,
     KeyNotePlugin,
+    HelpCenterModel,
+    IntercomArticleModel,
     BecomeInstructorPlugin as BecomeInstructorPluginModel,
 )
 
@@ -278,6 +280,18 @@ class BecomeInstructorPlugin(CMSPluginBase):
         return context
 
 
+class HelpCenterPlugin(CMSPluginBase):
+    model = HelpCenterModel
+    render_template = 'pages/help_center_plugin.html'
+    allow_children = True
+
+
+class IntercomArticlePlugin(CMSPluginBase):
+    model = IntercomArticleModel
+    render_template = 'pages/intercom_article_plugin.html'
+    allow_children = False
+
+
 plugin_pool.register_plugin(BecomeInstructorPlugin)
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
@@ -310,3 +324,5 @@ plugin_pool.register_plugin(ProofColumn)
 plugin_pool.register_plugin(Proof)
 plugin_pool.register_plugin(KeyNotesSet)
 plugin_pool.register_plugin(KeyNote)
+plugin_pool.register_plugin(HelpCenterPlugin)
+plugin_pool.register_plugin(IntercomArticlePlugin)

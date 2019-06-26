@@ -104,6 +104,9 @@ Run layout tests:
   stage: smoke 
   tags:
     - docker
+  only:
+    - development
+    - master
   script:
     - docker run maxsocl/backstop:development
 

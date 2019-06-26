@@ -1,0 +1,22 @@
+<!-- next_step -->
+<div class="get-started__step{% if next_steps.done %} get-started__step--done{% endif %}" data-step-id="next_steps"
+{% if not next_steps.done %}
+  data-redirect-to-after-done="{% if users_course.id and users_courselet.id %}{% url 'ctms:courslet_view' course_pk=users_course.id pk=users_courselet.id %}?message=1{% else %}#{% endif %}"
+{% endif %}>
+<div class="get-started__step-header">
+  <div class="get-started__step-status"></div>
+  <h2>{{ instance.title }}</h2>
+
+  <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
+</div>
+
+<div class="get-started__step-content">
+  <div class="onboarding-content">
+    <p>
+      {{ instance.short_description }}
+    </p>
+
+
+  <a href="{{ instance.link_url }}" class="button button--primary">{{ instance.link_text }}</a>
+</div>
+</div>
