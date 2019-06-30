@@ -1,0 +1,26 @@
+{% load static cms_tags %}
+
+{% if not instance.hidden %}
+<section class="section-text-with-image">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h2><b>{{ instance.title }}</b></h2>
+      </div>
+
+      <div class="col-sm-4 col-md-5 right">
+        <iframe src="{{ instance.video_url }}" width="640" height="360" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+
+      <div class="col-sm-7 col-md-7">
+        {{ instance.short_description|safe }}
+      </div>
+      <a href="{{ instance.best_prattices_link }}" class="btn im-interested btn-large">{{ instance.best_prattices_text }}</a><br>
+      <a href="{{ instance.bp1_link }}" class="btn im-interested btn-large">{{ instance.bp1_text }}</a>
+    </div>
+    {% for plugin in instance.child_plugin_instances %}
+    <div class="row">{% render_plugin plugin %}</div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

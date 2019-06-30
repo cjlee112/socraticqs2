@@ -260,3 +260,23 @@ class IntercomArticleModel(AbstractPlugin):
     short_description = models.TextField(blank=True)
     link_text = models.CharField(max_length=200)
     link_url = models.URLField()
+
+
+class Hero1Model(AbstractPlugin):
+    title = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    best_prattices_text = models.CharField(max_length=200)
+    best_prattices_link = models.URLField()
+    bp1_text = models.CharField(max_length=200)
+    bp1_link = models.URLField()
+    video_url = models.URLField()
+
+
+class Hero2Model(AbstractPlugin):
+    title = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    best_prattices_text = models.CharField(max_length=200)
+    best_prattices_link = models.URLField()
+    bp2_text = models.CharField(max_length=200)
+    bp2_link = models.URLField()
+    video_url = models.URLField()

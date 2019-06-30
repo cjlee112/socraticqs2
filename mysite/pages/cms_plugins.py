@@ -31,6 +31,8 @@ from pages.models import (
     KeyNotePlugin,
     HelpCenterModel,
     IntercomArticleModel,
+    Hero1Model,
+    Hero2Model,
     BecomeInstructorPlugin as BecomeInstructorPluginModel,
 )
 
@@ -292,6 +294,18 @@ class IntercomArticlePlugin(CMSPluginBase):
     allow_children = False
 
 
+class Hero1Plugin(CMSPluginBase):
+    model = Hero1Model
+    render_template = 'pages/hero1_plugin.html'
+    allow_children = True
+
+
+class Hero2Plugin(CMSPluginBase):
+    model = Hero2Model
+    render_template = 'pages/hero2_plugin.html'
+    allow_children = True
+
+
 plugin_pool.register_plugin(BecomeInstructorPlugin)
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
@@ -326,3 +340,5 @@ plugin_pool.register_plugin(KeyNotesSet)
 plugin_pool.register_plugin(KeyNote)
 plugin_pool.register_plugin(HelpCenterPlugin)
 plugin_pool.register_plugin(IntercomArticlePlugin)
+plugin_pool.register_plugin(Hero1Plugin)
+plugin_pool.register_plugin(Hero2Plugin)
