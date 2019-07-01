@@ -5,6 +5,8 @@ RUN apt-get -y update && \
     apt-get install -y \
     wget \
     pandoc \
+    python-dev \
+    gcc \
     make \
     git \
     libpq-dev \
