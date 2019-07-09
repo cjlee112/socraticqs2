@@ -1458,6 +1458,7 @@ class Course(models.Model):
     trial = models.BooleanField(default=False)
     FSM_flow = models.CharField(max_length=10, choices=FSM_CHOICES,
                                 default=DEFAULT_FSM)
+    students_number = models.PositiveIntegerField(blank=True, null=True, default=200)
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)

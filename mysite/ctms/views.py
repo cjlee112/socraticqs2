@@ -243,7 +243,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     template_name = 'ctms/my_courses.html'
     model = Course
-    fields = ['title']
+    fields = ['title', 'students_number']
     # form_class = CourseForm
 
     def get(self, request, *args, **kwargs):
@@ -266,7 +266,7 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
 class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     template_name = 'ctms/course_form.html'
     model = Course
-    fields = ['title', 'trial']
+    fields = ['title', 'students_number', 'trial']
 
     def get(self, request, *args, **kwargs):
         if not self.am_i_instructor():

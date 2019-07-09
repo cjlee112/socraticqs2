@@ -32,6 +32,13 @@
         {% if form.title.errors %}
           {{ form.title.errors }}
         {% endif %}
+        <label for="title">Number of Students</label>
+        <p>You can change the number of Students in your Course here.</p>
+        {{ form.students_number }}
+        {% if form.students_number.errors %}
+          {{ form.students_number.errors }}
+        {% endif %}
+
           {{ form.trial.label_tag }}
           {{ form.trial }}
 

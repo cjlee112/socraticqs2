@@ -38,9 +38,10 @@ Python tests:
   tags:
     - docker
   script:
-    - docker start mongo || docker run -d --name mongo -p 27017:27017 mongo:latest
+    - docker run -d --name mongo -p 27017:27017 mongo:latest
     - docker run --link mongo:mongo $DOCKER_IMG_NAME:$CI_COMMIT_SHA make coverage
-    - docker stop mongo
+  after_script:
+    - docker rm -f mongo
 
 Check code quality:
   stage: test 
