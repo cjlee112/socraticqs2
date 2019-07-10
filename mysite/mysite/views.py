@@ -22,5 +22,4 @@ def markup_view(request, path=''):
     else:
         templatepath = path
     template = loader.get_template('markup/' + templatepath)
-    context = RequestContext(request, {})
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render({}))

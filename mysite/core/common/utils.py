@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.shortcuts import reverse
-from django.template import loader, Context
+from django.template import loader
 
 from core.common.mongo import c_onboarding_status, c_onboarding_settings
 from core.common import onboarding
@@ -42,13 +42,11 @@ def send_email(context_data, from_email, to_email, template_subject, template_te
         template_subject (str): path to a subject template, e.g. 'ctms/email/subject.txt'
         template_text (str):  path to a body template, e.g. 'ctms/email/text.txt'
     """
-    context = Context(context_data)
-
     subj_template = loader.get_template(template_subject)
-    rendered_subj = subj_template.render(context)
+    rendered_subj = subj_template.render(context_data)
 
     text_template = loader.get_template(template_text)
-    rendered_text = text_template.render(context)
+    rendered_text = text_template.render(context_data)
 
     send_mail(
         rendered_subj,

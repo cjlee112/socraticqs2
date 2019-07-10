@@ -2,6 +2,7 @@ import sys
 from io import BytesIO
 
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.utils import six
 from django.forms.fields import ImageField
 
@@ -10,6 +11,7 @@ class SvgAllowedImageField(ImageField):
     """
     Custom ImageField which allows uploading svg images
     """
+    default_validators = [FileExtensionValidator(['svg', 'jpg', 'jpeg', 'png'])]
 
     def to_python(self, data):
         f = super(ImageField, self).to_python(data)

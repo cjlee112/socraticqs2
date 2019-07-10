@@ -25,11 +25,11 @@ def send_validation(strategy, backend, code, *args, **kwargs):
     )
     user_data = {f: strategy.request.POST.get(f, '') for f in user_fields}
     url = strategy.request.build_absolute_uri(url)
-    context = Context({
+    context = {
         'code': code,
         'url': url,
         'user_data': user_data
-    })
+    }
 
     subj_template = loader.get_template('psa/email/confirmation_subject.txt')
     rendered_subj = subj_template.render(context)

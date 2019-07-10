@@ -48,13 +48,53 @@
         </div>
       </div>
 
-      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post">
+      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group form-group--not-first">
           <label for="name">Courselet Name</label>
           <p>You can change the name of your courselet here.</p>
           {{ form.title }}
+          <label for="{{ form.practice_questions.auto_id }}">Upload practice questions doc/pdf</label>
+          {{ form.practice_questions }}
+          {% if form.practice_questions.errors %}
+            {{ form.practice_questions.errors }}
+          {% endif %}
+        <label for="{{ form.best_practice_type.auto_id }}">Best practice type</label>
+          {{ form.best_practice_type }}
+          {% if form.best_practice_type.errors %}
+            {{ form.best_practice_type.errors }}
+          {% endif %}
+        <label for="{{ form.assessment_name.auto_id }}">Assessment name</label>
+          {{ form.assessment_name }}
+          {% if form.assessment_name.errors %}
+            {{ form.assessment_name.errors }}
+          {% endif %}
+        <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-up assessment date</label>
+          {{ form.follow_up_assessment_date }}
+          {% if form.follow_up_assessment_date.errors %}
+            {{ form.follow_up_assessment_date.errors }}
+          {% endif %}
+        <label for="{{ form.follow_up_aassessment_grade.auto_id }}">Follow-up assessment grade</label>
+          {{ form.follow_up_assessment_grade }}
+          {% if form.follow_up_assessment_grade.errors %}
+            {{ form.follow_up_assessment_grade.errors }}
+          {% endif %}
+        <label for="{{ form.follow_up_aassessment_grade.auto_id }}">Courselet deadline (days before follow-up assessment)</label>
+          {{ form.deadline }}
+          {% if form.deadline.errors %}
+            {{ form.deadline.errors }}
+          {% endif %}
+        <label for="{{ form.follow_up_aassessment_grade.auto_id }}">Courselet duration (days)</label>
+          {{ form.durations }}
+          {% if form.durations.errors %}
+            {{ form.durations.errors }}
+          {% endif %}
+        <label for="{{ form.participation_credit.auto_id }}">Courselet participation credit (grade %)</label>
+          {{ form.participation_credit }}
+          {% if form.participation_credit.errors %}
+            {{ form.participation_credit.errors }}
+          {% endif %}
         </div>
 
         <br>

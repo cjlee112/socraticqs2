@@ -430,7 +430,11 @@ class CoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Unit
     template_name = 'ctms/courselet_form.html'
-    fields = ('title',)
+    fields = (
+        'title', 'practice_questions', 'best_practice_type',
+        'assessment_name', 'follow_up_assessment_date', 'follow_up_assessment_grade',
+        'deadline', 'durations', 'participation_credit'
+    )
     form = CreateCourseletForm
 
     def get_success_url(self):
@@ -649,7 +653,12 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = Unit
-    fields = ('title', 'is_show_will_learn')
+    fields = (
+        'title', 'practice_questions', 'best_practice_type',
+        'assessment_name', 'follow_up_assessment_date', 'follow_up_assessment_grade',
+        'deadline', 'durations', 'participation_credit',
+        'is_show_will_learn'
+    )
     course_pk_name = 'course_pk'
     courslet_pk_name = 'pk'
     template_name = 'ctms/courslet_settings.html'

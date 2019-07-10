@@ -102,10 +102,10 @@ class Invite(models.Model):
     def send_mail(self, request, view):
         try:
             # TODO: use `send_email` utility function here (see `core`)
-            context = Context({
+            context = {
                 'invite': self,
                 'current_site': Site.objects.get_current(request)
-            })
+            }
             subj_template = loader.get_template('ctms/email/invite_subject.txt')
             rendered_subj = subj_template.render(context)
 

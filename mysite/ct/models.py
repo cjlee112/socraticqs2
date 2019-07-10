@@ -12,11 +12,21 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 
 from core.common import onboarding
 from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.templatetags.ct_extras import md2html
+
+
+def percent_validator(value):
+        if not 0 <= value <= 100:
+            raise ValidationError(
+                _('%(value)s is not a persent. Value should be range 0-100'),
+                params={'value': value},
+            )
 
 
 not_only_spaces_validator = RegexValidator(
@@ -24,6 +34,7 @@ not_only_spaces_validator = RegexValidator(
     inverse_match=True,
     message='This field can not consist of only spaces'
 )
+
 
 def copy_model_instance(inst, **kwargs):
     n_inst = copy(inst)
@@ -956,6 +967,16 @@ class Unit(models.Model):
         (LIVE_SESSION, 'Live session'),
         (RESOLUTION, 'Resolutions for an error model'),
     )
+    PRACTICE = 'practice'
+    PREREQ = 'prereq'
+    MISSIN_TRAINING = 'mission'
+    IN_CLASS = 'in_class'
+    BP_CHOICES = (
+        (PRACTICE, 'Practice-exam'),
+        (PREREQ, 'Prereq inventory'),
+        (MISSIN_TRAINING, 'Mission training'),
+        (IN_CLASS, 'In-class'),
+    )
     title = models.CharField(
         max_length=200,
         help_text='Your students will see this, so give your courselet a descriptive name.',
@@ -969,6 +990,15 @@ class Unit(models.Model):
     img_url = models.URLField(blank=True)
     small_img_url = models.URLField(blank=True)
     is_show_will_learn = models.BooleanField(default=False)
+    practice_questions = models.FileField(
+        upload_to='practice_questions/', blank=True, null=True, validators=[FileExtensionValidator(['pdf', 'docx'])])
+    best_practice_type = models.CharField(max_length=10, choices=BP_CHOICES, blank=True, null=True)
+    assessment_name = models.CharField(max_length=30, blank=True)
+    follow_up_assessment_date = models.DateField(blank=True, null=True)
+    follow_up_assessment_grade = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    deadline = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    durations = models.IntegerField(blank=True, null=True)
+    participation_credit = models.IntegerField(blank=True, null=True, validators=[percent_validator])
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'

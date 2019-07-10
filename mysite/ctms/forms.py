@@ -13,7 +13,7 @@ from .fields import SvgAllowedImageField
 class CustomFileInput(forms.ClearableFileInput):
 
     def render(self, name, value, attrs):
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
             'name': name,
             'value': value
@@ -41,7 +41,7 @@ class EditUnitForm(forms.ModelForm):
         (Lesson.ORCT_QUESTION, 'Question'),
         (Lesson.EXPLANATION, 'Introduction'),
     )
-    DEFAULT_UNIT_TYPE =Lesson.EXPLANATION
+    DEFAULT_UNIT_TYPE = Lesson.EXPLANATION
 
     def __init__(self, *args, **kwargs):
         super(EditUnitForm, self).__init__(*args, **kwargs)
