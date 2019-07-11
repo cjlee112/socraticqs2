@@ -67,3 +67,6 @@ except ImportError as e:
     print '''You must provide a settings/local.py file,
     e.g. by copying the provided local_example.py'''
     pass
+
+
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG

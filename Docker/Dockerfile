@@ -19,12 +19,8 @@ RUN groupadd courselets && useradd --create-home --home-dir /home/courselets -g 
 WORKDIR /home/courselets/app/mysite
 RUN chown -R courselets:courselets /home/courselets
 
-COPY celeryconfig.py ./
-COPY .conf /home/courselets/app/.conf
-# ADD mysite /home/courselets/app/mysite
-# ONBUILD COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-# ONBUILD COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
-# ONBUILD COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
+COPY --chown=courselets:courselets celeryconfig.py ./
+COPY --chown=courselets:courselets .conf /home/courselets/app/.conf
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

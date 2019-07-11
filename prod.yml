@@ -8,8 +8,6 @@ services:
       - ./mysite/static:/mnt/static
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"
-    # ports:
-    #   - "8080:8080"
     environment:
       NGINX_HOST: ${NGINX_HOST}
       NGINX_PORT: ${NGINX_PORT}
@@ -21,19 +19,13 @@ services:
   app:
     container_name: cr_app
     env_file: ./envs/prod.env
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.prod
-    # image: registry-gitlab.raccoongang.com/cmltawt0/socraticqs2:default
-    image: ${DOCKER_REGISTRY}:courselets
+    image: ${DOCKER_REGISTRY}/courselets
     command: ["prod"]
     volumes:
-      # - .:/app
       - ${PWD}/mysite/mysite/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
       - ${PWD}/logs:/home/courselets/app/logs
     ports:
       - "9000:9000"
-    # command: gunicorn --config ../.conf/gunicorn/gunicorn.conf -b :9000 mysite.wsgi
     restart: on-failure
     links:
       - postgres
@@ -68,15 +60,10 @@ services:
   
   celery:
     container_name: cr_celery
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.celery
-    # image: registry-gitlab.raccoongang.com/cmltawt0/socraticqs2:celery
-    image: ${DOCKER_REGISTRY}:courselets
+    image: ${DOCKER_REGISTRY}/courselets
     command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
     env_file: ./envs/prod.env
     volumes:
-      # - ./:/home/user/app/
       - ${PWD}/logs:/home/courselets/app/logs
     links:
       - rabbit

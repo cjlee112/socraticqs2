@@ -362,18 +362,6 @@ LOGGING = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/errs.log'),
-            'formatter': 'verbose'
-        },
-        'notifications': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/notifs.log'),
-            'formatter': 'verbose'
         }
     },
     'loggers': {
@@ -383,25 +371,25 @@ LOGGING = {
             'propagate': True,
         },
         'lti.views': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
         },
         'lti.outcomes': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
         },
         'celery_warn': {
             'handlers': ['console'],
             'level': 'INFO',
         },
         'core': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO'
         },
         'ct': {
-            'handlers': ['notifications'],
+            'handlers': ['console'],
             'level': 'INFO'
         },
         'ctms': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO'
         }
     }

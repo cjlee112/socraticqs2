@@ -11,4 +11,7 @@ Docker/
 **/prod.yml
 **/dev.yml
 **/local.yml
-**/rebuild_all.sh
+**/rebuild*.sh
+
+Makefile
+Changelog*.txt

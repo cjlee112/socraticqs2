@@ -3,12 +3,13 @@ services:
   local_app:
     container_name: local_cr_app
     env_file: ./envs/local.env
+    image: local/courselets:courselets-local
     build:
       context: .
-      dockerfile: Dockerfile.local
-    command: python manage.py runserver 0.0.0.0:8080 --settings=mysite.settings.docker
+      dockerfile: Docker/Dockerfile.dev
+    command: ["local"]
     volumes:
-      - .:/app
+      - ./:/home/courselets/app
     ports:
       - "8080:8080"
     links:
@@ -31,20 +32,21 @@ services:
       - "27017"
     volumes:
       - local_cr_mongo:/data/db
-  
+ 
   local_memcached:
     container_name: local_cr_memcached
     image: memcached:latest
-  
+
   local_celery:
+    environment:
+      - CELERY_BROKER_URL=amqp://guest@local_rabbit
     container_name: local_cr_celery
-    build:
-      context: .
-      dockerfile: Dockerfile.celery.local
-    volumes:
-      - .:/home/user/app/
+    # image already built as local_app service
+    image: local/courselets:courselets-local
     command: celery worker -A mysite --loglevel=INFO -B
     env_file: ./envs/local.env
+    volumes:
+      - .:/home/courselets/app/
     links:
       - local_rabbit
       - local_redis
@@ -56,13 +58,6 @@ services:
   local_redis:
     container_name: local_cr_redis
     image: redis:latest
-  
-  react:
-    build:
-      context: .
-      dockerfile: Dockerfile.node
-    volumes:
-      - .:/app
 
 volumes:
   local_cr_db:

@@ -1,7 +1,6 @@
 ARG REGISTRY=local/courselets
-ARG TAG=base-latest
-# ARG STATIC_REG=local/static
-ARG STATIC_TAG=static-latest
+ARG TAG=base-local
+ARG STATIC_TAG=static-local
 
 FROM $REGISTRY:$STATIC_TAG as static
 
@@ -10,9 +9,10 @@ FROM $REGISTRY:$TAG
 
 USER courselets
 
-ADD mysite /home/courselets/app/mysite
-COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
-COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
+ADD --chown=courselets:courselets mysite /home/courselets/app/mysite
+COPY --from=static --chown=courselets:courselets /draw_svg.js lms/static/js/draw_svg.js
+COPY --from=static --chown=courselets:courselets /draw_svg.css lms/static/css/draw_svg.css
+COPY --from=static --chown=courselets:courselets /tmp/mysite/frontend/bower_components chat/static/bower_components
+RUN touch mysite/settings/local.py
 
 CMD ["prod"]
