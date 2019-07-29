@@ -2,15 +2,14 @@ import waffle
 import json
 import logging
 import time
-
-from uuid import uuid4
+from datetime import datetime
 
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, AnonymousUser
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.views.generic.base import View, TemplateView
@@ -19,7 +18,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.db import models
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 from django.conf import settings
 from django.core.cache import cache
 from social_core.backends.utils import load_backends
@@ -38,13 +37,13 @@ from ctms.forms import (
     ErrorModelFormSet,
     CreateEditUnitAnswerForm,
     CreateUnitForm,
-    BestPracticesForm,
-    BestPractices2Form,
-    BestPracticesPdfForm
+    BestPractice1Form,
+    BestPractice2Form,
+    BestPractice1PdfForm
 )
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
-from ctms.models import Invite, BestPractices, BestPractices2
+from ctms.models import Invite, BestPractice1, BestPractice2
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
@@ -1331,36 +1330,50 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         return response
 
 
-class OnboardingBP1(Onboarding):
+class OnboardingBP1(TemplateView):
     template_name = 'ctms/onboarding_bp1.html'
-    model = BestPractices
+    model = BestPractice1
     initial_data = {
         'student_count': 200,
         'misconceptions_count': 5,
         'question_count': 24,
         'mean_percent': 72
     }
-    form = BestPracticesForm
+    form = BestPractice1Form
 
     def get_context_data(self, **kwargs):
         context = super(OnboardingBP1, self).get_context_data(**kwargs)
-        initial_data = self.model.objects.filter(user=self.request.user).values().last()
+        _id = int(time.mktime(datetime.now().timetuple()))
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            user = User.objects.get_or_create(username='anonymous' + str(_id),
+                                              first_name='Temporary User')[0]
+            temporary_group, created = Group.objects.get_or_create(name='Temporary')
+            user.groups.add(temporary_group)
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(self.request, user)
+            # Set expiry time to year in future
+            one_year = 31536000
+            self.request.session.set_expiry(one_year)
+
+        initial_data = self.model.objects.filter(user=user).values().last()
         if not initial_data:
             initial_data = self.initial_data
         form = self.form(initial=initial_data)
         context.update({
             'form': form,
-            'pdf_form': BestPracticesPdfForm,
-            'form_data':initial_data,
+            'pdf_form': BestPractice1PdfForm,
+            'form_data': initial_data,
+            'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS)
         })
         return context
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
         print(request.POST, request.FILES)
-        instance = get_object_or_404(BestPractices, user=request.user.id)
+        instance = get_object_or_404(BestPractice1, user=request.user.id)
         print(instance)
-        form = BestPracticesPdfForm(request.POST, request.FILES, instance=instance)
+        form = BestPractice1PdfForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
             return redirect('ctms:onboarding')
@@ -1372,9 +1385,8 @@ class OnboardingBP1(Onboarding):
 
 class OnboardingBP2(OnboardingBP1):
     template_name = 'ctms/onboarding_bp2.html'
-    model = BestPractices2
+    model = BestPractice2
     initial_data = {
         'percent_engaged': 25
     }
-    form = BestPractices2Form
-
+    form = BestPractice2Form

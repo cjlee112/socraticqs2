@@ -54,10 +54,27 @@
         </p>
         <input type="submit" class="btn" value="Submit">
       </form>
+      {% if user and 'anonymous' in user.username %}
+  <h4>You are in a temporary anonymous session.</h4>
+  <h4>Please confirm your email to be able to restore progress.</h4>
+  <h4>This session may expire without email confirmation.</h4>
+  <h4>Send email confirmation link one more time <a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
+  <i class="fa fa-envelope"></i>
+  re-send
+  </a>
+  <section class="auth-card__social-options">
+    {% include "psa/new_social_backends.html" %}
+  </section>
+  </h4>
+  
+  {% endif %}
       </ul>
     </div>
     </main>
   </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  {% include 'psa/modal.html' %}
+  {% include 'psa/auth.js.html' %}
 {% endblock %}
 
 {% block js %}

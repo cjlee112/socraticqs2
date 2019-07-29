@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
-from ctms.forms import BestPracticesForm, BestPractices2Form, BestPracticesPdfForm
+from ctms.forms import BestPractice1Form, BestPractice2Form, BestPractice1PdfForm
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
@@ -169,12 +169,12 @@ class OnboardingBpAnalysis(APIView):
     def post(self, request, *args, **kwargs):
         form_data = {'user': request.user.id}
         form_data.update(request.data.dict())
-        form = BestPracticesForm(form_data)
+        form = BestPractice1Form(form_data)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.estimated_blindspots=35
-            instance.estimated_blindspots_courselets=1334
-            instance.activate=True
+            instance.estimated_blindspots = 35
+            instance.estimated_blindspots_courselets = 1334
+            instance.activate = True
             instance.save()
             data = {
                 'estimated_blindspots': instance.estimated_blindspots,
@@ -192,12 +192,12 @@ class OnboardingBp2Analysis(APIView):
     def post(self, request, *args, **kwargs):
         form_data = {'user': request.user.id}
         form_data.update(request.data.dict())
-        form = BestPractices2Form(form_data)
+        form = BestPractice2Form(form_data)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.activate=True
-            instance.estimated_blindspots=35
-            instance.estimated_blindspots_courselets=1334
+            instance.activate = True
+            instance.estimated_blindspots = 35
+            instance.estimated_blindspots_courselets = 1334
             instance.save()
             data = {
                 'estimated_blindspots': instance.estimated_blindspots,

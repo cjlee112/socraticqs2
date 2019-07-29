@@ -3,9 +3,7 @@ import time
 from uuid import uuid4
 
 from django.db import models
-from django.db.models.signals import post_save
 from django.db.utils import IntegrityError
-from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -13,12 +11,11 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import FileExtensionValidator
 from django.http.response import Http404
-from django.template import loader, Context
+from django.template import loader
 
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
-from core.common import onboarding
-from core.common.utils import update_onboarding_step, create_intercom_event
+from core.common.utils import create_intercom_event
 from ct.models import Course
 
 
@@ -32,10 +29,12 @@ TYPE_CHOICES = (
     ('tester', 'tester')
 )
 
+
 def clean_email_name(email):
     email_name, domain = email.split('@', 1)
     email_name = email_name.replace('.', '')
     return email_name, domain
+
 
 class InviteQuerySet(models.QuerySet):
     def my_invites(self, request):
@@ -188,7 +187,7 @@ class Invite(models.Model):
         return "Code {}, User {}".format(self.code, self.email)
 
 
-class BestPractices(models.Model):
+class BestPractice1(models.Model):
     user = models.ForeignKey(User)
     student_count = models.IntegerField('How many students do you have in your class?')
     misconceptions_count = models.IntegerField(
@@ -208,13 +207,20 @@ class BestPractices(models.Model):
         validators=[FileExtensionValidator(['pdf'])]
     )
 
+    def __str__(self):
+        return 'BP1 for user {}'.format(self.user)
 
-class BestPractices2(models.Model):
+
+class BestPractice2(models.Model):
     user = models.ForeignKey(User)
     percent_engaged = models.IntegerField(
-        'What percent of students are fully engaged, i.e. would immediately do any optional exercises you provide, just to '
+        'What percent of students are fully engaged, '
+        'i.e. would immediately do any optional exercises you provide, just to '
         'improve their understanding?'
     )
     activate = models.BooleanField(blank=True)
     estimated_blindspots = models.IntegerField(blank=True)
     estimated_blindspots_courselets = models.IntegerField(blank=True)
+
+    def __str__(self):
+        return 'BP2 for user {}'.format(self.user)

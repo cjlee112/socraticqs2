@@ -199,7 +199,7 @@ class SideBarMiddleware(SideBarUtils):
         # urls = self._get_urls(request)
         self.request = request
         current_url = resolve(request.path_info).url_name
-        if request.path.startswith('/ctms/') and reverse('accounts:profile_update') != request.path and \
+        if 'bp' not in request.path and request.path.startswith('/ctms/') and reverse('accounts:profile_update') != request.path and \
                 request.path != reverse('ctms:email_sent') and '/ctms/invites/' not in request.path:
             # if we are going to /ctms/ namespace except of /ctms/email_sent/
             if (request.user.is_authenticated and (not getattr(request.user, 'instructor', None)

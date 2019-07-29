@@ -134,6 +134,8 @@ def union_merge(tmp_user, user):
     tmp_user.fsmstate_set.all().update(user=user)
     tmp_user.response_set.all().update(author=user)
     tmp_user.studenterror_set.all().update(author=user)
+    tmp_user.bestpractice1_set.all().update(user=user)
+    tmp_user.bestpractice2_set.all().update(user=user)
 
 
 def social_merge(tmp_user, user):
