@@ -11,6 +11,7 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.core.validators import FileExtensionValidator
 from django.http.response import Http404
 from django.template import loader, Context
 
@@ -185,3 +186,35 @@ class Invite(models.Model):
 
     def __unicode__(self):
         return "Code {}, User {}".format(self.code, self.email)
+
+
+class BestPractices(models.Model):
+    user = models.ForeignKey(User)
+    student_count = models.IntegerField('How many students do you have in your class?')
+    misconceptions_count = models.IntegerField(
+        'How many individual student misconceptions in your class did you fix today'' (or your average teaching day)?'
+    )
+    question_count = models.IntegerField(
+        'Number of question-parts in your typical exam (e.g. 8 questions with 3 parts each = 24)?'
+    )
+    mean_percent = models.IntegerField('Mean percent score on this exam?')
+    activate = models.BooleanField(blank=True)
+    estimated_blindspots = models.IntegerField(blank=True)
+    estimated_blindspots_courselets = models.IntegerField(blank=True)
+    pdf = models.FileField(
+        upload_to='best_practices/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(['pdf'])]
+    )
+
+
+class BestPractices2(models.Model):
+    user = models.ForeignKey(User)
+    percent_engaged = models.IntegerField(
+        'What percent of students are fully engaged, i.e. would immediately do any optional exercises you provide, just to '
+        'improve their understanding?'
+    )
+    activate = models.BooleanField(blank=True)
+    estimated_blindspots = models.IntegerField(blank=True)
+    estimated_blindspots_courselets = models.IntegerField(blank=True)

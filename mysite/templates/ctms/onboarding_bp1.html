@@ -1,0 +1,91 @@
+{% extends "ctms_base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Get Started
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <main class="card__content">
+    <h1>Onboarding BP1</h1>
+    <form action="" method="POST" id="bp-analysis"  {% if form_data.activate %} hidden {% endif %}>
+      <p>
+        <label for="id_student_count">How many students do you have in your class?</label>
+        {{ form.student_count }}
+        {{ form.student_count.errors }}
+        <label for="id_misconceptions_count">How many individual student misconceptions in your class did you fix today (or your average teaching day)?</label>
+        {{ form.misconceptions_count }}
+        {{ form.misconceptions_count.errors }}
+        <label for="id_question_count">Number of question-parts in your typical exam (e.g. 8 questions with 3 parts each = 24)?</label>
+        {{ form.question_count }}
+        {{ form.question_count.errors }}
+        <label for="id_mean_percent">Mean percent score on this exam?</label>
+        {{ form.mean_percent }}
+        {{ form.mean_percent.errors }}
+      </p>
+      <input type="submit" class="btn" value="Submit">
+    </form>
+    <div id='result' {% if not form_data.activate %} hidden {% endif %}>
+      <h2>Impact Analysis for Your Class</h2><br>
+
+      <ul>
+        <li>
+        <span style='font-weight: 550'>
+        Estimated student blindspots you would resolve manually, assuming students do your practice exam 7 days before the 
+        test: 7 * 5 = <span id='estimated_blindspots'>{{form_data.estimated_blindspots}}</span><br>
+        </span>
+        defining the metric: 1 student blindspot = 1 student response (to a question-part) that exposes a 
+        form.misconceptions_count.errors</li>
+
+        <li style='font-weight: 550'>Estimated student blindspots Courselets would detect, identify and help your 
+        students resolve using your practice exam: 
+        <span id='estimated_blindspots_courselets'>{{form_data.estimated_blindspots_courselets}}</span></li>
+        <li><span style='font-weight: 500'>Analysis</span>: your exam data indicate that there are far too many total 
+        student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums. 
+        To genuinely fix this number of student blindspots,you need an online platform that's actually designed to identify and 
+        resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot 
+        for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on 
+        exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.</li>
+      <form action="" method="POST" enctype="multipart/form-data">
+        <p>
+          {% csrf_token %}
+          {{ pdf_form }}
+        </p>
+        <input type="submit" class="btn" value="Submit">
+      </form>
+      </ul>
+    </div>
+    </main>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+      $(document).ready(function(){
+        $form = $('#bp-analysis');
+        $form.on('submit', function(e){
+          e.preventDefault();
+          var formData = $form.serialize();
+          $.ajax({
+            headers: {
+              "X-CSRFToken": '{{ csrf_token }}'
+            },
+            data: formData,
+            method: 'POST',
+            url: '/api/v0/bp-analysis/'
+          })
+          .done( function(response) {
+            console.log(response.data);
+            $form.hide()
+            $("#result").removeAttr('hidden');
+            $("#estimated_blindspots").text(String(response.data.estimated_blindspots))
+            $("#estimated_blindspots_courselets").text(String(response.data.estimated_blindspots_courselets))
+          })
+          .fail( function(error) {
+            alert('Something went wrong. Please refresh the page and try again.');
+          })
+        });
+      }); 
+  </script>
+{% endblock %}

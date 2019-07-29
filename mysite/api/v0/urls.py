@@ -8,7 +8,9 @@ from .views import (
     GenReportView,
     CourseReportViewSet,
     HealthCheck,
-    OnboardingStatus
+    OnboardingStatus,
+    OnboardingBpAnalysis,
+    OnboardingBp2Analysis
 )
 
 urlpatterns = [
@@ -40,4 +42,7 @@ urlpatterns = [
     url(r'^health/*$', HealthCheck.as_view(), name='health-check'),
 
     url(r'^onboarding-status/$', OnboardingStatus.as_view(), name='onboarding-status'),
+
+    url(r'^bp-analysis/$', OnboardingBpAnalysis.as_view(), name='onboarding_bp2-analysis'),
+    url(r'^bp2-analysis/$', OnboardingBp2Analysis.as_view(), name='onboarding_bp2-analysis')
 ]

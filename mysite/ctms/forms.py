@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 
 
 from ct.models import Course, Unit, Lesson, UnitLesson
-from ctms.models import Invite
+from ctms.models import Invite, BestPractices, BestPractices2
 from .fields import SvgAllowedImageField
 
 
@@ -194,3 +194,22 @@ class InviteForm(forms.ModelForm):
                 self.enroll_unit_code
             )
         return super(InviteForm, self).save(commit=commit)
+
+
+class BestPracticesForm(forms.ModelForm):
+    class Meta:
+        model = BestPractices
+        fields = ('__all__')
+
+
+class BestPracticesPdfForm(forms.ModelForm):
+    class Meta:
+        model = BestPractices
+        fields = ('pdf',)
+
+
+class BestPractices2Form(forms.ModelForm):
+
+    class Meta:
+        model = BestPractices2
+        fields = ('__all__')

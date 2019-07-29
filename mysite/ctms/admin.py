@@ -1,6 +1,10 @@
 from django.contrib import admin
 
-from ctms.models import Invite
+from ctms.models import Invite, BestPractices, BestPractices2
+
+
+admin.site.register(BestPractices)
+admin.site.register(BestPractices2)
 
 
 @admin.register(*[Invite])

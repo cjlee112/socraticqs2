@@ -1,0 +1,79 @@
+{% extends "ctms_base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Get Started
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <main class="card__content">
+    <h1>Onboarding Best Practices page 2</h1>
+    <form action="" method="POST" id="bp2-analysis">
+      <p>
+        <label for="id_percent_engaged">
+          What percent of students are fully engaged, i.e. would immediately do any optional exercises you provide, just 
+          to improve their understanding?
+        </label>
+        {{ form.percent_engaged }}
+        {{ form.percent_engaged.errors }}
+      </p>
+      <input type="submit" class="btn" value="Submit">
+    </form>
+    <div id='result' {% if not form_data.activate %} hidden {% endif %}>
+      <h2>Impact Analysis for Your Class</h2><br>
+
+      <ul>
+        <li>
+          <span style='font-weight: 550'>
+          Estimated student blindspot-engagements manually on Day 1-2 of practice exam:
+          <span id='estimated_blindspots'> 336</span><br>
+          </span>
+          defining the metric: 1 blindspot-engagement = 1 student response (to a practice question) that exposes an error. 
+          The key point is WHEN this engagement event occurs, specifically, how many days are left to help the student overcome 
+          this blindspot before the actual exam.
+        </li>
+
+        <li style='font-weight: 550'>Estimated student blindspots Courselets would detect, identify and help your 
+        students resolve using your practice exam: 
+        <span id='estimated_blindspots_courselets'>1210</span></li>
+      </ul>
+      <span style='font-weight: 500'>Analysis</span>: y your class engagement values suggest that Courselets could help to reduce
+      disparities by equalizing student engagement.
+    </div>
+    </main>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+      $(document).ready(function(){
+        $(".drop_down").hide();
+        $("#drop_down_button").click(function(){
+          $(".drop_down").slideToggle();
+        });
+        $form = $('#bp2-analysis');
+        $form.on('submit', function(e){
+          e.preventDefault();
+          var formData = $form.serialize();
+          $.ajax({
+            headers: {
+              "X-CSRFToken": '{{ csrf_token }}'
+            },
+            data: formData,
+            method: 'POST',
+            url: '/api/v0/bp2-analysis/'
+          })
+          .done( function(response) {
+            console.log(response.data);
+            $("#result").removeAttr('hidden');
+            $("#estimated_blindspots").text(String(response.data.estimated_blindspots))
+            $("#estimated_blindspots_courselets").text(String(response.data.estimated_blindspots_courselets))
+          })
+          .fail( function(error) {
+            alert('Something went wrong. Please refresh the page and try again.');
+          })
+        });
+      }); 
+  </script>
+{% endblock %}

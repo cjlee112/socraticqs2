@@ -8,7 +8,7 @@ from uuid import uuid4
 from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template.response import TemplateResponse
@@ -37,10 +37,14 @@ from ctms.forms import (
     CreateEditUnitForm,
     ErrorModelFormSet,
     CreateEditUnitAnswerForm,
-    CreateUnitForm)
+    CreateUnitForm,
+    BestPracticesForm,
+    BestPractices2Form,
+    BestPracticesPdfForm
+)
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
-from ctms.models import Invite
+from ctms.models import Invite, BestPractices, BestPractices2
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
@@ -1325,3 +1329,52 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         if not waffle.switch_is_active('ctms_onboarding_enabled'):
             return redirect('ctms:my_courses')
         return response
+
+
+class OnboardingBP1(Onboarding):
+    template_name = 'ctms/onboarding_bp1.html'
+    model = BestPractices
+    initial_data = {
+        'student_count': 200,
+        'misconceptions_count': 5,
+        'question_count': 24,
+        'mean_percent': 72
+    }
+    form = BestPracticesForm
+
+    def get_context_data(self, **kwargs):
+        context = super(OnboardingBP1, self).get_context_data(**kwargs)
+        initial_data = self.model.objects.filter(user=self.request.user).values().last()
+        if not initial_data:
+            initial_data = self.initial_data
+        form = self.form(initial=initial_data)
+        context.update({
+            'form': form,
+            'pdf_form': BestPracticesPdfForm,
+            'form_data':initial_data,
+        })
+        return context
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        print(request.POST, request.FILES)
+        instance = get_object_or_404(BestPractices, user=request.user.id)
+        print(instance)
+        form = BestPracticesPdfForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect('ctms:onboarding')
+        context.update({
+            'pdf_form': form,
+        })
+        return render(request, self.template_name, context)
+
+
+class OnboardingBP2(OnboardingBP1):
+    template_name = 'ctms/onboarding_bp2.html'
+    model = BestPractices2
+    initial_data = {
+        'percent_engaged': 25
+    }
+    form = BestPractices2Form
+
