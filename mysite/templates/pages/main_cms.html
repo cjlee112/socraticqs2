@@ -4,7 +4,7 @@
 {% load cms_tags sekizai_tags %}
 {% load static %}
 {% load staticfiles %}
-{% load intercom %}
+{% load intercom account_utils %}
 <!DOCTYPE html>
 <html lang="en" style="height: 100%;">
     <head>
@@ -68,6 +68,8 @@
     <div class="page">
       <header class="page__topbar">
         <div class="page__topbar-inner">
+          {% is_temporary user as is_temporary %}
+          {% if not is_temporary %}
           {% if user and user.is_authenticated %}
             <a class="page__account" href={% url "accounts:settings" %}>
               <img src="{% static "img/instructor/default-avatar@2x.png" %}" alt={% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %} class="avatar">
@@ -84,6 +86,7 @@
             <a class="page__account" href={% url "new_login" %}>
               <span>Sign in</span>
             </a>
+          {% endif %}
           {% endif %}
         </div>
         </header>

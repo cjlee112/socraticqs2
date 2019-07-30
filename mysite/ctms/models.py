@@ -208,7 +208,7 @@ class BestPractice1(models.Model):
     )
 
     def __str__(self):
-        return 'BP1 for user {}'.format(self.user)
+        return '{} for user {}'.format(self.__class__.__name__, self.user)
 
 
 class BestPractice2(models.Model):
@@ -223,4 +223,4 @@ class BestPractice2(models.Model):
     estimated_blindspots_courselets = models.IntegerField(blank=True)
 
     def __str__(self):
-        return 'BP2 for user {}'.format(self.user)
+        return '{} for user {}'.format(self.__class__.__name__, self.user)

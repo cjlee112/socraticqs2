@@ -1,13 +1,17 @@
 {% load staticfiles %}
-{% load waffle_tags %}
+{% load waffle_tags account_utils %}
 
 <aside class="sidebar" id="sidebar">
   <header>
+    {% is_temporary user as is_temporary %}
+    {% if not is_temporary %}
     <a href="{% url 'ctms:my_courses' %}">Courses</a>
+    {% endif %}
 
     {% comment %} <a href="https://intercom.help/courselets" target="_blank" rel="noopener noreferrer">Help Center</a> {% endcomment %}
     <a href="/help-center">Help Center</a>
 
+    {% if not is_temporary %}
     {% switch "ctms_onboarding_enabled" %}
       <a href="{% url 'ctms:onboarding' %}" class="sidebar__link-with-progress">
         Get Started
@@ -16,6 +20,7 @@
         </span>
       </a>
     {% endswitch %}
+    {% endif %}
   </header>
 
   <div class="sidebar__scroll-container">
@@ -26,7 +31,9 @@
           This sidebar will give you quick access to the content you’re currently working on.
         </p>
 
+        {% if not is_temporary %}
         <a href="{% url 'ctms:create_course' %}">Create Course</a>
+        {% endif %}
       </section>
 
     <!-- Show the course section if the user has 1 or more courses -->
