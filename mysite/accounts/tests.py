@@ -147,9 +147,7 @@ class AccountSettingsTests(TestCase):
         # We didn't change the password
         self.assertTrue(can_login)
 
-    @mock.patch('ctms.views.get_onboarding_percentage')
-    def test_post_valid_email_change(self, onboarding_percentage):
-        onboarding_percentage.return_value = 100
+    def test_post_valid_email_change(self):
         data = {'email': 'mm@mail.com', 'form_id': 'email_form'}
         response = self.client.post(self.url, data, follow=True)
         self.assertRedirects(response, reverse('ctms:email_sent'))
@@ -246,12 +244,10 @@ class ProfileUpdateTests(TestCase):
         self.assertTemplateUsed(response, 'accounts/profile_edit.html')
         self.assertFalse(Instructor.objects.all())
 
-    @mock.patch('ctms.views.get_onboarding_percentage')
-    def test_post_social_form(self, onboarding_percentage):
+    def test_post_social_form(self):
         """Test when user has no instructor it will show social form,
          after submit it - user will have instructor.
          """
-        onboarding_percentage.return_value = 100
         inst_name = 'Some Institute'
         response = self.client.post(self.url, {
             'institution': inst_name,

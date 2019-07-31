@@ -5,7 +5,7 @@ from ctms.views import (
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
-    ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2)
+    ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2, BestPracticeCourseView)
 
 urlpatterns = [
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
     url(r'^course/(?P<pk>\d+)/courselet/?$', CourseView.as_view(), name='course_view'),
     url(r'^course/(?P<pk>\d+)/settings/?$', UpdateCourseView.as_view(), name='course_settings'),
+    url(r'^course/(?P<pk>\d+)/best-practice/?$', BestPracticeCourseView.as_view(), name='course_best_practice'),
     url(r'^course/(?P<pk>\d+)/delete/?$', DeleteCourseView.as_view(), name='course_delete'),
     url(r'^onboarding/$', Onboarding.as_view(), name='onboarding'),
     url(r'^onboarding/bp1$', OnboardingBP1.as_view(), name='onboarding_bp1'),

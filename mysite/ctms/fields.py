@@ -11,7 +11,7 @@ class SvgAllowedImageField(ImageField):
     """
     Custom ImageField which allows uploading svg images
     """
-    default_validators = [FileExtensionValidator(['svg', 'jpg', 'jpeg', 'png'])]
+    default_validators = [FileExtensionValidator(['svg', 'jpg', 'jpeg', 'png', 'pdf'])]
 
     def to_python(self, data):
         f = super(ImageField, self).to_python(data)

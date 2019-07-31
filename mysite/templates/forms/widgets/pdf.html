@@ -1,0 +1,21 @@
+{% load static %}
+{% load media %}
+<div class="image-upload">
+    {% if value %}
+        <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Replace Document</button>
+
+        <div class="image-clear">
+            <label for="{{ name }}-clear_id">
+              <input id="{{ name }}-clear_id" name="{{ name }}-clear" type="checkbox">
+              Check to remove document
+          </label>
+        </div>
+        <object data="/media/{{value}}" type="application/pdf" width="400" height="600">
+          <p>Alternative text - include a link <a href="/media/{{value}}">to the PDF!</a></p>
+        </object>
+    {% else %}
+      <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Upload an Document</button>
+    {% endif %}
+
+    <input type="file" class="hidden js-upload-input" id="input-{{ id }}" data-id="{{ id }}" name="{{ name }}">
+</div>

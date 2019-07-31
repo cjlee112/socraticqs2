@@ -13,12 +13,25 @@ from .fields import SvgAllowedImageField
 class CustomFileInput(forms.ClearableFileInput):
 
     def render(self, name, value, attrs):
+        print(value)
         final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
             'name': name,
             'value': value
         }, **final_attrs)
         return render_to_string('forms/widgets/file.html', attrs)
+
+
+class CustomPdfInput(forms.ClearableFileInput):
+
+    def render(self, name, value, attrs):
+        print(value)
+        final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
+        attrs.update({
+            'name': name,
+            'value': value
+        }, **final_attrs)
+        return render_to_string('forms/widgets/pdf.html', attrs)
 
 
 class CourseForm(forms.ModelForm):
@@ -203,6 +216,8 @@ class BestPractice1Form(forms.ModelForm):
 
 
 class BestPractice1PdfForm(forms.ModelForm):
+    pdf = forms.FileField(required=False, widget=CustomPdfInput)
+
     class Meta:
         model = BestPractice1
         fields = ('pdf',)

@@ -9,7 +9,7 @@
   <div class="card">
     <main class="card__content">
     <h1>Onboarding Best Practices page 2</h1>
-    <form action="" method="POST" id="bp2-analysis">
+    <form action="" method="POST" id="bp2-analysis" {% if form_data.activate %} hidden {% endif %}>
       <p>
         <label for="id_percent_engaged">
           What percent of students are fully engaged, i.e. would immediately do any optional exercises you provide, just 
@@ -41,8 +41,22 @@
       <span style='font-weight: 500'>Analysis</span>: y your class engagement values suggest that Courselets could help to reduce
       disparities by equalizing student engagement.
     </div>
-    </main>
-  </div>
+  </main>
+</div>
+{% if user and 'anonymous' in user.username %}
+  <h4><a class="btn btn-default" name="email-required-modal_2" href="{% url "social:begin" "email" %}">
+  <i class="fa fa-envelope"></i>
+  re-send
+  </a>
+  <section class="auth-card__social-options">
+    {% include "psa/new_social_backends.html" %}
+  </section>
+  </h4>
+  
+  {% endif %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  {% include 'psa/modal.html' %}
+  {% include 'psa/auth.js.html' %}
 {% endblock %}
 
 {% block js %}

@@ -2,6 +2,7 @@ import waffle
 import json
 import logging
 import time
+from uuid import uuid4
 from datetime import datetime
 
 from django.contrib.sites.models import Site
@@ -26,7 +27,7 @@ from social_core.backends.utils import load_backends
 from accounts.models import Instructor
 
 from core.common import onboarding
-from core.common.utils import get_onboarding_steps, get_onboarding_percentage, \
+from core.common.utils import get_onboarding_steps, \
     get_onboarding_setting, get_onboarding_status_with_settings, create_intercom_event
 
 from chat.models import EnrollUnitCode
@@ -48,7 +49,7 @@ from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
 
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 
 logger = logging.getLogger(__name__)
 memoize = Memoize()
@@ -150,12 +151,13 @@ class CourseCoursletUnitMixin(View):
                     output_field=models.IntegerField()
                 )
             )
-        ) # pragma: no cover
+        )  # pragma: no cover
         for unit in courslet_units:
             unit.url = reverse(
                 'ctms:unit_edit',
                 # Commended out due to discussion in the https://github.com/cjlee112/socraticqs2/issues/755
-                # 'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION and unit.response_set.exists() else 'ctms:unit_edit',
+                # 'ctms:unit_view' if unit.lesson.kind == Lesson.ORCT_QUESTION \
+                # and unit.response_set.exists() else 'ctms:unit_edit',
                 kwargs={
                     'course_pk': courselet.course.id,
                     'courslet_pk': courselet.id,
@@ -262,6 +264,9 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
     def form_valid(self, form):
         form.instance.addedBy = self.request.user
         self.object = form.save()
+        best_practice1 = BestPractice1.objects.filter(user=self.request.user).first()
+        self.object.best_practice1 = best_practice1
+        self.object.save()
         Role.objects.create(course=self.object, role=Role.INSTRUCTOR, user=self.request.user)
         return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
 
@@ -418,10 +423,10 @@ class CoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         if request.GET.get('message'):
             message = """
             <p>
-              <b>You've completed the "Get Started" tutorial</b> <br> 
-              We hope that you feel ready to continue working on your courselet. 
-              You can edit or add new threads on this page. 
-              Remember that you can ask us anything in the chat in your lower right corner. 
+              <b>You've completed the "Get Started" tutorial</b> <br>
+              We hope that you feel ready to continue working on your courselet.
+              You can edit or add new threads on this page.
+              Remember that you can ask us anything in the chat in your lower right corner.
               Thanks again for trying out Courselets, we're excited see what you'll create!
             </p>
             """
@@ -478,6 +483,7 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
         })
         return context
 
+
 def pagination(pages, page):
         page_list = []
         page = int(page)
@@ -497,12 +503,14 @@ def pagination(pages, page):
 
         return page_list
 
+
 class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     template_name = 'ctms/unit_detail.html'
     model = UnitLesson
 
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
+
     def get_queryset(self):
         return self.model.objects.filter(addedBy=self.request.user)
 
@@ -516,7 +524,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
 
         page = self.request.GET.get('page', 1)
-        paginator = Paginator(responses, 50) #Show 50 contacts per page
+        paginator = Paginator(responses, 50)  # Show 50 contacts per page
         current_page = paginator.page(page)
         page_count = len(current_page.paginator.page_range)
         pages = pagination(page_count, page)
@@ -677,7 +685,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
 
     def get_success_url(self):
         return reverse('ctms:courselet_invite_student', kwargs={'pk': self.get_course().id,
-                                                        'courselet_pk': self.get_courslet().id})
+                       'courselet_pk': self.get_courslet().id})
 
     def get_context_data(self, **kwargs):
         context = super(CoursletSettingsView, self).get_context_data(**kwargs)
@@ -1085,7 +1093,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
             courselet = CourseUnit.objects.filter(course=course).first()
         # TODO: Cover this
         kwargs['invites'] = Invite.objects.my_invites(request=self.request).filter(
-            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True, isTest=True)) # pragma: no cover
+            enroll_unit_code=EnrollUnitCode.get_code(courselet, give_instance=True, isTest=True))  # pragma: no cover
         kwargs['invite_tester_form'] = self.form_class(
             initial={
                 'type': 'tester',
@@ -1112,7 +1120,8 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         kwargs['course'] = self.get_course()
         kwargs['instructor'] = self.request.user.instructor
         # TODO: Cover this
-        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'), give_instance=True, isTest=True) # pragma: no cover
+        kwargs['enroll_unit_code'] = EnrollUnitCode.get_code(self.kwargs.get('courselet_pk'),
+                                                             give_instance=True, isTest=True)  # pragma: no cover
         return kwargs
 
     def get_initial(self):
@@ -1156,7 +1165,8 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                     invite.status = 'joined'
                     invite.save()
                     if invite.enroll_unit_code:
-                        return redirect(reverse('chat:tester_chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                        return redirect(reverse('chat:tester_chat_enroll',
+                                                kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
                     else:
                         return redirect(reverse('lms:tester_course_view', kwargs={'course_id': invite.course.id}))
                 # TODO: It seems to be no longer needed owing to absent invites for students
@@ -1166,7 +1176,8 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                 #     invite.status = 'joined'
                 #     invite.save()
                 #     if invite.enroll_unit_code:
-                #         return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
+                #         return redirect(reverse('chat:chat_enroll',
+                #                         kwargs={'enroll_key': invite.enroll_unit_code.enrollCode}))
                 #     else:
                 #         return redirect(reverse('lms:course_view', kwargs={'course_id': invite.course.id}))
             # if user is not owned this invite
@@ -1359,10 +1370,11 @@ class OnboardingBP1(TemplateView):
         initial_data = self.model.objects.filter(user=user).values().last()
         if not initial_data:
             initial_data = self.initial_data
+        print(initial_data)
         form = self.form(initial=initial_data)
         context.update({
             'form': form,
-            'pdf_form': BestPractice1PdfForm,
+            'pdf_form': BestPractice1PdfForm(initial_data),
             'form_data': initial_data,
             'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS)
         })
@@ -1371,7 +1383,7 @@ class OnboardingBP1(TemplateView):
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
         print(request.POST, request.FILES)
-        instance = get_object_or_404(BestPractice1, user=request.user.id)
+        instance = BestPractice1.objects.filter(user=request.user.id).first()
         print(instance)
         form = BestPractice1PdfForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
@@ -1390,3 +1402,43 @@ class OnboardingBP2(OnboardingBP1):
         'percent_engaged': 25
     }
     form = BestPractice2Form
+
+
+class BestPracticeCourseView(NewLoginRequiredMixin, OnboardingBP1):
+    template_name = 'ctms/onboarding_bp1.html'
+    model = BestPractice1
+    initial_data = {
+        'student_count': 200,
+        'misconceptions_count': 5,
+        'question_count': 24,
+        'mean_percent': 72
+    }
+    form = BestPractice1Form
+
+    def get_course(self, queryset=None):
+        if 'pk' in self.kwargs:
+            course = Course.objects.filter(
+                models.Q(id=self.kwargs.get('pk')) &
+                (
+                    models.Q(addedBy=self.request.user) |
+                    models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+                )
+            ).distinct().first()
+            if not course:
+                raise Http404()
+            return course
+
+    def get_context_data(self, **kwargs):
+        context = super(OnboardingBP1, self).get_context_data(**kwargs)
+
+        initial_data = self.get_course().best_practice1.__dict__ if self.get_course().best_practice1 else None
+        if not initial_data:
+            initial_data = self.initial_data
+        form = self.form(initial=initial_data)
+        context.update({
+            'form': form,
+            'pdf_form': BestPractice1PdfForm(initial=initial_data),
+            'form_data': initial_data,
+            'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS)
+        })
+        return context

@@ -204,7 +204,7 @@ class BestPractice1(models.Model):
         upload_to='best_practices/',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(['pdf'])]
+        validators=[FileExtensionValidator(['pdf', 'jpg'])]
     )
 
     def __str__(self):

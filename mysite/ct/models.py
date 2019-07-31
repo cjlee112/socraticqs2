@@ -1489,6 +1489,7 @@ class Course(models.Model):
     FSM_flow = models.CharField(max_length=10, choices=FSM_CHOICES,
                                 default=DEFAULT_FSM)
     students_number = models.PositiveIntegerField(blank=True, null=True, default=200)
+    best_practice1 = models.ForeignKey('ctms.BestPractice1', blank=True, null=True)
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)

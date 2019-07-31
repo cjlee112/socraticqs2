@@ -180,6 +180,10 @@ class OnboardingBpAnalysis(APIView):
                 'estimated_blindspots': instance.estimated_blindspots,
                 'estimated_blindspots_courselets': instance.estimated_blindspots_courselets
             }
+            course = Course.objects.filter(id=form_data.get('course_id')).first()
+            course.best_practice1 = instance
+            print(instance)
+            course.save()
             return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
