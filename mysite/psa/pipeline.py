@@ -4,12 +4,11 @@ custom_mail_validation - > implement code obj inspect
 """
 from datetime import datetime
 import time
-import waffle
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db import IntegrityError
 from django.shortcuts import reverse, render_to_response
 
@@ -17,39 +16,13 @@ from sekizai.context import SekizaiContext
 
 from social_core.backends.utils import load_backends
 from social_core.exceptions import (InvalidEmail,
-                               AuthException,
-                               AuthAlreadyAssociated)
+                                    AuthException,
+                                    AuthAlreadyAssociated)
 from social_core.pipeline.partial import partial
 from social_django.models import UserSocialAuth
 
-from core.common.utils import get_onboarding_percentage, get_redirect_url
+from core.common.utils import get_redirect_url
 from psa.models import AnonymEmail, SecondaryEmail
-
-
-# @partial
-# def password_ask(strategy, details, user=None, is_new=False, *args, **kwargs):
-# if is_new and kwargs.get('backend').name == 'email':
-#         email = user.email or details.get('email')
-#         if strategy.request.POST.get('password'):
-#             if user.groups.filter(name='Temporary').exists():
-#                 user.username = details.get('username')
-#                 user.first_name = ''
-#             username = user.username
-#             password = strategy.request.POST.get('password')
-#             user.set_password(password)
-#             user.save()
-#             if email:
-#                 send_mail('Account is created',
-#                           'Account is created.\nUsername: {0}\nPassword: {1}'.format(username,
-#                                                                                      password),
-#                           settings.EMAIL_FROM,
-#                           [email],
-#                           fail_silently=False)
-#         else:
-#             return render_to_response('psa/require_password.html', {
-#                 'request': strategy.request,
-#                 'next': strategy.request.POST.get('next') or ''
-#             }, RequestContext(strategy.request))
 
 
 @partial
@@ -180,6 +153,8 @@ def validated_user_details(strategy, backend, details, user=None, *args, **kwarg
                 try:
                     user.username = details.get('username')
                     user.first_name = ''
+                    temporary_group, created = Group.objects.get_or_create(name='Temporary')
+                    user.groups.remove(temporary_group)
                     user.save()
                 except IntegrityError:
                     _id = int(time.mktime(datetime.now().timetuple()))
