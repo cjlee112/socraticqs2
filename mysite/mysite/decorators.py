@@ -7,7 +7,7 @@ def not_anonymous_required(function=None, redirect_field_name=REDIRECT_FIELD_NAM
     redirecting to the log-in page if necessary.
     """
     actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated() and 'anonymous' not in u.username,
+        lambda u: u.is_authenticated and 'anonymous' not in u.username,
         login_url=login_url,
         redirect_field_name=redirect_field_name
     )

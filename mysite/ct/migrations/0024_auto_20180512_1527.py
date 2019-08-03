@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import django.core.validators
 
@@ -15,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lesson',
             name='attachment',
-            field=models.FileField(null=True, upload_to=b'questions', blank=True),
+            field=models.FileField(null=True, upload_to='questions', blank=True),
         ),
         migrations.AddField(
             model_name='lesson',
@@ -40,12 +37,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lesson',
             name='sub_kind',
-            field=models.CharField(blank=True, max_length=50, null=True, choices=[(b'choices', b'Multiple Choices Question'), (b'numbers', b'Numbers'), (b'equation', b'Equation'), (b'canvas', b'Canvas')]),
+            field=models.CharField(blank=True, max_length=50, null=True, choices=[('choices', 'Multiple Choices Question'), ('numbers', 'Numbers'), ('equation', 'Equation'), ('canvas', 'Canvas')]),
         ),
         migrations.AddField(
             model_name='response',
             name='attachment',
-            field=models.FileField(null=True, upload_to=b'answers', blank=True),
+            field=models.FileField(null=True, upload_to='answers', blank=True),
         ),
         migrations.AddField(
             model_name='response',
@@ -55,21 +52,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='response',
             name='sub_kind',
-            field=models.CharField(blank=True, max_length=10, null=True, choices=[(b'choices', b'Multiple Choices response'), (b'numbers', b'Numbers response'), (b'equation', b'Equation response'), (b'canvas', b'Canvas response')]),
+            field=models.CharField(blank=True, max_length=10, null=True, choices=[('choices', 'Multiple Choices response'), ('numbers', 'Numbers response'), ('equation', 'Equation response'), ('canvas', 'Canvas response')]),
         ),
         migrations.AlterField(
             model_name='course',
             name='title',
-            field=models.CharField(max_length=200, validators=[django.core.validators.RegexValidator(regex=b'^\\s+?$', message=b'This field can not consist of only spaces', inverse_match=True)]),
+            field=models.CharField(max_length=200, validators=[django.core.validators.RegexValidator(regex='^\\s+?$', message='This field can not consist of only spaces', inverse_match=True)]),
         ),
         migrations.AlterField(
             model_name='lesson',
             name='title',
-            field=models.CharField(max_length=200, validators=[django.core.validators.RegexValidator(regex=b'^\\s+?$', message=b'This field can not consist of only spaces', inverse_match=True)]),
+            field=models.CharField(max_length=200, validators=[django.core.validators.RegexValidator(regex='^\\s+?$', message='This field can not consist of only spaces', inverse_match=True)]),
         ),
         migrations.AlterField(
             model_name='unit',
             name='title',
-            field=models.CharField(help_text=b'Your students will see this, so give your courselet a descriptive name.', max_length=200, validators=[django.core.validators.RegexValidator(regex=b'^\\s+?$', message=b'This field can not consist of only spaces', inverse_match=True)]),
+            field=models.CharField(help_text='Your students will see this, so give your courselet a descriptive name.', max_length=200, validators=[django.core.validators.RegexValidator(regex='^\\s+?$', message='This field can not consist of only spaces', inverse_match=True)]),
         ),
     ]

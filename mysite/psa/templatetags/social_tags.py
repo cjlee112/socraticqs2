@@ -74,7 +74,7 @@ def icon_name(name):
 
 @register.filter
 def social_backends(backends):
-    backends = [(name, backend) for name, backend in backends.items()
+    backends = [(name, backend) for name, backend in list(backends.items())
                 if name not in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
 
@@ -84,7 +84,7 @@ def social_backends(backends):
 
 @register.filter
 def legacy_backends(backends):
-    backends = [(name, backend) for name, backend in backends.items()
+    backends = [(name, backend) for name, backend in list(backends.items())
                 if name in ['username', 'email']]
     backends.sort(key=lambda b: b[0])
 
@@ -112,7 +112,7 @@ def legacy_backends(backends):
 def associated(context, backend):
     user = context.get('user')
     context['association'] = None
-    if user and user.is_authenticated():
+    if user and user.is_authenticated:
         try:
             context['association'] = user.social_auth.filter(
                 provider=backend.name

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import filer.fields.image
 
@@ -16,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='interestedplugin',
             name='bg_image',
-            field=filer.fields.image.FilerImageField(blank=True, to='filer.Image', null=True),
+            field=filer.fields.image.FilerImageField(blank=True, to='filer.Image', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

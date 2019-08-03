@@ -14,7 +14,7 @@ RUN apt-get -y update && \
 	libxslt1-dev \
 	make \
 	phantomjs \
-	python-dev \
+	python3-dev \
 	wget \
 	zlib1g-dev \
 	&& rm -rf /var/lib/apt/lists/*

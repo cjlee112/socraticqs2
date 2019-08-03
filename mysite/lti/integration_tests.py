@@ -3,14 +3,13 @@
 import json
 import oauth2
 from datetime import date, timedelta
-import unittest
 
 from mock import patch, Mock
 from ddt import ddt, data, unpack
 from django.utils import timezone
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from accounts.models import Profile, Instructor
 
@@ -32,35 +31,35 @@ class LTITestCase(TestCase):
         get_specs()[0].save_graph(self.user.username)
         get_specs_additional()[0].save_graph(self.user.username)
 
-        mocked_nonce = u'135685044251684026041377608307'
-        mocked_timestamp = u'1234567890'
-        mocked_decoded_signature = u'my_signature='
+        mocked_nonce = '135685044251684026041377608307'
+        mocked_timestamp = '1234567890'
+        mocked_decoded_signature = 'my_signature='
         self.headers = {
-            u'user_id': 1,
-            u'lis_person_name_full': u'Test Username',
-            u'lis_person_name_given': u'First',
-            u'lis_person_name_family': u'Second',
-            u'lis_person_contact_email_primary': u'test@test.com',
-            u'lis_person_sourcedid': u'Test_Username',
-            u'oauth_callback': u'about:blank',
-            u'launch_presentation_return_url': '',
-            u'lti_message_type': u'basic-lti-launch-request',
-            u'lti_version': 'LTI-1p0',
-            u'roles': u'Student',
-            u'context_id': 1,
-            u'tool_consumer_info_product_family_code': u'moodle',
-            u'context_title': u'Test title',
-            u'tool_consumer_instance_guid': u'test.dot.com',
+            'user_id': 1,
+            'lis_person_name_full': 'Test Username',
+            'lis_person_name_given': 'First',
+            'lis_person_name_family': 'Second',
+            'lis_person_contact_email_primary': 'test@test.com',
+            'lis_person_sourcedid': 'Test_Username',
+            'oauth_callback': 'about:blank',
+            'launch_presentation_return_url': '',
+            'lti_message_type': 'basic-lti-launch-request',
+            'lti_version': 'LTI-1p0',
+            'roles': 'Student',
+            'context_id': 1,
+            'tool_consumer_info_product_family_code': 'moodle',
+            'context_title': 'Test title',
+            'tool_consumer_instance_guid': 'test.dot.com',
 
-            u'resource_link_id': 'dfgsfhrybvrth',
-            u'lis_result_sourcedid': 'wesgaegagrreg',
+            'resource_link_id': 'dfgsfhrybvrth',
+            'lis_result_sourcedid': 'wesgaegagrreg',
 
-            u'oauth_nonce': mocked_nonce,
-            u'oauth_timestamp': mocked_timestamp,
-            u'oauth_consumer_key': u'consumer_key',
-            u'oauth_signature_method': u'HMAC-SHA1',
-            u'oauth_version': u'1.0',
-            u'oauth_signature': mocked_decoded_signature
+            'oauth_nonce': mocked_nonce,
+            'oauth_timestamp': mocked_timestamp,
+            'oauth_consumer_key': 'consumer_key',
+            'oauth_signature_method': 'HMAC-SHA1',
+            'oauth_version': '1.0',
+            'oauth_signature': mocked_decoded_signature
         }
 
         self.unit = Unit(title='Test title', addedBy=self.user)
@@ -142,8 +141,8 @@ class ParamsTest(LTITestCase):
     Test different params handling.
     """
     @unpack
-    @data((Role.INSTRUCTOR, {u'roles': u'Instructor'}),
-          (Role.ENROLLED, {u'roles': u'Learner'}))
+    @data((Role.INSTRUCTOR, {'roles': 'Instructor'}),
+          (Role.ENROLLED, {'roles': 'Learner'}))
     def test_roles(self, role, header, mocked):
         self.headers.update(header)
         mocked.return_value.is_valid_request.return_value = True
@@ -153,7 +152,7 @@ class ParamsTest(LTITestCase):
         self.assertTrue(Role.objects.filter(role=role).exists())
 
     def test_user_id(self, mocked):
-        del self.headers[u'user_id']
+        del self.headers['user_id']
         mocked.return_value.is_valid_request.return_value = True
         response = self.client.post('/lti/',
                                     data=self.headers,
@@ -161,7 +160,7 @@ class ParamsTest(LTITestCase):
         self.assertTemplateUsed(response, template_name='lti/error.html')
 
     def test_roles_none(self, mocked):
-        del self.headers[u'roles']
+        del self.headers['roles']
         mocked.return_value.is_valid_request.return_value = True
         self.client.post('/lti/', data=self.headers, follow=True)
         self.assertTrue(Role.objects.filter(role=Role.ENROLLED).exists())
@@ -190,22 +189,22 @@ class ParamsTest(LTITestCase):
         )
 
         # Create new Django user
-        self.headers[u'user_id'] = 2
-        self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
+        self.headers['user_id'] = 2
+        self.headers['lis_person_contact_email_primary'] = 'new_email@mail.com'
         self.client.post('/lti/', data=self.headers, follow=True)
         self.assertNotEqual(self.user, UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
+            uid=self.headers['lis_person_contact_email_primary']
         ).user)
         first_user = UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
+            uid=self.headers['lis_person_contact_email_primary']
         ).user
 
         # Create another Django user
-        self.headers[u'user_id'] = 3
-        self.headers[u'lis_person_contact_email_primary'] = 'new_email_2@mail.com'
+        self.headers['user_id'] = 3
+        self.headers['lis_person_contact_email_primary'] = 'new_email_2@mail.com'
         self.client.post('/lti/', data=self.headers, follow=True)
         self.assertNotEqual(first_user, UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
+            uid=self.headers['lis_person_contact_email_primary']
         ).user)
 
     @patch('lti.models.hash_lti_user_data')
@@ -216,18 +215,18 @@ class ParamsTest(LTITestCase):
         mocked.return_value.is_valid_request.return_value = True
         hashvalue = 'somehashvalue'
         hash_lti_user_data.return_value = hashvalue
-        self.headers[u'user_id'] = 2
-        self.headers[u'lis_person_contact_email_primary'] = 'new_email@mail.com'
-        self.headers[u'lis_person_name_full'] = u'きつね'
+        self.headers['user_id'] = 2
+        self.headers['lis_person_contact_email_primary'] = 'new_email@mail.com'
+        self.headers['lis_person_name_full'] = 'きつね'
         self.client.post('/lti/', data=self.headers, follow=True)
         new_user = UserSocialAuth.objects.get(
-            uid=self.headers[u'lis_person_contact_email_primary']
+            uid=self.headers['lis_person_contact_email_primary']
         ).user
         self.assertNotEqual(self.user, new_user)
         self.assertEqual(new_user.username, hashvalue)
 
     def test_lti_user_no_email(self, mocked):
-        del self.headers[u'lis_person_contact_email_primary']
+        del self.headers['lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
         self.client.post('/lti/',
                          data=self.headers,
@@ -246,8 +245,8 @@ class ParamsTest(LTITestCase):
         """
         test_random_username = 'c'*32
 
-        del self.headers[u'lis_person_name_full']
-        del self.headers[u'lis_person_contact_email_primary']
+        del self.headers['lis_person_name_full']
+        del self.headers['lis_person_contact_email_primary']
         mocked.return_value.is_valid_request.return_value = True
         hash_lti_user_data.return_value = test_random_username[:30]
 
@@ -272,7 +271,7 @@ class ParamsTest(LTITestCase):
         """
         social = UserSocialAuth(
             user=self.user,
-            uid=self.headers[u'lis_person_contact_email_primary'],
+            uid=self.headers['lis_person_contact_email_primary'],
             provider='email'
         )
         social.save()
@@ -393,7 +392,7 @@ class TestCourseRef(LTITestCase):
         request = Mock()
         request.session = {}
         res = create_courseref(request)
-        self.assertEqual(res.content, 'Only LTI allowed')
+        self.assertEqual(res.content, b'Only LTI allowed')
 
     @unpack
     @data(('1', 'ct:course'), ('1111', 'ct:edit_course'))
@@ -448,8 +447,8 @@ class TestUnit(LTITestCase):
         self.assertRedirects(response, '{}?next={}'.format(reverse('accounts:profile_update'), _next))
     
     @unpack
-    @data((Role.INSTRUCTOR, {u'roles': u'Instructor'}),
-          (Role.ENROLLED, {u'roles': u'Learner'}))
+    @data((Role.INSTRUCTOR, {'roles': 'Instructor'}),
+          (Role.ENROLLED, {'roles': 'Learner'}))
     def test_instructor_enabled_w_instructor_profile_unit_view(self, mocked, switch):
         """
         Checks redirect to the new Instructor UI on courselet detail page.
@@ -492,7 +491,6 @@ class AcceptanceTests(LTITestCase):
         """
         Checking that expired consumer will not be used.
         """
-        self.lti_consumer.expiration_date = date.today() - timedelta(days=1)
         response = self.client.post('/lti/', data=self.headers, follow=True)
         self.assertTemplateUsed(response, 'lti/error.html')
 
@@ -501,9 +499,13 @@ class AcceptanceTests(LTITestCase):
         """
         Test that user w/ short_term flag will be treated correctly.
         """
-        self.lti_consumer.expiration_date = date.today() + timedelta(days=1)
         self.headers['custom_short_term'] = 'true'
-        response = self.client.post('/lti/', data=self.headers, follow=True)
+        lti_consumer_mock = Mock()
+        lti_consumer_mock.expiration_date = date.today() + timedelta(days=1)
+        first_mock = Mock()
+        first_mock.first.return_value = lti_consumer_mock
+        mocked_consumer.return_value = first_mock
+        self.client.post('/lti/', data=self.headers, follow=True)
         mocked_consumer.assert_called_once_with(
             consumer_key=self.headers['oauth_consumer_key']
         )
@@ -513,8 +515,10 @@ class AcceptanceTests(LTITestCase):
         """
         Typical LTi request (w/o short_term flag) will be treated w/ get_or_combine.
         """
-        self.lti_consumer.expiration_date = date.today() + timedelta(days=1)
-        response = self.client.post('/lti/', data=self.headers, follow=True)
+        lti_consumer_mock = Mock()
+        lti_consumer_mock.expiration_date = date.today() + timedelta(days=1)
+        mocked_consumer.return_value = lti_consumer_mock
+        self.client.post('/lti/', data=self.headers, follow=True)
         mocked_consumer.assert_called_once_with(
             self.headers['tool_consumer_instance_guid'],
             self.headers['oauth_consumer_key'],

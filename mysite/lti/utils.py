@@ -1,5 +1,3 @@
-import string
-import random
 import hashlib
 from uuid import uuid4
 from functools import wraps
@@ -54,8 +52,8 @@ def key_secret_generator():
     """
     Generate a key/secret for LtiConsumer.
     """
-    hash = hashlib.sha1(uuid4().hex)
-    hash.update(settings.SECRET_KEY)
+    hash = hashlib.sha1(bytes(uuid4().hex, 'latin-1'))
+    hash.update(bytes(settings.SECRET_KEY, 'latin-1'))
     return hash.hexdigest()[::2]
 
 
@@ -64,9 +62,9 @@ def hash_lti_user_data(user_id, tool_consumer_instance_guid, lis_person_sourcedi
     Create unique ID for Django user based on TC user.
     """
     h = hashlib.new('ripemd160')
-    h.update(user_id)
-    h.update(tool_consumer_instance_guid)
-    h.update(lis_person_sourcedid)
+    h.update(user_id.encode('utf-8'))
+    h.update(tool_consumer_instance_guid.encode('utf-8'))
+    h.update(lis_person_sourcedid.encode('utf-8'))
 
     # Return 30 chars Django 1.8
     return h.hexdigest()[:30]

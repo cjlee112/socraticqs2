@@ -1,7 +1,7 @@
 import os
 import random
 from collections import namedtuple
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 
 import pytest
 from django.conf import settings
@@ -50,7 +50,7 @@ def fsm(user):
 @pytest.fixture
 def fsm_state(user, fsm, course, unit, unit_lesson_canvas):
     request_data = {'session': {}, 'user': user}
-    request = namedtuple('Request', request_data.keys())(*request_data.values())
+    request = namedtuple('Request', list(request_data.keys()))(*list(request_data.values()))
     stateData = {
         'course': course,
         'unit': unit,
@@ -94,8 +94,8 @@ def temp_image():
     media_dir = settings.MEDIA_ROOT
     if not os.path.exists(media_dir):
         os.makedirs(media_dir)
-    temp = TemporaryFile(suffix='.jpeg', dir=media_dir)
-    temp.write(base64_gif_image())
+    temp = NamedTemporaryFile(suffix='.jpeg', dir=media_dir)
+    temp.write(bytes(base64_gif_image(), 'utf-8'))
     yield File(temp)
 
 

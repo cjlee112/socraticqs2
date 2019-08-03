@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
-from ctms.forms import BestPractice1Form, BestPractice2Form, BestPractice1PdfForm
+from ctms.forms import BestPractice1Form, BestPractice2Form
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
@@ -137,10 +137,10 @@ class OnboardingStatus(APIView):
         steps_to_update = request.data.copy()
         user_id = steps_to_update.pop('user_id', None) or request.user.id
         to_update = {
-            k: bool(v) for k, v in steps_to_update.items() if k in get_onboarding_steps()
+            k: bool(v) for k, v in list(steps_to_update.items()) if k in get_onboarding_steps()
         }
         if to_update and request.user.id:
-            projection = {k: 1 for k, v in to_update.items()}
+            projection = {k: 1 for k, v in list(to_update.items())}
             projection['_id'] = 0
             passed_steps = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, projection) or {}
             for step in to_update:

@@ -3,17 +3,10 @@ from pytz.exceptions import UnknownTimeZoneError
 from accounts.models import Profile
 from mysite.celery import app
 
-import re
-import os
-import sys
 import json
 import uuid
-import StringIO
-from datetime import datetime
-from collections import defaultdict
+from io import StringIO
 
-import unicodecsv as csv
-from pandas import DataFrame
 from django.conf import settings
 from django.core.files import File
 from django.contrib.auth.models import User
@@ -40,8 +33,8 @@ def report(course_id, user_id):
         user_resps = ul_resps.setdefault(obj.author, [])
         user_resps.append(obj)
 
-    for _, user_resps in lesson_responses.items():
-        for _, respss in user_resps.items():
+    for _, user_resps in list(lesson_responses.items()):
+        for _, respss in list(user_resps.items()):
             if respss:
                 last_resps.append(sorted(respss, key=lambda o: o.atime)[0])
 

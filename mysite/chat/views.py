@@ -12,7 +12,7 @@ from django.views.generic import View
 from django.http import Http404
 from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User

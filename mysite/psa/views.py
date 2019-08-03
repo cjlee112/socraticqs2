@@ -7,7 +7,7 @@ from django.http.response import HttpResponseRedirect
 from django.http.response import Http404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse, resolve
+from django.urls import reverse, resolve
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_complete
@@ -45,17 +45,17 @@ def validation_sent(request):
     user = request.user
     social_list = []
     email = request.session.get('email_validation_address')
-    if user and user.is_anonymous():
+    if user and user.is_anonymous:
         by_secondary = [i.provider.provider for i in
                         SecondaryEmail.objects.filter(email=email)
-                        if not i.provider.provider == u'email']
+                        if not i.provider.provider == 'email']
         social_list.extend(by_secondary)
 
         users_by_email = User.objects.filter(email=email)
         for user_by_email in users_by_email:
             by_primary = [i.provider for i in
                           user_by_email.social_auth.all()
-                          if not i.provider == u'email' and
+                          if not i.provider == 'email' and
                           not SecondaryEmail.objects.filter(
                               ~Q(email=email), provider=i, user=user_by_email
                           ).exists()]
@@ -76,7 +76,7 @@ def custom_login(request, template_name='psa/custom_login.html', login_form_cls=
     # Anyway we need checking this before defining next_page
 
     next_page = request.POST.get('next') or request.GET.get('next')
-    if request.user.is_authenticated() and not request.user.is_anonymous():
+    if request.user.is_authenticated and not request.user.is_anonymous:
         return redirect(next_page or get_redirect_url(request.user))
     u_hash_sess = request.session.get('u_hash')
     # logout(request)
@@ -141,7 +141,7 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
             request.session['cc_id'] = cc.id
     # remove u_hash from session
     request.session.pop('u_hash', None)
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         Profile.check_tz(request)
     return response
 
@@ -154,7 +154,7 @@ def signup(request):
     u_hash = request.POST.get('u_hash')
     u_hash_sess = request.session.get('u_hash')
     next_page = request.POST.get('next') or request.GET.get('next')
-    if request.user.is_authenticated() and not request.user.is_anonymous():
+    if request.user.is_authenticated and not request.user.is_anonymous:
         return redirect(next_page or get_redirect_url(request.user))
     if u_hash and u_hash == u_hash_sess:
         # if we have u_hash and it's equal with u_hash from session
@@ -220,7 +220,7 @@ def set_pass(request):
     """
     changed = False
     user = request.user
-    if user.is_authenticated():
+    if user.is_authenticated:
         if request.POST:
             password = request.POST['pass']
             confirm = request.POST['confirm']
@@ -236,7 +236,7 @@ def set_pass(request):
 
 def social_auth_complete(request, *args, **kwargs):
     response = social_complete(request, *args, **kwargs)
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         Profile.check_tz(request)
     return response
 
@@ -264,12 +264,12 @@ def complete(request, *args, **kwargs):
     if form.is_valid() or 'verification_code' in request.GET:
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
-            if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated():
+            if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated:
                 Profile.check_tz(request)
             return resp
         except AuthMissingParameter:
             messages.error(request, 'Email already verified.')
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 Profile.check_tz(request)
             return redirect('ctms:my_courses')
     else:
@@ -278,7 +278,7 @@ def complete(request, *args, **kwargs):
             "{} - {}".format(
                 k.capitalize(), ", ".join(i.lower() for i in v)
             )
-            for k, v in form.errors.items()
+            for k, v in list(form.errors.items())
         ])
         messages.error(
             request,

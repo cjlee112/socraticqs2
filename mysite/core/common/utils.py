@@ -101,7 +101,8 @@ def get_onboarding_percentage(user_id):
         if status:
             steps = [status.get(key, False) for key in get_onboarding_steps()]
             return round(
-                len(filter(lambda x: x, steps)) / float(len(steps)) * 100,
+                # TODO rewrite it to len([x for x in steps if x]) / float(len(steps)) * 100, ?
+                len(list([x for x in steps if x])) / float(len(steps)) * 100,
                 0
             )
     return 0

@@ -22,7 +22,7 @@ def store_errors(q, concept, parentUL, conceptIDdict=None):
             ulID = conceptIDdict.get(mapID, None)
             if ulID is None:
                 saveMapping = True
-                print 'WARNING: %s not found in conceptIDdict; treating as new error model' % mapID
+                print(('WARNING: %s not found in conceptIDdict; treating as new error model' % mapID))
             else:
                 if isinstance(ulID, int): # just add existing EM to this question
                     ul = UnitLesson.objects.get(pk=ulID)
@@ -142,9 +142,9 @@ def store_question(q, course, unit, genericErrors, genericIndex,
     for r in q.get('responses', ()):
         store_response(r, course, unitLesson, errorModels, genericErrors,
                        genericIndex)
-    print 'saved %s: %d error models, %d responses' \
+    print(('saved %s: %d error models, %d responses' \
       % (unitLesson.lesson.title, len(errorModels),
-         len(q.get('responses', ())))
+         len(q.get('responses', ())))))
     return unitLesson
 
 def index_generic_errors(unit):
@@ -216,7 +216,7 @@ class PhraseIndex(object):
         if not counts:
             raise KeyError
         l = []
-        for i, c in counts.items(): # compute match fractions
+        for i, c in list(counts.items()): # compute match fractions
             l.append((c / float(self.sizes[i]), i))
         l.sort()
         return l[-1][1] # return id with highest match fraction

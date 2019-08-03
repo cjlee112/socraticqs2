@@ -159,7 +159,7 @@ class BaseTask(Task):
         try:
             handlers[self.engine].__call__(self, suffix)
         except KeyError:
-            print('Error: Unknown engine `%s`' % self.engine)
+            print(('Error: Unknown engine `%s`' % self.engine))
 
     def postgres(fn):
         """
@@ -238,16 +238,16 @@ class BaseTask(Task):
                        self.backup_path, suffix),
                     capture=True)
                 if not x.stderr or 'FATAL' not in x.stderr:
-                    print 'Bakup is ok'
+                    print('Bakup is ok')
                 else:
-                    print(x.stderr)
-                    print 'An error has occurred while backup'
+                    print((x.stderr))
+                    print('An error has occurred while backup')
                 local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
                                                                                 self.db_cfg['USER'],
                                                                                 self.db_cfg['HOST'],
                                                                                 self.db_cfg['PORT']))
             else:
-                print(log.stderr)
+                print((log.stderr))
                 print('An error has occurred while backup')
 
     def backup_db_sqlite(self, suffix, *args, **kwargs):
@@ -308,17 +308,17 @@ class BaseTask(Task):
                                                                                    self.db_cfg['USER'],
                                                                                    self.db_cfg['HOST'],
                                                                                    self.db_cfg['PORT']))
-                    print 'Restore is ok'
+                    print('Restore is ok')
                 else:
-                    print(log.stderr)
+                    print((log.stderr))
                     print('An error has occured.')
                     local('dropdb %s_temp --username=%s --host=%s --port=%s -w ' % (self.db_cfg['NAME'],
                                                                                     self.db_cfg['USER'],
                                                                                     self.db_cfg['HOST'],
                                                                                     self.db_cfg['PORT']))
             else:
-                print(x.stderr)
-                print 'An error has occurred'
+                print((x.stderr))
+                print('An error has occurred')
 
     def restore_db_sqlite(self, suffix, *args, **kwargs):
         """
@@ -338,7 +338,7 @@ class BaseTask(Task):
 
     @staticmethod
     def list_backups(engine):
-        print('='*32)
+        print(('='*32))
         print('There is no requested backup file.')
         backups = local('ls backups', capture=True).split()
         print('Below you can find available backup files:')

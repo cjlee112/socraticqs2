@@ -1,8 +1,8 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from ct.models import Unit, Concept, Lesson, UnitLesson, Course, CourseUnit, Role
 from ct.tests.integrate import OurTestCase
@@ -54,7 +54,7 @@ class FunctionTests(OurTestCase):
         """
         Check wikipedia view and concept addition method.
         """
-        url = '/ct/teach/courses/1/units/%d/concepts/wikipedia/%s/' % (self.unit.pk, urllib.quote('New York City'))
+        url = '/ct/teach/courses/1/units/%d/concepts/wikipedia/%s/' % (self.unit.pk, urllib.parse.quote('New York City'))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'City of New York')

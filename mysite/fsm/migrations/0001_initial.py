@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import django.utils.timezone
 from django.conf import settings
@@ -19,8 +16,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('nodeName', models.CharField(max_length=64)),
-                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time created')),
-                ('endTime', models.DateTimeField(null=True, verbose_name=b'time ended')),
+                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time created')),
+                ('endTime', models.DateTimeField(null=True, verbose_name='time ended')),
                 ('exitEvent', models.CharField(max_length=64)),
             ],
             options={
@@ -32,9 +29,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('fsmName', models.CharField(max_length=64)),
-                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time created')),
-                ('endTime', models.DateTimeField(null=True, verbose_name=b'time ended')),
-                ('course', models.ForeignKey(to='ct.Course', null=True)),
+                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time created')),
+                ('endTime', models.DateTimeField(null=True, verbose_name='time ended')),
+                ('course', models.ForeignKey(to='ct.Course', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -51,8 +48,8 @@ class Migration(migrations.Migration):
                 ('hideTabs', models.BooleanField(default=False)),
                 ('hideLinks', models.BooleanField(default=False)),
                 ('hideNav', models.BooleanField(default=False)),
-                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time submitted')),
-                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time submitted')),
+                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -68,8 +65,8 @@ class Migration(migrations.Migration):
                 ('help', models.TextField(null=True)),
                 ('showOption', models.BooleanField(default=False)),
                 ('data', models.TextField(null=True)),
-                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time submitted')),
-                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time submitted')),
+                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -80,7 +77,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('group', models.CharField(max_length=64)),
-                ('fsm', models.ForeignKey(to='fsm.FSM')),
+                ('fsm', models.ForeignKey(to='fsm.FSM', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -96,11 +93,11 @@ class Migration(migrations.Migration):
                 ('help', models.TextField(null=True)),
                 ('path', models.CharField(max_length=200, null=True)),
                 ('data', models.TextField(null=True)),
-                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time submitted')),
+                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time submitted')),
                 ('funcName', models.CharField(max_length=200, null=True)),
                 ('doLogging', models.BooleanField(default=False)),
-                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('fsm', models.ForeignKey(to='fsm.FSM')),
+                ('addedBy', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('fsm', models.ForeignKey(to='fsm.FSM', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -117,14 +114,14 @@ class Migration(migrations.Migration):
                 ('hideLinks', models.BooleanField(default=False)),
                 ('hideNav', models.BooleanField(default=False)),
                 ('isLiveSession', models.BooleanField(default=False)),
-                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time started')),
-                ('activity', models.ForeignKey(to='fsm.ActivityLog', null=True)),
-                ('activityEvent', models.ForeignKey(to='fsm.ActivityEvent', null=True)),
-                ('fsmNode', models.ForeignKey(to='fsm.FSMNode')),
-                ('linkState', models.ForeignKey(related_name='linkChildren', to='fsm.FSMState', null=True)),
-                ('parentState', models.ForeignKey(related_name='children', to='fsm.FSMState', null=True)),
-                ('unitLesson', models.ForeignKey(to='ct.UnitLesson', null=True)),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('atime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time started')),
+                ('activity', models.ForeignKey(to='fsm.ActivityLog', null=True, on_delete=models.CASCADE)),
+                ('activityEvent', models.ForeignKey(to='fsm.ActivityEvent', null=True, on_delete=models.CASCADE)),
+                ('fsmNode', models.ForeignKey(to='fsm.FSMNode', on_delete=models.CASCADE)),
+                ('linkState', models.ForeignKey(related_name='linkChildren', to='fsm.FSMState', null=True, on_delete=models.CASCADE)),
+                ('parentState', models.ForeignKey(related_name='children', to='fsm.FSMState', null=True, on_delete=models.CASCADE)),
+                ('unitLesson', models.ForeignKey(to='ct.UnitLesson', null=True, on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -133,37 +130,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fsmedge',
             name='fromNode',
-            field=models.ForeignKey(related_name='outgoing', to='fsm.FSMNode'),
+            field=models.ForeignKey(related_name='outgoing', to='fsm.FSMNode', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fsmedge',
             name='toNode',
-            field=models.ForeignKey(related_name='incoming', to='fsm.FSMNode'),
+            field=models.ForeignKey(related_name='incoming', to='fsm.FSMNode', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fsm',
             name='startNode',
-            field=models.ForeignKey(related_name='+', to='fsm.FSMNode', null=True),
+            field=models.ForeignKey(related_name='+', to='fsm.FSMNode', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='activityevent',
             name='activity',
-            field=models.ForeignKey(to='fsm.ActivityLog'),
+            field=models.ForeignKey(to='fsm.ActivityLog', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='activityevent',
             name='unitLesson',
-            field=models.ForeignKey(to='ct.UnitLesson', null=True),
+            field=models.ForeignKey(to='ct.UnitLesson', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='activityevent',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

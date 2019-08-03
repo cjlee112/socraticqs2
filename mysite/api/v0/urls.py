@@ -13,6 +13,8 @@ from .views import (
     OnboardingBp2Analysis
 )
 
+app_name = 'v0'
+
 urlpatterns = [
     url(
         r'^courses/(?P<course_id>\d+)/responses/$',

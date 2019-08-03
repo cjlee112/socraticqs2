@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import InterestedForm
+from .models import InterestedForm
 
 
 class InterestedFormAdmin(admin.ModelAdmin):

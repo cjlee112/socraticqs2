@@ -1,17 +1,18 @@
 import re
-from django.db import models
 from collections import OrderedDict
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, resolve, NoReverseMatch
 from django.conf import settings
-from django.core.urlresolvers import resolve
-from django.http import HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponseRedirect
 
-from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response
+from ct.models import Course, CourseUnit, UnitLesson, Response
 from ctms.urls import urlpatterns as ctms_urls
 from .views import CourseCoursletUnitMixin
 
 # course, courslet, unit
-MODEL_ORDER_TUPLE = (('course_pk', Course), ('courslet_pk', CourseUnit), ('unit_pk', UnitLesson), ('response_pk', Response))
+MODEL_ORDER_TUPLE = (('course_pk', Course),
+                     ('courslet_pk', CourseUnit),
+                     ('unit_pk', UnitLesson),
+                     ('response_pk', Response))
 MODELS_ORDERED_DICT = OrderedDict(MODEL_ORDER_TUPLE)
 
 MODEL_NAMES_MAPPING = {
@@ -76,8 +77,8 @@ class SideBarUtils(object):
         '''
         model_ids = dict()
         last_pk = None
-        _, default_model = MODELS_ORDERED_DICT.items()[0]
-        for kw, model in MODELS_ORDERED_DICT.items():
+        _, default_model = list(MODELS_ORDERED_DICT.items())[0]
+        for kw, model in list(MODELS_ORDERED_DICT.items()):
             if kw in kwargs:
                 last_pk = kw
                 model_ids[MODELS_ORDERED_DICT[kw]] = kwargs[kw]
@@ -86,7 +87,7 @@ class SideBarUtils(object):
                 model_ids[default_model] = kwargs['pk']
             else:
                 model_ids[
-                    MODELS_ORDERED_DICT.items()[MODELS_ORDERED_DICT.keys().index(last_pk) + 1][1]
+                    list(MODELS_ORDERED_DICT.items())[list(MODELS_ORDERED_DICT.keys()).index(last_pk) + 1][1]
                 ] = kwargs['pk']
         return model_ids
 
@@ -97,9 +98,9 @@ class SideBarUtils(object):
         :param model_ids: dict returned from _get_model_ids
         :return:
         '''
-        for model, pk in model_ids.items():
+        for model, pk in list(model_ids.items()):
             filter_data = {'id': pk}
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 filter_data.update(get_model_filter(model, {'addedBy': self.request.user}))
             yield (MODEL_NAMES_MAPPING[model], model.objects.filter(**filter_data).first())
 
@@ -178,10 +179,10 @@ class SideBarUtils(object):
 
     def _translate_kwargs(self, request, kwargs_list):
         last_pk = None
-        _, default_model = MODELS_ORDERED_DICT.items()[0]
+        _, default_model = list(MODELS_ORDERED_DICT.items())[0]
         result_kwargs = {}
 
-        for kw, model in MODELS_ORDERED_DICT.items():
+        for kw, model in list(MODELS_ORDERED_DICT.items()):
             if kw in kwargs_list:
                 result_kwargs[kw] = self._get_model_from_request(request, model)
                 last_pk = kw
@@ -189,7 +190,7 @@ class SideBarUtils(object):
             if last_pk is None:
                 result_kwargs['pk'] = self._get_model_from_request(request, default_model)
             else:
-                next_model = MODELS_ORDERED_DICT.items()[MODELS_ORDERED_DICT.keys().index(last_pk) + 1]
+                next_model = list(MODELS_ORDERED_DICT.items())[list(MODELS_ORDERED_DICT.keys()).index(last_pk) + 1]
                 result_kwargs['pk'] = self._get_model_from_request(request, next_model[1])
         return result_kwargs
 
@@ -216,7 +217,7 @@ class SideBarMiddleware(SideBarUtils):
             # attach object id's to session
             old_obj_ids = request.session.get('sidebar_object_ids', {})
             obj_ids = {}
-            for name, cls in NAME_MODEL_MAPPING.items():
+            for name, cls in list(NAME_MODEL_MAPPING.items()):
                 old_id = old_obj_ids.get(cls.__name__)
                 new_id = model_ids.get(cls)
                 if old_id and new_id:
@@ -236,17 +237,17 @@ class SideBarMiddleware(SideBarUtils):
         current_url = resolve(request.path_info).url_name
         self.course_mixin.request = request
         sidebar_context = {}
-        my_courses = self.course_mixin.get_my_courses() if request.user.is_authenticated() else Course.objects.none()
+        my_courses = self.course_mixin.get_my_courses() if request.user.is_authenticated else Course.objects.none()
         sidebar_context['user_courses'] = my_courses
         if 'ctms' in request.path and not request.session.get('sidebar_object_ids', {}):
-            for model, name in MODEL_NAMES_MAPPING.items():
+            for model, name in list(MODEL_NAMES_MAPPING.items()):
                 sidebar_context[name] = getattr(request, name, None)
             # urls = self._get_urls(request)
             # sidebar_context['urls'] = urls
         elif request.session.get('sidebar_object_ids'):
             objects = dict(self._get_objects({
                 model: request.session.get('sidebar_object_ids', {}).get(name)
-                for name, model in NAME_MODEL_MAPPING.items()
+                for name, model in list(NAME_MODEL_MAPPING.items())
             }))
             sidebar_context.update(objects)
 

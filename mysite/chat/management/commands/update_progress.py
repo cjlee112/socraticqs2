@@ -1,3 +1,5 @@
+from functools import reduce
+
 from django.core.management.base import BaseCommand
 
 from chat.serializers import LessonSerializer
@@ -29,7 +31,7 @@ class Command(BaseCommand):
             lessons_dict = LessonSerializer(many=True).to_representation(lessons)
 
             if lessons_dict and chat.state:
-                done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], lessons_dict))
+                done = reduce(lambda x, y: x+y, [x['isDone'] for x in lessons_dict])
                 progress = round(float(done)/len(lessons_dict), 2)
             else:
                 # if no lessons passed yet - return 1

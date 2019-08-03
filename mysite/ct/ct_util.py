@@ -1,7 +1,7 @@
 import hashlib
 from functools import wraps
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import cache
 from django.utils.encoding import force_bytes
 from django.utils.http import urlquote
@@ -79,7 +79,7 @@ reverseArgLists = {
 def reverse_path_args(target, path, **kwargs):
     'robustly generate desired URL, automatically applying the right IDs'
     pathKwargs = get_path_kwargs(path) # extract IDs from path
-    for k,v in kwargs.items():
+    for k,v in list(kwargs.items()):
         if k.endswith('_id'): # use supplied IDs as is
             pathKwargs[k] = v
         elif k in nameIDs: # supply kwargs object IDs too
@@ -99,7 +99,7 @@ def cache_this(fn):
     def wrapped(*args, **kwargs):
         sub_keys = list(args)
         sub_keys.append(kwargs)
-        key = ':'.join(urlquote(arg) for arg in sub_keys)
+        key = ':'.join(urlquote(arg.__str__().encode('utf-8')) for arg in sub_keys)
         cache_key = CACHE_KEY_TEMPLATE % (fn.__name__, hashlib.md5(force_bytes(key)).hexdigest())
         result = cache.get(cache_key)
 

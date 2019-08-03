@@ -10,4 +10,4 @@ class CourseletsConfig(AppConfig):
     verbose_name = 'ct'
 
     def ready(self):
-        import signals  # noqa
+        from . import signals  # noqa

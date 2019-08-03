@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -20,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='lesson',
             name='kind',
-            field=models.CharField(default=b'base', max_length=50, choices=[(b'base', b'brief definition and explanation'), (b'explanation', b'long explanation'), (b'orct', b'Open Response Concept Test question'), (b'mcct', b'Concept Inventory Test question'), (b'exercise', b'exercise'), (b'project', b'project'), (b'practice', b'practice exam question'), (b'answer', b'answer'), (b'errmod', b'error model'), (b'data', b'data'), (b'case', b'Case Study'), (b'e-pedia', b'Encyclopedia'), (b'faq', b'frequently asked question'), (b'forum', b'forum')]),
+            field=models.CharField(default='base', max_length=50, choices=[('base', 'brief definition and explanation'), ('explanation', 'long explanation'), ('orct', 'Open Response Concept Test question'), ('mcct', 'Concept Inventory Test question'), ('exercise', 'exercise'), ('project', 'project'), ('practice', 'practice exam question'), ('answer', 'answer'), ('errmod', 'error model'), ('data', 'data'), ('case', 'Case Study'), ('e-pedia', 'Encyclopedia'), ('faq', 'frequently asked question'), ('forum', 'forum')]),
             preserve_default=True,
         ),
         migrations.AlterField(

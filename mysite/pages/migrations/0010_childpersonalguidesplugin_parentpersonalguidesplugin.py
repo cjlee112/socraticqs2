@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import filer.fields.image
 import djangocms_text_ckeditor.fields
@@ -18,10 +15,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ChildPersonalGuidesPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('title', models.CharField(max_length=70, blank=True)),
                 ('description', djangocms_text_ckeditor.fields.HTMLField()),
-                ('image', filer.fields.image.FilerImageField(related_name='personal_guides_image', to='filer.Image')),
+                ('image', filer.fields.image.FilerImageField(related_name='personal_guides_image', to='filer.Image', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -31,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ParentPersonalGuidesPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('title', models.CharField(max_length=70, blank=True)),
             ],
             options={

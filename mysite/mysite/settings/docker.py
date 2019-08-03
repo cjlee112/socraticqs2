@@ -1,7 +1,7 @@
 # coding: utf-8
 import sys
 
-from base import *
+from .base import *
 
 
 SECRET_KEY = 'm*n5u7jgkbp2b5f&*hp#o+e1e33s^6&730wlpb#-g536l^4es-'
@@ -61,11 +61,11 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 try:
-    from mysite.settings.local import *
+    from .local import *
 except ImportError as e:
-    print e
-    print '''You must provide a settings/local.py file,
-    e.g. by copying the provided local_example.py'''
+    print(e)
+    print('''You must provide a settings/local.py file,
+    e.g. by copying the provided local_example.py''')
     pass
 
 

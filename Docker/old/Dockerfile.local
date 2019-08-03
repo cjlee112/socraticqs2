@@ -12,7 +12,6 @@ RUN apt-get -y update && \
     libpq-dev \
     libxml2-dev \
     libxslt1-dev \
-    python-dev \
     zlib1g-dev \
     phantomjs \
     && rm -rf /var/lib/apt/lists/*

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -15,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DetailsChildPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('title', models.CharField(max_length=70, blank=True)),
             ],
             options={
@@ -26,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DetailsQuotePlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('quote_text', models.CharField(max_length=70)),
                 ('quote_small', models.CharField(max_length=70)),
             ],
@@ -38,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DetailsVideoPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('video_url', models.URLField()),
                 ('description', models.CharField(max_length=70)),
             ],

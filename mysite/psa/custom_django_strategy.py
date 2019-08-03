@@ -96,7 +96,7 @@ class CustomDjangoStrategy(DjangoStrategy):
                 code, field,
                 f_val
             )
-        if user and user.is_authenticated():
+        if user and user.is_authenticated:
             code.force_update = force_update
             code.user_id = user.id
         code.save()

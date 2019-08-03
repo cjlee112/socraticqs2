@@ -148,7 +148,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'djangocms_admin_style',
-    'djangocms_column',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -273,6 +272,7 @@ PASSWORDLESS = True
 
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = 'psa.mail.send_validation'
 SOCIAL_AUTH_EMAIL_VALIDATION_URL = '/ctms/email_sent/'
+NEW_USER_REDIRECT_URL = '/ctms/'
 
 SOCIAL_AUTH_STRATEGY = 'psa.custom_django_strategy.CustomDjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'psa.custom_django_storage.CustomDjangoStorage'

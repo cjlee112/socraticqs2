@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 from django.conf import settings
 
@@ -31,12 +28,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='gradedlaunch',
             name='outcome_service',
-            field=models.ForeignKey(to='lti.OutcomeService'),
+            field=models.ForeignKey(to='lti.OutcomeService', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='gradedlaunch',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='gradedlaunch',

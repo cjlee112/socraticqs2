@@ -1,7 +1,7 @@
 """
 Misc utils for ctms application.
 """
-from __future__ import unicode_literals
+ 
 
 import hashlib
 

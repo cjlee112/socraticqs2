@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import mock
 from ddt import ddt, unpack, data
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
 
@@ -111,7 +110,7 @@ class AccountSettingsTests(TestCase):
                 'form_id': 'password_form'
             },
             'errors': {
-                'current_password': u'Provided current password doesn\'t match your password',
+                'current_password': 'Provided current password doesn\'t match your password',
             },
         },
         {
@@ -122,8 +121,8 @@ class AccountSettingsTests(TestCase):
                 'form_id': 'password_form'
             },
             'errors': {
-                'password': u'Should be equal to confirm password field.',
-                'confirm_password': u'Should be equal to password field.',
+                'password': 'Should be equal to confirm password field.',
+                'confirm_password': 'Should be equal to password field.',
                 '__all__': 'Password and Confirm password fields doesn\'t match.'
             }
         }
@@ -138,7 +137,7 @@ class AccountSettingsTests(TestCase):
         response = self.client.post(self.url, data, follow=True)
         self.assertEqual(response.status_code, 200)
         if errors:
-            for field, error in errors.items():
+            for field, error in list(errors.items()):
                 self.assertIn(
                     error,
                     response.context['password_form'].errors.get(field, [])
@@ -264,8 +263,8 @@ class PasswordResetTest(TestCase):
 
     @unpack
     @data(
-        ('username','email@mail.com', '123', u'Иван', u'Иванов'),
-        (u'ИванИванов','email@mail.com', '123', 'first_name', 'last_name')
+        ('username', 'email@mail.com', '123', 'Ілона', 'Кожуренко'),
+        ('ІлонаКожуренко', 'email@mail.com', '123', 'first_name', 'last_name')
     )
     def test_password_reset(self, username, email, password, first_name, last_name):
         with mock.patch('django_ses.SESBackend.send_messages') as mock_send_message:

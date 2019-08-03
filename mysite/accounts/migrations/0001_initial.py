@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 from django.conf import settings
 
@@ -21,7 +18,7 @@ class Migration(migrations.Migration):
                 ('job', models.CharField(max_length=100)),
                 ('icon_url', models.URLField()),
                 ('page_url', models.URLField()),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

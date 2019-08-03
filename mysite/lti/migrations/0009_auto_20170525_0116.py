@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -14,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='outcomeservice',
             name='lti_consumer',
-            field=models.ForeignKey(default=1, to='lti.LtiConsumer'),
+            field=models.ForeignKey(default=1, to='lti.LtiConsumer', on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AlterUniqueTogether(

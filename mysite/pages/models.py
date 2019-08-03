@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.db import models
 from djangocms_text_ckeditor import fields
 from cms.models.pluginmodel import CMSPlugin
@@ -84,7 +83,7 @@ class ChildPersonalGuidesPlugin(AbstractPlugin):
     """
     Plugin for personal guides block.
     """
-    image = FilerImageField(related_name="personal_guides_image")
+    image = FilerImageField(related_name="personal_guides_image", on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField()
 
@@ -102,7 +101,7 @@ class ProofPlugin(AbstractPlugin):
     """
     Plugin for proof.
     """
-    proof_icon = FilerImageField(related_name="proof_icon", blank=True, null=True)
+    proof_icon = FilerImageField(related_name="proof_icon", blank=True, null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField()
 
@@ -146,7 +145,7 @@ class BenefitsItemPlugin(AbstractPlugin):
     """
     title = models.CharField(max_length=200, blank=True)
     description = fields.HTMLField(blank=True)
-    image = FilerImageField(null=True, blank=True)
+    image = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
 
 
 class BenefitsPlugin(AbstractPlugin):
@@ -205,7 +204,7 @@ class InterestedPlugin(AbstractPlugin):
     email_to = models.EmailField(default='dummy@mail.com')
 
     btn_text = models.CharField(max_length=70, default='Schedule to demo')
-    bg_image = FilerImageField(null=True, blank=True)
+    bg_image = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
 
 
 class InterestedForm(models.Model):

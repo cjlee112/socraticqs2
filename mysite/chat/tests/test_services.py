@@ -11,7 +11,7 @@ def test_live_chat_fsm_handler(unit, chat, user, fsm, fsm_state, mocker):
     assert chat.state is None
 
     request_data = {'session': {}, 'user': user}
-    request = namedtuple('Request', request_data.keys())(*request_data.values())
+    request = namedtuple('Request', list(request_data.keys()))(*list(request_data.values()))
     handler = FsmHandler()
 
     next_point = handler.start_point(unit, chat, request)

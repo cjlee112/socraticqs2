@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from models import InterestedForm
+from .models import InterestedForm
 from accounts.models import Instructor
 
 

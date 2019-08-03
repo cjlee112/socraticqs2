@@ -54,6 +54,6 @@ class Command(BaseCommand):
             if enroll_unit_code_exists:
                 update_onboarding_step(onboarding.STEP_6, instructor.user_id)
 
-            print("Instructor {} passed onboarding at {}%".format(
+            print(("Instructor {} passed onboarding at {}%".format(
                 instructor.user.username, get_onboarding_percentage(instructor.user.id))
-            )
+            ))

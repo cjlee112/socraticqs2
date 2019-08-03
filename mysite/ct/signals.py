@@ -42,7 +42,7 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
         # Define if it's a milestone question (either first, middle, or last)
         milestone = None
         questions = unit_lesson.unit.all_orct()
-        i = map(lambda _: _[0], questions.values_list('id')).index(unit_lesson_id)
+        i = [_[0] for _ in questions.values_list('id')].index(unit_lesson_id)
         if i == 0:
             milestone = "first"
         elif i == len(questions) - 1:
@@ -94,7 +94,7 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
                         "unit_lesson_id": unit_lesson_id,
                         "courselet_pk": unit_lesson.unit.id if unit_lesson.unit else None
                     }  # pragma: no cover
-                    log.info(u"""Courselet notification with data:
+                    log.info("""Courselet notification with data:
                         Course title - {course_title},
                         Lesson title - {lesson_title},
                         Students number - {students_number},

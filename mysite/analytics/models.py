@@ -33,8 +33,8 @@ class CourseReport(models.Model):
     """
     Handles Course reports.
     """
-    addedBy = models.ForeignKey(User, blank=True, null=True)
+    addedBy = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     response_report = models.FileField(upload_to=UploadTo('reports/responses'), blank=True, null=True)
     error_report = models.FileField(upload_to=UploadTo('reports/errors/'), blank=True, null=True)

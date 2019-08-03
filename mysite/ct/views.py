@@ -1,5 +1,5 @@
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime
 from collections import OrderedDict
 from django.contrib import messages
@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.contrib.auth import logout, login
@@ -177,7 +177,7 @@ class PageData(object):
     'generic holder for page UI elements such as tabs'
     def __init__(self, request, **kwargs):
         self.fsmStack = FSMStack(request)
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self, k, v)
         try:
             self.statusMessage = request.session['statusMessage']
@@ -473,7 +473,7 @@ def clone_course(request, course_id):
                 'with_students': False,
                 'asis': False,
             }
-            for f, v in default_opts.items():
+            for f, v in list(default_opts.items()):
                 if f == form.cleaned_data['copy_options']:
                     default_opts[f] = True
             default_opts.update(form.cleaned_data)
@@ -671,7 +671,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                         reverse_path_args(
                             'ct:wikipedia_concept',
                             request.path,
-                            source_id=urllib.quote(t[0].encode('utf-8'), '')
+                            source_id=urllib.parse.quote(t[0].encode('utf-8'), '')
                         ),
                         None
                     )
@@ -722,7 +722,7 @@ class ConceptLinkTable(object):
         self.data = []
         for cl in data:
             self.append(cl)
-        for k,v in kwargs.items():
+        for k,v in list(kwargs.items()):
             setattr(self, k, v)
     def append(self, cl):
         self.data.append((cl, self.formClass(instance=cl)))
@@ -747,7 +747,7 @@ def unit_concepts(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
-    unitConcepts = unit.get_related_concepts().items()
+    unitConcepts = list(unit.get_related_concepts().items())
     r = _concepts(request, pageData,
     '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', unitConcepts=unitConcepts,
@@ -1103,7 +1103,7 @@ def unit_resources(request, course_id, unit_id):
     unit = get_object_or_404(Unit, pk=unit_id)
     lessonTable = list(unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=True))
-    lessonTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
+    lessonTable.sort(key=lambda x: x.lesson.title)
     return unit_lessons(request, course_id, unit_id, lessonTable,
                         'Resources', msg='', showReorderForm=False, allowSearch=False)
 
@@ -1114,10 +1114,10 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
     opt = None
     unit = get_object_or_404(Unit, pk=unit_id)
     try:
-        sourceID = urllib.unquote(source_id).encode('iso-8859-1').decode('utf-8')
+        sourceID = urllib.parse.unquote(source_id).encode('iso-8859-1').decode('utf-8')
     except UnicodeEncodeError:
         # TODO refactor this part - need to separate search and add actions
-        sourceID = urllib.unquote(source_id).encode('utf-8').decode('utf-8')
+        sourceID = urllib.parse.unquote(source_id).encode('utf-8').decode('utf-8')
     pageData = PageData(request, title=unit.title,
                         navTabs=unit_tabs(request.path, 'Concepts'))
     addForm = push_button(request, 'add', 'Add to this courselet')
@@ -1135,7 +1135,7 @@ def wikipedia_concept(request, course_id, unit_id, source_id):
     except CommonDisambiguationError as e:
         lesson = None
         opt = [(s, reverse_path_args('ct:wikipedia_concept', request.path,
-                      source_id=urllib.unquote(s.replace('"', '').encode('utf-8')))) for s in e.options]
+                      source_id=urllib.parse.unquote(s.replace('"', '')))) for s in e.options]
 
 
     return pageData.render(request, 'ct/wikipedia.html',
@@ -1553,7 +1553,7 @@ def unit_resources_student(request, course_id, unit_id):
     lessonTable = list(unit.unitlesson_set \
             .filter(kind=UnitLesson.COMPONENT, order__isnull=True,
                     lesson__concept__isnull=True)) # exclude concepts
-    lessonTable.sort(lambda x,y:cmp(x.lesson.title, y.lesson.title))
+    lessonTable.sort(key=lambda x: x.lesson.title)
     return unit_lessons_student(request, course_id, unit_id, lessonTable,
                                 'Resources')
 
@@ -1569,8 +1569,7 @@ def unit_concepts_student(request, course_id, unit_id):
     l2 = list(unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT,
         lesson__concept__isnull=False))
     conceptTable = distinct_subset(l1 + l2)
-    conceptTable.sort(lambda x,y:cmp(x.lesson.concept.title,
-                                     y.lesson.concept.title))
+    conceptTable.sort(key=lambda x: x.lesson.concept.title)
     return pageData.render(request, 'ct/concepts_student.html',
                            dict(conceptTable=conceptTable))
 
@@ -1627,7 +1626,7 @@ def ul_tasks_student(request, course_id, unit_id, ul_id):
         for se in StudentError.get_ul_errors(ul,
                 response__author=request.user).exclude(status=DONE_STATUS):
             d[se.errorModel] = se
-        errorTable = d.values()
+        errorTable = list(d.values())
     else:
         pageData.isQuestion = errorTable = False
     return pageData.render(request, 'ct/lesson_tasks.html',
@@ -1752,7 +1751,7 @@ def save_response(form, ul, user, course_id, **kwargs):
     r.unitLesson = ul
     r.course = course
     r.author = user
-    for k,v in kwargs.items():
+    for k,v in list(kwargs.items()):
         setattr(r, k, v)
     r.save()
     return r

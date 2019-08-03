@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -15,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FAQItemPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('question', models.TextField(blank=True)),
                 ('answer', models.TextField(blank=True)),
             ],
@@ -27,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FAQPlugin',
             fields=[
-                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin')),
+                ('cmsplugin_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='cms.CMSPlugin', on_delete=models.CASCADE)),
                 ('title', models.CharField(max_length=70, blank=True)),
             ],
             options={

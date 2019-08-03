@@ -10,7 +10,7 @@ def copy_model_instance(inst, **kwargs):
     n_inst = copy(inst)
     n_inst.id = None
     if kwargs:
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             setattr(n_inst, k, v)
     n_inst.save()
     return n_inst
@@ -47,6 +47,6 @@ class Command(BaseCommand):
         if course:
             new_course = course.deep_clone(**options)
             print('Done')
-            print('New Course id is {0}'.format(new_course.id))
+            print(('New Course id is {0}'.format(new_course.id)))
         else:
             print('There is no Course w/ such id')

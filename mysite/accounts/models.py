@@ -19,7 +19,7 @@ class Profile(models.Model):
      - `user` - one to one rel to User model
      - `timezone` - offset from UTC-0
     """
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     timezone = models.CharField(max_length=255, blank=True, null=True, choices=ALL_TIMEZONES_CHOICES)
 
     @staticmethod
@@ -76,7 +76,7 @@ class Instructor(models.Model):
     page_url = models.URLField(blank=True)
     what_do_you_teach = models.CharField(max_length=100, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.user.username if not (self.user.last_name or self.user.first_name) else self.user.get_full_name()
 
 

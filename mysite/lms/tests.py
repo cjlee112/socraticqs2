@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 from mock import patch, Mock
 
@@ -116,7 +116,7 @@ class TestCourseView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'lms/course_page.html')
         self.assertIn('livesessions', response.context)
-        self.assertNotEquals(response.context['livesessions'], [])
+        self.assertNotEqual(response.context['livesessions'], [])
         self.assertEqual(response.context['livesessions'][0].get_formatted_time_spent(), '1 day, 1:00:00')
 
 
@@ -289,7 +289,7 @@ class TestCourseletViewHistoryTab(TestCase):
         next_url = json_content['input']['url']
 
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEqual(len(json_content['addMessages']), 2)
 
         # emulate chat finished - set state to None
 
@@ -304,6 +304,6 @@ class TestCourseletViewHistoryTab(TestCase):
         json_content = json.loads(response.content)
 
         self.assertIsNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 4)
+        self.assertEqual(len(json_content['addMessages']), 4)
 
 

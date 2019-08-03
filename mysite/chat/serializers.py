@@ -1,8 +1,9 @@
 
 import logging
 import injections
+from functools import reduce, cmp_to_key
 from rest_framework import serializers
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from .models import Message, Chat
 from .services import ProgressHandler
@@ -43,7 +44,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     def get_initials(self, obj):
         if not obj.userMessage:
             if obj.chat.instructor.first_name and obj.chat.instructor.last_name:
-                return u'{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0]).upper()
+                return '{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0]).upper()
             else:
                 return  # Myabe need to add here something like "PR" (professor)?
         return 'me'
@@ -349,7 +350,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
             except:
                 pass
         if self.lessons_dict and obj.state:
-            done = reduce(lambda x, y: x+y, map(lambda x: x['isDone'], self.lessons_dict))
+            done = reduce(lambda x, y: x+y, [x['isDone'] for x in self.lessons_dict])
             progress = round(float(done)/len(self.lessons_dict), 2)
         else:
             # if no lessons passed yet - return 1
@@ -513,7 +514,7 @@ class ChatResourcesSerializer(serializers.ModelSerializer):
         lessons = list(
             unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)
         )
-        lessons.sort(lambda x, y: cmp(x.lesson.title, y.lesson.title))
+        lessons.sort(key=lambda x: x.lesson.title)
         messages = obj.message_set.filter(
             contenttype='unitlesson', is_additional=True, student_error__isnull=True
         )

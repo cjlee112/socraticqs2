@@ -9,7 +9,7 @@ from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.http.response import Http404, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User, Group, AnonymousUser
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -1154,9 +1154,9 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
 
     def get(self, *args, **kwargs):
         invite = get_object_or_404(Invite, code=self.kwargs['code'])
-        if self.request.user.is_authenticated() and invite.email != self.request.user.email:
+        if self.request.user.is_authenticated and invite.email != self.request.user.email:
             logout(self.request)
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if invite.user and invite.user == self.request.user or invite.email == self.request.user.email:
                 # if user is a person for whom this invite
                 if invite.type == 'tester':
@@ -1265,8 +1265,8 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
         if not ids:
             return JsonResponse({'ok': 0, 'err': 'empty'})
 
-        order = range(len(ids))
-        id_order = dict(zip(ids, order))
+        order = list(range(len(ids)))
+        id_order = dict(list(zip(ids, order)))
         # check that all ids are unique
         if len(set(ids)) != len(ids):
             raise JsonResponse({'ok': 0, 'err': 'not uniq'})
@@ -1276,7 +1276,7 @@ class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
 
         old_ids = units.values_list('id', flat=True)
         old_order = units.values_list('order', flat=True)
-        old_id_order = dict(zip(old_ids, old_order))
+        old_id_order = dict(list(zip(old_ids, old_order)))
 
         # check that all provided ids are correct
         for _id in ids:
@@ -1367,7 +1367,7 @@ class OnboardingBP1(TemplateView):
             one_year = 31536000
             self.request.session.set_expiry(one_year)
 
-        initial_data = self.model.objects.filter(user=user).values().last()
+        initial_data = list(self.model.objects.filter(user=user).values()).last()
         if not initial_data:
             initial_data = self.initial_data
         print(initial_data)
@@ -1382,7 +1382,7 @@ class OnboardingBP1(TemplateView):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
-        print(request.POST, request.FILES)
+        print((request.POST, request.FILES))
         instance = BestPractice1.objects.filter(user=request.user.id).first()
         print(instance)
         form = BestPractice1PdfForm(request.POST, request.FILES, instance=instance)

@@ -2,7 +2,7 @@ import datetime
 import re
 
 import pytest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 
 from chat.models import EnrollUnitCode
@@ -84,7 +84,7 @@ def test_chat(chat, message, course_unit, fsm_state):
 
 @pytest.mark.django_db
 def test_message(message, unit_lesson, chat):
-    assert unicode(message) is not None
+    assert str(message) is not None
 
     assert message.content == unit_lesson
 

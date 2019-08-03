@@ -1,4 +1,5 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
+from django.urls import path
 
 from ct.views import *
 
@@ -29,7 +30,7 @@ urlpatterns = [
         edit_unit, name='edit_unit'),
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/answers/$',
         unit_answers, name='unit_answers'),
-    url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/concepts/wikipedia/(?P<source_id>[^/]+)/$',
+    path('teach/courses/<int:course_id>/units/<int:unit_id>/concepts/wikipedia/<source_id>/',
         wikipedia_concept, name='wikipedia_concept'),
     # lesson tabs
     url(r'^teach/courses/(?P<course_id>\d+)/units/(?P<unit_id>\d+)/lessons/(?P<ul_id>\d+)/$',

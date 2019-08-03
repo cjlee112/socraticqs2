@@ -12,7 +12,7 @@ from .fields import SvgAllowedImageField
 
 class CustomFileInput(forms.ClearableFileInput):
 
-    def render(self, name, value, attrs):
+    def render(self, name, value, attrs=None, renderer=None):
         print(value)
         final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
@@ -24,7 +24,7 @@ class CustomFileInput(forms.ClearableFileInput):
 
 class CustomPdfInput(forms.ClearableFileInput):
 
-    def render(self, name, value, attrs):
+    def render(self, name, value, attrs=None, renderer=None):
         print(value)
         final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
@@ -152,6 +152,7 @@ class BaseErrorModelFormSet(BaseModelFormSet):
             auto_id=self.auto_id,
             prefix=self.add_prefix('__prefix__'),
             empty_permitted=True,
+            use_required_attribute=False,
             **self.get_form_kwargs(None)
         )
         form.fields.pop('attachment')

@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+ 
 
 import json
 import re
@@ -78,7 +78,7 @@ class JSONBlobMixin(object):
         Get json representation of dict of db objects.
         """
         data = {}
-        for key, value in state_data.items():
+        for key, value in list(state_data.items()):
             if value.__class__.__name__ in KLASS_NAME_DICT:  # save db object id
                 name, pk = self.dump_json_id(value, key)
                 data[name] = pk
@@ -119,7 +119,7 @@ class JSONBlobMixin(object):
         """
         data = json.loads(state_data)
         obj_dict = {}
-        for key, value in data.items():
+        for key, value in list(data.items()):
             if key.endswith('_id'):  # retrieve db object
                 name, obj = self.load_json_id(key, value)
                 obj_dict[name] = obj
@@ -1202,7 +1202,7 @@ class ChatMixin(object):
                 faqs = c_faq_data().find_one(
                     {"chat_id": chat.id, "ul_id": ul_id}).get('faqs', {})
                 faq_id = None
-                for key, value in faqs.items():
+                for key, value in list(faqs.items()):
                     if not value.get('status').get('done', False):
                         faq_id = key
                         break

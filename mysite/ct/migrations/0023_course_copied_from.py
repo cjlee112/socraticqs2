@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -14,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='course',
             name='copied_from',
-            field=models.ForeignKey(blank=True, to='ct.Course', null=True),
+            field=models.ForeignKey(blank=True, to='ct.Course', null=True, on_delete=models.CASCADE),
         ),
     ]

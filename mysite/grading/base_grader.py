@@ -13,11 +13,10 @@ class KnowChildrenMeta(type):
         return kls
 
 
-class BaseGrader(object):
+class BaseGrader(object, metaclass=KnowChildrenMeta):
     """
     Base grader class.
     """
-    __metaclass__ = KnowChildrenMeta
 
     def __init__(self, unitlesson, response, *args, **kwargs):
         self.unitlesson = unitlesson

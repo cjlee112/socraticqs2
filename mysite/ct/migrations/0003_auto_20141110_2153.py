@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -14,6 +11,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='conceptlink',
             name='relationship',
-            field=models.CharField(default=b'defines', max_length=10, choices=[(b'is', b'Represents (unique ID for)'), (b'defines', b'Defines'), (b'informal', b'Intuitive statement of'), (b'formaldef', b'Formal definition for'), (b'tests', b'Tests understanding of'), (b'derives', b'Derives'), (b'proves', b'Proves'), (b'assumes', b'Assumes'), (b'motiv', b'Motivates'), (b'illust', b'Illustrates'), (b'intro', b'Introduces'), (b'comment', b'Comments on'), (b'warns', b'Warning about')]),
+            field=models.CharField(default='defines', max_length=10, choices=[('is', 'Represents (unique ID for)'), ('defines', 'Defines'), ('informal', 'Intuitive statement of'), ('formaldef', 'Formal definition for'), ('tests', 'Tests understanding of'), ('derives', 'Derives'), ('proves', 'Proves'), ('assumes', 'Assumes'), ('motiv', 'Motivates'), ('illust', 'Illustrates'), ('intro', 'Introduces'), ('comment', 'Comments on'), ('warns', 'Warning about')]),
         ),
     ]

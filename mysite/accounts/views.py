@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import password_reset, password_reset_done
-from django.core.urlresolvers import reverse
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView
+from django.urls import reverse
 from django.http.response import HttpResponseRedirect, Http404
 from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
@@ -79,7 +79,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                 data.pop(data.index('form_id'))
             return data
 
-        for form_id, form_cls in form_name.items():
+        for form_id, form_cls in list(form_name.items()):
             if form_id in request.POST.getlist('form_id'):
                 form = form_cls(data=request.POST)
                 changed_data = get_form_changed_data(form)
@@ -95,7 +95,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
                         save()
                 elif changed_data:
                     has_errors = True
-                    non_field_errors_list.append(unicode(form.non_field_errors()))
+                    non_field_errors_list.append(str(form.non_field_errors()))
                 kwargs[form_id] = form
             else:
                 kwargs[form_id] = form_cls()
@@ -105,7 +105,7 @@ class AccountSettingsView(NotAnonymousRequiredMixin, TemplateView):
         if not has_errors:
             return HttpResponseRedirect(reverse('accounts:settings'))
         else:
-            msg = u"Please correct errors below: <br> {}".format(u"<br>".join(non_field_errors_list))
+            msg = "Please correct errors below: <br> {}".format("<br>".join(non_field_errors_list))
             messages.add_message(request, messages.WARNING, mark_safe(msg))
         return self.render_to_response(
             kwargs
@@ -190,17 +190,15 @@ def custom_password_reset(request,
                           current_app=None,
                           extra_context=None,
                           html_email_template_name=None):
-    response = password_reset(request,
-                              template_name=template_name,
-                              email_template_name=email_template_name,
-                              subject_template_name=subject_template_name,
-                              password_reset_form=password_reset_form,
-                              token_generator=token_generator,
-                              post_reset_redirect=post_reset_redirect,
-                              from_email=from_email,
-                              current_app=current_app,
-                              extra_context=extra_context,
-                              html_email_template_name=html_email_template_name)
+    response = PasswordResetView.as_view(template_name=template_name,
+                                         email_template_name=email_template_name,
+                                         subject_template_name=subject_template_name,
+                                         form_class=password_reset_form,
+                                         token_generator=token_generator,
+                                         success_url=reverse(post_reset_redirect),
+                                         from_email=from_email,
+                                         extra_context=extra_context,
+                                         html_email_template_name=html_email_template_name)(request)
     if request.method == 'POST' and isinstance(response, HttpResponseRedirect):
         request.session['anonym_user_email'] = request.POST.get('email')
     return response
@@ -213,9 +211,8 @@ def custom_password_reset_done(request,
         extra_context.update({'anonym_user_email': request.session.get('anonym_user_email')})
     else:
         extra_context = {'anonym_user_email': request.session.get('anonym_user_email')}
-    return password_reset_done(request,
-                               template_name=template_name,
-                               current_app=current_app, extra_context=extra_context)
+    return PasswordResetDoneView.as_view(
+        template_name=template_name, extra_context=extra_context)(request)
 
 
 def resend_email_confirmation_link(request):
@@ -226,7 +223,7 @@ def resend_email_confirmation_link(request):
     if session_email != email:
         raise Http404()
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         logout(request)
         request.session['resend_user_email'] = session_email
         request.session['cc_id'] = cc_id

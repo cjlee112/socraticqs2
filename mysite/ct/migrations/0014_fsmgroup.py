@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -16,7 +13,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('group', models.CharField(max_length=64)),
-                ('fsm', models.ForeignKey(to='ct.FSM')),
+                ('fsm', models.ForeignKey(to='ct.FSM', on_delete=models.CASCADE)),
             ],
             options={
             },

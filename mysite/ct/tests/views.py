@@ -268,7 +268,7 @@ class MiscTests(TestCase):
             :return:
             """
             return re.search(
-                r"^\s*<(?P<table>table .* id=\"needHelpResponses\").*style=\"(?P<style>.*display: none.*)\">$",
+                rb"^\s*<(?P<table>table .* id=\"needHelpResponses\").*style=\"(?P<style>.*display: none.*)\">$",
                 content,
                 re.MULTILINE
             )
@@ -343,7 +343,7 @@ class MiscTests(TestCase):
         grouped = f.groupdict()
         self.assertIn('table', grouped)
         self.assertIn('style', grouped,)
-        self.assertIn('display: none;', grouped['style'])
+        self.assertIn(b'display: none;', grouped['style'])
 
 
 class PageDataTests(TestCase):
@@ -416,10 +416,10 @@ class BaseViewsTests(TestCase):
         self.user = User.objects.create_user(username='test', password='test')
         self.client.login(username='test', password='test')
         response = self.client.get(reverse('ct:person_profile', kwargs={'user_id': self.user.id}))
-        self.assertAlmostEquals(response.status_code, 200)
+        self.assertAlmostEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/person.html')
-        self.assertIn('You username is', response.content)
-        self.assertIn('User profile page', response.content)
+        self.assertIn(b'You username is', response.content)
+        self.assertIn(b'User profile page', response.content)
         self.assertEqual(LogoutForm.call_count, 1)
 
     @patch('ct.views.LogoutForm')
@@ -428,10 +428,10 @@ class BaseViewsTests(TestCase):
         self.user2 = User.objects.create_user(username='test2', password='test2')
         self.client.login(username='test2', password='test2')
         response = self.client.get(reverse('ct:person_profile', kwargs={'user_id': self.user.id}))
-        self.assertAlmostEquals(response.status_code, 200)
+        self.assertAlmostEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/person.html')
-        self.assertNotIn('You username is', response.content)
-        self.assertIn('User profile page', response.content)
+        self.assertNotIn(b'You username is', response.content)
+        self.assertIn(b'User profile page', response.content)
         self.assertEqual(LogoutForm.call_count, 0)
 
     @patch('ct.views.LogoutForm')
@@ -449,7 +449,7 @@ class BaseViewsTests(TestCase):
     def test_about(self):
         response = self.client.get(reverse('ct:about'))
         self.assertTemplateUsed(response, 'ct/about.html')
-        self.assertIn('About Courselets.org', response.content)
+        self.assertIn(b'About Courselets.org', response.content)
 
 
 class CourseViewTest(TestCase):
@@ -480,7 +480,7 @@ class CourseViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/course.html')
         self.assertRedirects(response, reverse('ct:course_student', kwargs={'course_id': self.course.id}))
-        self.assertIn(self.course.title, response.content)
+        self.assertIn(bytes(self.course.title, 'utf-8'), response.content)
 
     def test_course_view_teacher_get(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -492,7 +492,7 @@ class CourseViewTest(TestCase):
         response = self.client.get(reverse('ct:course', kwargs={'course_id': self.course.id}), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/course.html')
-        self.assertIn(self.course.title, response.content)
+        self.assertIn(bytes(self.course.title, 'utf-8'), response.content)
 
     def test_course_view_post_new_courselet(self):
         self.user = User.objects.create_user(username='test', password='test')
@@ -506,7 +506,7 @@ class CourseViewTest(TestCase):
             {'title': 'test_unit_title'},
             follow=True)
         self.assertTemplateUsed(response, 'ct/unit_tasks.html')
-        self.assertIn('test_unit_title', response.content)
+        self.assertIn(b'test_unit_title', response.content)
 
     @patch('ct.views.Course.reorder_course_unit')
     def test_course_view_post_reorder(self, reorder_course_unit):
@@ -554,7 +554,7 @@ class CoursesTest(TestCase):
         self.assertIn('courses', response.context)
         self.assertEqual(len(response.context['courses']), 1)
         self.assertEqual(response.context['courses'][0], self.course_pub)
-        self.assertNotIn('You can access your personal list of', response.content)
+        self.assertNotIn(b'You can access your personal list of', response.content)
 
     def test_courses_temporary(self):
         """
@@ -568,7 +568,7 @@ class CoursesTest(TestCase):
         self.assertTemplateUsed(response, 'ct/courses.html')
         self.assertIn('courses', response.context)
         self.assertEqual(response.context['courses'][0], self.course_pub)
-        self.assertNotIn('You can access your personal list of', response.content)
+        self.assertNotIn(b'You can access your personal list of', response.content)
 
     def test_courses_all(self):
         """
@@ -581,7 +581,7 @@ class CoursesTest(TestCase):
         self.assertEqual(len(response.context['courses']), 2)
         self.assertIn(self.course_pub, response.context['courses'])
         self.assertIn(self.course_privat, response.context['courses'])
-        self.assertIn('You can access your personal list of', response.content)
+        self.assertIn(b'You can access your personal list of', response.content)
 
 
 class EditCourseTest(TestCase):
@@ -624,8 +624,8 @@ class EditCourseTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/course.html')
-        self.assertIn('test_description', response.content)
-        self.assertIn('test_title', response.content)
+        self.assertIn(b'test_description', response.content)
+        self.assertIn(b'test_title', response.content)
         course = Course.objects.get(id=self.course.id)
         self.assertEqual(course.access, 'enroll')
 
@@ -709,7 +709,7 @@ class EditUnitTest(TestCase):
             response,
             reverse('ct:unit_tasks', kwargs={'course_id': self.course.id, 'unit_id': self.unit.id})
         )
-        self.assertIn('new test title', response.content)
+        self.assertIn(b'new test title', response.content)
         self.assertIn('unit', response.context)
         self.assertIn('courseUnit', response.context)
         self.assertEqual(response.context['unit'], self.unit)
@@ -997,7 +997,7 @@ class EditLessonTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/lesson.html')
-        self.assertIn('new lesson title', response.content)
+        self.assertIn(b'new lesson title', response.content)
         self.assertEqual(response.context['unitLesson'], self.unit_lesson)
         self.assertEqual(response.context['unit'], self.unit)
         self.assertIn('statusTable', response.context)
@@ -1099,7 +1099,7 @@ class ResolutionsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(UnitLesson.objects.filter(lesson__title='new lesson title', kind=UnitLesson.RESOLVES).exists())
         self.assertTemplateUsed(response, 'ct/lessons.html')
-        self.assertIn('new lesson title', response.content)
+        self.assertIn(b'new lesson title', response.content)
 
     def test_link_resolution_ul(self):
         """
@@ -1203,7 +1203,7 @@ class SlideShowTest(TestCase):
         )
         self.assertEqual(pageData.fsm_push.call_count, 1)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'It is ok')
+        self.assertEqual(response.content, b'It is ok')
 
 
 class UnitLessonTaskStudentTest(TestCase):
@@ -1229,7 +1229,7 @@ class UnitLessonTaskStudentTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/unit_tasks_student.html')
-        self.assertIn('test unit title', response.content)
+        self.assertIn(b'test unit title', response.content)
 
     def test_unit_tasks_student_no_unit(self):
         unit_id = self.unit.id
@@ -1279,7 +1279,7 @@ class UnitLessonsStudentTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/lessons_student.html')
-        self.assertIn('test unit title', response.content)
+        self.assertIn(b'test unit title', response.content)
 
 
 class ConceptLinkTableTest(TestCase):
@@ -1350,7 +1350,7 @@ class UnitConceptsStudentTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/concepts_student.html')
-        self.assertIn('test unit title', response.content)
+        self.assertIn(b'test unit title', response.content)
 
 
 class LessonNextUrlTest(TestCase):
@@ -1662,7 +1662,7 @@ class ConceptLessonsTeacherTest(TestCase):
             'course_id': self.course.id,
             'unit_id': self.unit.id,
             'ul_id': UnitLesson.objects.get(
-                lesson=self.concept.lesson_set.filter(title='bad')
+                lesson=self.concept.lesson_set.filter(title='bad').first()
             ).id,
         }
         post_data = {

@@ -7,6 +7,8 @@ from ctms.views import (
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
     ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2, BestPracticeCourseView)
 
+app_name = 'ctms'
+
 urlpatterns = [
     url(r'^$', MyCoursesView.as_view(), name='my_courses'),
 

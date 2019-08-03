@@ -13,7 +13,7 @@ class AnonymEmail(models.Model):
     Model for temporary storing anonymous user emails
     to allow to restore anonymous sessions.
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     email = models.CharField(max_length=64)
     date = models.DateTimeField()
 
@@ -28,8 +28,8 @@ class SecondaryEmail(models.Model):
     We can store emails here from social_auth
     or LTI login.
     """
-    user = models.ForeignKey(User, related_name='secondary')
-    provider = models.ForeignKey(UserSocialAuth)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='secondary')
+    provider = models.ForeignKey(UserSocialAuth, on_delete=models.CASCADE)
     email = models.EmailField(verbose_name='Secondary Email')
 
     class Meta:
@@ -42,8 +42,8 @@ class UserSession(models.Model):
     Model for linking user to session.
     Solution from http://gavinballard.com/associating-django-users-sessions/
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    session = models.ForeignKey(Session)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
 
 def user_logged_in_handler(sender, request, user, **kwargs):

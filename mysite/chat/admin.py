@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from models import EnrollUnitCode, Chat, Message
+from .models import EnrollUnitCode, Chat, Message
 
 
 @admin.register(EnrollUnitCode)
@@ -8,6 +8,7 @@ class EnrollUnitCodeAdmin(admin.ModelAdmin):
     list_display = ('enrollCode', 'isLive', 'isPreview', 'courseUnit')
 # admin.site.register(Chat)
 # admin.site.register(Message)
+
 
 def get_property_if_exist(*args, **kwargs):
     '''
@@ -25,9 +26,9 @@ def get_property_if_exist(*args, **kwargs):
     return get_obj_prop
 
 
-
 def next_point_text(obj):
     return obj.next_point.text if obj.next_point else None
+
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
@@ -45,9 +46,11 @@ def chat_id(obj):
     if obj.chat:
         return obj.chat.id
 
+
 def chat_state(obj):
     if obj.chat:
         return obj.chat.state
+
 
 @admin.register(Message)
 class AdminRole(admin.ModelAdmin):
@@ -55,4 +58,3 @@ class AdminRole(admin.ModelAdmin):
         'id', chat_id, chat_state, 'timestamp',  'text', 'owner', 'contenttype', 'content_id',
         'input_type', 'type', 'kind', 'userMessage'
     )
-

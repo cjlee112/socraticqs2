@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -14,25 +11,25 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='activityevent',
             name='endTime',
-            field=models.DateTimeField(null=True, verbose_name=b'time ended', blank=True),
+            field=models.DateTimeField(null=True, verbose_name='time ended', blank=True),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='activityevent',
             name='unitLesson',
-            field=models.ForeignKey(blank=True, to='ct.UnitLesson', null=True),
+            field=models.ForeignKey(blank=True, to='ct.UnitLesson', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='activitylog',
             name='course',
-            field=models.ForeignKey(blank=True, to='ct.Course', null=True),
+            field=models.ForeignKey(blank=True, to='ct.Course', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='activitylog',
             name='endTime',
-            field=models.DateTimeField(null=True, verbose_name=b'time ended', blank=True),
+            field=models.DateTimeField(null=True, verbose_name='time ended', blank=True),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -50,7 +47,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fsm',
             name='startNode',
-            field=models.ForeignKey(related_name='+', blank=True, to='fsm.FSMNode', null=True),
+            field=models.ForeignKey(related_name='+', blank=True, to='fsm.FSMNode', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -104,13 +101,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fsmstate',
             name='activity',
-            field=models.ForeignKey(blank=True, to='fsm.ActivityLog', null=True),
+            field=models.ForeignKey(blank=True, to='fsm.ActivityLog', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='fsmstate',
             name='activityEvent',
-            field=models.ForeignKey(blank=True, to='fsm.ActivityEvent', null=True),
+            field=models.ForeignKey(blank=True, to='fsm.ActivityEvent', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -122,19 +119,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fsmstate',
             name='linkState',
-            field=models.ForeignKey(related_name='linkChildren', blank=True, to='fsm.FSMState', null=True),
+            field=models.ForeignKey(related_name='linkChildren', blank=True, to='fsm.FSMState', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='fsmstate',
             name='parentState',
-            field=models.ForeignKey(related_name='children', blank=True, to='fsm.FSMState', null=True),
+            field=models.ForeignKey(related_name='children', blank=True, to='fsm.FSMState', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='fsmstate',
             name='unitLesson',
-            field=models.ForeignKey(blank=True, to='ct.UnitLesson', null=True),
+            field=models.ForeignKey(blank=True, to='ct.UnitLesson', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

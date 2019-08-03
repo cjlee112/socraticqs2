@@ -29,7 +29,7 @@ class BodyHashClient(Client):
         """Override get_oauth_params to add the body hash."""
         params = super(BodyHashClient, self).get_oauth_params(request)
         digest = b64encode(sha1(request.body.encode('UTF-8')).digest())
-        params.append((u'oauth_body_hash', to_unicode(digest)))
+        params.append(('oauth_body_hash', to_unicode(digest)))
         return params
 
 

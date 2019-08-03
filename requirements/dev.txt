@@ -1,5 +1,4 @@
 # Packages required for local development
--r base.txt
 -r test.txt
 
 ipython==5.5.0

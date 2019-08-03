@@ -72,7 +72,7 @@ class TagsTest(TestCase):
 
     @patch('ct.templatetags.ct_extras.pypandoc')
     def test_md2html_pandoc_exception(self, pypandoc):
-        pypandoc.convert.side_effect = StandardError
+        pypandoc.convert.side_effect = Exception
         rendered = self.render_template(
             '{% load ct_extras %}'
             '{{ test_text | md2html }}',

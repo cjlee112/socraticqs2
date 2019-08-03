@@ -66,7 +66,8 @@ def custom_mail_validation(backend, details, user=None, is_new=False, force_upda
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(backend.strategy.request, user)
                     if _next == reverse('accounts:settings'):
-                        messages.add_message(backend.strategy.request, messages.SUCCESS, 'Email has been successfully updated')
+                        messages.add_message(
+                            backend.strategy.request, messages.SUCCESS, 'Email has been successfully updated')
                     backend.strategy.session_set('next', _next)
                     return {'user': user, 'force_update': code.force_update or force_update}
         else:
@@ -231,6 +232,7 @@ def associate_user(backend, details, uid, user=None, social=None, force_update=F
     Create UserSocialAuth.
     """
     redirect_url = backend.strategy.session_get('next') or kwargs.get('response', {}).get('next') or kwargs.get('next')
+    redirect_url = redirect_url if redirect_url != [''] else ''
     # one more mega analysis to where should we redirect a user
     if redirect_url:
         backend.strategy.session_set('next', redirect_url)
@@ -303,7 +305,7 @@ def associate_by_email(backend, details, user=None, *args, **kwargs):
         users = list(backend.strategy.storage.user.get_users_by_email(email))
         if len(users) == 0:
             social = UserSocialAuth.objects.filter(
-                uid=email, provider=u'email'
+                uid=email, provider='email'
             ).first()
             if social:
                 return {'user': social.user}

@@ -19,7 +19,7 @@ class CorrectnessMeter(models.Model):
         (NOT_CORRECT, 'not correct'),
     )
 
-    response = models.ForeignKey(Response)
+    response = models.ForeignKey(Response, on_delete=models.CASCADE)
     correctness = models.CharField(choices=CORRECTNESS_CHOICES, max_length=25)
     points = models.FloatField(default=0)
 
@@ -32,4 +32,4 @@ class CorrectnessMeter(models.Model):
             return
 
     def __str__(self):
-            return "{} {} {}".format(self.response.author, self.correctness, self.points)
+            return "{} {} {}".format(self.response.author, self.correctness, str(self.points))

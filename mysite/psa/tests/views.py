@@ -1,7 +1,7 @@
 import mock
 import unittest
 from uuid import uuid4
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core import mail
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -64,7 +64,7 @@ class ViewsUnitTest(TestCase):
         self.request.current_page = None
         response = validation_sent(self.request)
         self.assertIsInstance(response, HttpResponse)
-        self.assertTrue('test@test.com' in response.content)
+        self.assertTrue(b'test@test.com' in response.content)
 
     def test_custom_login_get(self):
         self.request.current_page = None
@@ -72,7 +72,7 @@ class ViewsUnitTest(TestCase):
         self.request.user = anonymous
         response = custom_login(self.request)
         self.assertIsInstance(response, HttpResponse)
-        self.assertTrue('LoginForm' in response.content)
+        self.assertTrue(b'LoginForm' in response.content)
 
     def test_custom_login_post_negative(self):
         self.client = Client()
@@ -156,7 +156,7 @@ class ViewsUnitTest(TestCase):
         self.request.current_page = None
         response = done(self.request)
         self.assertIsInstance(response, HttpResponse)
-        self.assertTrue('test_user' in response.content)
+        self.assertTrue(b'test_user' in response.content)
 
     def test_ask_stranger(self):
         user = User(username='test')
@@ -168,7 +168,7 @@ class ViewsUnitTest(TestCase):
         self.client.post('/login/', data=credentials, follow=True)
         response = self.client.get('/tmp-email-ask/')
         self.assertIsInstance(response, HttpResponse)
-        self.assertTrue('email-required-modal' in response.content)
+        self.assertTrue(b'email-required-modal' in response.content)
 
     def test_set_pass_false(self):
         user = User(username='test')
@@ -179,7 +179,7 @@ class ViewsUnitTest(TestCase):
                        'password': 'test'}
         self.client.post('/login/', data=credentials, follow=True)
         response = self.client.get('/set-pass/')
-        self.assertTrue('Something goes wrong' in response.content)
+        self.assertTrue(b'Something goes wrong' in response.content)
         self.assertTemplateUsed(response, template_name='ct/person.html')
 
     def test_set_pass_true(self):
@@ -200,7 +200,7 @@ class ViewsUnitTest(TestCase):
             follow=True
         )
         self.assertTemplateUsed(response, template_name='ct/person.html')
-        self.assertTrue('Your password was changed' in response.content)
+        self.assertTrue(b'Your password was changed' in response.content)
         user = User.objects.get(username='test')
         self.assertTrue(user.check_password('test2'))
 
@@ -882,7 +882,7 @@ class SignupTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
-        self.assertIn(u'Confirmation e-mail should be the same as e-mail.',
+        self.assertIn('Confirmation e-mail should be the same as e-mail.',
                       response.context['form']['email_confirmation'].errors)
 
     def test_signup_without_u_hash(self):

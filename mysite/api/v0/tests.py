@@ -1,15 +1,15 @@
 import json
 import mock
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from pymongo.errors import ServerSelectionTimeoutError
 
 
 from analytics.models import CourseReport
-from core.common.mongo import c_onboarding_status, _conn
+from core.common.mongo import c_onboarding_status
 from core.common import onboarding
-from ct.models import UnitLesson, StudentError
+from ct.models import UnitLesson, StudentError, Concept
 from ctms.tests import MyTestCase
 
 
@@ -128,7 +128,7 @@ class TestOnboardingStatus(MyTestCase):
             "done": True,
         }
         response_data = json.loads(response.content)['data']
-        for key in response_data.keys():
+        for key in list(response_data.keys()):
             self.assertSetEqual(set(expected_data), set(response_data[key]))
 
 
@@ -171,6 +171,10 @@ class TestErrorViewSet(ApiAccessMixinTest, MyTestCase):
 
     def setUp(self):
         super(TestErrorViewSet, self).setUp()
+        concept = Concept(title='test title', addedBy=self.user)
+        concept.save()
+        self.lesson.concept = concept
+        self.lesson.save()
         self.unit_lesson_error = UnitLesson(
             unit=self.unit, order=0,
             lesson=self.lesson, addedBy=self.user,

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import djangocms_text_ckeditor.fields
 
@@ -20,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='landingplugin',
             name='block_color',
-            field=models.CharField(default=b'bg-primary', max_length=20, choices=[(b'blue', b'bg-primary'), (b'red', b'bg-danger'), (b'green', b'bg-success'), (b'light-blue', b'bg-info'), (b'yellow', b'bg-warning')]),
+            field=models.CharField(default='bg-primary', max_length=20, choices=[('blue', 'bg-primary'), ('red', 'bg-danger'), ('green', 'bg-success'), ('light-blue', 'bg-info'), ('yellow', 'bg-warning')]),
             preserve_default=True,
         ),
         migrations.AlterField(

@@ -93,7 +93,7 @@ class ConceptMethodTests(OurTestCase):
         parent = UnitLesson.objects.get(lesson__concept=concept)
         ulList = concept.copy_error_models(parent)
         self.assertEqual(len(ulList), 2)
-        lessons = [ul.lesson for ul in ulList]
+        lessons = [_ul.lesson for _ul in ulList]
         self.assertIn(emUL1.lesson, lessons)
         self.assertIn(emUL2.lesson, lessons)
         self.assertEqual(parent, ulList[0].parent)
@@ -105,14 +105,15 @@ class ConceptMethodTests(OurTestCase):
         self.assertEqual(ul3.unit, unit3)
         children = list(ul3.get_errors())
         self.assertEqual(len(children), 2)
-        lessons = [ul.lesson for ul in children]
+        lessons = [_ul.lesson for _ul in children]
         self.assertIn(emUL1.lesson, lessons)
         self.assertIn(emUL2.lesson, lessons)
         # test adding resolution
         reso = Lesson(title='A resolution', text='now I get it',
                       addedBy=self.user)
-        resoUL = ul.save_resolution(reso)
-        em, resols = ul.get_em_resolutions()
+        base_em = children[1]
+        resoUL = base_em.save_resolution(reso)
+        em, resols = base_em.get_em_resolutions()
         resols = list(resols)
         self.assertEqual(resols, [resoUL])
         # test linking a lesson as resolution
@@ -120,14 +121,14 @@ class ConceptMethodTests(OurTestCase):
                        addedBy=self.user)
         other.save_root()
         otherUL = UnitLesson.create_from_lesson(other, self.unit)
-        resoUL2 = ul.copy_resolution(otherUL, self.user)
-        em, resols = ul.get_em_resolutions()
+        resoUL2 = base_em.copy_resolution(otherUL, self.user)
+        em, resols = base_em.get_em_resolutions()
         resols = list(resols)
         self.assertEqual(resols, [resoUL, resoUL2])
         # check that it prevents adding duplicate resolutions
-        resoUL3 = ul.copy_resolution(otherUL, self.user)
+        resoUL3 = base_em.copy_resolution(otherUL, self.user)
         self.assertEqual(resoUL2, resoUL3)
-        em, resols = ul.get_em_resolutions()
+        em, resols = base_em.get_em_resolutions()
         resols = list(resols)
         self.assertEqual(resols, [resoUL, resoUL2])
 
@@ -326,7 +327,7 @@ class LiveFSMTest(SetUpMixin, OurTestCase):
         request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
         response = self.client.get(result)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Start asking a question', response.content)
+        self.assertIn(b'Start asking a question', response.content)
 
         url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
         self.check_post_get(result, dict(fsmtask='next'), url, 'test')
@@ -391,7 +392,7 @@ class LiveFSMTest(SetUpMixin, OurTestCase):
         request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
         response = self.client.get(result)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Start asking a question', response.content)
+        self.assertIn(b'Start asking a question', response.content)
 
         url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
         self.check_post_get(result, dict(fsmtask='next'), url, 'test')
@@ -482,7 +483,7 @@ class LiveTeachingTest(SetUpMixin, OurTestCase):
         request, fsmStack, result = self.get_fsm_request('liveteach', fsmData, user=self.teacher)
         response = self.client.get(result)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Start asking a question', response.content)
+        self.assertIn(b'Start asking a question', response.content)
 
         url = '/ct/teach/courses/%d/units/%d/lessons/' % (self.course.id, self.unit.id)
         origin = 'http://testserver'
@@ -494,7 +495,7 @@ class LiveTeachingTest(SetUpMixin, OurTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ask this Question")
-        self.assertEqual(response.content.count("Ask this Question"), 1)
+        self.assertEqual(response.content.count(b'Ask this Question'), 1)
 
 
 class AltVersionsOfLessonsUITests(TestCase):

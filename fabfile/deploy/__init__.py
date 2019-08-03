@@ -27,14 +27,14 @@ STAGING_HOST = 'staging.courselets.org'
 def debug(*args, **kwargs):
     output = ""
     for x in args:
-        print x
+        print(x)
         output += str(x)
     return output
 
 
 @contextmanager
 def debug_cd(path):
-    print "run on path:{0}".format(path)
+    print("run on path:{0}".format(path))
     yield
 
 

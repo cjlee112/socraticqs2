@@ -8,7 +8,7 @@ from grading.models import CorrectnessMeter
 class BaseGraderTests(TestCase):
     def test_search_graders(self):
         """Test that discovering graders works properly."""
-        from base_grader import GRADERS
+        from .base_grader import GRADERS
         self.assertIn('numbers', GRADERS)
         # base grader should not be included
         self.assertIsNone(GRADERS.get('base'))
@@ -19,7 +19,7 @@ class NumbersGraderTest(TestCase):
     fixtures = ["chat/tests/fixtures/initial_numbers.json"]
 
     def setUp(self):
-        from base_grader import GRADERS
+        from .base_grader import GRADERS
         self.unitLesson = UnitLesson.objects.get(lesson__id=110)
         self.answer = self.unitLesson.get_answers()[0]
         self.responses = Response.objects.filter(unitLesson=self.unitLesson)
@@ -38,7 +38,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 1)
         self.assertEqual(grader.is_correct, True)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"correct")
+        self.assertEqual(grader.message, "correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.CORRECT)
@@ -56,7 +56,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 0)
         self.assertEqual(grader.is_correct, False)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"not correct")
+        self.assertEqual(grader.message, "not correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.NOT_CORRECT)
@@ -74,7 +74,7 @@ class NumbersGraderTest(TestCase):
         self.assertEqual(grader.grade, 0.9)
         self.assertEqual(grader.is_correct, True)
         self.assertEqual(CorrectnessMeter.objects.all().count(), cor_met_count + 1)
-        self.assertEqual(grader.message, u"partially correct")
+        self.assertEqual(grader.message, "partially correct")
 
         cor_met = CorrectnessMeter.objects.get()
         self.assertEqual(cor_met.correctness, CorrectnessMeter.PARTIALLY_CORRECT)

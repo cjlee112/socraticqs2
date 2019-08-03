@@ -1,19 +1,18 @@
-Django==1.11.22
-django-cms==3.5.3
+Django==2.1.11
+django-cms==3.6.0
 djangocms-text-ckeditor==3.6.1
 djangocms-admin-style==1.2.9
-django-filer==1.3.0
-djangocms-column==1.9.0
+django-filer==1.5.0
 
-amqp==2.2.2
+amqp==2.5.0
 
 # Distributed Task Queue
-celery==4.0.0
+celery==4.3.0
 
-django-crispy-forms==1.6.1
+django-crispy-forms==1.7.2
 
 # LTI python implementation
-git+https://github.com/mitodl/ims_lti_py.git@d96a6201cf3b63b9e1b33780ef5e29bc65242ceb
+git+https://github.com/cmltaWt0/ims_lti_py.git@development
 
 lxml==4.3.4
 
@@ -21,7 +20,7 @@ oauth2==1.9.0.post1
 pypandoc==1.4
 
 # social authentication/registration mechanizm
-social-auth-app-django==2.1.0
+social-auth-app-django==3.1.0
 requests==2.22.0
 
 pytz==2018.4
@@ -30,11 +29,11 @@ wikipedia==1.4.0
 sqlparse==0.2.2
 python-memcached==1.58
 injections==0.2.2
-djangorestframework==3.6.4
+djangorestframework==3.10.2
 django-waffle==0.15.0
 django_intercom
 
-pandas==0.19.2
+pandas==0.25.0
 unicodecsv==0.14.1
 django-bower==5.2.0
 
@@ -43,10 +42,10 @@ pygeoip==0.3.2
 # Sentry
 sentry-sdk==0.4.1
 
-kombu==4.1.0
+kombu==4.6.3
 
-pymongo==3.7.1
-redis==3.0.1
+pymongo==3.8.0
+redis==3.3.4
 
 
 # Intercome SDK

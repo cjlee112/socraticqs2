@@ -1,7 +1,6 @@
-from __future__  import unicode_literals
-
 import re
 from uuid import uuid4
+from functools import reduce
 from itertools import starmap
 import datetime
 
@@ -11,7 +10,7 @@ from django.db.models import Count
 from django.utils.text import Truncator
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from core.common import onboarding
@@ -95,15 +94,15 @@ class Chat(models.Model):
     """
     Chat model that handles particular student chat.
     """
-    next_point = models.OneToOneField('Message', null=True, related_name='base_chat')
-    user = models.ForeignKey(User)
+    next_point = models.OneToOneField('Message', null=True, on_delete=models.CASCADE, related_name='base_chat')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_open = models.BooleanField(default=False)
     is_live = models.BooleanField(default=False)
     is_preview = models.BooleanField(default=False)
     is_test = models.BooleanField(default=False)
-    enroll_code = models.ForeignKey('EnrollUnitCode', null=True)
+    enroll_code = models.ForeignKey('EnrollUnitCode', null=True, on_delete=models.CASCADE)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
-    instructor = models.ForeignKey(User, blank=True, null=True, related_name='course_instructor')
+    instructor = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='course_instructor')
     last_modify_timestamp = models.DateTimeField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     progress = models.IntegerField(default=0, blank=True, null=True)
@@ -162,11 +161,11 @@ class Message(models.Model):
     )
     content_id = models.IntegerField(null=True)
     input_type = models.CharField(max_length=16, choices=TYPE_CHOICES, null=True, default='options')
-    lesson_to_answer = models.ForeignKey(UnitLesson, null=True)
-    response_to_check = models.ForeignKey(Response, null=True)
-    student_error = models.ForeignKey(StudentError, null=True)
+    lesson_to_answer = models.ForeignKey(UnitLesson, null=True, on_delete=models.CASCADE)
+    response_to_check = models.ForeignKey(Response, null=True, on_delete=models.CASCADE)
+    student_error = models.ForeignKey(StudentError, null=True, on_delete=models.CASCADE)
     type = models.CharField(max_length=16, default='message', choices=MESSAGE_TYPES)
-    owner = models.ForeignKey(User, null=True)
+    owner = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     is_additional = models.BooleanField(default=False)
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
     sub_kind = models.CharField(max_length=32, choices=SUB_KIND_CHOICES, null=True)
@@ -175,8 +174,8 @@ class Message(models.Model):
     class Meta:
         ordering = ['timestamp']
 
-    def __unicode__(self):
-        return u"<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
+    def __str__(self):
+        return "<Message {}>: chat_id - '{}' user - '{}', kind - '{}', text - '{}'".format(
             self.id,
             self.chat.id if self.chat else None,
             self.owner.username, self.get_kind_display(), self.text
@@ -222,20 +221,17 @@ class Message(models.Model):
                 id=self.content_id
             ).response.studenterror_set.all().values_list('errorModel', flat=True)
             error_str = (
-                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
-                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+                '<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+                'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
             )
             errors = reduce(
-                lambda x, y: x+y, map(
-                    lambda x: error_str.format(
+                lambda x, y: x+y, [error_str.format(
                         'chat-selectable-selected' if x.id in checked_errors else '',
                         x.id,
                         x.lesson.title
-                    ),
-                    error_list
-                )
+                    ) for x in error_list]
             )
-        return u'<ul class="chat-select-list">{}</ul>'.format(
+        return '<ul class="chat-select-list">{}</ul>'.format(
             errors or '<li><h3>There are no misconceptions to display.</h3></li>'
         )
 
@@ -267,7 +263,7 @@ class Message(models.Model):
 
     def render_my_choices(self):
         """Render user's answer choices."""
-        choices_template = u'<h3>{}</h3>'  # pragma: no cover
+        choices_template = '<h3>{}</h3>'  # pragma: no cover
         if '[selected_choices]' in self.content.text:
             selected = [int(i) for i in self.content.text.split('[selected_choices] ')[1].split()]
             my_choices = []
@@ -409,7 +405,7 @@ class Message(models.Model):
                         self.chat.state and
                         self.chat.state.fsmNode.fsm.fsm_name_is_one_of('chat')  # TODO: add livechat here
                     )
-                    values = CONF_CHOICES.values() + EVAL_OPTIONS.values()
+                    values = list(CONF_CHOICES.values()) + list(EVAL_OPTIONS.values())
                     text_in_values = self.text in values
                     if is_chat_fsm and not self.text:
                         if self.content.selfeval:  # confidence is before selfeval
@@ -475,7 +471,7 @@ class Message(models.Model):
                     # TODO add tests for this case
                     html = mark_safe(
                         md2html(
-                            u"Expected value {value}. \n\n{text}".format(
+                            "Expected value {value}. \n\n{text}".format(
                                 value=self.content.lesson.number_value,
                                 text=self.content.lesson.text
                             )
@@ -483,7 +479,7 @@ class Message(models.Model):
                     )
                 else:
                     if self.content.lesson.url:
-                        raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
+                        raw_html = '`Read more <{0}>`_ \n\n{1}'.format(
                             self.content.lesson.url,
                             self.content.lesson.text
                         )
@@ -499,7 +495,7 @@ class Message(models.Model):
 
                 if (self.content.lesson.attachment and self.content.lesson.sub_kind != Lesson.CANVAS and
                     not (self.content.parent and self.content.parent.sub_kind == Lesson.CANVAS)):
-                    html += u'<img src="{}" alt=""/>'.format(self.content.lesson.attachment.url)
+                    html += '<img src="{}" alt=""/>'.format(self.content.lesson.attachment.url)
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
         if html is None:
@@ -527,20 +523,17 @@ class Message(models.Model):
         if aborts_list:
             checked_aborts = ()
             abort_str = (
-                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
-                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+                '<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+                'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
             )
             aborts = reduce(
-                lambda x, y: x+y, map(
-                    lambda x: abort_str.format(
+                lambda x, y: x+y, [abort_str.format(
                         'chat-selectable-selected' if x.id in checked_aborts else '',
                         x.id,
                         x.lesson.title
-                    ),
-                    aborts_list
-                )
+                    ) for x in aborts_list]
             )
-        return u'<ul class="chat-select-list">{}</ul>'.format(
+        return '<ul class="chat-select-list">{}</ul>'.format(
             aborts or '<li><h3>There are no aborts to display.</h3></li>'
         )
 
@@ -559,20 +552,17 @@ class Message(models.Model):
                 {'faqs': 1, '_id': 0}
             )
             faq_str = (
-                u'<li><div class="chat-check chat-selectable {}" data-selectable-attribute="faqModel" '
-                u'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+                '<li><div class="chat-check chat-selectable {}" data-selectable-attribute="faqModel" '
+                'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
             )
             faqs = reduce(
-                lambda x, y: x+y, map(
-                    lambda x: faq_str.format(
-                        'chat-selectable-selected' if str(x.id) in checked_faqs.get('faqs', {}).keys() else '',
+                lambda x, y: x+y, [faq_str.format(
+                        'chat-selectable-selected' if str(x.id) in list(checked_faqs.get('faqs', {}).keys()) else '',
                         x.id,
                         x.title if x.title else Truncator(x.text).words(72, truncate=' ...')
-                    ),
-                    faq_list
-                )
+                    ) for x in faq_list]
             )
-        return u'<ul class="chat-select-list">{}</ul>'.format(
+        return '<ul class="chat-select-list">{}</ul>'.format(
             faqs or '<li><h3>There are no faqs to display.</h3></li>'
         )
 
@@ -582,7 +572,7 @@ class EnrollUnitCode(models.Model):
     Model contains links between enrollCode and Units.
     """
     enrollCode = models.CharField(max_length=32, default=enroll_generator)
-    courseUnit = models.ForeignKey(CourseUnit)
+    courseUnit = models.ForeignKey(CourseUnit, on_delete=models.CASCADE)
     isLive = models.BooleanField(default=False)
     isPreview = models.BooleanField(default=False)
     isTest = models.BooleanField(default=False)
@@ -625,8 +615,8 @@ class UnitError(models.Model):
     """
     Model contains links between unit and user error models.
     """
-    unit = models.ForeignKey(Unit)
-    response = models.ForeignKey(Response)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    response = models.ForeignKey(Response, on_delete=models.CASCADE)
 
     def get_errors(self):
         unit_lesson = self.response.unitLesson
@@ -666,4 +656,4 @@ class UnitError(models.Model):
 
 class ChatDivider(models.Model):
     text = models.CharField(max_length=200)
-    unitlesson = models.ForeignKey(UnitLesson, null=True) 
+    unitlesson = models.ForeignKey(UnitLesson, null=True, on_delete=models.CASCADE) 

@@ -1,7 +1,7 @@
-from django.template import Context, loader
+from django.template import loader
 from django.core.mail import EmailMessage
 
-from models import InterestedPlugin
+from .models import InterestedPlugin
 
 
 def form_send(interested_form):

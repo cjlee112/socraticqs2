@@ -19,6 +19,10 @@ router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, base_name='messages')
 router.register(r'resources', ResourcesView, base_name='resources')
 
+
+app_name = 'chat'
+
+
 urlpatterns = [
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 from django.conf import settings
 
@@ -20,7 +17,7 @@ class Migration(migrations.Migration):
                 ('consumer', models.CharField(max_length=64, blank=True)),
                 ('extra_data', models.TextField(max_length=1024)),
                 ('course_id', models.IntegerField()),
-                ('django_user', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True)),
+                ('django_user', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
             },

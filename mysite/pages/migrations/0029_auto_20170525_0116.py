@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -19,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='interestedplugin',
             name='email_to',
-            field=models.EmailField(default=b'cmathews@elancecloud.com', max_length=254),
+            field=models.EmailField(default='cmathews@elancecloud.com', max_length=254),
         ),
     ]

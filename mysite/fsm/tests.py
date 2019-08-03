@@ -127,7 +127,7 @@ class FSMTests(OurTestCase):
         """
         s = self.json_mixin.dump_json_id_dict(dict(fruity=self.unit))
         d = self.json_mixin.load_json_id_dict(s)
-        self.assertEqual(d.items(), [('fruity', self.unit)])
+        self.assertEqual(list(d.items()), [('fruity', self.unit)])
 
     def test_json_blob4(self):
         """

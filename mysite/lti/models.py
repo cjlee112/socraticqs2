@@ -51,7 +51,7 @@ class LtiConsumer(models.Model):
             consumer.save()
         return consumer
 
-    def __unicode__(self):
+    def __str__(self):
         return self.consumer_name
 
 
@@ -89,9 +89,9 @@ class LTIUser(models.Model):
     """
     user_id = models.CharField(max_length=255, blank=False)
     consumer = models.CharField(max_length=64, blank=True)
-    lti_consumer = models.ForeignKey(LtiConsumer, null=True)
+    lti_consumer = models.ForeignKey(LtiConsumer, null=True, on_delete=models.CASCADE)
     extra_data = models.TextField(max_length=1024, blank=False)
-    django_user = models.ForeignKey(User, null=True, related_name='lti_auth')
+    django_user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='lti_auth')
 
     class Meta:  # pragma: no cover
         unique_together = ('user_id', 'lti_consumer')
@@ -219,7 +219,7 @@ class CourseRef(models.Model):  # pragma: no cover
         context_id -> LTI context_id
         tc_guid - > LTI tool_consumer_instance_guid
     """
-    course = models.ForeignKey(Course, verbose_name='Courslet Course')
+    course = models.ForeignKey(Course, verbose_name='Courslet Course', on_delete=models.CASCADE)
     instructors = models.ManyToManyField(User, verbose_name='Course Instructors')
     date = models.DateTimeField('Creation date and time', default=timezone.now)
     context_id = models.CharField('LTI context_id', max_length=254)
@@ -238,21 +238,21 @@ class CourseRef(models.Model):  # pragma: no cover
 
 class OutcomeService(models.Model):
     lis_outcome_service_url = models.CharField(max_length=255)
-    lti_consumer = models.ForeignKey(LtiConsumer)
+    lti_consumer = models.ForeignKey(LtiConsumer, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (
             'lis_outcome_service_url', 'lti_consumer'
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.lis_outcome_service_url
 
 
 class GradedLaunch(models.Model):
-    user = models.ForeignKey(User, db_index=True)
+    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
     course_id = models.IntegerField(db_index=True)
-    outcome_service = models.ForeignKey(OutcomeService)
+    outcome_service = models.ForeignKey(OutcomeService, on_delete=models.CASCADE)
     lis_result_sourcedid = models.CharField(max_length=255, db_index=True)
 
     class Meta(object):
@@ -260,5 +260,5 @@ class GradedLaunch(models.Model):
             'outcome_service', 'lis_result_sourcedid', 'user', 'course_id'
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.lis_result_sourcedid

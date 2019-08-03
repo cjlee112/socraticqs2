@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 import django.utils.timezone
 from django.conf import settings
@@ -18,11 +15,11 @@ class Migration(migrations.Migration):
             name='UnitStatus',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name=b'time started')),
-                ('endTime', models.DateTimeField(null=True, verbose_name=b'time ended')),
+                ('startTime', models.DateTimeField(default=django.utils.timezone.now, verbose_name='time started')),
+                ('endTime', models.DateTimeField(null=True, verbose_name='time ended')),
                 ('order', models.IntegerField(default=0)),
-                ('unit', models.ForeignKey(to='ct.Unit')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('unit', models.ForeignKey(to='ct.Unit', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

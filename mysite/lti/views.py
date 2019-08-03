@@ -5,7 +5,7 @@ from datetime import date
 import logging
 
 from django.utils import timezone
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from ims_lti_py.tool_provider import DjangoToolProvider
 from django.shortcuts import (
@@ -101,7 +101,7 @@ def lti_init(request, course_id=None, unit_id=None):
         )
 
     session['is_valid'] = is_valid
-    session['LTI_POST'] = {k: v for (k, v) in request.POST.iteritems()}
+    session['LTI_POST'] = {k: v for (k, v) in list(request.POST.items())}
 
     if settings.LTI_DEBUG:
         msg = 'session: is_valid = {}'.format(session.get('is_valid'))
@@ -147,7 +147,7 @@ def lti_redirect(request, lti_consumer, course_id=None, unit_id=None):
         user_id=user_id,
         lti_consumer=lti_consumer
     )
-    extra_data = {k: v for (k, v) in request_dict.iteritems()
+    extra_data = {k: v for (k, v) in list(request_dict.items())
                   if k in MOODLE_PARAMS}
     user.extra_data = json.dumps(extra_data)
     user.save()

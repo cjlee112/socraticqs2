@@ -1,6 +1,7 @@
 import wikipedia
 from ct.exceptions import CommonDisambiguationError
 
+
 class LessonDoc(object):
     sourceDB = 'wikipedia'
 

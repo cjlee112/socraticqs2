@@ -147,7 +147,7 @@ class GET_FOR_FAQ_ANSWER(object):
             pending_faq = c_faq_data().find_one({
                 "chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
             show_another_faq = False
-            for key, value in pending_faq.items():
+            for key, value in list(pending_faq.items()):
                 if not value.get('status').get('done', False):
                     show_another_faq = True
                     break
@@ -220,7 +220,7 @@ class GET_UNDERSTANDING(object):
             pending_faq = c_faq_data().find_one(
                 {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
             show_another_faq = False
-            for key, value in pending_faq.items():
+            for key, value in list(pending_faq.items()):
                 if not value.get('status').get('done', False):
                     show_another_faq = True
                     break
@@ -245,7 +245,7 @@ class WILL_TRY_MESSAGE_2(object):
         pending_faq = c_faq_data().find_one(
             {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in pending_faq.items():
+        for key, value in list(pending_faq.items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break
@@ -267,7 +267,7 @@ class WILL_TRY_MESSAGE_3(object):
         pending_faq = c_faq_data().find_one(
             {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in pending_faq.items():
+        for key, value in list(pending_faq.items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break
@@ -289,7 +289,7 @@ class SELECT_NEXT_FAQ(object):
         pending_faq = c_faq_data().find_one(
             {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in pending_faq.items():
+        for key, value in list(pending_faq.items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break

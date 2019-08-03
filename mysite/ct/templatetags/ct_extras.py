@@ -26,7 +26,7 @@ def md2html(txt, stripP=False):
             format='rst',
             extra_args=('--mathjax', '--email-obfuscation=none')
         )
-    except StandardError:
+    except Exception:
         pass
     txt = replace_temporary_markers(txt, audio_html, markers)
     txt = replace_temporary_markers(txt, video_html, videoMarkers)

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 from django.conf import settings
 
@@ -18,9 +15,9 @@ class Migration(migrations.Migration):
             name='SecondaryEmail',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('email', models.EmailField(max_length=75, verbose_name=b'Secondary Email')),
-                ('provider', models.ForeignKey(to='social_django.UserSocialAuth')),
-                ('user', models.ForeignKey(related_name='secondary', to=settings.AUTH_USER_MODEL)),
+                ('email', models.EmailField(max_length=75, verbose_name='Secondary Email')),
+                ('provider', models.ForeignKey(to='social_django.UserSocialAuth', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(related_name='secondary', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

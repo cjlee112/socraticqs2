@@ -2,7 +2,7 @@
 import os
 import sys
 
-from base import *
+from .base import *
 
 
 DEBUG = True
@@ -94,8 +94,8 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
 
 
 try:
-    from local import *
+    from .local import *
 except ImportError:
-    print '''You must provide a settings/local.py file,
-    e.g. by copying the provided local_example.py'''
+    print('''You must provide a settings/local.py file,
+    e.g. by copying the provided local_example.py''')
     pass

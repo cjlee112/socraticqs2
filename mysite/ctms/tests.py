@@ -3,7 +3,7 @@ from unittest import skip
 
 from ddt import ddt, data, unpack
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -457,11 +457,11 @@ class SharedCoursesListViewTests(MyTestCase):
     def test_shared_courses_list(self):
         response = self.client.get(self.url)
 
-        self.assertEquals(
+        self.assertEqual(
             reverse('ctms:shared_courses'),
             response.context['shared_courses'][self.course.title]['link']
         )
-        self.assertEquals(
+        self.assertEqual(
             reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course3.code}),
             response.context['shared_courses'][self.course2.title]['link']
         )
@@ -871,7 +871,7 @@ class EditUnitViewTests(MyTestCase):
             'answer_form-answer': answer,
         }
         if attachment:
-            with open(attachment) as img:
+            with open(attachment, 'rb') as img:
                 data.update({
                     'attachment': img
                 })
@@ -879,9 +879,9 @@ class EditUnitViewTests(MyTestCase):
         else:
             response = self.post_valid_data(data)
 
-        self.assertEquals(response.context['form'].errors, {})
-        self.assertEquals(response.context['answer_form'].errors, {})
-        self.assertEquals(response.context['errors_formset'].errors, [])
+        self.assertEqual(response.context['form'].errors, {})
+        self.assertEqual(response.context['answer_form'].errors, {})
+        self.assertEqual(response.context['errors_formset'].errors, [])
 
         new_counts = self.get_model_counts()
 
@@ -919,7 +919,7 @@ class EditUnitViewTests(MyTestCase):
             'title': title
         }
         if attachment:
-            with open(attachment) as img:
+            with open(attachment, 'rb') as img:
                 data.update({
                     'attachment': img
                 })
@@ -928,9 +928,9 @@ class EditUnitViewTests(MyTestCase):
             response = self.post_valid_data(data)
         new_counts = self.get_model_counts()
         self.validate_model_counts(counts, new_counts, must_equal=True)
-
-        self.assertNotEquals(response.context['form'].errors.get('attachment', []), [])
-
+        self.assertEqual(
+            [_ for _ in response.context['form'].errors.get('attachment')],
+            ['Upload a valid image. The file you uploaded was either not an image or a corrupted image.'])
         self.assertNotEqual(self.get_test_unitlesson().lesson.kind, kind)
         # self.assertEqual(self.get_test_unitlesson().unit.text, text)
         self.check_context_keys(response)
@@ -1098,7 +1098,7 @@ class CoursletSettingsViewTests(MyTestCase):
         self.validate_model_counts(counts, new_counts, True)
 
         if is_valid and response.status_code == 200:
-            print response.context['form'].errors
+            print((response.context['form'].errors))
 
         if is_valid:
             url = reverse('ctms:courselet_invite_student', kwargs={'pk': self.kwargs['course_pk'],

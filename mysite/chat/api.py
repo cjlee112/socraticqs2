@@ -30,7 +30,7 @@ from .serializers import (
 )
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
-from ct.models import Response as StudentResponse, Lesson, CourseUnit, DONE_STATUS
+from ct.models import Response as StudentResponse, Lesson, DONE_STATUS
 from ct.models import UnitLesson
 
 
@@ -45,33 +45,31 @@ def get_additional_messages(response, chat):
     for each in student_errors:
         if not each.errorModel.get_em_resolutions()[1]:
             Message.objects.get_or_create(contenttype='unitlesson', content_id=dummy_ul.id, chat=chat,
-                                        owner=chat.user,
-                                        input_type='custom',
-                                        student_error=each,
-                                        kind='message',
-                                        text='Hope you\'ve overcame the misconception',
-                                        is_additional=True)
-        map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
-                                                     content_id=ul.id,
-                                                     chat=chat,
-                                                     owner=chat.user,
-                                                     input_type='custom',
-                                                     student_error=each,
-                                                     kind='message',
-                                                     is_additional=True),
-            reversed(each.errorModel.get_em_resolutions()[1]))
+                                          owner=chat.user,
+                                          input_type='custom',
+                                          student_error=each,
+                                          kind='message',
+                                          text='Hope you\'ve overcame the misconception',
+                                          is_additional=True)
+        [Message.objects.get_or_create(contenttype='unitlesson',
+                                       content_id=ul.id,
+                                       chat=chat,
+                                       owner=chat.user,
+                                       input_type='custom',
+                                       student_error=each,
+                                       kind='message',
+                                       is_additional=True) for ul in reversed(each.errorModel.get_em_resolutions()[1])]
 
 
 def get_help_messages(chat):
     for each in chat.enroll_code.courseUnit.unit.get_aborts():
-        map(lambda ul: Message.objects.get_or_create(contenttype='unitlesson',
-                                                     content_id=ul.id,
-                                                     chat=chat,
-                                                     owner=chat.user,
-                                                     input_type='custom',
-                                                     kind='abort',
-                                                     is_additional=True),
-            reversed(each.get_em_resolutions()[1]))
+        [Message.objects.get_or_create(contenttype='unitlesson',
+                                       content_id=ul.id,
+                                       chat=chat,
+                                       owner=chat.user,
+                                       input_type='custom',
+                                       kind='abort',
+                                       is_additional=True) for ul in reversed(each.get_em_resolutions()[1])]
 
 
 class ValidateMixin(object):
@@ -362,13 +360,13 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     selected = selected_items[str(message.id)]['choices']
                 except KeyError:
                     # here request.data is like {"option":1,"chat_id":9,"selected":{"116":{"choices":[0]}}}
-                    selected_msg_ids = self.request.data.get(
+                    selected_msg_ids = list(self.request.data.get(
                         'selected'
-                    ).keys()
+                    ).keys())
                     # selected_messages == tuple with keys of this dict {"116":{"choices":[0]}} - it will be ("116",)
                     msg_ids = Message.objects.filter(id__in=selected_msg_ids, chat=chat).values_list('id', flat=True)
                     correct_ids = set(msg_ids).intersection(
-                        set(int(i) for i in selected_items.keys())
+                        set(int(i) for i in list(selected_items.keys()))
                     )
                     selected_choices = []
                     for i in correct_ids:

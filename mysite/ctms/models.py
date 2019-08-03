@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import FileExtensionValidator
 from django.http.response import Http404
 from django.template import loader
@@ -53,14 +53,14 @@ class InviteQuerySet(models.QuerySet):
 
 
 class Invite(models.Model):
-    instructor = models.ForeignKey(Instructor)
-    user = models.ForeignKey(User, blank=True, null=True)
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     email = models.EmailField()
     code = models.CharField('invite code', max_length=255)
     status = models.CharField('status', max_length=20, choices=STATUS_CHOICES, default='pending')
     type = models.CharField('invite type', max_length=50, choices=TYPE_CHOICES, default='tester')
-    course = models.ForeignKey(Course)
-    enroll_unit_code = models.ForeignKey(EnrollUnitCode, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enroll_unit_code = models.ForeignKey(EnrollUnitCode, null=True, on_delete=models.CASCADE)
 
     added = models.DateTimeField('added datetime', auto_now_add=True)
 
@@ -183,12 +183,12 @@ class Invite(models.Model):
         else:
             raise Http404()
 
-    def __unicode__(self):
+    def __str__(self):
         return "Code {}, User {}".format(self.code, self.email)
 
 
 class BestPractice1(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     student_count = models.IntegerField('How many students do you have in your class?')
     misconceptions_count = models.IntegerField(
         'How many individual student misconceptions in your class did you fix today'' (or your average teaching day)?'
@@ -212,7 +212,7 @@ class BestPractice1(models.Model):
 
 
 class BestPractice2(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     percent_engaged = models.IntegerField(
         'What percent of students are fully engaged, '
         'i.e. would immediately do any optional exercises you provide, just to '

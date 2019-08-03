@@ -1,9 +1,12 @@
-FROM python:2.7-slim
+FROM python:3.7-slim
 
+RUN pip install cython
 RUN apt-get -y update && \
     apt-get install -y \
     git \
-    pandoc \
+    gcc \
+    pandoc && \
+    apt-get install -y --reinstall build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements ./requirements

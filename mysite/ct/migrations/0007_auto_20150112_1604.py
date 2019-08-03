@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -26,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='fsm',
             name='startNode',
-            field=models.ForeignKey(related_name=b'+', to='ct.FSMNode', null=True),
+            field=models.ForeignKey(related_name='+', to='ct.FSMNode', null=True, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='fsmnode',

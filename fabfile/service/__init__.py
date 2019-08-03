@@ -27,14 +27,14 @@ STAGING_HOST = 'staging.courselets.org'
 def debug(*args, **kwargs):
     output = ""
     for x in args:
-        print x
+        print(x)
         output += str(x)
     return output
 
 
 @contextmanager
 def debug_cd(path):
-    print "run on path:{0}".format(path)
+    print("run on path:{0}".format(path))
     yield
 
 
@@ -94,8 +94,8 @@ class NginxTask(Task):
                 self.project_name, self.service_path, backup_name))
 
             s = "*" * 80
-            print "{0}\n{0}\n\t\t\tNEW CONFIG ON BRANCH `{1}` FAILED!!!\n"\
-                  "\n \t\t\t OLD CONFIG RESTORED\n{0}\n{0}".format(s, self.config_branch)
+            print("{0}\n{0}\n\t\t\tNEW CONFIG ON BRANCH `{1}` FAILED!!!\n"\
+                  "\n \t\t\t OLD CONFIG RESTORED\n{0}\n{0}".format(s, self.config_branch))
 
     def run(self, running='local', branch='master', suffix=None):
         self.config_branch = branch

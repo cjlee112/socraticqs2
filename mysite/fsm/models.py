@@ -2,14 +2,14 @@
 from django.utils import timezone
 from django.db import models, transaction
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 
 from fsm.utils import get_plugin
 
 from ct.ct_util import reverse_path_args
 from ct.models import Course, Role
-from mixins import JSONBlobMixin, ChatMixin
+from .mixins import JSONBlobMixin, ChatMixin
 
 
 class FSM(models.Model):
@@ -20,12 +20,12 @@ class FSM(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     help = models.TextField(null=True, blank=True)
-    startNode = models.ForeignKey('FSMNode', related_name='+', null=True, blank=True)
+    startNode = models.ForeignKey('FSMNode', related_name='+', null=True, blank=True, on_delete=models.CASCADE)
     hideTabs = models.BooleanField(default=False)
     hideLinks = models.BooleanField(default=False)
     hideNav = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
+    addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def fsm_name_is_one_of(self, *args):
         return self.name in args + tuple(i + "OLD" for i in args)
@@ -67,7 +67,7 @@ class FSM(models.Model):
             for groupName in fsmGroups:  # register in specified groups
                 fsm.fsmgroup_set.create(group=groupName)
             nodes = {}
-            for name, nodeDict in nodeData.items():  # save nodes
+            for name, nodeDict in list(nodeData.items()):  # save nodes
                 node = FSMNode(name=name, fsm=fsm, addedBy=user, **nodeDict)
                 if node.funcName:  # make sure plugin imports successfully
                     get_plugin(node.funcName)
@@ -90,7 +90,7 @@ class FSM(models.Model):
         """
         return self.fsmnode_set.get(name=name)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -98,10 +98,10 @@ class FSMGroup(models.Model):
     """
     Groups multiple FSMs into one named UI group.
     """
-    fsm = models.ForeignKey(FSM)
+    fsm = models.ForeignKey(FSM, on_delete=models.CASCADE)
     group = models.CharField(db_index=True, max_length=64)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.group
 
 
@@ -127,7 +127,7 @@ class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
     """
     Stores one node of an FSM state-graph.
     """
-    fsm = models.ForeignKey(FSM)
+    fsm = models.ForeignKey(FSM, on_delete=models.CASCADE)
     name = models.CharField(db_index=True, max_length=64)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
@@ -135,7 +135,7 @@ class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
     path = models.CharField(max_length=200, null=True, blank=True)
     data = models.TextField(null=True, blank=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
+    addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     funcName = models.CharField(max_length=200, null=True, blank=True)
     doLogging = models.BooleanField(default=False)
     _plugin = PluginDescriptor()  # provide access to plugin code if any
@@ -187,8 +187,8 @@ class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
         else:
             return func(self, state, request)
 
-    def __unicode__(self):
-        return u'::'.join((self.name, self.funcName))
+    def __str__(self):
+        return '::'.join((self.name, self.funcName))
 
 
 class FSMDone(ValueError):
@@ -211,15 +211,15 @@ class FSMEdge(JSONBlobMixin, models.Model):
     Stores one edge of an FSM state-graph.
     """
     name = models.CharField(db_index=True, max_length=64)
-    fromNode = models.ForeignKey(FSMNode, related_name='outgoing')
-    toNode = models.ForeignKey(FSMNode, related_name='incoming')
+    fromNode = models.ForeignKey(FSMNode, on_delete=models.CASCADE, related_name='outgoing')
+    toNode = models.ForeignKey(FSMNode, on_delete=models.CASCADE, related_name='incoming')
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     help = models.TextField(null=True, blank=True)
     showOption = models.BooleanField(default=False)
     data = models.TextField(null=True, blank=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
-    addedBy = models.ForeignKey(User)
+    addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     _funcDict = {}
 
     def transition(self, fsmStack, request, **kwargs):
@@ -244,7 +244,7 @@ class FSMEdge(JSONBlobMixin, models.Model):
         else:
             return func(self, obj)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -252,13 +252,13 @@ class FSMState(JSONBlobMixin, models.Model):
     """
     Stores current state of a running FSM instance.
     """
-    user = models.ForeignKey(User)
-    fsmNode = models.ForeignKey(FSMNode)
-    parentState = models.ForeignKey('FSMState', null=True, blank=True,
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    fsmNode = models.ForeignKey(FSMNode, on_delete=models.CASCADE)
+    parentState = models.ForeignKey('FSMState', null=True, blank=True, on_delete=models.CASCADE,
                                     related_name='children')
-    linkState = models.ForeignKey('FSMState', null=True, blank=True,
+    linkState = models.ForeignKey('FSMState', null=True, blank=True, on_delete=models.CASCADE,
                                   related_name='linkChildren')
-    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True)
+    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     path = models.CharField(max_length=200)
     data = models.TextField(null=True, blank=True)
@@ -267,8 +267,8 @@ class FSMState(JSONBlobMixin, models.Model):
     hideNav = models.BooleanField(default=False)
     isLiveSession = models.BooleanField(default=False)
     atime = models.DateTimeField('time started', default=timezone.now)
-    activity = models.ForeignKey('ActivityLog', null=True, blank=True)
-    activityEvent = models.ForeignKey('ActivityEvent', null=True, blank=True)
+    activity = models.ForeignKey('ActivityLog', null=True, blank=True, on_delete=models.CASCADE)
+    activityEvent = models.ForeignKey('ActivityEvent', null=True, blank=True, on_delete=models.CASCADE)
 
     def get_all_state_data(self):
         """
@@ -367,8 +367,8 @@ class FSMState(JSONBlobMixin, models.Model):
             )
         ).distinct()
 
-    def __unicode__(self):
-        return u'::'.join((self.user.username, str(self.fsmNode)))
+    def __str__(self):
+        return '::'.join((self.user.username, str(self.fsmNode)))
 
 
 class ActivityLog(models.Model):
@@ -378,7 +378,7 @@ class ActivityLog(models.Model):
     fsmName = models.CharField(max_length=64)
     startTime = models.DateTimeField('time created', default=timezone.now)
     endTime = models.DateTimeField('time ended', null=True, blank=True)
-    course = models.ForeignKey(Course, null=True, blank=True)
+    course = models.ForeignKey(Course, null=True, blank=True, on_delete=models.CASCADE)
 
     @classmethod
     def log_node_entry(cls, fsmNode, user, unitLesson=None):
@@ -395,18 +395,18 @@ class ActivityLog(models.Model):
         activity_event.save()
         return activity_event
 
-    def __unicode__(self):
-        return u'::'.join((self.fsmName, str(self.startTime)))
+    def __str__(self):
+        return '::'.join((self.fsmName, str(self.startTime)))
 
 
 class ActivityEvent(models.Model):
     """
     Log FSM node entry/exit times.
     """
-    activity = models.ForeignKey(ActivityLog)
+    activity = models.ForeignKey(ActivityLog, on_delete=models.CASCADE)
     nodeName = models.CharField(max_length=64)
-    user = models.ForeignKey(User)
-    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    unitLesson = models.ForeignKey('ct.UnitLesson', null=True, blank=True, on_delete=models.CASCADE)
     startTime = models.DateTimeField('time created', default=timezone.now)
     endTime = models.DateTimeField('time ended', null=True, blank=True)
     exitEvent = models.CharField(max_length=64)
@@ -419,5 +419,5 @@ class ActivityEvent(models.Model):
         self.endTime = timezone.now()
         self.save()
 
-    def __unicode__(self):
-        return u'::'.join((self.user.username, self.nodeName, str(self.startTime)))
+    def __str__(self):
+        return '::'.join((self.user.username, self.nodeName, str(self.startTime)))

@@ -6,7 +6,7 @@ import unittest
 from ddt import ddt, data, unpack
 from django.test import TestCase, Client
 from django.test.utils import override_settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.http.response import HttpResponseNotFound
@@ -58,7 +58,7 @@ class CustomTestCase(TestCase):
         )
         self.courseunit.save()
         self.concept = Concept.new_concept('bad', 'idea', self.unit, self.user)
-        lesson = Lesson(title='title', text=u'きつね', addedBy=self.user, url='/test/url/')
+        lesson = Lesson(title='title', text='きつね', addedBy=self.user, url='/test/url/')
         lesson.save()
         self.unitlesson = UnitLesson(
             unit=self.unit, order=0, lesson=lesson, addedBy=self.user, treeID=lesson.id
@@ -76,7 +76,7 @@ class CustomTestCase(TestCase):
         self.unit_dummy = Unit(title='Test title', addedBy=self.user)
         self.unit_dummy.save()
         lesson_dummy = Lesson(title='Hope you\'ve overcame the misconception',
-                              text=u'Hope you\'ve overcame the misconception',
+                              text='Hope you\'ve overcame the misconception',
                               addedBy=self.user, url='/test/url/')
         lesson_dummy.save()
         self.unitlesson_dummy = UnitLesson(
@@ -87,7 +87,7 @@ class CustomTestCase(TestCase):
     @staticmethod
     def compile_html(resource):
         if resource.lesson.url:
-            raw_html = u'`Read more <{0}>`_ \n\n{1}'.format(
+            raw_html = '`Read more <{0}>`_ \n\n{1}'.format(
                 resource.lesson.url,
                 resource.lesson.text
             )
@@ -159,7 +159,7 @@ class MainChatViewTests(CustomTestCase):
         chat_id = json_content['id']
 
         response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
-        self.assertEquals(
+        self.assertEqual(
             Role.objects.filter(role=Role.ENROLLED, user=self.user, course=self.course).count(),
             1
         )
@@ -243,7 +243,7 @@ class MainChatViewTests(CustomTestCase):
                 val_check = response.context[pair[0]]
             except KeyError:
                 val_check = None
-            self.assertEquals(val_check, pair[1])
+            self.assertEqual(val_check, pair[1])
 
         self.assertIn('fsmstate', response.context)
         self.assertIn('lessons', response.context)
@@ -256,10 +256,10 @@ class MainChatViewTests(CustomTestCase):
     def test_chat_init_api(self):
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
 
-        lesson1 = Lesson(title='title1', text=u'きつね', kind='orct', addedBy=self.user, url='/test/url/')
+        lesson1 = Lesson(title='title1', text='きつね', kind='orct', addedBy=self.user, url='/test/url/')
         lesson1.save()
 
-        lesson2 = Lesson(title='title2', text=u'きつね', kind='orct', addedBy=self.user, url='/test/url/')
+        lesson2 = Lesson(title='title2', text='きつね', kind='orct', addedBy=self.user, url='/test/url/')
         lesson2.save()
 
         self.unitlesson1 = UnitLesson(
@@ -388,8 +388,8 @@ class MessagesViewTests(CustomTestCase):
             {'chat_id': chat_id},
             follow=True
         )
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(len(json.loads(response.content)['addMessages']), 3)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(json.loads(response.content)['addMessages']), 3)
 
     def test_permission_denied(self):
         """
@@ -428,7 +428,7 @@ class MessagesViewTests(CustomTestCase):
             {'chat_id': chat_id},
             follow=True
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
     @unittest.skip("TODO - review the put logic")
     def test_inappropriate_message_put(self):
@@ -468,7 +468,7 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
 
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         json_content = json.loads(response.content)
         self.assertNotIn('text', json_content['addMessages'][0])
 
@@ -513,11 +513,11 @@ class MessagesViewTests(CustomTestCase):
             content_type='application/json',
             follow=True
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         json_content = json.loads(response.content)
 
         self.assertIn('html', json_content['addMessages'][0])
-        self.assertEquals(json_content['addMessages'][0]['html'], u'<p>My Answer</p>\n')
+        self.assertEqual(json_content['addMessages'][0]['html'], '<p>My Answer</p>\n')
 
     def test_typical_chat_flow(self):
         """
@@ -590,7 +590,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEqual(len(json_content['addMessages']), 2)
 
         # confidence answer
         conf = json_content['input']['options'][2]['value']
@@ -606,7 +606,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         # self eval answer
         self_eval = json_content['input']['options'][2]['value']
@@ -620,7 +620,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 3)
+        self.assertEqual(len(json_content['addMessages']), 3)
 
         response = self.client.put(
             next_url,
@@ -632,7 +632,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
         # get next question (2)
         response = self.client.get(
@@ -642,8 +642,8 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(len(json_content['addMessages']), 3)
-        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+        self.assertEqual(len(json_content['addMessages']), 3)
+        self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
         # post answer (2)
         response = self.client.put(
@@ -686,7 +686,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         self_eval = json_content['input']['options'][0]['value']
 
@@ -761,9 +761,9 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
 
-        self.assertEquals(json_content['input']['type'], 'text')
+        self.assertEqual(json_content['input']['type'], 'text')
         # Response should contain only DIVIDER and Question (ORCT) itself
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEqual(len(json_content['addMessages']), 2)
 
         # post answer (3)
         response = self.client.put(
@@ -792,7 +792,7 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
         json_content = json.loads(response.content)
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         next_url = json_content['input']['url']
 
@@ -854,7 +854,7 @@ class MessagesViewTests(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-        self.assertEquals(
+        self.assertEqual(
             json_content['addMessages'][0]['html'],
             '<dl>\n<dt><strong>Re: Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
         )
@@ -904,8 +904,8 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(len(json_content['addMessages']), 2)
-        self.assertEquals(json_content['addMessages'][0]['html'], 'Yes!')
+        self.assertEqual(len(json_content['addMessages']), 2)
+        self.assertEqual(json_content['addMessages'][0]['html'], 'Yes!')
 
         # post FAQ (3)
         response = self.client.put(
@@ -956,7 +956,7 @@ class MessagesViewTests(CustomTestCase):
             reverse('chat:preview_courselet',
                     kwargs={'enroll_key': enroll.enrollCode}),
         )
-        assert 'This Courselet is not published yet or you have no permisions to open it.' in response.content
+        assert b'This Courselet is not published yet or you have no permisions to open it.' in response.content
 
 
 class HistoryAPIViewTests(CustomTestCase):
@@ -987,7 +987,7 @@ class HistoryAPIViewTests(CustomTestCase):
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         ).context['chat_id']
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_permission_denied(self):
         """
@@ -1014,7 +1014,7 @@ class HistoryAPIViewTests(CustomTestCase):
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
         response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
     def test_content(self):
         """
@@ -1022,7 +1022,7 @@ class HistoryAPIViewTests(CustomTestCase):
         """
         enroll_code = EnrollUnitCode.get_code(self.courseunit)
         lesson = self.unitlesson.lesson
-        lesson.text = u'🦊'
+        lesson.text = '🦊'
         lesson.save()
         self.client.login(username='test', password='test')
         response = self.client.get(
@@ -1045,15 +1045,15 @@ class HistoryAPIViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
-        self.assertEquals(len(json_content['addMessages']), 4)
-        self.assertEquals(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
-        self.assertEquals(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
-        self.assertEquals(json_content['addMessages'][1]['type'], 'message')
-        self.assertEquals(
+        self.assertEqual(len(json_content['addMessages']), 4)
+        self.assertEqual(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
+        self.assertEqual(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
+        self.assertEqual(json_content['addMessages'][1]['type'], 'message')
+        self.assertEqual(
             json_content['addMessages'][1]['html'],
             self.compile_html(self.unitlesson)
         )
-        self.assertEquals(json_content['addMessages'][2]['type'], 'message')
+        self.assertEqual(json_content['addMessages'][2]['type'], 'message')
         # TODO need to figure out how to find action help for Node
         # self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.get_help())
 
@@ -1109,7 +1109,7 @@ class NumbersTest(CustomTestCase):
             reverse('chat:history'), {'chat_id': chat_id}, follow=True
         )
         json_content = json.loads(response.content)
-        self.assertEquals(json_content['input']['subType'], 'numbers')
+        self.assertEqual(json_content['input']['subType'], 'numbers')
 
         next_url = json_content['input']['url']
 
@@ -1125,7 +1125,7 @@ class NumbersTest(CustomTestCase):
         )
 
         json_content = json.loads(response.content)
-        self.assertEquals({'error': 'Not correct value!'}, json_content)
+        self.assertEqual({'error': 'Not correct value!'}, json_content)
 
         response = self.client.put(
             next_url,
@@ -1146,7 +1146,7 @@ class NumbersTest(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEqual(len(json_content['addMessages']), 2)
 
         # confidence answer
         conf = json_content['input']['options'][2]['value']
@@ -1162,7 +1162,7 @@ class NumbersTest(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         # self eval answer
         self_eval = json_content['input']['options'][2]['value']
@@ -1175,7 +1175,7 @@ class NumbersTest(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 3)
+        self.assertEqual(len(json_content['addMessages']), 3)
 
         response = self.client.put(
             next_url,
@@ -1187,7 +1187,7 @@ class NumbersTest(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
         # get next question (2)
         response = self.client.get(
@@ -1197,14 +1197,14 @@ class NumbersTest(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['input']['subType'], 'numbers')
+        self.assertEqual(json_content['input']['subType'], 'numbers')
 
-        self.assertEquals(len(json_content['addMessages']), 4)  # + 1 message for grading
+        self.assertEqual(len(json_content['addMessages']), 4)  # + 1 message for grading
 
-        self.assertEquals(json_content['addMessages'][0]['html'], self_eval_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
-        grading_msg = u'Your answer is partially correct!'
-        self.assertEquals(json_content['addMessages'][1]['html'], grading_msg)
+        grading_msg = 'Your answer is partially correct!'
+        self.assertEqual(json_content['addMessages'][1]['html'], grading_msg)
 
         # post answer (2)
         response = self.client.put(
@@ -1247,7 +1247,7 @@ class NumbersTest(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         self_eval = json_content['input']['options'][0]['value']
 
@@ -1324,7 +1324,7 @@ class NumbersTest(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-        self.assertEquals(next_url, None)
+        self.assertEqual(next_url, None)
 
 
 class ProgressAPIViewTests(CustomTestCase):
@@ -1354,7 +1354,7 @@ class ProgressAPIViewTests(CustomTestCase):
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_permission_denied(self):
         """
@@ -1381,7 +1381,7 @@ class ProgressAPIViewTests(CustomTestCase):
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
     def test_content(self):
         """
@@ -1410,11 +1410,11 @@ class ProgressAPIViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['progress'], int)
         self.assertIsInstance(json_content['breakpoints'], list)
-        self.assertEquals(len(json_content['breakpoints']), 1)
-        self.assertEquals(json_content['progress'], 1)
-        self.assertEquals(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
-        self.assertEquals(json_content['breakpoints'][0]['isDone'], True)
-        self.assertEquals(json_content['breakpoints'][0]['isUnlocked'], True)
+        self.assertEqual(len(json_content['breakpoints']), 1)
+        self.assertEqual(json_content['progress'], 1)
+        self.assertEqual(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
+        self.assertEqual(json_content['breakpoints'][0]['isDone'], True)
+        self.assertEqual(json_content['breakpoints'][0]['isUnlocked'], True)
 
 
 class ResourcesViewTests(CustomTestCase):
@@ -1444,7 +1444,7 @@ class ResourcesViewTests(CustomTestCase):
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_permission_denied(self):
         """
@@ -1471,7 +1471,7 @@ class ResourcesViewTests(CustomTestCase):
         self.user = User.objects.create_user('middle_man', 'test@test.com', 'test')
         self.client.login(username='middle_man', password='test')
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
     def test_content(self):
         """
@@ -1498,14 +1498,14 @@ class ResourcesViewTests(CustomTestCase):
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['breakpoints'], list)
-        self.assertEquals(len(json_content['breakpoints']), 2)
+        self.assertEqual(len(json_content['breakpoints']), 2)
         # TODO Need to investigate why concepts also presented as Resources
-        self.assertEquals(
+        self.assertEqual(
             json_content['breakpoints'][1]['html'], self.resource_unitlesson.lesson.title
         )
-        self.assertEquals(json_content['breakpoints'][1]['isDone'], False)
-        self.assertEquals(json_content['breakpoints'][1]['isStarted'], False)
-        self.assertEquals(json_content['breakpoints'][1]['isUnlocked'], True)
+        self.assertEqual(json_content['breakpoints'][1]['isDone'], False)
+        self.assertEqual(json_content['breakpoints'][1]['isStarted'], False)
+        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
 
     def test_get_resources_message_by_id(self):
         """
@@ -1537,31 +1537,31 @@ class ResourcesViewTests(CustomTestCase):
             reverse('chat:resources-detail', args=(json_content['breakpoints'][0]['ul'],)),
             {'chat_id': chat_id}
         )
-        self.assertEquals(resource_response.status_code, 200)
+        self.assertEqual(resource_response.status_code, 200)
         resource_response = self.client.get(
             reverse('chat:resources-detail', args=(json_content['breakpoints'][1]['ul'],)),
             {'chat_id': chat_id}
         )
-        self.assertEquals(resource_response.status_code, 200)
+        self.assertEqual(resource_response.status_code, 200)
         json_content = json.loads(resource_response.content)
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
-        self.assertEquals(len(json_content['addMessages']), 3)
+        self.assertEqual(len(json_content['addMessages']), 3)
 
         self.assertIn('nextMessagesUrl', json_content)
         self.assertIsNone(json_content['nextMessagesUrl'])
         self.assertIn('id', json_content)
 
-        self.assertEquals(json_content['addMessages'][0]['name'], self.resource_unitlesson.addedBy.username)
-        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
-        self.assertEquals(json_content['addMessages'][0]['html'], self.resource_unitlesson.lesson.title)
-        self.assertEquals(json_content['addMessages'][1]['type'], 'message')
-        self.assertEquals(
+        self.assertEqual(json_content['addMessages'][0]['name'], self.resource_unitlesson.addedBy.username)
+        self.assertEqual(json_content['addMessages'][0]['type'], 'breakpoint')
+        self.assertEqual(json_content['addMessages'][0]['html'], self.resource_unitlesson.lesson.title)
+        self.assertEqual(json_content['addMessages'][1]['type'], 'message')
+        self.assertEqual(
             json_content['addMessages'][1]['html'],
             self.compile_html(self.resource_unitlesson)
         )
-        self.assertEquals(json_content['addMessages'][2]['type'], 'message')
-        self.assertEquals(json_content['addMessages'][2]['html'], END.help)
+        self.assertEqual(json_content['addMessages'][2]['type'], 'message')
+        self.assertEqual(json_content['addMessages'][2]['html'], END.help)
 
         self.assertIn('url', json_content['input'])
         self.assertIn('includeSelectedValuesFromMessages', json_content['input'])
@@ -1784,8 +1784,8 @@ class LessonSerializerTests(CustomTestCase):
         for attr in attrs:
             self.assertIn(attr, result)
 
-        self.assertEquals(result['id'], msg_id)
-        self.assertEquals(result['html'], msg.content.lesson.title)
+        self.assertEqual(result['id'], msg_id)
+        self.assertEqual(result['html'], msg.content.lesson.title)
 
 
 @ddt
@@ -1849,14 +1849,14 @@ class MultipleChoiceTests(CustomTestCase):
         super(MultipleChoiceTests, self).setUp()
         self.enroll_code = EnrollUnitCode.get_code(self.courseunit)
         lesson = self.unitlesson.lesson
-        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\n'+\
-                        u'потому что потому\r\n() три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.text = 'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\n'+\
+                        'потому что потому\r\n() три\r\nобъяснение\r\n() четыре\r\nобъяснение'
         lesson.sub_kind = "choices"
         lesson.kind = "orct"
         lesson.addedBy = self.user
         lesson.save()
 
-        lesson2 = Lesson(title='title2', text=u'два', kind='answer', addedBy=self.user)
+        lesson2 = Lesson(title='title2', text='два', kind='answer', addedBy=self.user)
         lesson2.save()
 
         self.unitlesson2 = UnitLesson(
@@ -1865,7 +1865,7 @@ class MultipleChoiceTests(CustomTestCase):
         )
         self.unitlesson2.save()
 
-        lesson3 = Lesson(title='title3', text=u'1', kind='orct', addedBy=self.user)
+        lesson3 = Lesson(title='title3', text='1', kind='orct', addedBy=self.user)
         lesson3.save()
 
         self.unitlesson3 = UnitLesson(
@@ -1918,7 +1918,7 @@ class MultipleChoiceTests(CustomTestCase):
         )
         json_content = json.loads(response.content)
 
-        self.assertEquals(json_content['input']['subType'], 'choices')
+        self.assertEqual(json_content['input']['subType'], 'choices')
         next_url = json_content['input']['url']
         return json_content, next_url
 
@@ -1939,7 +1939,7 @@ class MultipleChoiceTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
         self.assertIsNotNone(json_content['input']['options'])
-        self.assertEquals(len(json_content['addMessages']), 2)
+        self.assertEqual(len(json_content['addMessages']), 2)
         return json_content, next_url
 
     def confidence_answer(self, json_content, next_url):
@@ -1956,7 +1956,7 @@ class MultipleChoiceTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        self.assertEquals(json_content['addMessages'][0]['html'], conf_text)
+        self.assertEqual(json_content['addMessages'][0]['html'], conf_text)
 
         response = self.client.get(
             next_url, {'chat_id': self.chat_id}, follow=True
@@ -1969,20 +1969,20 @@ class MultipleChoiceTests(CustomTestCase):
         response = self.client.get(
             next_url, {'chat_id': self.chat_id}, follow=True
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_ascii_valid(self):
         lesson = self.unitlesson.lesson
-        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
-                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.text = 'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        ' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
         lesson.save()
 
         json_content, next_url = self.get_history()
         json_content, next_url = self.post_answer(json_content, next_url, [1])
         json_content, next_url = self.confidence_answer(json_content, next_url)
 
-        answer_msg = u"You got it right, the correct answer is: два"
-        explanation_msg = u"потому что потому"
+        answer_msg = "You got it right, the correct answer is: два"
+        explanation_msg = "потому что потому"
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
         self.assertIn('breakpoint', json_content['addMessages'][2]['type'])
@@ -1991,20 +1991,20 @@ class MultipleChoiceTests(CustomTestCase):
 
     def test_ascii_invalid(self):
         lesson = self.unitlesson.lesson
-        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
-                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.text = 'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        ' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
         lesson.save()
 
         json_content, next_url = self.get_history()
         json_content, next_url = self.post_answer(json_content, next_url, [0])
         json_content, next_url = self.confidence_answer(json_content, next_url)
 
-        answer_msg = u"The correct answer is: два"
-        explanation_msg = u"потому что потому"
+        answer_msg = "The correct answer is: два"
+        explanation_msg = "потому что потому"
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
 
-        answer_msg = u"You selected: один"
+        answer_msg = "You selected: один"
         self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
         # FAQ message
         self.assertIn('message', json_content['addMessages'][3]['type'])
@@ -2017,15 +2017,15 @@ class MultipleChoiceTests(CustomTestCase):
 
     def test_ascii_void_valid(self):
         lesson = self.unitlesson.lesson
-        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n() два\r\nпотому что потому\r\n()'+\
-                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.text = 'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n() два\r\nпотому что потому\r\n()'+\
+                        ' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
         lesson.save()
 
         json_content, next_url = self.get_history()
         json_content, next_url = self.post_answer(json_content, next_url, [])
         json_content, next_url = self.confidence_answer(json_content, next_url)
 
-        answer_msg = u"You got it right, the correct answer is: " + self.unitlesson2.lesson.title
+        answer_msg = "You got it right, the correct answer is: " + self.unitlesson2.lesson.title
         explanation_msg = self.unitlesson2.lesson.text
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
@@ -2035,22 +2035,22 @@ class MultipleChoiceTests(CustomTestCase):
 
     def test_ascii_void_invalid(self):
         lesson = self.unitlesson.lesson
-        lesson.text = u'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
-                        u' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
+        lesson.text = 'вопрос?\r\n[choices]\r\n() один\r\nобъяснение\r\n(*) два\r\nпотому что потому\r\n()'+\
+                        ' три\r\nобъяснение\r\n() четыре\r\nобъяснение'
         lesson.save()
 
         json_content, next_url = self.get_history()
         json_content, next_url = self.post_answer(json_content, next_url, [])
         json_content, next_url = self.confidence_answer(json_content, next_url)
 
-        answer_msg = u"The correct answer is: два"
-        explanation_msg = u"потому что потому"
+        answer_msg = "The correct answer is: два"
+        explanation_msg = "потому что потому"
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
         self.assertIn('Is there anything else you\'re wondering about, where you\'d like clarification or something you\'re unsure about this point?', json_content['addMessages'][3]['html'])
         self.assertIn('message', json_content['addMessages'][3]['type'])
 
-        answer_msg = u"You selected: Nothing"
+        answer_msg = "You selected: Nothing"
         self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
 
         # Roll FAQs

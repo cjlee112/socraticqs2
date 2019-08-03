@@ -5,7 +5,7 @@ from random import choice
 from django.test import TestCase
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.query import QuerySet
 from django.db import IntegrityError
 from mock import Mock, patch
@@ -36,7 +36,7 @@ class ConceptTest(TestCase):
 
     def test_title(self):
         self.assertTrue(isinstance(self.concept, Concept))
-        self.assertEqual(self.concept.__unicode__(), self.concept.title)
+        self.assertEqual(self.concept. __str__(), self.concept.title)
 
     @patch('ct.models.Lesson.get_from_sourceDB')
     def test_get_from_sourceDB(self, get_from_sourceDB):
@@ -404,7 +404,7 @@ class LessonTest(TestCase):
 
     def test_title(self):
         lesson = Lesson(title='ugh', text='brr', addedBy=self.user)
-        self.assertEqual(lesson.__unicode__(), lesson.title)
+        self.assertEqual(lesson. __str__(), lesson.title)
 
     @unpack
     @data(
@@ -481,7 +481,7 @@ class StudyListTest(TestCase):
         lesson = Lesson(title='ugh', text='brr', addedBy=user)
         lesson.save()
         study_list = StudyList(lesson=lesson, user=user)
-        self.assertEqual(study_list.__unicode__(), lesson.title)
+        self.assertEqual(study_list. __str__(), lesson.title)
 
 
 class UnitLessonTest(TestCase):
@@ -952,8 +952,8 @@ class UnitTest(TestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[self.concept], list)
-        self.assertEqual(result.keys()[0], self.concept)
-        self.assertEqual(result.keys()[1], self.concept_new)
+        self.assertEqual(list(result.keys())[0], self.concept)
+        self.assertEqual(list(result.keys())[1], self.concept_new)
         self.assertEqual(len(result[self.concept]), 2)
         self.assertEqual(result[self.concept][0].lesson, self.lesson)
         self.assertEqual(result[self.concept_new][0].lesson, self.new_lesson)
@@ -1312,7 +1312,7 @@ class ResponseManagerTest(TestCase):
         )
         self.unit_lesson.save()
         self.responses = []
-        for cnt in xrange(100):
+        for cnt in range(100):
             self.responses.append(Response(
                 lesson=self.lesson,
                 unitLesson=self.unit_lesson,
@@ -1401,7 +1401,7 @@ class StudentErrorTest(TestCase):
         self.student_error.save()
 
     def test_unicode(self):
-        self.assertEqual(self.student_error.__unicode__(), 'eval by ' + self.user.username)
+        self.assertEqual(self.student_error. __str__(), 'eval by ' + self.user.username)
 
     def test_get_counts(self):
         """
@@ -1427,7 +1427,7 @@ class CourseTest(TestCase):
         self.course.save()
 
     def test_title(self):
-        self.assertEqual(self.course.__unicode__(), self.course.title)
+        self.assertEqual(self.course. __str__(), self.course.title)
 
     def test_create_unit(self):
         result = self.course.create_unit(
