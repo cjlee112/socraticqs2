@@ -450,7 +450,12 @@ class CourseletPreviewView(ChatInitialView):
         :param courseUnit: course unit
         :return: True | False
         """
-        return not courseUnit.addedBy == request.user
+        return (
+            not courseUnit.addedBy == request.user and
+            not User.objects.filter(
+                id=request.user.id, role__role=Role.INSTRUCTOR, role__course=courseUnit.course
+            ).exists()
+        )
 
     @staticmethod
     def get_chat(request, enroll_code, **kwargs):

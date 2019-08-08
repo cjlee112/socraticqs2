@@ -157,7 +157,8 @@ Run layout tests:
     - development
     - master
   script:
-    - docker run maxsocl/backstop:development
+    - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
+    - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
 
 Deploy Stage:
   stage: deploy
