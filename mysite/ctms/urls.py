@@ -1,11 +1,13 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
+from django.urls import include, path
 from ctms.views import (
     MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
-    ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2, BestPracticeCourseView)
+    ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2, BestPracticesCourseView, BestPracticesCourseletView,
+    BestPracticeCalculation, BestPracticeActivation, BestPracticePreCalculation)
 
 app_name = 'ctms'
 
@@ -15,11 +17,14 @@ urlpatterns = [
     url(r'^course/new/?$', CreateCourseView.as_view(), name='create_course'),
     url(r'^course/(?P<pk>\d+)/courselet/?$', CourseView.as_view(), name='course_view'),
     url(r'^course/(?P<pk>\d+)/settings/?$', UpdateCourseView.as_view(), name='course_settings'),
-    url(r'^course/(?P<pk>\d+)/best-practice/?$', BestPracticeCourseView.as_view(), name='course_best_practice'),
+    url(r'^course/(?P<pk>\d+)/best-practices/?$', BestPracticesCourseView.as_view(), name='course_best_practice'),
     url(r'^course/(?P<pk>\d+)/delete/?$', DeleteCourseView.as_view(), name='course_delete'),
     url(r'^onboarding/$', Onboarding.as_view(), name='onboarding'),
     url(r'^onboarding/bp1$', OnboardingBP1.as_view(), name='onboarding_bp1'),
     url(r'^onboarding/bp2$', OnboardingBP2.as_view(), name='onboarding_bp2'),
+    path('bp/<int:pk>/calculation/', BestPracticePreCalculation.as_view(), name='template-calculation'),
+    path('course/<int:course_pk>/bp/<int:pk>/calculation/', BestPracticeCalculation.as_view(), name='calculation'),
+    path('course/<int:course_pk>/bp/<int:pk>/activation/', BestPracticeActivation.as_view(), name='activation'),
 
 
     # go to preview
@@ -41,11 +46,16 @@ urlpatterns = [
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/settings/?$',
         CoursletSettingsView.as_view(),
         name='courslet_settings'),
+    # courslet best practices
+    path('course/<int:course_pk>/courselet/<int:courselet_pk>/best-practices/',
+        BestPracticesCourseletView.as_view(),
+        name='courselet_best_practice'),
+    path('course/<int:course_pk>/courselet/<int:courselet_pk>/bp/<int:pk>/calculation/', BestPracticeCalculation.as_view(), name='courselet_bp_calculation'),
+    path('course/<int:course_pk>/courselet/<int:courselet_pk>/bp/<int:pk>/activation/', BestPracticeActivation.as_view(), name='courselet_bp_activation'),
     # delete courslet
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/delete/?$',
         CoursletDeleteView.as_view(),
         name='courslet_delete'),
-
     # reorder units
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/reorder/?$',
         (ReorderUnits.as_view()),

@@ -1,4 +1,5 @@
 import time
+import logging
 
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
@@ -11,11 +12,15 @@ from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
 from ctms.forms import BestPractice1Form, BestPractice2Form
+from ctms.models import BestPractice
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 class ResponseViewSet(viewsets.mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -209,3 +214,18 @@ class OnboardingBp2Analysis(APIView):
             }
             return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BestPracticeCreate(APIView):
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        best_practice = get_object_or_404(BestPractice, id=int(request.POST.get('id')))
+        try:
+            new_best_practice = BestPractice.objects.create(
+                template=best_practice.template, course=best_practice.course, courselet=best_practice.courselet)
+            return RestResponse({'status': 'Ok', 'data': {'new_best_practice': new_best_practice.id}}, status=status.HTTP_200_OK)
+        except ValueError as e:
+            logger.error(e)
+            return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)

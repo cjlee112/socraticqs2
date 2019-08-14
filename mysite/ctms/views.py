@@ -44,7 +44,7 @@ from ctms.forms import (
 )
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
-from ctms.models import Invite, BestPractice1, BestPractice2
+from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
@@ -275,7 +275,7 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
 class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     template_name = 'ctms/course_form.html'
     model = Course
-    fields = ['title', 'students_number', 'trial']
+    fields = ['title', 'students_number', 'misconceptions_per_day', 'trial']
 
     def get(self, request, *args, **kwargs):
         if not self.am_i_instructor():
@@ -440,9 +440,7 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
     model = Unit
     template_name = 'ctms/courselet_form.html'
     fields = (
-        'title', 'practice_questions', 'best_practice_type',
-        'assessment_name', 'follow_up_assessment_date', 'follow_up_assessment_grade',
-        'deadline', 'durations', 'participation_credit'
+        'title',    
     )
     form = CreateCourseletForm
 
@@ -664,9 +662,11 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = Unit
     fields = (
-        'title', 'practice_questions', 'best_practice_type',
-        'assessment_name', 'follow_up_assessment_date', 'follow_up_assessment_grade',
-        'deadline', 'durations', 'participation_credit',
+        'title', 'exam_name',
+        'follow_up_assessment_date', 'follow_up_assessment_grade',
+        'question_parts', 'average_score', 'graded_assessment_value',
+        'courselet_deadline', 'courselet_days', 'error_resolution_days',
+        'courselet_completion_credit', 'late_completion_penalty',
         'is_show_will_learn'
     )
     course_pk_name = 'course_pk'
@@ -1361,7 +1361,7 @@ class OnboardingBP1(TemplateView):
             one_year = 31536000
             self.request.session.set_expiry(one_year)
 
-        initial_data = list(self.model.objects.filter(user=user).values()).last()
+        initial_data = self.model.objects.filter(user=user).values().last()
         if not initial_data:
             initial_data = self.initial_data
         print(initial_data)
@@ -1398,16 +1398,25 @@ class OnboardingBP2(OnboardingBP1):
     form = BestPractice2Form
 
 
-class BestPracticeCourseView(NewLoginRequiredMixin, OnboardingBP1):
-    template_name = 'ctms/onboarding_bp1.html'
-    model = BestPractice1
-    initial_data = {
-        'student_count': 200,
-        'misconceptions_count': 5,
-        'question_count': 24,
-        'mean_percent': 72
-    }
-    form = BestPractice1Form
+class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
+    context_object_name = 'best_practices'
+    template_name = 'ctms/course_best_practices.html'
+    model = BestPractice
+    queryset = BestPractice.objects.all()
+
+    def get_context_data(self, **kwargs):
+        active_bps = self.get_queryset().filter(active=True).count()
+        all_bps = self.get_queryset().count()
+        context = super().get_context_data(**kwargs)
+        context['best_practices_progress'] = active_bps / all_bps * 100
+        return context
+
+    def get_queryset(self):
+        for template in BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSE):
+            # TODO test it
+            if not BestPractice.objects.filter(template=template, course=self.get_course()).exists():
+                BestPractice.objects.create(template=template, course=self.get_course(), active=False)
+        return self.get_course().bestpractice_set.all().order_by('template')
 
     def get_course(self, queryset=None):
         if 'pk' in self.kwargs:
@@ -1422,17 +1431,137 @@ class BestPracticeCourseView(NewLoginRequiredMixin, OnboardingBP1):
                 raise Http404()
             return course
 
-    def get_context_data(self, **kwargs):
-        context = super(OnboardingBP1, self).get_context_data(**kwargs)
 
-        initial_data = self.get_course().best_practice1.__dict__ if self.get_course().best_practice1 else None
-        if not initial_data:
-            initial_data = self.initial_data
-        form = self.form(initial=initial_data)
-        context.update({
-            'form': form,
-            'pdf_form': BestPractice1PdfForm(initial=initial_data),
-            'form_data': initial_data,
-            'available_backends': load_backends(settings.AUTHENTICATION_BACKENDS)
-        })
+class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
+    context_object_name = 'best_practices'
+    template_name = 'ctms/courselet_best_practices.html'
+    model = BestPractice
+    queryset = BestPractice.objects.all()
+
+    def get_context_data(self, **kwargs):
+        active_bps = self.get_queryset().filter(active=True).count()
+        all_bps = self.get_queryset().count()
+        context = super().get_context_data(**kwargs)
+        context['best_practices_progress'] = active_bps / all_bps * 100
         return context
+
+    def get_queryset(self):
+        for template in BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSELET):
+            # TODO test it
+            if not BestPractice.objects.filter(template=template, courselet=self.get_courselet()).exists():
+                BestPractice.objects.create(template=template, courselet=self.get_courselet(), active=False)
+        return self.get_courselet().bestpractice_set.all().order_by('template')
+
+    def get_courselet(self, queryset=None):
+        if 'courselet_pk' in self.kwargs:
+            courselet = CourseUnit.objects.filter(
+                models.Q(id=self.kwargs.get('courselet_pk')) &
+                (
+                    models.Q(addedBy=self.request.user) |
+                    models.Q(course__role__role=Role.INSTRUCTOR, course__role__user=self.request.user) |
+                    models.Q(course__addedBy=self.request.user)
+                )
+            ).distinct().first()
+            if not courselet:
+                raise Http404()
+            return courselet
+
+
+class BestPracticeCalculation(DetailView):
+    model = BestPractice
+    template_name = 'ctms/best_practice_calculation.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['input_data'] = self.object.template.calculation
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        data = request.POST.dict()
+        del data['csrfmiddlewaretoken']
+        ob = self.get_object()
+        ob.data = data
+        ob.save()
+        return HttpResponseRedirect(reverse(
+            'ctms:activation',
+            kwargs={
+                'course_pk': kwargs.get('course_pk'),
+                'pk': kwargs.get('pk')
+            }
+        ))
+
+
+class BestPracticeActivation(DetailView):
+    model = BestPractice
+    template_name = 'ctms/best_practice_activation.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activation_data'] = self.object.template.activation if self.object.template.activation else {}
+        return context
+
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(Course, id=kwargs.get('course_pk'))
+        if 'couselet_pk' not in kwargs:
+            if course.courseunit_set.exists():
+                courselet = course.courseunit_set.first()
+                target = reverse('ctms:courselet_best_practice',
+                    kwargs={
+                        'course_pk': kwargs.get('course_pk'),
+                        'courselet_pk': courselet.id
+                })
+            else:
+                target = reverse('ctms:courslet_create', kwargs={'course_pk': kwargs.get('course_pk')})
+        else:
+            target = reverse('ctms:courselet_best_practice',
+                kwargs={
+                    'course_pk': kwargs.get('course_pk'),
+                    'courselet_pk': kwargs.get('courselet_pk')
+            })
+        best_practice = self.get_object()
+        best_practice.active = True
+        best_practice.save()
+        return HttpResponseRedirect(target)
+
+
+class BestPracticePreCalculation(DetailView):
+    model = BestPracticeTemplate
+    template_name = 'ctms/best_practice_calculation.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            course = Course.objects.filter(
+                models.Q(addedBy=self.request.user) |
+                models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+            ).distinct().first()
+            if not BestPractice.objects.filter(template=self.object, course=course).exists():
+                BestPractice.objects.create(template=self.object, course=course, active=False)
+        context['input_data'] = self.object.calculation
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        data = request.POST.dict()
+        del data['csrfmiddlewaretoken']
+        ob = self.get_object()
+        if self.request.user.is_authenticated:
+            course = Course.objects.filter(
+                models.Q(addedBy=self.request.user) |
+                models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+            ).distinct().first()
+            if not BestPractice.objects.filter(template=ob, course=course).exists():
+                best_practice = BestPractice.objects.create(template=ob, course=course, active=False)
+            else:
+                best_practice = BestPractice.objects.filter(template=ob, course=course).first()
+            best_practice.data = data
+            best_practice.save()
+            target = reverse(
+                'ctms:activation',
+                kwargs={
+                    'course_pk': course.id,
+                    'pk': best_practice.id
+                }
+            )
+        else:
+            target = reverse('ctms:create_course')
+        return HttpResponseRedirect(target)

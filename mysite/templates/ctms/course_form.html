@@ -39,6 +39,13 @@
           {{ form.students_number.errors }}
         {% endif %}
 
+        <label for="misconceptions_per_day">Misconceptions fixed per day</label>
+        <p>How many individual student-misconceptions instructor fixes manually per day</p>
+        {{ form.misconceptions_per_day }}
+        {% if form.misconceptions_per_day.errors %}
+          {{ form.misconceptions_per_day.errors }}
+        {% endif %}
+
           {{ form.trial.label_tag }}
           {{ form.trial }}
 

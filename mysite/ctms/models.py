@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.core.validators import FileExtensionValidator
 from django.http.response import Http404
 from django.template import loader
+from django.contrib.postgres.fields import JSONField
 
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
@@ -185,6 +186,43 @@ class Invite(models.Model):
 
     def __str__(self):
         return "Code {}, User {}".format(self.code, self.email)
+
+
+class BestPracticeTemplate(models.Model):
+    """
+    Model for types of Best Practices for course or courselet scope.
+    """
+    COURSE = 'course'
+    COURSELET = 'courselet'
+    BP_SCOPES = (
+        (COURSE, 'Course'),
+        (COURSELET, 'Courselet')
+    )
+    title = models.CharField(max_length=100)
+    explanation = models.TextField(blank=True, null=True)
+    metric = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
+    scope = models.CharField(max_length=10, choices=BP_SCOPES, db_index=True)
+    calculation = JSONField(blank=True, null=True)
+    activation = JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return '{} scope: {}'.format(self.title, self.scope)
+
+
+class BestPractice(models.Model):
+    """
+    Model for instances where a BP could be implemented in a course/courselet.
+    """
+    template = models.ForeignKey('BestPracticeTemplate', on_delete=models.SET_NULL, null=True)
+    course = models.ForeignKey('ct.Course', null=True, blank=True, on_delete=models.CASCADE)
+    courselet = models.ForeignKey('ct.CourseUnit', null=True, blank=True, on_delete=models.CASCADE)
+    active = models.BooleanField(default=False)
+    data = JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return 'Best Practice for {}'.format(self.template.title)
 
 
 class BestPractice1(models.Model):

@@ -391,6 +391,10 @@ LOGGING = {
         'ctms': {
             'handlers': ['console'],
             'level': 'INFO'
+        },
+        'api.v0.views': {
+            'handlers': ['console'],
+            'level': 'ERROR'
         }
     }
 }

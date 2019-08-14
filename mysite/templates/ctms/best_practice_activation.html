@@ -1,0 +1,26 @@
+{% extends "ctms_base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Get Started
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <main class="card__content">
+    <h1>{{ object }}</h1>
+    <form method="post">{% csrf_token %}
+      <p>
+        {% for key, value in activation_data.inputs.items %}
+        <label for="{{ key }}">{{ value.label }}</label>
+        <input type="{{ value.type }}" name="{{ key }}">
+        {% endfor %}
+      </p>
+      <input type="submit" class="btn" value="{{ activation_data.button_text }}">
+    </form>
+    </ul>
+  </div>
+</main>
+</div>
+{% endblock %}
+

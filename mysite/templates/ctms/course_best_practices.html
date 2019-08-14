@@ -1,0 +1,210 @@
+{% extends "ctms_base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Get Started
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="get-started__intro">
+      <h1>Best Practice page</h1>
+
+      <p>
+          There we have to add some usefull desctription.
+          There we have to add some usefull desctription.
+          There we have to add some usefull desctription.
+          There we have to add some usefull desctription.
+      </p>
+
+      <div data-progress="{{ best_practices_progress | floatformat:"0" }}" class="get-started__progress-circle">
+        <div>
+          <span class="get-started__progress-text">{{ best_practices_progress | floatformat:"0" }}</span><span class="get-started__progress-sign">%</span>
+        </div>
+      </div>
+
+      <span class="progress-line progress-line--over-white">
+        <span style="width: calc({{ best_practices_progress | floatformat:"0" }}% + 2px);"></span>
+      </span>
+    </header>
+
+    <div class="get-started__steps">
+
+
+      {% for best_practice in best_practices %}
+      <!-- view_introduction -->
+      <div class="get-started__step{% if best_practice.active %} get-started__step--done{% endif %}" data-step-id="view_introduction">
+        <div class="get-started__step-header">
+          <div class="get-started__step-status"></div>
+          <h2>{{ best_practice.template.title }}</h2>
+
+          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
+        </div>
+
+        <div class="get-started__step-content">
+          <div class="onboarding-content">
+            <p>
+              {{ best_practice.template.explanation }}
+            </p>
+            <a data-complete-step="test_courselet" href="{% url 'ctms:calculation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button button--primary">
+                {% if best_practice.active %}Recalculate{% else %}Calculate{% endif %}
+            </a>
+            {% if not best_practice.active %}
+            <a data-complete-step="test_courselet" href="{% url 'ctms:activation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button button--primary">
+              Activate
+            </a>
+            {% endif %}
+            {% if best_practice.active %}
+            <a data-complete-step="test_courselet" href="#" data-bp-pk="{{ best_practice.id }}"  class="button button--primary create-new-bp">
+              Create new one
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+    // Add listeners once the DOM is ready
+    $(function(){
+
+      // Create the progress circle
+      var progressCircle = new ProgressBar.Circle('.get-started__progress-circle', {
+        strokeWidth: 2,
+        trailColor: '#DDE2E6',
+        color: '#43B02A'
+      });
+
+      // Animate progress circle
+      var progress = parseInt( $('.get-started__progress-circle').data('progress') ) / 100;
+      progressCircle.animate(progress);
+
+      // Get started accordion
+      $('.get-started__step-toggle').on('click', function(e) {
+        e.preventDefault();
+
+        // Save a reference to the button
+        var $button = $(e.currentTarget);
+
+        // Find the parent step
+        var $step = $button.closest('.get-started__step');
+
+        // Close if the step is open
+        if($step.hasClass('get-started__step--open')) {
+          $button.html('View');
+          $step.removeClass('get-started__step--open');
+
+        // Otherwise open it
+        } else {
+          $button.html('Hide');
+          $step.addClass('get-started__step--open');
+        }
+      })
+
+      // Complete get started steps
+      $('[data-complete-step]').on('click', function(e) {
+        // Get the step name and element
+        var stepName = $(e.currentTarget).data('complete-step');
+        var $step = $('.get-started__step[data-step-id='+ stepName +']');
+        var data = {};
+        data[stepName] = true;
+
+        // Send an ajax request to save the update
+        this.updateCartXhr = $.ajax({
+          headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+          },
+          cache: false,
+          context: this,
+          data: data,
+          dataType: 'json',
+          method: 'PUT',
+          url: '/api/v0/onboarding-status/'
+        })
+        .done( function(response) { })
+        .fail( function(error) {
+          alert('Something went wrong. Please refresh the page and try again.');
+        });
+
+        // Update the status checkbox
+        $step.addClass('get-started__step--done');
+
+        // Delay updates for 1 second (let e.g. video overlays animate in first)
+        setTimeout(function() {
+          // Update the progress bars
+          var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
+          var newProgressPercentage = Math.floor(newProgress * 100);
+          progressCircle.set(newProgress);
+          $('.get-started__progress-text').html(newProgressPercentage);
+          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'});
+
+          // Hide open steps
+          $('.get-started__step').removeClass('get-started__step--open');
+          $('.get-started__step-toggle').html('View');
+
+          // Find next incomplete step
+          var $nextStep = $('.get-started__step').not('.get-started__step--done').first();
+
+          // Open the next step if one exists
+          $nextStep.addClass('get-started__step--open');
+          $nextStep.find('.get-started__step-toggle').html('Hide');
+        }, 1000)
+      });
+
+      $('.create-new-bp').on('click', function(e) {
+        // Get the step name and element
+        var bpPk = $(e.currentTarget).data('bp-pk');
+        var data = {};
+        data['id'] = bpPk;
+
+        // Send an ajax request to save the update
+        this.updateCartXhr = $.ajax({
+          headers: {
+            "X-CSRFToken": getCookie('csrftoken')
+          },
+          cache: false,
+          context: this,
+          data: data,
+          dataType: 'json',
+          method: 'POST',
+          url: "{% url 'api:v0:bp-creation' %}"
+        })
+        .done( function(response) { location.reload(true) } )
+        .fail( function(error) {
+          alert('Something went wrong. Please refresh the page and try again.');
+        });
+      });
+      // Redirect when the user closes the final video
+      $("[data-fancybox]").fancybox({
+        afterClose: function( instance, slide ) {
+          var steps = $('.get-started__step').length;
+          var done = $('.get-started__step--done').length;
+          var redirectTo = $('[data-redirect-to-after-done]').data('redirect-to-after-done');
+
+          if(steps == done && redirectTo) {
+            window.location.href = redirectTo;
+          }
+        },
+        afterShow: function() {
+          var iframe = $(".fancybox-iframe");
+          var player = new Vimeo.Player(iframe);
+          player.on('ended', function() {
+            if ( document.fullscreen ) {
+              document.exitFullscreen();
+            }
+            parent.$.fancybox.close();
+          });
+        }
+      });
+      // Open first unresolved step
+      $('.get-started__step').not('.get-started__step--done').first().addClass('get-started__step--open').find('.get-started__step-toggle').html('Hide');;
+    });
+  </script>
+{% endblock %}

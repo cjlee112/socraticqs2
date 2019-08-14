@@ -991,15 +991,19 @@ class Unit(models.Model):
     img_url = models.URLField(blank=True)
     small_img_url = models.URLField(blank=True)
     is_show_will_learn = models.BooleanField(default=False)
-    practice_questions = models.FileField(
-        upload_to='practice_questions/', blank=True, null=True, validators=[FileExtensionValidator(['pdf', 'docx'])])
-    best_practice_type = models.CharField(max_length=10, choices=BP_CHOICES, blank=True, null=True)
-    assessment_name = models.CharField(max_length=30, blank=True)
+    exam_name = models.CharField(max_length=30, blank=True, default='Midterm 1')
     follow_up_assessment_date = models.DateField(blank=True, null=True)
     follow_up_assessment_grade = models.IntegerField(blank=True, null=True, validators=[percent_validator])
-    deadline = models.IntegerField(blank=True, null=True, validators=[percent_validator])
-    durations = models.IntegerField(blank=True, null=True)
-    participation_credit = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    question_parts = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    average_score = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    graded_assessment_value = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    courselet_deadline = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    courselet_days = models.IntegerField(blank=True, null=True)
+    error_resolution_days = models.IntegerField(blank=True, null=True)
+    courselet_completion_credit = models.IntegerField(default=5, blank=True, null=True, validators=[percent_validator])
+    late_completion_penalty = models.IntegerField(default=50, blank=True, null=True, validators=[percent_validator])
+    upload_file = models.FileField(
+        upload_to='practice_questions/', blank=True, null=True, validators=[FileExtensionValidator(['pdf', 'docx'])])
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'
@@ -1490,6 +1494,7 @@ class Course(models.Model):
     FSM_flow = models.CharField(max_length=10, choices=FSM_CHOICES,
                                 default=DEFAULT_FSM)
     students_number = models.PositiveIntegerField(blank=True, null=True, default=200)
+    misconceptions_per_day = models.PositiveIntegerField(blank=True, null=True, default=5)
     best_practice1 = models.ForeignKey('ctms.BestPractice1', blank=True, null=True, on_delete=models.CASCADE)
 
     def deep_clone(self, **options):

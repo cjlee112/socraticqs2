@@ -1,5 +1,6 @@
 """ API v0 URLs. """
 from django.conf.urls import url
+from django.urls import path
 
 from .views import (
     EchoDataView,
@@ -10,7 +11,8 @@ from .views import (
     HealthCheck,
     OnboardingStatus,
     OnboardingBpAnalysis,
-    OnboardingBp2Analysis
+    OnboardingBp2Analysis,
+    BestPracticeCreate
 )
 
 app_name = 'v0'
@@ -46,5 +48,6 @@ urlpatterns = [
     url(r'^onboarding-status/$', OnboardingStatus.as_view(), name='onboarding-status'),
 
     url(r'^bp-analysis/$', OnboardingBpAnalysis.as_view(), name='onboarding_bp2-analysis'),
-    url(r'^bp2-analysis/$', OnboardingBp2Analysis.as_view(), name='onboarding_bp2-analysis')
+    url(r'^bp2-analysis/$', OnboardingBp2Analysis.as_view(), name='onboarding_bp2-analysis'),
+    path('bp/create/', BestPracticeCreate.as_view(), name='bp-creation'),
 ]
