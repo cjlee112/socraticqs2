@@ -9,7 +9,7 @@
   <div class="card">
     <main class="card__content">
     <h1>{{ object }}</h1>
-    <form method="post">{% csrf_token %}
+    <form method="post" id="bp-analysis">{% csrf_token %}
       <p> 
         {% for key, value in input_data.items %}
         <label for="{{ key }}">{{ value.label }}</label>
@@ -19,7 +19,49 @@
       <input type="submit" class="btn" value="Calculate">
     </form>
     </ul>
+    <div id='result' hidden>
+      <h2>Impact Analysis</h2><br>
+      <ul>
+        <li>
+        <span style='font-weight: 550'>
+        Estimated student blindspots you would resolve manually, assuming students do your practice exam 7 days before the
+        test: 7 * 5 = 1234</span><br>
+        </span>
+        defining the metric: 1 student blindspot = 1 student response (to a question-part) that exposes a
+        form.misconceptions_count.errors</li>
+
+        <li style='font-weight: 550'>Estimated student blindspots Courselets would detect, identify and help your
+        students resolve using your practice exam:
+        <span id='estimated_blindspots_courselets'>8324</span></li>
+        <li><span style='font-weight: 500'>Analysis</span>: your exam data indicate that there are far too many total
+        student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.
+        To genuinely fix this number of student blindspots,you need an online platform that's actually designed to identify and
+        resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot
+        for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on
+        exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.</li>
+    </ul>
+      <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="submit" class="btn" value="Next">
+      </form>
+    </ul>
+  </div>
   </div>
 </main>
 </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+      $(document).ready(function(){
+        $form = $('#bp-analysis');
+        $form.on('submit', function(e){
+          e.preventDefault();
+          var formData = $form.serializeArray();
+          console.log(formData);
+          $form.hide()
+          $("#result").removeAttr('hidden');
+        });
+      });
+  </script>
 {% endblock %}
