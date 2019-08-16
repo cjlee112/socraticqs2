@@ -71,6 +71,11 @@ class CourseCoursletUnitMixin(View):
         )
 
     def dispatch(self, request, *args, **kwargs):
+        course = self.get_course()
+        if course and (
+            not course.addedBy == self.request.user and
+            not Role.objects.filter(user=self.request.user, course=course, role=Role.INSTRUCTOR).exists()):
+            raise Http404()
         if self.NEED_INSTRUCTOR and not self.am_i_instructor():
             return redirect(settings.BECOME_INSTRUCTOR_URL)
         return super(CourseCoursletUnitMixin, self).dispatch(request, *args, **kwargs)
@@ -108,8 +113,9 @@ class CourseCoursletUnitMixin(View):
 
     def get_my_courses(self):
         return Course.objects.filter(
-            models.Q(addedBy=self.request.user)
-        )
+            models.Q(addedBy=self.request.user) |
+            models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
+        ).distinct()
 
     def get_my_or_shared_with_me_courses(self):
         return Course.objects.filter(
@@ -314,9 +320,6 @@ class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
     """
     model = Course
 
-    def get_queryset(self):
-        return Course.objects.filter(addedBy=self.request.user)
-
     def get_success_url(self):
         return reverse('ctms:my_courses')
 
@@ -496,8 +499,6 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
     course_pk_name = 'course_pk'
     courslet_pk_name = 'courslet_pk'
-    def get_queryset(self):
-        return self.model.objects.filter(addedBy=self.request.user)
 
     def get_context_data(self, **kwargs):
         if not self.get_courslet() or not self.get_course():
@@ -548,7 +549,8 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         :return:
         """
         course = self.get_course()
-        if course.addedBy != self.request.user:
+        if (course.addedBy != self.request.user and
+            not Role.objects.filter(user=self.request.user, role=Role.INSTRUCTOR, course=course).exists()):
             raise Http404()
         return super(CreateUnitView, self).post(request, *args, **kwargs)
 
@@ -714,12 +716,9 @@ class CoursletDeleteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteV
     def get_object(self, queryset=None):
         if queryset:
             return super(CoursletDeleteView, self).get_object(
-                queryset=queryset.filter(addedBy=self.request.user)
+                queryset=queryset.all()
             )
-        courselet = self.get_courslet()
-        if courselet and courselet.addedBy == self.request.user:
-            return courselet
-        raise Http404()
+        return self.get_courslet()
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
@@ -748,12 +747,9 @@ class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView)
     def get_object(self, queryset=None):
         if queryset:
             return super(DeleteUnitView, self).get_queryset(
-                queryset=queryset.filter(addedBy=self.request.user)
+                queryset=queryset.all()
             )
-        ul = self.get_unit_lesson()
-        if ul and ul.addedBy == self.request.user:
-            return ul
-        raise Http404()
+        return self.get_unit_lesson()
 
     def get_success_url(self):
         course = self.get_course()
@@ -797,7 +793,8 @@ class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailVie
 
     def get_object(self, queryset=None):
         ul = self.get_unit_lesson()
-        if ul and ul.addedBy == self.request.user:
+        if (ul and ul.addedBy == self.request.user or
+            Role.objects.filter(role=Role.INSTRUCTOR, course=self.get_course()).exists()):
             return ul.lesson
         raise Http404()
 
@@ -979,7 +976,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
 
     def get_object(self, queryset=None):
         obj = self.get_unit_lesson()
-        if not obj or (obj and obj.addedBy != self.request.user):
+        if not obj:
             raise Http404()
         return obj
 
@@ -1191,7 +1188,7 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
 class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
     def post(self, request, code):
         invite = get_object_or_404(Invite, code=code)
-        if invite.course.addedBy != self.request.user:
+        if invite.course.addedBy != self.request.user and not Role(course=invite.course, role=Role.INSTRUCTOR).exists():
             raise Http404()
         response = invite.send_mail(self.request, self)
         messages.add_message(self.request, messages.SUCCESS,

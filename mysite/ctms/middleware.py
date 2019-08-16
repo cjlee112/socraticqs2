@@ -29,8 +29,8 @@ NAME_MODEL_MAPPING = {
 }
 
 ALLOWED_MODEL_FILTERS_MAPPING = {
-    Course: ['addedBy'],
-    CourseUnit: ['addedBy']
+    Course: [''],
+    CourseUnit: ['']
 }
 
 
@@ -100,7 +100,7 @@ class SideBarUtils(object):
         for model, pk in model_ids.items():
             filter_data = {'id': pk}
             if self.request.user.is_authenticated():
-                filter_data.update(get_model_filter(model, {'addedBy': self.request.user}))
+                filter_data.update(get_model_filter(model, {}))
             yield (MODEL_NAMES_MAPPING[model], model.objects.filter(**filter_data).first())
 
     def _reverse(self, name, kwargs=None):

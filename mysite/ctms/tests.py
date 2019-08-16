@@ -11,7 +11,8 @@ from django.db import models
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
 
-from ct.models import Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS, SubKindMixin
+from ct.models import (
+    Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS, SubKindMixin, Role)
 from ctms.forms import EditUnitForm
 from ctms.models import Invite
 from psa.forms import EmailLoginForm, SignUpForm
@@ -118,7 +119,10 @@ class MyTestCase(TestCase):
         return response
 
     def get_my_courses(self):
-        return Course.objects.filter(addedBy=self.user)
+        return Course.objects.filter(
+            models.Q(addedBy=self.user) |
+            models.Q(role__role=Role.INSTRUCTOR, role__user=self.user)
+        )
 
     def get_test_course(self):
         return Course.objects.get(id=self.course.id)
@@ -235,7 +239,7 @@ class OnboardingTests(MyTestCase):
         self.assertEqual(response.context['introduction_course'], None)
         self.assertEqual(response.context['enroll_url'], '#')
 
-
+@ddt
 class MyCoursesTests(MyTestCase):
     def setUp(self):
         self.username, self.password = 'test', 'test'
@@ -282,6 +286,49 @@ class MyCoursesTests(MyTestCase):
         self.assertTemplateUsed(response, 'ctms/my_courses.html')
         self.assertIn('my_courses', response.context)
         self.assertIn(self.course, response.context['my_courses'])
+    
+    def test_get_my_courses_page_instructor_role(self):
+        """
+        Ensure Role.INSTRUCTOR granted access to a Course.
+        """
+        course = Course(title='Instructor2 Course',
+                             description='test description',
+                             access='Public',
+                             enrollCode='111',
+                             lockout='222',
+                             addedBy=self.user2)
+        course.save()
+        Role.objects.create(role=Role.INSTRUCTOR, course=course, user=self.user)
+        response = self.client.get(self.url)
+        # should contain 2 courses
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ctms/my_courses.html')
+        self.assertIn('my_courses', response.context)
+        self.assertIn(self.course, response.context['my_courses'])
+        self.assertIn(course, response.context['my_courses'])
+        self.assertEqual(len(response.context['my_courses']), 2)
+
+    @data(Role.TA, Role.SELFSTUDY, Role.ENROLLED)
+    def test_get_my_courses_page_notinstructor_role(self, role):
+        """
+        Ensure Role.INSTRUCTOR granted access to a Course.
+        """
+        course = Course(title='Instructor2 Course',
+                                description='test description',
+                                access='Public',
+                                enrollCode='111',
+                                lockout='222',
+                                addedBy=self.user2)
+        course.save()
+        Role.objects.create(role=role, course=course, user=self.user)
+        response = self.client.get(self.url)
+        # should contain 1 courses
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'ctms/my_courses.html')
+        self.assertIn('my_courses', response.context)
+        self.assertIn(self.course, response.context['my_courses'])
+        self.assertNotIn(course, response.context['my_courses'])
+        self.assertEqual(len(response.context['my_courses']), 1)
 
     @mock.patch('ctms.views.get_onboarding_percentage')
     def test_my_courses_show_shared_courses(self, onboarding_percentage):
