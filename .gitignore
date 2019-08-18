@@ -91,3 +91,4 @@ mysite/lms/static/js/draw_svg.js
 
 .*env*
 *.code-workspace
+.mypy_cache/

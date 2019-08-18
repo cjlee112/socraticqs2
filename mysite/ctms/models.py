@@ -185,7 +185,7 @@ class Invite(models.Model):
             raise Http404()
 
     def __str__(self):
-        return "Code {}, User {}".format(self.code, self.email)
+        return f'Code {self.code}, User {self.email}'
 
 
 class BestPracticeTemplate(models.Model):
@@ -208,7 +208,7 @@ class BestPracticeTemplate(models.Model):
     activation = JSONField(blank=True, null=True)
 
     def __str__(self):
-        return '{} scope: {}'.format(self.title, self.scope)
+        return f'{self.title} scope: {self.scope}'
 
 
 class BestPractice(models.Model):
@@ -222,7 +222,7 @@ class BestPractice(models.Model):
     data = JSONField(blank=True, null=True)
 
     def __str__(self):
-        return 'Best Practice for {}'.format(self.template.title)
+        return f'Best Practice for {self.template.title}'
 
 
 class BestPractice1(models.Model):
@@ -246,7 +246,7 @@ class BestPractice1(models.Model):
     )
 
     def __str__(self):
-        return '{} for user {}'.format(self.__class__.__name__, self.user)
+        return f'{self.__class__.__name__} for user {self.user}'
 
 
 class BestPractice2(models.Model):
@@ -261,4 +261,4 @@ class BestPractice2(models.Model):
     estimated_blindspots_courselets = models.IntegerField(blank=True)
 
     def __str__(self):
-        return '{} for user {}'.format(self.__class__.__name__, self.user)
+        return f'{self.__class__.__name__} for user {self.user}'

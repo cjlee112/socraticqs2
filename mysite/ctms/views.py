@@ -1494,16 +1494,42 @@ class BestPracticeCalculation(DetailView):
 class BestPracticeActivation(DetailView):
     model = BestPractice
     template_name = 'ctms/best_practice_activation.html'
+    course = 'course'
+    courselet = 'courselet'
+
+    def create_courselet(self, *args, **kwargs) -> HttpResponseRedirect:
+        ob = CreateCourseletForm({'title': self.request.POST.get('exam_name')}).save(commit=False)
+        ob.addedBy = self.request.user
+        ob.save()
+        ob.course_unit = CourseUnit.objects.create(
+            unit=ob,
+            course=kwargs.get('course'),
+            addedBy=self.request.user,
+            order=0,
+        )
+        ob.save()
+        return reverse('ctms:courselet_best_practice',
+            kwargs={
+                'course_pk': kwargs.get('course').id,
+                'courselet_pk': ob.course_unit.id
+        })
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['activation_data'] = self.object.template.activation if self.object.template.activation else {}
         return context
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        best_practice = self.get_object()
         course = get_object_or_404(Course, id=kwargs.get('course_pk'))
-        if 'couselet_pk' not in kwargs:
-            if course.courseunit_set.exists():
+        if best_practice.template.scope == self.course:
+            target = reverse('ctms:course_best_practice',
+                kwargs={'pk': kwargs.get('course_pk')})
+            if BestPracticeTemplate.objects.filter(id=best_practice.template.id, activation__action__isnull=False).exists() and \
+                hasattr(self, best_practice.template.activation.get('action')):
+                action = getattr(self, best_practice.template.activation.get('action'))
+                target = action(self, course=course)
+            elif course.courseunit_set.exists():
                 courselet = course.courseunit_set.first()
                 target = reverse('ctms:courselet_best_practice',
                     kwargs={
@@ -1512,14 +1538,16 @@ class BestPracticeActivation(DetailView):
                 })
             else:
                 target = reverse('ctms:courslet_create', kwargs={'course_pk': kwargs.get('course_pk')})
-        else:
+        elif best_practice.template.scope == self.courselet:
             target = reverse('ctms:courselet_best_practice',
-                kwargs={
-                    'course_pk': kwargs.get('course_pk'),
-                    'courselet_pk': kwargs.get('courselet_pk')
-            })
-        best_practice = self.get_object()
-        best_practice.active = True
+                kwargs={'course_pk': kwargs.get('course_pk'), 'courselet_pk': kwargs.get('course_pk')})
+            if BestPracticeTemplate.objects.filter(id=best_practice.template.id, activation__action__isnull=False).exists() and \
+                hasattr(self, best_practice.template.activation.get('action')):
+                action = getattr(self, best_practice.template.activation.get('action'))
+                target = action(self, course=course)
+        data = request.POST.dict()
+        del data['csrfmiddlewaretoken']
+        best_practice.active, best_practice.data = True, request.POST.dict()
         best_practice.save()
         return HttpResponseRedirect(target)
 
@@ -1530,38 +1558,8 @@ class BestPracticePreCalculation(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            course = Course.objects.filter(
-                models.Q(addedBy=self.request.user) |
-                models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
-            ).distinct().first()
-            if not BestPractice.objects.filter(template=self.object, course=course).exists():
-                BestPractice.objects.create(template=self.object, course=course, active=False)
         context['input_data'] = self.object.calculation
         return context
     
     def post(self, request, *args, **kwargs):
-        data = request.POST.dict()
-        del data['csrfmiddlewaretoken']
-        ob = self.get_object()
-        if self.request.user.is_authenticated:
-            course = Course.objects.filter(
-                models.Q(addedBy=self.request.user) |
-                models.Q(role__role=Role.INSTRUCTOR, role__user=self.request.user)
-            ).distinct().first()
-            if not BestPractice.objects.filter(template=ob, course=course).exists():
-                best_practice = BestPractice.objects.create(template=ob, course=course, active=False)
-            else:
-                best_practice = BestPractice.objects.filter(template=ob, course=course).first()
-            best_practice.data = data
-            best_practice.save()
-            target = reverse(
-                'ctms:activation',
-                kwargs={
-                    'course_pk': course.id,
-                    'pk': best_practice.id
-                }
-            )
-        else:
-            target = reverse('ctms:create_course')
-        return HttpResponseRedirect(target)
+        return HttpResponseRedirect(reverse('ctms:create_course'))
