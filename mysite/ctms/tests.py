@@ -701,7 +701,7 @@ class UnitViewTests(MyTestCase):
         self.url = reverse(
             'ctms:unit_view', kwargs={
                 'course_pk': self.course.id,
-                'courslet_pk': self.courseunit.id,
+                'courselet_pk': self.courseunit.id,
                 'pk': self.unitlesson.id
             }
         )
@@ -720,7 +720,7 @@ class UnitViewTests(MyTestCase):
         self.url = reverse(
             'ctms:unit_view', kwargs={
                 'course_pk': 99999,
-                'courslet_pk': 999,
+                'courselet_pk': 999,
                 'pk': 999
             }
         )
@@ -735,7 +735,7 @@ class CreateUnitViewTests(MyTestCase):
             'ctms:unit_create',
             kwargs={
                 'course_pk': self.course.id,
-                'courslet_pk': self.courseunit.id,
+                'courselet_pk': self.courseunit.id,
 
             }
         )
@@ -754,7 +754,7 @@ class CreateUnitViewTests(MyTestCase):
             'ctms:unit_create',
             kwargs={
                 'course_pk': 999,
-                'courslet_pk': 999,
+                'courselet_pk': 999,
             }
         )
         response = self.get_page()
@@ -783,7 +783,7 @@ class CreateUnitViewTests(MyTestCase):
             'ctms:unit_edit',
             kwargs={
                 'course_pk': self.get_test_course().id,
-                'courslet_pk': self.get_test_courseunit().id,
+                'courselet_pk': self.get_test_courseunit().id,
                 'pk': last_ul.id
             })
         assert last_ul.lesson.kind == Lesson.ORCT_QUESTION
@@ -795,7 +795,7 @@ class CreateUnitViewTests(MyTestCase):
         self.url = reverse(
             'ctms:unit_edit', kwargs={
                 'course_pk': 99999,
-                'courslet_pk': 999,
+                'courselet_pk': 999,
                 'pk': 999
             }
         )
@@ -835,7 +835,7 @@ class EditUnitViewTests(MyTestCase):
             'ctms:unit_edit',
             kwargs={
                 'course_pk': self.get_test_course().id,
-                'courslet_pk': self.get_test_courseunit().id,
+                'courselet_pk': self.get_test_courseunit().id,
                 'pk': self.get_test_unitlessons()[0].id,
             }
         )
@@ -877,7 +877,7 @@ class EditUnitViewTests(MyTestCase):
             'ctms:unit_edit',
             kwargs={
                 'course_pk': self.get_test_course().id,
-                'courslet_pk': self.get_test_courseunit().id,
+                'courselet_pk': self.get_test_courseunit().id,
                 'pk': lesson_id,
             }
         )
@@ -942,7 +942,7 @@ class EditUnitViewTests(MyTestCase):
         ul = self.get_test_unitlesson()
         url = reverse('ctms:unit_edit', kwargs={
             'course_pk': self.get_test_course().id,
-            'courslet_pk': self.get_test_courseunit().id,
+            'courselet_pk': self.get_test_courseunit().id,
             'pk': ul.id
         })
         self.assertEqual(self.get_test_unitlesson().lesson.text, text)
@@ -1094,7 +1094,7 @@ class EditUnitViewTests(MyTestCase):
 
 class ResponseViewTests(MyTestCase):
     models_to_check = (Response,)
-    context_should_contain_keys = ('course_pk', 'courslet_pk', 'unit_pk', 'pk', 'object')
+    context_should_contain_keys = ('course_pk', 'courselet_pk', 'unit_pk', 'pk', 'object')
 
     def setUp(self):
         super(ResponseViewTests, self).setUp()
@@ -1102,7 +1102,7 @@ class ResponseViewTests(MyTestCase):
             'ctms:response_view',
             kwargs={
                 'course_pk': self.get_test_course().id,
-                'courslet_pk': self.get_test_courseunit().id,
+                'courselet_pk': self.get_test_courseunit().id,
                 'unit_pk': self.get_test_unitlesson().id,
                 'pk': self.get_test_response().id
             }
@@ -1198,7 +1198,7 @@ class DeleteUnitViewTests(MyTestCase):
         super(DeleteUnitViewTests, self).setUp()
         self.kwargs = {
             'course_pk': self.get_test_course().id,
-            'courslet_pk': self.get_test_courseunit().id,
+            'courselet_pk': self.get_test_courseunit().id,
             'pk': self.get_test_courslet().id
         }
         self.url = reverse('ctms:unit_delete', kwargs=self.kwargs)
@@ -1225,7 +1225,7 @@ class UnitSettingsViewTests(MyTestCase):
         super(UnitSettingsViewTests, self).setUp()
         self.kwargs = {
             'course_pk': self.get_test_course().id,
-            'courslet_pk': self.get_test_courseunit().id,
+            'courselet_pk': self.get_test_courseunit().id,
             'pk': self.get_test_unitlesson().id
         }
         self.url = reverse('ctms:unit_settings', kwargs=self.kwargs)

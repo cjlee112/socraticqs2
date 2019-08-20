@@ -95,7 +95,7 @@ def error_tabs(path, current, unitLesson,
             if cu:
                 url = reverse('ctms:unit_edit', kwargs={
                     'course_pk': course_id,
-                    'courslet_pk': cu.id,
+                    'courselet_pk': cu.id,
                     'pk': unitLesson.parent.id,
                 })
                 outTabs.append(make_tab(path, current, 'New UI', url))

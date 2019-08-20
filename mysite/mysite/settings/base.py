@@ -188,6 +188,8 @@ INSTALLED_APPS = (
 
     # Intercom
     'django_intercom',
+
+    'django_json_widget',
 )
 
 THUMBNAIL_HIGH_RESOLUTION = True

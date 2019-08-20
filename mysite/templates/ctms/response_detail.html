@@ -10,15 +10,15 @@
   <nav class="card__nav">
     <ul>
       <li>
-        <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Edit</a>
+        <a href="{% url 'ctms:unit_edit' course_pk=course_pk courselet_pk=courselet_pk pk=unit_pk %}">Edit</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}" class="card__nav-active">Answers</a>
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courselet_pk=courselet_pk pk=unit_pk %}" class="card__nav-active">Answers</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_settings' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">Settings</a>
+        <a href="{% url 'ctms:unit_settings' course_pk=course_pk courselet_pk=courselet_pk pk=unit_pk %}">Settings</a>
       </li>
     </ul>
   </nav>
@@ -26,7 +26,7 @@
   <main class="card__content">
     <div class="answer">
       <div class="answer__back">
-        <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=courslet_pk pk=unit_pk %}">&larr; All answers</a>
+        <a href="{% url 'ctms:unit_view' course_pk=course_pk courselet_pk=courselet_pk pk=unit_pk %}">&larr; All answers</a>
       </div>
 
       <div class="user-info">

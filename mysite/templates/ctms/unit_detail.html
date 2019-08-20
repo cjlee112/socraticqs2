@@ -10,15 +10,15 @@
   <nav class="card__nav">
     <ul>
       <li>
-        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Edit</a>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Edit</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Answers</a>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courselet_pk=courslet.id pk=pk %}" class="card__nav-active">Answers</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Settings</a>
       </li>
     </ul>
   </nav>
@@ -29,8 +29,8 @@
 
   <main class="card__content">
     <ul class="nav nav-tabs custom-nav-tabs">
-      {# <li class="{% if not is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courslet_pk=courslet.pk pk=unit.pk %}">Common</a></li> #}
-      {# <li class="{% if is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courslet_pk=courslet.pk pk=unit.pk %}?is_trial=true">Trial</a></li> #}
+      {# <li class="{% if not is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courselet_pk=courslet.pk pk=unit.pk %}">Common</a></li> #}
+      {# <li class="{% if is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courselet_pk=courslet.pk pk=unit.pk %}?is_trial=true">Trial</a></li> #}
     </ul>
     {% if responses %}
     <table>
@@ -69,7 +69,7 @@
           </td>
 
           <td>
-            <a href="{% url 'ctms:response_view' course_pk=course_pk courslet_pk=courslet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
+            <a href="{% url 'ctms:response_view' course_pk=course_pk courselet_pk=courselet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
           </td>
         </tr>
         {% endfor %}

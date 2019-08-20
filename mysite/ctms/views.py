@@ -43,7 +43,7 @@ from ctms.forms import (
     BestPractice1PdfForm
 )
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
-from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm
+from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm, EditCourseletForm, UploadFileBPForm
 from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
@@ -62,7 +62,7 @@ def json_response(x):
 
 class CourseCoursletUnitMixin(View):
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'unit_pk'
     NEED_INSTRUCTOR = True
     response_class = TemplateResponse
@@ -161,7 +161,7 @@ class CourseCoursletUnitMixin(View):
                 # and unit.response_set.exists() else 'ctms:unit_edit',
                 kwargs={
                     'course_pk': courselet.course.id,
-                    'courslet_pk': courselet.id,
+                    'courselet_pk': courselet.id,
                     'pk': unit.id
                 }
             )
@@ -249,7 +249,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     template_name = 'ctms/my_courses.html'
     model = Course
-    fields = ['title', 'students_number']
+    fields = ('title',)
     # form_class = CourseForm
 
     def get(self, request, *args, **kwargs):
@@ -439,10 +439,7 @@ class CoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     model = Unit
     template_name = 'ctms/courselet_form.html'
-    fields = (
-        'title',    
-    )
-    form = CreateCourseletForm
+    form_class = CreateCourseletForm
 
     def get_success_url(self):
         return reverse(
@@ -508,7 +505,7 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = UnitLesson
 
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
 
     def get_context_data(self, **kwargs):
         if not self.get_courslet() or not self.get_course():
@@ -546,7 +543,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
     form_class = CreateUnitForm
     template_name = 'ctms/create_unit_form.html'
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'pk'
 
     def post(self, request, *args, **kwargs):
@@ -569,7 +566,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
             'ctms:unit_edit',
             kwargs={
                 'course_pk': self.get_course().id,
-                'courslet_pk': self.get_courslet().id,
+                'courselet_pk': self.get_courslet().id,
                 'pk': self.object.unit_lesson.id
             }
         )
@@ -605,7 +602,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = UnitLesson
     template_name = 'ctms/unit_form.html'
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'pk'
     form_class = EditUnitForm
 
@@ -644,7 +641,7 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
 class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = Response
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'unit_pk'
     template_name = 'ctms/response_detail.html'
 
@@ -661,7 +658,7 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
 
 class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
     model = Unit
-    fields = (
+    _fields = (
         'title', 'exam_name',
         'follow_up_assessment_date', 'follow_up_assessment_grade',
         'question_parts', 'average_score', 'graded_assessment_value',
@@ -669,6 +666,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         'courselet_completion_credit', 'late_completion_penalty',
         'is_show_will_learn'
     )
+    form_class = EditCourseletForm
     course_pk_name = 'course_pk'
     courslet_pk_name = 'pk'
     template_name = 'ctms/courslet_settings.html'
@@ -788,7 +786,7 @@ class DeleteUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DeleteView)
 class UnitSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     model = UnitLesson
     course_pk_name = 'course_pk'
-    courslet_pk_name = 'courslet_pk'
+    courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'pk'
     template_name = 'ctms/unit_settings.html'
 
@@ -847,7 +845,7 @@ class CreateEditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, FormSet
     def get_success_url(self):
         return reverse('ctms:unit_edit', kwargs={
             'course_pk': self.kwargs['course_pk'],
-            'courslet_pk': self.kwargs['courslet_pk'],
+            'courselet_pk': self.kwargs['courselet_pk'],
             'pk': self.object.id
         })
 
@@ -1251,7 +1249,7 @@ class EmailSentView(TemplateView):  # NewLoginRequiredMixin , CourseCoursletUnit
 
 
 class ReorderUnits(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
-    def post(self, request, course_pk, courslet_pk):
+    def post(self, request, course_pk, courselet_pk):
         # new ordered ids are in request.POST['ordered_ids']
         data = json.loads(request.POST.get('data') or '{}')
         ids = [int(i) for i in data.get('ordered_ids')]
@@ -1408,7 +1406,7 @@ class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
         active_bps = self.get_queryset().filter(active=True).count()
         all_bps = self.get_queryset().count()
         context = super().get_context_data(**kwargs)
-        context['best_practices_progress'] = active_bps / all_bps * 100
+        context['best_practices_progress'] = active_bps / all_bps * 100 if all_bps else 0
         return context
 
     def get_queryset(self):
@@ -1416,7 +1414,7 @@ class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
             # TODO test it
             if not BestPractice.objects.filter(template=template, course=self.get_course()).exists():
                 BestPractice.objects.create(template=template, course=self.get_course(), active=False)
-        return self.get_course().bestpractice_set.all().order_by('template')
+        return self.get_course().bestpractice_set.filter(template__scope='course').order_by('template')
 
     def get_course(self, queryset=None):
         if 'pk' in self.kwargs:
@@ -1442,7 +1440,7 @@ class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
         active_bps = self.get_queryset().filter(active=True).count()
         all_bps = self.get_queryset().count()
         context = super().get_context_data(**kwargs)
-        context['best_practices_progress'] = active_bps / all_bps * 100
+        context['best_practices_progress'] = active_bps / all_bps * 100 if all_bps else 0
         return context
 
     def get_queryset(self):
@@ -1450,7 +1448,7 @@ class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
             # TODO test it
             if not BestPractice.objects.filter(template=template, courselet=self.get_courselet()).exists():
                 BestPractice.objects.create(template=template, courselet=self.get_courselet(), active=False)
-        return self.get_courselet().bestpractice_set.all().order_by('template')
+        return self.get_courselet().bestpractice_set.filter(template__scope='courselet').order_by('template')
 
     def get_courselet(self, queryset=None):
         if 'courselet_pk' in self.kwargs:
@@ -1470,6 +1468,8 @@ class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
 class BestPracticeCalculation(DetailView):
     model = BestPractice
     template_name = 'ctms/best_practice_calculation.html'
+    course = 'course'
+    courselet = 'courselet'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1477,18 +1477,35 @@ class BestPracticeCalculation(DetailView):
         return context
     
     def post(self, request, *args, **kwargs):
-        data = request.POST.dict()
-        del data['csrfmiddlewaretoken']
         ob = self.get_object()
+        data = ob.data or {}
+        data.update(request.POST.dict())
+        del data['csrfmiddlewaretoken']
+
         ob.data = data
         ob.save()
-        return HttpResponseRedirect(reverse(
-            'ctms:activation',
-            kwargs={
-                'course_pk': kwargs.get('course_pk'),
-                'pk': kwargs.get('pk')
-            }
-        ))
+        course = get_object_or_404(Course, id=kwargs.get('course_pk'))
+        course.apply_from(data, commit=True)
+        ob.courselet.unit.apply_from(data, commit=True) if ob.courselet else None
+
+        target = (
+            reverse(
+                'ctms:activation',
+                kwargs={
+                    'course_pk': kwargs.get('course_pk'),
+                    'pk': kwargs.get('pk')
+                }
+            ) if ob.template.scope == self.course else
+            reverse(
+                'ctms:courselet_bp_activation',
+                kwargs={
+                    'course_pk': kwargs.get('course_pk'),
+                    'courselet_pk': kwargs.get('courselet_pk'),
+                    'pk': kwargs.get('pk')
+                }
+            )
+        )
+        return HttpResponseRedirect(target)
 
 
 class BestPracticeActivation(DetailView):
@@ -1508,6 +1525,9 @@ class BestPracticeActivation(DetailView):
             order=0,
         )
         ob.save()
+        best_practice = kwargs.get('best_practice')
+        best_practice.courselet = ob.course_unit
+        best_practice.save()
         return reverse('ctms:courselet_best_practice',
             kwargs={
                 'course_pk': kwargs.get('course').id,
@@ -1527,8 +1547,9 @@ class BestPracticeActivation(DetailView):
                 kwargs={'pk': kwargs.get('course_pk')})
             if BestPracticeTemplate.objects.filter(id=best_practice.template.id, activation__action__isnull=False).exists() and \
                 hasattr(self, best_practice.template.activation.get('action')):
+                # TODO rewrite this to get action code authomatically
                 action = getattr(self, best_practice.template.activation.get('action'))
-                target = action(self, course=course)
+                target = action(best_practice=best_practice, course=course)
             elif course.courseunit_set.exists():
                 courselet = course.courseunit_set.first()
                 target = reverse('ctms:courselet_best_practice',
@@ -1540,15 +1561,24 @@ class BestPracticeActivation(DetailView):
                 target = reverse('ctms:courslet_create', kwargs={'course_pk': kwargs.get('course_pk')})
         elif best_practice.template.scope == self.courselet:
             target = reverse('ctms:courselet_best_practice',
-                kwargs={'course_pk': kwargs.get('course_pk'), 'courselet_pk': kwargs.get('course_pk')})
+                kwargs={'course_pk': kwargs.get('course_pk'), 'courselet_pk': kwargs.get('courselet_pk')})
             if BestPracticeTemplate.objects.filter(id=best_practice.template.id, activation__action__isnull=False).exists() and \
                 hasattr(self, best_practice.template.activation.get('action')):
                 action = getattr(self, best_practice.template.activation.get('action'))
-                target = action(self, course=course)
-        data = request.POST.dict()
+                target = action(best_practice=best_practice, course=course)
+
+        data = best_practice.data or {}
+        data.update(request.POST.dict())
         del data['csrfmiddlewaretoken']
-        best_practice.active, best_practice.data = True, request.POST.dict()
+        best_practice.active, best_practice.data = True, data
         best_practice.save()
+        course.apply_from(data, commit=True)
+        best_practice.courselet.unit.apply_from(data, commit=True) if best_practice.courselet else None
+
+        if 'upload_file' in self.request.FILES:
+            bp_form = UploadFileBPForm(self.request.POST, self.request.FILES, instance=best_practice)
+            if bp_form.is_valid():
+                bp_form.save()
         return HttpResponseRedirect(target)
 
 

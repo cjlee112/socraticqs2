@@ -959,7 +959,22 @@ def reorder_exercise(self, old=0, new=0, l=()):
 
 
 class Unit(models.Model):
-    'a container of exercises performed together'
+    """
+    A container of exercises performed together.
+    """
+    ALLOWED_FIELDS = (
+        'exam_name',
+        'follow_up_assessment_date',
+        'follow_up_assessment_grade',
+        'question_parts',
+        'average_score',
+        'graded_assessment_value',
+        'courselet_deadline',
+        'courselet_days',
+        'error_resolution_days',
+        'courselet_completion_credit',
+        'late_completion_penalty'
+    )
     COURSELET = 'unit'
     LIVE_SESSION = 'live'
     RESOLUTION = 'resol'
@@ -1002,8 +1017,6 @@ class Unit(models.Model):
     error_resolution_days = models.IntegerField(blank=True, null=True)
     courselet_completion_credit = models.IntegerField(default=5, blank=True, null=True, validators=[percent_validator])
     late_completion_penalty = models.IntegerField(default=50, blank=True, null=True, validators=[percent_validator])
-    upload_file = models.FileField(
-        upload_to='practice_questions/', blank=True, null=True, validators=[FileExtensionValidator(['pdf', 'docx'])])
 
     def next_order(self):
         'get next order value for appending new UnitLesson.order'
@@ -1146,6 +1159,14 @@ class Unit(models.Model):
             return ul
         else:  # not in this unit so copy
             return ul.copy(self, user, order='APPEND')
+    
+    def apply_from(self, data: dict, commit=False):
+        assert isinstance(data, dict)
+        assert hasattr(self, 'ALLOWED_FIELDS')
+        for key, value in data.items():
+            setattr(self, key, value) if key in self.ALLOWED_FIELDS else None
+        self.save() if commit else None
+        return self
 
     def __str__(self):
         return self.title
@@ -1467,7 +1488,10 @@ class FAQ(models.Model):
 # Course and membership info
 
 class Course(models.Model):
-    'top-level (enrollment) container'
+    """
+    Top-level (enrollment) container.
+    """
+    ALLOWED_FIELDS = ('students_number', 'misconceptions_per_day')
     ACCESS_CHOICES = (
         (PUBLIC_ACCESS, 'Public'),
         (INSTRUCTOR_ENROLLED, 'By instructors only'),
@@ -1587,6 +1611,13 @@ class Course(models.Model):
         if not role:
             role = Role.INSTRUCTOR
         return User.objects.filter(role__role=role, role__course=self)
+    
+    def apply_from(self, data: dict, commit=False):
+        assert isinstance(data, dict)
+        for key, value in data.items():
+            setattr(self, key, value) if key in self.ALLOWED_FIELDS else None
+        self.save() if commit else None
+        return self
 
     def __str__(self):
         return self.title

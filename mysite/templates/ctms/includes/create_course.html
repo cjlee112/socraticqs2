@@ -13,9 +13,6 @@
       {{ form.title }}
       {{ form.title.errors }}
 
-      <label for="number">Number of Students</label>
-      {{ form.students_number }}
-
       {% csrf_token %}
 
       <input type="submit" name="Create Course" value="Create Course"/>

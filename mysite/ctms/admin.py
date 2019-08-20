@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.postgres import fields
+from django_json_widget.widgets import JSONEditorWidget
 
 from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate
 
@@ -16,12 +18,18 @@ class AdminModel(admin.ModelAdmin):
 class BestPracticeTemplateAdmin(admin.ModelAdmin):
     list_display = ('title', 'scope')
     list_filter = ('scope',)
+    formfield_overrides = {
+        fields.JSONField: {'widget': JSONEditorWidget},
+    }
 
 
 @admin.register(BestPractice)
 class BestPracticeAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'courselet', 'active', 'scope')
     list_filter = ('active', 'template__scope')
+    formfield_overrides = {
+        fields.JSONField: {'widget': JSONEditorWidget},
+    }
 
     def title(self, ob):
         return ob.template.title

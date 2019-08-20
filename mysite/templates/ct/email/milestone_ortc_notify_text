@@ -1,3 +1,3 @@
 {{ students_number }} students answered the {{ milestone }} lesson, "{{ lesson_title }}", of the course "{{ course_title }}".
 
-You can navigate to students' answers following the next link: https://{{ current_site }}{% url 'ctms:unit_view' course_pk=course_id courslet_pk=courselet_pk pk=unit_lesson_id %}
+You can navigate to students' answers following the next link: https://{{ current_site }}{% url 'ctms:unit_view' course_pk=course_id courselet_pk=courselet_pk pk=unit_lesson_id %}

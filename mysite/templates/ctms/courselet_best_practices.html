@@ -43,21 +43,18 @@
 
         <div class="get-started__step-content">
           <div class="onboarding-content">
+            {% if not best_practice.active %}
             <p>
               {{ best_practice.template.explanation }}
             </p>
             <a data-complete-step="test_courselet" href="{% url 'ctms:courselet_bp_calculation' course_pk=best_practice.courselet.course.id courselet_pk=best_practice.courselet.id pk=best_practice.id %}" class="button button--primary">
                 {% if best_practice.active %}Recalculate{% else %}Calculate{% endif %}
               </a>
-            {% if not best_practice.active %}
             <a data-complete-step="test_courselet" href="{% url 'ctms:courselet_bp_activation' course_pk=best_practice.courselet.course.id courselet_pk=best_practice.courselet.id pk=best_practice.id %}" class="button button--primary">
               {{ best_practice.template.activation.button_text }}
             </a>
-            {% endif %}
-            {% if best_practice.active %}
-            <a data-complete-step="test_courselet" href="#" data-bp-pk="{{ best_practice.id }}"  class="button button--primary create-new-bp">
-              Create new one
-            </a>
+            {% else %}
+              {{ best_practice.summary }}
             {% endif %}
           </div>
         </div>

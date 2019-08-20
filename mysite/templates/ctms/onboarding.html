@@ -151,7 +151,7 @@
             {% include 'ctms/includes/onboarding/threads.html' %}
 
             {% if users_course.id and users_courselet.id %}
-                <a href="{% url 'ctms:unit_create' course_pk=users_course.id courslet_pk=users_courselet.id %}" class="button button--primary">Add a Thread</a>
+                <a href="{% url 'ctms:unit_create' course_pk=users_course.id courselet_pk=users_courselet.id %}" class="button button--primary">Add a Thread</a>
             {% else %}
                 <div class="alert alert-warning">
                   You need to create a courselet before you can add a thread.

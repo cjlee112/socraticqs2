@@ -57,33 +57,33 @@ urlpatterns = [
         CoursletDeleteView.as_view(),
         name='courslet_delete'),
     # reorder units
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/reorder/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/reorder/?$',
         (ReorderUnits.as_view()),
         name='courslet_reorder'),
 
     # new unit
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/new/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/new/?$',
         CreateUnitView.as_view(),
         name='unit_create'),
     # unit edit
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/edit/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/(?P<pk>\d+)/edit/?$',
         CreateEditUnitView.as_view(),
         name='unit_edit'),
     # delete unit
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/delete/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/(?P<pk>\d+)/delete/?$',
         DeleteUnitView.as_view(),
         name='unit_delete'),
     # unit settings
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/settings/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/(?P<pk>\d+)/settings/?$',
         UnitSettingsView.as_view(),
         name='unit_settings'),
 
     # responses
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<pk>\d+)/response/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/(?P<pk>\d+)/response/?$',
         UnitView.as_view(),
         name='unit_view'),
     # response
-    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courslet_pk>\d+)/unit/(?P<unit_pk>\d+)/response/(?P<pk>\d+)/?$',
+    url(r'^course/(?P<course_pk>\d+)/courselet/(?P<courselet_pk>\d+)/unit/(?P<unit_pk>\d+)/response/(?P<pk>\d+)/?$',
         ResponseView.as_view(),
         name='response_view'),
 

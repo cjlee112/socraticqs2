@@ -39,7 +39,7 @@ Courselets
       {% if u_lessons %}
         <h2>
           <span>Threads</span>
-          <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary button--small">Add Thread</a>
+          <a href="{% url 'ctms:unit_create' course_pk=course_pk courselet_pk=pk %}" class="button button--primary button--small">Add Thread</a>
 
           {% switch "add_unit_by_chat" %}
           <!-- <a href="{% url 'ctms:add_units_chat' course_pk=course_pk pk=pk %}" class="button button--small">Add Units by Chat</a> -->
@@ -58,13 +58,13 @@ Courselets
             {% for u_lesson in u_lessons %}
               <tr>
                 <td>
-                  <a href="{% url 'ctms:unit_edit' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                  <a href="{% url 'ctms:unit_edit' course_pk=course_pk courselet_pk=pk pk=u_lesson.pk %}">
                     {{ u_lesson.lesson.title }}
                   </a>
                 </td>
 
                 <td>
-                  <a href="{% url 'ctms:unit_view' course_pk=course_pk courslet_pk=pk pk=u_lesson.pk %}">
+                  <a href="{% url 'ctms:unit_view' course_pk=course_pk courselet_pk=pk pk=u_lesson.pk %}">
                     {{ u_lesson.responses_count }}
                   </a>
                 </td>
@@ -79,7 +79,7 @@ Courselets
           <div class="onboarding-content">
             {% include 'ctms/includes/onboarding/threads.html' %}
 
-            <a href="{% url 'ctms:unit_create' course_pk=course_pk courslet_pk=pk %}" class="button button--primary">Add Thread</a>
+            <a href="{% url 'ctms:unit_create' course_pk=course_pk courselet_pk=pk %}" class="button button--primary">Add Thread</a>
           </div>
         </div>
       {% endif %}

@@ -3,10 +3,11 @@ from django.forms import BaseModelFormSet
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.forms.models import modelformset_factory
 from django.template.loader import render_to_string
+from django.core.validators import FileExtensionValidator
 
 
 from ct.models import Course, Unit, Lesson, UnitLesson
-from ctms.models import Invite, BestPractice1, BestPractice2
+from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice
 from .fields import SvgAllowedImageField
 
 
@@ -170,6 +171,32 @@ class CreateCourseletForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = ('title',)
+
+
+class EditCourseletForm(forms.ModelForm):
+    follow_up_assessment_date = forms.DateField(required=False, widget=forms.SelectDateWidget())
+    class Meta:
+        model = Unit
+        fields = (
+            'title', 'exam_name', 
+            'follow_up_assessment_date',
+            'follow_up_assessment_grade',
+            'question_parts',
+            'average_score',
+            'courselet_days',
+            'graded_assessment_value',
+            'error_resolution_days',
+            'courselet_completion_credit',
+            'late_completion_penalty',
+            'is_show_will_learn'
+        )
+
+
+class UploadFileBPForm(forms.ModelForm):
+
+    class Meta:
+        model = BestPractice
+        fields = ('upload_file',)
 
 
 class InviteForm(forms.ModelForm):

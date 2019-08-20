@@ -10,7 +10,7 @@ from .views import CourseCoursletUnitMixin
 
 # course, courslet, unit
 MODEL_ORDER_TUPLE = (('course_pk', Course),
-                     ('courslet_pk', CourseUnit),
+                     ('courselet_pk', CourseUnit),
                      ('unit_pk', UnitLesson),
                      ('response_pk', Response))
 MODELS_ORDERED_DICT = OrderedDict(MODEL_ORDER_TUPLE)
@@ -156,7 +156,7 @@ class SideBarUtils(object):
                 kwargs = self._translate_kwargs(request, url_kw)
                 _url = self._reverse(url.name, kwargs)
                 # course_pk = kwargs.get('course_pk')
-                # courslet_pk = kwargs.get('courslet_pk')
+                # courselet_pk = kwargs.get('courselet_pk')
                 if 'course' in url.name:
                     pk = kwargs.get('pk')
                     add_url('course_urls', url.name, pk, _url)

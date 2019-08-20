@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.core.validators import FileExtensionValidator
 from django.http.response import Http404
 from django.template import loader
+from django.utils.safestring import mark_safe
 from django.contrib.postgres.fields import JSONField
 
 from accounts.models import Instructor
@@ -206,6 +207,7 @@ class BestPracticeTemplate(models.Model):
     scope = models.CharField(max_length=10, choices=BP_SCOPES, db_index=True)
     calculation = JSONField(blank=True, null=True)
     activation = JSONField(blank=True, null=True)
+    summary = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return f'{self.title} scope: {self.scope}'
@@ -215,13 +217,32 @@ class BestPractice(models.Model):
     """
     Model for instances where a BP could be implemented in a course/courselet.
     """
-    template = models.ForeignKey('BestPracticeTemplate', on_delete=models.SET_NULL, null=True)
+    template = models.ForeignKey('BestPracticeTemplate', on_delete=models.CASCADE)
     course = models.ForeignKey('ct.Course', null=True, blank=True, on_delete=models.CASCADE)
     courselet = models.ForeignKey('ct.CourseUnit', null=True, blank=True, on_delete=models.CASCADE)
     active = models.BooleanField(default=False)
     data = JSONField(blank=True, null=True)
+    upload_file = models.FileField(
+        upload_to='practice_questions/', blank=True, null=True, validators=[FileExtensionValidator(['pdf', 'docx'])])
 
-    def __str__(self):
+
+    def summary_fg(self) -> str:
+        return mark_safe(f'''
+            Practice exam divided into {self.courselet.unit.unitlesson_set.count()} threads
+            <a href={
+                reverse(
+                    "ctms:courslet_view",
+                    kwargs={"course_pk": self.courselet.course.id, "pk": self.courselet.id})
+            }>(click here to View)</a>
+        ''')
+
+    # TODO do dynamic summary invocation throught descriptor (probably)
+    @property
+    def summary(self) -> str:
+        summary_engine = getattr(self, self.template.summary) if self.template.summary else None
+        return summary_engine() if self.template.summary else ''
+
+    def __str__(self) -> str:
         return f'Best Practice for {self.template.title}'
 
 
@@ -245,7 +266,7 @@ class BestPractice1(models.Model):
         validators=[FileExtensionValidator(['pdf', 'jpg'])]
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__} for user {self.user}'
 
 
@@ -260,5 +281,5 @@ class BestPractice2(models.Model):
     estimated_blindspots = models.IntegerField(blank=True)
     estimated_blindspots_courselets = models.IntegerField(blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.__class__.__name__} for user {self.user}'

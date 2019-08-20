@@ -361,7 +361,7 @@
                     var newOrder = $('.sortable').sortable("toArray");
                     if (newOrder != originalOrder) {
                         $.post(
-                            "{% url 'ctms:courslet_reorder' course_pk=sidebar.course.pk courslet_pk=sidebar.courslet.pk %}",
+                            "{% url 'ctms:courslet_reorder' course_pk=sidebar.course.pk courselet_pk=sidebar.courslet.pk %}",
                             {
                                 csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
                                 data: JSON.stringify({'ordered_ids': newOrder})

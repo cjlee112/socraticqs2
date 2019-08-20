@@ -9,7 +9,7 @@
   <div class="card">
     <main class="card__content">
     <h1>{{ object }}</h1>
-    <form method="post">{% csrf_token %}
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
       <p>
         {% for key, value in activation_data.inputs.items %}
         <label for="{{ key }}">{{ value.label }}</label>

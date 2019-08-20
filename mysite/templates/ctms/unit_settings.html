@@ -10,15 +10,15 @@
   <nav class="card__nav">
     <ul>
       <li>
-        <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Edit</a>
+        <a href="{% url 'ctms:unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Edit</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+        <a href="{% url 'ctms:unit_view' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Answers</a>
       </li>
 
       <li>
-        <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Settings</a>
+        <a href="{% url 'ctms:unit_settings' course_pk=course.id courselet_pk=courslet.id pk=pk %}" class="card__nav-active">Settings</a>
       </li>
     </ul>
   </nav>
@@ -29,7 +29,7 @@
       {% crispy role_form %}
     </form>
 
-    <form action="{% url 'ctms:unit_delete' course_pk=course_pk courslet_pk=courslet_pk pk=pk %}" method="post" class="card__delete">
+    <form action="{% url 'ctms:unit_delete' course_pk=course_pk courselet_pk=courselet_pk pk=pk %}" method="post" class="card__delete">
       {% csrf_token %}
       <input type="submit" class="button pull-left button--delete" style="position: inherit; margin-top: 30px;" value="Remove Thread" data-confirm-text="Do you really want to remove this thread?">
     </form>

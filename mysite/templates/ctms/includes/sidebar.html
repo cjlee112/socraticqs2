@@ -177,7 +177,7 @@
               <li>
                 <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
                 {% if sidebar.courslet %}
-                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Thread</a>
+                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Thread</a>
                 {% endif %}
               </li>
 

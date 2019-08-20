@@ -40,7 +40,7 @@
         for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on
         exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.</li>
     </ul>
-      <form action="" method="POST" enctype="multipart/form-data">
+      <form action="" id="fake-form" method="POST">
         {% csrf_token %}
         <input type="submit" class="btn" value="Next">
       </form>
@@ -61,6 +61,12 @@
           console.log(formData);
           $form.hide()
           $("#result").removeAttr('hidden');
+        });
+        $fake_form = $('#fake-form');
+        $fake_form.on('submit', function(e){
+          e.preventDefault();
+          $form.unbind()
+          $form.submit()
         });
       });
   </script>

@@ -15,24 +15,24 @@ Courselet
     <nav class="card__nav">
       <ul>
         <li>
-          <a href="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
+          <a href="{% url 'ctms:unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
         </li>
 
         <li>
-          <a href="{% url 'ctms:unit_view' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Answers</a>
+          <a href="{% url 'ctms:unit_view' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Answers</a>
         </li>
 
         <li>
-          <a href="{% url 'ctms:unit_settings' course_pk=course.id courslet_pk=courslet.id pk=pk %}">Settings</a>
+          <a href="{% url 'ctms:unit_settings' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Settings</a>
         </li>
       </ul>
     </nav>
   {% endif %}
 
   <main class="card__content">
-    <form action="{% url 'ctms:unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %}"
+    <form action="{% url 'ctms:unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %}"
           method="POST" enctype="multipart/form-data" id="unitEditForm">
-      <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courslet_pk=courslet.id pk=pk %} #}-->
+      <!--TODO: {# post data and redirect to {% url 'ctms:add_unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %} #}-->
 
       {% csrf_token %}
 

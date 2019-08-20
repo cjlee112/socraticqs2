@@ -70,20 +70,20 @@
   <hr>
     <h4>Units</h4>
       {% for unit in sidebar.courslet_units %}
-      <a href={% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=unit.id %}>
+      <a href={% url 'ctms:unit_view' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id pk=unit.id %}>
         {{ unit.lesson.title }}
       </a>
       <br>
       {% endfor %}
     {% if sidebar.unit %}
       <span class="glyphicon glyphicon-wrench label label-info">
-        <a href="{% url 'ctms:unit_settings' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=sidebar.unit.id %}" class="text-red">
+        <a href="{% url 'ctms:unit_settings' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id pk=sidebar.unit.id %}" class="text-red">
           Settings
         </a>&nbsp;
       </span>&nbsp;
 
       <span class="glyphicon glyphicon-thumbs-up label label-info">
-        <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id pk=sidebar.unit.id %}">
+        <a href="{% url 'ctms:unit_view' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id pk=sidebar.unit.id %}">
           Responses
         </a>&nbsp;
       </span>&nbsp;
@@ -91,7 +91,7 @@
 
     {% if sidebar.courslet %}
     <span class="glyphicon glyphicon-plus label label-info">
-      <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courslet_pk=sidebar.courslet.id %}">Add unit</a>
+      <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}">Add unit</a>
     </span>
 
 
