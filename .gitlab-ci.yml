@@ -11,23 +11,32 @@ stages:
   - tag
   - deploy
   - smoke
+  - cleanup
 
 Build static:
   stage: pre-build
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
-    - docker build 
-      -t $REGISTRY:static-$CI_COMMIT_SHORT_SHA 
+    - docker build
+      -t $REGISTRY:static-$CI_COMMIT_SHORT_SHA
       -f Docker/Dockerfile.static .
 
 Build base:
   stage: pre-build
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
-    - docker build 
-      -t $REGISTRY:base-$CI_COMMIT_SHORT_SHA 
+    - docker build
+      -t $REGISTRY:base-$CI_COMMIT_SHORT_SHA
       -f Docker/Dockerfile .
 
 Build Prod:
@@ -36,25 +45,30 @@ Build Prod:
     - dind
   only:
     - master
+    - merge_requests
   script:
-    - docker build 
-      --force-rm 
-      -t $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA 
+    - docker build
+      --force-rm
+      -t $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA
       -f Docker/Dockerfile.prod
-      --build-arg REGISTRY=$REGISTRY 
-      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+      --build-arg REGISTRY=$REGISTRY
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 Build Test:
   stage: build
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
-    - docker build 
-      -t $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
-      -f Docker/Dockerfile.test 
-      --build-arg REGISTRY=$REGISTRY 
-      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+    - docker build
+      -t $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA
+      -f Docker/Dockerfile.test
+      --build-arg REGISTRY=$REGISTRY
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 Build Dev:
@@ -63,18 +77,23 @@ Build Dev:
     - dind
   only:
     - development
+    - merge_requests
   script:
-    - docker build 
-      -t $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA 
-      -f Docker/Dockerfile.dev 
-      --build-arg REGISTRY=$REGISTRY 
-      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA 
+    - docker build
+      -t $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA
+      -f Docker/Dockerfile.dev
+      --build-arg REGISTRY=$REGISTRY
+      --build-arg TAG=base-$CI_COMMIT_SHORT_SHA
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 JavaScript tests:
   stage: test
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
     - docker build -f Docker/Dockerfile-test.node -t node-test:$CI_COMMIT_SHORT_SHA .
     - docker run node-test:$CI_COMMIT_SHORT_SHA
@@ -85,27 +104,35 @@ Python tests:
   stage: test
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
     - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:latest
     - docker run
       --volume ${PWD}/logs:/home/courselets/app/logs
       --volume ${PWD}/.git:/home/courselets/app/.git
-      --rm 
-      --link mongo_$CI_COMMIT_SHORT_SHA:mongo 
-      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
+      --rm
+      --link mongo_$CI_COMMIT_SHORT_SHA:mongo
+      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA
       make coverage
   after_script:
     - docker rm -f mongo_$CI_COMMIT_SHORT_SHA || true
 
 Check code quality:
-  stage: test 
+  stage: test
   tags:
     - dind
+  only:
+    - development
+    - master
+    - merge_requests
   script:
     # .git volume requires for diff-quality. And it does not work :-\
-    - docker run 
-      --volume ${PWD}/.git:/home/courselets/app/.git 
-      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA 
+    - docker run
+      --volume ${PWD}/.git:/home/courselets/app/.git
+      $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA
       make quality
 
 Tag latest courselets-dev image:
@@ -117,6 +144,19 @@ Tag latest courselets-dev image:
   script:
     - docker tag $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA $REGISTRY/courselets-dev
     - docker push $REGISTRY/courselets-dev
+  after_script:
+    - docker rmi -f $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA || true
+
+Tag (cache) latest static-dev image:
+  stage: tag
+  tags:
+    - dind
+  only:
+    - development
+  script:
+    - docker tag $REGISTRY:static-$CI_COMMIT_SHORT_SHA $REGISTRY/static-dev
+  after_script:
+    - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
 
 Tag latest courselets image:
   stage: tag
@@ -127,6 +167,19 @@ Tag latest courselets image:
   script:
     - docker tag $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA $REGISTRY/courselets
     - docker push $REGISTRY/courselets
+  after_script:
+    - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
+
+Tag (cache) latest static image:
+  stage: tag
+  tags:
+    - dind
+  only:
+    - master
+  script:
+    - docker tag $REGISTRY:static-$CI_COMMIT_SHORT_SHA $REGISTRY/static
+  after_script:
+    - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
 
 Deploy Dev:
   stage: deploy
@@ -150,7 +203,7 @@ Deploy Dev:
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
 Run layout tests:
-  stage: smoke 
+  stage: smoke
   tags:
     - dind
   only:
@@ -178,3 +231,18 @@ Deploy Stage:
     - docker-compose -f prod.yml run --rm app static
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
     - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@here", "link_names":1}'
+
+Cleanup:
+  stage: cleanup
+  tags:
+    - dind
+  only:
+    - development
+    - master
+    - merge_requests
+  when: always
+  script:
+    - docker rmi -f $(docker images --filter reference=$REGISTRY:static-$CI_COMMIT_SHORT_SHA -q) || true
+    - docker rmi -f $(docker images --filter reference=$REGISTRY:base-$CI_COMMIT_SHORT_SHA -q) || true
+    - docker rmi -f $(docker images --filter reference=$REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA -q) || true
+    - docker rmi -f $(docker images --filter reference=$REGISTRY/courselets:$CI_COMMIT_SHORT_SHA -q) || true
