@@ -12,7 +12,7 @@ from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import Response, StudentError, Course, Role
 from ctms.forms import BestPractice1Form, BestPractice2Form
-from ctms.models import BestPractice
+from ctms.models import BestPractice, BestPracticeTemplate
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
@@ -169,50 +169,37 @@ class OnboardingStatus(APIView):
 class OnboardingBpAnalysis(APIView):
 
     authentication_classes = (SessionAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
+    @staticmethod
+    def get_result_calculation(data, calculation):
+        if calculation and data:
+            result = {}
+            data.pop('csrfmiddlewaretoken', None),
+            data.pop('best_practice_template_id', None)
+            for field, value in data.items():
+                if calculation.get(field, {}).get('analys', {}).get('formula'):
+                    if value:
+                        if value.isdigit() and calculation.get(field).get('type') == 'number':
+                            result.update({
+                                field: calculation.get(field).get('analys').get('text', '{}').format(
+                                int(value) * calculation.get(field).get('analys').get('formula'))
+                            })  
+                        else:
+                            result.update({
+                                field: 'Value not integer'
+                            })
+                    else:
+                        result.update({
+                            field: 'Value not filled'
+                        })
+        return result
 
     def post(self, request, *args, **kwargs):
-        form_data = {'user': request.user.id}
-        form_data.update(request.data.dict())
-        form = BestPractice1Form(form_data)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.estimated_blindspots = 35
-            instance.estimated_blindspots_courselets = 1334
-            instance.activate = True
-            instance.save()
-            data = {
-                'estimated_blindspots': instance.estimated_blindspots,
-                'estimated_blindspots_courselets': instance.estimated_blindspots_courselets
-            }
-            course = Course.objects.filter(id=form_data.get('course_id')).first()
-            course.best_practice1 = instance
-            print(instance)
-            course.save()
-            return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
-        return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class OnboardingBp2Analysis(APIView):
-
-    authentication_classes = (SessionAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, *args, **kwargs):
-        form_data = {'user': request.user.id}
-        form_data.update(request.data.dict())
-        form = BestPractice2Form(form_data)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.activate = True
-            instance.estimated_blindspots = 35
-            instance.estimated_blindspots_courselets = 1334
-            instance.save()
-            data = {
-                'estimated_blindspots': instance.estimated_blindspots,
-                'estimated_blindspots_courselets': instance.estimated_blindspots_courselets
-            }
-            return RestResponse({'status': 'Ok', 'data': data}, status=status.HTTP_200_OK)
+        data = (request.data)
+        bp_template = BestPracticeTemplate.objects.filter(id=data.get('best_practice_template_id')).first()
+        if bp_template:
+            result_data = self.get_result_calculation(data.dict(), bp_template.calculation)
+            return RestResponse({'status': 'Ok', 'result_data': result_data}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 

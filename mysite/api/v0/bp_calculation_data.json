@@ -1,0 +1,188 @@
+[
+    {
+        "data": {"field1": "1", "field2": "2", "field3": "3", "field4": "4"},
+        "calculation": {
+            "field1": {
+                "type": "number",
+                "label": "field1",
+                "analys": {
+                    "text": "field1 {}",
+                    "formula": 1
+                }
+            },
+            "field2": {
+                "type": "number",
+                "label": "field2",
+                "analys": {
+                    "text": "field2 {}",
+                    "formula": 2
+                }
+            },
+            "field3": {
+                "type": "number",
+                "label": "field3",
+                "analys": {
+                    "text": "field3 {}",
+                    "formula": 3
+                }
+            },
+            "field4": {
+                "type": "number",
+                "label": "field4",
+                "analys": {
+                    "text": "field4 {}",
+                    "formula": 4
+                }
+            }
+        },
+        "result": {"field1": "field1 1", "field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+    },
+    {
+        "data": {"field1": "text", "field2": "2", "field3": "3", "field4": "4"},
+        "calculation": {
+            "field1": {
+                "type": "text",
+                "label": "field1",
+                "analys": {
+                    "text": "field1 {}",
+                    "formula": 1
+                }
+            },
+            "field2": {
+                "type": "number",
+                "label": "field2",
+                "analys": {
+                    "text": "field2 {}",
+                    "formula": 2
+                }
+            },
+            "field3": {
+                "type": "number",
+                "label": "field3",
+                "analys": {
+                    "text": "field3 {}",
+                    "formula": 3
+                }
+            },
+            "field4": {
+                "type": "number",
+                "label": "field4",
+                "analys": {
+                    "text": "field4 {}",
+                    "formula": 4
+                }
+            }
+        },
+        "result": {"field1": "Value not integer", "field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+    },
+    {
+        "data": {"field1": "2", "field2": "3", "field3": "", "field4": "4"},
+        "calculation": {
+            "field1": {
+                "type": "number",
+                "label": "field1",
+                "analys": {
+                    "text": "field1 {}",
+                    "formula": 1
+                }
+            },
+            "field2": {
+                "type": "number",
+                "label": "field2",
+                "analys": {
+                    "text": "field2 {}",
+                    "formula": 2
+                }
+            },
+            "field3": {
+                "type": "number",
+                "label": "field3",
+                "analys": {
+                    "text": "field3 {}",
+                    "formula": 3
+                }
+            },
+            "field4": {
+                "type": "number",
+                "label": "field4",
+                "analys": {
+                    "text": "field4 {}",
+                    "formula": 4
+                }
+            }
+        },
+        "result": {"field1": "field1 2", "field2": "field2 6", "field3": "Value not filled", "field4": "field4 16"}
+    },
+    {
+        "data": {"field1": "3", "field2": "2", "field3": "3", "field4": "not integer"},
+        "calculation": {
+            "field1": {
+                "type": "number",
+                "label": "field1",
+                "analys": {
+                    "text": "field1 {}",
+                    "formula": 1
+                }
+            },
+            "field2": {
+                "type": "number",
+                "label": "field2",
+                "analys": {
+                    "text": "field2 {}",
+                    "formula": 2
+                }
+            },
+            "field3": {
+                "type": "number",
+                "label": "field3",
+                "analys": {
+                    "text": "field3 {}",
+                    "formula": 3
+                }
+            },
+            "field4": {
+                "type": "number",
+                "label": "field4",
+                "analys": {
+                    "text": "field4 {}",
+                    "formula": 4
+                }
+            }
+        },
+        "result": {"field1": "field1 3", "field2": "field2 4", "field3": "field3 9", "field4": "Value not integer"}
+    },
+    {
+        "data": {"field1": "text", "field2": "2", "field3": "3", "field4": "4"},
+        "calculation": {
+            "field1": {
+                "type": "text",
+                "label": "field1"
+            },
+            "field2": {
+                "type": "number",
+                "label": "field2",
+                "analys": {
+                    "text": "field2 {}",
+                    "formula": 2
+                }
+            },
+            "field3": {
+                "type": "number",
+                "label": "field3",
+                "analys": {
+                    "text": "field3 {}",
+                    "formula": 3
+                }
+            },
+            "field4": {
+                "type": "number",
+                "label": "field4",
+                "analys": {
+                    "text": "field4 {}",
+                    "formula": 4
+                }
+            }
+        },
+        "result": {"field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+    }
+]

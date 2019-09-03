@@ -22,24 +22,8 @@
     <div id='result' hidden>
       <h2>Impact Analysis</h2><br>
       <ul>
-        <li>
-        <span style='font-weight: 550'>
-        Estimated student blindspots you would resolve manually, assuming students do your practice exam 7 days before the
-        test: 7 * 5 = 1234</span><br>
-        </span>
-        defining the metric: 1 student blindspot = 1 student response (to a question-part) that exposes a
-        form.misconceptions_count.errors</li>
-
-        <li style='font-weight: 550'>Estimated student blindspots Courselets would detect, identify and help your
-        students resolve using your practice exam:
-        <span id='estimated_blindspots_courselets'>8324</span></li>
-        <li><span style='font-weight: 500'>Analysis</span>: your exam data indicate that there are far too many total
-        student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.
-        To genuinely fix this number of student blindspots,you need an online platform that's actually designed to identify and
-        resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot
-        for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on
-        exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.</li>
-    </ul>
+        <div id='estimated_blindspots'></div>
+      </ul>
       <form action="" id="fake-form" method="POST">
         {% csrf_token %}
         <input type="submit" class="btn" value="Next">
@@ -58,9 +42,29 @@
         $form.on('submit', function(e){
           e.preventDefault();
           var formData = $form.serializeArray();
+          formData.push(
+            {name: "best_practice_template_id", value: '{{ best_practice_template_id }}'},
+          );
           console.log(formData);
-          $form.hide()
-          $("#result").removeAttr('hidden');
+          $.ajax({
+            headers: {
+              "X-CSRFToken": '{{ csrf_token }}'
+            },
+            data: formData,
+            method: 'POST',
+            url: '/api/v0/bp-analysis/'
+          })
+          .done( function(response) {
+            console.log(response.result_data);
+            $form.hide()
+            $("#result").removeAttr('hidden');
+            $.each( response.result_data, function( index, value ){
+              $("#estimated_blindspots").append( "<li>" + String(value)+ "</li>")
+            });
+          })
+          .fail( function(error) {
+            alert('Something went wrong. Please refresh the page and try again.');
+          })
         });
         $fake_form = $('#fake-form');
         $fake_form.on('submit', function(e){

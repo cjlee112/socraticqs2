@@ -1,3 +1,4 @@
+import json
 import os
 import random
 from collections import namedtuple
@@ -235,3 +236,14 @@ def unique_instructor():
     instructor.save()
     yield instructor
     instructor.delete()
+
+
+def load_from_json(file_dir):
+    with open(file_dir) as res_file:
+        input_data = json.load(res_file)
+    return input_data
+
+
+@pytest.fixture(params=load_from_json('api/v0/bp_calculation_data.json'), ids=lambda param: str(param.get("data")))
+def input_data(request):
+    return request.param

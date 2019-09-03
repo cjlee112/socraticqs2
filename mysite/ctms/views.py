@@ -1474,6 +1474,7 @@ class BestPracticeCalculation(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['input_data'] = self.object.template.calculation
+        context['best_practice_template_id'] = self.object.template.id
         return context
     
     def post(self, request, *args, **kwargs):
@@ -1589,6 +1590,7 @@ class BestPracticePreCalculation(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['input_data'] = self.object.calculation
+        context['best_practice_template_id'] = self.object.id
         return context
     
     def post(self, request, *args, **kwargs):
