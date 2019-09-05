@@ -1,4 +1,4 @@
-Django==2.1.11
+Django==2.1.12
 django-cms==3.6.0
 djangocms-text-ckeditor==3.6.1
 djangocms-admin-style==1.2.9
