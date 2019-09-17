@@ -12,16 +12,13 @@ DOCKER_REGISTRY = registry-gitlab.raccoongang.com/cmltawt0/socraticqs2
 GIT_TAG := $(shell git describe --abbrev=0)
 VERSION :=
 
-# TODO: Fix. This conditional does not work
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	DOCKERFILE_PATH := Docker/Dockerfile.prod
 	DOCKERCOMPOSE_PATH := prod.yml
 	APP = app
 	export NGINX_HOST
 	export NGINX_PORT
-endif
-
-ifneq ($(filter $(env),$(DEV_ENV)),)
+else ifneq ($(filter $(env),$(DEV_ENV)),)
 	DOCKERFILE_PATH := Docker/Dockerfile.dev
 	DOCKERCOMPOSE_PATH := dev.yml
 	APP = dev_app
@@ -30,7 +27,6 @@ else
 	DOCKERCOMPOSE_PATH := docker-compose.yml
 	APP = local_app
 endif
-
 
 sh:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) bash
