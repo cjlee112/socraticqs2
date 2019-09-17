@@ -1,28 +1,13 @@
 version: '3'
 services:
-  web:
-    container_name: cr_web
-    image: nginx
-    volumes:
-      - .conf/nginx/app.template:/etc/nginx/conf.d/app.template
-      - ./mysite/static:/mnt/static
-    ports:
-      - "${NGINX_PORT}:${NGINX_PORT}"
-    environment:
-      NGINX_HOST: ${NGINX_HOST}
-      NGINX_PORT: ${NGINX_PORT}
-    restart: on-failure
-    command: /bin/bash -c "envsubst < /etc/nginx/conf.d/app.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
-    links:
-      - app  
-
   app:
     container_name: cr_app
     env_file: ./envs/prod.env
     image: ${DOCKER_REGISTRY}/courselets
     command: ["prod"]
     volumes:
-      - ${PWD}/mysite/mysite/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
+      # /home/wwwapps/socraticqs2/mysite/mysite/settings/local.py
+      - ${CONFIG_PATH}:/home/courselets/app/mysite/mysite/settings/local.py
       - ${PWD}/logs:/home/courselets/app/logs
     ports:
       - "9000:9000"
@@ -46,18 +31,17 @@ services:
   mongo:
     container_name: cr_mongo
     image: mongo:latest
-    
     expose:
       - "27017"
     volumes:
       - cr_mongo:/data/db
     restart: on-failure
-  
+
   memcached:
     container_name: cr_memcached
     image: memcached:latest
     restart: on-failure
-  
+
   celery:
     container_name: cr_celery
     image: ${DOCKER_REGISTRY}/courselets
@@ -77,7 +61,7 @@ services:
     container_name: cr_rabbit
     image: rabbitmq:latest
     restart: on-failure
-  
+
   redis:
     container_name: cr_redis
     image: redis:latest

@@ -6,7 +6,7 @@ services:
     image: ${DOCKER_REGISTRY}/courselets-dev
     command: ["dev"]
     volumes:
-      # file should exist on host (even if empty) or docker will create a directory instead
+      # /home/wwwapps/dev/socraticqs2/mysite/mysite/settings/local.py
       - ${DEV_CONFIG_PATH}:/home/courselets/app/mysite/mysite/settings/local.py
     ports:
       - "8080:8080"
@@ -54,7 +54,7 @@ services:
   dev_rabbit:
     container_name: dev_cr_rabbit
     image: rabbitmq:latest
-  
+
   dev_redis:
     container_name: dev_cr_redis
     image: redis:latest

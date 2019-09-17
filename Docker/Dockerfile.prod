@@ -13,6 +13,5 @@ ADD --chown=courselets:courselets mysite /home/courselets/app/mysite
 COPY --from=static --chown=courselets:courselets /draw_svg.js lms/static/js/draw_svg.js
 COPY --from=static --chown=courselets:courselets /draw_svg.css lms/static/css/draw_svg.css
 COPY --from=static --chown=courselets:courselets /tmp/mysite/frontend/bower_components chat/static/bower_components
-RUN touch mysite/settings/local.py
 
 CMD ["prod"]
