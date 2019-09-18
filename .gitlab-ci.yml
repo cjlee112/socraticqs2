@@ -220,6 +220,7 @@ Deploy Stage:
     - deploy
     - ssh
   when: manual
+  allow_failure: false
   only:
     - master
   variables:
