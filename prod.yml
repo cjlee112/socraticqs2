@@ -9,6 +9,8 @@ services:
       # /home/wwwapps/socraticqs2/mysite/mysite/settings/local.py
       - ${CONFIG_PATH}:/home/courselets/app/mysite/mysite/settings/local.py
       - ${PWD}/logs:/home/courselets/app/logs
+      # /home/wwwapps/socraticqs2/mysite/mysite/static/
+      - ${STATIC_PATH}:/home/courselets/app/mysite/static
     ports:
       - "9000:9000"
     restart: on-failure
