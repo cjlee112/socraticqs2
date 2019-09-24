@@ -1407,6 +1407,7 @@ class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
         all_bps = self.get_queryset().count()
         context = super().get_context_data(**kwargs)
         context['best_practices_progress'] = active_bps / all_bps * 100 if all_bps else 0
+        context['course'] = self.get_course()
         return context
 
     def get_queryset(self):

@@ -7,6 +7,26 @@
 
 {% block content %}
   <div class="card">
+    <header class="card__topbar">
+      <h1>{{ course.title }}  </h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:course_view' pk=course.id %}">Courselets</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:course_settings' pk=course.id %}">Settings</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:course_best_practice' pk=course.id %}" class="card__nav-active">Best Practices</a>
+        </li>
+      </ul>
+    </nav>
+
     <header class="get-started__intro">
       <h1>Best Practice page</h1>
 

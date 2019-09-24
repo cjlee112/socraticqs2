@@ -76,7 +76,7 @@
                 <a href="{% url 'ctms:course_settings' pk=sidebar.course.id %}" class="{% if sidebar.current_page_name == 'course_settings' %}sidebar__actions__active{% endif %}">Settings</a>
               </li>
               <li>
-                <a href="{% url 'ctms:course_best_practice' pk=sidebar.course.id %}" class="{% if sidebar.current_page_name == 'course_settings' %}sidebar__actions__active{% endif %}">Best Practices</a>
+                <a href="{% url 'ctms:course_best_practice' pk=sidebar.course.id %}" class="{% if sidebar.current_page_name == 'course_best_practice' %}sidebar__actions__active{% endif %}">Best Practices</a>
               </li>
             </ul>
           </nav>

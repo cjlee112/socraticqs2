@@ -19,6 +19,10 @@
         <li>
           <a href="{% url 'ctms:course_settings' pk=object.id %}" class="card__nav-active">Settings</a>
         </li>
+
+        <li>
+          <a href="{% url 'ctms:course_best_practice' pk=object.id %}">Best Practices</a>
+        </li>
       </ul>
     </nav>
 
