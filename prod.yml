@@ -6,11 +6,10 @@ services:
     image: ${DOCKER_REGISTRY}/courselets
     command: ["prod"]
     volumes:
-      # /home/wwwapps/socraticqs2/mysite/mysite/settings/local.py
-      - ${CONFIG_PATH}:/home/courselets/app/mysite/mysite/settings/local.py
-      - ${PWD}/logs:/home/courselets/app/logs
-      # /home/wwwapps/socraticqs2/mysite/mysite/static/
-      - ${STATIC_PATH}:/home/courselets/app/mysite/static
+      # APP_PWD=/courselets/app
+      - ${APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
+      - ${APP_PWD}/logs:/home/courselets/app/logs
+      - ${APP_PWD}/static:/home/courselets/app/mysite/static
     ports:
       - "9000:9000"
     restart: on-failure
@@ -50,7 +49,7 @@ services:
     command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
     env_file: ./envs/prod.env
     volumes:
-      - ${PWD}/logs:/home/courselets/app/logs
+      - ${APP_PWD}/logs:/home/courselets/app/logs
     links:
       - rabbit
       - redis
