@@ -6,10 +6,9 @@ services:
     image: ${DOCKER_REGISTRY}/courselets-dev
     command: ["dev"]
     volumes:
-      # /home/wwwapps/dev/socraticqs2/mysite/mysite/settings/local.py
-      - ${DEV_CONFIG_PATH}:/home/courselets/app/mysite/mysite/settings/local.py
-      # /home/wwwapps/dev/socraticqs2/mysite/static/
-      - ${DEV_STATIC_PATH}:/home/courselets/app/mysite/static
+      # DEV_APP_PWD=/courselets/dev/app
+      - ${DEV_APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
+      - ${DEV_APP_PWD}/static:/home/courselets/app/mysite/static
     ports:
       - "8080:8080"
     links:
