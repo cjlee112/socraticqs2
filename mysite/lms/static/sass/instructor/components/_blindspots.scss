@@ -1,0 +1,29 @@
+.blindspots {
+  display: flex;
+  padding: 0;
+  margin: 0 0 18px;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    font-style: italic;
+    font-size: 14px;
+    margin-right: 36px;
+    margin-bottom: 18px;
+    list-style-type: none;
+  }
+
+  &__number {
+    display: block;
+    font-style: normal;
+    font-size: 32px;
+    font-weight: 600;
+    color: #000;
+    margin: 0 0 8px;
+  }
+
+  a {
+    font-style: normal;
+  }
+}
