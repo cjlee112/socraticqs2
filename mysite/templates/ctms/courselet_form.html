@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block content %}
+  <head>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+    $( function() {
+      $( "#id_follow_up_assessment_date" ).datepicker({
+        dateFormat: 'yy-mm-dd'
+      });
+    } );
+    </script>
+  </head>
+ 
   <div class="card">
     <header class="card__topbar card__topbar--with-description">
       <h1>Create a Courselet</h1>
@@ -16,31 +30,35 @@
     <main class="card__content">
       <form class="form__holder" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-<!--        <label for="{{ form.title.auto_id }}">Courselet Name</label>-->
-<!--          {{ form.title }}-->
-<!--          {% if form.title.errors %}-->
-<!--            {{ form.title.errors }}-->
-<!--          {% endif %}-->
         <div class="input__item">
-          <label for="">
+          <label for="{{ form.title.auto_id }}">
             Courselet Name
             <span>Describe how they should name their courselet here.</span>
           </label>
-          <input type="text">
+          {{ form.title }}
+          {% if form.title.errors %}
+            {{ form.title.errors }}
+          {% endif %}
         </div>
         <div class="input__item">
-          <label for="">
+          <label for="{{ form.exam_name.auto_id }}">
             Follow-Up Assessment Name
             <span>Describe this field here.</span>
           </label>
-          <input type="text">
+          {{ form.exam_name }}
+          {% if form.exam_name.errors %}
+            {{ form.exam_name.errors }}
+          {% endif %}
         </div>
         <div class="input__item">
-          <label for="">
+          <label for="{{ form.follow_up_assessment_date.auto_id }}">
             Follow-Up Assessment Date
             <span>Describe this field here.</span>
           </label>
-          <input type="text">
+          {{ form.follow_up_assessment_date }}
+          {% if form.follow_up_assessment_date.errors %}
+            {{ form.follow_up_assessment_date.errors }}
+          {% endif %}
         </div>
         <input type="submit" value="Create Courselet">
       </form>

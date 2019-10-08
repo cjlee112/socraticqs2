@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from django.urls import include, path
 from ctms.views import (
-    MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView, CoursletView, CreateCoursletView,
+    MyCoursesView, CreateCourseView, SharedCoursesListView, CourseView,
+    CoursletView, CreateCoursletView, CreateCoursletWithPBView,
     CreateUnitView, UnitView,
     UpdateCourseView, DeleteCourseView, ResponseView, UnitSettingsView, CoursletSettingsView,
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
@@ -38,6 +39,10 @@ urlpatterns = [
     url(r'^course/(?P<course_pk>\d+)/courselet/new/?$',
         CreateCoursletView.as_view(),
         name='courslet_create'),
+    # new courslet with BP
+    url(r'^course/(?P<course_pk>\d+)/bestpractise/(?P<best_practise_pk>\d+)/courselet/new/?$',
+        CreateCoursletWithPBView.as_view(),
+        name='courslet_create_with_bp'),
     # list units
     url(r'^course/(?P<course_pk>\d+)/courselet/(?P<pk>\d+)/units/?$',
         CoursletView.as_view(),

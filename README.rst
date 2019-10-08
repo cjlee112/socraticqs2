@@ -262,7 +262,7 @@ Here's a list of switches:
  * live_session_enabled - to enable button "Live session"
  * menu_activity_center_link_enabled - to enable activity center link in top menu
  * add_unit_by_chat - to enable add unit by chat feature in CTMS
- *
+ * ctms_bp_coursletes_enabled - to enable button "Best Practices" for courselet in sidebar
 
 
 GitLab configuration

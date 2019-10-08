@@ -1,5 +1,6 @@
 {% extends "ctms_base.html" %}
 {% load staticfiles %}
+{% load best_practice %}
 
 {% block title %}
     Get Started
@@ -46,30 +47,30 @@
 
     <div class="get-started__steps">
 
-
-      {% for best_practice in best_practices %}
+      {% for template in best_practices_templates %}
       <!-- view_introduction -->
-      <div class="get-started__step{% if best_practice.active %} get-started__step--done{% endif %}" data-step-id="view_introduction">
+      <div class="get-started__step{% if template.count_active_bp %} get-started__step--done{% endif %}" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>
-            {{ best_practice.template.title }}
-            <span class="get-started__step-tip">
-              Get up to x amount of value by completing this best practice.
-              <a href="/">test1</a>,
-              <a href="/">test2</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-              <a href="/">test3</a>,
-            </span>
+            {{ template.title }}
           </h2>
+          <span class="get-started__step-tip">
+            {% if template.bestpractice_set.all %}
+              You've created best practice exam:
+                {% for best_practice in template.bestpractice_set.all|active %}
+                  {% if best_practice.courselet %}
+                    <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
+                      {{ best_practice.courselet.unit.title }}
+                    </a>
+                    {% if not forloop.last %}, {% else %}. {% endif %}
+                  {% endif %}
+                {% endfor %}
+            {% else %}
+              Get up to x amount of value by completing this best practice.
+            {% endif %}
+          </span>
+          
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -77,21 +78,14 @@
         <div class="get-started__step-content">
           <div class="onboarding-content">
             <p>
-              {{ best_practice.template.explanation }}
+              {{ template.explanation }}
             </p>
-            <a data-complete-step="test_courselet" href="{% url 'ctms:calculation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button button--primary">
-                {% if best_practice.active %}Recalculate{% else %}Calculate{% endif %}
+            <a data-complete-step="test_courselet" href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" redirect="{% url 'ctms:courslet_create' course_pk=course.id %}" class="button button--primary create-new-bp-default">
+              Create another practice exam courselet
             </a>
-            {% if not best_practice.active %}
-            <a data-complete-step="test_courselet" href="{% url 'ctms:activation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button">
-              Activate
+            <a data-complete-step="test_courselet" href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" class="button create-new-bp">
+              Assess Impact for Your Class
             </a>
-            {% endif %}
-            {% if best_practice.active %}
-            <a data-complete-step="test_courselet" href="#" data-bp-pk="{{ best_practice.id }}"  class="button button--primary create-new-bp">
-              Create new one
-            </a>
-            {% endif %}
           </div>
         </div>
       </div>
@@ -160,12 +154,6 @@
 
         // Delay updates for 1 second (let e.g. video overlays animate in first)
         setTimeout(function() {
-          // Update the progress bars
-          var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
-          var newProgressPercentage = Math.floor(newProgress * 100);
-          progressCircle.set(newProgress);
-          $('.get-started__progress-text').html(newProgressPercentage);
-          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'});
 
           // Hide open steps
           $('.get-started__step').removeClass('get-started__step--open');
@@ -180,11 +168,14 @@
         }, 1000)
       });
 
-      $('.create-new-bp').on('click', function(e) {
+      $('.create-new-bp, .create-new-bp-default').on('click', function(e) {
         // Get the step name and element
-        var bpPk = $(e.currentTarget).data('bp-pk');
+        var bpPk = $(e.currentTarget).data('bpTemplatePk');
+        var coursePk = $(e.currentTarget).data('coursePk');
+        console.log(bpPk, coursePk)
         var data = {};
-        data['id'] = bpPk;
+        data['template_id'] = bpPk;
+        data['course_id'] = coursePk;
 
         // Send an ajax request to save the update
         this.updateCartXhr = $.ajax({
@@ -198,7 +189,15 @@
           method: 'POST',
           url: "{% url 'api:v0:bp-creation' %}"
         })
-        .done( function(response) { location.reload(true) } )
+        .done( function(response) {
+          console.log(response.data.new_best_practice);
+          if ($(e.currentTarget).is($('.create-new-bp'))){
+            window.location.href = '/ctms/course/' + coursePk + '/bp/' + response.data.new_best_practice + '/calculation/';
+          } else if
+          ($(e.currentTarget).is($('.create-new-bp-default'))){
+            window.location.href = '/ctms/course/' + coursePk + '/bestpractise/' + response.data.new_best_practice + '/courselet/new';
+          };
+        })
         .fail( function(error) {
           alert('Something went wrong. Please refresh the page and try again.');
         });

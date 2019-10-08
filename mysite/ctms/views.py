@@ -249,7 +249,7 @@ class MyCoursesView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
 class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView):
     template_name = 'ctms/my_courses.html'
     model = Course
-    fields = ('title',)
+    fields = ('title', 'students_number')
     # form_class = CourseForm
 
     def get(self, request, *args, **kwargs):
@@ -478,6 +478,31 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
             'courslet': self.get_courslet()
         })
         return context
+
+
+class CreateCoursletWithPBView(CreateCoursletView):
+
+    def get_context_data(self, **kwargs):
+        context = super(CreateCoursletView, self).get_context_data(**kwargs)
+        if not BestPractice.objects.filter(pk=self.kwargs.get('best_practise_pk')).exists():
+            raise Http404()
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.addedBy = self.request.user
+        self.object.save()
+        self.object.course_unit = CourseUnit.objects.create(
+            unit=self.object,
+            course=self.get_course(),
+            addedBy=self.request.user,
+            order=0,
+        )
+        best_practise = get_object_or_404(BestPractice, pk=self.kwargs.get('best_practise_pk'))
+        best_practise.courselet = self.object.course_unit
+        best_practise.active = True
+        best_practise.save(update_fields=['courselet', 'active'])
+        return redirect(self.get_success_url())
 
 
 def pagination(pages, page):
@@ -1397,25 +1422,21 @@ class OnboardingBP2(OnboardingBP1):
 
 
 class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
-    context_object_name = 'best_practices'
+    context_object_name = 'best_practices_templates'
     template_name = 'ctms/course_best_practices.html'
-    model = BestPractice
-    queryset = BestPractice.objects.all()
+    model = BestPracticeTemplate
+    queryset = BestPracticeTemplate.objects.all()
 
     def get_context_data(self, **kwargs):
-        active_bps = self.get_queryset().filter(active=True).count()
-        all_bps = self.get_queryset().count()
         context = super().get_context_data(**kwargs)
-        context['best_practices_progress'] = active_bps / all_bps * 100 if all_bps else 0
         context['course'] = self.get_course()
         return context
 
     def get_queryset(self):
-        for template in BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSE):
-            # TODO test it
-            if not BestPractice.objects.filter(template=template, course=self.get_course()).exists():
-                BestPractice.objects.create(template=template, course=self.get_course(), active=False)
-        return self.get_course().bestpractice_set.filter(template__scope='course').order_by('template')
+        return BestPracticeTemplate.objects.filter(
+            scope=BestPracticeTemplate.COURSE,
+            # bestpractice__course=self.get_course(),
+        ).distinct().annotate(count_active_bp=models.Count('bestpractice', filter=models.Q(bestpractice__active=True)))
 
     def get_course(self, queryset=None):
         if 'pk' in self.kwargs:
@@ -1476,38 +1497,9 @@ class BestPracticeCalculation(DetailView):
         context = super().get_context_data(**kwargs)
         context['input_data'] = self.object.template.calculation
         context['best_practice_template_id'] = self.object.template.id
+        context['best_practice_data'] = self.object.data or {}
+        context['course'] = self.object.course
         return context
-    
-    def post(self, request, *args, **kwargs):
-        ob = self.get_object()
-        data = ob.data or {}
-        data.update(request.POST.dict())
-        del data['csrfmiddlewaretoken']
-
-        ob.data = data
-        ob.save()
-        course = get_object_or_404(Course, id=kwargs.get('course_pk'))
-        course.apply_from(data, commit=True)
-        ob.courselet.unit.apply_from(data, commit=True) if ob.courselet else None
-
-        target = (
-            reverse(
-                'ctms:activation',
-                kwargs={
-                    'course_pk': kwargs.get('course_pk'),
-                    'pk': kwargs.get('pk')
-                }
-            ) if ob.template.scope == self.course else
-            reverse(
-                'ctms:courselet_bp_activation',
-                kwargs={
-                    'course_pk': kwargs.get('course_pk'),
-                    'courselet_pk': kwargs.get('courselet_pk'),
-                    'pk': kwargs.get('pk')
-                }
-            )
-        )
-        return HttpResponseRedirect(target)
 
 
 class BestPracticeActivation(DetailView):

@@ -168,9 +168,12 @@ ErrorModelFormSet = modelformset_factory(
 
 
 class CreateCourseletForm(forms.ModelForm):
+    follow_up_assessment_date = forms.CharField(widget=forms.TextInput(attrs={'placeholder': '2019-01-01'}))
+    exam_name = forms.CharField()
+
     class Meta:
         model = Unit
-        fields = ('title',)
+        fields = ('title', 'follow_up_assessment_date', 'exam_name')
 
 
 class EditCourseletForm(forms.ModelForm):
