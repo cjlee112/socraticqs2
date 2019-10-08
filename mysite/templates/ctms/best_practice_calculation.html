@@ -7,9 +7,10 @@
 
 {% block content %}
 <div class="card mod">
-    <div class="card__header">
+    <header class="card__topbar card__topbar--with-description">
       <h1>{{ object }}</h1>
-    </div>
+    </header>
+
     <main class="card__content">
       <h2 class="card__content__title">
         Enter your values here
@@ -101,7 +102,7 @@
         Your exam data indicate that there are far too many total student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.  To genuinely fix this number of student blindspots, you need an online platform that's actually designed to identify and resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.
       </p>
     </div>
-    <div class="text-right">
+    <div class="btn-holder text-right">
       <input type="submit" class="btn-mod" value="Create a Courselet">
     </div>
   </main>

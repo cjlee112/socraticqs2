@@ -14,13 +14,34 @@
     </header>
 
     <main class="card__content">
-      <form action="" method="post" enctype="multipart/form-data">
+      <form class="form__holder" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <label for="{{ form.title.auto_id }}">Courselet Name</label>
-          {{ form.title }}
-          {% if form.title.errors %}
-            {{ form.title.errors }}
-          {% endif %}
+<!--        <label for="{{ form.title.auto_id }}">Courselet Name</label>-->
+<!--          {{ form.title }}-->
+<!--          {% if form.title.errors %}-->
+<!--            {{ form.title.errors }}-->
+<!--          {% endif %}-->
+        <div class="input__item">
+          <label for="">
+            Courselet Name
+            <span>Describe how they should name their courselet here.</span>
+          </label>
+          <input type="text">
+        </div>
+        <div class="input__item">
+          <label for="">
+            Follow-Up Assessment Name
+            <span>Describe this field here.</span>
+          </label>
+          <input type="text">
+        </div>
+        <div class="input__item">
+          <label for="">
+            Follow-Up Assessment Date
+            <span>Describe this field here.</span>
+          </label>
+          <input type="text">
+        </div>
         <input type="submit" value="Create Courselet">
       </form>
     </main>

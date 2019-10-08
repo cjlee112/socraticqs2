@@ -217,6 +217,31 @@ input[type=submit] {
   }
 }
 
+.btn-holder {
+  padding-top: 36px;
+}
+
+.form__holder {
+  .input__item {
+    margin-bottom: 28px;
+
+    &:last-of-type {
+      margin: 0;
+    }
+
+    label {
+      margin: 0 0 12px;
+      padding: 0;
+    }
+
+    span {
+      color: #333;
+      display: block;
+      font-style: italic;
+    }
+  }
+}
+
 /**
  * Columns with inputs
  */

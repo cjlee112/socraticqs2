@@ -168,6 +168,21 @@ input[type=submit] {
     float: none;
     margin: 0; }
 
+.btn-holder {
+  padding-top: 36px; }
+
+.form__holder .input__item {
+  margin-bottom: 28px; }
+  .form__holder .input__item:last-of-type {
+    margin: 0; }
+  .form__holder .input__item label {
+    margin: 0 0 12px;
+    padding: 0; }
+  .form__holder .input__item span {
+    color: #333;
+    display: block;
+    font-style: italic; }
+
 /**
  * Columns with inputs
  */
@@ -458,6 +473,7 @@ a.sidebar__add {
       margin-top: 45px; }
 
 .card-mod {
+  background: #fff;
   border: 1px solid #DDE2E6;
   border-top: none;
   border-bottom-left-radius: 4px;
@@ -1269,7 +1285,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .blindspots {
   display: flex;
   padding: 0;
-  margin: 0 0 18px; }
+  margin: 0; }
   .blindspots__item {
     display: flex;
     flex-direction: column;
