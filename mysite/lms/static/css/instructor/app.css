@@ -999,14 +999,20 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     right: 4px;
     margin: 0; }
 
+.get-started__holder {
+  border-bottom: 1px solid #DDE2E6;
+  padding-bottom: 28px; }
+  @media screen and (min-width: 1024px) {
+    .get-started__holder {
+      padding-bottom: 52px; } }
+
 .get-started__intro {
-  padding: 27px 24px 29px 24px; }
+  padding: 27px 24px 0 24px; }
   .get-started__intro h1 {
     margin: 0; }
   .get-started__intro p {
     color: #333;
-    margin: 15px 0 0 0;
-    max-width: 480px; }
+    margin: 15px 0 0 0; }
   .get-started__intro .progress-line {
     display: block;
     width: 100%;
@@ -1037,9 +1043,6 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   font-size: 24px;
   color: #808080; }
 
-.get-started__step {
-  border-top: 1px solid #DDE2E6; }
-
 .get-started__step--open h2 {
   font-weight: 600; }
 
@@ -1068,6 +1071,13 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   background: #ccc;
   background: url(../../img/instructor/get-started-not-done.svg) no-repeat top left; }
 
+.get-started__step-tip {
+  display: block;
+  color: #333;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 400; }
+
 .get-started__step-toggle {
   position: static;
   margin: 17px 0 0 0;
@@ -1079,7 +1089,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 
 @media (min-width: 1024px) {
   .get-started__intro {
-    padding: 51px 240px 53px 60px;
+    padding: 51px 60px 0 60px;
     position: relative; }
     .get-started__intro .progress-line {
       display: none; }

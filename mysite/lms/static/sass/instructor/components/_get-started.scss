@@ -1,9 +1,16 @@
 .get-started {
-
+  &__holder {
+    border-bottom: 1px solid #DDE2E6;
+    padding-bottom: 28px;
+    
+    @media screen and (min-width: 1024px) {
+      padding-bottom: 52px;
+    }
+  }
 }
 
 .get-started__intro {
-  padding: 27px 24px 29px 24px;
+  padding: 27px 24px 0 24px;
 
   h1 {
     margin: 0;
@@ -12,7 +19,6 @@
   p {
     color: $color-text-primary;
     margin: 15px 0 0 0;
-    max-width: 480px;
   }
 
   .progress-line {
@@ -49,10 +55,6 @@
 .get-started__progress-sign {
   font-size: 24px;
   color: #808080;
-}
-
-.get-started__step {
-  border-top: 1px solid #DDE2E6;
 }
 
 .get-started__step--open {
@@ -94,6 +96,14 @@
   background: url(../../img/instructor/get-started-not-done.svg) no-repeat top left;
 }
 
+.get-started__step-tip {
+  display: block;
+  color: #333;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 400;
+}
+
 .get-started__step-toggle {
   position: static;
   margin: 17px 0 0 0;
@@ -108,7 +118,7 @@
 // Larger viewports
 @media (min-width: 1024px) {
   .get-started__intro {
-    padding: 51px 240px 53px 60px;
+    padding: 51px 60px 0 60px;
     position: relative;
 
     .progress-line {

@@ -28,24 +28,20 @@
     </nav>
 
     <header class="get-started__intro">
-      <h1>Best Practice page</h1>
+      <div class="get-started__holder">
+        <h1>Best Practice page</h1>
 
-      <p>
+        <p>
           There we have to add some usefull desctription.
           There we have to add some usefull desctription.
           There we have to add some usefull desctription.
           There we have to add some usefull desctription.
-      </p>
+        </p>
 
-      <div data-progress="{{ best_practices_progress | floatformat:"0" }}" class="get-started__progress-circle">
-        <div>
-          <span class="get-started__progress-text">{{ best_practices_progress | floatformat:"0" }}</span><span class="get-started__progress-sign">%</span>
-        </div>
-      </div>
-
-      <span class="progress-line progress-line--over-white">
+        <span class="progress-line progress-line--over-white">
         <span style="width: calc({{ best_practices_progress | floatformat:"0" }}% + 2px);"></span>
-      </span>
+        </span>
+      </div>
     </header>
 
     <div class="get-started__steps">
@@ -56,7 +52,24 @@
       <div class="get-started__step{% if best_practice.active %} get-started__step--done{% endif %}" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
-          <h2>{{ best_practice.template.title }}</h2>
+          <h2>
+            {{ best_practice.template.title }}
+            <span class="get-started__step-tip">
+              Get up to x amount of value by completing this best practice.
+              <a href="/">test1</a>,
+              <a href="/">test2</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+              <a href="/">test3</a>,
+            </span>
+          </h2>
 
           <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
         </div>
@@ -70,7 +83,7 @@
                 {% if best_practice.active %}Recalculate{% else %}Calculate{% endif %}
             </a>
             {% if not best_practice.active %}
-            <a data-complete-step="test_courselet" href="{% url 'ctms:activation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button button--primary">
+            <a data-complete-step="test_courselet" href="{% url 'ctms:activation' course_pk=best_practice.course.id pk=best_practice.id %}" class="button">
               Activate
             </a>
             {% endif %}
@@ -94,17 +107,6 @@
   <script>
     // Add listeners once the DOM is ready
     $(function(){
-
-      // Create the progress circle
-      var progressCircle = new ProgressBar.Circle('.get-started__progress-circle', {
-        strokeWidth: 2,
-        trailColor: '#DDE2E6',
-        color: '#43B02A'
-      });
-
-      // Animate progress circle
-      var progress = parseInt( $('.get-started__progress-circle').data('progress') ) / 100;
-      progressCircle.animate(progress);
 
       // Get started accordion
       $('.get-started__step-toggle').on('click', function(e) {
