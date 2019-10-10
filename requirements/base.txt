@@ -11,6 +11,7 @@ celery==4.3.0
 
 django-crispy-forms==1.7.2
 
+
 # LTI python implementation
 git+https://github.com/cmltaWt0/ims_lti_py.git@development
 

@@ -86,7 +86,6 @@ def lti_init(request, course_id=None, unit_id=None):
             raise oauth2.Error('Wrong Consumer Key: {}'.format(consumer_key))
         consumer_key = lti_consumer.consumer_key
         secret = lti_consumer.consumer_secret
-
         tool = DjangoToolProvider(consumer_key, secret, request.POST)
         is_valid = tool.is_valid_request(request)
         session['target'] = '_blank'
@@ -97,7 +96,7 @@ def lti_init(request, course_id=None, unit_id=None):
         is_valid = False
         session['message'] = "{}".format(err)
         LOGGER.error(
-            "Error during processing LTI request: ".format(err.__str__())
+            "Error during processing LTI request: {}".format(err.__str__())
         )
 
     session['is_valid'] = is_valid
