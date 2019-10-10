@@ -199,7 +199,7 @@ Deploy Dev:
     - docker-compose -f dev.yml up -d dev_app
     - docker-compose -f dev.yml run --rm dev_app migrate
     - docker-compose -f dev.yml run --rm dev_app fsm-deploy
-    - docker ps
+    - docker-compose -f dev.yml run --rm app static
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
 Run layout tests:
@@ -226,6 +226,7 @@ Deploy Stage:
   variables:
     DOCKER_REGISTRY: $REGISTRY
   script:
+    - docker pull ${DOCKER_REGISTRY}/courselets
     - docker-compose -f prod.yml up -d app
     - docker-compose -f prod.yml run --rm app migrate
     - docker-compose -f prod.yml run --rm app fsm-deploy
