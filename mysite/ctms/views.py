@@ -1425,18 +1425,12 @@ class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
     context_object_name = 'best_practices_templates'
     template_name = 'ctms/course_best_practices.html'
     model = BestPracticeTemplate
-    queryset = BestPracticeTemplate.objects.all()
+    queryset = BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSE)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course'] = self.get_course()
         return context
-
-    def get_queryset(self):
-        return BestPracticeTemplate.objects.filter(
-            scope=BestPracticeTemplate.COURSE,
-            # bestpractice__course=self.get_course(),
-        ).distinct().annotate(count_active_bp=models.Count('bestpractice', filter=models.Q(bestpractice__active=True)))
 
     def get_course(self, queryset=None):
         if 'pk' in self.kwargs:

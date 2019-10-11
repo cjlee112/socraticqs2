@@ -4,10 +4,11 @@ def get_result_calculation(data, calculation):
             for field, value in data.items():
                 if calculation.get(field, {}).get('analys', {}).get('formula'):
                     if value:
-                        if value.isdigit() and calculation.get(field).get('type') == 'number':
+                        if value.isdigit() and calculation.get(field, {}).get('type') == 'number':
                             result.update({
-                                field: calculation.get(field).get('analys').get('text', '{}').format(
-                                int(value) * calculation.get(field).get('analys').get('formula'))
+                                field: calculation.get(field, {}).get('analys').get('text', '{}').format(
+                                    int(value) * calculation.get(field, {}).get('analys').get('formula')
+                                )
                             })  
                         else:
                             result.update({

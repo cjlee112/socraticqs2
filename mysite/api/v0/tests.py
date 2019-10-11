@@ -8,7 +8,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 
 from analytics.models import CourseReport
-from api.v0.views import OnboardingBpAnalysis
+from api.v0.utils import get_result_calculation
 from core.common.mongo import c_onboarding_status
 from core.common import onboarding
 from ct.models import UnitLesson, StudentError, Concept
@@ -20,7 +20,7 @@ HEALTH_URL = reverse('api:v0:health-check')
 
 def test_result_calculation(input_data):
     data, calculation, result = input_data.values()
-    assert OnboardingBpAnalysis.get_result_calculation(data, calculation) == result
+    assert get_result_calculation(data, calculation) == result
 
 
 def test_health_positive(client, db):

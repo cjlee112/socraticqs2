@@ -14,6 +14,6 @@
       <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Upload an Image</button>
     {% endif %}
 
-    <img id="image-{{ id }}" src="/media/{{ value }}" alt="" class="image-holder js-image-holder">
+    <img id="image-{{ id }}" src="{% media_prefix value %}" alt="" class="image-holder js-image-holder">
     <input type="file" class="hidden js-upload-input" id="input-{{ id }}" data-id="{{ id }}" name="{{ name }}">
 </div>

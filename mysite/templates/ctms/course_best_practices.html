@@ -49,16 +49,16 @@
 
       {% for template in best_practices_templates %}
       <!-- view_introduction -->
-      <div class="get-started__step{% if template.count_active_bp %} get-started__step--done{% endif %}" data-step-id="view_introduction">
+      <div class="get-started__step{% if template.bestpractice_set.all|bps_exists:course %} get-started__step--done{% endif %}" data-step-id="view_introduction">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>
             {{ template.title }}
           </h2>
           <span class="get-started__step-tip">
-            {% if template.bestpractice_set.all %}
+            {% if template.bestpractice_set.all|bps_exists:course      %}
               You've created best practice exam:
-                {% for best_practice in template.bestpractice_set.all|active %}
+                {% for best_practice in template.bestpractice_set.all|active:course %}
                   {% if best_practice.courselet %}
                     <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
                       {{ best_practice.courselet.unit.title }}
@@ -80,8 +80,16 @@
             <p>
               {{ template.explanation }}
             </p>
-            <a data-complete-step="test_courselet" href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" redirect="{% url 'ctms:courslet_create' course_pk=course.id %}" class="button button--primary create-new-bp-default">
+            <a data-complete-step="test_courselet" href="#"
+              data-bp-template-pk="{{ template.id }}"
+              data-course-pk="{{ course.id }}"
+              redirect="{% url 'ctms:courslet_create' course_pk=course.id %}"
+              class="button button--primary create-new-bp-default">
+            {% if template.bestpractice_set.all|bps_exists:course %}
               Create another practice exam courselet
+            {% else %}
+              Create a Practice Exam Courselet
+            {% endif %}
             </a>
             <a data-complete-step="test_courselet" href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" class="button create-new-bp">
               Assess Impact for Your Class

@@ -7,16 +7,23 @@
   </header>
 
   <main class="card__content">
-    <form method="POST" action="{% url 'ctms:create_course' %}">
-      <label for="name">Course Name</label>
-
-      {{ form.title }}
-      {{ form.title.errors }}
-
-
-      <label for="name">Students Number</label>
-      {{ form.students_number }}
-      {{ form.students_number.errors }}
+    <form class="form__holder" method="POST" action="{% url 'ctms:create_course' %}">
+        <div class="input__item">
+          <label for="{{ form.title.auto_id }}">
+            Course Name
+            <span>Let’s start by giving your course a name.</span>
+          </label>
+          {{ form.title }}
+          {{ form.title.errors }}
+        </div>
+      <div class="input__item">
+        <label for="{{ form.title.auto_id }}">
+          Number of Students
+          <span>Roughly how many students are in this course?</span>
+        </label>
+        {{ form.students_number }}
+        {{ form.students_number.errors }}
+      </div>
 
       {% csrf_token %}
 
