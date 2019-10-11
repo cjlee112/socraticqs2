@@ -34,9 +34,16 @@
 
   <nav class="navbar-default navbar-static-top" role="navigation">
     <div class="container">
+    {% if 'teach/courses' in request.get_full_path %}
       <div class="alert alert-info">
           You're currently viewing the old Instructor UI. <a href="{% url "ctms:my_courses" %}">Return to the new Instructor UI</a>.
       </div>
+    
+    {% elif 'ct/courses' in request.get_full_path and course %}
+      <div class="alert alert-info">
+          You're currently viewing the old LMS UI. <a href="{% url "lms:course_view" course.id %}">Return to the new LMS UI</a>.
+      </div>
+    {% endif %}
 
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -130,7 +137,7 @@
 
   <footer class="footer-main" style="position: absolute; left: 0; bottom: 0; width: 100%; padding-bottom: 50px;">
      <div class="container">
-      © 2018 Courselets.org
+      © 2019 Courselets.org
     </div>
   </footer>
 
