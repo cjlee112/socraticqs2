@@ -2,6 +2,7 @@
 {% load staticfiles ct_extras %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/draw_svg.css' %}">
 <div class="card">
   <header class="card__topbar">
     <h1>{{ object.unitLesson.lesson.title }}</h1>
@@ -40,7 +41,15 @@
       </div>
 
       <div class="answer__answer">
-        {{ object.text }}
+        <p>{{ object.text }}</p>
+        {% if object.lesson.sub_kind == 'canvas' or object.parent.sub_kind == 'canvas' %}
+          {% if object.lesson.attachment %}
+            <div class="draw-svg-container" disabled="disabled"
+              style="background-image: url({{ object.lesson.attachment.url }})">
+              <img src="{{ object.attachment.url }}">
+            </div>
+          {% endif %}
+        {% endif %}
       </div>
     </div>
   </main>
