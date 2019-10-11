@@ -13,11 +13,10 @@ django-crispy-forms==1.7.2
 
 
 # LTI python implementation
-git+https://github.com/cmltaWt0/ims_lti_py.git@development
+git+https://github.com/cmltaWt0/ims_lti_py.git@master
+git+https://github.com/cmltaWt0/python-oauth2.git@v1.9.1
 
 lxml==4.3.4
-
-oauth2==1.9.0.post1
 pypandoc==1.4
 
 # social authentication/registration mechanizm
