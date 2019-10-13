@@ -18,6 +18,7 @@ from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
 from ..permissions import IsInstructor
 from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
+from .utils import get_result_calculation
 
 
 logger = logging.getLogger(__name__)
@@ -170,35 +171,17 @@ class OnboardingBpAnalysis(APIView):
 
     authentication_classes = (SessionAuthentication,)
 
-    @staticmethod
-    def get_result_calculation(data, calculation):
-        if calculation and data:
-            result = {}
-            data.pop('csrfmiddlewaretoken', None),
-            data.pop('best_practice_template_id', None)
-            for field, value in data.items():
-                if calculation.get(field, {}).get('analys', {}).get('formula'):
-                    if value:
-                        if value.isdigit() and calculation.get(field).get('type') == 'number':
-                            result.update({
-                                field: calculation.get(field).get('analys').get('text', '{}').format(
-                                int(value) * calculation.get(field).get('analys').get('formula'))
-                            })  
-                        else:
-                            result.update({
-                                field: 'Value not integer'
-                            })
-                    else:
-                        result.update({
-                            field: 'Value not filled'
-                        })
-        return result
-
     def post(self, request, *args, **kwargs):
-        data = (request.data)
-        bp_template = BestPracticeTemplate.objects.filter(id=data.get('best_practice_template_id')).first()
-        if bp_template:
-            result_data = self.get_result_calculation(data.dict(), bp_template.calculation)
+        data = request.data.dict()
+        bp_template = BestPracticeTemplate.objects.filter(id=data.pop('best_practice_template_id')).first()
+        best_practice = BestPractice.objects.filter(id=data.pop('best_practice_id')).first()
+        if bp_template and best_practice:
+            data.pop('csrfmiddlewaretoken', None)
+            result_data = get_result_calculation(data, bp_template.calculation)
+            best_practice.data.update({'input_data': data, 'result_data': result_data})
+            best_practice.save()
+            best_practice.course.apply_from(data, commit=True)
+            best_practice.courselet.unit.apply_from(data, commit=True) if best_practice.courselet else None
             return RestResponse({'status': 'Ok', 'result_data': result_data}, status=status.HTTP_200_OK)
         return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -208,10 +191,23 @@ class BestPracticeCreate(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
-        best_practice = get_object_or_404(BestPractice, id=int(request.POST.get('id')))
+        bp_template = BestPracticeTemplate.objects.filter(id=int(request.POST.get('template_id'))).first()
+        data = {}
+        if bp_template:
+            data["input_data"] = {key: value.get("default") for key, value in bp_template.calculation.items()}
+            data["result_data"] = get_result_calculation(data["input_data"], bp_template.calculation)
+
         try:
             new_best_practice = BestPractice.objects.create(
-                template=best_practice.template, course=best_practice.course, courselet=best_practice.courselet)
+                template_id=int(request.POST.get('template_id')),
+                course_id=int(request.POST.get('course_id')),
+                data=data
+            )
+            if data:
+                new_best_practice.data.update(data)
+                new_best_practice.save()
+                new_best_practice.course.apply_from(data, commit=True)
+                new_best_practice.courselet.unit.apply_from(data, commit=True) if new_best_practice.courselet else None
             return RestResponse({'status': 'Ok', 'data': {'new_best_practice': new_best_practice.id}}, status=status.HTTP_200_OK)
         except ValueError as e:
             logger.error(e)

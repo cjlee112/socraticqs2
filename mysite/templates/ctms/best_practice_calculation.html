@@ -1,5 +1,6 @@
 {% extends "ctms_base.html" %}
 {% load staticfiles %}
+{% load dictionary_extras %}
 
 {% block title %}
     Get Started
@@ -16,72 +17,42 @@
         Enter your values here
       </h2>
       <form method="post" id="bp-analysis">{% csrf_token %}
-        <div class="input__row">
-          <div class="input__row__item">
-            <label for="row-input-number">How many students do you have in your class?</label>
-            <input id="row-input-number" type="number" name="row-input-number">
+        {% for key, value in input_data.items %}
+        {% if forloop.counter0|divisibleby:"2" %}<div class="input__row">{% endif %}
+          <div class="input__row__item {{ value.subtype }}">
+            <label for="{{ key }}">{{ value.label }}</label>
+            <input type="{{ value.type }}" name="{{ key }}" value="{% if best_practice_data %}{{ best_practice_data.input_data |get:key }}{% elif value.default %}{{ value.default }}{% endif %}">
           </div>
-          <div class="input__row__item percent">
-            <label for="row-input-number">What is the mean percent score on a typical exam?</label>
-            <input id="row-input-percent" type="number" name="row-input-number">
-          </div>
-        </div>
-        <div class="input__row">
-          <div class="input__row__item">
-            <label for="row-input-number-2">How many question-parts do you have in a typical exam?
-              <span>(e.g. 8 questions with 3 parts each = 24)</span>
-            </label>
-            <input id="row-input-number-2" type="number" name="row-input-number-2">
-          </div>
-          <div class="input__row__item">
-            <label for="row-input-number-3">How many individual student misconceptions do you fix in a typical exam?</label>
-            <input id="row-input-number-3" type="number" name="row-input-number-3">
-          </div>
-        </div>
-        <p>
-          {% for key, value in input_data.items %}
-          <label for="{{ key }}">{{ value.label }}</label>
-          <input type="{{ value.type }}" name="{{ key }}">
-          {% endfor %}
-        </p>
+        {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
+        {% endfor %}
         <input type="submit" class="btn-mod" value="Calculate">
       </form>
-      <div id='result' hidden>
-        <h2>Impact Analysis</h2><br>
-        <ul>
-          <div id='estimated_blindspots'></div>
-        </ul>
-        <form action="" id="fake-form" method="POST">
-          {% csrf_token %}
-          <input type="submit" class="btn" value="Next">
-        </form>
-      </div>
     </main>
 </div>
 
 <div class="card-mod">
   <main class="card__content">
-    <h2 class="card__content__title">
+    <h2 id='result' class="card__content__title">
       Calculated impact for your class
     </h2>
     <h3>
       Student blindspots resolved by your practice exam
     </h3>
     <ul class="blindspots">
+        <li class="blindspots__item">
+            <span id="without_courselets_result" class="blindspots__number">
+              {{ best_practice_data.result_data.field3 }}
+            </span>
+          Without Courselets
+        </li>
+        <li class="blindspots__item">
+            <span id="with_courselets_result" class="blindspots__number">
+              {{ best_practice_data.result_data.field4 }}
+            </span>
+          With Courselets
+        </li>
       <li class="blindspots__item">
-          <span class="blindspots__number">
-            35
-          </span>
-        Without Courselets
-      </li>
-      <li class="blindspots__item">
-          <span class="blindspots__number">
-            1344
-          </span>
-        With Courselets
-      </li>
-      <li class="blindspots__item">
-        <a href="/">
+        <a id="recalculate">
           Recalculate
         </a>
       </li>
@@ -103,7 +74,7 @@
       </p>
     </div>
     <div class="btn-holder text-right">
-      <input type="submit" class="btn-mod" value="Create a Courselet">
+      <a href="{% url 'ctms:courslet_create_with_bp' course.id object.id %}" class="button button--primary">Create a Courselet</a>
     </div>
   </main>
 </div>
@@ -115,10 +86,18 @@
       $(document).ready(function(){
         $form = $('#bp-analysis');
         $form.on('submit', function(e){
+          $("#btnSubmit").attr("disabled", true);
+          $('html, body').animate({
+            scrollTop: $("#result").offset().top
+          }, 500);
+          $estimatedBlindspots = $(".blindspots")
           e.preventDefault();
           var formData = $form.serializeArray();
           formData.push(
             {name: "best_practice_template_id", value: '{{ best_practice_template_id }}'},
+          );
+          formData.push(
+            {name: "best_practice_id", value: '{{ object.id }}'},
           );
           console.log(formData);
           $.ajax({
@@ -131,16 +110,19 @@
           })
           .done( function(response) {
             console.log(response.result_data);
-            $form.hide()
-            $("#result").removeAttr('hidden');
-            $.each( response.result_data, function( index, value ){
-              $("#estimated_blindspots").append( "<li>" + String(value)+ "</li>")
-            });
+            $('#without_courselets_result').text(response.result_data.field3);
+            $('#with_courselets_result').text(response.result_data.field4);
           })
           .fail( function(error) {
             alert('Something went wrong. Please refresh the page and try again.');
           })
+          $("#btnSubmit").attr("disabled", false);
         });
+        $('#recalculate').on('click', function(e){
+          $('html, body').animate({
+            scrollTop: $(".card__content").offset().top
+          }, 500);
+        })
         $fake_form = $('#fake-form');
         $fake_form.on('submit', function(e){
           e.preventDefault();

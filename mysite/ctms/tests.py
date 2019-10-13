@@ -665,7 +665,11 @@ class CreateCoursletViewTests(MyTestCase):
         courslets_in_course = CourseUnit.objects.filter(
             course=self.course
         ).count()
-        data = {'title': 'Some new Courslet'}
+        data = {
+            'title': 'Some new Courslet',
+            'follow_up_assessment_date': '2019-01-01',
+            'exam_name': 'Exam name'
+        }
         response = self.client.post(self.url, data, follow=False)
         new_unit = CourseUnit.objects.filter(
             course=self.course

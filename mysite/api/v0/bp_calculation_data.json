@@ -1,188 +1,217 @@
 [
     {
-        "data": {"field1": "1", "field2": "2", "field3": "3", "field4": "4"},
+        "data": {"field1": "200", "field2": "72", "field3": "24", "field4": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
-                "label": "field1",
-                "analys": {
-                    "text": "field1 {}",
-                    "formula": 1
-                }
+                "label": "How many student do you have in class?",
+                "default": "200"
             },
             "field2": {
                 "type": "number",
-                "label": "field2",
+                "label": "What is the mean is percent score on a typical exam?",
                 "analys": {
-                    "text": "field2 {}",
+                    "text": "{}",
                     "formula": 2
-                }
+                },
+                "default": "72",
+                "subtype": "percent"
             },
             "field3": {
                 "type": "number",
-                "label": "field3",
+                "label": "How many question-parts do you have in a typical edxam?",
                 "analys": {
-                    "text": "field3 {}",
-                    "formula": 3
-                }
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
             },
             "field4": {
                 "type": "number",
-                "label": "field4",
+                "label": "how many individual student misconception do you fix in a typical exam?",
                 "analys": {
-                    "text": "field4 {}",
-                    "formula": 4
-                }
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
             }
         },
-        "result": {"field1": "field1 1", "field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+        "result": {
+            "field2": "144",
+            "field3": "48",
+            "field4": "500"
+        }
     },
     {
-        "data": {"field1": "text", "field2": "2", "field3": "3", "field4": "4"},
+        "data": {"field1": "", "field2": "", "field3": "", "field4": ""},
         "calculation": {
             "field1": {
-                "type": "text",
-                "label": "field1",
-                "analys": {
-                    "text": "field1 {}",
-                    "formula": 1
-                }
+                "type": "number",
+                "label": "How many student do you have in class?",
+                "default": "200"
             },
             "field2": {
                 "type": "number",
-                "label": "field2",
+                "label": "What is the mean is percent score on a typical exam?",
                 "analys": {
-                    "text": "field2 {}",
+                    "text": "{}",
                     "formula": 2
-                }
+                },
+                "default": "72",
+                "subtype": "percent"
             },
             "field3": {
                 "type": "number",
-                "label": "field3",
+                "label": "How many question-parts do you have in a typical edxam?",
                 "analys": {
-                    "text": "field3 {}",
-                    "formula": 3
-                }
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
             },
             "field4": {
                 "type": "number",
-                "label": "field4",
+                "label": "how many individual student misconception do you fix in a typical exam?",
                 "analys": {
-                    "text": "field4 {}",
-                    "formula": 4
-                }
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
             }
         },
-        "result": {"field1": "Value not integer", "field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+        "result": {
+            "field2": "Value not filled",
+            "field3": "Value not filled",
+            "field4": "Value not filled"
+        }
     },
     {
-        "data": {"field1": "2", "field2": "3", "field3": "", "field4": "4"},
+        "data": {"field1": "200", "field2": "", "field3": "24", "field4": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
-                "label": "field1",
-                "analys": {
-                    "text": "field1 {}",
-                    "formula": 1
-                }
+                "label": "How many student do you have in class?",
+                "default": "200"
             },
             "field2": {
                 "type": "number",
-                "label": "field2",
+                "label": "What is the mean is percent score on a typical exam?",
                 "analys": {
-                    "text": "field2 {}",
+                    "text": "{}",
                     "formula": 2
-                }
+                },
+                "default": "72",
+                "subtype": "percent"
             },
             "field3": {
                 "type": "number",
-                "label": "field3",
+                "label": "How many question-parts do you have in a typical edxam?",
                 "analys": {
-                    "text": "field3 {}",
-                    "formula": 3
-                }
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
             },
             "field4": {
                 "type": "number",
-                "label": "field4",
+                "label": "how many individual student misconception do you fix in a typical exam?",
                 "analys": {
-                    "text": "field4 {}",
-                    "formula": 4
-                }
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
             }
         },
-        "result": {"field1": "field1 2", "field2": "field2 6", "field3": "Value not filled", "field4": "field4 16"}
+        "result": {
+            "field2": "Value not filled",
+            "field3": "48",
+            "field4": "500"
+        }
     },
     {
-        "data": {"field1": "3", "field2": "2", "field3": "3", "field4": "not integer"},
+        "data": {"field1": "200", "field2": "72", "field3": "", "field4": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
-                "label": "field1",
-                "analys": {
-                    "text": "field1 {}",
-                    "formula": 1
-                }
+                "label": "How many student do you have in class?",
+                "default": "200"
             },
             "field2": {
                 "type": "number",
-                "label": "field2",
+                "label": "What is the mean is percent score on a typical exam?",
                 "analys": {
-                    "text": "field2 {}",
+                    "text": "{}",
                     "formula": 2
-                }
+                },
+                "default": "72",
+                "subtype": "percent"
             },
             "field3": {
                 "type": "number",
-                "label": "field3",
+                "label": "How many question-parts do you have in a typical edxam?",
                 "analys": {
-                    "text": "field3 {}",
-                    "formula": 3
-                }
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
             },
             "field4": {
                 "type": "number",
-                "label": "field4",
+                "label": "how many individual student misconception do you fix in a typical exam?",
                 "analys": {
-                    "text": "field4 {}",
-                    "formula": 4
-                }
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
             }
         },
-        "result": {"field1": "field1 3", "field2": "field2 4", "field3": "field3 9", "field4": "Value not integer"}
+        "result": {
+            "field2": "144",
+            "field3": "Value not filled",
+            "field4": "500"
+        }
     },
     {
-        "data": {"field1": "text", "field2": "2", "field3": "3", "field4": "4"},
+        "data": {"field1": "200", "field2": "72", "field3": "24", "field4": ""},
         "calculation": {
             "field1": {
-                "type": "text",
-                "label": "field1"
+                "type": "number",
+                "label": "How many student do you have in class?",
+                "default": "200"
             },
             "field2": {
                 "type": "number",
-                "label": "field2",
+                "label": "What is the mean is percent score on a typical exam?",
                 "analys": {
-                    "text": "field2 {}",
+                    "text": "{}",
                     "formula": 2
-                }
+                },
+                "default": "72",
+                "subtype": "percent"
             },
             "field3": {
                 "type": "number",
-                "label": "field3",
+                "label": "How many question-parts do you have in a typical edxam?",
                 "analys": {
-                    "text": "field3 {}",
-                    "formula": 3
-                }
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
             },
             "field4": {
                 "type": "number",
-                "label": "field4",
+                "label": "how many individual student misconception do you fix in a typical exam?",
                 "analys": {
-                    "text": "field4 {}",
-                    "formula": 4
-                }
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
             }
         },
-        "result": {"field2": "field2 4", "field3": "field3 9", "field4": "field4 16"}
+        "result": {
+            "field2": "144",
+            "field3": "48",
+            "field4": "Value not filled"
+        }
     }
 ]

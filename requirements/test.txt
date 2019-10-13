@@ -6,7 +6,8 @@ pytest-mock
 pytest-django
 pytest-cov==2.5.1
 pytest-xdist==1.25.0
-pytest-selenium
+pytest-selenium==1.17.0
+pytest-html==1.22.0
 docker-py
 ddt
 python-coveralls==2.9.1

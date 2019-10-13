@@ -148,9 +148,11 @@
                 <li>
                   <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
                 </li>
+                {% switch "ctms_bp_courseletes_enabled" %}
                 <li>
                   <a href="{% url 'ctms:courselet_best_practice' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_best_practice' %}sidebar__actions__active{% endif %}">Best Practices</a>
                 </li>
+                {% endswitch %}
               </ul>
             </nav>
           {% endif %}
