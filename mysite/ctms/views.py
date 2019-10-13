@@ -75,6 +75,11 @@ class CourseCoursletUnitMixin(View):
         )
 
     def dispatch(self, request, *args, **kwargs):
+        course = self.get_course()
+        if course and (
+            not course.addedBy == self.request.user and
+            not Role.objects.filter(user=self.request.user, course=course, role=Role.INSTRUCTOR).exists()):
+            raise Http404()
         if self.NEED_INSTRUCTOR and not self.am_i_instructor():
             return redirect(settings.BECOME_INSTRUCTOR_URL)
         return super(CourseCoursletUnitMixin, self).dispatch(request, *args, **kwargs)
@@ -322,9 +327,6 @@ class DeleteCourseView(NewLoginRequiredMixin, DeleteView):
     Delete course can only owner.
     """
     model = Course
-
-    def get_queryset(self):
-        return Course.objects.filter(addedBy=self.request.user)
 
     def get_success_url(self):
         return reverse('ctms:my_courses')
@@ -582,7 +584,7 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         """
         course = self.get_course()
         if (course.addedBy != self.request.user and
-            not Role.objects.filter(role=Role.INSTRUCTOR, course=course).exists()):
+            not Role.objects.filter(user=self.request.user, role=Role.INSTRUCTOR, course=course).exists()):
             raise Http404()
         return super(CreateUnitView, self).post(request, *args, **kwargs)
 
@@ -637,9 +639,6 @@ class EditUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
         :param queryset:
         :return:
         """
-        course = self.get_course()
-        if not course.addedBy == self.request.user:
-            raise Http404()
         self.object = self.get_unit_lesson().lesson
         return self.object
 
@@ -669,12 +668,6 @@ class ResponseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
     courslet_pk_name = 'courselet_pk'
     unit_pk_name = 'unit_pk'
     template_name = 'ctms/response_detail.html'
-
-    def get_queryset(self):
-        course = self.get_course()
-        if not course.addedBy == self.request.user:
-            raise Http404()
-        return super(ResponseView, self).get_queryset()
 
     def get_context_data(self, **kwargs):
         kwargs.update(self.kwargs)
