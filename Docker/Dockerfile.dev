@@ -20,7 +20,7 @@ RUN apt-get -y update && \
 	&& rm -rf /var/lib/apt/lists/*
 RUN pip install --ignore-installed -U -r /requirements/dev.txt
 
-USER root
+USER courselets
 
 ADD --chown=courselets:courselets mysite /home/courselets/app/mysite
 COPY --from=static --chown=courselets:courselets /draw_svg.js lms/static/js/draw_svg.js
