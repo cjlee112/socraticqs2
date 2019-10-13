@@ -208,7 +208,6 @@ Run layout tests:
     - dind
   only:
     - development
-    - master
   script:
     - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
     - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
