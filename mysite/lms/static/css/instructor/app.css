@@ -1081,7 +1081,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .get-started__step-toggle {
   position: static;
   margin: 17px 0 0 0;
-  width: 72px; }
+  min-width: 72px; }
 
 .get-started__step-content {
   display: none;

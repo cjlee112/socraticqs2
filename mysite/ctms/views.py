@@ -1474,7 +1474,7 @@ class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
             return courselet
 
 
-class BestPracticeCalculation(DetailView):
+class BestPracticeCalculation(NewLoginRequiredMixin, DetailView):
     model = BestPractice
     template_name = 'ctms/best_practice_calculation.html'
     course = 'course'

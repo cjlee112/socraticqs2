@@ -20,8 +20,8 @@
         {% for key, value in input_data.items %}
         {% if forloop.counter0|divisibleby:"2" %}<div class="input__row">{% endif %}
           <div class="input__row__item {{ value.subtype }}">
-            <label for="{{ key }}">{{ value.label }}</label>
-            <input type="{{ value.type }}" name="{{ key }}" value="{% if best_practice_data %}{{ best_practice_data.input_data |get:key }}{% elif value.default %}{{ value.default }}{% endif %}">
+            <label for="{{ key }}">{{ value.label }}{% if value.label_explanation %}<span> ({{ value.label_explanation }})</span>{% endif %}</label>
+            <input type="{{ value.type }}" {% if value.type == "number" %} min={{ value.min }} step={{ value.step }} max={{ value.max }} {% endif %} name="{{ key }}" value="{% if best_practice_data %}{{ best_practice_data.input_data |get:key }}{% elif value.default %}{{ value.default }}{% endif %}">
           </div>
         {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
         {% endfor %}
