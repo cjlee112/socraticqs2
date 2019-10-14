@@ -4,4 +4,4 @@ register = template.Library()
 
 @register.filter(name='get')
 def get(value, arg):
-    return value[arg]
+    return value.get(arg)

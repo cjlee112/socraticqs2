@@ -21,7 +21,15 @@
         {% if forloop.counter0|divisibleby:"2" %}<div class="input__row">{% endif %}
           <div class="input__row__item {{ value.subtype }}">
             <label for="{{ key }}">{{ value.label }}{% if value.label_explanation %}<span> ({{ value.label_explanation }})</span>{% endif %}</label>
-            <input type="{{ value.type }}" {% if value.type == "number" %} min={{ value.min }} step={{ value.step }} max={{ value.max }} {% endif %} name="{{ key }}" value="{% if best_practice_data %}{{ best_practice_data.input_data |get:key }}{% elif value.default %}{{ value.default }}{% endif %}">
+            <input type="{{ value.type }}"
+              {% if value.type == "number" %}
+                min={{ value.min }}
+                step={{ value.step }}
+                max={{ value.max }}
+              {% endif %}
+              name="{{ key }}"
+              value="{% if best_practice_data and best_practice_data.input_data|get:key %}{{ best_practice_data.input_data|get:key }}{% elif value.default %}{{ value.default }}{% endif %}"
+            >
           </div>
         {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
         {% endfor %}
@@ -41,13 +49,13 @@
     <ul class="blindspots">
         <li class="blindspots__item">
             <span id="without_courselets_result" class="blindspots__number">
-              {{ best_practice_data.result_data.field3 }}
+              {{ best_practice_data.result_data.w_o_courselets }}
             </span>
           Without Courselets
         </li>
         <li class="blindspots__item">
             <span id="with_courselets_result" class="blindspots__number">
-              {{ best_practice_data.result_data.field4 }}
+              {{ best_practice_data.result_data.w_courselets }}
             </span>
           With Courselets
         </li>
@@ -110,8 +118,8 @@
           })
           .done( function(response) {
             console.log(response.result_data);
-            $('#without_courselets_result').text(response.result_data.field3);
-            $('#with_courselets_result').text(response.result_data.field4);
+            $('#without_courselets_result').text(response.result_data.w_o_courselets);
+            $('#with_courselets_result').text(response.result_data.w_courselets);
           })
           .fail( function(error) {
             alert('Something went wrong. Please refresh the page and try again.');

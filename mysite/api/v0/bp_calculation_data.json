@@ -37,13 +37,51 @@
             }
         },
         "result": {
-            "field2": "144",
-            "field3": "48",
-            "field4": "500"
+            "w_o_courselets": 48,
+            "w_courselets": 1344
         }
     },
     {
-        "data": {"field1": "", "field2": "", "field3": "", "field4": ""},
+        "data": {},
+        "calculation": {
+            "field1": {
+                "type": "number",
+                "label": "How many student do you have in class?",
+                "default": "200"
+            },
+            "field2": {
+                "type": "number",
+                "label": "What is the mean is percent score on a typical exam?",
+                "analys": {
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "72",
+                "subtype": "percent"
+            },
+            "field3": {
+                "type": "number",
+                "label": "How many question-parts do you have in a typical edxam?",
+                "analys": {
+                    "text": "{}",
+                    "formula": 2
+                },
+                "default": "24"
+            },
+            "field4": {
+                "type": "number",
+                "label": "how many individual student misconception do you fix in a typical exam?",
+                "analys": {
+                    "text": "{}",
+                    "formula": 100
+                },
+                "default": "5"
+            }
+        },
+        "result": {}
+    },
+    {
+        "data": {"bp_student_number": "200", "question_parts": "24", "field4": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -80,13 +118,12 @@
             }
         },
         "result": {
-            "field2": "Value not filled",
-            "field3": "Value not filled",
-            "field4": "Value not filled"
+            "w_o_courselets": 48,
+            "w_courselets": 1344
         }
     },
     {
-        "data": {"field1": "200", "field2": "", "field3": "24", "field4": "5"},
+        "data": {"bp_student_number": "200", "average_score": "72", "field4": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -123,13 +160,12 @@
             }
         },
         "result": {
-            "field2": "Value not filled",
-            "field3": "48",
-            "field4": "500"
+            "w_o_courselets": 48,
+            "w_courselets": 1344
         }
     },
     {
-        "data": {"field1": "200", "field2": "72", "field3": "", "field4": "5"},
+        "data": {"bp_student_number": "200", "average_score": "72", "question_parts": "24", "field4": ""},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -166,13 +202,12 @@
             }
         },
         "result": {
-            "field2": "144",
-            "field3": "Value not filled",
-            "field4": "500"
+            "w_o_courselets": 48,
+            "w_courselets": 1344
         }
     },
     {
-        "data": {"field1": "200", "field2": "72", "field3": "24", "field4": ""},
+        "data": {"bp_student_number": "100", "average_score": "50", "question_parts": "12", "field4": ""},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -209,9 +244,8 @@
             }
         },
         "result": {
-            "field2": "144",
-            "field3": "48",
-            "field4": "Value not filled"
+            "w_o_courselets": 12,
+            "w_courselets": 600
         }
     }
 ]

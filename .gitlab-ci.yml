@@ -10,7 +10,7 @@ stages:
   - test
   - tag
   - deploy
-  - smoke
+## - smoke
   - cleanup
 
 Build static:
@@ -202,15 +202,16 @@ Deploy Dev:
     - docker-compose -f dev.yml run --rm dev_app static
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
-Run layout tests:
-  stage: smoke
-  tags:
-    - dind
-  only:
-    - development
-  script:
-    - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
-    - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
+## Run layout tests:
+##   stage: smoke
+##   tags:
+##     - dind
+##   only:
+##     - development
+##     - master
+##   script:
+##     - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
+##     - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
 
 Deploy Stage:
   stage: deploy
