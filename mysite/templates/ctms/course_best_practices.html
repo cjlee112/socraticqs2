@@ -47,7 +47,7 @@
 
       {% for template in best_practices_templates %}
       <!-- view_introduction -->
-      <div class="get-started__step{% if template.bestpractice_set.all|bps_exists:course %} get-started__step--done{% endif %}"
+      <div class="get-started__step{% if template.bestpractice_set.all|bps_exists:course %} get-started__step--done{% endif %} get-started__step--summary"
           data-step-id="view_introduction"
           data-bps-exists="{{ template.bestpractice_set.all|bps_exists:course }}">
         <div class="get-started__step-header">

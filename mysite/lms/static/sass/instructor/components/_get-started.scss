@@ -67,6 +67,12 @@
   }
 }
 
+.get-started__step--summary {
+  h2 {
+    font-weight: 600;
+  }
+}
+
 .get-started__step--done {
   .get-started__step-status {
     background: url(../../img/instructor/get-started-done.svg) no-repeat top left;

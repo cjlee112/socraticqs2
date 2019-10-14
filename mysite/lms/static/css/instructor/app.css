@@ -1049,6 +1049,9 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .get-started__step--open .get-started__step-content {
   display: block; }
 
+.get-started__step--summary h2 {
+  font-weight: 600; }
+
 .get-started__step--done .get-started__step-status {
   background: url(../../img/instructor/get-started-done.svg) no-repeat top left; }
 
