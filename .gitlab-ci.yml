@@ -230,8 +230,8 @@ Deploy Stage:
     - docker-compose -f prod.yml run --rm app migrate
     - docker-compose -f prod.yml run --rm app fsm-deploy
     - docker-compose -f prod.yml run --rm app static
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
-    - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@here", "link_names":1}'
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
+    - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org```\n'"$CI_COMMIT_MESSAGE"'\n```\n@here", "link_names":1}'
 
 Cleanup:
   stage: cleanup
