@@ -999,6 +999,9 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     right: 4px;
     margin: 0; }
 
+.get-started__steps-bordered .get-started__step {
+  border-top: 1px solid #DDE2E6; }
+
 .get-started__holder {
   border-bottom: 1px solid #DDE2E6;
   padding-bottom: 28px; }
@@ -1006,18 +1009,22 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     .get-started__holder {
       padding-bottom: 52px; } }
 
-.get-started__intro {
+.get-started__intro, .get-started__intro-mod {
   padding: 27px 24px 0 24px; }
-  .get-started__intro h1 {
+  .get-started__intro h1, .get-started__intro-mod h1 {
     margin: 0; }
-  .get-started__intro p {
+  .get-started__intro p, .get-started__intro-mod p {
     color: #333;
-    margin: 15px 0 0 0; }
-  .get-started__intro .progress-line {
+    margin: 15px 0 0 0;
+    max-width: 480px; }
+  .get-started__intro .progress-line, .get-started__intro-mod .progress-line {
     display: block;
     width: 100%;
     max-width: 480px;
     margin: 25px 0 7px 0; }
+
+.get-started__intro-mod {
+  padding-bottom: 29px; }
 
 .get-started__progress-circle {
   display: none;
@@ -1091,11 +1098,13 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   padding: 7px 24px 36px 24px; }
 
 @media (min-width: 1024px) {
-  .get-started__intro {
+  .get-started__intro, .get-started__intro-mod {
     padding: 51px 60px 0 60px;
     position: relative; }
-    .get-started__intro .progress-line {
+    .get-started__intro .progress-line, .get-started__intro-mod .progress-line {
       display: none; }
+  .get-started__intro-mod {
+    padding-bottom: 53px; }
   .get-started__progress-circle {
     display: block; }
   .get-started__step-header {
