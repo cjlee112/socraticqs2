@@ -10,34 +10,22 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {
-            "w_o_courselets": 48,
+            "w_o_courselets": 35,
             "w_courselets": 1344
         }
     },
@@ -52,36 +40,24 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {}
     },
     {
-        "data": {"bp_student_number": "200", "question_parts": "24", "field4": "5"},
+        "data": {"bp_student_number": "200", "question_parts": "24", "misconception_a_day": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -91,39 +67,27 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {
-            "w_o_courselets": 48,
+            "w_o_courselets": 35,
             "w_courselets": 1344
         }
     },
     {
-        "data": {"bp_student_number": "200", "average_score": "72", "field4": "5"},
+        "data": {"bp_student_number": "200", "average_score": "72", "misconception_a_day": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -133,39 +97,27 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {
-            "w_o_courselets": 48,
+            "w_o_courselets": 35,
             "w_courselets": 1344
         }
     },
     {
-        "data": {"bp_student_number": "200", "average_score": "72", "question_parts": "24", "field4": ""},
+        "data": {"bp_student_number": "200", "average_score": "72", "question_parts": "24"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -175,39 +127,27 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {
-            "w_o_courselets": 48,
+            "w_o_courselets": 35,
             "w_courselets": 1344
         }
     },
     {
-        "data": {"bp_student_number": "100", "average_score": "50", "question_parts": "12", "field4": ""},
+        "data": {"bp_student_number": "100", "average_score": "50", "question_parts": "12", "misconception_a_day": "5"},
         "calculation": {
             "field1": {
                 "type": "number",
@@ -217,34 +157,22 @@
             "field2": {
                 "type": "number",
                 "label": "What is the mean is percent score on a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "72",
                 "subtype": "percent"
             },
             "field3": {
                 "type": "number",
                 "label": "How many question-parts do you have in a typical edxam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 2
-                },
                 "default": "24"
             },
             "field4": {
                 "type": "number",
                 "label": "how many individual student misconception do you fix in a typical exam?",
-                "analys": {
-                    "text": "{}",
-                    "formula": 100
-                },
                 "default": "5"
             }
         },
         "result": {
-            "w_o_courselets": 12,
+            "w_o_courselets": 35,
             "w_courselets": 600
         }
     }

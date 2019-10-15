@@ -13,9 +13,7 @@ def get_result_calculation(data, calculation) -> dict:
     result = {}
     if calculation and data:
         result['w_o_courselets'] = int(
-            int(data.get('bp_student_number', 200)) *
-            int(data.get('question_parts', 24)) *
-            ((1 - int(data.get('w_o_cr_correct', 99)) / 100)))
+            int(data.get('misconception_a_day', 5)) * 7)
         result['w_courselets'] = int(
             int(data.get('bp_student_number', 200)) *
             int(data.get('question_parts', 24)) *
