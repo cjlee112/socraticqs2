@@ -1076,9 +1076,10 @@ class Unit(models.Model):
             d.setdefault(cl.concept, []).append(cl)
         return d
 
-    def get_exercises(self):
+    def get_exercises(self, _filter=None):
         'ordered list of lessons for this courselet'
-        return list(self.unitlesson_set.filter(order__isnull=False)
+        _filter = _filter or {}
+        return list(self.unitlesson_set.filter(order__isnull=False, **_filter)
                     .order_by('order'))
 
     reorder_exercise = reorder_exercise

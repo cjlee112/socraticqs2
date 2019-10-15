@@ -1042,7 +1042,7 @@ def unit_answers(request, course_id, unit_id, **kwargs):
     pageData = PageData(
         request, title=unit.title, navTabs=unit_tabs(request.path, 'Answers')
     )
-    exercises = unit.get_exercises()
+    exercises = unit.get_exercises(_filter={'lesson__kind': Lesson.ORCT_QUESTION})
 
     page = request.GET.get('page', 1)
     roles_list = Role.objects.order_by(
