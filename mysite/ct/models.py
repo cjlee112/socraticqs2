@@ -418,7 +418,10 @@ class Lesson(models.Model, SubKindMixin):
         is_answer = self.kind == 'answer'
         if is_answer:
             background_image = self.unitlesson_set.first().parent.lesson.attachment
-            svg_image = self.attachment
+            try:
+                svg_image = self.attachment.read()
+            except (ValueError, OSError):
+                svg_image = None
         else:
             background_image = self.attachment
             svg_image = None
@@ -1332,8 +1335,13 @@ class Response(models.Model, SubKindMixin):
         """
         Returns container for drawing
         """
+        try:
+            canvas = self.attachment.read()
+        except (ValueError, OSError):
+            canvas = ''
         html = render_to_string('ct/lesson/response_sub_kind_canvas.html', context={
             'response': self,
+            'canvas': canvas,
         })
         return html
 

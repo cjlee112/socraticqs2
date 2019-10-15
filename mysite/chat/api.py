@@ -32,6 +32,7 @@ from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
 from ct.models import Response as StudentResponse, Lesson, DONE_STATUS
 from ct.models import UnitLesson
+from lti.utils import key_secret_generator
 
 
 inj_alternative = injections.Container()
@@ -318,7 +319,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             if data_attachment and data_attachment.startswith('data:image'):
                 format, image_string = data_attachment.split(';base64,')
                 extension = format.split('/')[-1].split('+')[0]
-                name = '{}.{}'.format('canvas', extension)
+                name = '{}-{}.{}'.format('canvas', key_secret_generator(), extension)
                 resp.attachment = ContentFile(base64.b64decode(image_string), name=name)
 
             if not message.content_id:

@@ -264,6 +264,13 @@ class PageData(object):
         if self.has_refresh_timer(request):
             templateArgs['elapsedTime'] = self.get_refresh_timer(request)
             templateArgs['refreshInterval'] = 15
+        ul = templateArgs.get('unitLesson')
+        if ul:
+            try:
+                ul.lesson.attachment.read()
+                ul.lesson.attachment.seek(0)
+            except (ValueError, OSError):
+                ul.lesson.attachment = None
         return self.fsm_redirect(request, addNextButton=addNextButton) \
             or render(request, templatefile, templateArgs, **kwargs)
     def fsm_push(self, request, name, *args, **kwargs):
