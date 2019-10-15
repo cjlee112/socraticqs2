@@ -1,7 +1,7 @@
 <div id="draw-svg--{{ lesson.id }}" class="draw-svg-container" disabled="{{ disabled|yesno:'1,0' }}"
      style="background-image: url({{ background_image.url }})">
     {% if svg_image %}
-        {{ svg_image.read|safe }}
+        {{ svg_image|safe }}
     {% else %}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
              xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"

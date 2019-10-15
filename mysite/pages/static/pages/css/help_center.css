@@ -986,7 +986,7 @@ body {
   .get-started__step-toggle {
     position: static;
     margin: 17px 0 0 0;
-    width: 72px; }
+    min-width: 72px; }
   
   .get-started__step-content {
     display: none;

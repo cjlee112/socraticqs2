@@ -218,7 +218,7 @@ input[type=submit] {
 }
 
 .btn-holder {
-  padding-top: 36px;
+  padding-top: 16px;
 }
 
 .form__holder {
@@ -250,9 +250,17 @@ input[type=submit] {
   align-items: flex-end;
   justify-content: space-between;
 
+  @media screen and (max-width: 719px) {
+    flex-direction: column;
+  }
+
   &__item {
     width: 48%;
     margin: 0 0 30px;
+
+    @media screen and (max-width: 719px) {
+      width: 100%;
+    }
 
     &.percent {
       position: relative;
@@ -262,7 +270,11 @@ input[type=submit] {
         position: absolute;
         height: 54px;
         width: 50px;
-        border-left: 1px solid #DDE2E6;
+        color: #333;
+        background: #FAFBFD;
+        border: 1px solid #D0D5D9;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
         bottom: 0;
         right: 0;
         display: flex;
@@ -280,8 +292,24 @@ input[type=submit] {
 /**
  * Blocks with text
  */
-.text-block {
-  p {
-    margin: 0 0 24px;
+
+.text-block__holder {
+  .text-block {
+    margin: 0 0 46px;
+
+    &:last-child {
+      margin: 0;
+    }
+
+    h3 {
+      margin: 0 0 14px;
+    }
+
+    p {
+      margin: 0 0 24px;
+      &:last-of-type {
+        margin: 0;
+      }
+    }
   }
 }

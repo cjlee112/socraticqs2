@@ -177,11 +177,11 @@ class CreateCourseletForm(forms.ModelForm):
 
 
 class EditCourseletForm(forms.ModelForm):
-    follow_up_assessment_date = forms.DateField(required=False, widget=forms.SelectDateWidget())
     class Meta:
         model = Unit
         fields = (
-            'title', 'exam_name', 
+            'title',
+            'exam_name', 
             'follow_up_assessment_date',
             'follow_up_assessment_grade',
             'question_parts',
@@ -191,7 +191,7 @@ class EditCourseletForm(forms.ModelForm):
             'error_resolution_days',
             'courselet_completion_credit',
             'late_completion_penalty',
-            'is_show_will_learn'
+            'is_show_will_learn',
         )
 
 

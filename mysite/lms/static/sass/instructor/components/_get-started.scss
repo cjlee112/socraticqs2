@@ -1,4 +1,10 @@
 .get-started {
+  &__steps-bordered {
+    .get-started__step {
+      border-top: 1px solid #DDE2E6;
+    }
+  }
+
   &__holder {
     border-bottom: 1px solid #DDE2E6;
     padding-bottom: 28px;
@@ -19,6 +25,7 @@
   p {
     color: $color-text-primary;
     margin: 15px 0 0 0;
+    max-width: 480px;
   }
 
   .progress-line {
@@ -27,6 +34,11 @@
     max-width: 480px;
     margin: 25px 0 7px 0;
   }
+}
+
+.get-started__intro-mod {
+  @extend .get-started__intro;
+  padding-bottom: 29px;
 }
 
 .get-started__progress-circle {
@@ -64,6 +76,12 @@
 
   .get-started__step-content {
     display: block;
+  }
+}
+
+.get-started__step--summary {
+  h2 {
+    font-weight: 600;
   }
 }
 
@@ -107,7 +125,7 @@
 .get-started__step-toggle {
   position: static;
   margin: 17px 0 0 0;
-  width: 72px;
+  min-width: 72px;
 }
 
 .get-started__step-content {
@@ -124,6 +142,10 @@
     .progress-line {
       display: none;
     }
+  }
+
+  .get-started__intro-mod {
+    padding-bottom: 53px;
   }
 
   .get-started__progress-circle {

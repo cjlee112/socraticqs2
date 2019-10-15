@@ -1,0 +1,40 @@
+{
+  "bp_student_number": {
+    "max": 500,
+    "min": 0,
+    "step": 1,
+    "type": "number",
+    "label": "How many student do you have in class?",
+    "default": "200",
+    "order": 0
+  },
+  "average_score": {
+    "max": 100,
+    "min": 0,
+    "step": 1,
+    "type": "number",
+    "label": "What is the mean is percent score on a typical exam?",
+    "default": "72",
+    "subtype": "percent",
+    "order": 1
+  },
+  "question_parts": {
+    "max": 200,
+    "min": 0,
+    "step": 1,
+    "type": "number",
+    "label": "How many question-parts do you have in a typical exam?",
+    "default": "24",
+    "label_explanation": "e.g. 8 questions with 3 parts each = 24",
+    "order": 2
+  },
+  "misconception_a_day": {
+    "max": 500,
+    "min": 0,
+    "step": 1,
+    "type": "number",
+    "label": "How many individual student misconception do you fix in a typical exam?",
+    "default": "5",
+    "order": 3
+  }
+}

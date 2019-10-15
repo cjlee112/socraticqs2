@@ -10,7 +10,7 @@ stages:
   - test
   - tag
   - deploy
-  - smoke
+## - smoke
   - cleanup
 
 Build static:
@@ -203,16 +203,16 @@ Deploy Dev:
     - docker-compose -f dev.yml run --rm dev_app static
     - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Development has been successfully deployed https://dev.courselets.org\n```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
 
-Run layout tests:
-  stage: smoke
-  tags:
-    - dind
-  only:
-    - development
-    - master
-  script:
-    - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
-    - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
+## Run layout tests:
+##   stage: smoke
+##   tags:
+##     - dind
+##   only:
+##     - development
+##     - master
+##   script:
+##     - docker pull maxsocl/backstop:${CI_COMMIT_REF_NAME}
+##     - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
 
 Deploy Stage:
   stage: deploy
@@ -233,8 +233,8 @@ Deploy Stage:
     - docker-compose -f prod.yml run --rm app migrate
     - docker-compose -f prod.yml run --rm app fsm-deploy
     - docker-compose -f prod.yml run --rm app static
-    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@redilonka (・ω・)", "link_names":1}'
-    - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org\n@here", "link_names":1}'
+    - curl "$SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org```\n'"$CI_COMMIT_MESSAGE"'\n```\n@redilonka (・ω・)", "link_names":1}'
+    - curl "$CR_SLACK_WEBHOOK_URL" -d 'payload={"text":"Staging has been successfully deployed https://staging.courselets.org```\n'"$CI_COMMIT_MESSAGE"'\n```\n@here", "link_names":1}'
 
 Cleanup:
   stage: cleanup

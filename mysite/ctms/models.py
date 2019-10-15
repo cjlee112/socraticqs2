@@ -207,7 +207,7 @@ class BestPracticeTemplate(models.Model):
     scope = models.CharField(max_length=10, choices=BP_SCOPES, db_index=True)
     calculation = JSONField(blank=True, null=True)
     activation = JSONField(blank=True, null=True)
-    summary = models.CharField(max_length=20, blank=True, null=True)
+    summary = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return f'{self.title} scope: {self.scope}'
@@ -217,7 +217,7 @@ class BestPractice(models.Model):
     """
     Model for instances where a BP could be implemented in a course/courselet.
     """
-    template = models.ForeignKey('BestPracticeTemplate', on_delete=models.CASCADE)
+    template = models.ForeignKey('BestPracticeTemplate', null=True, blank=True, on_delete=models.CASCADE)
     course = models.ForeignKey('ct.Course', null=True, blank=True, on_delete=models.CASCADE)
     courselet = models.ForeignKey('ct.CourseUnit', null=True, blank=True, on_delete=models.CASCADE)
     active = models.BooleanField(default=False)

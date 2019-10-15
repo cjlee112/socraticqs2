@@ -78,15 +78,6 @@ There is a helper that creates a tag for you:
     make version VERSION=vX.X.X
 
 
-    Onboarding settings
--------------------
-
-Switches
-::
-
-    ctms_onboarding_enabled set to Active in admin page /admin/waffle/switch/
-
-
 Developer documentation is available at http://cjlee112.github.io/socraticqs2
 
 
@@ -263,6 +254,7 @@ Here's a list of switches:
  * menu_activity_center_link_enabled - to enable activity center link in top menu
  * add_unit_by_chat - to enable add unit by chat feature in CTMS
  * ctms_bp_courseletes_enabled - to enable button "Best Practices" for courselet in sidebar
+ * ctms_onboarding_enabled - to enable `Get Started` page
 
 
 GitLab configuration
@@ -296,3 +288,64 @@ AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
 AWS_SES_REGION_NAME = ''
 AWS_SES_REGION_ENDPOINT = ''
+
+
+Best Practices
+--------------
+
+Practice exam sample calculation config
+::
+
+    {
+      "bp_student_number": {
+        "max": 500,
+        "min": 0,
+        "step": 1,
+        "type": "number",
+        "label": "How many student do you have in class?",
+        "default": "200",
+        "order": 0
+      },
+      "average_score": {
+        "max": 100,
+        "min": 0,
+        "step": 1,
+        "type": "number",
+        "label": "What is the mean is percent score on a typical exam?",
+        "default": "72",
+        "subtype": "percent",
+        "order": 1
+      },
+      "question_parts": {
+        "max": 200,
+        "min": 0,
+        "step": 1,
+        "type": "number",
+        "label": "How many question-parts do you have in a typical exam?",
+        "default": "24",
+        "label_explanation": "e.g. 8 questions with 3 parts each = 24",
+        "order": 2
+      },
+      "misconception_a_day": {
+        "max": 500,
+        "min": 0,
+        "step": 1,
+        "type": "number",
+        "label": "How many individual student misconception do you fix in a typical exam?",
+        "default": "5",
+        "order": 3
+      }
+    }
+
+
+Field attributes
+::
+
+    type: Field type (number, string, date)
+    order: order in the field list
+    min: min number value
+    max: max number value
+    step: step to increase/decrease number value
+    label: input value
+    label_explanation: additional text for label_explanation
+    default: default value

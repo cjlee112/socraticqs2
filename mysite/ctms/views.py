@@ -1474,15 +1474,36 @@ class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
             return courselet
 
 
-class BestPracticeCalculation(DetailView):
+class BestPracticeCalculation(NewLoginRequiredMixin, DetailView):
     model = BestPractice
     template_name = 'ctms/best_practice_calculation.html'
     course = 'course'
     courselet = 'courselet'
 
     def get_context_data(self, **kwargs):
+        """
+        Get context for BP calculation.
+
+        Notes:
+          - reorder fields by order key
+          Example:
+            {
+              "field1": {
+                .....
+                "order": 1,
+                .....
+              },
+              "field2": {
+                .....
+                "order": 2,
+                .....
+              }
+            }
+        """
         context = super().get_context_data(**kwargs)
-        context['input_data'] = self.object.template.calculation
+        context['input_data'] = {
+            field[0]: field[1] for field in
+            sorted(self.object.template.calculation.items(), key=lambda x: x[1].get('order'))}
         context['best_practice_template_id'] = self.object.template.id
         context['best_practice_data'] = self.object.data or {}
         context['course'] = self.object.course

@@ -20,12 +20,20 @@
         {% for key, value in input_data.items %}
         {% if forloop.counter0|divisibleby:"2" %}<div class="input__row">{% endif %}
           <div class="input__row__item {{ value.subtype }}">
-            <label for="{{ key }}">{{ value.label }}</label>
-            <input type="{{ value.type }}" name="{{ key }}" value="{% if best_practice_data %}{{ best_practice_data.input_data |get:key }}{% elif value.default %}{{ value.default }}{% endif %}">
+            <label for="{{ key }}">{{ value.label }}{% if value.label_explanation %}<span> ({{ value.label_explanation }})</span>{% endif %}</label>
+            <input type="{{ value.type }}"
+              {% if value.type == "number" %}
+                min={{ value.min }}
+                step={{ value.step }}
+                max={{ value.max }}
+              {% endif %}
+              name="{{ key }}"
+              value="{% if best_practice_data and best_practice_data.input_data|get:key %}{{ best_practice_data.input_data|get:key }}{% elif value.default %}{{ value.default }}{% endif %}"
+            >
           </div>
         {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
         {% endfor %}
-        <input type="submit" class="btn-mod" value="Calculate">
+        <input type="submit" class="btn-mod" value="Calculate Impact">
       </form>
     </main>
 </div>
@@ -41,13 +49,13 @@
     <ul class="blindspots">
         <li class="blindspots__item">
             <span id="without_courselets_result" class="blindspots__number">
-              {{ best_practice_data.result_data.field3 }}
+              {{ best_practice_data.result_data.w_o_courselets }}
             </span>
           Without Courselets
         </li>
         <li class="blindspots__item">
             <span id="with_courselets_result" class="blindspots__number">
-              {{ best_practice_data.result_data.field4 }}
+              {{ best_practice_data.result_data.w_courselets }}
             </span>
           With Courselets
         </li>
@@ -57,21 +65,23 @@
         </a>
       </li>
     </ul>
-    <div class="text-block">
-      <h3>
-        How we calculated impact
-      </h3>
-      <p>
-        1 student blindspot = 1 student response (to a question-part) that exposes a misconception. Your practice exam is projected to expose 6.72 blindspots on average for each student. Resolving all these for 200 students individually is inefficient compared with using Courselets
-      </p>
-    </div>
-    <div class="text-block">
-      <h3>
-        Recommendations
-      </h3>
-      <p>
-        Your exam data indicate that there are far too many total student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.  To genuinely fix this number of student blindspots, you need an online platform that's actually designed to identify and resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.
-      </p>
+    <div class="text-block__holder">
+        <div class="text-block">
+            <h3>
+                How we calculated impact
+            </h3>
+            <p>
+                1 student blindspot = 1 student response (to a question-part) that exposes a misconception. Your practice exam is projected to expose 6.72 blindspots on average for each student. Resolving all these for 200 students individually is inefficient compared with using Courselets
+            </p>
+        </div>
+        <div class="text-block">
+            <h3>
+                Recommendations
+            </h3>
+            <p>
+                Your exam data indicate that there are far too many total student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.  To genuinely fix this number of student blindspots, you need an online platform that's actually designed to identify and resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.
+            </p>
+        </div>
     </div>
     <div class="btn-holder text-right">
       <a href="{% url 'ctms:courslet_create_with_bp' course.id object.id %}" class="button button--primary">Create a Courselet</a>
@@ -110,8 +120,8 @@
           })
           .done( function(response) {
             console.log(response.result_data);
-            $('#without_courselets_result').text(response.result_data.field3);
-            $('#with_courselets_result').text(response.result_data.field4);
+            $('#without_courselets_result').text(response.result_data.w_o_courselets);
+            $('#with_courselets_result').text(response.result_data.w_courselets);
           })
           .fail( function(error) {
             alert('Something went wrong. Please refresh the page and try again.');

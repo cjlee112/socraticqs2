@@ -14,15 +14,15 @@
     <nav class="card__nav">
       <ul>
         <li>
+          <a href="{% url 'ctms:course_best_practice' pk=object.id %}">Best Practices</a>
+        </li>
+
+        <li>
           <a href="{% url 'ctms:course_view' pk=object.id %}" class="card__nav-active">Courselets</a>
         </li>
 
         <li>
           <a href="{% url 'ctms:course_settings' pk=object.id %}">Settings</a>
-        </li>
-
-        <li>
-          <a href="{% url 'ctms:course_best_practice' pk=object.id %}">Best Practices</a>
         </li>
       </ul>
     </nav>

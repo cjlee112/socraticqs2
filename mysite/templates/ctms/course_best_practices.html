@@ -15,6 +15,10 @@
     <nav class="card__nav">
       <ul>
         <li>
+          <a href="{% url 'ctms:course_best_practice' pk=course.id %}" class="card__nav-active">Best Practices</a>
+        </li>
+
+        <li>
           <a href="{% url 'ctms:course_view' pk=course.id %}">Courselets</a>
         </li>
 
@@ -22,21 +26,15 @@
           <a href="{% url 'ctms:course_settings' pk=course.id %}">Settings</a>
         </li>
 
-        <li>
-          <a href="{% url 'ctms:course_best_practice' pk=course.id %}" class="card__nav-active">Best Practices</a>
-        </li>
       </ul>
     </nav>
 
     <header class="get-started__intro">
       <div class="get-started__holder">
-        <h1>Best Practice page</h1>
+        <h1>Course Best Practices</h1>
 
         <p>
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
+            Follow these best practices to make the most out of your course.
         </p>
 
         <span class="progress-line progress-line--over-white">
@@ -49,21 +47,22 @@
 
       {% for template in best_practices_templates %}
       <!-- view_introduction -->
-      <div class="get-started__step{% if template.bestpractice_set.all|bps_exists:course %} get-started__step--done{% endif %}" data-step-id="view_introduction">
+      <div class="get-started__step{% if template.bestpractice_set.all|bps_exists:course %} get-started__step--done{% endif %} get-started__step--summary"
+          data-step-id="view_introduction"
+          data-bps-exists="{{ template.bestpractice_set.all|bps_exists:course }}">
         <div class="get-started__step-header">
           <div class="get-started__step-status"></div>
           <h2>
-            {{ template.title }}
+              {{forloop.counter}}. {{ template.summary }}
           </h2>
           <span class="get-started__step-tip">
-            {% if template.bestpractice_set.all|bps_exists:course      %}
-              You've created best practice exam:
+            {% if template.bestpractice_set.all|bps_exists:course %}
+              You've created best practice exams
                 {% for best_practice in template.bestpractice_set.all|active:course %}
                   {% if best_practice.courselet %}
                     <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
-                      {{ best_practice.courselet.unit.title }}
-                    </a>
-                    {% if not forloop.last %}, {% else %}. {% endif %}
+                      {{ best_practice.courselet.unit.exam_name }}
+                    </a>{% if not forloop.last %}, {% else %}. {% endif %}
                   {% endif %}
                 {% endfor %}
             {% else %}
@@ -71,8 +70,9 @@
             {% endif %}
           </span>
           
-
-          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
+          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">
+            {% if template.bestpractice_set.all|bps_exists:course %}Create another one{% else %}View{% endif %}
+          </a>
         </div>
 
         <div class="get-started__step-content">
@@ -120,9 +120,14 @@
         // Find the parent step
         var $step = $button.closest('.get-started__step');
 
+        viewBtnText = "View"
+        if ( $step.data('bps-exists') == "True" ) {
+          viewBtnText = "Create another one";
+        }
+        
         // Close if the step is open
         if($step.hasClass('get-started__step--open')) {
-          $button.html('View');
+          $button.html(viewBtnText);
           $step.removeClass('get-started__step--open');
 
         // Otherwise open it
