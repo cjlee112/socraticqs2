@@ -12,6 +12,10 @@ DOCKER_REGISTRY = registry-gitlab.raccoongang.com/cmltawt0/socraticqs2
 GIT_TAG := $(shell git describe --abbrev=0)
 VERSION :=
 
+DEFAULT_APP_PWD = mysite/mysite
+# server APP_PWD for prod: /courselets/app
+# server DEV_APP_PWD for dev: /courselets/dev/app
+
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	DOCKERFILE_PATH := Docker/Dockerfile.prod
 	DOCKERCOMPOSE_PATH := prod.yml
@@ -43,7 +47,7 @@ restart:
 debug:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) run --service-ports $(APP)
 
-build: .prebuild .build .migrate .load-fixtures .fsm-deploy
+build: .prebuild .build .touch .migrate .load-fixtures .fsm-deploy
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
 	make .static
 endif
@@ -57,6 +61,9 @@ endif
 
 .build:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) build
+
+.touch:
+	touch $(DEFAULT_APP_PWD)/settings/local.py
 
 .migrate:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \

@@ -195,6 +195,7 @@ Deploy Dev:
   only:
     - development
   script:
+    - touch $DEV_APP_PWD/settings/local.py
     - docker pull ${DOCKER_REGISTRY}/courselets-dev
     - docker-compose -f dev.yml up -d dev_app
     - docker-compose -f dev.yml run --rm dev_app migrate
@@ -226,6 +227,7 @@ Deploy Stage:
   variables:
     DOCKER_REGISTRY: $REGISTRY
   script:
+    - touch $APP_PWD/settings/local.py
     - docker pull ${DOCKER_REGISTRY}/courselets
     - docker-compose -f prod.yml up -d app
     - docker-compose -f prod.yml run --rm app migrate
