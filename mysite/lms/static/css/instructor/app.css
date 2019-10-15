@@ -169,7 +169,7 @@ input[type=submit] {
     margin: 0; }
 
 .btn-holder {
-  padding-top: 36px; }
+  padding-top: 16px; }
 
 .form__holder .input__item {
   margin-bottom: 28px; }
@@ -190,9 +190,15 @@ input[type=submit] {
   display: flex;
   align-items: flex-end;
   justify-content: space-between; }
+  @media screen and (max-width: 719px) {
+    .input__row {
+      flex-direction: column; } }
   .input__row__item {
     width: 48%;
     margin: 0 0 30px; }
+    @media screen and (max-width: 719px) {
+      .input__row__item {
+        width: 100%; } }
     .input__row__item.percent {
       position: relative; }
       .input__row__item.percent:before {
@@ -200,7 +206,11 @@ input[type=submit] {
         position: absolute;
         height: 54px;
         width: 50px;
-        border-left: 1px solid #DDE2E6;
+        color: #333;
+        background: #FAFBFD;
+        border: 1px solid #D0D5D9;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
         bottom: 0;
         right: 0;
         display: flex;
@@ -212,8 +222,16 @@ input[type=submit] {
 /**
  * Blocks with text
  */
-.text-block p {
-  margin: 0 0 24px; }
+.text-block__holder .text-block {
+  margin: 0 0 46px; }
+  .text-block__holder .text-block:last-child {
+    margin: 0; }
+  .text-block__holder .text-block h3 {
+    margin: 0 0 14px; }
+  .text-block__holder .text-block p {
+    margin: 0 0 24px; }
+    .text-block__holder .text-block p:last-of-type {
+      margin: 0; }
 
 .checkbox, .radio, .checkbox-inline, .radio-inline {
   margin: 12px 0 0 0;
@@ -477,8 +495,10 @@ a.sidebar__add {
   border: 1px solid #DDE2E6;
   border-top: none;
   border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  margin: 0 60px; }
+  border-bottom-right-radius: 4px; }
+  @media screen and (min-width: 1024px) {
+    .card-mod {
+      margin: 0 60px; } }
 
 .card__topbar {
   height: 96px;
@@ -1307,7 +1327,7 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
 .blindspots {
   display: flex;
   padding: 0;
-  margin: 0; }
+  margin: 0 0 34px; }
   .blindspots__item {
     display: flex;
     flex-direction: column;
