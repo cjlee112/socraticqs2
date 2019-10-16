@@ -246,7 +246,7 @@ Cleanup:
     - merge_requests
   when: always
   script:
-    - docker rmi -f $(docker images --filter reference=$REGISTRY:static-$CI_COMMIT_SHORT_SHA -q) || true
-    - docker rmi -f $(docker images --filter reference=$REGISTRY:base-$CI_COMMIT_SHORT_SHA -q) || true
-    - docker rmi -f $(docker images --filter reference=$REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA -q) || true
-    - docker rmi -f $(docker images --filter reference=$REGISTRY/courselets:$CI_COMMIT_SHORT_SHA -q) || true
+    - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
+    - docker rmi -f $REGISTRY:base-$CI_COMMIT_SHORT_SHA || true
+    - docker rmi -f $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA || true
+    - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
