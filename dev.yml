@@ -46,6 +46,8 @@ services:
     image: ${DOCKER_REGISTRY}/courselets-dev
     command: celery worker -A mysite --loglevel=INFO -B
     env_file: ./envs/dev.env
+    volumes:
+      - ${DEV_APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
     links:
       - dev_rabbit
       - dev_redis

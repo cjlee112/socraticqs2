@@ -50,6 +50,7 @@ services:
     env_file: ./envs/prod.env
     volumes:
       - ${APP_PWD}/logs:/home/courselets/app/logs
+      - ${APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
     links:
       - rabbit
       - redis
