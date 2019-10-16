@@ -39,6 +39,7 @@ services:
 
   local_celery:
     environment:
+      - CELERY_BROKER_URL=amqp://guest@local_rabbit
     container_name: local_cr_celery
     # image already built as local_app service
     image: local/courselets:courselets-local
