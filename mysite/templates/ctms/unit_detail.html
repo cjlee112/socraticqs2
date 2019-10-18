@@ -25,7 +25,7 @@
   </nav>
 
   <div class="card__notice">
-    You can find additional features in <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.id %}">the old Instructor UI</a>.
+    You can find additional features in <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.unit.id %}">the old Instructor UI</a>.
   </div>
 
   <main class="card__content">
