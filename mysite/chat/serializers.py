@@ -2,9 +2,14 @@
 import logging
 import injections
 from functools import reduce, cmp_to_key
+
+import waffle
+
 from rest_framework import serializers
 from django.urls import reverse
 
+from lti.models import GradedLaunch
+from mysite.celery import send_outcome
 from .models import Message, Chat
 from .services import ProgressHandler
 from ct.models import UnitLesson
@@ -355,16 +360,16 @@ class ChatProgressSerializer(serializers.ModelSerializer):
         else:
             # if no lessons passed yet - return 1
             progress = 1
-        # assignment = GradedLaunch.objects.filter(
-        #     course_id=obj.enroll_code.courseUnit.course.id
-        # ).first()
+        assignment = GradedLaunch.objects.filter(
+            course_id=obj.enroll_code.courseUnit.course.id
+        ).first()
         if not obj.progress == (progress * 100):
             obj.progress = progress * 100
             obj.save()
-            # if assignment:
-                # this is very simplt implementation and should be changed
+            if assignment and waffle.switch_is_active('lti_send_outcome'):
+                # this is very simple implementation and should be changed
                 # we are sendign grade only for updated progress
-                # send_outcome.delay(progress, assignment.id)
+                send_outcome.delay(progress, assignment.id)
         return progress
 
 
