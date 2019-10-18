@@ -57,7 +57,7 @@
             </li>
             {% for course in sidebar.user_courses %}
               <li>
-                <a href="{% url 'ctms:course_view' pk=course.id %}">
+                <a href="{% url 'ctms:course_best_practice' pk=course.id %}">
                   {{ course.title }}
                 </a>
               </li>
