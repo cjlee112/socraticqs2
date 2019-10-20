@@ -22,9 +22,6 @@
   <div class="card">
     <header class="card__topbar card__topbar--with-description">
       <h1>Create a Courselet</h1>
-      <p>
-        Let’s give your courselet a name.
-      </p>
     </header>
 
     <main class="card__content">
@@ -33,7 +30,7 @@
         <div class="input__item">
           <label for="{{ form.title.auto_id }}">
             Courselet Name
-            <span>Describe how they should name their courselet here.</span>
+            <span>Let’s give your courselet a name. We strongly recommend giving your courselet a name that says exactly what it prepares your students for, e.g. "Practice Test for Midterm 1".</span>
           </label>
           {{ form.title }}
           {% if form.title.errors %}
@@ -43,7 +40,7 @@
         <div class="input__item">
           <label for="{{ form.exam_name.auto_id }}">
             Follow-Up Assessment Name
-            <span>Describe this field here.</span>
+            <span>We strongly recommend that you follow-up your courselet with a graded assignment that assesses the skills taught in your courselet. Enter the name of that graded assessment here, e.g. "Midterm 1".</span>
           </label>
           {{ form.exam_name }}
           {% if form.exam_name.errors %}
@@ -53,7 +50,7 @@
         <div class="input__item">
           <label for="{{ form.follow_up_assessment_date.auto_id }}">
             Follow-Up Assessment Date
-            <span>Describe this field here.</span>
+            <span>We recommend requiring your students to complete your courselet 2-3 days before the follow-up graded assessment. Enter the date when you think the follow-up graded assessment will occur, e.g. the date for Midterm 1.</span>
           </label>
           {{ form.follow_up_assessment_date }}
           {% if form.follow_up_assessment_date.errors %}
