@@ -29,6 +29,7 @@
               {% endif %}
               name="{{ key }}"
               value="{% if best_practice_data and best_practice_data.input_data|get:key %}{{ best_practice_data.input_data|get:key }}{% elif value.default %}{{ value.default }}{% endif %}"
+              required
             >
           </div>
         {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
