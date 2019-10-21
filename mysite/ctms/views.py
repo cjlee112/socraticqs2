@@ -274,7 +274,7 @@ class CreateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateVie
         self.object.best_practice1 = best_practice1
         self.object.save()
         Role.objects.create(course=self.object, role=Role.INSTRUCTOR, user=self.request.user)
-        return redirect(reverse('ctms:course_view', kwargs={'pk': self.object.id}))
+        return redirect(reverse('ctms:course_best_practice', kwargs={'pk': self.object.id}))
 
 
 class UpdateCourseView(NewLoginRequiredMixin, CourseCoursletUnitMixin, UpdateView):
