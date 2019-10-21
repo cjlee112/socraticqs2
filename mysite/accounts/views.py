@@ -140,7 +140,7 @@ class ProfileUpdateView(NotAnonymousRequiredMixin, CreateView):
     def get_success_url(self):
         if self.request.POST.get('next'):
             return self.request.POST.get('next')
-        return reverse('ctms:my_courses')
+        return reverse('ctms:onboarding')
 
     def get_initial(self):
         return {'user': self.request.user}
