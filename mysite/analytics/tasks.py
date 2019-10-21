@@ -5,7 +5,7 @@ from mysite.celery import app
 
 import json
 import uuid
-from io import StringIO
+from io import BytesIO
 
 from django.conf import settings
 from django.core.files import File
@@ -89,8 +89,8 @@ def report(course_id, user_id):
         report.append(r)
     if report:
         report_dumped_indent = json.dumps(report, indent=4)
-        output = StringIO.StringIO()
-        output.write(report_dumped_indent)
+        output = BytesIO()
+        output.write(report_dumped_indent.encode())
         try:
             file_instance = File(
               file=output,
