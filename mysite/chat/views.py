@@ -418,7 +418,7 @@ class CourseletPreviewView(ChatInitialView):
             'ctms:courslet_view',
             kwargs=dict(
                 course_pk=kwargs['courseUnit'].course.id,
-                pk=kwargs['courseUnit'].unit.pk)
+                pk=kwargs['courseUnit'].pk)
         )
 
     @staticmethod
@@ -600,6 +600,7 @@ class InitializeLiveSession(ChatInitialView):
         except AttributeError:
             instructor_icon = ''
 
+        back_url_name, back_url = self.get_back_url(courseUnit=locals().get('course_unit'))
         return render(
             request,
             'chat/main_view.html',
@@ -618,6 +619,8 @@ class InitializeLiveSession(ChatInitialView):
                 'duration': len(lessons) * 3,
                 'next_point': next_point,
                 'fsmstate': chat.state,
+                'back_url': back_url,
+                'back_url_name': back_url_name,
             }
         )
 
