@@ -493,8 +493,14 @@ class Message(models.Model):
                         # append svg attachment to the message
                         html += mark_safe(self.content.lesson.get_html())
 
-                if (self.content.lesson.attachment and self.content.lesson.sub_kind != Lesson.CANVAS and
-                    not (self.content.parent and self.content.parent.sub_kind == Lesson.CANVAS)):
+                if (
+                    self.kind != 'faqs' and self.content.lesson.attachment and self.content.lesson.sub_kind != Lesson.CANVAS and not
+                    (self.content.parent and self.content.parent.sub_kind == Lesson.CANVAS)
+                ) or (
+                    self.kind != 'faqs' and
+                    self.content.lesson.kind == Lesson.ERROR_MODEL and
+                    self.content.lesson.attachment
+                ):
                     html += '<img src="{}" alt=""/>'.format(self.content.lesson.attachment.url)
             elif self.contenttype == 'uniterror':
                 html = self.get_errors()
