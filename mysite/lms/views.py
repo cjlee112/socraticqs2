@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 
 from chat.models import EnrollUnitCode, Chat, Message
+from chat.serializers import ChatProgressSerializer
 from ct.models import Course
 from ctms.models import Invite
 from fsm.models import FSMState
@@ -79,18 +80,10 @@ class CourseView(View):
         # TODO: http://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
         #
         for chat in live_sessions_history:
-            chat.lessons_done = Message.objects.filter(
-                chat=chat,
-                # contenttype='unitlesson',
-                # kind='orct',
-                # type='message',
-                # owner=request.user,
-                contenttype='response',
-                kind='response',
-                type='message',
-                owner=request.user,
-                timestamp__isnull=False,
-            ).count()
+            chat_prog_ser = ChatProgressSerializer()
+            lessons = chat_prog_ser.get_breakpoints(chat)
+            chat.lessons_done = len([i for i in lessons if i['isDone']])
+            chat.total_lessons = len(lessons)
             if not chat.lessons_done:
                 chat.delete()
 
