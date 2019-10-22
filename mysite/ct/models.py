@@ -418,20 +418,16 @@ class Lesson(models.Model, SubKindMixin):
         is_answer = self.kind == 'answer'
         if is_answer:
             background_image = self.unitlesson_set.first().parent.lesson.attachment
-            try:
-                svg_image = self.attachment.read()
-            except (ValueError, OSError):
-                svg_image = None
+            svg_image = self.attachment
         else:
             background_image = self.attachment
             svg_image = None
-        html = render_to_string('ct/lesson/sub_kind_canvas.html', context={
+        return render_to_string('ct/lesson/sub_kind_canvas.html', context={
             'lesson': self,
             'disabled': self.kind == 'answer' or disabled,
             'background_image': background_image,
             'svg_image': svg_image,
         })
-        return html
 
     @classmethod
     def get_sourceDB_plugin(klass, sourceDB):
@@ -1336,15 +1332,10 @@ class Response(models.Model, SubKindMixin):
         """
         Returns container for drawing
         """
-        try:
-            canvas = self.attachment.read()
-        except (ValueError, OSError):
-            canvas = ''
-        html = render_to_string('ct/lesson/response_sub_kind_canvas.html', context={
+        return render_to_string('ct/lesson/response_sub_kind_canvas.html', context={
             'response': self,
-            'canvas': canvas,
+            'canvas': self.attachment,
         })
-        return html
 
     @classmethod
     def get_counts(klass, query, fmt_count=fmt_count, n=0, tableKey='status',

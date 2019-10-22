@@ -1,4 +1,5 @@
 {% load crispy_forms_field %}
+{% load string_convert media %}
 
 {% if unitLesson.parent.lesson.sub_kind == 'canvas' %}
     <label for="id_attachment">Answer attachment</label>
@@ -6,14 +7,16 @@
         <div class="draw-svg-preview form-group">
             <div id="draw-svg" class="draw-svg-container"
                  style="background-image: url({{ unitLesson.parent.lesson.attachment.url }})">
-                {% if unitLesson.lesson.attachment %}
-                    {{ unitLesson.lesson.attachment.file.read|safe }}
+                {% with attachment=unitLesson.lesson.attachment %}
+                {% if attachment and attachment|is_svg %}
+                    {{ attachment.file.read|decode|safe }}
                 {% else %}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
                          xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
                          height="500">
                     </svg>
                 {% endif %}
+                {% endwith %}
             </div>
             <input type="hidden" id="id_attachment" name="attachment"/>
             <script type="text/javascript">
