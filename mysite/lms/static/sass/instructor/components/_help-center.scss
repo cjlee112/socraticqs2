@@ -1,0 +1,23 @@
+.help-center {
+  &__item {
+    background: #fff;
+    border: 1px solid #DDE2E6;
+    border-radius: 4px;
+    padding-bottom: 27px;
+    margin: 0 0 24px;
+
+    @media screen and (min-width: 1024px) {
+      padding-bottom: 78px;
+    }
+  }
+
+  &__content {
+    &__title {
+      font-weight: 600;
+    }
+
+    p {
+      max-width: initial;
+    }
+  }
+}

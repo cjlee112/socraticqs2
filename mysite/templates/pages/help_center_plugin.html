@@ -2,20 +2,17 @@
 
 {% block content %}
 
-<header class="get-started__intro">
-    <h1>{{ instance.title }}</h1>
+<div class="help-center__wrapper">
+    <header class="get-started__intro help-center__item">
+        <div class="help-center__content">
+            <h2 class="help-center__content__title">{{ instance.title }}</h2>
 
-    <p>
-      {{ instance.description }}
-    </p>
+            <p>
+                {{ instance.description }}
+            </p>
 
-    <a href="{{ instance.link_url }}" class="button button--primary">{{ instance.link_text }}</a>
-  </header>
-
-  <div class="get-started__steps">
-    {% for plugin in instance.child_plugin_instances %}
-      {% render_plugin plugin %}
-    {% endfor %}
-  </div>
-
+            <a href="{{ instance.link_url }}" class="button button--primary">{{ instance.link_text }}</a>
+        </div>
+    </header>
+</div>
 {% endblock %}

@@ -5,6 +5,11 @@
   border-bottom: 1px solid #DDE2E6;
   margin: 23px 0 0 0;
 
+  &.card__separate {
+    background: none;
+    border: none;
+  }
+
   section {
     margin-top: 60px;
     border-top: 1px solid #DDE2E6;

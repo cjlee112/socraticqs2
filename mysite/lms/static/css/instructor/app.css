@@ -477,6 +477,9 @@ a.sidebar__add {
   border-top: 1px solid #DDE2E6;
   border-bottom: 1px solid #DDE2E6;
   margin: 23px 0 0 0; }
+  .card.card__separate {
+    background: none;
+    border: none; }
   .card section {
     margin-top: 60px;
     border-top: 1px solid #DDE2E6;
@@ -1346,5 +1349,21 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     margin: 0 0 8px; }
   .blindspots a {
     font-style: normal; }
+
+.help-center__item {
+  background: #fff;
+  border: 1px solid #DDE2E6;
+  border-radius: 4px;
+  padding-bottom: 27px;
+  margin: 0 0 24px; }
+  @media screen and (min-width: 1024px) {
+    .help-center__item {
+      padding-bottom: 78px; } }
+
+.help-center__content__title {
+  font-weight: 600; }
+
+.help-center__content p {
+  max-width: initial; }
 
 /*# sourceMappingURL=app.css.map */
