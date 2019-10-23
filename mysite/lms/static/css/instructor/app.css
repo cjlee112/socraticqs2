@@ -1354,16 +1354,31 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   background: #fff;
   border: 1px solid #DDE2E6;
   border-radius: 4px;
-  padding-bottom: 27px;
+  padding: 27px 24px;
   margin: 0 0 24px; }
   @media screen and (min-width: 1024px) {
     .help-center__item {
-      padding-bottom: 78px; } }
+      padding: 27px 60px; } }
 
-.help-center__content__title {
-  font-weight: 600; }
-
-.help-center__content p {
-  max-width: initial; }
+.help-center__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; }
+  @media screen and (max-width: 719px) {
+    .help-center__content {
+      display: block; } }
+  .help-center__content > div {
+    margin-right: 22px; }
+    @media screen and (max-width: 719px) {
+      .help-center__content > div {
+        margin: 0 0 12px; } }
+  .help-center__content__title {
+    font-weight: 600;
+    line-height: 1;
+    margin: 0; }
+  .help-center__content p {
+    max-width: initial; }
+  .help-center__content a {
+    margin: 0; }
 
 /*# sourceMappingURL=app.css.map */

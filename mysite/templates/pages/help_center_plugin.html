@@ -5,13 +5,13 @@
 <div class="help-center__wrapper">
     <header class="get-started__intro help-center__item">
         <div class="help-center__content">
-            <h2 class="help-center__content__title">{{ instance.title }}</h2>
-
-            <p>
-                {{ instance.description }}
-            </p>
-
-            <a href="{{ instance.link_url }}" class="button button--primary">{{ instance.link_text }}</a>
+            <div>
+                <h2 class="help-center__content__title">{{ instance.title }}</h2>
+                <p>
+                    {{ instance.description }}
+                </p>
+            </div>
+            <a href="{{ instance.link_url }}" target="_blank" class="button button--primary">{{ instance.link_text }}</a>
         </div>
     </header>
 </div>
