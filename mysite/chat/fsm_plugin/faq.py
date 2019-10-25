@@ -9,6 +9,12 @@ class START(object):
     Initialize data for viewing a courselet, and go immediately
     to first lesson (not yet completed).
     """
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
+
     def start_event(self, node, fsmStack, request, **kwargs):
         """
         Event handler for START node.
@@ -144,10 +150,8 @@ class GET_FOR_FAQ_ANSWER(object):
             else:
                 next_node = fsm.get_node('WILL_TRY_MESSAGE_2')
         else:
-            pending_faq = c_faq_data().find_one({
-                "chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
             show_another_faq = False
-            for key, value in list(pending_faq.items()):
+            for key, value in list(self.get_pending_faqs(chat_id=fsmStack.id, ul_id=ul_id).items()):
                 if not value.get('status').get('done', False):
                     show_another_faq = True
                     break
@@ -217,10 +221,9 @@ class GET_UNDERSTANDING(object):
             next_node = fsm.get_node('WILL_TRY_MESSAGE_3')
         else:
             ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
-            pending_faq = c_faq_data().find_one(
-                {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
+
             show_another_faq = False
-            for key, value in list(pending_faq.items()):
+            for key, value in list(self.get_pending_faqs(chat_id=fsmStack.id, ul_id=ul_id).items()):
                 if not value.get('status').get('done', False):
                     show_another_faq = True
                     break
@@ -242,10 +245,8 @@ class WILL_TRY_MESSAGE_2(object):
         fsm = edge.fromNode.fsm
         ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
 
-        pending_faq = c_faq_data().find_one(
-            {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in list(pending_faq.items()):
+        for key, value in list(self.get_pending_faqs(chat_id=fsmStack.id, ul_id=ul_id).items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break
@@ -264,10 +265,8 @@ class WILL_TRY_MESSAGE_3(object):
         fsm = edge.fromNode.fsm
         ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
 
-        pending_faq = c_faq_data().find_one(
-            {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in list(pending_faq.items()):
+        for key, value in list(self.get_pending_faqs(chat_id=fsmStack.id, ul_id=ul_id).items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break
@@ -286,10 +285,8 @@ class SELECT_NEXT_FAQ(object):
         fsm = edge.fromNode.fsm
         ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
 
-        pending_faq = c_faq_data().find_one(
-            {"chat_id": fsmStack.id, "ul_id": ul_id}).get('faqs', {})
         show_another_faq = False
-        for key, value in list(pending_faq.items()):
+        for key, value in list(self.get_pending_faqs(chat_id=fsmStack.id, ul_id=ul_id).items()):
             if not value.get('status').get('done', False):
                 show_another_faq = True
                 break
