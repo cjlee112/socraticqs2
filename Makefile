@@ -56,7 +56,7 @@ ifneq ($(filter $(env),$(LOCAL_ENV)),)
 endif
 
 .prebuild:
-	docker build -t local/courselets:static-local -f Docker/Dockerfile.static .
+	docker build --build-arg node_env=production -t local/courselets:static-local -f Docker/Dockerfile.static .
 	docker build -t local/courselets:base-local -f Docker/Dockerfile .
 
 .build:

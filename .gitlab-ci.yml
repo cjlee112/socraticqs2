@@ -23,6 +23,7 @@ Build static:
     - merge_requests
   script:
     - docker build
+      --build-arg node_env=production
       -t $REGISTRY:static-$CI_COMMIT_SHORT_SHA
       -f Docker/Dockerfile.static .
 

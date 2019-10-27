@@ -41,8 +41,7 @@ COPY celeryconfig.py ./
 # ENV CELERY_BROKER_URL amqp://guest@rabbit
 
 # ONBUILD ADD . /app
-# ONBUILD COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-# ONBUILD COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
+# ONBUILD COPY --from=static /drawing.bundle.js lms/static/js/drawing.bundle.js
 # ONBUILD COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
 
 # # ONBUILD WORKDIR /app/mysite
@@ -56,8 +55,7 @@ COPY celeryconfig.py ./
 FROM base as prod
 
 ADD . /home/courselets/app
-# COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-# COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
+# COPY --from=static /drawing.bundle.js lms/static/js/drawing.bundle.js
 # COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
 
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -82,8 +80,7 @@ RUN apt-get -y update && \
 RUN pip install --ignore-installed -U -r /requirements/test.txt
 
 ADD . /home/courselets/app
-# COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-# COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
+# COPY --from=static /drawing.bundle.js lms/static/js/drawing.bundle.js
 # COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
 
 RUN chown -R courselets:courselets /home/courselets
@@ -104,8 +101,7 @@ RUN apt-get -y update && \
 RUN pip install --ignore-installed -U -r /requirements/dev.txt
 
 ADD . /home/courselets/app
-# COPY --from=static /draw_svg.js lms/static/js/draw_svg.js
-# COPY --from=static /draw_svg.css lms/static/css/draw_svg.css
+# COPY --from=static /drawing.bundle.js lms/static/js/drawing.bundle.js
 # COPY --from=static /tmp/mysite/frontend/bower_components chat/static/bower_components
 
 COPY docker-entrypoint.sh /usr/local/bin/
