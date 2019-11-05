@@ -251,6 +251,7 @@ class DrawApp extends Component {
         setTimeout(function () {
             input.focus();
         }, 50);
+        this.onChange();
     }
 
     undo(event) {
