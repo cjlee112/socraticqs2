@@ -243,6 +243,7 @@ class DrawApp extends Component {
 
         input.addEventListener('keyup', (e) => {
             figure.text(e.target.value);
+            this.onChange();
             if (e.key.toLowerCase() === 'enter') {
                 endPrint(e);
             }
@@ -251,7 +252,6 @@ class DrawApp extends Component {
         setTimeout(function () {
             input.focus();
         }, 50);
-        this.onChange();
     }
 
     undo(event) {
