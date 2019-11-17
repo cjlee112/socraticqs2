@@ -1,6 +1,12 @@
 {% extends 'ctms_base.html' %}
 {% load staticfiles ct_extras %}
 
+
+{% block title %}
+  Answers: {{ unit.lesson.title }}
+{% endblock %}
+
+  
 {% block content %}
 <div class="card">
   <header class="card__topbar">

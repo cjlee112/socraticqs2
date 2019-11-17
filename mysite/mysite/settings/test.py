@@ -23,3 +23,5 @@ EMAIL_FROM = ''
 DB_DATA = '{}:test_data'.format(os.getpid())
 
 IN_TESTING = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
