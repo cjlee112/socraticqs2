@@ -1697,6 +1697,7 @@ def ul_faq_student(request, course_id, unit_id, ul_id):
         if form.is_valid():
             r = save_response(form, ul, request.user, course_id,
                               kind=Response.STUDENT_QUESTION, needsEval=True)
+            r.notify_instructors()
             red = pageData.fsm_redirect(request, 'create_Comment',
                                         defaultURL=None, response=r)
             if red: # let FSM redirect us if desired
@@ -1729,6 +1730,7 @@ def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
                 reply = save_response(form, ul, request.user, course_id,
                                   kind=Response.COMMENT, needsEval=True,
                                   parent=inquiry)
+                reply.notify_students()
                 red = pageData.fsm_redirect(request, 'create_Reply',
                                             defaultURL=None, response=reply)
                 if red: # let FSM redirect us if desired

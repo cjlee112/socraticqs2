@@ -417,6 +417,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             else:
                 faq_request.text = text
             faq_request.save()
+            faq_request.notify_instructors()
             message.text = text
             message.save()
         if is_in_node('GET_FOR_FAQ_ANSWER'):

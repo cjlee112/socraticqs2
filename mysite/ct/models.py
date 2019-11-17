@@ -15,7 +15,9 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sites.models import Site
 
+from core.tasks import faq_notify_instructors, faq_notify_students
 from core.common import onboarding
 from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.templatetags.ct_extras import md2html
@@ -1320,6 +1322,7 @@ class Response(models.Model, SubKindMixin):
     needsEval = models.BooleanField(default=False)
     parent = models.ForeignKey('Response', null=True, blank=True, on_delete=models.CASCADE)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True, on_delete=models.CASCADE)
+    faq_notified = models.BooleanField(blank=True, null=True, default=False)
 
     is_trial = models.BooleanField(default=False)
 
@@ -1327,6 +1330,67 @@ class Response(models.Model, SubKindMixin):
 
     def __str__(self):
         return 'answer by ' + self.author.username
+
+    @property
+    def faq_affected_studets(self):
+        """
+        Return all affected user.
+        """
+        return self.inquirycount_set.count() + 1
+
+    @property
+    def completed_faq(self):
+        """
+        Determine a completed state for the FAQ.
+
+        FAQ must have the text.
+        """
+        return self.kind == self.STUDENT_QUESTION and self.title and self.text
+
+    def notify_instructors(self):
+        """
+        Notify all Instructors with a newly created FAQ and new Inquiry.
+        """
+        if self.completed_faq and not self.faq_notified and self.faq_affected_studets >= self.course.faq_threshold:
+            # TODO change to general logic when EMs faq notification will be implemented
+            url = reverse(
+                'ct:ul_thread',
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unitLesson.unit.id,
+                    'ul_id': self.unitLesson.id,
+                    'resp_id': self.id
+                }
+            )
+            domain = 'https://{0}'.format(Site.objects.get_current().domain)
+            faq_notify_instructors.apply_async(kwargs={
+                'faq_link': domain + url,
+                'faq_title': self.title,
+                'instructors': [i.email for i in self.course.instructors if i.email]})
+            # TODO move to the task
+            self.faq_notified = True
+
+    def notify_students(self):
+        """
+        Notify Students witha new FAQ comment.
+        """
+        if self.kind == self.COMMENT:
+            url = reverse(
+                'ct:ul_thread',
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unitLesson.unit.id,
+                    'ul_id': self.unitLesson.id,
+                    'resp_id': self.parent.id
+                }
+            )
+            domain = 'https://{0}'.format(Site.objects.get_current().domain)
+            faq_notify_students.apply_async(kwargs={
+                'faq_link': domain + url,
+                'faq_title': self.title,
+                'faq_text': self.text,
+                'students': [self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
+            })
 
     def get_canvas_html(self):
         """
@@ -1375,6 +1439,7 @@ class Response(models.Model, SubKindMixin):
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
                     Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
+
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'URL for this response'
@@ -1512,6 +1577,7 @@ class Course(models.Model):
     lockout = models.CharField(max_length=200, null=True, blank=True)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    faq_threshold = models.PositiveIntegerField(blank=False, null=False, default=1)
 
     copied_from = models.ForeignKey('Course', blank=True, null=True, on_delete=models.CASCADE)
     trial = models.BooleanField(default=False)
@@ -1611,6 +1677,10 @@ class Course(models.Model):
         if not role:
             role = Role.INSTRUCTOR
         return User.objects.filter(role__role=role, role__course=self)
+    
+    @property
+    def instructors(self):
+        return self.get_users(role=Role.INSTRUCTOR)
     
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)

@@ -9,12 +9,6 @@ class START(object):
     Initialize data for viewing a courselet, and go immediately
     to first lesson (not yet completed).
     """
-    @staticmethod
-    def get_pending_faqs(chat_id, ul_id):
-        # TODO change to the Assignment expressions in Python3.8
-        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
-        return faq_data.get('faqs', {}) if faq_data else {}
-
     def start_event(self, node, fsmStack, request, **kwargs):
         """
         Event handler for START node.
@@ -116,6 +110,12 @@ class GET_FOR_FAQ_ANSWER(object):
     path = 'fsm:fsm_node'
     title = 'GET_FOR_FAQ_ANSWER'
 
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
+
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         next_node = edge.toNode
@@ -130,6 +130,7 @@ class GET_FOR_FAQ_ANSWER(object):
                 ob = InquiryCount.objects.filter(
                     response=faq, addedBy=request.user
                 ).order_by('-atime').first()
+            faq.notify_instructors()
             c_chat_context().update_one(
                 {"chat_id": fsmStack.id},
                 {"$set": {"actual_inquiry_id": ob.id}},
@@ -206,6 +207,12 @@ class GET_UNDERSTANDING(object):
     path = 'fsm:fsm_node'
     title = 'GET_UNDERSTANDING'
 
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
+
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         inquiry_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_inquiry_id')
@@ -241,6 +248,12 @@ class WILL_TRY_MESSAGE_2(object):
     path = 'fsm:fsm_node'
     title = 'We will try to get you an answer to this.'
 
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
+
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
@@ -261,6 +274,12 @@ class WILL_TRY_MESSAGE_3(object):
     path = 'fsm:fsm_node'
     title = 'We will try to provide more explanation for this.'
 
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
+
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
         ul_id = c_chat_context().find_one({"chat_id": fsmStack.id}).get('actual_ul_id')
@@ -280,6 +299,12 @@ class WILL_TRY_MESSAGE_3(object):
 class SELECT_NEXT_FAQ(object):
     path = 'fsm:fsm_node'
     title = 'SELECT_NEXT_FAQ'
+
+    @staticmethod
+    def get_pending_faqs(chat_id, ul_id):
+        # TODO change to the Assignment expressions in Python3.8
+        faq_data = c_faq_data().find_one({"chat_id": chat_id, "ul_id": ul_id})
+        return faq_data.get('faqs', {}) if faq_data else {}
 
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm

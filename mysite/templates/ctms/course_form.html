@@ -44,10 +44,17 @@
         {% endif %}
 
         <label for="misconceptions_per_day">Misconceptions fixed per day</label>
-        <p>How many individual student-misconceptions instructor fixes manually per day</p>
+        <p>How many individual student-misconceptions instructor fixes manually per day.</p>
         {{ form.misconceptions_per_day }}
         {% if form.misconceptions_per_day.errors %}
           {{ form.misconceptions_per_day.errors }}
+        {% endif %}
+
+        <label for="misconceptions_per_day">FAQ notification threshold</label>
+        <p>How many Students should be affected before notify me.</p>
+        {{ form.faq_threshold }}
+        {% if form.faq_threshold.errors %}
+          {{ form.faq_threshold.errors }}
         {% endif %}
 
           {{ form.trial.label_tag }}
