@@ -1363,10 +1363,10 @@ class Response(models.Model, SubKindMixin):
                 }
             )
             domain = 'https://{0}'.format(Site.objects.get_current().domain)
-            faq_notify_instructors.apply_async(kwargs={
-                'faq_link': domain + url,
-                'faq_title': self.title,
-                'instructors': [i.email for i in self.course.instructors if i.email]})
+            faq_notify_instructors.delay(
+                faq_link=domain + url,
+                faq_title=self.title,
+                instructors=[i.email for i in self.course.instructors if i.email])
             # TODO move to the task
             self.faq_notified = True
 
@@ -1385,12 +1385,12 @@ class Response(models.Model, SubKindMixin):
                 }
             )
             domain = 'https://{0}'.format(Site.objects.get_current().domain)
-            faq_notify_students.apply_async(kwargs={
-                'faq_link': domain + url,
-                'faq_title': self.title,
-                'faq_text': self.text,
-                'students': [self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
-            })
+            faq_notify_students.delay(
+                faq_link=domain + url,
+                faq_title=self.title,
+                faq_text=self.text,
+                students=[self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
+            )
 
     def get_canvas_html(self):
         """

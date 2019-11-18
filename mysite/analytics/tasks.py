@@ -1,7 +1,7 @@
 import pytz
 from pytz.exceptions import UnknownTimeZoneError
 from accounts.models import Profile
-from mysite.celery import app
+from mysite import celery_app
 
 import json
 import uuid
@@ -16,7 +16,7 @@ from ct.models import Response
 from .models import CourseReport
 
 
-@app.task
+@celery_app.task
 def report(course_id, user_id):
     report = []
     user = User.objects.filter(id=user_id).first()

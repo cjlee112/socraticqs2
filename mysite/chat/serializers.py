@@ -9,7 +9,7 @@ from rest_framework import serializers
 from django.urls import reverse
 
 from lti.models import GradedLaunch
-from mysite.celery import send_outcome
+from lti.tasks import send_outcome
 from .models import Message, Chat
 from .services import ProgressHandler
 from ct.models import UnitLesson

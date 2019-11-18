@@ -13,15 +13,11 @@ SOCIAL_AUTH_TWITTER_SECRET = 'test_secret'
 DEBUG = True
 LTI_DEBUG = True
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = ''
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 587
-EMAIL_FROM = ''
+EMAIL_FROM = 'me@example.com'
 
 DB_DATA = '{}:test_data'.format(os.getpid())
 
 IN_TESTING = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+CELERY_TASK_ALWAYS_EAGER = True

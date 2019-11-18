@@ -314,16 +314,16 @@ X_FRAME_OPTIONS = "GOFORIT"
 # SSL proxy fix
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'amqp://')
 CELERY_TIMEZONE = 'UTC'
 
-CELERYBEAT_SCHEDULE = {
-    'check_anonymous': {
-        'task': 'mysite.celery.check_anonymous',
-        'schedule': timedelta(days=1),
-    }
-}
+# CELERYBEAT_SCHEDULE = {
+#     'check_anonymous': {
+#         'task': 'core.tasks.check_anonymous',
+#         'schedule': timedelta(days=1),
+#     }
+# }
 
 # Cache settings
 CACHES = {
