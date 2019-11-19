@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ct.models import Response, StudentError, UnitLesson
+from ct.models import Response, StudentError, UnitLesson, Unit
 from ctms.models import BestPractice1, BestPractice2
 from analytics.models import CourseReport
 
@@ -115,3 +115,22 @@ class BestPractice2Serializer(serializers.ModelSerializer):
     class Meta:
         model = BestPractice2
         fields = ('percent_engaged',)
+
+
+class UnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Unit
+        fields = (
+            'title',
+            'exam_name', 
+            'follow_up_assessment_date',
+            'follow_up_assessment_grade',
+            'question_parts',
+            'average_score',
+            'courselet_days',
+            'graded_assessment_value',
+            'error_resolution_days',
+            'courselet_completion_credit',
+            'late_completion_penalty',
+            'is_show_will_learn',
+        )

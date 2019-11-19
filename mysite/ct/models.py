@@ -995,6 +995,7 @@ class Unit(models.Model):
         (IN_CLASS, 'In-class'),
     )
     title = models.CharField(
+        blank=True,
         max_length=200,
         help_text='Your students will see this, so give your courselet a descriptive name.',
         validators=[not_only_spaces_validator]

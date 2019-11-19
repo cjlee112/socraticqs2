@@ -1,0 +1,48 @@
+{% load best_practice_courselet %}
+
+<div class="get-started__step{% if template.bestpractice_set.all|bps_exists:courselet %} get-started__step--done{% endif %} get-started__step--summary"
+    data-step-id="view_introduction"
+    data-bps-exists="{{ template.bestpractice_set.all|bps_exists:courselet }}">
+  <div class="get-started__step-header">
+    <div class="get-started__step-status"></div>
+    <h2>
+        {{forloop.counter}}. {{ template.summary }}
+    </h2>
+    <span class="get-started__step-tip">
+      {% if template.bestpractice_set.all|bps_exists:courselet %}
+          <ul>
+          {% for best_practice in template.bestpractice_set.all|active:courselet %}
+            {% if best_practice.courselet %}
+            <li>
+              You’ve uploaded the file "{{ best_practice.upload_file.name }}" and {{ best_practice.get_converted_status_display|lower }}.
+              {% if best_practice.converted_status != 'pending' %}
+              <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=courselet_pk %}">
+                View threads
+              </a>
+              </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          </ul>
+      {% else %}
+        {{ template.explanation }}
+      {% endif %}
+    </span>
+    
+    <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">
+      {% if template.bestpractice_set.all|bps_exists:courselet %}Do this again{% else %}View{% endif %}
+    </a>
+  </div>
+
+  <div class="get-started__step-content">
+    <div class="onboarding-content">
+      <p>
+        {{ template.description }}
+      </p>
+      <a href="{% url "ctms:unit_create" course_pk=course_pk courselet_pk=courselet_pk %}?template_id={{ template.id }}#/upload"
+        class="button button--primary">
+        Add Threads
+      </a>
+    </div>
+  </div>
+</div>

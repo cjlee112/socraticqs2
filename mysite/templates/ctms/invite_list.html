@@ -1,4 +1,5 @@
 {% extends "ctms_base.html" %}
+{% load waffle_tags %}
 
 {% block title %}
   Share {{ object.title }}
@@ -14,6 +15,11 @@
 
   <nav class="card__nav">
       <ul>
+        {% switch "ctms_bp_courseletes_enabled" %}
+        <li>
+          <a href="{% url 'ctms:courselet_best_practice' course_pk=course.id courselet_pk=courselet.id %}">Best Practices</a>
+        </li>
+        {% endswitch %}
         <li>
           <a href="{% url 'ctms:courslet_view' course_pk=course.id pk=courselet.id %}">Threads</a>
         </li>

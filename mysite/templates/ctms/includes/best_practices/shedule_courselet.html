@@ -1,0 +1,53 @@
+{% load best_practice_courselet %}
+
+<div class="get-started__step{% if template.bestpractice_set.all|bps_exists:courselet %} get-started__step--done{% endif %} get-started__step--summary"
+    data-step-id="view_introduction"
+    data-bps-exists="{{ template.bestpractice_set.all|bps_exists:courselet }}">
+  <div class="get-started__step-header">
+    <div class="get-started__step-status"></div>
+    <h2>
+        {{forloop.counter}}. {{ template.summary }}
+    </h2>
+    <span class="get-started__step-tip">
+      {% if template.bestpractice_set.all|bps_exists:courselet %}
+        You've created best practice exams
+          {% for best_practice in template.bestpractice_set.all|active:courselet %}
+            {% if best_practice.courselet %}
+              <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
+                {{ best_practice.courselet.unit.exam_name }}
+              </a>{% if not forloop.last %}, {% else %}. {% endif %}
+            {% endif %}
+          {% endfor %}
+      {% else %}
+        {{ template.explanation }}
+      {% endif %}
+    </span>
+    
+    <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">
+      {% if template.bestpractice_set.all|bps_exists:courselet %}Do this again{% else %}View{% endif %}
+    </a>
+  </div>
+
+  <div class="get-started__step-content">
+    <div class="onboarding-content">
+      <p>
+        {{ template.description }}
+      </p>
+      <a data-complete-step="test_courselet" href="#"
+        data-bp-template-pk="{{ template.id }}"
+        data-course-pk="{{ course_pk }}"
+        data-courselet-pk="{{ courselet_pk }}"
+        redirect="{% url 'ctms:courslet_settings' course_pk=course_pk pk=courselet_pk %}"
+        class="button button--primary create-new-bp-default">
+        Schedule Courselet
+      </a>
+      <a data-complete-step="test_courselet" href="#"
+        data-bp-template-pk="{{ template.id }}"
+        data-course-pk="{{ course_pk }}"
+        data-courselet-pk="{{ courselet_pk }}"
+        class="button create-new-bp">
+        Assess Impact for Your Class
+      </a>
+    </div>
+  </div>
+</div>

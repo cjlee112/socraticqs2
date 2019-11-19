@@ -18,9 +18,10 @@
       </h2>
       <form method="post" id="bp-analysis">{% csrf_token %}
         {% for key, value in input_data.items %}
-        {% if forloop.counter0|divisibleby:"2" %}<div class="input__row">{% endif %}
-          <div class="input__row__item {{ value.subtype }}">
+        {% if forloop.counter0|divisibleby:"2" and not object.template.config.single_column %}<div class="input__row">{% endif %}
+          <div class="input__row__item {{ value.subtype }}" {% if object.template.config.single_column %}style="width: 100%"{% endif %}>
             <label for="{{ key }}">{{ value.label }}{% if value.label_explanation %}<span> ({{ value.label_explanation }})</span>{% endif %}</label>
+            <p>{{ value.help_text }}</p>
             <input type="{{ value.type }}"
               {% if value.type == "number" %}
                 min={{ value.min }}
@@ -32,7 +33,9 @@
               required
             >
           </div>
-        {% if forloop.last or forloop.counter|divisibleby:"2" %}</div>{% endif %}
+        {% if not object.template.config.single_column %}
+          {% if forloop.last or forloop.counter|divisibleby:"2"%}</div>{% endif %}
+        {% endif %}
         {% endfor %}
         <input type="submit" class="btn-mod" value="Calculate Impact">
       </form>
@@ -45,7 +48,11 @@
       Calculated impact for your class
     </h2>
     <h3>
-      Student blindspots resolved by your practice exam
+      {% if object.template.scope == object.template.COURSELET %}
+        Estimated student blindspot-engagements
+      {% elif object.template.scope == object.template.COURSE %}
+        Student blindspots resolved by your practice exam        
+      {% endif %}
     </h3>
     <ul class="blindspots">
         <li class="blindspots__item">
@@ -72,7 +79,11 @@
                 How we calculated impact
             </h3>
             <p>
-                1 student blindspot = 1 student response (to a question-part) that exposes a misconception. Your practice exam is projected to expose 6.72 blindspots on average for each student. Resolving all these for 200 students individually is inefficient compared with using Courselets
+            {% if object.template.config.calculated_impact %}
+              {{ object.template.config.calculated_impact }}
+            {% else%}
+              1 student blindspot = 1 student response (to a question-part) that exposes a misconception. Your practice exam is projected to expose 6.72 blindspots on average for each student. Resolving all these for 200 students individually is inefficient compared with using Courselets
+            {% endif %}
             </p>
         </div>
         <div class="text-block">
@@ -80,12 +91,20 @@
                 Recommendations
             </h3>
             <p>
-                Your exam data indicate that there are far too many total student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.  To genuinely fix this number of student blindspots, you need an online platform that's actually designed to identify and resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.
+            {% if object.template.config.recommendations %}
+              {{ object.template.config.recommendations }}
+            {% else%}
+              Your exam data indicate that there are far too many total student blindspots on this upcoming exam, for you to resolve them all in office hours or discussion forums.  To genuinely fix this number of student blindspots, you need an online platform that's actually designed to identify and resolve student blindspots with the least instructor effort possible.  Specifically, because identifying a blindspot for one student on Courselets will automatically help all students with that blindspot, you can focus your efforts on exactly what will help the most students, gaining a massive multiplier in student learning at no increase in effort.
+            {% endif %}
             </p>
         </div>
     </div>
     <div class="btn-holder text-right">
+    {% if object.template.scope == object.template.COURSELET %}
+      <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=object.courselet.id %}" class="button button--primary">Schedule Your Courselet</a>
+    {% elif object.template.scope == object.template.COURSE %}
       <a href="{% url 'ctms:courslet_create_with_bp' course.id object.id %}" class="button button--primary">Create a Courselet</a>
+    {% endif %}
     </div>
   </main>
 </div>

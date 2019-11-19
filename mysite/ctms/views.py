@@ -620,7 +620,8 @@ class CreateUnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView)
         context.update({
             'unit_lesson': self.get_unit_lesson(),
             'course': self.get_course(),
-            'courslet': self.get_courslet()
+            'courslet': self.get_courslet(),
+            'template_id': self.request.GET.get('template_id', ''),
         })
         return context
 
@@ -1380,7 +1381,6 @@ class OnboardingBP1(TemplateView):
         initial_data = self.model.objects.filter(user=user).values().last()
         if not initial_data:
             initial_data = self.initial_data
-        print(initial_data)
         form = self.form(initial=initial_data)
         context.update({
             'form': form,
@@ -1392,9 +1392,7 @@ class OnboardingBP1(TemplateView):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
-        print((request.POST, request.FILES))
         instance = BestPractice1.objects.filter(user=request.user.id).first()
-        print(instance)
         form = BestPractice1PdfForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
@@ -1439,26 +1437,20 @@ class BestPracticesCourseView(NewLoginRequiredMixin, ListView):
             return course
 
 
-class BestPracticesCourseletView(NewLoginRequiredMixin, ListView):
-    context_object_name = 'best_practices'
+class BestPracticesCourseletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, ListView):
+    context_object_name = 'best_practices_templates'
     template_name = 'ctms/courselet_best_practices.html'
-    model = BestPractice
-    queryset = BestPractice.objects.all()
+    model = BestPracticeTemplate
+    queryset = BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSELET)
 
     def get_context_data(self, **kwargs):
-        active_bps = self.get_queryset().filter(active=True).count()
-        all_bps = self.get_queryset().count()
         context = super().get_context_data(**kwargs)
-        context['best_practices_progress'] = active_bps / all_bps * 100 if all_bps else 0
-        context['courselet_title'] = self.get_courselet().unit.title
+        courselet = self.get_courselet()
+        context['courselet'] = courselet
+        context.update({
+            'u_lessons': self.get_units_by_courselet(courselet)
+        })
         return context
-
-    def get_queryset(self):
-        for template in BestPracticeTemplate.objects.filter(scope=BestPracticeTemplate.COURSELET):
-            # TODO test it
-            if not BestPractice.objects.filter(template=template, courselet=self.get_courselet()).exists():
-                BestPractice.objects.create(template=template, courselet=self.get_courselet(), active=False)
-        return self.get_courselet().bestpractice_set.filter(template__scope='courselet').order_by('template')
 
     def get_courselet(self, queryset=None):
         if 'courselet_pk' in self.kwargs:
@@ -1507,6 +1499,7 @@ class BestPracticeCalculation(NewLoginRequiredMixin, DetailView):
             sorted(self.object.template.calculation.items(), key=lambda x: x[1].get('order'))}
         context['best_practice_template_id'] = self.object.template.id
         context['best_practice_data'] = self.object.data or {}
+
         context['course'] = self.object.course
         return context
 

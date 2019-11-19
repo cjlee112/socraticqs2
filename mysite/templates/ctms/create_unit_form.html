@@ -1,53 +1,16 @@
 {% extends 'ctms_base.html' %}
+{% load static %}
 
+  <!-- Загрузка нашего компонента React. -->
 {% block content %}
-<div class="card">
-  <header class="card__topbar card__topbar--with-description">
-    <h1>Add a Thread</h1>
-    <p>
-      Let’s give your thread a name.
-    </p>
-  </header>
+<div id="add-threads-root"></div>
+{% endblock %}
 
-  <!-- TODO: We don't need this if when new and edit are separate views -->
-  {% if pk %}
-  <nav class="card__nav">
-    <ul>
-      <li>
-        <a href="{% url 'ctms:unit_edit' course_pk=course.id courselet_pk=courslet.id pk=pk %}" class="card__nav-active">Edit</a>
-      </li>
-
-      <li>
-        <a href="{% url 'ctms:unit_view' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Answers</a>
-      </li>
-
-      <li>
-        <a href="{% url 'ctms:unit_settings' course_pk=course.id courselet_pk=courslet.id pk=pk %}">Settings</a>
-      </li>
-    </ul>
-  </nav>
-  {% endif %}
-
-  <div class="card__notice">
-    You can also search Courselets for exercises to add, using <a href="{% url 'ct:unit_lessons' course_id=course.id unit_id=courslet.id %}">the old Instructor UI</a>.
-  </div>
-
-  <main class="card__content">
-    <form action="{% url 'ctms:unit_create' course_pk=course.id courselet_pk=courslet.id %}" method="POST">
-
-      <label for="{{ form.title.auto_id }}">Thread Name</label>
-      <p>
-        Choose a name that's short – a few words – and distinct – that helps students easily recognize this question within the list shown in the sidebar. For example, if your courselet presented questions about probability, and this question was the only one that featured trains (as an example), you could name it something like "Two Trains". Don't try to make the name a summary of what the question's asking -- that will be too long.
-      </p>
-      {{ form.title }}
-      {% if form.title.errors %}
-      {{ form.title.errors }}
-      {% endif %}
-
-      {% csrf_token %}
-
-      <input type="submit" value="Add Thread">
-    </form>
-  </main>
-</div>
+{% block js %}
+  <script>
+    window.courseletId = {{ courselet_pk }}
+    window.searchUrl = '{% url 'ct:unit_lessons' course_id=course_pk unit_id=courslet.unit.id %}'
+    {% if template_id %}window.templateId = {{ template_id }}{% endif %}
+  </script>
+  <script src="{% static 'js/add_threads.bundle.js' %}"></script>
 {% endblock %}

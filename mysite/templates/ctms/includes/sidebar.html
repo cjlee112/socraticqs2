@@ -129,6 +129,11 @@
           {% if sidebar.courslet and sidebar.courslet in sidebar.course_courslets %}
             <nav class="sidebar__actions">
               <ul>
+                {% switch "ctms_bp_courseletes_enabled" %}
+                <li>
+                  <a href="{% url 'ctms:courselet_best_practice' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_best_practice' %}sidebar__actions__active{% endif %}">Best Practices</a>
+                </li>
+                {% endswitch %}
                 <li>
                   <a href="{% url 'ctms:courslet_view' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_view' %}sidebar__actions__active{% endif %}">Threads</a>
                 </li>
@@ -148,11 +153,6 @@
                 <li>
                   <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
                 </li>
-                {% switch "ctms_bp_courseletes_enabled" %}
-                <li>
-                  <a href="{% url 'ctms:courselet_best_practice' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_best_practice' %}sidebar__actions__active{% endif %}">Best Practices</a>
-                </li>
-                {% endswitch %}
               </ul>
             </nav>
           {% endif %}
@@ -179,7 +179,7 @@
               <li>
                 <!-- TODO: This should always be visible if the user has a courselet in the active course and this if should not be necessary -->
                 {% if sidebar.courslet %}
-                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Thread</a>
+                  <a href="{% url 'ctms:unit_create' course_pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="sidebar__add">Add Threads</a>
                 {% endif %}
               </li>
 

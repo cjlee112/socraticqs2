@@ -1,0 +1,22 @@
+%dropzone {
+    flex: 1;
+    align-items: center;
+    padding: 50px;
+    border-color: #eeeeee;
+    border-style: dashed;
+    width: 50%;
+}
+
+div.dropzone{
+    @extend %dropzone;
+}
+
+div.dropzone-accept { 
+    @extend %dropzone;
+    border-color: #00e675;
+}
+
+div.dropzone-reject { 
+    @extend %dropzone;
+    border-color: #ff1744;
+}

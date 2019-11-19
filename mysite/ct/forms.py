@@ -150,6 +150,7 @@ class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
     def __init__(self, *args, **kwargs):
         super(UnitTitleForm, self).__init__(*args, **kwargs)
+        self.fields['title'].required = True
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-unitTitleForm'
         self.helper.form_class = 'form-vertical'

@@ -10,15 +10,15 @@ from rest_framework.views import APIView
 
 from analytics.models import CourseReport
 from analytics.tasks import report
-from ct.models import Response, StudentError, Course, Role
+from ct.models import Response, StudentError, Course, Role, Unit
 from ctms.forms import BestPractice1Form, BestPractice2Form
 from ctms.models import BestPractice, BestPracticeTemplate
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
 from ..permissions import IsInstructor
-from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer
-from .utils import get_result_calculation
+from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer, UnitSerializer
+from .utils import get_result_course_calculation, get_result_courselet_calculation
 
 
 logger = logging.getLogger(__name__)
@@ -177,7 +177,14 @@ class OnboardingBpAnalysis(APIView):
         best_practice = BestPractice.objects.filter(id=data.pop('best_practice_id')).first()
         if bp_template and best_practice:
             data.pop('csrfmiddlewaretoken', None)
-            result_data = get_result_calculation(data, bp_template.calculation)
+            if bp_template.scope == bp_template.COURSELET:
+                course_best_practice = best_practice.course.bestpractice_set.filter(
+                    template__scope='course', template__slug='practice-exam'
+                ).first()
+                data.update({'base': course_best_practice.data.get('result_data', {}).get('w_courselets')})
+                result_data = get_result_courselet_calculation(data, bp_template.calculation)
+            else:
+                result_data = get_result_course_calculation(data, bp_template.calculation)
             best_practice.data.update({'input_data': data, 'result_data': result_data})
             best_practice.save()
             best_practice.course.apply_from(data, commit=True)
@@ -195,12 +202,17 @@ class BestPracticeCreate(APIView):
         data = {}
         if bp_template:
             data["input_data"] = {key: value.get("default") for key, value in bp_template.calculation.items()}
-            data["result_data"] = get_result_calculation(data["input_data"], bp_template.calculation)
+            if bp_template.scope == bp_template.COURSELET:
+                data["result_data"] = get_result_courselet_calculation(data["input_data"], bp_template.calculation)
+            else:
+                data["result_data"] = get_result_course_calculation(data["input_data"], bp_template.calculation)
 
         try:
+            courselet_id = int(request.POST.get('courselet_id')) if request.POST.get('courselet_id') else None
             new_best_practice = BestPractice.objects.create(
                 template_id=int(request.POST.get('template_id')),
                 course_id=int(request.POST.get('course_id')),
+                courselet_id=courselet_id,
                 data=data
             )
             if data:
@@ -212,3 +224,50 @@ class BestPracticeCreate(APIView):
         except ValueError as e:
             logger.error(e)
             return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BestPracticeUpload(APIView):
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('best_practice_id'):
+            best_practice = BestPractice.objects.filter(id=int(request.POST.get('best_practice_id'))).first()
+            best_practice.upload_file = request.data.get('upload_file')
+            best_practice.save()
+            create_intercom_event(
+                event_name='exam-upload',
+                created_at=int(time.mktime(time.localtime())),
+                email=request.user.email,
+                metadata={'document-link': best_practice.upload_file.url}
+            )
+            return RestResponse({'best_practice_id': best_practice.id}, status=status.HTTP_200_OK)
+        else:
+            try:
+                if request.POST.get('template_id'):
+                    template_id = int(request.POST.get('template_id'))
+                else:
+                    template_id = BestPracticeTemplate.objects.filter(slug='upload-practice-exam').first().id
+                new_best_practice = BestPractice.objects.create(
+                    template_id=template_id,
+                    courselet_id=int(request.POST.get('courselet_id')),
+                    upload_file=request.data.get('upload_file'),
+                    active=True
+                )
+                create_intercom_event(
+                    event_name='exam-upload',
+                    created_at=int(time.mktime(time.localtime())),
+                    email=request.user.email,
+                    metadata={'document-link': new_best_practice.upload_file.url}
+                )
+                return RestResponse({'best_practice_id': new_best_practice.id}, status=status.HTTP_200_OK)
+            except ValueError as e:
+                logger.error(e)
+                return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnitViewSet(viewsets.ModelViewSet):
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsInstructor,)
+    queryset = Unit.objects.all()
+    serializer_class = UnitSerializer

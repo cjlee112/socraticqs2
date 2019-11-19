@@ -25,5 +25,6 @@ USER courselets
 ADD --chown=courselets:courselets mysite /home/courselets/app/mysite
 COPY --from=static --chown=courselets:courselets /drawing.bundle.js lms/static/js/drawing.bundle.js
 COPY --from=static --chown=courselets:courselets /tmp/mysite/frontend/bower_components chat/static/bower_components
+COPY --from=static --chown=courselets:courselets /tmp/mysite/ctms/frontend/dist/add_threads.bundle.js lms/static/js/add_threads.bundle.js
 
 CMD ["dev"]

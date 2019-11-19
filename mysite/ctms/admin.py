@@ -21,6 +21,7 @@ class BestPracticeTemplateAdmin(admin.ModelAdmin):
     formfield_overrides = {
         fields.JSONField: {'widget': JSONEditorWidget},
     }
+    prepopulated_fields = {"slug": ("title",)}
 
 
 @admin.register(BestPractice)

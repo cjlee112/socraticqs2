@@ -61,6 +61,7 @@ target/
 settings_local.py
 local.py
 #static/
+add_threads.bundle.js
 assets/
 mysite/static/
 deploy.sh
