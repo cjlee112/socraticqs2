@@ -1,22 +1,77 @@
 %dropzone {
-    flex: 1;
-    align-items: center;
-    padding: 50px;
-    border-color: #eeeeee;
-    border-style: dashed;
-    width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 360px;
+  max-width: 100%;
+  min-height: 120px;
+  border: 1px dashed #CED2D6;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+  margin-top: 50px;
+  padding: 35px 65px;
+  margin-bottom: 10px;
+  word-break: break-word;
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }
 
-div.dropzone{
-    @extend %dropzone;
+div.dropzone {
+  @extend %dropzone;
 }
 
-div.dropzone-accept { 
-    @extend %dropzone;
-    border-color: #00e675;
+div.dropzone-accept {
+  @extend %dropzone;
+  border-color: #00e675;
 }
 
-div.dropzone-reject { 
-    @extend %dropzone;
-    border-color: #ff1744;
+div.dropzone-reject {
+  @extend %dropzone;
+  border-color: #ff1744;
+}
+
+p {
+  &.content {
+    &--medium {
+      max-width: 480px;
+    }
+
+    &--large {
+      max-width: 600px;
+    }
+  }
+}
+
+.button {
+  &--upload {
+    margin-top: 0;
+    width: 360px;
+    max-width: 100%;
+  }
+
+  &--search {
+    margin-top: 15px;
+  }
+}
+
+.card__title {
+  font-size: 20px;
+  line-height: 30px;
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+#new-todo {
+  margin-top: 20px;
 }

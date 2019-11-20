@@ -188,7 +188,7 @@
     margin: 4px 0 0 0;
   }
 
-  .onboarding-content{
+  .onboarding-content {
     margin-top: 13px;
   }
 }
@@ -265,7 +265,7 @@
   }
 
   .card__content {
-    padding: 60px;
+    padding: 50px 60px 60px;
     min-height: 168px;
   }
 
@@ -275,10 +275,23 @@
       bottom: 60px;
       left: 60px;
       margin: 0;
+
+      &.button--delete {
+        position: static;
+        float: none;
+        margin-top: 15px;
+      }
     }
   }
 
   .card__notice {
     padding: 23px 60px;
   }
+}
+
+.card__title {
+  font-size: 20px;
+  line-height: 30px;
+  margin-bottom: 10px;
+  font-weight: 400;
 }

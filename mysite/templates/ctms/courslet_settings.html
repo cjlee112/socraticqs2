@@ -81,8 +81,8 @@
     </nav>
 
     <main class="card__content">
-      <div class="form-group">
-        <label>Publish Settings</label>
+      <div class="form-group form-wrapper">
+        <label class="card__title">Publish Settings</label>
         <p>
           {% if courslet.releaseTime %}
             Your courselet is published. Click on the button below if you want to unpublish it.
@@ -96,20 +96,18 @@
         </div>
       </div>
 
-      <form class="form_general" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
+      <form class="form_general form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
         {% csrf_token %}
         <div class="form-group form-group--not-first">
           <h1>General Settings</h1>
-          <label for="name">Courselet Name</label>
+          <label for="{{ form.title.auto_id }}" class="form-label--name">Courselet Name</label>
           <p>You can change the name of your courselet here.</p>
           {{ form.title }}
 
 
-          <label for="{{ form.exam_name.auto_id }}">Concepts</label>
-          <div style="float: left">
-            {{ form.is_show_will_learn }}
-          </div>
-          <div style="margin-left: 1%; float: left">
+          <label for="{{ form.is_show_will_learn.auto_id }}" class="form-checkbox--label">Concepts</label>
+          <div>
+            <span class="form-checkbox">{{ form.is_show_will_learn }}</span>
             Show Concepts in the Chat start page?
           </div>
 
@@ -117,53 +115,60 @@
         <input type="submit" value="Update General Settings">
       </form>
 
-      <form class="form_schedul" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
+      <form class="form_schedul form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
         {% csrf_token %}
         <div class="form-group form-group--not-first">
           <h1>Scheduling Settings</h1>
           <label for="{{ form.exam_name.auto_id }}">Follow-Up Assessment Name</label>
-            <p>Store as graded assessment name</p>
+            <p class="form-field--description">Store as graded assessment name</p>
             {{ form.exam_name }}
             {% if form.exam_name.errors %}
               {{ form.exam_name.errors }}
             {% endif %}
           <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-Up Assessment Date</label>
-          <p>TODO Describe this field here</p>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.follow_up_assessment_date }}
             {% if form.follow_up_assessment_date.errors %}
               {{ form.follow_up_assessment_date.errors }}
             {% endif %}
-          <label for="{{ form.follow_up_aassessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
+          <label for="{{ form.follow_up_assessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.follow_up_assessment_grade }}
             {% if form.follow_up_assessment_grade.errors %}
               {{ form.follow_up_assessment_grade.errors }}
             {% endif %}
           <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
+          <p class="form-field--description">TODO Describe this field here</p>
               {{ form.error_resolution_days }}
               {% if form.error_resolution_days.errors %}
                 {{ form.error_resolution_days.errors }}
               {% endif %}
           <label for="{{ form.courselet_completion_credit.auto_id }}">Courselet Duration</label>
+          <p class="form-field--description">TODO Describe this field here</p>
               {{ form.courselet_completion_credit }}
               {% if form.courselet_completion_credit.errors %}
               {{ form.courselet_completion_credit.errors }}
               {% endif %}
           <label for="{{ form.question_parts.auto_id }}">Question parts</label>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.question_parts }}
             {% if form.question_parts.errors %}
               {{ form.question_parts.errors }}
             {% endif %}
           <label for="{{ form.average_score.auto_id }}">Average score</label>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.average_score }}
             {% if form.average_score.errors %}
               {{ form.average_score.errors }}
             {% endif %}
           <label for="{{ form.graded_assessment_value.auto_id }}">Total grade % for the paired (graded) assessment</label>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.graded_assessment_value }}
             {% if form.graded_assessment_value.errors %}
               {{ form.graded_assessment_value.errors }}
             {% endif %}
           <label for="{{ form.courselet_days.auto_id }}">Number of days students are given to complete the courselet</label>
+          <p class="form-field--description">TODO Describe this field here</p>
             {{ form.courselet_days }}
             {% if form.courselet_days.errors %}
             {{ form.courselet_days.errors }}
@@ -173,12 +178,12 @@
           {{ form.as_p }}
         -->
 
-        <input type="submit" value="Update Scheduling Settings">
+        <input type="submit" value="Update Scheduling Settings" class="submit__settings">
       </form>
-      <div class="form-group">
+      <div class="form-group form-group--last">
         <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
           {% csrf_token %}
-          <label>Delete Courselet</label>
+          <label class="card__title">Delete Courselet</label>
           <p>Click on the button below if you want to delete this courselet.</p>
           <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
         </form>

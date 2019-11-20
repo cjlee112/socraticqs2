@@ -58,11 +58,11 @@ class StyledDropzone extends React.Component {
           <section>
             <div {...getRootProps()} className={className}>
               <input {...getInputProps()} />
-              <p>
+              <p className="content--medium">
               {message}
               </p>
             </div>
-            <button type="button" onClick={open} class="button button--primary">Upload</button>
+            <button type="button" onClick={open} class="button button--primary button--upload">Upload</button>
           </section>
         )}
         }
@@ -76,12 +76,11 @@ export class UploadDocument extends React.Component {
   render() {
     return (
       <div>
-
-        <main className="card__content">
+        <main className="card__content card__content_upload">
           <form action="#" method="POST">
 
-            <label for="id_title">Upload a Document</label>
-            <p>
+            <label for="id_title" className="card__title">Upload a Document</label>
+            <p className="content--medium">
               Let our experienced instructors convert your existing material to threads for free.
               We’ll send an email when they’re ready, usually in a day or two. If you prefer,
               you can <NavLink to="/add">add threads manually</NavLink> manually instead.

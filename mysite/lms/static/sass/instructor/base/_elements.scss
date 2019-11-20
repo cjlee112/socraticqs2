@@ -9,8 +9,6 @@ body {
   color: $color-text-primary;
 }
 
-
-
 /**
  * Links
  */
@@ -24,8 +22,6 @@ a {
     text-decoration: none;
   }
 }
-
-
 
 /**
  * Text
@@ -67,12 +63,10 @@ b, strong {
   font-weight: bold;
 }
 
-
-
 /**
  * Tables
  */
- table, tr, th, td {
+table, tr, th, td {
   border: 0;
   margin: 0;
   padding: 0;
@@ -121,8 +115,6 @@ td a {
   }
 }
 
-
-
 /**
  * Forms
  */
@@ -138,7 +130,7 @@ label {
   font-weight: 500;
   line-height: 24px;
   color: $color-headline;
-  margin: 48px 0 0 0;
+  margin: 50px 0 0 0;
   padding: 6px 0 0 0;
 
   &:first-of-type {
@@ -167,12 +159,12 @@ textarea {
   font-size: 14px;
   font-weight: 400;
   line-height: 24px;
-  padding: 15px 24px;
+  padding: 15px 22px;
   background: #fff;
   border: 1px solid #D0D5D9;
   border-radius: 4px;
   color: $color-text-primary;
-  margin: 12px 0 0 0;
+  margin: 10px 0 0 0;
 }
 
 textarea {
@@ -198,13 +190,17 @@ input[type=submit] {
   text-decoration: none;
   background: $color-primary;
   color: #fff;
-  margin: 60px 0 0 0;
-  padding: 14px 30px;
+  margin: 50px 0 0 0;
+  padding: 14px 24px;
   text-align: center;
   border-radius: 4px;
   border: 1px solid $color-primary;;
   cursor: pointer;
   transition: all 0.2s;
+
+  &.submit__settings {
+    margin-top: 60px;
+  }
 
   &:hover, &:active, &:focus {
     opacity: 0.6;

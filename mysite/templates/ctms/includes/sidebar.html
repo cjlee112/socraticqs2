@@ -146,13 +146,30 @@
                   <a href="#">Preview</a>
                 </li>
                 {% endif %}
-                <li>
-                  <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
+
+
+                <li class="dropdown">
+                  <div class="dropdown-toggle" id="dropdown-courselets-more" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span>More</span><span class="sidebar__arrow"></span>
+                  </div>
+                  <ul class="dropdown-menu" aria-labelledby="dropdown-courselets-more">
+                    <li>
+                      <a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>
+                    </li>
+
+                    <li>
+                      <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
+                    </li>
+                  </ul>
                 </li>
 
-                <li>
-                  <a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>
-                </li>
+                <!--<li>-->
+                  <!--<a href="{% url 'ctms:courselet_invite' pk=sidebar.course.id courselet_pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courselet_invite' or sidebar.current_page_name == 'courselet_invite_student' %}sidebar__actions__active{% endif %}">Share</a>-->
+                <!--</li>-->
+
+                <!--<li>-->
+                  <!--<a href="{% url 'ctms:courslet_settings' course_pk=sidebar.course.id pk=sidebar.courslet.id %}" class="{% if sidebar.current_page_name == 'courslet_settings' %}sidebar__actions__active{% endif %}">Settings</a>-->
+                <!--</li>-->
               </ul>
             </nav>
           {% endif %}
