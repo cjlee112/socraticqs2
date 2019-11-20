@@ -1,4 +1,5 @@
 import re
+import os
 import time
 from uuid import uuid4
 
@@ -234,6 +235,9 @@ class BestPractice(models.Model):
         upload_to='practice_questions/', blank=True, null=True)
     converted_status = models.CharField('status', max_length=20, choices=CONVERTED_STATUS, default='pending')
 
+    @property
+    def filename(self):
+        return os.path.basename(self.upload_file.name)
 
     def summary_fg(self) -> str:
         return mark_safe(f'''

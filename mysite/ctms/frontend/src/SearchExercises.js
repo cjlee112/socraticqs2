@@ -11,11 +11,11 @@ export class SearchExercises extends React.Component {
     return (  
       <div>
         <main className="card__content">
-            <label for="id_title" className="card__title">Search for Exercises</label>
+            <label htmlFor="id_title" className="card__title">Search for Exercises</label>
             <p className="content--medium">
             You can search Courselets for exercises to add. Please note that you will be redirected to the <b>old Instructor interface</b> to use this feature.
             </p>
-            <button type="button" onClick={this.handleClick} class="button button--primary button--search">Search for Exercises</button>
+            <button type="button" onClick={this.handleClick} className="button button--primary button--search">Search for Exercises</button>
         </main>
       </div>
     );

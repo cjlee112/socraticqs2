@@ -1,7 +1,7 @@
 import Cookie from 'js-cookie';
 
 export function uploadFile(formData){
-    return fetch('http://localhost:8080/api/v0/bp/upload/', {
+    return fetch('/api/v0/bp/upload/', {
       method: 'POST',
       headers: {
         'X-CSRFToken': Cookie.get('csrftoken'),
@@ -13,4 +13,3 @@ export function uploadFile(formData){
       error => console.log(error)
     );
   }
-  

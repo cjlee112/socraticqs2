@@ -35,7 +35,7 @@ export class AddThreads extends React.Component {
       <div className="card">
         <header className="card__topbar">
           <h1>Add Threads</h1>
-          <nav class="card__nav">
+          <nav className="card__nav">
             <ul>
               <li> <NavLink to="/add" activeClassName="card__nav-active">Add Manually</NavLink> </li>
               <li> <NavLink to="/upload" activeClassName="card__nav-active">Upload a Document</NavLink> </li>

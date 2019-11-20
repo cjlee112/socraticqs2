@@ -7,6 +7,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
+from django.contrib import messages
+from django.utils.safestring import mark_safe
 
 from analytics.models import CourseReport
 from analytics.tasks import report
@@ -260,6 +262,11 @@ class BestPracticeUpload(APIView):
                     email=request.user.email,
                     metadata={'document-link': new_best_practice.upload_file.url}
                 )
+                messages.add_message(
+                    self.request,
+                    messages.SUCCESS,
+                    mark_safe(f"<b>Your document has been uploaded.</b> We’ll send an email to \
+                        {self.request.user.email} once it has been converted, usually in a day or two."))
                 return RestResponse({'best_practice_id': new_best_practice.id}, status=status.HTTP_200_OK)
             except ValueError as e:
                 logger.error(e)

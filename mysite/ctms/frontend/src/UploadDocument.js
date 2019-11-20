@@ -38,6 +38,7 @@ class StyledDropzone extends React.Component {
       this.setState({
         bestPracticeId: data.best_practice_id
       });
+      window.location = window.courseletBpUrl;
     });
   }
 
@@ -46,7 +47,7 @@ class StyledDropzone extends React.Component {
       <Dropzone onDrop={this.onDrop}>
         {({getRootProps, getInputProps, acceptedFiles, rejectedFiles, open}) => {
           var className ='dropzone'
-          var message = <p>Drag and drop here or <a>choose a file</a> (pdf, doc or txt)</p>
+          var message = <p className="content--medium">Drag and drop here or <a>choose a file</a> (pdf, doc or txt)</p>
           if (acceptedFiles.length || this.state.fileName){
             className ='dropzone-accept'
             message = <p>{this.state.fileName} <a>Remove</a></p>
@@ -58,11 +59,9 @@ class StyledDropzone extends React.Component {
           <section>
             <div {...getRootProps()} className={className}>
               <input {...getInputProps()} />
-              <p className="content--medium">
               {message}
-              </p>
             </div>
-            <button type="button" onClick={open} class="button button--primary button--upload">Upload</button>
+            <button type="button" onClick={open} className="button button--primary button--upload">Upload</button>
           </section>
         )}
         }
@@ -79,7 +78,7 @@ export class UploadDocument extends React.Component {
         <main className="card__content card__content_upload">
           <form action="#" method="POST">
 
-            <label for="id_title" className="card__title">Upload a Document</label>
+            <label htmlFor="id_title" className="card__title">Upload a Document</label>
             <p className="content--medium">
               Let our experienced instructors convert your existing material to threads for free.
               We’ll send an email when they’re ready, usually in a day or two. If you prefer,

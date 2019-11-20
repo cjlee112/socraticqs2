@@ -14,7 +14,7 @@
           {% for best_practice in template.bestpractice_set.all|active:courselet %}
             {% if best_practice.courselet %}
             <li>
-              You’ve uploaded the file "{{ best_practice.upload_file.name }}" and {{ best_practice.get_converted_status_display|lower }}.
+              You’ve uploaded the file "{{ best_practice.filename }}" and {{ best_practice.get_converted_status_display|lower }}.
               {% if best_practice.converted_status != 'pending' %}
               <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=courselet_pk %}">
                 View threads

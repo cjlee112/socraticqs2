@@ -11,7 +11,7 @@ export class AddManually extends React.Component {
         <main className="card__content">
           <form action={window.location} method="POST">
             <input type="hidden" name="csrfmiddlewaretoken" value={Cookie.get("csrftoken")} />
-            <label for="id_title" className="card__title">Add a Thread Manually</label>
+            <label htmlFor="id_title" className="card__title">Add a Thread Manually</label>
             <p className="content--medium">
               Use this option to add a new thread on your own. If you prefer, you can also
               <NavLink to="/upload"> upload a document </NavLink> and let our experienced instructors do it for you.
@@ -26,6 +26,7 @@ export class AddManually extends React.Component {
               id="new-todo"
               type="text"
               name="title"
+              required
             />
             <input type="submit" value="Add Thread" />
 

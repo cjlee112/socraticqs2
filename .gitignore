@@ -62,6 +62,7 @@ settings_local.py
 local.py
 #static/
 add_threads.bundle.js
+webpack-stats*
 assets/
 mysite/static/
 deploy.sh
