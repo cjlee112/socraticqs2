@@ -676,10 +676,10 @@ class CreateCoursletViewTests(MyTestCase):
         ).count()
         self.assertNotEqual(courslets_in_course, new_unit)
         self.assertRedirects(response, reverse(
-            'ctms:courslet_view',
+            'ctms:courselet_best_practice',
             kwargs={
                 'course_pk': self.get_test_course().pk,
-                'pk': CourseUnit.objects.all().last().id
+                'courselet_pk': CourseUnit.objects.all().last().id
             }
         ))
 

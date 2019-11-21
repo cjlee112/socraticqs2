@@ -2,6 +2,7 @@ import re
 import time
 import logging
 from copy import deepcopy
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -1014,9 +1015,9 @@ class Unit(models.Model):
     question_parts = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     average_score = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     graded_assessment_value = models.IntegerField(blank=True, null=True, validators=[percent_validator])
-    courselet_deadline = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    courselet_deadline = models.DateField(blank=True, null=True)
     courselet_days = models.IntegerField(blank=True, null=True)
-    error_resolution_days = models.IntegerField(blank=True, null=True)
+    error_resolution_days = models.IntegerField(default=2, blank=True, null=True)
     courselet_completion_credit = models.IntegerField(default=5, blank=True, null=True, validators=[percent_validator])
     late_completion_penalty = models.IntegerField(default=50, blank=True, null=True, validators=[percent_validator])
 
@@ -1167,7 +1168,7 @@ class Unit(models.Model):
             return ul
         else:  # not in this unit so copy
             return ul.copy(self, user, order='APPEND')
-    
+
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)
         assert hasattr(self, 'ALLOWED_FIELDS')
@@ -1178,6 +1179,11 @@ class Unit(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.courselet_deadline and self.follow_up_assessment_date:
+            self.courselet_deadline = self.follow_up_assessment_date + timedelta(days=self.error_resolution_days or 2)
+        super().save(*args, **kwargs)
 
 
 ############################################################

@@ -445,10 +445,10 @@ class CreateCoursletView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateV
 
     def get_success_url(self):
         return reverse(
-            'ctms:courslet_view',
+            'ctms:courselet_best_practice',
             kwargs={
                 'course_pk': self.get_course().pk,
-                'pk': self.object.course_unit.id
+                'courselet_pk': self.object.course_unit.id
             }
         )
 
