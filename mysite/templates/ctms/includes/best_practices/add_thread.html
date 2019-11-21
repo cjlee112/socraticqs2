@@ -8,7 +8,7 @@
     <h2>
         {{forloop.counter}}. {{ template.summary }}
     </h2>
-    <span class="get-started__step-tip">
+    <div class="get-started__step-tip">
       {% if template.bestpractice_set.all|bps_exists:courselet %}
           <ul>
           {% for best_practice in template.bestpractice_set.all|active:courselet %}
@@ -27,7 +27,7 @@
       {% else %}
         {{ template.explanation }}
       {% endif %}
-    </span>
+    </div>
     
     <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">
       {% if template.bestpractice_set.all|bps_exists:courselet %}Do this again{% else %}View{% endif %}

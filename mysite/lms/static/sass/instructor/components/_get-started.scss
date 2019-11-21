@@ -120,6 +120,20 @@
   font-size: 14px;
   font-style: italic;
   font-weight: 400;
+
+  ul {
+    max-width: 480px;
+    padding: 0;
+    list-style: none;
+    word-break: break-word;
+  }
+
+  li {
+    &:before {
+      content: '∙';
+      margin-right: 5px;
+    }
+  }
 }
 
 .get-started__step-toggle {
@@ -154,6 +168,10 @@
 
   .get-started__step-header {
     padding: 30px 144px 29px 108px;
+
+    .get-started__step--done & {
+      padding-right: 190px;
+    }
   }
 
   .get-started__step-status {

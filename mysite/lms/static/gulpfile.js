@@ -84,10 +84,10 @@ gulp.task('clean', function(){
 
 // Watch task
 gulp.task('watch', function(){
-  gulp.watch('src/sass/**/*.scss', ['compile-sass']);
-  gulp.watch('src/js/**/*.hbs', ['precompile-templates']);
-  gulp.watch('src/js/**/*.js', ['lint']);
-})
+  gulp.watch('sass/**/*.scss', ['compile-sass']);
+  gulp.watch('js/**/*.hbs', ['precompile-templates']);
+  gulp.watch('js/**/*.js', ['lint']);
+});
 
 // Build task
 gulp.task('build', function(callback){

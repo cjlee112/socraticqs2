@@ -1,3 +1,4 @@
+@charset "UTF-8";
 body {
   background: #FAFBFD;
   -webkit-font-smoothing: antialiased;
@@ -1182,6 +1183,14 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
   font-size: 14px;
   font-style: italic;
   font-weight: 400; }
+  .get-started__step-tip ul {
+    max-width: 480px;
+    padding: 0;
+    list-style: none;
+    word-break: break-word; }
+  .get-started__step-tip li:before {
+    content: '∙';
+    margin-right: 5px; }
 
 .get-started__step-toggle {
   position: static;
@@ -1204,6 +1213,8 @@ h1 .button, h2 .button, h3 .button, h4 .button, h5 .button, h6 .button {
     display: block; }
   .get-started__step-header {
     padding: 30px 144px 29px 108px; }
+    .get-started__step--done .get-started__step-header {
+      padding-right: 190px; }
   .get-started__step-status {
     left: 60px;
     top: 40px; }
