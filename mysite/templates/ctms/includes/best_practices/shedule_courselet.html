@@ -10,7 +10,7 @@
     </h2>
     <span class="get-started__step-tip">
       {% if template.bestpractice_set.all|bps_exists:courselet %}
-        You've created best practice exams
+          You have scheduled this courselet for {{ courselet.unit.follow_up_assessment_date }} ({{ courselet.unit.error_resolution_days }} days before assessment).
           {% for best_practice in template.bestpractice_set.all|active:courselet %}
             {% if best_practice.courselet %}
               <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
@@ -37,7 +37,7 @@
         data-bp-template-pk="{{ template.id }}"
         data-course-pk="{{ course_pk }}"
         data-courselet-pk="{{ courselet_pk }}"
-        redirect="{% url 'ctms:courslet_settings' course_pk=course_pk pk=courselet_pk %}"
+        redirect="{% url 'ctms:courslet_settings' course_pk=course_pk pk=courselet_pk %}#schedule-section"
         class="button button--primary create-new-bp-default">
         Schedule Courselet
       </a>

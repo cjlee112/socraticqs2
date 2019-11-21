@@ -117,7 +117,7 @@
               </li>
               {% for courslet in sidebar.course_courslets %}
                 <li>
-                  <a href="{% url 'ctms:courslet_view' course_pk=courslet.course.id pk=courslet.id %}">
+                  <a href="{% url 'ctms:courselet_best_practice' course_pk=courslet.course.id courselet_pk=courslet.id %}">
                     {{ courslet.unit.title }}
                   </a>
                 </li>

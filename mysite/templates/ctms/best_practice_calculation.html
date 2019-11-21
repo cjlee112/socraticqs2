@@ -101,7 +101,7 @@
     </div>
     <div class="btn-holder text-right">
     {% if object.template.scope == object.template.COURSELET %}
-      <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=object.courselet.id %}" class="button button--primary">Schedule Your Courselet</a>
+      <a href="{% url 'ctms:courslet_settings' course_pk=course.id pk=object.courselet.id %}#schedule-section" class="button button--primary">Schedule Your Courselet</a>
     {% elif object.template.scope == object.template.COURSE %}
       <a href="{% url 'ctms:courslet_create_with_bp' course.id object.id %}" class="button button--primary">Create a Courselet</a>
     {% endif %}

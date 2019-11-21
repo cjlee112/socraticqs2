@@ -117,7 +117,7 @@
 
       <form class="form_schedul form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
         {% csrf_token %}
-        <div class="form-group form-group--not-first">
+        <div class="form-group form-group--not-first" id="schedule-section">
           <h1>Scheduling Settings</h1>
           <label for="{{ form.exam_name.auto_id }}">Follow-Up Assessment Name</label>
             <p class="form-field--description">Store as graded assessment name</p>
@@ -138,7 +138,13 @@
               {{ form.follow_up_assessment_grade.errors }}
             {% endif %}
           <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
-          <p class="form-field--description">TODO Describe this field here</p>
+          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
+              {{ form.courselet_deadline }}
+              {% if form.courselet_deadline.errors %}
+                {{ form.courselet_deadline.errors }}
+              {% endif %}
+          <label for="{{ form.error_resolution_days.auto_id }}">Courselet Resolution days</label>
+          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
               {{ form.error_resolution_days }}
               {% if form.error_resolution_days.errors %}
                 {{ form.error_resolution_days.errors }}

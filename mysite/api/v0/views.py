@@ -181,9 +181,10 @@ class OnboardingBpAnalysis(APIView):
             data.pop('csrfmiddlewaretoken', None)
             if bp_template.scope == bp_template.COURSELET:
                 course_best_practice = best_practice.course.bestpractice_set.filter(
-                    template__scope='course', template__slug='practice-exam'
+                    template__scope='course', template__slug='practice-exam', courselet=best_practice.courselet
                 ).first()
-                data.update({'base': course_best_practice.data.get('result_data', {}).get('w_courselets')})
+                if course_best_practice and course_best_practice.data:
+                    data.update({'base': course_best_practice.data.get('result_data', {}).get('w_courselets')})
                 result_data = get_result_courselet_calculation(data, bp_template.calculation)
             else:
                 result_data = get_result_course_calculation(data, bp_template.calculation)

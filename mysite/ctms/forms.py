@@ -187,6 +187,7 @@ class EditCourseletForm(forms.ModelForm):
             'question_parts',
             'average_score',
             'courselet_days',
+            'courselet_deadline',
             'graded_assessment_value',
             'error_resolution_days',
             'courselet_completion_credit',
