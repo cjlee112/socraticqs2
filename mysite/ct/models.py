@@ -1176,6 +1176,13 @@ class Unit(models.Model):
             setattr(self, key, value) if key in self.ALLOWED_FIELDS else None
         self.save() if commit else None
         return self
+    
+    @property
+    def scheduled(self):
+        return (
+            self.follow_up_assessment_date and self.courselet_deadline and self.error_resolution_days and
+            self.follow_up_assessment_date < self.courselet_deadline
+        )
 
     def __str__(self):
         return self.title

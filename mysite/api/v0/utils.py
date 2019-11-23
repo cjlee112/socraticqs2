@@ -39,8 +39,7 @@ def get_result_courselet_calculation(data, calculation) -> dict:
     """
     result = {}
     if calculation and data:
-        result['w_o_courselets'] = int(
-            int(data.get('base', 1344)) * 0.25)
-        result['w_courselets'] = int(
-            int(data.get('base', 1344)) * int(data.get('average_score', 72)) / 100)
+        base = int(data.get('base', 1344))
+        result['w_o_courselets'] = int(round(base * int(data.get('average_score', 25)) / 100))
+        result['w_courselets'] = int(round(base * 0.9))
     return result

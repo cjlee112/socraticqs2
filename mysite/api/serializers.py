@@ -122,12 +122,13 @@ class UnitSerializer(serializers.ModelSerializer):
         model = Unit
         fields = (
             'title',
-            'exam_name', 
+            'exam_name',
             'follow_up_assessment_date',
             'follow_up_assessment_grade',
             'question_parts',
             'average_score',
             'courselet_days',
+            'courselet_deadline',
             'graded_assessment_value',
             'error_resolution_days',
             'courselet_completion_credit',
