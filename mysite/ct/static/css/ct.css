@@ -44,3 +44,8 @@ ul.messages > li {
 .custom-nav-tabs-li > a:hover {
     border-radius: 4px;
 }
+
+.draw-svg-container {
+    display: inline-block;
+    background-size: contain;
+}

@@ -4,8 +4,9 @@ Various utilities.
 import time
 import functools
 
-import waffle
+import logging
 
+import waffle
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -18,6 +19,9 @@ from core.common import onboarding
 from core.tasks import intercom_event
 
 
+logger = logging.getLogger(__name__)
+
+
 def create_intercom_event(event_name, created_at, email, metadata):
     """
     params:
@@ -27,6 +31,7 @@ def create_intercom_event(event_name, created_at, email, metadata):
       metadata: dict
     """
     if getattr(settings, 'IN_TESTING', None):
+        logger.info(f'Event: {event_name}: created at: {created_at}: email: {email}: metadata: {metadata}')
         return
     intercom_event.apply_async(args=(event_name, created_at, email, metadata))
 

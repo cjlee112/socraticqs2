@@ -61,6 +61,8 @@ target/
 settings_local.py
 local.py
 #static/
+add_threads.bundle.js
+webpack-stats*
 assets/
 mysite/static/
 deploy.sh
@@ -85,10 +87,10 @@ mysite/media/
 *journal*
 
 .pytest_cache
-src/
-mysite/lms/static/css/draw_svg.css
-mysite/lms/static/js/draw_svg.js
+**/src/*.css
+mysite/lms/static/js/drawing.bundle.js
 
 .*env*
 *.code-workspace
 .mypy_cache/
+package-lock.json

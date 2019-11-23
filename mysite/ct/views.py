@@ -619,11 +619,14 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
         elif request.POST.get('task') == 'reverse' and 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
-            c = cg.fromConcept
-            cg.fromConcept = cg.toConcept
-            cg.toConcept = c
-            cg.save() # save the reversed relationship
-            toTable.move_between_tables(cg, fromTable)
+            if cg.fromConcept.relatedTo.filter(
+                toConcept__lesson__unitlesson__isnull=False
+            ).exists():
+                c = cg.fromConcept
+                cg.fromConcept = cg.toConcept
+                cg.toConcept = c
+                cg.save()  # save the reversed relationship
+                toTable.move_between_tables(cg, fromTable)
         elif 'cgID' in request.POST:
             cg = get_object_or_404(ConceptGraph,
                                    pk=int(request.POST.get('cgID')))
@@ -788,7 +791,9 @@ def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
 def concept_concepts(request, course_id, unit_id, ul_id):
     unit, ul, concept, pageData = ul_page_data(request, unit_id, ul_id,
                                                'Concepts')
-    toConcepts = concept.relatedTo.all()
+    toConcepts = concept.relatedTo.filter(
+        toConcept__lesson__unitlesson__isnull=False
+    )
     fromConcepts = concept.relatedFrom \
       .exclude(relationship=ConceptGraph.MISUNDERSTANDS)
     toTable = ConceptLinkTable(toConcepts, ConceptGraphForm,
@@ -1697,6 +1702,7 @@ def ul_faq_student(request, course_id, unit_id, ul_id):
         if form.is_valid():
             r = save_response(form, ul, request.user, course_id,
                               kind=Response.STUDENT_QUESTION, needsEval=True)
+            r.notify_instructors()
             red = pageData.fsm_redirect(request, 'create_Comment',
                                         defaultURL=None, response=r)
             if red: # let FSM redirect us if desired
@@ -1729,6 +1735,7 @@ def ul_thread_student(request, course_id, unit_id, ul_id, resp_id):
                 reply = save_response(form, ul, request.user, course_id,
                                   kind=Response.COMMENT, needsEval=True,
                                   parent=inquiry)
+                reply.notify_students()
                 red = pageData.fsm_redirect(request, 'create_Reply',
                                             defaultURL=None, response=reply)
                 if red: # let FSM redirect us if desired

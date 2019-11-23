@@ -7,6 +7,11 @@
   Show materials relevant for a given concept
 {% endcomment %}
 
+{% block head %}
+{{ block.super }}
+<script src="{% static 'js/drawing.bundle.js' %}"></script>
+{% endblock %}
+
 {% block title %}
   {{ pageData.title }}
 {% endblock %}
@@ -73,9 +78,6 @@ Added by: {{ unitLesson.addedBy.get_full_name }}, {{ atime }}
 <script type="application/javascript">
 $("#js-slct-unit").select2({placeholder: "Select a unit"});
 </script>
-
-<link rel="stylesheet" href="{% static 'css/draw_svg.css' %}">
-<script src="{% static 'js/draw_svg.js' %}"></script>
 
 {% endblock %}
 

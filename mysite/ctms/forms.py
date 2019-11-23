@@ -14,7 +14,6 @@ from .fields import SvgAllowedImageField
 class CustomFileInput(forms.ClearableFileInput):
 
     def render(self, name, value, attrs=None, renderer=None):
-        print(value)
         final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
             'name': name,
@@ -26,7 +25,6 @@ class CustomFileInput(forms.ClearableFileInput):
 class CustomPdfInput(forms.ClearableFileInput):
 
     def render(self, name, value, attrs=None, renderer=None):
-        print(value)
         final_attrs = self.build_attrs(attrs, {'type': self.input_type, 'name': name})
         attrs.update({
             'name': name,
@@ -168,6 +166,7 @@ ErrorModelFormSet = modelformset_factory(
 
 
 class CreateCourseletForm(forms.ModelForm):
+    title = forms.CharField()
     follow_up_assessment_date = forms.CharField(widget=forms.TextInput(attrs={'placeholder': '2019-01-01'}))
     exam_name = forms.CharField()
 
@@ -177,6 +176,7 @@ class CreateCourseletForm(forms.ModelForm):
 
 
 class EditCourseletForm(forms.ModelForm):
+    title = forms.CharField()
     class Meta:
         model = Unit
         fields = (
@@ -187,6 +187,7 @@ class EditCourseletForm(forms.ModelForm):
             'question_parts',
             'average_score',
             'courselet_days',
+            'courselet_deadline',
             'graded_assessment_value',
             'error_resolution_days',
             'courselet_completion_credit',

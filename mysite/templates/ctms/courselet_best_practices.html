@@ -2,63 +2,66 @@
 {% load staticfiles %}
 
 {% block title %}
-    Get Started
+    Best Practices: {{ courselet.unit.title }}
 {% endblock %}
 
 {% block content %}
   <div class="card">
+    <header class="card__topbar">
+      <h1>{{ courselet.unit.title }} </h1>
+    </header>
+
+    <nav class="card__nav">
+      <ul>
+        <li>
+          <a href="{% url 'ctms:courselet_best_practice' course_pk=course_pk courselet_pk=courselet_pk %}" class="card__nav-active">Best Practices</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=courselet_pk %}">Threads</a>
+        </li>
+
+        {% if u_lessons %}
+        <li>
+          <a href="{% url 'ctms:courselet_preview' course_pk=course_pk pk=courselet_pk %}" target="_blank">Preview</a>
+        </li>
+        {% else %}
+        <li>
+          <a href="#">Preview</a>
+        </li>
+        {% endif %}
+
+        <li>
+          <a href="{% url 'ctms:courselet_invite' pk=course_pk courselet_pk=courselet_pk %}" class="">Share</a>
+        </li>
+
+        <li>
+          <a href="{% url 'ctms:courslet_settings' course_pk=course_pk pk=courselet_pk %}">Settings</a>
+        </li>
+      </ul>
+    </nav>
+
+
     <header class="get-started__intro">
-      <h1>Best Practice page</h1>
+      <div class="get-started__holder">
+        <h1>Courselet Best Practices</h1>
 
-      <p>
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
-          There we have to add some usefull desctription.
-      </p>
+        <p>
+            Follow these best practices to make the most out of your courselet.
+        </p>
 
-      <div data-progress="{{ best_practices_progress | floatformat:"0" }}" class="get-started__progress-circle">
-        <div>
-          <span class="get-started__progress-text">{{ best_practices_progress | floatformat:"0" }}</span><span class="get-started__progress-sign">%</span>
-        </div>
       </div>
-
-      <span class="progress-line progress-line--over-white">
-        <span style="width: calc({{ best_practices_progress | floatformat:"0" }}% + 2px);"></span>
-      </span>
     </header>
 
     <div class="get-started__steps">
 
-
-      {% for best_practice in best_practices %}
+      {% for template in best_practices_templates %}
       <!-- view_introduction -->
-      <div class="get-started__step{% if best_practice.active %} get-started__step--done{% endif %}" data-step-id="view_introduction">
-        <div class="get-started__step-header">
-          <div class="get-started__step-status"></div>
-          <h2>{{ best_practice.template.title }}</h2>
-
-          <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">View</a>
-        </div>
-
-        <div class="get-started__step-content">
-          <div class="onboarding-content">
-            {% if not best_practice.active %}
-            <p>
-              {{ best_practice.template.explanation }}
-            </p>
-            <a data-complete-step="test_courselet" href="{% url 'ctms:courselet_bp_calculation' course_pk=best_practice.courselet.course.id courselet_pk=best_practice.courselet.id pk=best_practice.id %}" class="button button--primary">
-                {% if best_practice.active %}Recalculate{% else %}Calculate{% endif %}
-              </a>
-            <a data-complete-step="test_courselet" href="{% url 'ctms:courselet_bp_activation' course_pk=best_practice.courselet.course.id courselet_pk=best_practice.courselet.id pk=best_practice.id %}" class="button button--primary">
-              {{ best_practice.template.activation.button_text }}
-            </a>
-            {% else %}
-              {{ best_practice.summary }}
-            {% endif %}
-          </div>
-        </div>
-      </div>
+        {% if template.slug == 'upload-practice-exam' %}
+          {% include 'ctms/includes/best_practices/add_thread.html' %}
+        {% else %}
+          {% include 'ctms/includes/best_practices/shedule_courselet.html' %}
+        {% endif %}
       {% endfor %}
 
 
@@ -72,17 +75,6 @@
     // Add listeners once the DOM is ready
     $(function(){
 
-      // Create the progress circle
-      var progressCircle = new ProgressBar.Circle('.get-started__progress-circle', {
-        strokeWidth: 2,
-        trailColor: '#DDE2E6',
-        color: '#43B02A'
-      });
-
-      // Animate progress circle
-      var progress = parseInt( $('.get-started__progress-circle').data('progress') ) / 100;
-      progressCircle.animate(progress);
-
       // Get started accordion
       $('.get-started__step-toggle').on('click', function(e) {
         e.preventDefault();
@@ -93,9 +85,14 @@
         // Find the parent step
         var $step = $button.closest('.get-started__step');
 
+        viewBtnText = "View"
+        if ( $step.data('bps-exists') == "True" ) {
+          viewBtnText = "Do this again";
+        }
+        
         // Close if the step is open
         if($step.hasClass('get-started__step--open')) {
-          $button.html('View');
+          $button.html(viewBtnText);
           $step.removeClass('get-started__step--open');
 
         // Otherwise open it
@@ -135,12 +132,6 @@
 
         // Delay updates for 1 second (let e.g. video overlays animate in first)
         setTimeout(function() {
-          // Update the progress bars
-          var newProgress = $('.get-started__step--done').length / $('.get-started__step').length;
-          var newProgressPercentage = Math.floor(newProgress * 100);
-          progressCircle.set(newProgress);
-          $('.get-started__progress-text').html(newProgressPercentage);
-          $('.progress-line span').css({width: 'calc('+ newProgressPercentage+'% + 2px)'});
 
           // Hide open steps
           $('.get-started__step').removeClass('get-started__step--open');
@@ -155,12 +146,15 @@
         }, 1000)
       });
 
-      $('.create-new-bp').on('click', function(e) {
+      $('.create-new-bp, .create-new-bp-default').on('click', function(e) {
         // Get the step name and element
-        var bpPk = $(e.currentTarget).data('bp-pk');
+        var bpPk = $(e.currentTarget).data('bpTemplatePk');
+        var coursePk = $(e.currentTarget).data('coursePk');
+        var courseletPk = $(e.currentTarget).data('courseletPk');
         var data = {};
-        data['id'] = bpPk;
-
+        data['template_id'] = bpPk;
+        data['course_id'] = coursePk;
+        data['courselet_id'] = courseletPk;
         // Send an ajax request to save the update
         this.updateCartXhr = $.ajax({
           headers: {
@@ -173,12 +167,18 @@
           method: 'POST',
           url: "{% url 'api:v0:bp-creation' %}"
         })
-        .done( function(response) { location.reload(true) } )
+        .done( function(response) {
+          if ($(e.currentTarget).is($('.create-new-bp'))){
+            window.location.href = '/ctms/course/' + coursePk + '/courselet/' + courseletPk + '/bp/' + response.data.new_best_practice + '/calculation/';
+          } else if
+          ($(e.currentTarget).is($('.create-new-bp-default'))){
+            window.location.href = $(e.currentTarget).attr('redirect');
+          };
+        })
         .fail( function(error) {
           alert('Something went wrong. Please refresh the page and try again.');
         });
       });
-
       // Redirect when the user closes the final video
       $("[data-fancybox]").fancybox({
         afterClose: function( instance, slide ) {

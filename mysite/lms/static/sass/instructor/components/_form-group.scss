@@ -5,22 +5,58 @@
     margin-top: 0;
   }
 
+  &.form-group--last {
+    margin-top: 60px;
+  }
+
   .radio-list {
     margin-bottom: -6px;
   }
 }
 
-.form-group--question, .form-group--answer, .form-group--error-models, .form-group--introduction {
+.form-group--question,
+.form-group--answer,
+.form-group--error-models,
+.form-group--introduction {
   display: none;
 }
 
 .form-group--not-first:first-of-type {
-  margin: 36px 0 0 0;
+  margin: 42px 0 0 0;
 }
 
 .form-group__action {
   input[type=submit] {
     float: none;
-    margin: 18px 0 0 0;
+    margin: 15px 0 0 0;
   }
 }
+
+.form-wrapper {
+  padding-bottom: 60px;
+  border-bottom: 1px solid #dde2e6;
+  margin-bottom: 10px;
+
+  h1 {
+    margin-bottom: 45px;
+  }
+}
+
+.form-checkbox--label {
+  margin-top: 40px;
+}
+
+.form-checkbox {
+  margin-right: 10px;
+
+  input {
+    margin-top: 0;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.form-field--description {
+  font-style: italic;
+}
+

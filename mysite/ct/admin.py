@@ -62,6 +62,7 @@ class AdminModel(BaseAdmin):
 class AdminRole(admin.ModelAdmin):
     list_display = ('role', 'course', 'user')
     # exclude = ('trial_mode',)
+    search_fields = ('user__username', 'user__email')
 
 
 def short_text(obj):

@@ -16,7 +16,7 @@
 
 <b>Instructor</b>:
 {% for u in course.get_users %}
-  <a href="/ct/people/{{ u.pk }}/">{{ u.get_full_name }}</a>  
+  <a href="/ct/people/{{ u.pk }}/">{{ u.get_full_name }}</a>
 {% endfor %}
 <br>
 
@@ -66,8 +66,8 @@ $( "#headtoggle" ).click(function() {
     <input type="submit" value="Move" />
     </form></td>
     {% endif %}
-    <td>
-    <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title }}</a>
+    <td style="max-width: 700px;">
+    <a href="{{ actionTarget }}units/{{ cu.unit.pk}}/">{{ cu.unit.title|truncatechars:100 }}</a>
     {% if not cu.is_published %}
       (not yet published)
     {% endif %}
@@ -93,4 +93,3 @@ $( "#headtoggle" ).click(function() {
   </div><!-- @end #HomeTabDiv -->
 </div>
 {% endblock %}
-

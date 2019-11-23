@@ -1,4 +1,9 @@
 {% extends "ctms_base.html" %}
+{% load waffle_tags %}
+
+{% block title %}
+    Settings:: {{ courslet.unit.title }}
+{% endblock %}
 
 
 {% block content %}
@@ -15,6 +20,28 @@
     } );
     </script>
   </head>
+  <div class="page__messages">
+
+        <!-- TODO: Add notifications here -->
+
+        <!--
+          <div class="alert alert-success">
+            Succcess
+          </div>
+
+          <div class="alert alert-info">
+            Info
+          </div>
+
+          <div class="alert alert-warning">
+            Warning
+          </div>
+
+          <div class="alert alert-danger">
+            Danger
+          </div>
+        -->
+      </div>
 
 
   <div class="card">
@@ -24,6 +51,11 @@
 
     <nav class="card__nav">
       <ul>
+        {% switch "ctms_bp_courseletes_enabled" %}
+        <li>
+          <a href="{% url 'ctms:courselet_best_practice' course_pk=course_pk courselet_pk=pk %}">Best Practices</a>
+        </li>
+        {% endswitch %}
         <li>
           <a href="{% url 'ctms:courslet_view' course_pk=course_pk pk=pk %}">Threads</a>
         </li>
@@ -49,8 +81,8 @@
     </nav>
 
     <main class="card__content">
-      <div class="form-group">
-        <label>Publish Settings</label>
+      <div class="form-group form-wrapper">
+        <label class="card__title">Publish Settings</label>
         <p>
           {% if courslet.releaseTime %}
             Your courselet is published. Click on the button below if you want to unpublish it.
@@ -64,80 +96,105 @@
         </div>
       </div>
 
-      <form class="form" action="{% url 'ctms:courslet_settings' course_pk=course_pk pk=pk %}" method="post" enctype="multipart/form-data">
+      <form class="form_general form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
         {% csrf_token %}
-
         <div class="form-group form-group--not-first">
-          <label for="name">Courselet Name</label>
+          <h1>General Settings</h1>
+          <label for="{{ form.title.auto_id }}" class="form-label--name">Courselet Name</label>
           <p>You can change the name of your courselet here.</p>
           {{ form.title }}
-        <label for="{{ form.exam_name.auto_id }}">Exam name</label>
-        <p>Store as graded assessment name</p>
-          {{ form.exam_name }}
-          {% if form.exam_name.errors %}
-            {{ form.exam_name.errors }}
-          {% endif %}
-        <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-up assessment date</label>
-          {{ form.follow_up_assessment_date }}
-          {% if form.follow_up_assessment_date.errors %}
-            {{ form.follow_up_assessment_date.errors }}
-          {% endif %}
-        <label for="{{ form.follow_up_aassessment_grade.auto_id }}">Follow-up assessment grade</label>
-          {{ form.follow_up_assessment_grade }}
-          {% if form.follow_up_assessment_grade.errors %}
-            {{ form.follow_up_assessment_grade.errors }}
-          {% endif %}
-        <label for="{{ form.question_parts.auto_id }}">Question parts</label>
-          {{ form.question_parts }}
-          {% if form.question_parts.errors %}
-            {{ form.question_parts.errors }}
-          {% endif %}
-        <label for="{{ form.average_score.auto_id }}">Average score</label>
-          {{ form.average_score }}
-          {% if form.average_score.errors %}
-            {{ form.average_score.errors }}
-          {% endif %}
-        <label for="{{ form.graded_assessment_value.auto_id }}">Total grade % for the paired (graded) assessment</label>
-          {{ form.graded_assessment_value }}
-          {% if form.graded_assessment_value.errors %}
-            {{ form.graded_assessment_value.errors }}
-          {% endif %}
-        <label for="{{ form.courselet_days.auto_id }}">Number of days students are given to complete the courselet</label>
-          {{ form.courselet_days }}
-          {% if form.courselet_days.errors %}
-          {{ form.courselet_days.errors }}
-          {% endif %}
-        <label for="{{ form.error_resolution_days.auto_id }}">Number of days between courselet deadline and paired (graded) assessment</label>
-            {{ form.error_resolution_days }}
-            {% if form.error_resolution_days.errors %}
-              {{ form.error_resolution_days.errors }}
-            {% endif %}
-        <label for="{{ form.courselet_completion_credit.auto_id }}">Courselet duration (days)</label>
-            {{ form.courselet_completion_credit }}
-            {% if form.courselet_completion_credit.errors %}
-            {{ form.courselet_completion_credit.errors }}
-            {% endif %}
-        </div>
 
-        <br>
-        <div style="float: left">
-          {{ form.is_show_will_learn }}
+
+          <label for="{{ form.is_show_will_learn.auto_id }}" class="form-checkbox--label">Concepts</label>
+          <div>
+            <span class="form-checkbox">{{ form.is_show_will_learn }}</span>
+            Show Concepts in the Chat start page?
+          </div>
+
         </div>
-        <div style="margin-left: 1%; float: left">
-          Show Concepts in the Chat start page?
+        <input type="submit" value="Update General Settings">
+      </form>
+
+      <form class="form_schedul form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
+        {% csrf_token %}
+        <div class="form-group form-group--not-first" id="schedule-section">
+          <h1>Scheduling Settings</h1>
+          <label for="{{ form.exam_name.auto_id }}">Follow-Up Assessment Name</label>
+            <p class="form-field--description">Store as graded assessment name</p>
+            {{ form.exam_name }}
+            {% if form.exam_name.errors %}
+              {{ form.exam_name.errors }}
+            {% endif %}
+          <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-Up Assessment Date</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.follow_up_assessment_date }}
+            {% if form.follow_up_assessment_date.errors %}
+              {{ form.follow_up_assessment_date.errors }}
+            {% endif %}
+          <label for="{{ form.follow_up_assessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.follow_up_assessment_grade }}
+            {% if form.follow_up_assessment_grade.errors %}
+              {{ form.follow_up_assessment_grade.errors }}
+            {% endif %}
+          <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
+          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
+              {{ form.courselet_deadline }}
+              {% if form.courselet_deadline.errors %}
+                {{ form.courselet_deadline.errors }}
+              {% endif %}
+          <label for="{{ form.error_resolution_days.auto_id }}">Courselet Resolution days</label>
+          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
+              {{ form.error_resolution_days }}
+              {% if form.error_resolution_days.errors %}
+                {{ form.error_resolution_days.errors }}
+              {% endif %}
+          <label for="{{ form.courselet_completion_credit.auto_id }}">Courselet Duration</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+              {{ form.courselet_completion_credit }}
+              {% if form.courselet_completion_credit.errors %}
+              {{ form.courselet_completion_credit.errors }}
+              {% endif %}
+          <label for="{{ form.question_parts.auto_id }}">Question parts</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.question_parts }}
+            {% if form.question_parts.errors %}
+              {{ form.question_parts.errors }}
+            {% endif %}
+          <label for="{{ form.average_score.auto_id }}">Average score</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.average_score }}
+            {% if form.average_score.errors %}
+              {{ form.average_score.errors }}
+            {% endif %}
+          <label for="{{ form.graded_assessment_value.auto_id }}">Total grade % for the paired (graded) assessment</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.graded_assessment_value }}
+            {% if form.graded_assessment_value.errors %}
+              {{ form.graded_assessment_value.errors }}
+            {% endif %}
+          <label for="{{ form.courselet_days.auto_id }}">Number of days students are given to complete the courselet</label>
+          <p class="form-field--description">TODO Describe this field here</p>
+            {{ form.courselet_days }}
+            {% if form.courselet_days.errors %}
+            {{ form.courselet_days.errors }}
+            {% endif %}
         </div>
         <!-- TODO: Replace label, description and input with real form
           {{ form.as_p }}
         -->
 
-        <input type="submit" value="Save">
+        <input type="submit" value="Update Scheduling Settings" class="submit__settings">
       </form>
+      <div class="form-group form-group--last">
+        <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
+          {% csrf_token %}
+          <label class="card__title">Delete Courselet</label>
+          <p>Click on the button below if you want to delete this courselet.</p>
+          <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
+        </form>
+      </div>
 
-      <form action="{% url 'ctms:courslet_delete' course_pk=course_pk pk=pk %}" class="card__delete" method="post">
-        {% csrf_token %}
-
-        <input type="submit" value="Remove Courselet" class="button button--delete" data-confirm-text="Do you really want to remove this courselet?">
-      </form>
     </main>
   </div>
   </div>
@@ -148,4 +205,58 @@
     margin-right: 160px !important;
   }
 </style>
+{% endblock %}
+
+{% block js %}
+<script>
+$formGeneral = $('.form_general');
+$formSchedul = $('.form_schedul');
+
+$messageContainer = $('.page__messages');
+
+$formGeneral.on('submit', function(e){
+  e.preventDefault();
+  var formData = $formGeneral.serialize();
+
+  $.ajax({
+    type: 'PUT',
+    url: $formGeneral.attr('action'),
+    data: formData,
+    headers: {
+              "X-CSRFToken": '{{ csrf_token }}'
+            },
+    dataType: 'json'
+  }).done(function(data){
+    $messageContainer.html('<div class="alert alert-success"><div class="container"> Courselet successfully updated </div></div>');
+    setTimeout(() => $messageContainer.html(''), 4000);
+  }).fail(function(data){
+    $messageContainer.html('<div class="alert alert-danger"><div class="container">'+data.error+'</div></div>');
+    setTimeout(() => $messageContainer.html(''), 4000);
+  });
+})
+
+$formSchedul.on('submit', function(e){
+  e.preventDefault();
+  var formData = $formSchedul.serialize();
+
+  $.ajax({
+    type: 'PUT',
+    url: $formSchedul.attr('action'),
+    data: formData,
+    headers: {
+              "X-CSRFToken": '{{ csrf_token }}'
+            },
+    dataType: 'json'
+  }).done(function(data){
+    $messageContainer.html('<div class="alert alert-success"><div class="container"> Courselet successfully updated </div></div>');
+    setTimeout(() => $messageContainer.html(''), 4000);
+  }).fail(function(data){
+    $messageContainer.html('<div class="alert alert-danger"><div class="container">'+data.error+'</div></div>');
+    setTimeout(() => $messageContainer.html(''), 4000);
+  });
+  $('html, body').animate({
+      scrollTop: $(".page__messages").offset().top-200
+  }, 600);
+})
+</script>
 {% endblock %}

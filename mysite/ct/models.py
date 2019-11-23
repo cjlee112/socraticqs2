@@ -2,6 +2,7 @@ import re
 import time
 import logging
 from copy import deepcopy
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -15,7 +16,9 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sites.models import Site
 
+from core.tasks import faq_notify_instructors, faq_notify_students
 from core.common import onboarding
 from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.templatetags.ct_extras import md2html
@@ -993,6 +996,7 @@ class Unit(models.Model):
         (IN_CLASS, 'In-class'),
     )
     title = models.CharField(
+        blank=True,
         max_length=200,
         help_text='Your students will see this, so give your courselet a descriptive name.',
         validators=[not_only_spaces_validator]
@@ -1011,9 +1015,9 @@ class Unit(models.Model):
     question_parts = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     average_score = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     graded_assessment_value = models.IntegerField(blank=True, null=True, validators=[percent_validator])
-    courselet_deadline = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    courselet_deadline = models.DateField(blank=True, null=True)
     courselet_days = models.IntegerField(blank=True, null=True)
-    error_resolution_days = models.IntegerField(blank=True, null=True)
+    error_resolution_days = models.IntegerField(default=2, blank=True, null=True)
     courselet_completion_credit = models.IntegerField(default=5, blank=True, null=True, validators=[percent_validator])
     late_completion_penalty = models.IntegerField(default=50, blank=True, null=True, validators=[percent_validator])
 
@@ -1055,15 +1059,20 @@ class Unit(models.Model):
     def get_related_concepts(self):
         'get dict of concepts linked to lessons in this unit'
         d = {}
+
         for ul in self.unitlesson_set.filter(lesson__concept__isnull=False,
                                              kind=UnitLesson.COMPONENT):
             cl = ConceptLink(lesson=ul.lesson, concept=ul.lesson.concept)
             cl.unitLesson = ul
             d[cl.concept] = [cl]
-        for cld in ConceptLink.objects.filter(lesson__unitlesson__unit=self,
-                                              concept__isError=False,
-                                              lesson__unitlesson__kind=UnitLesson.COMPONENT) \
-                .values('concept', 'relationship', 'lesson__unitlesson'):
+
+        # TODO need to decide how to remove Concepts correctly
+        for cld in ConceptLink.objects.filter(
+            lesson__unitlesson__unit=self,
+            concept__isError=False,
+            lesson__unitlesson__kind=UnitLesson.COMPONENT,
+            concept__lesson__unitlesson__isnull=False
+        ).values('concept', 'relationship', 'lesson__unitlesson'):
             concept = Concept.objects.get(pk=cld['concept'])
             ul = UnitLesson.objects.get(pk=cld['lesson__unitlesson'])
             cl = ConceptLink(concept=concept,
@@ -1159,7 +1168,7 @@ class Unit(models.Model):
             return ul
         else:  # not in this unit so copy
             return ul.copy(self, user, order='APPEND')
-    
+
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)
         assert hasattr(self, 'ALLOWED_FIELDS')
@@ -1170,6 +1179,11 @@ class Unit(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.courselet_deadline and self.follow_up_assessment_date:
+            self.courselet_deadline = self.follow_up_assessment_date + timedelta(days=self.error_resolution_days or 2)
+        super().save(*args, **kwargs)
 
 
 ############################################################
@@ -1320,6 +1334,7 @@ class Response(models.Model, SubKindMixin):
     needsEval = models.BooleanField(default=False)
     parent = models.ForeignKey('Response', null=True, blank=True, on_delete=models.CASCADE)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True, on_delete=models.CASCADE)
+    faq_notified = models.BooleanField(blank=True, null=True, default=False)
 
     is_trial = models.BooleanField(default=False)
 
@@ -1327,6 +1342,67 @@ class Response(models.Model, SubKindMixin):
 
     def __str__(self):
         return 'answer by ' + self.author.username
+
+    @property
+    def faq_affected_studets(self):
+        """
+        Return all affected user.
+        """
+        return self.inquirycount_set.count() + 1
+
+    @property
+    def completed_faq(self):
+        """
+        Determine a completed state for the FAQ.
+
+        FAQ must have the text.
+        """
+        return self.kind == self.STUDENT_QUESTION and self.title and self.text
+
+    def notify_instructors(self):
+        """
+        Notify all Instructors with a newly created FAQ and new Inquiry.
+        """
+        if self.completed_faq and not self.faq_notified and self.faq_affected_studets >= self.course.faq_threshold:
+            # TODO change to general logic when EMs faq notification will be implemented
+            url = reverse(
+                'ct:ul_thread',
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unitLesson.unit.id,
+                    'ul_id': self.unitLesson.id,
+                    'resp_id': self.id
+                }
+            )
+            domain = 'https://{0}'.format(Site.objects.get_current().domain)
+            faq_notify_instructors.delay(
+                faq_link=domain + url,
+                faq_title=self.title,
+                instructors=[i.email for i in self.course.instructors if i.email])
+            # TODO move to the task
+            self.faq_notified = True
+
+    def notify_students(self):
+        """
+        Notify Students witha new FAQ comment.
+        """
+        if self.kind == self.COMMENT:
+            url = reverse(
+                'ct:ul_thread',
+                kwargs={
+                    'course_id': self.course.id,
+                    'unit_id': self.unitLesson.unit.id,
+                    'ul_id': self.unitLesson.id,
+                    'resp_id': self.parent.id
+                }
+            )
+            domain = 'https://{0}'.format(Site.objects.get_current().domain)
+            faq_notify_students.delay(
+                faq_link=domain + url,
+                faq_title=self.title,
+                faq_text=self.text,
+                students=[self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
+            )
 
     def get_canvas_html(self):
         """
@@ -1375,6 +1451,7 @@ class Response(models.Model, SubKindMixin):
             query = Q(unitLesson=unitLesson)
         return klass.objects.filter(query &
                     Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
+
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):
         'URL for this response'
@@ -1512,6 +1589,7 @@ class Course(models.Model):
     lockout = models.CharField(max_length=200, null=True, blank=True)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    faq_threshold = models.PositiveIntegerField(blank=False, null=False, default=1)
 
     copied_from = models.ForeignKey('Course', blank=True, null=True, on_delete=models.CASCADE)
     trial = models.BooleanField(default=False)
@@ -1611,6 +1689,10 @@ class Course(models.Model):
         if not role:
             role = Role.INSTRUCTOR
         return User.objects.filter(role__role=role, role__course=self)
+    
+    @property
+    def instructors(self):
+        return self.get_users(role=Role.INSTRUCTOR)
     
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)

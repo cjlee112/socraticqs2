@@ -7,7 +7,7 @@
 {% endcomment %}
 
 {% block title %}
-  {{ unit.title }}
+  {{ unit.title|truncatechars:100 }}
 {% endblock %}
 
 {% block content %}

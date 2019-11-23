@@ -148,15 +148,24 @@ class ResponseListForm(forms.Form):
 
 class UnitTitleForm(forms.ModelForm):
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(UnitTitleForm, self).__init__(*args, **kwargs)
+        self.fields['title'].required = True
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-unitTitleForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Unit
         fields = ['title', 'description', 'img_url', 'small_img_url']
+    
+    def clean_title(self):
+         data = self.cleaned_data['title']
+         if len(data.strip()) == 0:
+             raise forms.ValidationError("Courselet title should contain at least 1 symbol.")
+         return data
 
 
 class NewUnitTitleForm(UnitTitleForm):
@@ -164,16 +173,20 @@ class NewUnitTitleForm(UnitTitleForm):
 
 
 class CourseTitleForm(forms.ModelForm):
+    description = forms.CharField(max_length=1500, widget=forms.widgets.Textarea)
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(CourseTitleForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-courseTitleForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Course
         fields = ['title', 'access', 'description', 'trial']
+
 
 
 class NewCourseTitleForm(CourseTitleForm):
@@ -206,8 +219,14 @@ class NewConceptForm(forms.Form):
 
 
 class ConceptSearchForm(forms.Form):
-    search = forms.CharField(label='Search for concepts containing')
+    search = forms.CharField(max_length=300, label='Search for concepts containing')
 
+
+    def clean_search(self):
+        data = self.cleaned_data['search']
+        if len(data.strip()) == 0:
+            raise forms.ValidationError("This field should contains at least one letter.")
+        return data
 
 class ConceptLinkForm(forms.ModelForm):
     submitLabel = 'Update'
@@ -254,9 +273,25 @@ class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
     changeLog = forms.CharField(required=False,
             label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
+
     class Meta:
         model = Lesson
         fields = ['title', 'text', 'changeLog']
+
+    def __clean_field(self, field_name):
+        """
+        Base helper method to check for space-only input data.
+        """
+        data = self.cleaned_data[field_name]
+        if len(data.strip()) == 0:
+            raise forms.ValidationError("This field should contains at least one letter.")
+        return data
+
+    def clean_title(self):
+        return self.__clean_field('title')
+
+    def clean_text(self):
+        return self.__clean_field('text')
 
 
 class LessonForm(ErrorForm):
@@ -355,7 +390,7 @@ class SearchFormBase(forms.Form):
         self.helper.form_id = 'id-lessonSearchForm'
         self.helper.form_method = 'get'
         self.helper.form_class = 'form-inline'
-    ##    self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+        self.helper.field_template = 'ct/inline_field_with_errors.html'
         self.helper.add_input(Submit('submit', 'Search'))
     ##    self.helper.add_input(StrictButton('Search', css_class='btn-default'))
     ## sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),

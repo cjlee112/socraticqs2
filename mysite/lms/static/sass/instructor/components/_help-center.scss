@@ -3,21 +3,43 @@
     background: #fff;
     border: 1px solid #DDE2E6;
     border-radius: 4px;
-    padding-bottom: 27px;
+    padding: 27px 24px;
     margin: 0 0 24px;
 
     @media screen and (min-width: 1024px) {
-      padding-bottom: 78px;
+      padding: 27px 60px;
     }
   }
 
   &__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    @media screen and (max-width: 719px) {
+      display: block;
+    }
+
+    > div {
+      margin-right: 22px;
+
+      @media screen and (max-width: 719px) {
+        margin: 0 0 12px;
+      }
+    }
+
     &__title {
       font-weight: 600;
+      line-height: 1;
+      margin: 0;
     }
 
     p {
       max-width: initial;
+    }
+
+    a {
+      margin: 0;
     }
   }
 }

@@ -8,7 +8,7 @@
   &__holder {
     border-bottom: 1px solid #DDE2E6;
     padding-bottom: 28px;
-    
+
     @media screen and (min-width: 1024px) {
       padding-bottom: 52px;
     }
@@ -120,6 +120,20 @@
   font-size: 14px;
   font-style: italic;
   font-weight: 400;
+
+  ul {
+    max-width: 480px;
+    padding: 0;
+    list-style: none;
+    word-break: break-word;
+  }
+
+  li {
+    &:before {
+      content: '∙';
+      margin-right: 5px;
+    }
+  }
 }
 
 .get-started__step-toggle {
@@ -154,10 +168,15 @@
 
   .get-started__step-header {
     padding: 30px 144px 29px 108px;
+
+    .get-started__step--done & {
+      padding-right: 190px;
+    }
   }
 
   .get-started__step-status {
     left: 60px;
+    top: 40px;
   }
 
   .get-started__step-content {
@@ -166,7 +185,7 @@
 
   .get-started__step-toggle {
     position: absolute;
-    top: 23px;
+    top: 35px;
     right: 60px;
     margin: 0;
   }

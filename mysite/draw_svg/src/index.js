@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import './index.scss';
 import DrawApp from './DrawApp';
-import registerServiceWorker from './registerServiceWorker';
 
 
 document.drawToElement = function (elements, onChange) {
@@ -11,7 +10,9 @@ document.drawToElement = function (elements, onChange) {
     });
 };
 
-document.drawToElement(document.getElementsByClassName('draw-svg-container-demo'), function(data) {
+
+if (process.env.NODE_ENV !== 'production') {
+  document.drawToElement(document.getElementsByClassName('draw-svg-container-demo'), function(data) {
     console.log(data);
-});
-registerServiceWorker();
+  });
+}

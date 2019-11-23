@@ -1,0 +1,4 @@
+There is a new FAQ:
+{{ faq_title }}
+
+You can navigate to it with the next link: {{ faq_link }}

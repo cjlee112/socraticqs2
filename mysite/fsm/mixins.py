@@ -1199,8 +1199,9 @@ class ChatMixin(object):
         if self.name in ('SHOW_FAQ_BY_ONE',):
             ul_id = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
             try:
-                faqs = c_faq_data().find_one(
-                    {"chat_id": chat.id, "ul_id": ul_id}).get('faqs', {})
+                # TODO change to the Assignment expressions in Python3.8
+                faq_data = c_faq_data().find_one({"chat_id": chat.id, "ul_id": ul_id})
+                faqs = faq_data.get('faqs', {}) if faq_data else {}
                 faq_id = None
                 for key, value in list(faqs.items()):
                     if not value.get('status').get('done', False):

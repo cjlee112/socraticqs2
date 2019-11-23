@@ -143,10 +143,11 @@ def sign_and_send_replace_result(assignment, xml):
     with the consumer key and secret assigned to the consumer. Send the signed
     message to the LTI consumer.
     """
-    outcome_service = assignment.outcome_service
-    # consumer = outcome_service.lti_consumer
-    consumer_key = settings.CONSUMER_KEY
-    consumer_secret = settings.LTI_SECRET
+    lti_consumer = assignment.outcome_service.lti_consumer
+
+    consumer_key = lti_consumer.consumer_key
+    consumer_secret = lti_consumer.consumer_secret
+    outcome_service_url = lti_consumer.lis_outcome_service_url
 
     # Calculate the OAuth signature for the replace_result message.
     # TODO: According to the LTI spec, there should be an additional
@@ -164,7 +165,7 @@ def sign_and_send_replace_result(assignment, xml):
 
     headers = {'content-type': 'application/xml'}
     response = requests.post(
-        assignment.outcome_service.lis_outcome_service_url,
+        outcome_service_url,
         data=xml,
         auth=oauth,
         headers=headers

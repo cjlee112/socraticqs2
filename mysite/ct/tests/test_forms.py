@@ -190,12 +190,13 @@ def test_answerlesson_form_without_sub_kind():
     })
     assert form.is_valid() == True
 
+
 @pytest.mark.django_db
 def test_lesson_answer_attachment_form(base64_gif_image, lesson_answer_canvas):
     attachment = 'data:image/gif;base64,{}'.format(base64_gif_image)
     form = AnswerLessonForm(
         instance=lesson_answer_canvas.lesson,
-        data={'attachment': attachment, 'title': 'test_title', 'text': '',
+        data={'attachment': attachment, 'title': 'test_title', 'text': 'test_text',
         'medium': Lesson.READING, 'sub_kind': 'canvas',
         'number_value': '0', 'number_min_value': '0', 'number_max_value': '0',
         'url': '', 'changeLog': ''}

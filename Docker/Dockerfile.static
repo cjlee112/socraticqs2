@@ -1,12 +1,20 @@
 FROM node:8
 
+ARG node_env=production
+ENV NODE_ENV=$node_env
+
 COPY mysite/draw_svg /tmp/mysite/draw_svg
 COPY mysite/frontend /tmp/mysite/frontend
 
 WORKDIR /tmp/mysite/draw_svg
 
-RUN npm install && npm rebuild node-sass
-RUN yarn build && yarn build:copy-prebuild
+RUN npm i
+RUN npm run build && npm run build:copy
 
 WORKDIR /tmp/mysite/frontend
 RUN yarn
+
+COPY mysite/ctms/frontend /tmp/mysite/ctms/frontend
+WORKDIR /tmp/mysite/ctms/frontend
+RUN npm install
+RUN npm run build
