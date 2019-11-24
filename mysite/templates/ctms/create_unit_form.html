@@ -10,7 +10,7 @@
   <script>
     window.courseletId = {{ courselet_pk }}
     window.searchUrl = '{% url 'ct:unit_lessons' course_id=course_pk unit_id=courslet.unit.id %}'
-    window.courseletBpUrl = '{% url 'ctms:courselet_best_practice' course_pk=course_pk courselet_pk=courslet.unit.id %}'
+    window.courseletBpUrl = '{% url 'ctms:courselet_best_practice' course_pk=course_pk courselet_pk=courslet.id %}'
     {% if template_id %}window.templateId = {{ template_id }}{% endif %}
   </script>
   <script src="{% static 'js/add_threads.bundle.js' %}"></script>

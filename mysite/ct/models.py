@@ -1370,6 +1370,9 @@ class Response(models.Model, SubKindMixin):
         """
         Notify all Instructors with a newly created FAQ and new Inquiry.
         """
+        # Do not send notifications about test or preview FAQs
+        if self.is_preview or self.is_test:
+            return
         if self.completed_faq and not self.faq_notified and self.faq_affected_studets >= self.course.faq_threshold:
             # TODO change to general logic when EMs faq notification will be implemented
             url = reverse(
@@ -1384,7 +1387,10 @@ class Response(models.Model, SubKindMixin):
             domain = 'https://{0}'.format(Site.objects.get_current().domain)
             faq_notify_instructors.delay(
                 faq_link=domain + url,
-                faq_title=self.title,
+                faq_title=self.title.strip(),
+                faq_text=self.text,
+                course_title=self.course.title,
+                courselet_title=self.unitLesson.unit.title.strip(),
                 instructors=[i.email for i in self.course.instructors if i.email])
             # TODO move to the task
             self.faq_notified = True
@@ -1393,6 +1399,9 @@ class Response(models.Model, SubKindMixin):
         """
         Notify Students witha new FAQ comment.
         """
+        # Do not send notifications about test or preview FAQs
+        if self.is_preview or self.is_test:
+            return
         if self.kind == self.COMMENT:
             url = reverse(
                 'ct:ul_thread',
@@ -1406,8 +1415,11 @@ class Response(models.Model, SubKindMixin):
             domain = 'https://{0}'.format(Site.objects.get_current().domain)
             faq_notify_students.delay(
                 faq_link=domain + url,
-                faq_title=self.title,
+                faq_title=self.title.strip(),
                 faq_text=self.text,
+                course_title=self.course.title,
+                courselet_title=self.unitLesson.unit.title,
+                parent_faq_title=self.parent.title.strip(),
                 students=[self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
             )
 

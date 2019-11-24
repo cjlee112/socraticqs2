@@ -1,5 +1,14 @@
-There is a new FAQ asnwer:
+There is a new asnwer for the FAQ you are interested in:
+
 {{ faq_title }}
+
 {{ faq_text }}
+
+
+Course:
+{{ course_title }}
+
+Courselet:
+{{ courselet_title }}
 
 You can navigate to it with the next link: {{ faq_link }}
