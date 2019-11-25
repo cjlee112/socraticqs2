@@ -1,6 +1,6 @@
 Django==2.1.12
 django-cms==3.6.0
-djangocms-text-ckeditor==3.6.1
+djangocms-text-ckeditor==3.8.0
 djangocms-admin-style==1.2.9
 django-filer==1.5.0
 
@@ -40,7 +40,7 @@ django-bower==5.2.0
 pygeoip==0.3.2
 
 # Sentry
-sentry-sdk==0.4.1
+sentry-sdk==0.13.3
 
 kombu==4.6.3
 
