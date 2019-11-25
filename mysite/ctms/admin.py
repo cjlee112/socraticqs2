@@ -34,6 +34,6 @@ class BestPracticeAdmin(admin.ModelAdmin):
 
     def title(self, ob):
         return ob.template.title
-    
+
     def scope(self, ob):
         return ob.template.scope

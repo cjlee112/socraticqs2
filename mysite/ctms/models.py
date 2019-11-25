@@ -221,9 +221,8 @@ class BestPractice(models.Model):
     Model for instances where a BP could be implemented in a course/courselet.
     """
     CONVERTED_STATUS = (
-        ('pending', 'Document uploaded, conversion in progress, etc.'),
-        ('review', 'Conversion completed, please review ...'),
-        ('done', 'Conversion completed, reviewed, X threads created.'),
+        ('pending', 'it will be converted shortly'),
+        ('done', 'it has been converted'),
     )
 
     template = models.ForeignKey('BestPracticeTemplate', null=True, blank=True, on_delete=models.CASCADE)
