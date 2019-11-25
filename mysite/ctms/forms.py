@@ -177,11 +177,15 @@ class CreateCourseletForm(forms.ModelForm):
 
 class EditCourseletForm(forms.ModelForm):
     title = forms.CharField()
+    error_resolution_days = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'placeholder': 'Recommended value is 2'}))
+
     class Meta:
         model = Unit
         fields = (
             'title',
-            'exam_name', 
+            'exam_name',
             'follow_up_assessment_date',
             'follow_up_assessment_grade',
             'question_parts',

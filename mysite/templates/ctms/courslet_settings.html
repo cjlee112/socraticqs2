@@ -129,59 +129,41 @@
               {{ form.exam_name.errors }}
             {% endif %}
           <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-Up Assessment Date</label>
-          <p class="form-field--description">TODO Describe this field here</p>
+          <p class="form-field--description">Exact time the paired (graded) assessment is due</p>
             {{ form.follow_up_assessment_date }}
             {% if form.follow_up_assessment_date.errors %}
               {{ form.follow_up_assessment_date.errors }}
             {% endif %}
-          <label for="{{ form.follow_up_assessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
-          <p class="form-field--description">TODO Describe this field here</p>
-            {{ form.follow_up_assessment_grade }}
-            {% if form.follow_up_assessment_grade.errors %}
-              {{ form.follow_up_assessment_grade.errors }}
+            <label for="{{ form.error_resolution_days.auto_id }}">Courselet Resolution days</label>
+            <p class="form-field--description">Number of days students are given to complete the courselet</p>
+            {{ form.error_resolution_days }}
+            {% if form.error_resolution_days.errors %}
+            {{ form.error_resolution_days.errors }}
             {% endif %}
-          <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
-          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
-              {{ form.courselet_deadline }}
-              {% if form.courselet_deadline.errors %}
-                {{ form.courselet_deadline.errors }}
+            <label for="{{ form.follow_up_assessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
+            <p class="form-field--description">Follow-Up Assessment Grade</p>
+              {{ form.follow_up_assessment_grade }}
+              {% if form.follow_up_assessment_grade.errors %}
+                {{ form.follow_up_assessment_grade.errors }}
               {% endif %}
-          <label for="{{ form.error_resolution_days.auto_id }}">Courselet Resolution days</label>
-          <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
-              {{ form.error_resolution_days }}
-              {% if form.error_resolution_days.errors %}
-                {{ form.error_resolution_days.errors }}
-              {% endif %}
-          <label for="{{ form.courselet_completion_credit.auto_id }}">Courselet Duration</label>
-          <p class="form-field--description">TODO Describe this field here</p>
-              {{ form.courselet_completion_credit }}
-              {% if form.courselet_completion_credit.errors %}
-              {{ form.courselet_completion_credit.errors }}
-              {% endif %}
-          <label for="{{ form.question_parts.auto_id }}">Question parts</label>
-          <p class="form-field--description">TODO Describe this field here</p>
-            {{ form.question_parts }}
-            {% if form.question_parts.errors %}
-              {{ form.question_parts.errors }}
+            <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
+            <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
+            {{ form.courselet_deadline }}
+            {% if form.courselet_deadline.errors %}
+            {{ form.courselet_deadline.errors }}
             {% endif %}
-          <label for="{{ form.average_score.auto_id }}">Average score</label>
-          <p class="form-field--description">TODO Describe this field here</p>
-            {{ form.average_score }}
-            {% if form.average_score.errors %}
-              {{ form.average_score.errors }}
-            {% endif %}
-          <label for="{{ form.graded_assessment_value.auto_id }}">Total grade % for the paired (graded) assessment</label>
-          <p class="form-field--description">TODO Describe this field here</p>
-            {{ form.graded_assessment_value }}
-            {% if form.graded_assessment_value.errors %}
-              {{ form.graded_assessment_value.errors }}
-            {% endif %}
-          <label for="{{ form.courselet_days.auto_id }}">Number of days students are given to complete the courselet</label>
-          <p class="form-field--description">TODO Describe this field here</p>
+            <label for="{{ form.courselet_days.auto_id }}">Courselet duration</label>
+            <p class="form-field--description">Number of days students are given to complete the courselet</p>
             {{ form.courselet_days }}
             {% if form.courselet_days.errors %}
             {{ form.courselet_days.errors }}
             {% endif %}
+            <label for="{{ form.courselet_completion_credit.auto_id }}">Courselet Participation Credit</label>
+            <p class="form-field--description">Total grade % students can earn by completing all courselets on time</p>
+              {{ form.courselet_completion_credit }}
+              {% if form.courselet_completion_credit.errors %}
+              {{ form.courselet_completion_credit.errors }}
+              {% endif %}
         </div>
         <!-- TODO: Replace label, description and input with real form
           {{ form.as_p }}

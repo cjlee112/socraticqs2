@@ -1011,13 +1011,13 @@ class Unit(models.Model):
     is_show_will_learn = models.BooleanField(default=False)
     exam_name = models.CharField(max_length=30, blank=True, default='Midterm 1')
     follow_up_assessment_date = models.DateField(blank=True, null=True)
-    follow_up_assessment_grade = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    follow_up_assessment_grade = models.IntegerField(default=15, blank=True, null=True, validators=[percent_validator])
     question_parts = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     average_score = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     graded_assessment_value = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     courselet_deadline = models.DateField(blank=True, null=True)
-    courselet_days = models.IntegerField(blank=True, null=True)
-    error_resolution_days = models.IntegerField(default=2, blank=True, null=True)
+    courselet_days = models.IntegerField(blank=True, null=True, help_text="2")
+    error_resolution_days = models.IntegerField(blank=True, null=True)
     courselet_completion_credit = models.IntegerField(default=5, blank=True, null=True, validators=[percent_validator])
     late_completion_penalty = models.IntegerField(default=50, blank=True, null=True, validators=[percent_validator])
 
@@ -1176,7 +1176,7 @@ class Unit(models.Model):
             setattr(self, key, value) if key in self.ALLOWED_FIELDS else None
         self.save() if commit else None
         return self
-    
+
     @property
     def scheduled(self):
         return (
@@ -1188,8 +1188,8 @@ class Unit(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.courselet_deadline and self.follow_up_assessment_date:
-            self.courselet_deadline = self.follow_up_assessment_date + timedelta(days=self.error_resolution_days or 2)
+        if not self.courselet_deadline and self.follow_up_assessment_date and self.error_resolution_days:
+            self.courselet_deadline = self.follow_up_assessment_date + timedelta(self.error_resolution_days)
         super().save(*args, **kwargs)
 
 
