@@ -5,10 +5,6 @@ from django_json_widget.widgets import JSONEditorWidget
 from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate
 
 
-admin.site.register(BestPractice1)
-admin.site.register(BestPractice2)
-
-
 @admin.register(*[Invite])
 class AdminModel(admin.ModelAdmin):
     list_display = ('code', 'email', 'course', 'get_status_display', 'type')

@@ -2,29 +2,22 @@
 
 <div class="get-started__step{% if courselet.unit.scheduled %} get-started__step--done{% endif %} get-started__step--summary"
     data-step-id="view_introduction"
-    data-bps-exists="{{ template.bestpractice_set.all|bps_exists:courselet }}">
+    data-bps-exists="{{ courselet.unit.scheduled }}">
   <div class="get-started__step-header">
     <div class="get-started__step-status"></div>
     <h2>
         {{forloop.counter}}. {{ template.summary }}
     </h2>
     <span class="get-started__step-tip">
-      {% if template.bestpractice_set.all|bps_exists:courselet %}
-          You have scheduled this courselet for {{ courselet.unit.follow_up_assessment_date }} ({{ courselet.unit.error_resolution_days }} days before assessment).
-          {% for best_practice in template.bestpractice_set.all|active:courselet %}
-            {% if best_practice.courselet %}
-              <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
-                {{ best_practice.courselet.unit.exam_name }}
-              </a>{% if not forloop.last %}, {% else %}. {% endif %}
-            {% endif %}
-          {% endfor %}
+      {% if courselet.unit.scheduled %}
+          You have scheduled this courselet for {{ courselet.unit.follow_up_assessment_date|date:"F j, Y" }} ({{ courselet.unit.error_resolution_days }} day{% if courselet.unit.error_resolution_days > 1 %}s{% endif %} before assessment).
       {% else %}
         {{ template.explanation }}
       {% endif %}
     </span>
     
     <a href="#" class="get-started__step-toggle button button--xsmall button--no-focus-style">
-      {% if template.bestpractice_set.all|bps_exists:courselet %}Do this again{% else %}View{% endif %}
+      {% if courselet.unit.scheduled %}Do this again{% else %}View{% endif %}
     </a>
   </div>
 

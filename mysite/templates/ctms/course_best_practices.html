@@ -57,7 +57,7 @@
           </h2>
           <span class="get-started__step-tip">
             {% if template.bestpractice_set.all|bps_exists:course %}
-              You've created best practice exams
+              You've created best practice exam{% if template.bestpractice_set.all|active_count:course > 1 %}s{% endif %}
                 {% for best_practice in template.bestpractice_set.all|active:course %}
                   {% if best_practice.courselet %}
                     <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
