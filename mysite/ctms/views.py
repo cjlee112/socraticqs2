@@ -681,6 +681,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         'title', 'exam_name',
         'follow_up_assessment_date', 'follow_up_assessment_grade',
         'question_parts', 'average_score', 'graded_assessment_value',
+        'graded_assessment_datetime',
         'courselet_deadline', 'courselet_days', 'error_resolution_days',
         'courselet_completion_credit', 'late_completion_penalty',
         'is_show_will_learn'

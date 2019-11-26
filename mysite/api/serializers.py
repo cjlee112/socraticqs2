@@ -130,6 +130,7 @@ class UnitSerializer(serializers.ModelSerializer):
             'courselet_days',
             'courselet_deadline',
             'graded_assessment_value',
+            'graded_assessment_datetime',
             'error_resolution_days',
             'courselet_completion_credit',
             'late_completion_penalty',

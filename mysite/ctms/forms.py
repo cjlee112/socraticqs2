@@ -167,12 +167,12 @@ ErrorModelFormSet = modelformset_factory(
 
 class CreateCourseletForm(forms.ModelForm):
     title = forms.CharField()
-    follow_up_assessment_date = forms.CharField(widget=forms.TextInput(attrs={'placeholder': '2019-01-01'}))
+    graded_assessment_datetime = forms.CharField(widget=forms.TextInput(attrs={'placeholder': '2019-01-01'}))
     exam_name = forms.CharField()
 
     class Meta:
         model = Unit
-        fields = ('title', 'follow_up_assessment_date', 'exam_name')
+        fields = ('title', 'graded_assessment_datetime', 'exam_name')
 
 
 class EditCourseletForm(forms.ModelForm):
@@ -193,6 +193,7 @@ class EditCourseletForm(forms.ModelForm):
             'courselet_days',
             'courselet_deadline',
             'graded_assessment_value',
+            'graded_assessment_datetime',
             'error_resolution_days',
             'courselet_completion_credit',
             'late_completion_penalty',

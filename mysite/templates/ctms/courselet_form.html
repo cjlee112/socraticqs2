@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
     $( function() {
-      $( "#id_follow_up_assessment_date" ).datepicker({
+      $( "#id_graded_assessment_datetime" ).datepicker({
         dateFormat: 'yy-mm-dd'
       });
     } );
@@ -48,13 +48,13 @@
           {% endif %}
         </div>
         <div class="input__item">
-          <label for="{{ form.follow_up_assessment_date.auto_id }}">
+          <label for="{{ form.graded_assessment_datetime.auto_id }}">
             Follow-Up Assessment Date
             <span>We recommend requiring your students to complete your courselet 2-3 days before the follow-up graded assessment. Enter the date when you think the follow-up graded assessment will occur, e.g. the date for Midterm 1.</span>
           </label>
-          {{ form.follow_up_assessment_date }}
-          {% if form.follow_up_assessment_date.errors %}
-            {{ form.follow_up_assessment_date.errors }}
+          {{ form.graded_assessment_datetime }}
+          {% if form.graded_assessment_datetime.errors %}
+            {{ form.graded_assessment_datetime.errors }}
           {% endif %}
         </div>
         <input type="submit" value="Create Courselet">

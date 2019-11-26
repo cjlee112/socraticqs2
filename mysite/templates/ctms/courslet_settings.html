@@ -2,7 +2,7 @@
 {% load waffle_tags %}
 
 {% block title %}
-    Settings:: {{ courslet.unit.title }}
+    Settings: {{ courslet.unit.title }}
 {% endblock %}
 
 
@@ -14,7 +14,7 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
     $( function() {
-      $( "#id_follow_up_assessment_date" ).datepicker({
+      $( "#id_graded_assessment_datetime" ).datepicker({
         dateFormat: 'yy-mm-dd'
       });
       $( "#id_courselet_deadline" ).datepicker({
@@ -128,26 +128,26 @@
             {% if form.exam_name.errors %}
               {{ form.exam_name.errors }}
             {% endif %}
-          <label for="{{ form.follow_up_assessment_date.auto_id }}">Follow-Up Assessment Date</label>
+          <label for="{{ form.graded_assessment_datetime.auto_id }}">Follow-Up Assessment Date</label>
           <p class="form-field--description">Exact time the paired (graded) assessment is due</p>
-            {{ form.follow_up_assessment_date }}
-            {% if form.follow_up_assessment_date.errors %}
-              {{ form.follow_up_assessment_date.errors }}
+            {{ form.graded_assessment_datetime }}
+            {% if form.graded_assessment_datetime.errors %}
+              {{ form.graded_assessment_datetime.errors }}
             {% endif %}
-            <label for="{{ form.error_resolution_days.auto_id }}">Courselet Resolution days</label>
-            <p class="form-field--description">Number of days students are given to complete the courselet</p>
+            <label for="{{ form.error_resolution_days.auto_id }}">Error Resolution days</label>
+            <p class="form-field--description">Number of days between courselet deadline and paired (graded) assessment</p>
             {{ form.error_resolution_days }}
             {% if form.error_resolution_days.errors %}
             {{ form.error_resolution_days.errors }}
             {% endif %}
             <label for="{{ form.follow_up_assessment_grade.auto_id }}">Follow-Up Assessment Grade %</label>
-            <p class="form-field--description">Follow-Up Assessment Grade</p>
-              {{ form.follow_up_assessment_grade }}
-              {% if form.follow_up_assessment_grade.errors %}
-                {{ form.follow_up_assessment_grade.errors }}
+            <p class="form-field--description">Total grade % for the paired (graded) assessment</p>
+              {{ form.graded_assessment_value }}
+              {% if form.graded_assessment_value.errors %}
+                {{ form.graded_assessment_value.errors }}
               {% endif %}
             <label for="{{ form.error_resolution_days.auto_id }}">Courselet Deadline</label>
-            <p class="form-field--description">Days between courselet deadline and paired (graded) assessment</p>
+            <p class="form-field--description">Exact time courselet is due</p>
             {{ form.courselet_deadline }}
             {% if form.courselet_deadline.errors %}
             {{ form.courselet_deadline.errors }}
@@ -235,6 +235,7 @@ $formSchedul.on('submit', function(e){
   }).done(function(data){
     $messageContainer.html('<div class="alert alert-success"><div class="container"> Courselet successfully updated </div></div>');
     setTimeout(() => $messageContainer.html(''), 4000);
+    $('#id_courselet_deadline').val(data['courselet_deadline']);
   }).fail(function(data){
     $messageContainer.html('<div class="alert alert-danger"><div class="container">'+data.error+'</div></div>');
     setTimeout(() => $messageContainer.html(''), 4000);

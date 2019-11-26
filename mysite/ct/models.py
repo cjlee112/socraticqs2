@@ -971,6 +971,7 @@ class Unit(models.Model):
         'question_parts',
         'average_score',
         'graded_assessment_value',
+        'graded_assessment_datetime',
         'courselet_deadline',
         'courselet_days',
         'error_resolution_days',
@@ -1014,7 +1015,8 @@ class Unit(models.Model):
     follow_up_assessment_grade = models.IntegerField(default=15, blank=True, null=True, validators=[percent_validator])
     question_parts = models.IntegerField(blank=True, null=True, validators=[percent_validator])
     average_score = models.IntegerField(blank=True, null=True, validators=[percent_validator])
-    graded_assessment_value = models.IntegerField(blank=True, null=True, validators=[percent_validator])
+    graded_assessment_value = models.IntegerField(default=15, blank=True, null=True, validators=[percent_validator])
+    graded_assessment_datetime = models.DateField(blank=True, null=True)
     courselet_deadline = models.DateField(blank=True, null=True)
     courselet_days = models.IntegerField(blank=True, null=True, help_text="2")
     error_resolution_days = models.IntegerField(blank=True, null=True)
@@ -1180,16 +1182,16 @@ class Unit(models.Model):
     @property
     def scheduled(self):
         return (
-            self.follow_up_assessment_date and self.courselet_deadline and self.error_resolution_days and
-            self.follow_up_assessment_date < self.courselet_deadline
+            self.graded_assessment_datetime and self.courselet_deadline and self.error_resolution_days and
+            self.graded_assessment_datetime > self.courselet_deadline
         )
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.courselet_deadline and self.follow_up_assessment_date and self.error_resolution_days:
-            self.courselet_deadline = self.follow_up_assessment_date + timedelta(self.error_resolution_days)
+        if not self.courselet_deadline and self.graded_assessment_datetime and self.error_resolution_days:
+            self.courselet_deadline = self.graded_assessment_datetime - timedelta(self.error_resolution_days)
         super().save(*args, **kwargs)
 
 

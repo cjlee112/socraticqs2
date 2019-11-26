@@ -667,7 +667,7 @@ class CreateCoursletViewTests(MyTestCase):
         ).count()
         data = {
             'title': 'Some new Courslet',
-            'follow_up_assessment_date': '2019-01-01',
+            'graded_assessment_datetime': '2019-01-01',
             'exam_name': 'Exam name'
         }
         response = self.client.post(self.url, data, follow=False)

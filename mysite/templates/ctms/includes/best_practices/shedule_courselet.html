@@ -10,7 +10,7 @@
     </h2>
     <span class="get-started__step-tip">
       {% if courselet.unit.scheduled %}
-          You have scheduled this courselet for {{ courselet.unit.follow_up_assessment_date|date:"F j, Y" }} ({{ courselet.unit.error_resolution_days }} day{% if courselet.unit.error_resolution_days > 1 %}s{% endif %} before assessment).
+          You have scheduled this courselet for {{ courselet.unit.courselet_deadline|date:"F j, Y" }} ({{ courselet.unit.error_resolution_days }} day{% if courselet.unit.error_resolution_days > 1 %}s{% endif %} before assessment).
       {% else %}
         {{ template.explanation }}
       {% endif %}

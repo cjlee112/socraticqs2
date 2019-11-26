@@ -68,7 +68,7 @@ def test_course_apply_from(mocker, course, data, commit):
 @pytest.mark.parametrize("data, commit", [
     ({
         "exam_name": 'Midterm 4',
-        "follow_up_assessment_date": '24/12/2019',
+        "graded_assessment_datetime": '24/12/2019',
         "follow_up_assessment_grade": 50,
         "question_parts": 50,
         "average_score": 50,
@@ -84,7 +84,7 @@ def test_course_apply_from(mocker, course, data, commit):
     False),
     ({
         "exam_name": 'Midterm 4',
-        "follow_up_assessment_date": '24/12/2019',
+        "graded_assessment_datetime": '24/12/2019',
         "follow_up_assessment_grade": 50,
         "question_parts": 50,
         "average_score": 50,
@@ -109,7 +109,7 @@ def test_courselet_apply_from(mocker, unit, data, commit):
     assert isinstance(result, type(unit))
     assert not hasattr(unit, 'wrong_field')
     assert unit.exam_name == 'Midterm 4'
-    assert unit.follow_up_assessment_date == '24/12/2019'
+    assert unit.graded_assessment_datetime == '24/12/2019'
     assert unit.follow_up_assessment_grade == 50
     assert unit.question_parts == 50
     assert unit.average_score == 50
