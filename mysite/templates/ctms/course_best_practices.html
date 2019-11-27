@@ -60,7 +60,7 @@
               You've created best practice exam{% if template.bestpractice_set.all|active_count:course > 1 %}s{% endif %}
                 {% for best_practice in template.bestpractice_set.all|active:course %}
                   {% if best_practice.courselet %}
-                    <a data-complete-step="test_courselet" href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
+                    <a href="{% url 'ctms:courslet_view' course_pk=best_practice.course.id pk=best_practice.courselet.id %}">
                       {{ best_practice.courselet.unit.exam_name }}
                     </a>{% if not forloop.last %}, {% else %}. {% endif %}
                   {% endif %}
@@ -80,7 +80,7 @@
             <p>
               {{ template.explanation }}
             </p>
-            <a data-complete-step="test_courselet" href="#"
+            <a href="#"
               data-bp-template-pk="{{ template.id }}"
               data-course-pk="{{ course.id }}"
               redirect="{% url 'ctms:courslet_create' course_pk=course.id %}"
@@ -91,7 +91,7 @@
               Create a Practice Exam Courselet
             {% endif %}
             </a>
-            <a data-complete-step="test_courselet" href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" class="button create-new-bp">
+            <a href="#" data-bp-template-pk="{{ template.id }}" data-course-pk="{{ course.id }}" class="button create-new-bp">
               Assess Impact for Your Class
             </a>
           </div>
@@ -105,7 +105,6 @@
 {% endblock %}
 
 {% block js %}
-  <script src="https://player.vimeo.com/api/player.js"></script>
   <script>
     // Add listeners once the DOM is ready
     $(function(){
@@ -139,32 +138,6 @@
 
       // Complete get started steps
       $('[data-complete-step]').on('click', function(e) {
-        // Get the step name and element
-        var stepName = $(e.currentTarget).data('complete-step');
-        var $step = $('.get-started__step[data-step-id='+ stepName +']');
-        var data = {};
-        data[stepName] = true;
-
-        // Send an ajax request to save the update
-        this.updateCartXhr = $.ajax({
-          headers: {
-            "X-CSRFToken": getCookie('csrftoken')
-          },
-          cache: false,
-          context: this,
-          data: data,
-          dataType: 'json',
-          method: 'PUT',
-          url: '/api/v0/onboarding-status/'
-        })
-        .done( function(response) { })
-        .fail( function(error) {
-          alert('Something went wrong. Please refresh the page and try again.');
-        });
-
-        // Update the status checkbox
-        $step.addClass('get-started__step--done');
-
         // Delay updates for 1 second (let e.g. video overlays animate in first)
         setTimeout(function() {
 
