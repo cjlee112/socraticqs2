@@ -1396,6 +1396,7 @@ class Response(models.Model, SubKindMixin):
                 instructors=[i.email for i in self.course.instructors if i.email])
             # TODO move to the task
             self.faq_notified = True
+            self.save()
 
     def notify_students(self):
         """

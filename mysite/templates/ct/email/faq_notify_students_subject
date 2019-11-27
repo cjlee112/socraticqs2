@@ -1,1 +1,1 @@
-{{ parent_faq_title }}
+{{ parent_faq_title|safe }}

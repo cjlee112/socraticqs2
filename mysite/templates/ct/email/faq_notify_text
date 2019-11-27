@@ -1,14 +1,14 @@
 There is a new FAQ:
 
-{{ faq_title }}
+{{ faq_title|safe }}
 
-{{ faq_text }}
+{{ faq_text|safe }}
 
 
 Course:
-{{ course_title }}
+{{ course_title|safe }}
 
 Courselet:
-{{ courselet_title }}
+{{ courselet_title|safe }}
 
 You can navigate to it with the next link: {{ faq_link }}
