@@ -46,6 +46,7 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/login_as_user/(?P<user_id>\d+)/?$', login_as_user, name='admin_login_as_user'),
+    path('admin/django-ses/', include('django_ses.urls')),
     path('admin/', admin.site.urls),
 
     url(r'^email-sent/$', validation_sent, name='email_sent'),

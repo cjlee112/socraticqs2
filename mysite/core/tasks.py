@@ -4,11 +4,11 @@ from pytz import UTC
 
 from intercom.client import Client
 from django.conf import settings
-from django.core.mail import send_mail
 from django.template import loader
 # from django.contrib.auth.models import User
 # from django.contrib.sessions.models import Session
 
+from .utils import send_emails
 from mysite import celery_app
 # from psa.models import UserSession
 
@@ -19,7 +19,7 @@ LOGGER = logging.getLogger('celery_warn')
 
 
 @celery_app.task
-def intercom_event(event_name, created_at, email, metadata):    
+def intercom_event(event_name, created_at, email, metadata) -> None:
     intercom.events.create(
         event_name=event_name,
         created_at=created_at,
@@ -30,7 +30,7 @@ def intercom_event(event_name, created_at, email, metadata):
 
 
 @celery_app.task
-def faq_notify_instructors(**kwargs):
+def faq_notify_instructors(**kwargs) -> None:
     if kwargs.get('instructors') and kwargs.get('faq_link'):
         subj_template = loader.get_template('ct/email/faq_notify_subject')
         rendered_subj = subj_template.render(kwargs)
@@ -38,17 +38,16 @@ def faq_notify_instructors(**kwargs):
         text_template = loader.get_template('ct/email/faq_notify_text')
         rendered_text = text_template.render(kwargs)
 
-        send_mail(
+        send_emails(
             rendered_subj,
             rendered_text,
             settings.EMAIL_FROM,
             kwargs.get('instructors'),
-            fail_silently=False,
         )
 
 
 @celery_app.task
-def faq_notify_students(**kwargs):
+def faq_notify_students(**kwargs) -> None:
     if kwargs.get('students') and kwargs.get('faq_link'):
         subj_template = loader.get_template('ct/email/faq_notify_students_subject')
         rendered_subj = subj_template.render(kwargs)
@@ -56,12 +55,11 @@ def faq_notify_students(**kwargs):
         text_template = loader.get_template('ct/email/faq_notify_students_text')
         rendered_text = text_template.render(kwargs)
 
-        send_mail(
+        send_emails(
             rendered_subj,
             rendered_text,
             settings.EMAIL_FROM,
             kwargs.get('students'),
-            fail_silently=False,
         )
 
 
