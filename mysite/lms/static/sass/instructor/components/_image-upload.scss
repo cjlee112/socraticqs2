@@ -1,15 +1,15 @@
 .image-upload {
+
   img {
     display: block;
     max-width: 360px;
     height: auto;
-    margin: 12px 0 0 0;
     box-shadow: 0 0 4px 0 rgba(0,0,0,0.12), 0 25px 50px -25px rgba(0,0,0,0.2);
     border-radius: 5px;
   }
 
   .image-clear {
-    margin: 12px 0 0 0;
+    margin: 12px 0 12px 0;
   }
 
   .button {
@@ -18,5 +18,15 @@
 
   label {
     font-weight: normal;
+  }
+
+  .draw-svg-container {
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+
+    > img {
+      vertical-align: baseline;
+    }
   }
 }

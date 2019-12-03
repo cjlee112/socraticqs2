@@ -758,6 +758,13 @@ p + p {
     .chat-message .chat-bubble img, .chat-message .chat-bubble iframe, .chat-message .chat-bubble audio, .chat-message .chat-bubble video {
       margin-top: 20px;
       border-radius: 4px; }
+    .chat-message .chat-bubble .draw-svg-container {
+      display: inline-block;
+      background-size: contain;
+      background-repeat: no-repeat; }
+      .chat-message .chat-bubble .draw-svg-container img {
+        vertical-align: baseline;
+        margin-top: 0px; }
     .chat-message .chat-bubble label {
       display: block;
       font-weight: normal;

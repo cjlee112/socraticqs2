@@ -1,5 +1,5 @@
 {% extends "ct/portal.html" %}
-{% load crispy_forms_tags ct_extras%}
+{% load crispy_forms_tags ct_extras static %}
 
 
 {% comment %}
@@ -8,6 +8,11 @@
 
 {% block title %}
   {{ pageData.title }}
+{% endblock %}
+
+{% block head %}
+{{ block.super }}
+<script src="{% static 'js/drawing.bundle.js' %}"></script>
 {% endblock %}
 
 {% block refresher %}

@@ -14,6 +14,18 @@
       <button type="button" class="button button--primary button--small js-upload-image" data-id="{{ id }}">Upload an Image</button>
     {% endif %}
 
-    <img id="image-{{ id }}" src="{% media_prefix value %}" alt="" class="image-holder js-image-holder">
+
+    {% with value.instance as lesson %}
+
+    {% if lesson.unitlesson_set.first.parent.sub_kind == 'canvas' and lesson.kind == 'answer' and lesson.attachment %}
+      <p><b>Attachment</b></p>
+      <div class="draw-svg-container" style="background-image: url({{ lesson.unitlesson_set.first.parent.lesson.attachment.url }})" disabled="1">
+          <img id="image-{{ id }}" src="{% media_prefix value %}">
+      </div>
+    {% else %}
+      <img id="image-{{ id }}" src="{% media_prefix value %}" alt="" class="image-holder js-image-holder">
+    {% endif %}
     <input type="file" class="hidden js-upload-input" id="input-{{ id }}" data-id="{{ id }}" name="{{ name }}">
+    {% endwith %}
+
 </div>

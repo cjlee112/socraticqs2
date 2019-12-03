@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+  {% block head %}
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -19,6 +20,7 @@
 
     {% include "google-analytics.html" %}
   </head>
+  {% endblock %}
 
   <body>
     {% include "ctms/includes/sidebar.html" %}

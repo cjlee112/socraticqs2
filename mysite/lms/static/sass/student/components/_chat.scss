@@ -429,6 +429,19 @@
       border-radius: 4px;
     }
 
+    .draw-svg-container {
+      display: inline-block;
+      background-size: contain;
+      background-repeat: no-repeat;
+
+      img {
+        vertical-align: baseline;
+        margin-top: 0px;
+      }
+    }
+
+
+
     label {
       display: block;
       font-weight: normal;

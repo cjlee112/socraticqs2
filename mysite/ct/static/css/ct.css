@@ -48,4 +48,9 @@ ul.messages > li {
 .draw-svg-container {
     display: inline-block;
     background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.draw-svg-container > img {
+    vertical-align: baseline;
 }
