@@ -139,7 +139,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
             message.content_id and
             next_point == message
         ):
-            return self.roll_fsm_forward(chat, message)   
+            return self.roll_fsm_forward(chat, message)
         if not message.chat or message.chat != chat or message.timestamp:
             serializer = self.get_serializer(message)
             return Response(serializer.data)
@@ -149,8 +149,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
         # Important for resolving additional messages
         if message and message.kind not in ('button', 'faqs'):
-            if not (not 'additional' in chat.state.fsmNode.funcName and
-                    message.kind == 'response'):
+            if not ('additional' not in chat.state.fsmNode.funcName and message.kind == 'response'):
                 # Set next message for user
                 if not message.timestamp:
                     message.timestamp = timezone.now()
@@ -280,7 +279,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                         kind=Lesson.ANSWER,
                     )
                     answer.save_root()
-                    unit_lesson_answer = UnitLesson.create_from_lesson(
+                    UnitLesson.create_from_lesson(
                         unit=ul.unit, lesson=answer, parent=ul, kind=UnitLesson.ANSWERS
                     )
                     # chat.next_point = message
@@ -349,11 +348,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
         lesson_has_sub_kind = message.lesson_to_answer and message.lesson_to_answer.sub_kind
         content_is_not_additional = not message.content and not message.is_additional
         mc_selfeval = None
-        is_orct_additional = message.content and message.is_additional and message.lesson_to_answer and message.lesson_to_answer.kind == 'orct'
+
         if (message_is_response and lesson_has_sub_kind and content_is_not_additional) or (
-                message_is_response and message.lesson_to_answer and \
-                message.lesson_to_answer.sub_kind == 'choices' and not content_is_not_additional
-                 ):
+                message_is_response and message.lesson_to_answer and
+                message.lesson_to_answer.sub_kind == 'choices' and not content_is_not_additional):
             resp_text = ''
             if message.lesson_to_answer.sub_kind == Lesson.MULTIPLE_CHOICES:
                 selected_items = self.request.data.get('selected')
@@ -385,7 +383,6 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     mc_selfeval = StudentResponse.CLOSE
                 else:
                     mc_selfeval = StudentResponse.DIFFERENT
-
 
             resp = StudentResponse(text=resp_text)
             # tes, preview flags

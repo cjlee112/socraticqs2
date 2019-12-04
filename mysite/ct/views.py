@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from social_core.backends.utils import load_backends
-from collections import defaultdict
 
 from ct.forms import *
 from ct.models import *
@@ -58,8 +57,8 @@ def make_tabs(path, current, tabs, tail=4, **kwargs):
         try:
             i = label.index(':')
         except ValueError:
-            tail = label.lower() + '/' # default, just use label
-        else: # use specified URL tail
+            tail = label.lower() + '/'  # default, just use label
+        else:  # use specified URL tail
             tail = label[i + 1:]
             label = label[:i]
         labels = label.split(',')
@@ -71,6 +70,7 @@ def make_tabs(path, current, tabs, tail=4, **kwargs):
             outTabs.append((label, path + tail))
     return outTabs
 
+
 def concept_tabs(path, current, unitLesson,
                  tabs=('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'),
                  user=None, **kwargs):
@@ -80,17 +80,17 @@ def concept_tabs(path, current, unitLesson,
         tabs = tabs[:1] + ('Tasks',) + tabs[1:]
     return make_tabs(path, current, tabs, **kwargs)
 
+
 def error_tabs(path, current, unitLesson,
                tabs=('Resolutions:', 'Resources', 'FAQ', 'Edit',), user=None, **kwargs):
     if not is_teacher_url(path):
         tabs = ('Resolutions:', 'Resources', 'FAQ')
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.parent:
-        outTabs.append(make_tab(path, current, 'Question',
-                            get_object_url(path, unitLesson.parent)))
+        outTabs.append(make_tab(path, current, 'Question', get_object_url(path, unitLesson.parent)))
         if 'courses' in path and '/teach/' in path:
             spltd = path.split('/')
-            course_id = spltd[spltd.index('courses') + 1] # next after 'courses' word is going course id
+            course_id = spltd[spltd.index('courses') + 1]  # next after 'courses' word is going course id
             cu = CourseUnit.objects.filter(unit__id=unitLesson.unit.id, course_id=course_id).first()
             if cu:
                 url = reverse('ctms:unit_edit', kwargs={
@@ -105,13 +105,14 @@ def error_tabs(path, current, unitLesson,
 def make_tab(path, current, label, url):
     'use #LABELTabDiv or URL depending on whether current matches label'
     if current == label:
-        return (label,'#%sTabDiv' % label)
+        return (label, '#%sTabDiv' % label)
     else:
         return (label, url)
 
 
 def filter_tabs(tabs, filterLabels):
     return [t for t in tabs if t[0] in filterLabels]
+
 
 def lesson_tabs(path, current, unitLesson,
                 tabs=('Home:', 'Tasks', 'Concepts', 'Errors', 'FAQ', 'Edit'),
@@ -129,22 +130,20 @@ def lesson_tabs(path, current, unitLesson,
     outTabs = make_tabs(path, current, tabs, **kwargs)
     if unitLesson.kind == UnitLesson.ANSWERS and unitLesson.parent:
         outTabs = filter_tabs(outTabs, answerTabs)
-        outTabs.append(make_tab(path, current, 'Question', get_base_url(path,
-                    ['lessons', str(unitLesson.parent.pk)])))
+        outTabs.append(make_tab(path, current, 'Question', get_base_url(path, ['lessons', str(unitLesson.parent.pk)])))
     elif showAnswer:
         a = unitLesson.get_answers().all()
         if a:
-            outTabs.append(make_tab(path, current, 'Answer',
-                get_base_url(path, ['lessons', str(a[0].pk)])))
+            outTabs.append(make_tab(path, current, 'Answer', get_base_url(path, ['lessons', str(a[0].pk)])))
     return outTabs
 
+
 def auto_tabs(path, current, unitLesson, **kwargs):
-    tabFuncs = {'errors':error_tabs,
-                   'concepts':concept_tabs,
-                   'lessons':lesson_tabs}
+    tabFuncs = {'errors': error_tabs,
+                'concepts': concept_tabs,
+                'lessons': lesson_tabs}
     currentType = get_path_type(path)
     return tabFuncs[currentType](path, current, unitLesson, **kwargs)
-
 
 
 def unit_tabs(path, current,
@@ -152,21 +151,22 @@ def unit_tabs(path, current,
     tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
     return tabs
 
-def unit_lessons_tabs(path, current,
-              tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), courseUnit=None, **kwargs):
+
+def unit_lessons_tabs(
+        path, current,
+        tabs=('Tasks:', 'Concepts', 'Lessons', 'Resources', 'Edit', 'Answers'), courseUnit=None, **kwargs):
     tabs = make_tabs(path, current, tabs, tail=2, **kwargs)
     if courseUnit and '/teach/' in path:
         tabs.append(make_tab(
             path, current, 'New UI',
             reverse('ctms:courslet_view',
-                    kwargs={'course_pk': courseUnit.course.id, 'pk': courseUnit.id}))
-        )
+                    kwargs={'course_pk': courseUnit.course.id, 'pk': courseUnit.id})))
     return tabs
 
 
-def unit_tabs_student(path, current,
-              tabs=('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), **kwargs):
+def unit_tabs_student(path, current, tabs=('Study:', 'Tasks', 'Lessons', 'Concepts', 'Resources'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, **kwargs)
+
 
 def course_tabs(path, current, tabs=('Home:', 'Edit'), **kwargs):
     return make_tabs(path, current, tabs, tail=2, baseToken='courses',
@@ -177,36 +177,36 @@ class PageData(object):
     'generic holder for page UI elements such as tabs'
     def __init__(self, request, **kwargs):
         self.fsmStack = FSMStack(request)
-        for k,v in list(kwargs.items()):
+        for k, v in list(kwargs.items()):
             setattr(self, k, v)
         try:
             self.statusMessage = request.session['statusMessage']
             del request.session['statusMessage']
         except KeyError:
             pass
+
     def fsm_redirect(self, request, eventName=None, defaultURL=None,
                      addNextButton=False, vagueEvents=('next',), **kwargs):
         'check whether fsm intercepts this event and returns redirect'
         if request.method == 'POST' and \
               'launch' == request.POST.get('fsmtask', None):
-            fsmName = request.POST['fsmName'] # launch specified FSM
+            fsmName = request.POST['fsmName']  # launch specified FSM
             fsmArgs = self.fsmData[fsmName]
             return self.fsm_push(request, fsmName, fsmArgs)
-        if not self.fsmStack.state: # no FSM running, so nothing to do
+        if not self.fsmStack.state:  # no FSM running, so nothing to do
             return defaultURL and HttpResponseRedirect(defaultURL)
         # now we check here whether event is actually from path matching
         # this node
         referer = request.META.get('HTTP_REFERER', '')
         origin = request.META.get('HTTP_ORIGIN', '/'.join(referer.split('/')[:3]))
-        if request.method == 'POST' and referer != origin + self.fsmStack.state.path \
-             and eventName in vagueEvents:
-            r = None # don't even call FSM with POST events from other pages.
-        else: # event from current node's page
-            if not eventName: # handle Next and Select POST requests
+        if request.method == 'POST' and referer != origin + self.fsmStack.state.path and eventName in vagueEvents:
+            r = None  # don't even call FSM with POST events from other pages.
+        else:  # event from current node's page
+            if not eventName:  # handle Next and Select POST requests
                 if request.method == 'POST' and 'fsmtask' in request.POST:
                     task = request.POST['fsmtask']
                     if 'next' == task:
-                        eventName = 'next' # tell FSM this is next event
+                        eventName = 'next'  # tell FSM this is next event
                     elif task.startswith('select_'):
                         className = task[7:]
                         attr = className[0].lower() + className[1:]
@@ -214,22 +214,23 @@ class PageData(object):
                             # TODO import KLASS_NAME_DICT from fsm should be refactored
                             klass = KLASS_NAME_DICT[className]
                             selectID = int(request.POST['selectID'])
-                        except (KeyError,ValueError):
+                        except (KeyError, ValueError):
                             return HttpResponse('bad select', status=400)
-                        eventName = task # pass event and object to FSM
+                        eventName = task  # pass event and object to FSM
                         kwargs[attr] = get_object_or_404(klass, pk=selectID)
                     else:
                         return HttpResponse('invalid fsm task: %s' % task,
                                             status=400)
-                elif addNextButton: # must supply Next form
+                elif addNextButton:  # must supply Next form
                     self.nextForm = NextForm()
                     set_crispy_action(request.path, self.nextForm)
             r = self.fsmStack.event(request, eventName, defaultURL=defaultURL,
                                     pageData=self, **kwargs)
-        if r: # let FSM override the default URL
+        if r:  # let FSM override the default URL
             return HttpResponseRedirect(r)
-        elif defaultURL: # otherwise follow the default
+        elif defaultURL:  # otherwise follow the default
             return HttpResponseRedirect(defaultURL)
+
     def render(self, request, templatefile, templateArgs=None,
                addNextButton=False, fsmGroups=(), **kwargs):
         'let fsm adjust view / redirect prior to rendering'
@@ -238,21 +239,19 @@ class PageData(object):
         self.fsmData = {}
         if self.fsmStack.state:
             # Disable this for now
-            # if self.fsmStack.state.hideTabs: # turn off tab interface
+            # if self.fsmStack.state.hideTabs:  # turn off tab interface
             #     self.navTabs = ()
-            self.fsm_help_message = self.fsmStack.state.fsmNode \
-              .get_help(self.fsmStack.state, request)
-        else: # only show Start Activity menu if no FSM running
-            for groupName, data in fsmGroups: # set up fsmLauncher
+            self.fsm_help_message = self.fsmStack.state.fsmNode.get_help(self.fsmStack.state, request)
+        else:  # only show Start Activity menu if no FSM running
+            for groupName, data in fsmGroups:  # set up fsmLauncher
                 for fsm in FSM.objects.filter(fsmgroup__group=groupName):
                     if fsm.description:
                         submitArgs = dict(title=fsm.description)
                     else:
                         submitArgs = {}
-                    self.fsmLauncher[fsm.name] = (LaunchFSMForm(fsm.name,
-                                    fsm.title, submitArgs=submitArgs), fsm)
+                    self.fsmLauncher[fsm.name] = (LaunchFSMForm(fsm.name, fsm.title, submitArgs=submitArgs), fsm)
                     self.fsmData[fsm.name] = data
-        if templateArgs: # avoid side-effects of modifying caller's dict
+        if templateArgs:  # avoid side-effects of modifying caller's dict
             templateArgs = templateArgs.copy()
         else:
             templateArgs = {}
@@ -266,10 +265,12 @@ class PageData(object):
             templateArgs['refreshInterval'] = 15
         return self.fsm_redirect(request, addNextButton=addNextButton) \
             or render(request, templatefile, templateArgs, **kwargs)
+
     def fsm_push(self, request, name, *args, **kwargs):
         'create a new FSM and redirect to its START page'
         url = self.fsmStack.push(request, name, *args, **kwargs)
         return HttpResponseRedirect(url)
+
     def fsm_off_path(self):
         """
         True if not on current node view or Activity Center viewself.
@@ -279,16 +280,19 @@ class PageData(object):
         return ('preview' not in self.fsmStack.state.fsmNode.funcName and
                 not self.fsmStack.state.fsm_on_path(self.path) and
                 self.path != reverse('fsm:fsm_status'))
+
     def set_refresh_timer(self, request, timer=True):
         'start or end the refresh timer'
         if timer:
             request.session['timerStart'] = time.time()
         elif 'timerStart' in request.session:
             del request.session['timerStart']
+
     def get_refresh_timer(self, request):
         'return duration string in format 1:03'
         secs = int(time.time() - request.session['timerStart'])
         return '%d:%02d' % (secs / 60, secs % 60)
+
     def has_refresh_timer(self, request):
         'return True if timer running'
         return 'timerStart' in request.session
@@ -342,11 +346,11 @@ def person_profile(request, user_id):
     'stub for basic user info page'
     person = get_object_or_404(User, pk=user_id)
     pageData = PageData(request)
-    if request.method == 'POST': # signout
+    if request.method == 'POST':  # signout
         if request.POST.get('task') == 'logout':
             logout(request)
             return HttpResponseRedirect(reverse('ct:home'))
-    if request.user == person: # button for user to logout
+    if request.user == person:  # button for user to logout
         logoutForm = LogoutForm()
     else:
         logoutForm = None
@@ -360,15 +364,15 @@ def about(request):
     pageData = PageData(request)
     return pageData.render(request, 'ct/about.html')
 
-# course views
 
+# course views
 @login_required
 def course_view(request, course_id):
     'show courselets in a course'
     course = get_object_or_404(Course, pk=course_id)
     if is_teacher_url(request.path):
         notInstructor = check_instructor_auth(course, request)
-        if notInstructor: # redirect students to live session or student page
+        if notInstructor:  # redirect students to live session or student page
             return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
         navTabs = course_tabs(request.path, 'Home')
         courseletform = NewUnitTitleForm()
@@ -381,7 +385,7 @@ def course_view(request, course_id):
     pageData = PageData(request, title=course.title,
                         headLabel='course description',
                         headText=md2html(course.description), navTabs=navTabs)
-    if request.method == 'POST': # create new courselet
+    if request.method == 'POST':  # create new courselet
         if 'oldOrder' in request.POST and not notInstructor:
             reorderForm = ReorderForm(0, len(unitTable), request.POST)
             if reorderForm.is_valid():
@@ -391,7 +395,7 @@ def course_view(request, course_id):
                                                        unitTable)
                 red = pageData.fsm_redirect(request, 'reorder_Unit',
                                             defaultURL=None, course=course)
-                if red: # let FSM redirect us if desired
+                if red:  # let FSM redirect us if desired
                     return red
         else:
             courseletform = NewUnitTitleForm(request.POST)
@@ -409,8 +413,7 @@ def course_view(request, course_id):
                 )
                 kwargs = dict(course_id=course_id, unit_id=unit.id)
                 defaultURL = reverse('ct:unit_tasks', kwargs=kwargs)
-                return pageData.fsm_redirect(request, 'create_Unit',
-                                defaultURL, reverseArgs=kwargs, unit=unit)
+                return pageData.fsm_redirect(request, 'create_Unit', defaultURL, reverseArgs=kwargs, unit=unit)
     if courseletform:
         set_crispy_action(request.path, courseletform)
     if len(unitTable) < 2:
@@ -429,16 +432,17 @@ def course_view(request, course_id):
         )
     )
 
+
 @login_required
 def edit_course(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     notInstructor = check_instructor_auth(course, request)
-    if notInstructor: # redirect students to live session or student page
+    if notInstructor:  # redirect students to live session or student page
         return HttpResponseRedirect(reverse('ct:course_student', args=(course.id,)))
 
     pageData = PageData(request, title=course.title,
                         navTabs=course_tabs(request.path, 'Edit'))
-    if request.method == 'POST': # update course description
+    if request.method == 'POST':  # update course description
         courseform = CourseTitleForm(request.POST, instance=course)
         if courseform.is_valid():
             courseform.save()
@@ -482,7 +486,6 @@ def clone_course(request, course_id):
             return redirect(reverse('ct:edit_course', kwargs={'course_id': new_course.id}))
         messages.add_message(request, messages.ERROR, 'Not valid request data! {}'.format(form.errors))
     return redirect(request.META.get('HTTP_REFERER', reverse('ct:home')))
-
 
 
 def courses(request):
@@ -588,11 +591,12 @@ def edit_unit(request, course_id, unit_id):
 
 def update_concept_link(request, conceptLinks, unit):
     cl = get_object_or_404(ConceptLink, pk=int(request.POST.get('clID')))
-    cl.annotate_ul(unit) # add unitLesson attribute
+    cl.annotate_ul(unit)  # add unitLesson attribute
     clform = ConceptLinkForm(request.POST, instance=cl)
     if clform.is_valid():
         clform.save()
         conceptLinks.replace(cl, clform)
+
 
 def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
               toTable=None, fromTable=None, unit=None,
@@ -607,9 +611,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
     searchForm = ConceptSearchForm()
     if request.method == 'POST' and not ignorePOST:
         if 'wikipediaID' in request.POST:
-            concept, lesson = \
-              Concept.get_from_sourceDB(request.POST.get('wikipediaID'),
-                                        request.user)
+            concept, lesson = Concept.get_from_sourceDB(request.POST.get('wikipediaID'), request.user)
             if unit:
                 lesson.unitlesson_set.create(unit=unit, treeID=lesson.treeID,
                                              addedBy=concept.addedBy)
@@ -637,17 +639,17 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                 fromTable.replace(cg, cgform)
         elif 'conceptID' in request.POST:
             return Concept.objects.get(pk=int(request.POST.get('conceptID')))
-        elif 'title' in request.POST: # create new concept
+        elif 'title' in request.POST:  # create new concept
             conceptForm = NewConceptForm(request.POST)
             if conceptForm.is_valid():
                 return Concept.new_concept(conceptForm.cleaned_data['title'],
-                            conceptForm.cleaned_data['description'],
-                            unit, request.user, isError)
+                                           conceptForm.cleaned_data['description'],
+                                           unit, request.user, isError)
     elif 'search' in request.GET:
         searchForm = ConceptSearchForm(request.GET)
         if searchForm.is_valid():
             s = searchForm.cleaned_data['search']
-            if errorModels is not None: # search errors only
+            if errorModels is not None:  # search errors only
                 cset = [
                     (
                         ul.lesson.title,
@@ -656,7 +658,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                     )
                     for ul in UnitLesson.search_text(s, IS_ERROR)
                 ]
-            else: # search correct concepts only
+            else:  # search correct concepts only
                 cset = UnitLesson.search_text(s, IS_CONCEPT)
                 cset2, wset = UnitLesson.search_sourceDB(s, unit=unit)
                 cset = distinct_subset(cset2 + cset, lambda x: x.lesson.concept)
@@ -680,7 +682,7 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
                     )
                     for t in wset]
                 cset.sort()
-            conceptForm = NewConceptForm() # let user define new concept
+            conceptForm = NewConceptForm()  # let user define new concept
     if conceptForm:
         set_crispy_action(request.path, conceptForm)
     kwargs.update(dict(cset=cset, msg=msg, searchForm=searchForm,
@@ -690,32 +692,32 @@ def _concepts(request, pageData, msg='', ignorePOST=False, conceptLinks=None,
     return pageData.render(request, 'ct/concepts.html', kwargs)
 
 
-## def edit_concept(request, course_id, unit_id, ul_id,
-##                  tabsFunc=concept_tabs):
-##     ul = get_object_or_404(UnitLesson, pk=ul_id)
-##     navTabs = tabsFunc(request.path, 'Edit')
-##     if request.user == ul.lesson.addedBy:
-##         titleform = ConceptForm(instance=ul.lesson)
-##         if request.method == 'POST':
-##             if 'title' in request.POST:
-##                 titleform = ConceptForm(request.POST, instance=concept)
-##                 if titleform.is_valid():
-##                     titleform.save()
-##             elif request.POST.get('task') == 'delete':
-##                 concept.delete()
-##                 return HttpResponseRedirect(reverse('ct:unit_concepts',
-##                                 args=(course_id, unit_id,)))
-##         set_crispy_action(request.path, titleform)
-##     else:
-##         titleform = None
-##     return render(request, 'ct/edit_concept.html',
-##                   dict(actionTarget=request.path, concept=concept,
-##                        atime=display_datetime(concept.atime),
-##                        titleform=titleform, navTabs=navTabs))
+# def edit_concept(request, course_id, unit_id, ul_id,
+#                  tabsFunc=concept_tabs):
+#     ul = get_object_or_404(UnitLesson, pk=ul_id)
+#     navTabs = tabsFunc(request.path, 'Edit')
+#     if request.user == ul.lesson.addedBy:
+#         titleform = ConceptForm(instance=ul.lesson)
+#         if request.method == 'POST':
+#             if 'title' in request.POST:
+#                 titleform = ConceptForm(request.POST, instance=concept)
+#                 if titleform.is_valid():
+#                     titleform.save()
+#             elif request.POST.get('task') == 'delete':
+#                 concept.delete()
+#                 return HttpResponseRedirect(reverse('ct:unit_concepts',
+#                                 args=(course_id, unit_id,)))
+#         set_crispy_action(request.path, titleform)
+#     else:
+#         titleform = None
+#     return render(request, 'ct/edit_concept.html',
+#                   dict(actionTarget=request.path, concept=concept,
+#                        atime=display_datetime(concept.atime),
+#                        titleform=titleform, navTabs=navTabs))
 
-## def edit_error(request, course_id, unit_id, concept_id):
-##     return edit_concept(request, course_id, unit_id, concept_id,
-##                         tabsFunc=error_tabs)
+# def edit_error(request, course_id, unit_id, concept_id):
+#     return edit_concept(request, course_id, unit_id, concept_id,
+#                         tabsFunc=error_tabs)
 
 class ConceptLinkTable(object):
     def __init__(self, data=(), formClass=ConceptLinkForm, noEdit=False,
@@ -725,24 +727,29 @@ class ConceptLinkTable(object):
         self.data = []
         for cl in data:
             self.append(cl)
-        for k,v in list(kwargs.items()):
+        for k, v in list(kwargs.items()):
             setattr(self, k, v)
+
     def append(self, cl):
         self.data.append((cl, self.formClass(instance=cl)))
+
     def replace(self, cl, clform):
-        for i,t in enumerate(self.data):
+        for i, t in enumerate(self.data):
             if t[0] == cl:
                 self.data[i] = (cl, clform)
+
     def remove(self, cl):
-        for i,t in enumerate(self.data):
+        for i, t in enumerate(self.data):
             if t[0] == cl:
                 del self.data[i]
                 return True
+
     def move_between_tables(self, cl, other):
         if self.remove(cl):
             other.append(cl)
         elif other.remove(cl):
             self.append(cl)
+
 
 @login_required
 def unit_concepts(request, course_id, unit_id):
@@ -755,11 +762,12 @@ def unit_concepts(request, course_id, unit_id):
     '''To add a concept to this courselet, start by
     typing a search for relevant concepts. ''', unitConcepts=unitConcepts,
                   unit=unit, actionLabel='Add to courselet')
-    if isinstance(r, Concept): # newly created concept
+    if isinstance(r, Concept):  # newly created concept
         defaultURL = get_object_url(request.path, r)
         return pageData.fsm_redirect(request, 'create_Concept', defaultURL,
                                      concept=r)
     return r
+
 
 @login_required
 def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
@@ -778,7 +786,7 @@ def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
                                                       addedBy=request.user)
         red = pageData.fsm_redirect(request, 'create_ConceptLink',
                                     defaultURL=None, conceptLink=cl)
-        if red: # let FSM redirect us if desired
+        if red:  # let FSM redirect us if desired
             return red
         clTable.append(cl)
         return _concepts(request, pageData,
@@ -786,6 +794,7 @@ def ul_concepts(request, course_id, unit_id, ul_id, tabFunc=None):
                          ignorePOST=True, conceptLinks=clTable, unit=unit,
                          showConceptAction=True)
     return r
+
 
 @login_required
 def concept_concepts(request, course_id, unit_id, ul_id):

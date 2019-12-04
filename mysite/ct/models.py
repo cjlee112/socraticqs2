@@ -14,7 +14,6 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from django.contrib.sites.models import Site
 
@@ -25,11 +24,11 @@ from ct.templatetags.ct_extras import md2html
 
 
 def percent_validator(value):
-        if not 0 <= value <= 100:
-            raise ValidationError(
-                _('%(value)s is not a persent. Value should be range 0-100'),
-                params={'value': value},
-            )
+    if not 0 <= value <= 100:
+        raise ValidationError(
+            _('%(value)s is not a persent. Value should be range 0-100'),
+            params={'value': value},
+        )
 
 
 not_only_spaces_validator = RegexValidator(
@@ -474,15 +473,15 @@ class Lesson(models.Model, SubKindMixin):
         dataClass = klass.get_sourceDB_plugin(sourceDB)
         return dataClass.search(query, **kwargs)
 
-    ## @classmethod
-    ## def create_from_concept(klass, concept, **kwargs):
-    ##     'create lesson for initial concept definition'
-    ##     if concept.isError:
-    ##         kwargs['kind'] = klass.ERROR_MODEL
-    ##     lesson = klass(title=concept.title, text=concept.description,
-    ##                    addedBy=concept.addedBy, concept=concept, **kwargs)
-    ##     lesson.save_root()
-    ##     return lesson
+    # @classmethod
+    # def create_from_concept(klass, concept, **kwargs):
+    #     'create lesson for initial concept definition'
+    #     if concept.isError:
+    #         kwargs['kind'] = klass.ERROR_MODEL
+    #     lesson = klass(title=concept.title, text=concept.description,
+    #                    addedBy=concept.addedBy, concept=concept, **kwargs)
+    #     lesson.save_root()
+    #     return lesson
     def save_root(self, concept=None, relationship=None):
         'create root commit by initializing treeID'
         if self.treeID is None:  # no tree ID, so save as root commit
@@ -553,11 +552,11 @@ class Lesson(models.Model, SubKindMixin):
 
     def __str__(self):
         return self.title
-    ## def get_url(self):
-    ##     if self.sourceDB:
-    ##         return self.url
-    ##     else:
-    ##         return reverse('ct:lesson', args=(self.id,))
+    # def get_url(self):
+    #     if self.sourceDB:
+    #         return self.url
+    #     else:
+    #         return reverse('ct:lesson', args=(self.id,))
 
 
 def distinct_subset(inlist, distinct_func=lambda x: x.treeID):
@@ -694,11 +693,11 @@ class UnitLesson(models.Model):
     treeID = models.IntegerField()  # VCS METADATA
     branch = models.CharField(max_length=32, default='master')
 
-    ## @classmethod
-    ## def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
-    ##     'create lesson for initial concept definition'
-    ##     lesson = Lesson.create_from_concept(concept, **kwargs)
-    ##     return klass.create_from_lesson(lesson, unit, **ulArgs)
+    # @classmethod
+    # def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
+    #     'create lesson for initial concept definition'
+    #     lesson = Lesson.create_from_concept(concept, **kwargs)
+    #     return klass.create_from_lesson(lesson, unit, **ulArgs)
 
     @property
     def text(self):
@@ -819,10 +818,10 @@ class UnitLesson(models.Model):
         'get list of resolution UL for this error UL'
         em = self.lesson.concept
         return em, list(self.unitlesson_set.filter(kind=self.RESOLVES))
-        ## query = Q(kind=self.RESOLVES,
-        ##           lesson__conceptlink__relationship=ConceptLink.RESOLVES,
-        ##           lesson__conceptlink__concept=em)
-        ## return em, distinct_subset(UnitLesson.objects.filter(query))
+        # query = Q(kind=self.RESOLVES,
+        #           lesson__conceptlink__relationship=ConceptLink.RESOLVES,
+        #           lesson__conceptlink__concept=em)
+        # return em, distinct_subset(UnitLesson.objects.filter(query))
 
     def get_new_inquiries(self):
         return self.response_set.filter(kind=Response.STUDENT_QUESTION,
@@ -1098,7 +1097,7 @@ class Unit(models.Model):
         if not aborts:  # need to add ABORTs etc. to this unit
             aborts = []
             for errorLesson in distinct_subset(Lesson.objects
-                                                       .filter(kind=Lesson.ERROR_MODEL, concept__alwaysAsk=True)):
+                                               .filter(kind=Lesson.ERROR_MODEL, concept__alwaysAsk=True)):
                 em = self.unitlesson_set.create(lesson=errorLesson,
                                                 kind=UnitLesson.MISUNDERSTANDS,
                                                 addedBy=errorLesson.addedBy,
@@ -1117,10 +1116,14 @@ class Unit(models.Model):
                                .exclude(unitlesson__kind=UnitLesson.MISUNDERSTANDS))
 
     def get_resoless_uls(self, **kwargs):
-        return distinct_subset(self.unitlesson_set
-                               .filter(Q(unitlesson__kind=UnitLesson.MISUNDERSTANDS, **kwargs)
-                                       & ~Q(unitlesson__lesson__concept__conceptlink__relationship=
-                                            ConceptLink.RESOLVES)))
+        return distinct_subset(
+            self.unitlesson_set.filter(
+                Q(
+                    unitlesson__kind=UnitLesson.MISUNDERSTANDS,
+                    **kwargs
+                ) & ~Q(
+                    unitlesson__lesson__concept__conceptlink__relationship=ConceptLink.RESOLVES
+                )))
 
     def get_unanswered_uls(self, user=None, **kwargs):
         if user:
@@ -1152,8 +1155,9 @@ class Unit(models.Model):
         if user:
             kwargs['response__author'] = user
         return distinct_subset(self.unitlesson_set
-                               .filter(response__studenterror__status__in=
-                                       [NEED_HELP_STATUS, NEED_REVIEW_STATUS], **kwargs))
+                               .filter(
+                                   response__studenterror__status__in=[NEED_HELP_STATUS, NEED_REVIEW_STATUS],
+                                   **kwargs))
 
     def get_study_url(self, path, extension=['tasks']):
         'return URL for next study tasks on this unit'
@@ -1263,7 +1267,6 @@ class ResponseManager(models.Manager):
     def filter_all(self, **kwargs):
         """Filter all responses."""
         return self.get_all_responses_queryset().filter(**kwargs)
-
 
     def test_responses(self, **kwargs):
         '''
@@ -1423,7 +1426,8 @@ class Response(models.Model, SubKindMixin):
                 course_title=self.course.title,
                 courselet_title=self.unitLesson.unit.title,
                 parent_faq_title=self.parent.title.strip(),
-                students=[self.parent.author.email] + [i.addedBy.email for i in self.parent.inquirycount_set.all() if i.addedBy.email]
+                students=[self.parent.author.email] + [i.addedBy.email for i in
+                                                       self.parent.inquirycount_set.all() if i.addedBy.email]
             )
 
     def get_canvas_html(self):
@@ -1471,8 +1475,7 @@ class Response(models.Model, SubKindMixin):
             if not unitLesson:
                 raise ValueError('no query and no unitLesson?!?')
             query = Q(unitLesson=unitLesson)
-        return klass.objects.filter(query &
-                    Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
+        return klass.objects.filter(query & Q(selfeval=selfeval, studenterror__isnull=True), **kwargs)
 
     def get_url(self, basePath, forceDefault=False, subpath=None,
                 isTeach=True):

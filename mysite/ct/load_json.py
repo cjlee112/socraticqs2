@@ -24,41 +24,39 @@ def store_errors(q, concept, parentUL, conceptIDdict=None):
                 saveMapping = True
                 print(('WARNING: %s not found in conceptIDdict; treating as new error model' % mapID))
             else:
-                if isinstance(ulID, int): # just add existing EM to this question
+                if isinstance(ulID, int):  # just add existing EM to this question
                     ul = UnitLesson.objects.get(pk=ulID)
-                    emUL = UnitLesson.create_from_lesson(ul.lesson, unit,
-                                                        parent=parentUL)
-                else: # add new EMLesson to existing EM
+                    emUL = UnitLesson.create_from_lesson(ul.lesson, unit, parent=parentUL)
+                else:  # add new EMLesson to existing EM
                     try:
                         if not ulID.startswith('fork:'):
                             raise ValueError
                         ul = UnitLesson.objects.get(pk=int(ulID[5:]))
                     except ValueError:
-                        raise ValueError('bad conceptIDdict ID value %s: should be int or "fork:INT"'
-                                        % ulID)
-                    em = ul.lesson.concept # link to existing error model
+                        raise ValueError('bad conceptIDdict ID value %s: should be int or "fork:INT"' % ulID)
+                    em = ul.lesson.concept  # link to existing error model
                 if not ul.lesson.concept or not ul.lesson.concept.isError:
-                    raise ValueError('%s: not a valid error model'
-                                    % ul.lesson.title)
-        if not emUL: # create new error model lesson
+                    raise ValueError('%s: not a valid error model' % ul.lesson.title)
+        if not emUL:  # create new error model lesson
             emLesson = Lesson(title=e.get('title', '(rename this)'),
                               addedBy=parentUL.addedBy,
                               text=e.get('explanation', '(write an explanation)'))
             emUL = emLesson.save_as_error_model(concept, parentUL, em)
-            if saveMapping: # allow other questions to fork this EM
+            if saveMapping:  # allow other questions to fork this EM
                 conceptIDdict[mapID] = 'fork:%d' % emUL.pk
         errorModels.append(emUL)
     return errorModels
+
 
 def get_or_create_user(username, email='unknown'):
     'get user object with specified username, create it if necessary'
     try:
         u = User.objects.get(username=username)
     except User.DoesNotExist:
-        u = User.objects.create_user(username, email, None, 
-                                 first_name='Student', last_name=username)
+        u = User.objects.create_user(username, email, None, first_name='Student', last_name=username)
         u.save()
     return u
+
 
 def store_response_errors(r, errorModels, response, genericErrors,
                           genericIndex):
@@ -67,12 +65,14 @@ def store_response_errors(r, errorModels, response, genericErrors,
         error_id = se['error_id']
         if isinstance(error_id, int):
             emUL = errorModels[error_id]
-        else: # look up generic error model
+        else:  # look up generic error model
             i = genericIndex[error_id]
             emUL = genericErrors[i]
-        studentError = StudentError(response=response, atime=response.atime,
-                                   errorModel=emUL, author=response.author)
+        studentError = StudentError(
+            response=response, atime=response.atime,
+            errorModel=emUL, author=response.author)
         studentError.save()
+
 
 def store_response(r, course, parentUL, errorModels, genericErrors,
                    genericIndex, tzinfo=timezone.get_default_timezone()):
@@ -109,8 +109,9 @@ def add_concept_resource(conceptID, unit, conceptIDdict=()):
     else:
         concept, lesson = Concept.get_from_sourceDB(conceptID, unit.addedBy)
     if unit.unitlesson_set.filter(lesson__concept=concept).count() <= 0:
-        UnitLesson.create_from_lesson(lesson, unit) # attach as unit resource
+        UnitLesson.create_from_lesson(lesson, unit)  # attach as unit resource
     return concept
+
 
 def store_new_question(q, unit, concept,
                        tzinfo=timezone.get_default_timezone(),
@@ -125,8 +126,8 @@ def store_new_question(q, unit, concept,
     lesson.save_root(concept)
     unitLesson = UnitLesson.create_from_lesson(lesson, unit, order='APPEND',
                                                addAnswer=True)
-    answer = unitLesson._answer.lesson # get auto-created record
-    answer.title = q['title'] + ' Answer' # update answer text
+    answer = unitLesson._answer.lesson  # get auto-created record
+    answer.title = q['title'] + ' Answer'  # update answer text
     answer.text = q['answer']
     answer.save()
     return unitLesson
@@ -135,17 +136,18 @@ def store_new_question(q, unit, concept,
 def store_question(q, course, unit, genericErrors, genericIndex,
                    conceptIDdict=(), **kwargs):
     'store question linked to concept, error models, answer, responses'
-    conceptID = q['tests'][0] # link to first concept
+    conceptID = q['tests'][0]  # link to first concept
     concept = add_concept_resource(conceptID, unit, conceptIDdict)
     unitLesson = store_new_question(q, unit, concept, **kwargs)
     errorModels = store_errors(q, concept, unitLesson, conceptIDdict)
     for r in q.get('responses', ()):
         store_response(r, course, unitLesson, errorModels, genericErrors,
                        genericIndex)
-    print(('saved %s: %d error models, %d responses' \
+    print(('saved %s: %d error models, %d responses'
       % (unitLesson.lesson.title, len(errorModels),
          len(q.get('responses', ())))))
     return unitLesson
+
 
 def index_generic_errors(unit):
     'extract generic error models and construct phrase index'
@@ -156,7 +158,7 @@ def index_generic_errors(unit):
     genericIndex = PhraseIndex(l)
     return genericErrors, genericIndex
 
-    
+
 def load_orct_data(infile='orctmerge.json', course=None, unit=None,
                    courseID=None, unitID=None, conceptIDfile=None):
     'load ORCT questions, responses etc into this unit'
@@ -175,10 +177,12 @@ def load_orct_data(infile='orctmerge.json', course=None, unit=None,
             store_question(q, course, unit, genericErrors, genericIndex,
                            conceptIDdict)
 
+
 def load_json(infile):
     with codecs.open(infile, 'r', encoding='utf-8') as ifile:
         data = json.load(ifile)
     return data
+
 
 class PhraseIndex(object):
     def __init__(self, t, nword=2):
@@ -188,8 +192,8 @@ class PhraseIndex(object):
         self.sizes = {}
         for i, text in t:
             n, l = self.get_phrases(text)
-            self.sizes[i] = n # save numbers of phrases
-            for j in range(n): # index all phrases in this text
+            self.sizes[i] = n  # save numbers of phrases
+            for j in range(n):  # index all phrases in this text
                 phrase = tuple(l[j:j + nword])
                 try:
                     d[phrase].append(i)
@@ -202,7 +206,7 @@ class PhraseIndex(object):
         l = text.split()
         if len(l) > self.nword:
             return len(l) - self.nword + 1, l
-        else: # handle short phrases gracefully to allow matching
+        else:  # handle short phrases gracefully to allow matching
             return 1, l
 
     def __getitem__(self, text):
@@ -212,12 +216,11 @@ class PhraseIndex(object):
         for j in range(n):
             phrase = tuple(l[j:j + self.nword])
             for i in self.d.get(phrase, ()):
-                counts[i] = counts.get(i, 0)  + 1
+                counts[i] = counts.get(i, 0) + 1
         if not counts:
             raise KeyError
         l = []
-        for i, c in list(counts.items()): # compute match fractions
+        for i, c in list(counts.items()):  # compute match fractions
             l.append((c / float(self.sizes[i]), i))
         l.sort()
-        return l[-1][1] # return id with highest match fraction
-
+        return l[-1][1]  # return id with highest match fraction

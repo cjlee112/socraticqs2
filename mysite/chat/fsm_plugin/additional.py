@@ -1,4 +1,4 @@
-from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS, Lesson
+from ct.models import UnitStatus, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS, Lesson, UnitLesson
 from core.common.mongo import c_chat_context
 from ..models import Message
 
@@ -10,7 +10,7 @@ def help_egde_decision(self, edge, fsmStack, request, useCurrent=False, **kwargs
                                          timestamp__isnull=True)
     if not additionals:
         return fsm.get_node('END')
-    
+
     return edge.toNode
 
 
@@ -85,15 +85,15 @@ class ADDITIONAL_CORRECT_ANSWER(object):
 
     title = 'Show correct answer for Multiple Choices'
     edges = (
-            dict(name='next', toNode='GREAT_MESSAGE', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GREAT_MESSAGE', title='Assess yourself'),
+    )
 
 
 class ADDITIONAL_INCORRECT_ANSWER(object):
     title = 'Show correct answer for Multiple Choices'
     edges = (
-            dict(name='next', toNode='ADDITIONAL_INCORRECT_CHOICE', title='Assess yourself'),
-        )
+        dict(name='next', toNode='ADDITIONAL_INCORRECT_CHOICE', title='Assess yourself'),
+    )
 
 
 class ADDITIONAL_INCORRECT_CHOICE(object):
@@ -143,8 +143,8 @@ class ADDITIONAL_ASK(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='ADDITIONAL_GET_ANSWER', title='Answer a question'),
-        )
+        dict(name='next', toNode='ADDITIONAL_GET_ANSWER', title='Answer a question'),
+    )
 
 
 class ADDITIONAL_GET_ANSWER(object):
@@ -169,7 +169,7 @@ class ADDITIONAL_GET_ANSWER(object):
                 if unit.unitlesson_set.filter(
                     kind=UnitLesson.COMPONENT, order__isnull=True
                 ).exists():
-                    return fsm.get_node('IF_RESOURCES') 
+                    return fsm.get_node('IF_RESOURCES')
                 else:
                     return fsm.get_node('END')
             else:  # just a lesson to read
@@ -180,8 +180,8 @@ class ADDITIONAL_GET_ANSWER(object):
 
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='ADDITIONAL_CONFIDENCE', title='Go to confidence'),
-        )
+        dict(name='next', toNode='ADDITIONAL_CONFIDENCE', title='Go to confidence'),
+    )
 
 
 class ADDITIONAL_CONFIDENCE(object):
@@ -204,7 +204,7 @@ class ADDITIONAL_GET_CONFIDENCE(object):
             return fsm.get_node('ADDITIONAL_CORRECT_ANSWER')
         else:
             return edge.toNode
-        
+
         return edge.toNode
 
     title = 'Choose confidence'
@@ -218,8 +218,8 @@ class ADDITIONAL_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='ADDITIONAL_ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
-        )
+        dict(name='next', toNode='ADDITIONAL_ASSESS_QUESTION_MESSAGE', title='Assess yourself'),
+    )
 
 
 class ADDITIONAL_ASSESS_QUESTION_MESSAGE(object):
@@ -227,8 +227,8 @@ class ADDITIONAL_ASSESS_QUESTION_MESSAGE(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='ADDITIONAL_GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='ADDITIONAL_GET_ASSESS', title='Assess yourself'),
+    )
     help = 'How close was your answer to the one shown here?'
 
 
@@ -238,8 +238,8 @@ class ADDITIONAL_GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='START', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='START', title='View Next Lesson'),
+    )
 
 
 class NEED_HELP_MESSAGE(object):
@@ -279,8 +279,8 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='STUDENTERROR', title='View Next Lesson'),
+    )
 
 
 class START_MESSAGE(object):
@@ -306,14 +306,11 @@ class RESOLVE(object):
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
-        )
-    
+        dict(name='next', toNode='MESSAGE_NODE', title='Go to self-assessment'),
+    )
+
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
-
-        unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        unit_lesson = unitStatus.get_lesson()
         if fsmStack.state.unitLesson.lesson.kind == 'orct':
             return fsm.get_node('ADDITIONAL_GET_ANSWER')
         else:
@@ -336,8 +333,8 @@ class GET_RESOLVE(object):
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='RESOLVE', title='Go to self-assessment'),
-        )
+        dict(name='next', toNode='RESOLVE', title='Go to self-assessment'),
+    )
 
 
 class END(object):

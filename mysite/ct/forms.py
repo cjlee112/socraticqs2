@@ -1,12 +1,23 @@
 from django import forms
-from django.forms import widgets
-from ct.models import Response, Course, Unit, Concept, Lesson, ConceptLink, ConceptGraph, STATUS_CHOICES, StudentError, UnitLesson
+
+from ct.models import (
+    Response,
+    Course,
+    Unit,
+    Concept,
+    Lesson,
+    ConceptLink,
+    ConceptGraph,
+    STATUS_CHOICES,
+    StudentError,
+    UnitLesson,
+)
 from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Field, Div
+from crispy_forms.layout import Submit, Field
 
 
-## from crispy_forms.bootstrap import StrictButton
+# from crispy_forms.bootstrap import StrictButton
 from mysite.helpers import base64_to_file
 
 
@@ -17,6 +28,7 @@ class ResponseForm(forms.ModelForm):
         self.helper.form_id = 'id-responseForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', 'Save'))
+
     class Meta:
         model = Response
         fields = ['text', 'confidence']
@@ -54,6 +66,7 @@ class SelfAssessForm(forms.Form):
     liked = forms.BooleanField(required=False,
                 label='''Check here if this lesson really showed
                 you something you were missing before.''')
+
     def __init__(self, *args, **kwargs):
         super(SelfAssessForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -71,10 +84,11 @@ class AssessErrorsForm(forms.Form):
 class ReorderForm(forms.Form):
     newOrder = forms.ChoiceField()
     oldOrder = forms.CharField()
+
     def __init__(self, initial, total, *args, **kwargs):
         super(ReorderForm, self).__init__(*args, **kwargs)
         self.fields['newOrder'].initial = str(initial)
-        self.fields['newOrder'].choices = [(str(i),str(i + 1))
+        self.fields['newOrder'].choices = [(str(i), str(i + 1))
                                            for i in range(total)]
 
 
@@ -82,6 +96,7 @@ class NextLikeForm(forms.Form):
     liked = forms.BooleanField(required=False,
                 label='''Check here if this lesson really showed
                 you something you were missing before.''')
+
     def __init__(self, *args, **kwargs):
         super(NextLikeForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -93,6 +108,7 @@ class NextLikeForm(forms.Form):
 
 class NextForm(forms.Form):
     fsmtask = forms.CharField(widget=forms.HiddenInput)
+
     def __init__(self, label='Next', fsmtask='next', submitArgs={},
                  *args, **kwargs):
         super(NextForm, self).__init__(*args, **kwargs)
@@ -106,6 +122,7 @@ class NextForm(forms.Form):
 
 class LaunchFSMForm(NextForm):
     fsmName = forms.CharField(widget=forms.HiddenInput)
+
     def __init__(self, fsmName, label, fsmtask='launch',
                  *args, **kwargs):
         super(LaunchFSMForm, self).__init__(label, fsmtask, *args, **kwargs)
@@ -114,6 +131,7 @@ class LaunchFSMForm(NextForm):
 
 class TaskForm(forms.Form):
     task = forms.CharField(widget=forms.HiddenInput)
+
     def __init__(self, task='start', label='Start', *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
         self.fields['task'].initial = task
@@ -127,6 +145,7 @@ class TaskForm(forms.Form):
 class LessonRoleForm(forms.Form):
     role = forms.ChoiceField(choices=UnitLesson.ROLE_CHOICES,
                              label='Role of this thread in this courselet:')
+
     def __init__(self, initial=UnitLesson.LESSON_ROLE, *args, **kwargs):
         super(LessonRoleForm, self).__init__(*args, **kwargs)
         self.fields['role'].initial = initial
@@ -160,12 +179,12 @@ class UnitTitleForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = ['title', 'description', 'img_url', 'small_img_url']
-    
+
     def clean_title(self):
-         data = self.cleaned_data['title']
-         if len(data.strip()) == 0:
-             raise forms.ValidationError("Courselet title should contain at least 1 symbol.")
-         return data
+        data = self.cleaned_data['title']
+        if len(data.strip()) == 0:
+            raise forms.ValidationError("Courselet title should contain at least 1 symbol.")
+        return data
 
 
 class NewUnitTitleForm(UnitTitleForm):
@@ -188,19 +207,20 @@ class CourseTitleForm(forms.ModelForm):
         fields = ['title', 'access', 'description', 'trial']
 
 
-
 class NewCourseTitleForm(CourseTitleForm):
     submitLabel = 'Add'
 
 
 class ConceptForm(forms.ModelForm):
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(ConceptForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-conceptForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = Concept
         fields = ['title']
@@ -210,6 +230,7 @@ class NewConceptForm(forms.Form):
     title = forms.CharField()
     description = forms.CharField(widget=forms.Textarea)
     submitLabel = 'Add'
+
     def __init__(self, *args, **kwargs):
         super(NewConceptForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -221,21 +242,23 @@ class NewConceptForm(forms.Form):
 class ConceptSearchForm(forms.Form):
     search = forms.CharField(max_length=300, label='Search for concepts containing')
 
-
     def clean_search(self):
         data = self.cleaned_data['search']
         if len(data.strip()) == 0:
             raise forms.ValidationError("This field should contains at least one letter.")
         return data
 
+
 class ConceptLinkForm(forms.ModelForm):
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(ConceptLinkForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-conceptLinkForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = ConceptLink
         fields = ['relationship']
@@ -243,12 +266,14 @@ class ConceptLinkForm(forms.ModelForm):
 
 class ConceptGraphForm(forms.ModelForm):
     submitLabel = 'Update'
+
     def __init__(self, *args, **kwargs):
         super(ConceptGraphForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-conceptGraphForm'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', self.submitLabel))
+
     class Meta:
         model = ConceptGraph
         fields = ['relationship']
@@ -271,8 +296,9 @@ class NewErrorForm(forms.ModelForm):
 
 class ErrorForm(NewErrorForm):
     submitLabel = 'Update'
-    changeLog = forms.CharField(required=False,
-            label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
+    changeLog = forms.CharField(
+        required=False,
+        label='Commit Message (to commit a snapshot to your version history, summarize changes made since the last snapshot)')
 
     class Meta:
         model = Lesson
@@ -375,12 +401,11 @@ class NewLessonForm(NewErrorForm):
 
 
 class ResponseFilterForm(forms.Form):
-    selfeval = forms.ChoiceField(required=False, initial=Response.DIFFERENT,
-                choices=(('', '----'),) + Response.EVAL_CHOICES[:2])
-    status = forms.ChoiceField(required=False,
-                choices=(('', '----'),) + STATUS_CHOICES)
-    confidence = forms.ChoiceField(required=False,
-                choices=(('', '----'),) + Response.CONF_CHOICES)
+    selfeval = forms.ChoiceField(
+        required=False, initial=Response.DIFFERENT,
+        choices=(('', '----'),) + Response.EVAL_CHOICES[:2])
+    status = forms.ChoiceField(required=False, choices=(('', '----'),) + STATUS_CHOICES)
+    confidence = forms.ChoiceField(required=False, choices=(('', '----'),) + Response.CONF_CHOICES)
 
 
 class SearchFormBase(forms.Form):
@@ -392,20 +417,23 @@ class SearchFormBase(forms.Form):
         self.helper.form_class = 'form-inline'
         self.helper.field_template = 'ct/inline_field_with_errors.html'
         self.helper.add_input(Submit('submit', 'Search'))
-    ##    self.helper.add_input(StrictButton('Search', css_class='btn-default'))
-    ## sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
-    ##                              label='Search Courselets.org and')
+    #    self.helper.add_input(StrictButton('Search', css_class='btn-default'))
+    # sourceDB = forms.ChoiceField(choices=(('wikipedia', 'Wikipedia'),),
+    #                              label='Search Courselets.org and')
+
 
 class LessonSearchForm(SearchFormBase):
-    searchType = forms.ChoiceField(choices=(('question', 'questions'), ('lesson', 'lessons')),
-                             label='Search for')
+    searchType = forms.ChoiceField(choices=(('question', 'questions'), ('lesson', 'lessons')), label='Search for')
     search = forms.CharField(label='containing')
+
 
 class ErrorSearchForm(SearchFormBase):
     search = forms.CharField(label='Search for errors containing')
 
+
 class LogoutForm(forms.Form):
     task = forms.CharField(initial='logout', widget=forms.HiddenInput)
+
     def __init__(self, *args, **kwargs):
         super(LogoutForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -413,8 +441,10 @@ class LogoutForm(forms.Form):
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', 'Sign out'))
 
+
 class CancelForm(forms.Form):
     task = forms.CharField(initial='abort', widget=forms.HiddenInput)
+
     def __init__(self, *args, **kwargs):
         super(CancelForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)

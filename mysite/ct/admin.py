@@ -1,5 +1,4 @@
 from django.contrib import admin
-from ct.models import Liked
 
 from .forms import BaseForm
 from .models import (
@@ -30,6 +29,7 @@ MODELS = (
     FAQ,
     InquiryCount
 )
+
 
 @admin.register(UnitLesson)
 class UnitLessonAdmin(admin.ModelAdmin):
@@ -68,6 +68,7 @@ class AdminRole(admin.ModelAdmin):
 def short_text(obj):
     return obj.text[:25] + " ..."
 
+
 @admin.register(Response)
 class AdminResponse(admin.ModelAdmin):
     list_display = ('author', 'kind', 'course', 'lesson', 'text', 'attachment', 'is_preview', 'is_test', short_text)
@@ -82,11 +83,15 @@ class AdminStudentError(admin.ModelAdmin):
 
 def user_username(obj):
     return obj.addedBy.username
+
+
 user_username.short_description = 'Username'
 
 
 def lesson_title(obj):
     return obj.unitLesson.lesson.title
+
+
 lesson_title.short_description = 'Lesson title'
 
 
