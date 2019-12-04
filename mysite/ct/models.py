@@ -1407,7 +1407,7 @@ class Response(models.Model, SubKindMixin):
             return
         if self.kind == self.COMMENT:
             url = reverse(
-                'ct:ul_thread',
+                'ct:ul_thread_student',
                 kwargs={
                     'course_id': self.course.id,
                     'unit_id': self.unitLesson.unit.id,
