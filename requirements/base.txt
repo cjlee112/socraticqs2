@@ -1,10 +1,10 @@
-Django==2.1.12
-django-cms==3.6.0
+Django==2.1.15
+django-cms==3.7.1
 djangocms-text-ckeditor==3.8.0
-djangocms-admin-style==1.2.9
+djangocms-admin-style==1.4.0
 django-filer==1.6.0
 
-amqp==2.5.0
+amqp==2.5.2
 
 # Distributed Task Queue
 celery==4.3.0
@@ -16,35 +16,36 @@ django-crispy-forms==1.7.2
 git+https://github.com/cmltaWt0/ims_lti_py.git@master
 git+https://github.com/cmltaWt0/python-oauth2.git@v1.9.1
 
-lxml==4.3.4
+lxml==4.4.2
 pypandoc==1.4
 
 # social authentication/registration mechanizm
 social-auth-app-django==3.1.0
 requests==2.22.0
 
-pytz==2018.4
+pytz==2019.3
+
+# Update to some supportable package
 wikipedia==1.4.0
 
-sqlparse==0.2.2
-python-memcached==1.58
+python-memcached==1.59
 injections==0.2.2
 djangorestframework==3.10.2
 django-waffle==0.15.0
 django_intercom
 
-pandas==0.25.0
+pandas==0.25.3
 unicodecsv==0.14.1
 django-bower==5.2.0
 
 pygeoip==0.3.2
 
 # Sentry
-sentry-sdk==0.13.3
+sentry-sdk==0.13.5
 
-kombu==4.6.3
+kombu==4.6.7
 
-pymongo==3.8.0
+pymongo==3.9.0
 redis==3.3.4
 
 

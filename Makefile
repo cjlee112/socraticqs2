@@ -33,9 +33,9 @@ else
 endif
 
 sh:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) bash
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) bash
 
-run:
+dev.up:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) up -d
 
 start:
@@ -45,7 +45,7 @@ restart:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) restart
 
 debug:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run --service-ports $(APP)
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm --service-ports $(APP)
 
 build: .prebuild .build .touch .migrate .load-fixtures .fsm-deploy
 ifneq ($(filter $(env),$(STAGE_ENV) $(PROD_ENV)),)
@@ -60,39 +60,39 @@ endif
 	docker build -t local/courselets:base-local -f Docker/Dockerfile .
 
 .build:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) build
+	docker-compose -f $(DOCKERCOMPOSE_PATH) build --no-cache
 
 .touch:
 	touch $(DEFAULT_APP_PWD)/settings/local.py
 
 .migrate:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py migrate
 
 .fsm-deploy:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py fsm_deploy
 
 .load-fixtures:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
 .init-data:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py flush
 
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run -rm $(APP) \
 			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
 .static:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run --no-deps $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm --no-deps $(APP) \
 			python manage.py collectstatic --noinput
 
 .react:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run react
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm react
 
 .prepare-geo:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run --no-deps $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm --no-deps $(APP) \
 			bash -c \
 			" \
 			find . | grep -E "GeoLiteCity.dat.gz" | xargs rm -rf && \
@@ -108,7 +108,7 @@ rm:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) rm
 
 test:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			bash -c \
 			" \
 			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \

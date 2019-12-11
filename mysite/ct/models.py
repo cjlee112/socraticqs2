@@ -1,6 +1,7 @@
 import re
 import time
 import logging
+from dateutil import tz
 from copy import deepcopy
 from datetime import timedelta
 
@@ -19,6 +20,7 @@ from django.contrib.sites.models import Site
 
 from core.tasks import faq_notify_instructors, faq_notify_students
 from core.common import onboarding
+from core.common.mongo import c_chat_context
 from core.common.utils import update_onboarding_step, create_intercom_event
 from ct.templatetags.ct_extras import md2html
 
@@ -726,7 +728,7 @@ class UnitLesson(models.Model):
         l.save()
 
     def __str__(self):
-        return "UnitLesson: {}".format(self.lesson.title)
+        return f"UnitLesson: {self.lesson.title}"
 
     @classmethod
     def create_from_lesson(klass, lesson, unit, order=None, kind=None,
@@ -937,6 +939,60 @@ class UnitLesson(models.Model):
     def is_question(self):
         'is this a question?'
         return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
+
+    def question_faq_updates(self, chat):
+        """
+        Returns Question FAQ updates.
+        """
+        result = 0
+        last_access_time = None
+        context = c_chat_context().find_one({"chat_id": chat.id})
+        if context:
+            last_access_time = context.get('activity', {}).get(f"{self.id}")
+        if last_access_time:
+            result = Response.objects.filter(
+                kind=Response.STUDENT_QUESTION,
+                atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+                unitLesson__id=self.id).count()
+
+        return result
+
+    def answers_faq_updates(self, chat):
+        """
+        Returns Answers FAQ updates.
+        """
+        result = 0
+        last_access_time = None
+        context = c_chat_context().find_one({"chat_id": chat.id})
+        if context:
+            answer = self.get_answers().first()
+            last_access_time = context.get('activity', {}).get(f"{self.id}")
+        if last_access_time and answer:
+            result = Response.objects.filter(
+                kind=Response.STUDENT_QUESTION,
+                atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+                unitLesson__id=answer.id).count()
+
+        return result
+
+    def em_updates(self, chat):
+        result = 0
+        last_access_time = None
+        context = c_chat_context().find_one({"chat_id": chat.id})
+        if context:
+            last_access_time = context.get('activity', {}).get(f"{self.id}")
+        if last_access_time:
+            result = self.unitlesson_set.filter(
+                kind=self.MISUNDERSTANDS,
+                atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
+
+        return result
+
+    def updates(self, chat):
+        """
+        Currently presents Question FAQ updates.
+        """
+        return self.question_faq_updates(chat) + self.answers_faq_updates(chat) + self.em_updates(chat)
 
 
 def reorder_exercise(self, old=0, new=0, l=()):

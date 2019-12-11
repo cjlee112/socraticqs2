@@ -15,7 +15,7 @@ class BestPracticeTemplateAdmin(admin.ModelAdmin):
     list_display = ('title', 'scope')
     list_filter = ('scope',)
     formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
+        fields.JSONField: {'widget': JSONEditorWidget(mode='code')},
     }
     prepopulated_fields = {"slug": ("title",)}
 
@@ -25,7 +25,7 @@ class BestPracticeAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'courselet', 'active', 'scope')
     list_filter = ('active', 'template__scope')
     formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
+        fields.JSONField: {'widget': JSONEditorWidget(mode='code')},
     }
 
     def title(self, ob):

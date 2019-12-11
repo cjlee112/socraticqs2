@@ -1,7 +1,6 @@
-
 import logging
 import injections
-from functools import reduce, cmp_to_key
+from functools import reduce
 
 import waffle
 
@@ -10,10 +9,11 @@ from django.urls import reverse
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
-from .models import Message, Chat
-from .services import ProgressHandler
 from ct.models import UnitLesson
 from accounts.models import Instructor
+from .models import Message, Chat, ChatDivider
+from .services import ProgressHandler
+
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='get_name', read_only=True)
     avatar = serializers.SerializerMethodField()
     initials = serializers.SerializerMethodField()
+    thread_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -36,7 +37,8 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             'userMessage',
             'avatar',
             'html',
-            'initials'
+            'initials',
+            'thread_id',
         )
 
     def get_avatar(self, obj):
@@ -53,6 +55,9 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             else:
                 return  # Myabe need to add here something like "PR" (professor)?
         return 'me'
+
+    def get_thread_id(self, obj):
+        return obj.content.unitlesson_id if isinstance(obj.content, ChatDivider) else None
 
 
 class InputSerializer(serializers.Serializer):
@@ -229,6 +234,7 @@ class LessonSerializer(serializers.ModelSerializer):
     html = serializers.CharField(source='lesson.title', read_only=True)
     isDone = serializers.SerializerMethodField()
     isUnlocked = serializers.SerializerMethodField()
+    updatesCount = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
 
     class Meta:
@@ -237,7 +243,8 @@ class LessonSerializer(serializers.ModelSerializer):
             'id',
             'html',
             'isUnlocked',
-            'isDone'
+            'isDone',
+            'updatesCount',
         )
 
     def get_id(self, obj):
@@ -254,6 +261,9 @@ class LessonSerializer(serializers.ModelSerializer):
             return False
 
     def get_isDone(self, obj):
+        if hasattr(obj, 'is_done'):
+            return obj.is_done
+
         if hasattr(obj, 'message'):
             msg = Message.objects.get(id=obj.message)
             lesson_order = msg.content.unitlesson.order
@@ -279,17 +289,25 @@ class LessonSerializer(serializers.ModelSerializer):
                 if diff >= 1:
                     return False
                 elif diff == 0:
+                    obj.is_done = True
                     return True
                 else:
                     return False
             if check_fsm_name('chat'):
-                return lesson_order < chat.state.unitLesson.order
+                is_done = lesson_order < chat.state.unitLesson.order
+                obj.is_done = is_done
+                return is_done
             if check_fsm_name('additional') or check_fsm_name('faq'):
                 return lesson_order < chat.state.parentState.unitLesson.order
             else:
+                obj.is_done = True
                 return True
         else:
             return False
+
+    def get_updatesCount(self, obj):
+        is_done = obj.is_done if hasattr(obj, 'is_done') else self.get_isDone(obj)
+        return obj.updates(self.context.get('chat')) if is_done and self.context.get('chat') else 0
 
 
 class ChatProgressSerializer(serializers.ModelSerializer):
@@ -328,7 +346,8 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                                 self.context['request'].user.username,
                                 msg.kind,
                                 msg.text
-                        ))  # pragma: no cover
+                            )
+                        )  # pragma: no cover
             else:
                 lessons = list(
                     obj.enroll_code.courseUnit.unit.unitlesson_set.filter(
@@ -345,7 +364,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                             lessons.append(lesson)
                     except:
                         pass
-            self.lessons_dict = LessonSerializer(many=True).to_representation(lessons)
+            self.lessons_dict = LessonSerializer(many=True, context={'chat': obj}).to_representation(lessons)
         return self.lessons_dict
 
     def get_progress(self, obj):
@@ -404,6 +423,7 @@ class AddUnitByChatStepSerializer(serializers.ModelSerializer):
             'isUnlocked',
             'isDone'
         )
+
 
 class AddUnitByChatSerializer(ChatProgressSerializer):
     """
