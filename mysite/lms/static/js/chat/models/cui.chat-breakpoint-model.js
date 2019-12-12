@@ -25,6 +25,14 @@ CUI.ChatBreakpointModel = function(data){
    */
   this.id = data.id;
 
+
+  /**
+   * A unqiue thread ID for the breakpoint.
+   * @type {number}
+   * @public
+   */
+  this.threadId = data.threadId;
+
   /**
    * The html that is displayed within the breakpoint.
    * @type {string}

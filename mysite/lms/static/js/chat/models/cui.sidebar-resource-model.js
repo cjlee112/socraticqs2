@@ -31,7 +31,14 @@ CUI.SidebarResourceModel = function(data){
    */
   this.id = data.id;
 
-    /**
+  /**
+   * The id of the thread breakpoint links to in the chat.
+   * @type {number}
+   * @public
+   */
+  this.threadId = data.threadId;
+  
+  /**
    * The id of the message this breakpoint links to in the chat.
    * @type {number}
    * @public

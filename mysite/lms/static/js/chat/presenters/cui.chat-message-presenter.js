@@ -16,7 +16,7 @@ CUI.ChatMessagePresenter = function(model){
    * @type {String}
    * @public
    */
-   this.el = null;
+  this.el = null;
 
   /**
    * A jQuery object containing the DOM element for this message.

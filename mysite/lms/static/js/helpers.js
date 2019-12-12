@@ -13,7 +13,7 @@ window.onerror = function(msg, url, line, col, error) {
    extra += !error ? '' : '\nerror: ' + error;
 
    // Log the error to the console
-   console.log("Error: " + msg + "\nurl: " + url + "\nline: " + line + extra);
+   console.log("Error: " + msg + "\nurl: " + url + ":" + line + "\nline: " + line + extra);
    // TODO Log errors with ajax
 
    // Alert the user that something went wrong

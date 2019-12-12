@@ -33,6 +33,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
   this._chatID = chatID;
 
   /**
+   * Current thread unique ID.
+   * @type {number}
+   * @protected
+   */
+  this._currentThreadId = -1;
+
+  /**
    * An object with references to all messages, media, and breakpoints currently in the chat.
    * @type {Object.<number, CUI.ChatMessagePresenter|CUI.ChatMediaPresenter|CUI.ChatBreakpointPresenter>}
    * @protected
@@ -665,10 +672,18 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
       var model;
 
       // Create a model based on type
-      if(m.type === 'message') model = new CUI.ChatMessageModel(m);
-      else if(m.type === 'media') model = new CUI.ChatMediaModel(m);
-      else if(m.type === 'breakpoint') model = new CUI.ChatBreakpointModel(m);
-      else throw new Error("CUI.ChatPresenter._parseMessages(): Invalid m.type.");
+      if (m.type === 'breakpoint') {
+        model = new CUI.ChatBreakpointModel(m);
+        this._currentThreadId = model.threadId;
+      } else {
+        m.threadId = this._currentThreadId;
+
+        if (m.type === 'message') {
+          model = new CUI.ChatMessageModel(m);
+        } else if (m.type === 'media') {
+          model = new CUI.ChatMediaModel(m);
+        } else throw new Error("CUI.ChatPresenter._parseMessages(): Invalid m.type.");
+      }
 
       // Add message to chat
       newMessages.push(this._addMessage(model));
@@ -919,16 +934,46 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(id){
   }
 };
 
-CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul){
+CUI.ChatPresenter.prototype._getAllMessageElements = function(){
+  return $('.chat-message,.chat-breakpoint');
+};
+
+CUI.ChatPresenter.prototype._showMessages = function(threadId){
+  var $messageElementToScrollTo = null;
+  threadId = parseInt(threadId);
+
+  this._getAllMessageElements().each(function(){
+    var $messageElement = $(this);
+
+    if ($messageElement.data('thread-id') === threadId) {
+      $messageElement.css('display', '');
+
+      if (!$messageElementToScrollTo && $messageElement.hasClass('chat-breakpoint')) {
+        $messageElementToScrollTo = $messageElement;
+      }
+    } else {
+      $messageElement.css('display', 'none');
+    }
+  });
+
+  var scrollToMessageId = $messageElementToScrollTo ? $messageElementToScrollTo.data('message-id') : -1;
+  if (scrollToMessageId >= 0) {
+    this._scrollToMessage(scrollToMessageId);
+  }
+};
+
+CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, threadId){
   var $message;
   var top;
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
+    this._showMessages(threadId);
     top = $message.offset().top - 60;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
       this._getMessages(this._resourcesUrl+ul+'/');
+      this._showMessages(threadId);
   };
 };
 /**
@@ -1167,7 +1212,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Scroll to message
-    this._scrollToMessage($(e.currentTarget).data('href'));
+    this._showMessages($(e.currentTarget).data('href'));
   }, this));
 
   // Delegated events for sidebar resources links
@@ -1175,10 +1220,15 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Scroll to message
-    if ($.inArray('started', e.currentTarget.classList) > -1 ||
-        $.inArray('unlocked', e.currentTarget.classList) > -1 ) {
-    this._scrollToResourceMessage($(e.currentTarget).data('href'), $(e.currentTarget).data('ul'));
-  }
+    var $currentTarget = $(e.currentTarget);
+
+    if ($currentTarget.hasClass('started') || $currentTarget.hasClass('unlocked')) {      
+      this._scrollToResourceMessage(
+        $currentTarget.data('href'), 
+        $currentTarget.data('ul'),
+        $currentTarget.data('thread-id')
+      );
+    }
   }, this));
 
   // Text input submit

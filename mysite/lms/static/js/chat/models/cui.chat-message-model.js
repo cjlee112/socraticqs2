@@ -32,6 +32,13 @@ CUI.ChatMessageModel = function(data){
    */
   this.id = data.id;
 
+    /**
+   * A unqiue thread ID for the message.
+   * @type {number}
+   * @public
+   */
+  this.threadId = data.threadId;
+
   /**
    * The message html that is displayed within the message body.
    * @type {string}

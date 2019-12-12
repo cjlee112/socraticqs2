@@ -6,10 +6,12 @@
 this["CUI"] = this["CUI"] || {};
 this["CUI"]["views"] = this["CUI"]["views"] || {};
 this["CUI"]["views"]["chatBreakpoint"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function";
+    var stack1, helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function", alias5=container.escapeExpression;
 
-  return "<div class=\"chat-breakpoint\" data-message-id=\""
-    + container.escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
+  return "<div class=\"chat-breakpoint\" data-thread-id="
+    + alias5(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"threadId","hash":{},"data":data}) : helper)))
+    + " data-message-id=\""
+    + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
     + "\">\n  <span>"
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"html","hash":{},"data":data}) : helper))) != null ? stack1 : "")
     + "</span>\n</div>\n";
@@ -45,7 +47,9 @@ this["CUI"]["views"]["chatMedia"] = Handlebars.template({"1":function(container,
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.thumbnail : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + " "
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.caption : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "\" data-message-id=\""
+    + "\" data-thread-id="
+    + alias5(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"threadId","hash":{},"data":data}) : helper)))
+    + " data-message-id=\""
     + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
     + "\">\n  <div class=\"chat-container\">\n    <div class=\"inner\">\n      <img src=\""
     + alias5(((helper = (helper = helpers.avatar || (depth0 != null ? depth0.avatar : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"avatar","hash":{},"data":data}) : helper)))
@@ -108,12 +112,14 @@ this["CUI"]["views"]["chatMessage"] = Handlebars.template({"1":function(containe
     + alias5(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"text","hash":{},"data":data}) : helper)))
     + "</li>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function";
+    var stack1, helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function", alias5=container.escapeExpression;
 
   return "<div class=\"chat-message chat-message-text "
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.userMessage : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "\" data-message-id=\""
-    + container.escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
+    + "\" data-thread-id="
+    + alias5(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"threadId","hash":{},"data":data}) : helper)))
+    + " data-message-id=\""
+    + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
     + "\">\n  <div class=\"chat-container\">\n    <div class=\"inner\">\n"
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.avatar : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data})) != null ? stack1 : "")
     + "      <div class=\"chat-bubble\">\n        "
@@ -155,7 +161,7 @@ this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(co
     + " "
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.isDone : depth0),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "\" data-href=\""
-    + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
+    + alias5(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"threadId","hash":{},"data":data}) : helper)))
     + "\" data-updates-count=\""
     + alias5(((helper = (helper = helpers.updatesCount || (depth0 != null ? depth0.updatesCount : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"updatesCount","hash":{},"data":data}) : helper)))
     + "\">\n  "
@@ -179,9 +185,11 @@ this["CUI"]["views"]["sidebarResources"] = Handlebars.template({"1":function(con
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.isStarted : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "\n           "
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.isDone : depth0),{"name":"if","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "\"\n           data-href=\""
+    + "\"\n    data-href=\""
     + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data}) : helper)))
-    + "\"\n           data-ul=\""
+    + "\"\n    data-thread-id=\""
+    + alias5(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"threadId","hash":{},"data":data}) : helper)))
+    + "\"\n    data-ul=\""
     + alias5(((helper = (helper = helpers.ul || (depth0 != null ? depth0.ul : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"ul","hash":{},"data":data}) : helper)))
     + "\">\n  "
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"html","hash":{},"data":data}) : helper))) != null ? stack1 : "")

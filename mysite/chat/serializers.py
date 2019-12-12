@@ -26,7 +26,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='get_name', read_only=True)
     avatar = serializers.SerializerMethodField()
     initials = serializers.SerializerMethodField()
-    thread_id = serializers.SerializerMethodField()
+    threadId = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
@@ -38,7 +38,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             'avatar',
             'html',
             'initials',
-            'thread_id',
+            'threadId',
         )
 
     def get_avatar(self, obj):
@@ -56,7 +56,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
                 return  # Myabe need to add here something like "PR" (professor)?
         return 'me'
 
-    def get_thread_id(self, obj):
+    def get_threadId(self, obj):
         return obj.content.unitlesson_id if isinstance(obj.content, ChatDivider) else None
 
 
@@ -236,6 +236,7 @@ class LessonSerializer(serializers.ModelSerializer):
     isUnlocked = serializers.SerializerMethodField()
     updatesCount = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
+    threadId = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
@@ -245,6 +246,7 @@ class LessonSerializer(serializers.ModelSerializer):
             'isUnlocked',
             'isDone',
             'updatesCount',
+            'threadId',
         )
 
     def get_id(self, obj):
@@ -308,6 +310,9 @@ class LessonSerializer(serializers.ModelSerializer):
     def get_updatesCount(self, obj):
         is_done = obj.is_done if hasattr(obj, 'is_done') else self.get_isDone(obj)
         return obj.updates(self.context.get('chat')) if is_done and self.context.get('chat') else 0
+    
+    def get_threadId(self, obj):
+        return obj.id
 
 
 class ChatProgressSerializer(serializers.ModelSerializer):
@@ -364,6 +369,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                             lessons.append(lesson)
                     except:
                         pass
+            
             self.lessons_dict = LessonSerializer(many=True, context={'chat': obj}).to_representation(lessons)
         return self.lessons_dict
 
@@ -456,6 +462,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
     isStarted = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
     ul = serializers.SerializerMethodField()
+    threadId = serializers.SerializerMethodField()
 
     class Meta:
         model = UnitLesson
@@ -465,7 +472,8 @@ class ResourcesSerializer(serializers.ModelSerializer):
             'html',
             'isUnlocked',
             'isStarted',
-            'isDone'
+            'isDone',
+            'threadId',
         )
 
     def get_id(self, obj):
@@ -515,6 +523,12 @@ class ResourcesSerializer(serializers.ModelSerializer):
                 return True
         else:
             return False
+    
+    def get_threadId(self, obj):
+        """
+        Get id of current thread.
+        """
+        return obj.id
 
 
 class ChatResourcesSerializer(serializers.ModelSerializer):
