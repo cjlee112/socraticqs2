@@ -942,12 +942,11 @@ class UnitLesson(models.Model):
         'is this a question?'
         return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
 
-    def question_faq_updates(self, chat, last_access_time: datetime) -> int:
+    def question_faq_updates(self, last_access_time: datetime) -> int:
         """
         Count new Question FAQ updates.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -957,12 +956,11 @@ class UnitLesson(models.Model):
             atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
             unitLesson__id=self.id).count()
 
-    def answer_faq_updates(self, chat, last_access_time: datetime) -> int:
+    def answer_faq_updates(self, last_access_time: datetime) -> int:
         """
         Count new Answer FAQ updates.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -974,12 +972,11 @@ class UnitLesson(models.Model):
             atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
             unitLesson__id=answer.id).count() if answer else 0
 
-    def question_faq_comment_updates(self, chat, last_access_time: datetime) -> int:
+    def question_faq_comment_updates(self, last_access_time: datetime) -> int:
         """
         Count Question FAQ updates.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -989,12 +986,11 @@ class UnitLesson(models.Model):
             atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
             unitLesson__id=self.id).count()
 
-    def answer_faq_comment_updates(self, chat, last_access_time: datetime) -> int:
+    def answer_faq_comment_updates(self, last_access_time: datetime) -> int:
         """
         Count Answer FAQ updates.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -1006,12 +1002,11 @@ class UnitLesson(models.Model):
             atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
             unitLesson__id=answer.id).count() if answer else 0
 
-    def em_updates(self, chat, last_access_time: datetime) -> int:
+    def em_updates(self, last_access_time: datetime) -> int:
         """
         Count all new EMs.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -1020,12 +1015,11 @@ class UnitLesson(models.Model):
             kind=self.MISUNDERSTANDS,
             atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
 
-    def em_resolutions(self, chat, last_access_time: datetime) -> int:
+    def em_resolutions(self, last_access_time: datetime) -> int:
         """
         Count new resolution for all EMs for a given Thread.
 
         Params:
-        - chat: Chat
         - last_access_time: timezone aware datetime object
 
         Return value: int
@@ -1049,12 +1043,12 @@ class UnitLesson(models.Model):
         tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
 
         return reduce(operator.add, [
-            self.question_faq_updates(chat, tz_aware_datetime),
-            self.answer_faq_updates(chat, tz_aware_datetime),
-            self.em_updates(chat, tz_aware_datetime),
-            self.em_resolutions(chat, tz_aware_datetime),
-            self.question_faq_comment_updates(chat, tz_aware_datetime),
-            self.answer_faq_comment_updates(chat, tz_aware_datetime),
+            self.question_faq_updates(tz_aware_datetime),
+            self.answer_faq_updates(tz_aware_datetime),
+            self.em_updates(tz_aware_datetime),
+            self.em_resolutions(tz_aware_datetime),
+            self.question_faq_comment_updates(tz_aware_datetime),
+            self.answer_faq_comment_updates(tz_aware_datetime),
         ], 0) if tz_aware_datetime else 0
 
 
