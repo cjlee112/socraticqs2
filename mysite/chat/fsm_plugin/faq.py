@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.utils import timezone
 
 from ct.models import UnitStatus, Response, InquiryCount
 from core.common.mongo import c_faq_data, c_chat_context
@@ -45,13 +44,7 @@ class START(object):
                 upsert=True
             )
         _next = 'show_faq' if faqs_for_ul else 'ask_new_faq'
-        c_chat_context().update_one(
-            {"chat_id": chat.id},
-            {"$set": {
-                f"activity.{unit_lesson.parent.id}": timezone.now()
-            }},
-            upsert=True
-        )
+
         return fsmStack.state.transition(
             fsmStack, request, _next, useCurrent=True, **kwargs
         )

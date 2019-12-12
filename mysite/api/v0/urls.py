@@ -52,6 +52,6 @@ urlpatterns = [
     path('bp/create/', BestPracticeCreate.as_view(), name='bp-creation'),
     path('bp/upload/', BestPracticeUpload.as_view(), name='bp-upload'),
 
-    path('unit/update/<int:pk>/', UnitViewSet.as_view({'put': 'update', 'get': 'retrieve',}), name='unit_update')
+    path('unit/update/<int:pk>/', UnitViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='unit_update')
 
 ]

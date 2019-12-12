@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from core.common.mongo import c_chat_context
 from ct.models import UnitStatus, UnitLesson, Lesson
 
@@ -69,6 +71,8 @@ def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **k
         {"chat_id": chat.id},
         {"$set": {
             "actual_ul_id": answer.id if answer else nextUL.id,
+            "thread_id": nextUL.id,
+            f"activity.{nextUL.id}": timezone.now(),
             "need_faqs": False
         }},
         upsert=True
@@ -196,7 +200,7 @@ class GET_ANSWER(object):
                 if unit.unitlesson_set.filter(
                     kind=UnitLesson.COMPONENT, order__isnull=True
                 ).exists():
-                    return fsm.get_node('IF_RESOURCES') 
+                    return fsm.get_node('IF_RESOURCES')
                 else:
                     return fsm.get_node('END')
             else:  # just a lesson to read
@@ -257,7 +261,7 @@ class CORRECT_ANSWER(object):
             if unit.unitlesson_set.filter(
                 kind=UnitLesson.COMPONENT, order__isnull=True
             ).exists():
-                return fsm.get_node('IF_RESOURCES') 
+                return fsm.get_node('IF_RESOURCES')
             else:
                 return fsm.get_node('END')
         else:  # just a lesson to read

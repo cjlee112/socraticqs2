@@ -1588,6 +1588,6 @@ class BestPracticePreCalculation(DetailView):
         context['input_data'] = self.object.calculation
         context['best_practice_template_id'] = self.object.id
         return context
-    
+
     def post(self, request, *args, **kwargs):
         return HttpResponseRedirect(reverse('ctms:create_course'))

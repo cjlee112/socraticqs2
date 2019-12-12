@@ -953,7 +953,7 @@ class UnitLesson(models.Model):
         """
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
-            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            atime__gt=last_access_time,
             unitLesson__id=self.id).count()
 
     def answer_faq_updates(self, last_access_time: datetime) -> int:
@@ -969,7 +969,7 @@ class UnitLesson(models.Model):
 
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
-            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            atime__gt=last_access_time,
             unitLesson__id=answer.id).count() if answer else 0
 
     def question_faq_comment_updates(self, last_access_time: datetime) -> int:
@@ -983,7 +983,7 @@ class UnitLesson(models.Model):
         """
         return Response.objects.filter(
             kind=Response.COMMENT,
-            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            atime__gt=last_access_time,
             unitLesson__id=self.id).count()
 
     def answer_faq_comment_updates(self, last_access_time: datetime) -> int:
@@ -999,7 +999,7 @@ class UnitLesson(models.Model):
 
         return Response.objects.filter(
             kind=Response.COMMENT,
-            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            atime__gt=last_access_time,
             unitLesson__id=answer.id).count() if answer else 0
 
     def em_updates(self, last_access_time: datetime) -> int:
@@ -1011,9 +1011,7 @@ class UnitLesson(models.Model):
 
         Return value: int
         """
-        return self.unitlesson_set.filter(
-            kind=self.MISUNDERSTANDS,
-            atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
+        return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS, atime__gt=last_access_time).count()
 
     def em_resolutions(self, last_access_time: datetime) -> int:
         """
@@ -1025,9 +1023,7 @@ class UnitLesson(models.Model):
         Return value: int
         """
         def get_new_resolutions_count(em: UnitLesson) -> int:
-            return em.unitlesson_set.filter(
-                kind=self.RESOLVES,
-                atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
+            return em.unitlesson_set.filter(kind=self.RESOLVES, atime__gt=last_access_time).count()
 
         thread_ems = self.get_errors()
         result = reduce(operator.add, [get_new_resolutions_count(em) for em in thread_ems], 0)

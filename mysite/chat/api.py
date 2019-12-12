@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework import viewsets, generics
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -33,6 +34,8 @@ from chat.permissions import IsOwner
 from ct.models import Response as StudentResponse, Lesson, DONE_STATUS
 from ct.models import UnitLesson
 from lti.utils import key_secret_generator
+
+from .utils import update_activity
 
 
 inj_alternative = injections.Container()
@@ -189,6 +192,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 float(self.request.data.get('text'))
             except ValueError as e:
                 return Response({'error': 'Not correct value!'})
+        # Consider to move it to a backgrount task
+        update_activity(chat_id)
         return super(MessagesView, self).update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
@@ -700,6 +705,46 @@ class ResourcesView(ValidateMixin, viewsets.ModelViewSet):
         )[0]
         chat.next_point = self.next_handler.next_point(
             current=unitlesson, chat=chat, message=m, request=request, resources=True
+        )
+        serializer = MessageSerializer(m)
+        return Response(serializer.data)
+
+
+@injections.has
+class UpdatesView(ValidateMixin, APIView):
+    """
+    Return resources for chat.
+    """
+    next_handler = FsmHandler()
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request, pk=None):
+        chat_id = self.request.GET.get('chat_id')
+        try:
+            chat = self.validate_and_get_chat(chat_id)
+        except ValidationError as e:
+            return Response({'errors': str(e)})
+        self.check_object_permissions(self.request, chat)
+
+        unitlesson = get_object_or_404(UnitLesson, pk=pk)
+
+        divider = ChatDivider(
+            text=unitlesson.lesson.title, unitlesson=unitlesson
+        )
+
+        divider.save()
+        m = Message.objects.get_or_create(
+            contenttype='chatdivider',
+            content_id=divider.id,
+            input_type='custom',
+            type='breakpoint',
+            chat=chat,
+            owner=chat.user,
+            kind='message',
+            is_additional=True
+        )[0]
+        chat.next_point = self.next_handler.next_point(
+            current=unitlesson, chat=chat, message=m, request=request, updates=True
         )
         serializer = MessageSerializer(m)
         return Response(serializer.data)

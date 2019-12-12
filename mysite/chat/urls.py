@@ -1,13 +1,16 @@
 import injections
 from django.conf.urls import url, include
+from django.urls import path
 from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
-from chat.api import AddUnitByChatProgressView
 
-from chat.views import CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
-from .views import ChatInitialView, InitializeLiveSession
-from .api import MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat
-from .services import FsmHandler, LiveChatFsmHandler
+from .views import (
+    ChatInitialView, InitializeLiveSession, CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
+)
+from .api import (
+    MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat, UpdatesView, AddUnitByChatProgressView
+)
+from .services import FsmHandler
 
 
 inj = injections.Container()
@@ -61,7 +64,7 @@ urlpatterns = [
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),
     url(r'^progress/add_unit/$', AddUnitByChatProgressView.as_view(), name='add_unit_progress'),
-
+    path('updates/<int:pk>/', UpdatesView.as_view(), name='updates'),
 
     url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),

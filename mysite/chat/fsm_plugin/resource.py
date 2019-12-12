@@ -59,8 +59,8 @@ class START(object):
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
-            dict(name='next', toNode='LESSON', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='LESSON', title='View Next Lesson'),
+    )
 
 
 class LESSON(object):
@@ -71,8 +71,8 @@ class LESSON(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='END', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='END', title='View Next Lesson'),
+    )
 
 
 class ASK(object):
@@ -80,8 +80,8 @@ class ASK(object):
     # node specification data goes here
     title = 'View an explanation'
     edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
-        )
+        dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+    )
 
 
 class GET_ANSWER(object):
@@ -89,8 +89,8 @@ class GET_ANSWER(object):
     # node specification data goes here
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
-        )
+        dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
+    )
 
 
 class ASSESS(object):
@@ -98,8 +98,8 @@ class ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
 
 
 class GET_ASSESS(object):
@@ -108,8 +108,8 @@ class GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='END', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='END', title='View Next Lesson'),
+    )
 
 
 class ERRORS(object):
@@ -117,8 +117,8 @@ class ERRORS(object):
     # node specification data goes here
     title = 'Error options'
     edges = (
-            dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
-        )
+        dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
+    )
 
 
 class GET_ERRORS(object):
@@ -126,8 +126,9 @@ class GET_ERRORS(object):
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='END', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='END', title='View Next Lesson'),
+    )
+
 
 class END(object):
     # node specification data goes here
