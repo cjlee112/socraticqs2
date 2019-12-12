@@ -1,9 +1,11 @@
 import re
 import time
 import logging
+import operator
 from dateutil import tz
 from copy import deepcopy
-from datetime import timedelta
+from datetime import timedelta, datetime
+from functools import reduce
 
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -940,51 +942,101 @@ class UnitLesson(models.Model):
         'is this a question?'
         return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
 
-    def question_faq_updates(self, chat):
+    def question_faq_updates(self, chat, last_access_time: datetime) -> int:
         """
-        Returns Question FAQ updates.
+        Count new Question FAQ updates.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
         """
-        result = 0
-        last_access_time = None
-        context = c_chat_context().find_one({"chat_id": chat.id})
-        if context:
-            last_access_time = context.get('activity', {}).get(f"{self.id}")
-        if last_access_time:
-            result = Response.objects.filter(
-                kind=Response.STUDENT_QUESTION,
-                atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
-                unitLesson__id=self.id).count()
+        return Response.objects.filter(
+            kind=Response.STUDENT_QUESTION,
+            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            unitLesson__id=self.id).count()
 
-        return result
-
-    def answers_faq_updates(self, chat):
+    def answer_faq_updates(self, chat, last_access_time: datetime) -> int:
         """
-        Returns Answers FAQ updates.
+        Count new Answer FAQ updates.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
         """
-        result = 0
-        last_access_time = None
-        context = c_chat_context().find_one({"chat_id": chat.id})
-        if context:
-            answer = self.get_answers().first()
-            last_access_time = context.get('activity', {}).get(f"{self.id}")
-        if last_access_time and answer:
-            result = Response.objects.filter(
-                kind=Response.STUDENT_QUESTION,
-                atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
-                unitLesson__id=answer.id).count()
+        answer = self.get_answers().first()
 
-        return result
+        return Response.objects.filter(
+            kind=Response.STUDENT_QUESTION,
+            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            unitLesson__id=answer.id).count() if answer else 0
 
-    def em_updates(self, chat):
-        result = 0
-        last_access_time = None
-        context = c_chat_context().find_one({"chat_id": chat.id})
-        if context:
-            last_access_time = context.get('activity', {}).get(f"{self.id}")
-        if last_access_time:
-            result = self.unitlesson_set.filter(
-                kind=self.MISUNDERSTANDS,
+    def question_faq_comment_updates(self, chat, last_access_time: datetime) -> int:
+        """
+        Count Question FAQ updates.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
+        """
+        return Response.objects.filter(
+            kind=Response.COMMENT,
+            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            unitLesson__id=self.id).count()
+
+    def answer_faq_comment_updates(self, chat, last_access_time: datetime) -> int:
+        """
+        Count Answer FAQ updates.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
+        """
+        answer = self.get_answers().first()
+
+        return Response.objects.filter(
+            kind=Response.COMMENT,
+            atime__gt=last_access_time.replace(tzinfo=tz.tzutc()),
+            unitLesson__id=answer.id).count() if answer else 0
+
+    def em_updates(self, chat, last_access_time: datetime) -> int:
+        """
+        Count all new EMs.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
+        """
+        return self.unitlesson_set.filter(
+            kind=self.MISUNDERSTANDS,
+            atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
+
+    def em_resolutions(self, chat, last_access_time: datetime) -> int:
+        """
+        Count new resolution for all EMs for a given Thread.
+
+        Params:
+        - chat: Chat
+        - last_access_time: timezone aware datetime object
+
+        Return value: int
+        """
+        def get_new_resolutions_count(em: UnitLesson) -> int:
+            return em.unitlesson_set.filter(
+                kind=self.RESOLVES,
                 atime__gt=last_access_time.replace(tzinfo=tz.tzutc())).count()
+
+        thread_ems = self.get_errors()
+        result = reduce(operator.add, [get_new_resolutions_count(em) for em in thread_ems], 0)
 
         return result
 
@@ -992,7 +1044,18 @@ class UnitLesson(models.Model):
         """
         Currently presents Question FAQ updates.
         """
-        return self.question_faq_updates(chat) + self.answers_faq_updates(chat) + self.em_updates(chat)
+        context = c_chat_context().find_one({"chat_id": chat.id})
+        last_access_time = context.get('activity', {}).get(f"{self.id}") if context else None
+        tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
+
+        return reduce(operator.add, [
+            self.question_faq_updates(chat, tz_aware_datetime),
+            self.answer_faq_updates(chat, tz_aware_datetime),
+            self.em_updates(chat, tz_aware_datetime),
+            self.em_resolutions(chat, tz_aware_datetime),
+            self.question_faq_comment_updates(chat, tz_aware_datetime),
+            self.answer_faq_comment_updates(chat, tz_aware_datetime),
+        ], 0) if tz_aware_datetime else 0
 
 
 def reorder_exercise(self, old=0, new=0, l=()):
