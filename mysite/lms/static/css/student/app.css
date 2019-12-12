@@ -1132,7 +1132,8 @@ p + p {
       cursor: default;
       opacity: 0.6;
       background: url(../../img/student/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
-      background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none; }
+      background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none;
+      position: relative; }
     .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
     .chat-sidebar .chat-sidebar-resources li.unlocked,
     .chat-sidebar .chat-sidebar-resources li.done {
@@ -1152,6 +1153,20 @@ p + p {
     .chat-sidebar .chat-sidebar-resources li.unlocked.done {
       background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-done.svg), none; }
+    .chat-sidebar .chat-sidebar-breakpoints .breakpoints-unreads,
+    .chat-sidebar .chat-sidebar-resources .breakpoints-unreads {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: red;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-weight: bold; }
 
 /* --- Chat spinner --- */
 .chat-loading {

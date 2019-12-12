@@ -961,6 +961,7 @@
       // IE8 SVG fallback https://css-tricks.com/using-svg/
       background: url(../../img/student/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none;
+      position: relative;
     }
 
     li.unlocked, li.done {
@@ -983,6 +984,21 @@
       // IE8 SVG fallback https://css-tricks.com/using-svg/
       background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-done.svg), none;
+    }
+
+    .breakpoints-unreads {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: red;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-weight: bold;
     }
   }
 }

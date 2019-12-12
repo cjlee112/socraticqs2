@@ -137,6 +137,12 @@ this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(co
     return " started ";
 },"5":function(container,depth0,helpers,partials,data) {
     return " done ";
+},"7":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=container.propertyIsEnumerable;
+
+  return "  <span class=\"breakpoints-unreads\">\n      "
+    + container.escapeExpression(((helper = (helper = helpers.updatesCount || (depth0 != null ? depth0.updatesCount : depth0)) != null ? helper : container.hooks.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"updatesCount","hash":{},"data":data}) : helper)))
+    + "\n  </span>\n";
 },"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function", alias5=container.escapeExpression;
 
@@ -154,7 +160,9 @@ this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(co
     + alias5(((helper = (helper = helpers.updatesCount || (depth0 != null ? depth0.updatesCount : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"updatesCount","hash":{},"data":data}) : helper)))
     + "\">\n  "
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"html","hash":{},"data":data}) : helper))) != null ? stack1 : "")
-    + "\n</li>\n";
+    + "\n"
+    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.updatesCount : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "</li>\n";
 },"useData":true});
 this["CUI"]["views"]["sidebarResources"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     return " unlocked ";

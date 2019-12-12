@@ -1,3 +1,8 @@
 <li class="{{#if isStarted}} unlocked {{/if}} {{#if isStarted}} started {{/if}} {{#if isUnlocked}} unlocked {{/if}} {{#if isDone}} done {{/if}}" data-href="{{id}}" data-updates-count="{{updatesCount}}">
   {{{html}}}
+  {{#if updatesCount}}
+  <span class="breakpoints-unreads">
+      {{updatesCount}}
+  </span>
+  {{/if}}
 </li>
