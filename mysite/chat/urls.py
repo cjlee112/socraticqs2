@@ -5,7 +5,7 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 
 from .views import (
-    ChatInitialView, InitializeLiveSession, CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
+    ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView
 )
 from .api import (
     MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat, UpdatesView, AddUnitByChatProgressView
@@ -54,12 +54,6 @@ urlpatterns = [
         r'^preview/enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
         CourseletPreviewView.as_view(),
         name='preview_courselet'
-    ),
-    # add units
-    url(
-        r'^course/(?P<course_id>\d+)/courselet/(?P<courselet_id>\d+)/add_units/enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/$',
-        ChatAddLessonView.as_view(),
-        name='add_units_by_chat'
     ),
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),

@@ -1,34 +1,23 @@
-import logging
 import random
-from django.db.models.aggregates import Count
-from django.db.models.expressions import When, Case
-from django.db.models.fields import BooleanField, IntegerField
 
 import waffle
 import injections
-from django.db import models
+from django.db.models.expressions import When, Case
+from django.db.models.fields import IntegerField
 from django.db.models import Q
 from django.views.generic import View
-from django.http import Http404
-from django.template import RequestContext
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
-from django.contrib.staticfiles.templatetags.staticfiles import static
-from waffle import switch_is_active
 
+from mysite.mixins import LoginRequiredMixin
+from ct.models import Role, UnitLesson, ConceptLink, CourseUnit
 from chat.models import Message
-from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler, ChatAddUnitFsmHandler
+from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
 from chat.serializers import ChatProgressSerializer
-from chat.utils import enroll_generator
-from ctms.views import CourseCoursletUnitMixin
 from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-from ct.models import Unit, Role, UnitLesson, ConceptLink, CourseUnit
-from mysite.mixins import LoginRequiredMixin
 
 
 @injections.has
@@ -217,8 +206,6 @@ class ChatInitialView(LoginRequiredMixin, View):
                 trial_mode = bool(user_enrolled.trial_mode)  # course is not trial or role has already been set
         return trial_mode
 
-
-
     @staticmethod
     def check_unitlessons_with_order_null_exists(unit):
         return unit.unitlesson_set.filter(order__isnull=False).exists()
@@ -292,34 +279,6 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
-        # ).annotate(
-        #     lessons_done=models.Sum(
-        #         models.Case(
-        #             models.When(
-        #                 message__contenttype='unitlesson',
-        #                 message__kind='base',
-        #                 message__type='message',
-        #                 message__owner=request.user,
-        #                 message__timestamp__isnull=False,
-        #                 then=1
-        #             ),
-        #             default=0,
-        #             output_field=models.IntegerField()
-        #         )
-        #     ),
-        # )
-        # TODO: This should work correctly byt doesn't, because of NOT distinct result of query,
-        # TODO: We should find a way how to make it distinct to make only one query
-        # ).annotate(
-        #     total_lessons=models.Sum(
-        #         models.Case(
-        #             models.When(
-        #                 enroll_code__courseUnit__unit__unitlesson__order__isnull=False, then=1
-        #             ),
-        #             default=0,
-        #             output_field=models.IntegerField()
-        #         ))
-        # )
         for chat_ss in chat_sessions:
             chat_prog_ser = ChatProgressSerializer()
             lessons = chat_prog_ser.get_breakpoints(chat_ss)
@@ -465,38 +424,6 @@ class CourseletPreviewView(ChatInitialView):
         request.user.fsmstate_set.filter(chat__is_preview=True).delete()
         request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
         return super(CourseletPreviewView, self).get(request, enroll_key)
-
-
-class ChatAddLessonView(ChatNoJSInit, ChatInitialView):
-    next_handler = ChatAddUnitFsmHandler()
-    template_name = 'chat/add_unit_chat.html'
-
-    def get(self, request, enroll_key, **kwargs):
-        if not switch_is_active("add_unit_by_chat"):
-            raise Http404()
-        response = super(ChatAddLessonView, self).get(request, enroll_key)
-        return response
-
-    @staticmethod
-    def get_back_url(*args, **kwargs):
-        return "Course", reverse('ctms:courslet_view', kwargs={
-            'course_pk': kwargs['courseUnit'].course.id,
-            'pk': kwargs['courseUnit'].id
-        })
-
-    @staticmethod
-    def check_unitlessons_with_order_null_exists(unit):
-        return True
-
-    @staticmethod
-    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
-        return False
-
-    def get_chat(self, request, enroll_code, **kwargs):
-        return ChatInitialView.get_chat(
-            request, enroll_code, is_preview=False,
-            state__fsmNode__fsm__name=self.next_handler.FMS_name
-        )
 
 
 class InitializeLiveSession(ChatInitialView):

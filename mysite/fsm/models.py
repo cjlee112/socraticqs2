@@ -188,7 +188,7 @@ class FSMNode(JSONBlobMixin, ChatMixin, models.Model):
             return func(self, state, request)
 
     def __str__(self):
-        return '::'.join((self.name, self.funcName))
+        return f'{self.name}::{self.funcName}'
 
 
 class FSMDone(ValueError):

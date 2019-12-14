@@ -3,10 +3,10 @@ Handler container module.
 """
 from django.utils import timezone
 
-from .models import Message
 from fsm.fsm_base import FSMStack
 from ct.models import Lesson, UnitLesson
 from core.common.mongo import c_chat_context
+from .models import Message
 
 
 class ProgressHandler(object):
@@ -100,6 +100,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         chat.save()
         return chat.next_point
 
+    # TODO: Simplify
     def next_point(self, current, chat, message, request, resources=False, updates=False):
         next_point = None
         additionals = Message.objects.filter(is_additional=True,
@@ -159,6 +160,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             message.timestamp = timezone.now()
             message.save()
 
+        # TODO: move to external function
         group = True
         while group:
             if self.group_filter(message, next_point):
@@ -203,10 +205,6 @@ class LiveChatFsmHandler(FsmHandler):
 
 class ChatPreviewFsmHandler(FsmHandler):
     FMS_name = 'courselet_preview'
-
-
-class ChatAddUnitFsmHandler(FsmHandler):
-    FMS_name = 'chat_add_lesson'
 
 
 class TestHandler(GroupMessageMixin, ProgressHandler):

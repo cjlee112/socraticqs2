@@ -44,7 +44,7 @@ $(function(){
     var chatID = $(e.currentTarget).data('chat-id') || CUI.config.chatID;
 
     // Create the chat
-    var chat = new CUI.ChatPresenter(chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl);
+    var chat = new CUI.ChatPresenter(chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl, CUI.config.updatesUrl);
   });
 });
 

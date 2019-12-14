@@ -2,13 +2,8 @@ from django.utils import timezone
 
 from core.common.mongo import c_chat_context
 from ct.models import UnitStatus, UnitLesson
+from chat.models import Message
 
-
-def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    """
-    Edge method that moves us to right state for next lesson (or END).
-    """
-    return edge.toNode
 
 
 def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -54,8 +49,6 @@ class START(object):
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
         )
-
-    next_edge = next_lesson
     # node specification data goes here
     title = 'Start This Courselet'
     edges = (
@@ -75,14 +68,73 @@ def get_lesson_url(self, node, state, request, **kwargs):
 
 class UPDATES(object):
     """
-    View a lesson explanation.
+    View a lesson updates.
     """
     next_edge = next_lesson_after_title
     get_path = get_lesson_url
 
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        _data = {
+            'chat': chat,
+            'text': 'Imagine updates for this thread here :)',
+            'owner': chat.user,
+            'input_type': 'custom',  # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+            'kind': 'message',  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
     title = 'View updates'
     edges = (
-        dict(name='next', toNode='END', title='View Next Lesson'),
+        dict(name='next', toNode='ACT', title='Ask for acknowlegement'),
+    )
+
+
+class ACT(object):
+    """
+    Get acknowledgement.
+    """
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        _data = {
+            'chat': chat,
+            'text': 'Have you changed your mind?',
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+    title = 'Check acknowlegement'
+    edges = (
+        dict(name='next', toNode='GET_ACT', title='Get an acknowlegement'),
+    )
+
+
+class GET_ACT(object):
+    """
+    Get acknowledgement.
+    """
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        _data = {
+            'chat': chat,
+            'text': 'Change me: change',
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+    title = 'Check acknowlegement'
+    edges = (
+        dict(name='next', toNode='END', title='Move to the end'),
     )
 
 
@@ -101,6 +153,20 @@ class END(object):
         else:
             return '''Congratulations! You have completed the core lessons for this
                       courselet.'''
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        _data = {
+            'chat': chat,
+            'text': 'Some smart last message.',
+            'owner': chat.user,
+            'input_type': 'custom',  # SUBKIND_TO_INPUT_TYPE_MAP.get(sub_kind, 'custom'),
+            'kind': 'message',  # SUB_KIND_TO_KIND_MAP.get(sub_kind, next_lesson.lesson.kind),
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
     title = 'Courselet core lessons completed'
 
 
@@ -112,10 +178,12 @@ def get_specs():
     spec = FSMSpecification(
         name='updates',
         hideTabs=True,
-        title='Take the courselet core lessons',
+        title='Present updates for a particular Thread.',
         pluginNodes=[
             START,
             UPDATES,
+            ACT,
+            GET_ACT,
             END
         ],
 

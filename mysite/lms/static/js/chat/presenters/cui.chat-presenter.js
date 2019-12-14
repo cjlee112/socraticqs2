@@ -12,12 +12,13 @@ var CUI = CUI || {};
  * @param {string} progressUrl      - A url for loading a user's progress.
  * @returns {CUI.ChatPresenter}
  */
-CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
+CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl){
   // Check arguments
   if(typeof chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
   if(!historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
   if(!progressUrl) throw new Error('CUI.ChatPresenter(): No progressUrl.');
   if(!resourcesUrl) throw new Error('CUI.ChatPresenter(): No resourcesUrl.');
+  if(!updatesUrl) throw new Error('CUI.ChatPresenter(): No updatesUrl.');
 
   /* When chat gets doWait parameter it should show messages only first time. This flag is about it.
    * @type {bool}
@@ -80,6 +81,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl){
    * @protected
    */
   this._resourcesUrl = resourcesUrl;
+
+  /**
+   * The url for loading a updates of the unit.
+   * @type {string}
+   * @protected
+   */
+  this._updatesUrl = updatesUrl;
 
   /**
    * The currently active input type in the chat. 'text', 'options', or 'custom'.
@@ -267,7 +275,7 @@ CUI.ChatPresenter.prototype._getProgress = function(){
 };
 
 /**
- * Loads resources of the unit and sends the response to {@link CUI.ChatPresenter#_parseProgress}.
+ * Loads resources of the unit and sends the response to {@link CUI.ChatPresenter#_parseResources}.
  * @protected
  */
 CUI.ChatPresenter.prototype._getResources = function(){
@@ -629,7 +637,7 @@ CUI.ChatPresenter.prototype._parseResources = function(data){
       }
     }
   else{
-    throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');
+    throw new Error('CUI.ChatPresenter._parseResources(): No data');
   }
 };
 
@@ -1213,6 +1221,9 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
 
     // Scroll to message
     this._showMessages($(e.currentTarget).data('href'));
+    if ( $(e.currentTarget).data('updates-count') ) {
+      this._getMessages(this._updatesUrl+$(e.currentTarget).data('href')+'/');
+    };
   }, this));
 
   // Delegated events for sidebar resources links

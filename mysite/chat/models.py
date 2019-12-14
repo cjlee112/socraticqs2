@@ -305,8 +305,6 @@ class Message(models.Model):
             self.chat and next_point and
             next_point.input_type == 'options'
         ):
-            if self.chat.state and self.chat.state.fsmNode.fsm.name == 'chat_add_lesson':
-                return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             if next_point.sub_kind in ('add_faq', 'get_faq_answer'):
                 return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             # We need Continue buttom for FAQ
@@ -366,11 +364,6 @@ class Message(models.Model):
         if self.kind == 'abort':
             return self.get_aborts()
         html = self.text
-        if self.is_in_fsm_node('chat_add_lesson'):
-            if self.contenttype == 'chatdivider':
-                html = self.content.text
-            else:
-                return mark_safe(md2html(self.text or ''))
         if self.content_id:
             if self.contenttype == 'chatdivider':
                 html = self.content.text

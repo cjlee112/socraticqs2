@@ -30,7 +30,7 @@ from ..fsm_plugin.chat import get_specs
 from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
 from ..fsm_plugin.faq import get_specs as get_specs_faq
-from ..views import ChatInitialView, CourseletPreviewView, ChatAddLessonView, CheckChatInitialView
+from ..views import ChatInitialView, CourseletPreviewView, CheckChatInitialView
 
 
 class CustomTestCase(TestCase):
@@ -1813,14 +1813,6 @@ class TestChatGetBackUrls(CustomTestCase):
                 'pk': self.unit.pk
             })
         ),
-        (ChatAddLessonView, "Course",
-         lambda self: reverse(
-             'ctms:courslet_view',
-             kwargs={
-                 'course_pk': self.course.id,
-                 'pk': self.courseunit.id
-             })
-         ),
         (CheckChatInitialView, "Return",
          lambda self: reverse(
              'lms:tester_course_view',

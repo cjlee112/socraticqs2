@@ -175,6 +175,10 @@ class ChatMixin(object):
         faq_response_pattern = QUESTION_STACK_PATTERN.format(request.user.id, chat.id)
         is_additional = chat.state.fsmNode.fsm.fsm_name_is_one_of('additional', 'resource')
         next_lesson = chat.state.unitLesson
+
+        if hasattr(self._plugin, 'get_message'):
+            return self._plugin.get_message(chat, next_lesson, is_additional)
+
         if self.node_name_is_one_of('LESSON'):
             input_type = 'custom'
             kind = next_lesson.lesson.kind
@@ -575,7 +579,8 @@ class ChatMixin(object):
                     {}
                 """
                 .format(
-                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(['<h3>{}</h3>'.format(_) for _ in my_choices]),
+                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(
+                        ['<h3>{}</h3>'.format(_) for _ in my_choices]),
                     incorrect_description
                 )
             )
@@ -602,7 +607,8 @@ class ChatMixin(object):
                     {}
                 """
                 .format(
-                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(['<h3>{}</h3>'.format(_) for _ in my_choices]),
+                    my_choices[0] if len(my_choices) == 1 else '<br>' + ''.join(
+                        ['<h3>{}</h3>'.format(_) for _ in my_choices]),
                     incorrect_description
                 )
             )
@@ -808,7 +814,7 @@ class ChatMixin(object):
         if self.node_name_is_one_of('MESSAGE_NODE'):
             additional_info = c_chat_stack().find_one(
                 {"stack_id": stack_pattern}, {"additional_stack": 1, "_id": 0}).get("additional_stack")
-            student_error_id, em_id = additional_info.get('student_error_id'), additional_info.get('em_id')
+            student_error_id, _ = additional_info.get('student_error_id'), additional_info.get('em_id')  # FIXME
             message = Message.objects.get_or_create(
                 chat=chat,
                 owner=chat.user,
@@ -818,12 +824,13 @@ class ChatMixin(object):
                 kind='message',
                 is_additional=True)[0]
         if self.node_name_is_one_of(
-            'END', 
-            'IF_RESOURCES', 
-            'NEED_HELP_MESSAGE', 
+            'END',
+            'IF_RESOURCES',
+            'NEED_HELP_MESSAGE',
             'ASSESS_QUESTION_MESSAGE',
-            'ADDITIONAL_ASSESS_QUESTION_MESSAGE'):
-            if not self.help:   
+            'ADDITIONAL_ASSESS_QUESTION_MESSAGE'
+        ):
+            if not self.help:
                 text = self.get_help(chat.state, request=None)
             else:
                 text = self.help
@@ -957,36 +964,6 @@ class ChatMixin(object):
                 _data['contenttype'] = message.contenttype
 
             # content_id = current.id if current else None
-            message = Message.objects.create(**_data)
-
-        if self.name in ('START', 'UNIT_NAME_TITLE', 'NOT_A_QUESTION') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
-            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
-            _data = dict(
-                chat=chat,
-                text=text,
-                input_type='custom',
-                kind='message',
-                is_additional=is_additional,
-                owner=chat.user,
-            )
-            message = Message.objects.create(**_data)
-
-        if self.name in ('UNIT_QUESTION', 'UNIT_ANSWER') and self.fsm.fsm_name_is_one_of('chat_add_lesson'):
-            text = "**{}** \n\n{}".format(self.title, getattr(self, 'help', '') or '')
-            _data = dict(
-                chat=chat,
-                text=text,
-                input_type='custom',
-                kind='message',
-                is_additional=is_additional,
-                owner=chat.user,
-            )
-            if message and message.content_id:
-                _data['content_id'] = message.content_id
-                _data['contenttype'] = 'unitlesson'
-            elif isinstance(current, UnitLesson):
-                _data['content_id'] = current.id
-                _data['contenttype'] = 'unitlesson'
             message = Message.objects.create(**_data)
 
         if self.name in ('HAS_UNIT_ANSWER', 'WELL_DONE'):
