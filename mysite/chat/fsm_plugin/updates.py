@@ -5,7 +5,6 @@ from ct.models import UnitStatus, UnitLesson
 from chat.models import Message
 
 
-
 def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
     Edge method that moves us to right state for next lesson (or END).

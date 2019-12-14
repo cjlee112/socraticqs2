@@ -69,6 +69,7 @@ KIND_CHOICES = (
 
 SUB_KIND_CHOICES = (
     ('add_faq', 'add_faq'),
+    ('transition', 'transition'),
 )
 
 
@@ -301,6 +302,7 @@ class Message(models.Model):
         options = None
         next_point = self.chat.next_point
         CONTINUE_BTN = {"value": 1, "text": "Continue"}
+        TRANSITION_BTN = {"value": 1, "text": "Move to the next Thread"}
         if (
             self.chat and next_point and
             next_point.input_type == 'options'
@@ -308,7 +310,9 @@ class Message(models.Model):
             if next_point.sub_kind in ('add_faq', 'get_faq_answer'):
                 return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
             # We need Continue buttom for FAQ
-            if next_point.kind in ('button', 'faqs'):
+            if next_point.kind == 'button' and next_point.sub_kind == 'transition':
+                options = [TRANSITION_BTN]
+            elif next_point.kind in ('button', 'faqs'):
                 options = [CONTINUE_BTN]
             elif next_point.kind == 'ask_faq_understanding':
                 options = [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]

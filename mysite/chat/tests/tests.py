@@ -389,7 +389,14 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)['addMessages']), 3)
+        self.assertEqual(len(json.loads(response.content)['addMessages']), 2)
+
+        next_url = json_content['input']['url']
+        next_url, json_content = self._push_continue(next_url, chat_id)
+        self.assertEqual(len(json_content['addMessages']), 2)
+        # There are two messages - congrats and look ant resources
+        self.assertIn('Congratulations!', json_content['addMessages'][0]['html'])
+        self.assertIn('Please look over the available resources in the side panel.', json_content['addMessages'][1]['html'])
 
     def test_permission_denied(self):
         """
@@ -517,7 +524,13 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
 
         self.assertIn('html', json_content['addMessages'][0])
-        self.assertEqual(json_content['addMessages'][0]['html'], '<p>My Answer</p>\n')
+        self.assertEqual(json_content['addMessages'][0]['html'], 'Now you can move to the next lesson')
+
+        next_url = json_content['input']['url']
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
+
+        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
 
     def test_typical_chat_flow(self):
         """
@@ -568,6 +581,9 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
 
         next_url, _ = self._push_continue(next_url, chat_id)
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
 
         # post answer
         answer = 'My Answer'
@@ -632,7 +648,17 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
         self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
 
         # get next question (2)
         response = self.client.get(
@@ -641,9 +667,8 @@ class MessagesViewTests(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-
-        self.assertEqual(len(json_content['addMessages']), 3)
-        self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
+        self.assertEqual(len(json_content['addMessages']), 1)
+        self.assertEqual(json_content['addMessages'][0]['html'], 'Answer please')
 
         # post answer (2)
         response = self.client.put(
@@ -742,6 +767,31 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # Roll FAQs
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 'no', "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
+
         # get next message - question (3)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
@@ -752,14 +802,8 @@ class MessagesViewTests(CustomTestCase):
 
         next_url, json_content = self._push_continue(next_url, chat_id)
 
-        # Roll FAQs
+        # Move to the next Thread
         next_url, json_content = self._push_continue(next_url, chat_id)
-        response = self.client.put(
-            next_url,
-            data=json.dumps({"option": 'no', "chat_id": chat_id}),
-            content_type='application/json',
-            follow=True
-        )
 
         self.assertEqual(json_content['input']['type'], 'text')
         # Response should contain only DIVIDER and Question (ORCT) itself
@@ -866,7 +910,6 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        status_msg = json_content['input']['options'][0]['text']
         status_value = json_content['input']['options'][0]['value']
 
         response = self.client.put(
@@ -893,14 +936,14 @@ class MessagesViewTests(CustomTestCase):
             content_type='application/json',
             follow=True
         )
-        
+
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
-        
+
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
@@ -938,6 +981,11 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        next_url, json_content = self._push_continue(next_url, chat_id)
+
+        # Get next Thread
+        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
+
     def test_preview_forbidden(self):
         """
         Check that ON author can't access preview page.
@@ -963,6 +1011,27 @@ class HistoryAPIViewTests(CustomTestCase):
     """
     Tests /history API.
     """
+    def _push_continue(self, next_url, chat_id):
+        """
+        Click Continue button to roll forward to the next Message.
+        """
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        return json_content['input']['url'], json_content
+
     def test_positive_response(self):
         """
         Test positive case for /history call.
@@ -1045,17 +1114,16 @@ class HistoryAPIViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
-        self.assertEqual(len(json_content['addMessages']), 4)
+        self.assertEqual(len(json_content['addMessages']), 3)
         self.assertEqual(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
         self.assertEqual(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
         self.assertEqual(json_content['addMessages'][1]['type'], 'message')
+        self.assertEqual(json_content['addMessages'][2]['type'], 'message')
+        self.assertEqual(json_content['addMessages'][2]['html'], 'Now you can move to the next lesson')
         self.assertEqual(
             json_content['addMessages'][1]['html'],
             self.compile_html(self.unitlesson)
         )
-        self.assertEqual(json_content['addMessages'][2]['type'], 'message')
-        # TODO need to figure out how to find action help for Node
-        # self.assertEquals(json_content['addMessages'][2]['html'], CHAT_END.get_help())
 
 
 @override_settings(SUSPEND_SIGNALS=True)
@@ -1063,6 +1131,27 @@ class NumbersTest(CustomTestCase):
     """Tests to check numbers functionality."""
 
     fixtures = ['chat/tests/fixtures/initial_numbers.json']
+
+    def _push_continue(self, next_url, chat_id):
+        """
+        Click Continue button to roll forward to the next Message.
+        """
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        return json_content['input']['url'], json_content
 
     def test_typical_chat_flow(self):
         """
@@ -1189,22 +1278,22 @@ class NumbersTest(CustomTestCase):
 
         self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
-        # get next question (2)
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
-
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-
-        self.assertEqual(json_content['input']['subType'], 'numbers')
-
-        self.assertEqual(len(json_content['addMessages']), 4)  # + 1 message for grading
 
         self.assertEqual(json_content['addMessages'][0]['html'], self_eval_text)
 
         grading_msg = 'Your answer is partially correct!'
         self.assertEqual(json_content['addMessages'][1]['html'], grading_msg)
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
+
+        self.assertEqual(json_content['input']['subType'], 'numbers')
+        self.assertEqual(len(json_content['addMessages']), 2)
 
         # post answer (2)
         response = self.client.put(
@@ -1288,7 +1377,7 @@ class NumbersTest(CustomTestCase):
         )
 
         next_url = json_content['input']['url']
-        msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
+        # msg_id = json_content['input']['includeSelectedValuesFromMessages'][0]
 
         # TODO select error model 80 after changing the flow
         # {"selected": {msg_id: {"errorModel": ["80"]}}
@@ -1302,28 +1391,31 @@ class NumbersTest(CustomTestCase):
 
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
-        # # get next message - question (3)
+
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # Roll FAQs
         response = self.client.put(
             next_url,
             data=json.dumps({"option": 'no', "chat_id": chat_id}),
             content_type='application/json',
             follow=True
         )
-
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
+
         response = self.client.get(
             next_url, {'chat_id': chat_id}, follow=True
         )
-
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, chat_id)
         self.assertEqual(next_url, None)
 
 
@@ -1331,6 +1423,27 @@ class ProgressAPIViewTests(CustomTestCase):
     """
     Tests for /progress API.
     """
+    def _push_continue(self, next_url, chat_id):
+        """
+        Click Continue button to roll forward to the next Message.
+        """
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        return json_content['input']['url'], json_content
+
     def test_positive_response(self):
         """
         Test positive case for /progress call.
@@ -1408,6 +1521,22 @@ class ProgressAPIViewTests(CustomTestCase):
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
 
         json_content = json.loads(response.content)
+        self.assertIsInstance(json_content['progress'], float)
+        self.assertIsInstance(json_content['breakpoints'], list)
+        self.assertEqual(len(json_content['breakpoints']), 1)
+        self.assertEqual(json_content['progress'], 0.0)
+        self.assertEqual(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
+        self.assertEqual(json_content['breakpoints'][0]['isDone'], False)
+        self.assertEqual(json_content['breakpoints'][0]['isUnlocked'], True)
+
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        next_url, _ = self._push_continue(next_url, chat_id)
+
+        response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
+
+        json_content = json.loads(response.content)
         self.assertIsInstance(json_content['progress'], int)
         self.assertIsInstance(json_content['breakpoints'], list)
         self.assertEqual(len(json_content['breakpoints']), 1)
@@ -1421,6 +1550,27 @@ class ResourcesViewTests(CustomTestCase):
     """
     Tests for /resources API call.
     """
+    def _push_continue(self, next_url, chat_id):
+        """
+        Click Continue button to roll forward to the next Message.
+        """
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 1, "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        return json_content['input']['url'], json_content
+
     def test_positive_case(self):
         """
         Test positive case for /resources call.
@@ -1492,7 +1642,7 @@ class ResourcesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         chat_id = json_content['id']
 
-        response = self.client.get(
+        self.client.get(
             reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True
         )
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
@@ -1505,6 +1655,17 @@ class ResourcesViewTests(CustomTestCase):
         )
         self.assertEqual(json_content['breakpoints'][1]['isDone'], False)
         self.assertEqual(json_content['breakpoints'][1]['isStarted'], False)
+        # Explicit `Move to the next Thread` button is appearead
+        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], False)
+
+        # Do move to the next thread to get resourses to be unlocked
+        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
+        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+        next_url, _ = self._push_continue(next_url, chat_id)
+        response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
+        json_content = json.loads(response.content)
         self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
 
     def test_get_resources_message_by_id(self):
@@ -1977,7 +2138,11 @@ class MultipleChoiceTests(CustomTestCase):
         explanation_msg = "потому что потому"
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
-        self.assertIn('breakpoint', json_content['addMessages'][2]['type'])
+        # We have to click `Move th the next Thread` button to see a breakpoint
+        self.assertNotIn('breakpoint', json_content['addMessages'][2]['type'])
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, self.chat_id)
 
         self.get_and_check_next_question(json_content, next_url)
 
@@ -2004,6 +2169,9 @@ class MultipleChoiceTests(CustomTestCase):
         # Roll FAQs
         next_url, json_content = self._push_continue(next_url, self.chat_id)
 
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, self.chat_id)
+
         # TODO move one step futher to real question
         self.get_and_check_next_question(json_content, next_url)
 
@@ -2021,7 +2189,10 @@ class MultipleChoiceTests(CustomTestCase):
         explanation_msg = self.unitlesson2.lesson.text
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
-        self.assertIn('breakpoint', json_content['addMessages'][2]['type'])
+        self.assertNotIn('breakpoint', json_content['addMessages'][2]['type'])
+
+        # Click `move to the next Thread` button
+        next_url, json_content = self._push_continue(next_url, self.chat_id)
 
         self.get_and_check_next_question(json_content, next_url)
 
@@ -2046,6 +2217,9 @@ class MultipleChoiceTests(CustomTestCase):
         self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
 
         # Roll FAQs
+        next_url, json_content = self._push_continue(next_url, self.chat_id)
+
+        # Click `move to the next Thread` button
         next_url, json_content = self._push_continue(next_url, self.chat_id)
 
         # TODO move one step futher to real question

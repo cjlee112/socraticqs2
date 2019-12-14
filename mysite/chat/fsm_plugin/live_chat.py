@@ -114,8 +114,8 @@ class INCORRECT_CHOICE(object):  # pragma: no cover
 class CORRECT_ANSWER(object):  # pragma: no cover
     title = 'Show correct answer for Multiple Choices'
     edges = (
-            dict(name='next', toNode='WAIT_ASK', title='Assess yourself'),
-        )
+        dict(name='next', toNode='WAIT_ASK', title='Assess yourself'),
+    )
     next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCLE"])(
         lambda self, edge, *args, **kwargs: edge.toNode
     )
@@ -196,8 +196,8 @@ class ASK(object):
     for a minute or two, then briefly write whatever answer you
     come up with. """
     edges = (
-            dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
-        )
+        dict(name='next', toNode='GET_ANSWER', title='Answer a question'),
+    )
 
 
 class GET_ANSWER(object):
@@ -208,8 +208,8 @@ class GET_ANSWER(object):
     )
     title = 'It is time to answer'
     edges = (
-            dict(name='next', toNode='CONFIDENCE', title='Go to self-assessment'),
-        )
+        dict(name='next', toNode='CONFIDENCE', title='Go to self-assessment'),
+    )
 
 
 class CONFIDENCE(object):
@@ -271,8 +271,8 @@ class ASSESS_QUESTION_MESSAGE(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
-        )
+        dict(name='next', toNode='GET_ASSESS', title='Assess yourself'),
+    )
     help = 'How close was your answer to the one shown here?'
 
 
@@ -282,8 +282,8 @@ class GET_ASSESS(object):
     # node specification data goes here
     title = 'Assess your answer'
     edges = (
-            dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
-        )
+        dict(name='next', toNode='WAIT_ASK', title='View Next Lesson'),
+    )
 
 
 class GRADING(object):
@@ -317,8 +317,8 @@ class GET_ERRORS(object):
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
-            dict(name='next', toNode='WAIT_ASK', title='View next question'),
-        )
+        dict(name='next', toNode='WAIT_ASK', title='View next question'),
+    )
     next_edge = next_edge_teacher_coherent(["ANSWER", "RECYCLE"])(
         lambda self, edge, *args, **kwargs: edge.toNode
     )
