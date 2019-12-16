@@ -9,7 +9,6 @@ var handlebars = require('gulp-handlebars');
 var wrap = require('gulp-wrap');
 var declare = require('gulp-declare');
 var del = require('del');
-var runSequence = require('run-sequence');
 var imagemin = require('gulp-imagemin');
 var useref = require('gulp-useref');
 var cleanCSS = require('gulp-clean-css');
@@ -17,7 +16,6 @@ var gulpif = require('gulp-if');
 var jsdoc = require('gulp-jsdoc3');
 var insert = require('gulp-insert');
 var jshint = require('gulp-jshint');
-var replace = require('gulp-replace');
 
 // Compile handlebars templates
 // http://handlebarsjs.com/precompilation.html
@@ -84,17 +82,23 @@ gulp.task('clean', function(){
 
 // Watch task
 gulp.task('watch', function(){
-  gulp.watch('sass/**/*.scss', ['compile-sass']);
-  gulp.watch('js/**/*.hbs', ['precompile-templates']);
-  gulp.watch('js/**/*.js', ['lint']);
+  gulp.watch('sass/**/*.scss', gulp.series('compile-sass'));
+  gulp.watch('js/**/*.hbs', gulp.series('precompile-templates'));
+  gulp.watch('js/**/*.js', gulp.series('lint'));
 });
 
 // Build task
-gulp.task('build', function(callback){
-  runSequence('clean', 'lint', ['precompile-templates', 'compile-sass', 'optimize-images', 'doc'], 'inject-assets', callback);
-});
+gulp.task('build', gulp.series(
+  'clean',
+  'lint',
+  gulp.parallel(
+    'precompile-templates',
+    'compile-sass',
+    'optimize-images',
+    'doc'
+  ),
+  'inject-assets'
+));
 
 // Default task
-gulp.task('default', function(){
-  gulp.start('build');
-});
+gulp.task('default', gulp.series('build'));

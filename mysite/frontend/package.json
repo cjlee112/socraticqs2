@@ -4,7 +4,7 @@
     "@bower_components/bootstrap": "twbs/bootstrap#~3.1.1",
     "@bower_components/bootstrap-sidebar": "asyraf9/bootstrap-sidebar#^0.2.2",
     "@bower_components/gsap": "greensock/GreenSock-JS#^1.18.5",
-    "@bower_components/handlebars": "components/handlebars.js#^4.0.5",
+    "@bower_components/handlebars": "components/handlebars.js#>=4.3.0",
     "@bower_components/html5shiv": "aFarkas/html5shiv#^3.7.3",
     "@bower_components/jquery": "jquery/jquery-dist#^2.2.4",
     "@bower_components/placeholders": "jamesallardice/Placeholders.js#^4.0.1",

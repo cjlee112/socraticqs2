@@ -18,9 +18,9 @@
   version "1.20.5"
   resolved "https://codeload.github.com/greensock/GreenSock-JS/tar.gz/ec715487348cfd66166ea1272602d325284269e2"
 
-"@bower_components/handlebars@components/handlebars.js#^4.0.5":
-  version "4.1.2"
-  resolved "https://codeload.github.com/components/handlebars.js/tar.gz/5e52d62e36bc94561cc9b3acdf27ef878df1a5ab"
+"@bower_components/handlebars@components/handlebars.js#>=4.3.0":
+  version "4.5.3"
+  resolved "https://codeload.github.com/components/handlebars.js/tar.gz/8f49d168f94ac70b5b966b30da06b57203439ace"
 
 "@bower_components/html5shiv@aFarkas/html5shiv#^3.7.3":
   version "3.7.3"

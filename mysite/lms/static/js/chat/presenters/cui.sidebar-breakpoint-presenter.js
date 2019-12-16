@@ -38,6 +38,7 @@ CUI.SidebarBreakpointPresenter = function(model){
   return this;
 };
 
+
 /**
  * Renders the html for the breakpoint using a Handlebars templates.
  * @protected
@@ -45,6 +46,19 @@ CUI.SidebarBreakpointPresenter = function(model){
 CUI.SidebarBreakpointPresenter.prototype._render = function(){
   this.el = CUI.views.sidebarBreakpoint(this._model);
   this.$el = $(this.el);
+};
+
+
+/**
+ * Returns an object with thread id & html values.
+ * @public
+ * @returns {Object} - {threadId: 1, html: 'example'}
+ */
+CUI.SidebarBreakpointPresenter.prototype.getInfo = function() {
+  return {
+    threadId: this._model.threadId,
+    html: this._model.html
+  };
 };
 
 /**

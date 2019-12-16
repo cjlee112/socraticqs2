@@ -48,6 +48,20 @@ CUI.SidebarResourcePresenter.prototype._render = function(){
 };
 
 /**
+ * Returns an object with id, ul, thread id & html values.
+ * @public
+ * @returns {Object} - {id: 100, ul: 1, threadId: 1, html: 'example'}
+ */
+CUI.SidebarResourcePresenter.prototype.getInfo = function() {
+  return {
+    id: this._model.id,
+    ul: this._model.ul,
+    threadId: this._model.threadId,
+    html: this._model.html
+  };
+};
+
+/**
  * Destroys the breakpoint.
  * @public
  */

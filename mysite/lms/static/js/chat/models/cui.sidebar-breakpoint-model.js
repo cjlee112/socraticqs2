@@ -28,7 +28,7 @@ CUI.SidebarBreakpointModel = function(data){
    * @public
    */
   this.id = data.id;
-  
+
   /**
    * The id of the message this breakpoint links to in the chat.
    * @type {number}

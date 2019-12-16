@@ -5,7 +5,10 @@
   content: " ";
   display: table; }
 
-.clearfix:after, .course-content-tabs ul:after, .live-session-notification:after {
+
+.clearfix:after,
+.course-content-tabs ul:after,
+.live-session-notification:after {
   clear: both; }
 
 html {
@@ -662,8 +665,18 @@ p + p {
   background: #F0F4F7;
   display: none;
   min-height: 100%;
-  padding-top: 20px;
   padding-bottom: 120px; }
+  .chat-messages .chat-previous-thread {
+    width: 100%;
+    height: 3em;
+    padding: 0;
+    margin: 0;
+    color: #9E9DA6;
+    background-color: rgba(0, 0, 0, 0.01); }
+    .chat-messages .chat-previous-thread:hover {
+      background-color: rgba(0, 0, 0, 0.1); }
+    .chat-messages .chat-previous-thread:active {
+      background-color: rgba(0, 0, 0, 0.3); }
 
 /* --- Avatars --- */
 .chat-avatar {
