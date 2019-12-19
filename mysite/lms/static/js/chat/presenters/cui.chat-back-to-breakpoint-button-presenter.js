@@ -42,7 +42,7 @@ CUI.ChatBackToBreakpointButtonPresenter = function(model){
  * Updates button text and threadId.
  * @public
  * @param {CUI.ChatBackToBreakpointButtonModel} model      - The model to present.
- * @returns {CUI.ChatMessagePresenter}
+ * @returns {CUI.ChatBackToBreakpointButtonModel}
  */
 CUI.ChatBackToBreakpointButtonPresenter.prototype.update = function(model){
     // Replace existing model with new model

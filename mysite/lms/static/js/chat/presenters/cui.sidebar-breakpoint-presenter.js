@@ -57,7 +57,8 @@ CUI.SidebarBreakpointPresenter.prototype._render = function(){
 CUI.SidebarBreakpointPresenter.prototype.getInfo = function() {
   return {
     threadId: this._model.threadId,
-    html: this._model.html
+    html: this._model.html,
+    isDone: this._model.isDone,
   };
 };
 

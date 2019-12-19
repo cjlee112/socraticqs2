@@ -17,6 +17,7 @@ CUI.ChatBackToBreakpointButtonModel = function(data){
   // Check that data has all required properties
   if(typeof data.threadId !== 'number') throw new Error('CUI.ChatBackToBreakpointButtonModel(): Invalid data.threadId.');
   if(!data.html) throw new Error('CUI.ChatBackToBreakpointButtonModel(): No data.html.');
+  if(!data.type) data.type = CUI.ChatBackToBreakpointButtonModel.ItemType.none;
 
   /**
    * A unqiue breakpoint thread ID.

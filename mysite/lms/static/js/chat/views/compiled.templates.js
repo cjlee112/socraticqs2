@@ -139,6 +139,17 @@ this["CUI"]["views"]["chatMessage"] = Handlebars.template({"1":function(containe
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.overflow : depth0),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":14,"column":8},"end":{"line":24,"column":15}}})) != null ? stack1 : "")
     + "      </div>\n    </div>\n  </div>\n</div>\n";
 },"useData":true});
+this["CUI"]["views"]["chatToNextBreakpointButton"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
+
+  return "<div class=\"chat-next-thread-container\">\n    <button class=\"chat-next-thread\" data-thread-id=\""
+    + alias4(((helper = (helper = helpers.threadId || (depth0 != null ? depth0.threadId : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"threadId","hash":{},"data":data,"loc":{"start":{"line":2,"column":53},"end":{"line":2,"column":65}}}) : helper)))
+    + "\" data-type=\""
+    + alias4(((helper = (helper = helpers.type || (depth0 != null ? depth0.type : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"type","hash":{},"data":data,"loc":{"start":{"line":2,"column":78},"end":{"line":2,"column":86}}}) : helper)))
+    + "\">"
+    + alias4(((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"html","hash":{},"data":data,"loc":{"start":{"line":2,"column":88},"end":{"line":2,"column":96}}}) : helper)))
+    + "</button>\n</div>";
+},"useData":true});
 this["CUI"]["views"]["inputOption"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
 
@@ -146,6 +157,15 @@ this["CUI"]["views"]["inputOption"] = Handlebars.template({"compiler":[8,">= 4.3
     + alias4(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"value","hash":{},"data":data,"loc":{"start":{"line":1,"column":51},"end":{"line":1,"column":60}}}) : helper)))
     + "\">"
     + alias4(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"text","hash":{},"data":data,"loc":{"start":{"line":1,"column":62},"end":{"line":1,"column":70}}}) : helper)))
+    + "</button>\n";
+},"useData":true});
+this["CUI"]["views"]["inputToNextBreakpointButton"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=container.hooks.helperMissing, alias3="function", alias4=container.escapeExpression;
+
+  return "<button class=\"chat-next-thread\" data-test=\"bla\" data-option-value=\""
+    + alias4(((helper = (helper = helpers.value || (depth0 != null ? depth0.value : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"value","hash":{},"data":data,"loc":{"start":{"line":1,"column":68},"end":{"line":1,"column":77}}}) : helper)))
+    + "\">"
+    + alias4(((helper = (helper = helpers.text || (depth0 != null ? depth0.text : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"text","hash":{},"data":data,"loc":{"start":{"line":1,"column":79},"end":{"line":1,"column":87}}}) : helper)))
     + "</button>\n";
 },"useData":true});
 this["CUI"]["views"]["sidebarBreakpoint"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {

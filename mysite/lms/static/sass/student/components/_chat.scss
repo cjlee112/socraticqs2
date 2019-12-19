@@ -302,15 +302,36 @@
     padding: 0;
     margin: 0;
     color: #9E9DA6;
-    background-color: rgba(0, 0, 0, 0.01);
+    background: rgba(0, 0, 0, 0.01);
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.1);
+      color: #9E9DA6;
+      background: rgba(0, 0, 0, 0.1);
     }
 
     &:active {
-      background-color: rgba(0, 0, 0, 0.3);
+      color: #9E9DA6;
+      background: rgba(0, 0, 0, 0.3);
     }
+  }
+}
+
+/* --- Thread flow button --- */
+.thread-flow-button {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  color: #9E9DA6;
+  background: rgba(0, 0, 0, 0.01);
+
+  &:hover {
+    color: #9E9DA6;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    color: #9E9DA6;
+    background: rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -352,6 +373,10 @@
     &:hover .chat-actions {
       opacity: 1;
       visibility: visible;
+    }
+
+    & .chat-hidden {
+      display: none;
     }
   }
 
@@ -740,6 +765,30 @@
     background: #fff;
     min-height: 80px;
     box-shadow: 0 0 1px 0 rgba(0,0,0,0.3), 0 1px 3px 0 rgba(0,0,0,0.12);
+  }
+
+  & .chat-next-thread {
+    width: 100%;
+    min-height: 80px;
+    padding: 0;
+    margin: 0;
+    color: #9E9DA6;
+    background: rgba(0, 0, 0, 0.01);
+
+    &:hover {
+      color: #9E9DA6;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      color: #9E9DA6;
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .chat-next-thread-container {
+    margin: 0px 40px;
+    overflow: hidden;
   }
 
   .sidebar-toggle, .fullscreen-toggle {

@@ -48,11 +48,19 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._previousThreadId = -1;
 
   /**
-   * A reference to Backt to Breaktpoint button
+   * A reference to Back to Breaktpoint button
    * @type {CUI.ChatBackToBreakpointButtonPresenter}
    * @protected
    */
   this._backToBreakpointButton = null;
+
+  /**
+   * A reference to the chat input container
+   * @type {CUI.Chat}
+   * @protected
+   */
+  this._inputContainer = new CUI.ChatInputContinerPresenter();
+
   /**
    * An object with references to all messages, media, and breakpoints currently in the chat.
    * @type {Object.<number, CUI.ChatMessagePresenter|CUI.ChatMediaPresenter|CUI.ChatBreakpointPresenter>}
@@ -525,6 +533,7 @@ CUI.ChatPresenter.prototype._postAction = function(actionUrl){
  * @param {Object} info - previous breakpoint info.
  * @param {number} info.threadId - breakpoint hread ID.
  * @param {string} info.html -  breakpoint title.
+ * @param {string} info.type -  breakpoint type one of CUI.ChatBackToBreakpointButtonModel.ItemType.
  */
 CUI.ChatPresenter.prototype._updateBackToBreakpointButton = function(info) {
   if (info.threadId < 0) {
@@ -542,6 +551,27 @@ CUI.ChatPresenter.prototype._updateBackToBreakpointButton = function(info) {
     }
 
     this._$messagesContainer.prepend(this._backToBreakpointButton.$el);
+  }
+};
+
+/**
+ * Update a "To next breakpoint thread" button.
+ * @protected
+ * @param {Object} info - to next breakpoint info.
+ * @param {number} info.threadId - breakpoint hread ID.
+ * @param {string} info.html -  -reakpoint title.
+ * @param {string} info.type -  breakpoint type one of CUI.ChatBackToBreakpointButtonModel.ItemType.
+ */
+CUI.ChatPresenter.prototype._updateToNextBreakpointButton = function(info) {
+  info = info || {
+    threadId: -1,
+    html: ''
+  };
+
+  if (info.threadId < 0) {
+    this._inputContainer.removeNextThreadButton();
+  } else {
+    this._inputContainer.placeNextThreadButton(info, $.proxy(onChangeThreadButtonClickHandler, this));
   }
 };
 
@@ -609,14 +639,15 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
 
       // Reset breakpoints Array
       this._sidebarBreakpoints = [];
-      this.isDone = 0;
+      var threadsCompletedCount = 0;
+
       // Add new breakpoints
       $.each(data.breakpoints, $.proxy(function(i, b){
         // Create breakpoint from template
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
 
         if (b.isDone) {
-          this.isDone++;
+          threadsCompletedCount++;
         }
 
         // Add reference to breakpoint
@@ -625,8 +656,14 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         // Add breakpoint in sidebar
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
       }, this));
-      if (!data.is_live && this.isDone == this._sidebarBreakpoints.length){
+      if (!data.is_live && threadsCompletedCount == this._sidebarBreakpoints.length){
         this._$sidebarToggle.trigger('resources');
+        var lastBreakpointIndex = threadsCompletedCount - 1;
+        var lastBreakpointInfo = this._sidebarBreakpoints[lastBreakpointIndex].getInfo();
+        if (lastBreakpointInfo.threadId = this._currentThreadId) {
+          this._updateToNextBreakpointButton(this._getNextThreadInfo(lastBreakpointInfo.threadId));
+        }
+
       }
     }
   }else{
@@ -637,9 +674,9 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
 /**
  * Get info of a previous thread in realtion to the provided one.
  * @protected
- * @param {number} threadId - an ID of a thread to get previous thread ID for.
+ * @param {number} threadId - an ID of a thread to get previous thread Info for.
  *
- * @returns {Object}        - {threadId: -1, html: ''} is returned in case of failure, real data otherwise.
+ * @returns {Object}        - {threadId: -1, html: '', type: ''} is returned in case of failure, real data otherwise.
  */
 CUI.ChatPresenter.prototype._getPreviousThreadInfo = function(threadId) {
   var previousItem = {
@@ -647,22 +684,24 @@ CUI.ChatPresenter.prototype._getPreviousThreadInfo = function(threadId) {
     html: '',
   };
   var itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.none;
+  var breakpoints = this._sidebarBreakpoints;
+  var resources = this._sidebarResources;
 
-  for (var i = 0; i < this._sidebarBreakpoints.length; i++) {
-    var currentBreakpoint = this._sidebarBreakpoints[i].getInfo();
+  for (var i = 0; i < breakpoints.length; i++) {
+    var currentBreakpoint = breakpoints[i].getInfo();
 
     if (currentBreakpoint.threadId === threadId) {
       itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint;
       break;
     }
 
-    previousItem = this._sidebarBreakpoints[i].getInfo();
+    previousItem = breakpoints[i].getInfo();
   }
 
   // Item was not found among the breakpoints.
   if (itemType == CUI.ChatBackToBreakpointButtonModel.ItemType.none) {
-    for (var i = 0; i < this._sidebarResources.length; i++) {
-      var currentResource = this._sidebarResources[i].getInfo();
+    for (var i = 0; i < resources.length; i++) {
+      var currentResource = resources[i].getInfo();
 
       if (currentResource.threadId === threadId) {
         if (i == 0) {
@@ -674,7 +713,103 @@ CUI.ChatPresenter.prototype._getPreviousThreadInfo = function(threadId) {
         break;
       }
 
-      previousItem = this._sidebarResources[i].getInfo();
+      previousItem = resources[i].getInfo();
+    }
+  }
+
+  previousItem.type = itemType;
+  return previousItem;
+};
+
+/**
+ * Get info of a thread with threadId.
+ * @protected
+ * @param {number} threadId - an ID of a thread to get Info for.
+ *
+ * @returns {Object}        - {threadId: -1, html: '', type: 'none'} is returned in case of failure, real data otherwise.
+ */
+CUI.ChatPresenter.prototype._getThreadInfo = function(threadId) {
+  var foundItem = {
+    threadId: -1,
+    html: '',
+  };
+  var itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.none;
+  var breakpoints = this._sidebarBreakpoints;
+  var resources = this._sidebarResources;
+
+  for (var i = 0; i < breakpoints.length; i++) {
+    var currentBreakpoint = breakpoints[i].getInfo();
+
+    if (currentBreakpoint.threadId == threadId) {
+      itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint;
+      foundItem = breakpoints[i].getInfo();
+      break;
+    }
+  }
+
+  // Item was not found among the breakpoints.
+  if (itemType == CUI.ChatBackToBreakpointButtonModel.ItemType.none) {
+    for (var i = 0; i < resources.length; i++) {
+      var currentResource = resources[i].getInfo();
+
+      if (currentResource.threadId == threadId) {
+        itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
+        foundItem = resources[i].getInfo();
+        break;
+      }
+    }
+  }
+
+  foundItem.type = itemType;
+  return foundItem;
+}
+
+
+/**
+ * Get info of a next thread in realtion to the provided one.
+ * @protected
+ * @param {number} threadId - an ID of a thread to get next thread Info for.
+ *
+ * @returns {Object}        - {threadId: -1, html: '', type: ''} is returned in case of failure, real data otherwise.
+ */
+CUI.ChatPresenter.prototype._getNextThreadInfo = function(threadId) {
+  var previousItem = {
+    threadId: -1,
+    html: '',
+  };
+  var itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.none;
+  var breakpoints = this._sidebarBreakpoints;
+  var resources = this._sidebarResources;
+
+  for (var i = resources.length - 1; i >= 0; i--) {
+    var currentResource = resources[i].getInfo();
+
+    if (currentResource.threadId === threadId) {
+      itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
+      break;
+    }
+
+    previousItem = resources[i].getInfo();
+  }
+
+  // Item was not found among the resources.
+  if (itemType == CUI.ChatBackToBreakpointButtonModel.ItemType.none) {
+    var lastElementIndex = breakpoints.length - 1;
+
+    for (var i = lastElementIndex; i >= 0; i--) {
+      var currentBreakpoint = breakpoints[i].getInfo();
+
+      if (currentBreakpoint.threadId === threadId) {
+        if (i == lastElementIndex) {
+          itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
+        } else {
+          itemType = CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint;
+        }
+
+        break;
+      }
+
+      previousItem = breakpoints[i].getInfo();
     }
   }
 
@@ -1058,9 +1193,23 @@ CUI.ChatPresenter.prototype._showMessages = function(threadId){
   var $messageElementToScrollTo = null;
   threadId = parseInt(threadId);
 
-  this._updateBackToBreakpointButton(
-    this._getPreviousThreadInfo(threadId)
-  );
+  // Optimize to get (previous, current, next) info in one run (loop)
+  var previousThreadInfo = this._getPreviousThreadInfo(threadId);
+  this._updateBackToBreakpointButton(previousThreadInfo);
+
+  var currentThreadInfo = this._getThreadInfo(threadId);
+
+  var nextThreadInfo = this._getNextThreadInfo(threadId);
+
+  var isThreadDone = currentThreadInfo.isDone;
+  var isResource = currentThreadInfo.type === CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
+
+  if (isThreadDone || isResource) {
+    this._updateToNextBreakpointButton(nextThreadInfo);
+  } else {
+    this._updateToNextBreakpointButton();
+  }
+
 
   this._getAllMessageElements().each(function(){
     var $messageElement = $(this);
@@ -1093,9 +1242,8 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, threadId
     top = $message.offset().top - 60;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
-      this._getMessages(this._resourcesUrl+ul+'/');
-      this._showMessages(threadId);
-  };
+    this._getMessages(this._resourcesUrl+ul+'/');
+};
 };
 /**
  * Calculates the scroll animation time for window based on distance.
@@ -1291,6 +1439,34 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 };
 
 /**
+ * On change thread button click handler.
+ * @protected
+ * @params {event} e
+ */
+function onChangeThreadButtonClickHandler(e){
+  e.preventDefault();
+
+  var $target = $(e.currentTarget)
+  var targetType = $target.data('type');
+
+  if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint) {
+    this._showMessages($(e.currentTarget).data('thread-id'));
+  } else if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.resource) {
+    var threadId = $target.data('thread-id');
+    var resourceInfo = this._sidebarResources.find(function(r) {
+      return r.getInfo().threadId === threadId;
+    }).getInfo();
+
+    this._scrollToResourceMessage(
+      resourceInfo.id,
+      resourceInfo.ul,
+      resourceInfo.threadId
+    );
+  }
+
+}
+
+/**
  * Adds event listeners to the chat.
  * @protected
  */
@@ -1368,29 +1544,8 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     }
   }, this));
 
-    // Previous thread button
-    this._$messagesContainer.on('click', '.chat-previous-thread', $.proxy(function(e){
-      e.preventDefault();
-
-      var $target = $(e.currentTarget)
-      var targetType = $target.data('type');
-
-      if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint) {
-        this._showMessages($(e.currentTarget).data('thread-id'));
-      } else if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.resource) {
-        var threadId = $target.data('thread-id');
-        var resourceInfo = this._sidebarResources.find(function(r) {
-          return r.getInfo().threadId === threadId;
-        }).getInfo();
-
-        this._scrollToResourceMessage(
-          resourceInfo.id,
-          resourceInfo.ul,
-          resourceInfo.threadId
-        );
-      }
-
-    }, this));
+  // Previous thread button
+  this._$messagesContainer.on('click', '.chat-previous-thread', $.proxy(onChangeThreadButtonClickHandler, this));
 
   // Overflow actions
   this._$messagesContainer.on('click', '.chat-actions li', $.proxy(function(e){
