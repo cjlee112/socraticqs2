@@ -7,6 +7,7 @@ from copy import deepcopy
 from datetime import timedelta, datetime
 from functools import reduce
 
+from django.db.models.query import QuerySet  # Needed for typechecking.
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.urls import reverse
@@ -561,6 +562,13 @@ class Lesson(models.Model, SubKindMixin):
     #         return self.url
     #     else:
     #         return reverse('ct:lesson', args=(self.id,))
+    def natural_key(self):
+        """
+        Support method for ct.serializers.
+
+        Returns id, title and text fields instead of pk.
+        """
+        return (self.id, self.title, self.text)
 
 
 def distinct_subset(inlist, distinct_func=lambda x: x.treeID):
@@ -942,101 +950,95 @@ class UnitLesson(models.Model):
         'is this a question?'
         return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
 
-    def question_faq_updates(self, last_access_time: datetime, user: User) -> int:
+    def question_faq_updates(self, last_access_time: datetime, user: User) -> 'QuerySet[Response]':
         """
         Count new Question FAQ updates.
 
         Params:
-        - last_access_time: timezone aware datetime object
-        - user: current chat User
-
-        Return value: int
+        :last_access_time: timezone aware datetime object
+        :user: current chat User
         """
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
             atime__gt=last_access_time,
-            unitLesson__id=self.id).exclude(author=user).count()
+            unitLesson__id=self.id).exclude(author=user)
 
-    def answer_faq_updates(self, last_access_time: datetime, user: User) -> int:
+    def answer_faq_updates(self, last_access_time: datetime, user: User) -> 'QuerySet[Response]':
         """
         Count new Answer FAQ updates.
 
         Params:
-        - last_access_time: timezone aware datetime object
-        - user: current chat User
-
-        Return value: int
+        :last_access_time: timezone aware datetime object
+        :user: current chat User
         """
         answer = self.get_answers().first()
 
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
             atime__gt=last_access_time,
-            unitLesson__id=answer.id).exclude(author=user).count() if answer else 0
+            unitLesson__id=answer.id).exclude(author=user) if answer else Response.objects.none()
 
-    def question_faq_comment_updates(self, last_access_time: datetime, user: User) -> int:
+    def question_faq_comment_updates(self, last_access_time: datetime, user: User) -> 'QuerySet[Response]':
         """
         Count Question FAQ updates.
 
         Params:
-        - last_access_time: timezone aware datetime object
-        - user: current chat User
-
-        Return value: int
+        :last_access_time: timezone aware datetime object
+        :user: current chat User
         """
         return Response.objects.filter(
             kind=Response.COMMENT,
             atime__gt=last_access_time,
-            unitLesson__id=self.id).exclude(author=user).count()
+            unitLesson__id=self.id).exclude(author=user)
 
-    def answer_faq_comment_updates(self, last_access_time: datetime, user: User) -> int:
+    def answer_faq_comment_updates(self, last_access_time: datetime, user: User) -> 'QuerySet[Response]':
         """
         Count Answer FAQ updates.
 
         Params:
         :last_access_time: timezone aware datetime object
         :user: current chat User
-
-        Return value: int
         """
         answer = self.get_answers().first()
 
         return Response.objects.filter(
             kind=Response.COMMENT,
             atime__gt=last_access_time,
-            unitLesson__id=answer.id).exclude(author=user).count() if answer else 0
+            unitLesson__id=answer.id).exclude(author=user) if answer else Response.objects.none()
 
-    def em_updates(self, last_access_time: datetime) -> int:
+    def em_updates(self, last_access_time: datetime) -> 'QuerySet[UnitLesson]':
         """
         Count all new EMs.
 
         Params:
         :last_access_time: timezone aware datetime object
-
-        Return value: int
         """
         return self.unitlesson_set.filter(
             kind=self.MISUNDERSTANDS, atime__gt=last_access_time
-        ).count()
+        )
 
-    def em_resolutions(self, last_access_time: datetime) -> int:
+    def em_resolutions_updates(self, last_access_time: datetime) -> '[QuerySet[UnitLesson]]':
         """
         Count new resolution for all EMs for a given Thread.
 
         Params:
         :last_access_time: timezone aware datetime object
-
-        Return value: int
         """
-        def get_new_resolutions_count(em: UnitLesson) -> int:
+        def get_new_resolutions(em: UnitLesson) -> 'QuerySet[UnitLesson]':
             return em.unitlesson_set.filter(
                 kind=self.RESOLVES, atime__gt=last_access_time
-            ).count()
+            )
 
         thread_ems = self.get_errors()
-        result = reduce(operator.add, [get_new_resolutions_count(em) for em in thread_ems], 0)
+        result = [get_new_resolutions(em) for em in thread_ems]
 
         return result
+
+    def em_resolutions_updates_count(self, last_access_time: datetime) -> int:
+        """
+        Incapsulates counting logic.
+        """
+        return reduce(operator.add, [emr.count() for emr in self.em_resolutions_updates(last_access_time)], 0)
 
     def updates(self, chat):
         """
@@ -1048,12 +1050,12 @@ class UnitLesson(models.Model):
         user = chat.user
 
         return reduce(operator.add, [
-            self.question_faq_updates(tz_aware_datetime, user),
-            self.answer_faq_updates(tz_aware_datetime, user),
-            self.em_updates(tz_aware_datetime),
-            self.em_resolutions(tz_aware_datetime),
-            self.question_faq_comment_updates(tz_aware_datetime, user),
-            self.answer_faq_comment_updates(tz_aware_datetime, user),
+            self.question_faq_updates(tz_aware_datetime, user).count(),
+            self.answer_faq_updates(tz_aware_datetime, user).count(),
+            self.em_resolutions_updates_count(tz_aware_datetime),
+            self.em_updates(tz_aware_datetime).count(),
+            self.question_faq_comment_updates(tz_aware_datetime, user).count(),
+            self.answer_faq_comment_updates(tz_aware_datetime, user).count(),
         ], 0) if tz_aware_datetime else 0
 
 
@@ -1375,7 +1377,7 @@ class ResponseManager(models.Manager):
         )
 
     def get_all_responses_queryset(self, **kwargs):
-        """Return new queryset to filter all responsesn, not only valuable."""
+        """Return new queryset to filter all responses, not only valuable."""
         return self._queryset_class(model=self.model, using=self._db, hints=self._hints)
 
     def all_all(self):

@@ -861,7 +861,7 @@ class UnitLessonTest(TestCase):
 
     def test_question_faq_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        result = unit_lesson.question_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         response = Response(
@@ -874,7 +874,7 @@ class UnitLessonTest(TestCase):
             author=self.user
         )
         response.save()
-        result2 = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        result2 = unit_lesson.question_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 0)
         another_student_response = Response(
@@ -887,13 +887,13 @@ class UnitLessonTest(TestCase):
             author=self.another_user
         )
         another_student_response.save()
-        result3 = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        result3 = unit_lesson.question_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 1)
 
     def test_answer_faq_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
+        result = unit_lesson.answer_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         answer = UnitLesson.create_from_lesson(
@@ -909,7 +909,7 @@ class UnitLessonTest(TestCase):
             author=self.user
         )
         response.save()
-        result2 = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
+        result2 = unit_lesson.answer_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 0)
         another_student_response = Response(
@@ -922,13 +922,13 @@ class UnitLessonTest(TestCase):
             author=self.another_user
         )
         another_student_response.save()
-        result3 = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
+        result3 = unit_lesson.answer_faq_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 1)
 
     def test_question_faq_comment_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        result = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         response = Response(
@@ -941,7 +941,7 @@ class UnitLessonTest(TestCase):
             author=self.user
         )
         response.save()
-        result2 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        result2 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 0)
         another_student_response = Response(
@@ -954,13 +954,13 @@ class UnitLessonTest(TestCase):
             author=self.another_user
         )
         another_student_response.save()
-        result3 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        result3 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 1)
 
     def test_answer_faq_comment_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
+        result = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         answer = UnitLesson.create_from_lesson(
@@ -976,7 +976,7 @@ class UnitLessonTest(TestCase):
             author=self.user
         )
         response.save()
-        result2 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
+        result2 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 0)
         another_student_response = Response(
@@ -989,31 +989,31 @@ class UnitLessonTest(TestCase):
             author=self.another_user
         )
         another_student_response.save()
-        result3 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
+        result3 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 1)
 
     def test_em_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.em_updates(self.last_access_time)
+        result = unit_lesson.em_updates(self.last_access_time).count()
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
         )
-        result2 = unit_lesson.em_updates(self.last_access_time)
+        result2 = unit_lesson.em_updates(self.last_access_time).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 1)
         UnitLesson.create_from_lesson(
             unit=self.unit2, lesson=self.lesson2, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
         )
-        result3 = unit_lesson.em_updates(self.last_access_time)
+        result3 = unit_lesson.em_updates(self.last_access_time).count()
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 2)
 
-    def test_em_resolutions(self):
+    def test_em_resolutions_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        result = unit_lesson.em_resolutions(self.last_access_time)
+        result = unit_lesson.em_resolutions_updates_count(self.last_access_time)
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
         unit_lesson_error = UnitLesson.create_from_lesson(
@@ -1022,20 +1022,20 @@ class UnitLessonTest(TestCase):
         UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson_error, kind=UnitLesson.RESOLVES
         )
-        result2 = unit_lesson.em_resolutions(self.last_access_time)
+        result2 = unit_lesson.em_resolutions_updates_count(self.last_access_time)
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 1)
         UnitLesson.create_from_lesson(
             unit=self.unit2, lesson=self.lesson2, parent=unit_lesson_error, kind=UnitLesson.RESOLVES
         )
-        result3 = unit_lesson.em_resolutions(self.last_access_time)
+        result3 = unit_lesson.em_resolutions_updates_count(self.last_access_time)
         self.assertIsInstance(result3, int)
         self.assertEqual(result3, 2)
 
     @patch('ct.models.UnitLesson.question_faq_updates')
     @patch('ct.models.UnitLesson.answer_faq_updates')
     @patch('ct.models.UnitLesson.em_updates')
-    @patch('ct.models.UnitLesson.em_resolutions')
+    @patch('ct.models.UnitLesson.em_resolutions_updates')
     @patch('ct.models.UnitLesson.question_faq_comment_updates')
     @patch('ct.models.UnitLesson.answer_faq_comment_updates')
     @patch('ct.models.c_chat_context')
@@ -1044,7 +1044,7 @@ class UnitLessonTest(TestCase):
         c_chat_context,
         answer_faq_comment_updates,
         question_faq_comment_updates,
-        em_resolutions,
+        em_resolutions_updates,
         em_updates,
         answer_faq_updates,
         question_faq_updates
@@ -1052,8 +1052,14 @@ class UnitLessonTest(TestCase):
         args = locals()
         args.pop('self')
         args.pop('c_chat_context')
+        args.pop('em_resolutions_updates')
+
+        query_set_mock = Mock()
+        query_set_mock.count.return_value = 1
+        em_resolutions_updates.return_value = [query_set_mock]
+
         for arg in args.values():
-            arg.return_value = 1
+            arg.return_value = query_set_mock
 
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
         chat = Mock()

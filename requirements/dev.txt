@@ -9,3 +9,4 @@ pylint-django
 django-debug-toolbar==1.8
 flake8
 ptvsd
+mypy==0.761
