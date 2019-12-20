@@ -942,26 +942,28 @@ class UnitLesson(models.Model):
         'is this a question?'
         return self.lesson.kind in [Lesson.ORCT_QUESTION, Lesson.MULTIPLE_CHOICES]
 
-    def question_faq_updates(self, last_access_time: datetime) -> int:
+    def question_faq_updates(self, last_access_time: datetime, user: User) -> int:
         """
         Count new Question FAQ updates.
 
         Params:
         - last_access_time: timezone aware datetime object
+        - user: current chat User
 
         Return value: int
         """
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
             atime__gt=last_access_time,
-            unitLesson__id=self.id).count()
+            unitLesson__id=self.id).exclude(author=user).count()
 
-    def answer_faq_updates(self, last_access_time: datetime) -> int:
+    def answer_faq_updates(self, last_access_time: datetime, user: User) -> int:
         """
         Count new Answer FAQ updates.
 
         Params:
         - last_access_time: timezone aware datetime object
+        - user: current chat User
 
         Return value: int
         """
@@ -970,28 +972,30 @@ class UnitLesson(models.Model):
         return Response.objects.filter(
             kind=Response.STUDENT_QUESTION,
             atime__gt=last_access_time,
-            unitLesson__id=answer.id).count() if answer else 0
+            unitLesson__id=answer.id).exclude(author=user).count() if answer else 0
 
-    def question_faq_comment_updates(self, last_access_time: datetime) -> int:
+    def question_faq_comment_updates(self, last_access_time: datetime, user: User) -> int:
         """
         Count Question FAQ updates.
 
         Params:
         - last_access_time: timezone aware datetime object
+        - user: current chat User
 
         Return value: int
         """
         return Response.objects.filter(
             kind=Response.COMMENT,
             atime__gt=last_access_time,
-            unitLesson__id=self.id).count()
+            unitLesson__id=self.id).exclude(author=user).count()
 
-    def answer_faq_comment_updates(self, last_access_time: datetime) -> int:
+    def answer_faq_comment_updates(self, last_access_time: datetime, user: User) -> int:
         """
         Count Answer FAQ updates.
 
         Params:
-        - last_access_time: timezone aware datetime object
+        :last_access_time: timezone aware datetime object
+        :user: current chat User
 
         Return value: int
         """
@@ -1000,30 +1004,34 @@ class UnitLesson(models.Model):
         return Response.objects.filter(
             kind=Response.COMMENT,
             atime__gt=last_access_time,
-            unitLesson__id=answer.id).count() if answer else 0
+            unitLesson__id=answer.id).exclude(author=user).count() if answer else 0
 
     def em_updates(self, last_access_time: datetime) -> int:
         """
         Count all new EMs.
 
         Params:
-        - last_access_time: timezone aware datetime object
+        :last_access_time: timezone aware datetime object
 
         Return value: int
         """
-        return self.unitlesson_set.filter(kind=self.MISUNDERSTANDS, atime__gt=last_access_time).count()
+        return self.unitlesson_set.filter(
+            kind=self.MISUNDERSTANDS, atime__gt=last_access_time
+        ).count()
 
     def em_resolutions(self, last_access_time: datetime) -> int:
         """
         Count new resolution for all EMs for a given Thread.
 
         Params:
-        - last_access_time: timezone aware datetime object
+        :last_access_time: timezone aware datetime object
 
         Return value: int
         """
         def get_new_resolutions_count(em: UnitLesson) -> int:
-            return em.unitlesson_set.filter(kind=self.RESOLVES, atime__gt=last_access_time).count()
+            return em.unitlesson_set.filter(
+                kind=self.RESOLVES, atime__gt=last_access_time
+            ).count()
 
         thread_ems = self.get_errors()
         result = reduce(operator.add, [get_new_resolutions_count(em) for em in thread_ems], 0)
@@ -1037,14 +1045,15 @@ class UnitLesson(models.Model):
         context = c_chat_context().find_one({"chat_id": chat.id})
         last_access_time = context.get('activity', {}).get(f"{self.id}") if context else None
         tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
+        user = chat.user
 
         return reduce(operator.add, [
-            self.question_faq_updates(tz_aware_datetime),
-            self.answer_faq_updates(tz_aware_datetime),
+            self.question_faq_updates(tz_aware_datetime, user),
+            self.answer_faq_updates(tz_aware_datetime, user),
             self.em_updates(tz_aware_datetime),
             self.em_resolutions(tz_aware_datetime),
-            self.question_faq_comment_updates(tz_aware_datetime),
-            self.answer_faq_comment_updates(tz_aware_datetime),
+            self.question_faq_comment_updates(tz_aware_datetime, user),
+            self.answer_faq_comment_updates(tz_aware_datetime, user),
         ], 0) if tz_aware_datetime else 0
 
 
@@ -1823,11 +1832,11 @@ class Course(models.Model):
         if not role:
             role = Role.INSTRUCTOR
         return User.objects.filter(role__role=role, role__course=self)
-    
+
     @property
     def instructors(self):
         return self.get_users(role=Role.INSTRUCTOR)
-    
+
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)
         for key, value in data.items():

@@ -497,6 +497,16 @@ class UnitLessonTest(TestCase):
         self.unit = Unit(title='test unit title', addedBy=self.user)
         self.unit.save()
         self.last_access_time = datetime.now(pytz.utc) - timedelta(1)
+        self.another_user = User.objects.create_user(username='test2', password='test2')
+        self.concept2 = Concept(title='test title2', addedBy=self.another_user)
+        self.concept2.save()
+        self.lesson2 = Lesson(title='ugh2', text='brr2', addedBy=self.another_user, kind=Lesson.ORCT_QUESTION)
+        self.lesson2.save_root()
+        self.lesson2.add_concept_link(self.concept2, ConceptLink.TESTS, self.another_user)
+        self.unit2 = Unit(title='test unit title2', addedBy=self.another_user)
+        self.unit2.save()
+        self.course = Course(title='test course', description='test descr', addedBy=self.user)
+        self.course.save()
 
     def test_create_from_lesson(self):
         result = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
@@ -849,65 +859,157 @@ class UnitLessonTest(TestCase):
         self.lesson.kind = Lesson.EXERCISE
         self.assertFalse(unit_lesson.is_question())
 
-    @patch('ct.models.Response')
-    def test_question_faq_updates(self, response):
+    def test_question_faq_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        response.STUDENT_QUESTION = 'sq'
-        result = unit_lesson.question_faq_updates(self.last_access_time)
-        response.objects.filter.assert_called_once_with(
+        result = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 0)
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=unit_lesson,
+            course=self.course,
             kind=Response.STUDENT_QUESTION,
-            atime__gt=self.last_access_time.replace(tzinfo=tz.tzutc()),
-            unitLesson__id=unit_lesson.id
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.user
         )
+        response.save()
+        result2 = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result2, int)
+        self.assertEqual(result2, 0)
+        another_student_response = Response(
+            lesson=self.lesson,
+            unitLesson=unit_lesson,
+            course=self.course,
+            kind=Response.STUDENT_QUESTION,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.another_user
+        )
+        another_student_response.save()
+        result3 = unit_lesson.question_faq_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 1)
 
-    @patch('ct.models.Response')
-    def test_answer_faq_updates(self, response):
+    def test_answer_faq_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        response.STUDENT_QUESTION = 'sq'
-        result = unit_lesson.answer_faq_updates(self.last_access_time)
+        result = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
-        unit_lesson_answer = UnitLesson.create_from_lesson(
+        answer = UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.ANSWERS
         )
-        result2 = unit_lesson.answer_faq_updates(self.last_access_time)
-        response.objects.filter.assert_called_once()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.STUDENT_QUESTION,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.user
+        )
+        response.save()
+        result2 = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result2, int)
+        self.assertEqual(result2, 0)
+        another_student_response = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.STUDENT_QUESTION,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.another_user
+        )
+        another_student_response.save()
+        result3 = unit_lesson.answer_faq_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 1)
 
-    @patch('ct.models.Response')
-    def test_question_faq_comment_updates(self, response):
+    def test_question_faq_comment_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        response.COMMENT = 'comment'
-        result = unit_lesson.question_faq_comment_updates(self.last_access_time)
-        response.objects.filter.assert_called_once_with(
+        result = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result, int)
+        self.assertEqual(result, 0)
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=unit_lesson,
+            course=self.course,
             kind=Response.COMMENT,
-            atime__gt=self.last_access_time.replace(tzinfo=tz.tzutc()),
-            unitLesson__id=unit_lesson.id
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.user
         )
+        response.save()
+        result2 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result2, int)
+        self.assertEqual(result2, 0)
+        another_student_response = Response(
+            lesson=self.lesson,
+            unitLesson=unit_lesson,
+            course=self.course,
+            kind=Response.COMMENT,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.another_user
+        )
+        another_student_response.save()
+        result3 = unit_lesson.question_faq_comment_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 1)
 
-    @patch('ct.models.Response')
-    def test_answer_faq_comment_updates(self, response):
+    def test_answer_faq_comment_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
-        response.COMMENT = 'comment'
-        result = unit_lesson.answer_faq_comment_updates(self.last_access_time)
+        result = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
-        unit_lesson_answer = UnitLesson.create_from_lesson(
+        answer = UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.ANSWERS
         )
-        result2 = unit_lesson.answer_faq_comment_updates(self.last_access_time)
-        response.objects.filter.assert_called_once()
+        response = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.COMMENT,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.user
+        )
+        response.save()
+        result2 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result2, int)
+        self.assertEqual(result2, 0)
+        another_student_response = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.COMMENT,
+            text='test text',
+            confidence=Response.GUESS,
+            author=self.another_user
+        )
+        another_student_response.save()
+        result3 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 1)
 
     def test_em_updates(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
         result = unit_lesson.em_updates(self.last_access_time)
         self.assertIsInstance(result, int)
         self.assertEqual(result, 0)
-        unit_lesson_answer = UnitLesson.create_from_lesson(
+        UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
         )
         result2 = unit_lesson.em_updates(self.last_access_time)
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 1)
+        UnitLesson.create_from_lesson(
+            unit=self.unit2, lesson=self.lesson2, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
+        )
+        result3 = unit_lesson.em_updates(self.last_access_time)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 2)
 
     def test_em_resolutions(self):
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
@@ -917,12 +1019,18 @@ class UnitLessonTest(TestCase):
         unit_lesson_error = UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.MISUNDERSTANDS
         )
-        unit_lesson_answer = UnitLesson.create_from_lesson(
+        UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson_error, kind=UnitLesson.RESOLVES
         )
         result2 = unit_lesson.em_resolutions(self.last_access_time)
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 1)
+        UnitLesson.create_from_lesson(
+            unit=self.unit2, lesson=self.lesson2, parent=unit_lesson_error, kind=UnitLesson.RESOLVES
+        )
+        result3 = unit_lesson.em_resolutions(self.last_access_time)
+        self.assertIsInstance(result3, int)
+        self.assertEqual(result3, 2)
 
     @patch('ct.models.UnitLesson.question_faq_updates')
     @patch('ct.models.UnitLesson.answer_faq_updates')
