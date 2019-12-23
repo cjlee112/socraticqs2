@@ -106,9 +106,9 @@ $(window).on('load', function(){
 
   // start session in case there are no chat sessions
   if (!chatSessions) {
-    setTimeout(() => {
-      console.log(chatSessions);  
+    setTimeout(function() {
+      console.log(chatSessions);
       $('.chat-start-session').click();
     }, 1000);
-  } 
+  }
 });
