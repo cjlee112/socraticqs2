@@ -214,7 +214,10 @@ Courselets
   <!-- Chat input bar -->
   <section class="chat-input-bar">
     <div class="inner">
-      <div class="sidebar-toggle"><span></span></div>
+      <div class="sidebar-toggle">
+        <span></span>
+        {% if updates_counter %}<div class="chat-counter">2</div>{% endif %}
+      </div>
 
       <div class="chat-progress">
         <span></span>
