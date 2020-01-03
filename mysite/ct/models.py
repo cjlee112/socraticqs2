@@ -1043,9 +1043,9 @@ class UnitLesson(models.Model):
                         'id': resolution.id,
                         'title': resolution.lesson.title,
                         'text': resolution.lesson.text
-                    } for resolution in get_new_resolutions(em) if get_new_resolutions(em).exists()
+                    } for resolution in get_new_resolutions(em)
                 ]
-            } for em in thread_ems
+            } for em in thread_ems if get_new_resolutions(em).exists()
         ]
 
     def faq_answers(
@@ -1076,6 +1076,36 @@ class UnitLesson(models.Model):
                 ]
             } for faq in tracked_faqs if faq.response_set.filter(
                 kind=Response.COMMENT, atime__gt=last_access_time).exclude(author=user).exists()
+        ]
+
+    def new_ems(self, last_access_time: datetime) -> '[{}]':
+        """
+        Collect new EMs based on last access time.
+
+        Params:
+        :last_access_time: timezone aware datetime object
+        """
+        return [
+            {
+                'em_id': em.id,
+                'em_title': em.lesson.title
+            } for em in self.em_updates(last_access_time)
+        ]
+
+    def new_faqs(self, last_access_time: datetime, user: User) -> '[{}]':
+        """
+        Collect new FAQ based on last access time.
+
+        Params:
+        :last_access_time: timezone aware datetime object
+        :user: current user
+        """
+        return [
+            {
+                'faq_id': faq.id,
+                'faq_title': faq.title,
+                'faq_text': faq.text
+            } for faq in self.question_faq_updates(last_access_time, user)
         ]
 
     def em_resolutions_updates(

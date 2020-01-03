@@ -40,8 +40,11 @@ inj_alternative['next_handler'] = FsmHandler()
 MessageSerializer = inj_alternative.inject(MessageSerializer)
 
 
-def get_additional_messages(response, chat):
-    student_errors = response.studenterror_set.all()
+def get_additional_messages(response, chat, selected: list) -> None:
+    """
+    Emit resolutions based on user selection.
+    """
+    student_errors = response.studenterror_set.filter(errorModel__id__in=selected)
     dummy_ul = UnitLesson.objects.filter(lesson__title='Hope you\'ve overcame the misconception').first()
     for each in student_errors:
         if not each.errorModel.get_em_resolutions()[1]:
@@ -63,6 +66,9 @@ def get_additional_messages(response, chat):
 
 
 def get_help_messages(chat):
+    """
+    Emit HELP additional messages.
+    """
     for each in chat.enroll_code.courseUnit.unit.get_aborts():
         [Message.objects.get_or_create(contenttype='unitlesson',
                                        content_id=ul.id,
@@ -351,7 +357,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
                 if not message.chat.is_live:
-                    get_additional_messages(uniterror.response, chat)
+                    get_additional_messages(uniterror.response, chat, selected)
                 chat.next_point = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,

@@ -309,10 +309,12 @@ def updates():
             {
                 "faq_id": 1,
                 "faq_title": "FAQ title 1",
+                "faq_text": "FAQ text 1",
             },
             {
                 "faq_id": 2,
                 "faq_title": "FAQ title 2",
+                "faq_text": "FAQ text 2",
             }
         ]
     }

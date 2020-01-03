@@ -218,6 +218,9 @@ class Message(models.Model):
         ) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
+        node = self.chat.state.fsmNode if self.chat.state else None
+        if node and hasattr(node._plugin, 'get_errors'):
+            return node._plugin.get_errors(self)
         errors = None
         error_list = UnitError.objects.get(id=self.content_id).get_errors()
         if error_list:

@@ -1,4 +1,5 @@
 from dateutil import tz
+from functools import reduce
 
 from django.db.models import Q
 from django.utils import timezone
@@ -7,33 +8,9 @@ import waffle
 
 from core.common.mongo import c_chat_context
 from ct.models import UnitStatus, Response, STATUS_CHOICES
-from chat.models import Message
+from chat.models import Message, UnitError
 
 from ct.templatetags.ct_extras import md2html
-
-
-UPDATES_DATA = {
-    'new_ems': [
-        {
-            "em_id": 1,
-            "em_title": "EM title 1",
-        },
-        {
-            "em_id": 2,
-            "em_title": "EM title 2",
-        }
-    ],
-    'new_faqs': [
-        {
-            "faq_id": 1,
-            "faq_title": "FAQ title 1",
-        },
-        {
-            "faq_id": 2,
-            "faq_title": "FAQ title 2",
-        }
-    ]
-}
 
 
 def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -78,17 +55,20 @@ class START(object):
         tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
 
         em_resolutions = unit_lesson.em_resolutions(tz_aware_datetime, affected_ems)
-        fsmStack.state.set_data_attr('em_resolutions', em_resolutions)
+        fsmStack.state.set_data_attr('em_resolutions', em_resolutions) if em_resolutions else None
 
         interested_faqs = unit_lesson.response_set.filter(
             Q(
                 kind=Response.STUDENT_QUESTION, inquirycount__addedBy=request.user
             ) | Q(author=request.user, kind=Response.STUDENT_QUESTION))
         faq_answers = unit_lesson.faq_answers(tz_aware_datetime, request.user, interested_faqs)
-        fsmStack.state.set_data_attr('faq_answers', faq_answers)
+        fsmStack.state.set_data_attr('faq_answers', faq_answers) if faq_answers else None
 
-        for key, value in UPDATES_DATA.items():
-            fsmStack.state.set_data_attr(key, value)
+        new_ems = unit_lesson.new_ems(tz_aware_datetime)
+        fsmStack.state.set_data_attr('new_ems', new_ems) if new_ems else None
+
+        new_faqs = unit_lesson.new_faqs(tz_aware_datetime, request.user)
+        fsmStack.state.set_data_attr('new_faqs', new_faqs) if new_faqs else None
 
     def start_event(self, node, fsmStack, request, **kwargs):
         """
@@ -378,6 +358,31 @@ class SHOW_NEW_EMS(object):
     """
     title = 'View EMs'
     edges = (
+        dict(name='next', toNode='GET_NEW_EMS', title='Go to getting Student response'),
+    )
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'text': ''''''
+                '''Here are the new most common blindspots people reported when comparing their answer vs. '''
+                '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+
+class GET_NEW_EMS(object):
+    """
+    Get student response for new EMs.
+    """
+    title = 'Get EMs from a Student'
+    edges = (
         dict(name='next', toNode='ACT', title='Go to new FAQs'),
     )
 
@@ -387,17 +392,41 @@ class SHOW_NEW_EMS(object):
         return edge.toNode
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        unit_lesson = next_lesson
+        response = chat.message_set.filter(
+            lesson_to_answer_id=unit_lesson.id, kind='response', contenttype='response').first().content
+        uniterror = UnitError.objects.filter(response=response, unit=chat.enroll_code.courseUnit.unit).first()
         _data = {
             'chat': chat,
-            'text': 'Imagine new EMs for this thread here :)',
+            'contenttype': 'uniterror',
+            'content_id': uniterror.id,
             'owner': chat.user,
-            'input_type': 'custom',
-            'kind': 'message',
+            'input_type': 'options',
+            'kind': 'uniterror',
             'is_additional': is_additional
         }
         message = Message(**_data)
         message.save()
         return message
+
+    def get_errors(self, message) -> Message:
+        checked_errors = UnitError.objects.get(
+            id=message.content_id
+        ).response.studenterror_set.all().values_list('errorModel', flat=True)
+        error_str = (
+            '<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
+            'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
+        )
+        errors = reduce(
+            lambda x, y: x + y, [error_str.format(
+                'chat-selectable-selected' if x.get('em_id') in checked_errors else '',
+                x.get('em_id'),
+                x.get('em_title')
+            ) for x in message.chat.state.get_data_attr('new_ems')]
+        )
+        return '<ul class="chat-select-list">{}</ul>'.format(
+            errors or '<li><h3>There are no misconceptions to display.</h3></li>'
+        )
 
 
 class SHOW_NEW_FAQS(object):
@@ -593,6 +622,7 @@ def get_specs():
             SHOW_FAQ,
             SHOW_FAQ_ANSWER,
             SHOW_NEW_EMS,
+            GET_NEW_EMS,
             SHOW_NEW_FAQS,
             ACT,
             GET_ACT,
