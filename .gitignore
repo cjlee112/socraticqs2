@@ -60,6 +60,7 @@ target/
 *.db
 settings_local.py
 local.py
+private.py
 #static/
 add_threads.bundle.js
 webpack-stats*

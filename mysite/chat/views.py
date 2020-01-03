@@ -279,11 +279,17 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
+        most_recent_complete_session = None
+
         for chat_ss in chat_sessions:
             chat_prog_ser = ChatProgressSerializer()
             lessons = chat_prog_ser.get_breakpoints(chat_ss)
             chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
             chat_ss.total_lessons = len(lessons)
+
+            if not most_recent_complete_session and chat_ss.lessons_done == chat_ss.total_lessons:
+                most_recent_complete_session = chat_ss
+
         back_url_name, back_url = self.get_back_url(**locals())
         return render(
             request,
@@ -291,6 +297,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             {
                 'chat_sessions_exists': len(chat_sessions),  # mark for frontend
                 'chat_sessions': chat_sessions, #.exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
+                'most_recent_complete_session': most_recent_complete_session,
                 'chat': chat,
                 'chat_id': i_chat_id,
                 'course': courseUnit.course,

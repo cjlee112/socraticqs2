@@ -119,7 +119,11 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 chat.state.save()
                 next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
             else:
+                previous_state = chat.state.fsmNode.fsm.name if chat.state else None
                 self.pop_state(chat)
+                next_point = Message.objects.filter(
+                    id=chat.state.get_data_attr('saved_next_point')
+                ).first() if previous_state == 'updates' else None
 
         if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ'):
             chat_context = c_chat_context().find_one({'chat_id': chat.id})
@@ -139,7 +143,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             self.push_state(chat, request, 'resource', {'unitlesson': current})
             next_point = chat.state.fsmNode.get_message(chat, request)
         elif updates:
-            self.push_state(chat, request, 'updates', {'unitlesson': current})
+            self.push_state(chat, request, 'updates', {'unitlesson': current, 'chat': chat})
             next_point = chat.state.fsmNode.get_message(chat, request)
         elif chat.state:
             if not next_point:

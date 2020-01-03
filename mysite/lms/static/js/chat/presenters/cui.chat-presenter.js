@@ -12,7 +12,7 @@ var CUI = CUI || {};
  * @param {string} progressUrl      - A url for loading a user's progress.
  * @returns {CUI.ChatPresenter}
  */
-CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl){
+CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl, showUpdates){
   // Check arguments
   if(typeof chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
   if(!historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
@@ -158,6 +158,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @protected
    */
   this._isSidebarVisible = false;
+
+  /**
+   * Define if we want to see updates on load.
+   * @type {boolean}
+   * @protected
+   */
+  this._showUpdates = showUpdates;
 
   /**
    * A jQuery reference to the sidebar element.
@@ -818,6 +825,24 @@ CUI.ChatPresenter.prototype._getNextThreadInfo = function(threadId) {
 };
 
 /**
+ * Get a list of all thread brekapoints with updates.
+ * @protected
+ *
+ * @returns {Array<CUI.SidebarBreakpointPresenter>} - array of objects with {@link CUI.SidebarBreakpointPresenter}.
+ */
+CUI.ChatPresenter.prototype._getThreadsWithUpdates = function() {
+  var breakpointsWithUpdates = new Array();
+
+  this._sidebarBreakpoints.forEach(function(breakpoint) {
+    if (breakpoint.getInfo().updatesCount) {
+      breakpointsWithUpdates.push(breakpoint);
+    }
+  });
+
+  return breakpointsWithUpdates;
+};
+
+  /**
  * Parses resources data and updates the list of breakpoints in the sidebar.
  * @protected
  * @param {object} data               - An object containing the user's progress.
@@ -881,6 +906,18 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
 
   // Enable input
   this._hideLoading();
+
+  // Show updates if needed
+  if (this._showUpdates) {
+    var firstTreadWithUpdates = this._getThreadsWithUpdates()[0];
+
+    if (firstTreadWithUpdates) {
+      this._showThreadMessages(firstTreadWithUpdates.getInfo().threadId);
+      this._getThreadUpdates(firstTreadWithUpdates.$el);
+    }
+
+    this._showUpdates = false;
+  }
 };
 
 /**
@@ -938,7 +975,6 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
       } else if(m.type === 'breakpoint') {
         model = new CUI.ChatBreakpointModel(m);
 
-        this._show
       } else throw new Error("CUI.ChatPresenter._parseMessages(): Invalid m.type.");
 
       //Update messages
@@ -961,7 +997,7 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
 
   // Show messages for selected thread or Scroll to first new message
   if (threadChanged) {
-    this._showMessages(this._currentThreadId);
+    this._showThreadMessages(this._currentThreadId);
   } else {
     if(scrollTo) this._scrollToMessage(data.addMessages[0].id);
   }
@@ -1189,7 +1225,7 @@ CUI.ChatPresenter.prototype._getAllMessageElements = function(){
  * @protected
  * @param {number} threadId   - The ID of a thread to display messages of.
  */
-CUI.ChatPresenter.prototype._showMessages = function(threadId){
+CUI.ChatPresenter.prototype._showThreadMessages = function(threadId){
   var $messageElementToScrollTo = null;
   threadId = parseInt(threadId);
 
@@ -1204,11 +1240,11 @@ CUI.ChatPresenter.prototype._showMessages = function(threadId){
   var isThreadDone = currentThreadInfo.isDone;
   var isResource = currentThreadInfo.type === CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
 
-  if (isThreadDone || isResource) {
-    this._updateToNextBreakpointButton(nextThreadInfo);
-  } else {
-    this._updateToNextBreakpointButton();
-  }
+  // if (isThreadDone || isResource) {
+  //   this._updateToNextBreakpointButton(nextThreadInfo);
+  // } else {
+  this._updateToNextBreakpointButton();
+  // }
 
 
   this._getAllMessageElements().each(function(){
@@ -1238,7 +1274,7 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, threadId
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
-    this._showMessages(threadId);
+    this._showThreadMessages(threadId);
     top = $message.offset().top - 60;
     TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
   } else {
@@ -1439,6 +1475,16 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 };
 
 /**
+ * Get updates for a specified thread.
+ * @param {jQuery} $thread - a jQuery object reference to a sidebar thread breakpoint element.
+ */
+CUI.ChatPresenter.prototype._getThreadUpdates = function($thread) {
+  if ($thread.data('updates-count')) {
+    this._getMessages(this._updatesUrl+$thread.data('href')+'/');
+  };
+};
+
+/**
  * On change thread button click handler.
  * @protected
  * @params {event} e
@@ -1450,7 +1496,7 @@ function onChangeThreadButtonClickHandler(e){
   var targetType = $target.data('type');
 
   if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.breakpoint) {
-    this._showMessages($(e.currentTarget).data('thread-id'));
+    this._showThreadMessages($(e.currentTarget).data('thread-id'));
   } else if (targetType === CUI.ChatBackToBreakpointButtonModel.ItemType.resource) {
     var threadId = $target.data('thread-id');
     var resourceInfo = this._sidebarResources.find(function(r) {
@@ -1509,10 +1555,8 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Show only related messages and Scroll to the topmost one
-    this._showMessages($(e.currentTarget).data('href'));
-    if ( $(e.currentTarget).data('updates-count') ) {
-      this._getMessages(this._updatesUrl+$(e.currentTarget).data('href')+'/');
-    };
+    this._showThreadMessages($(e.currentTarget).data('href'));
+    this._getThreadUpdates($(e.currentTarget));
   }, this));
 
   // Delegated events for sidebar resources links

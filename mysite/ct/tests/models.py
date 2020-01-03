@@ -1063,7 +1063,7 @@ class UnitLessonTest(TestCase):
 
         unit_lesson = UnitLesson.create_from_lesson(unit=self.unit, lesson=self.lesson)
         chat = Mock()
-        result = unit_lesson.updates(chat)
+        result = unit_lesson.updates_count(chat)
         self.assertIsInstance(result, int)
         self.assertEqual(result, 6)
 

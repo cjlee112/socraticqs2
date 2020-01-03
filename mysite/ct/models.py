@@ -1011,28 +1011,89 @@ class UnitLesson(models.Model):
         Count all new EMs.
 
         Params:
+
         :last_access_time: timezone aware datetime object
         """
         return self.unitlesson_set.filter(
             kind=self.MISUNDERSTANDS, atime__gt=last_access_time
         )
 
-    def em_resolutions_updates(self, last_access_time: datetime) -> '[QuerySet[UnitLesson]]':
+    def em_resolutions(
+            self, last_access_time: datetime,
+            error_models: '[UnitLesson]' = None) -> '{UnitLesson: [QuerySet[UnitLesson]]}':
+        """
+        Collect new EMs resolutions.
+
+        :last_access_time: timezone aware datetime object
+        :error_models: misconceptions Student fall into
+        """
+        def get_new_resolutions(em: UnitLesson) -> 'QuerySet[UnitLesson]':
+            return em.unitlesson_set.filter(
+                kind=self.RESOLVES, atime__gt=last_access_time)
+
+        thread_ems = error_models or self.get_errors()
+
+        return [
+            {
+                'em_id': em.id,
+                'em_title': em.lesson.title,
+                'em_text': em.lesson.text,
+                'resolutions': [
+                    {
+                        'id': resolution.id,
+                        'title': resolution.lesson.title,
+                        'text': resolution.lesson.text
+                    } for resolution in get_new_resolutions(em) if get_new_resolutions(em).exists()
+                ]
+            } for em in thread_ems
+        ]
+
+    def faq_answers(
+            self, last_access_time: datetime, user: User,
+            faqs: '[Response]' = None) -> '{Response: [QuerySet[Response]]}':
+        """
+        Collect new FAQs comments in form of dictionary.
+
+        Params:
+        :last_access_time: timezone aware datetime object
+        :faqs: all FAQs Student intereested in
+        :user: current user
+        """
+        tracked_faqs = faqs or self.response_set.filter(kind=Response.COMMENT)
+
+        return [
+            {
+                'faq_id': faq.id,
+                'faq_title': faq.title,
+                'faq_text': faq.text,
+                'answers': [
+                    {
+                        'id': answer.id,
+                        'title': answer.title,
+                        'text': answer.text
+                    } for answer in faq.response_set.filter(
+                        kind=Response.COMMENT, atime__gt=last_access_time).exclude(author=user)
+                ]
+            } for faq in tracked_faqs if faq.response_set.filter(
+                kind=Response.COMMENT, atime__gt=last_access_time).exclude(author=user).exists()
+        ]
+
+    def em_resolutions_updates(
+            self, last_access_time: datetime,
+            error_models: '[UnitLesson]' = None) -> '{UnitLesson: [QuerySet[UnitLesson]]}':
         """
         Count new resolution for all EMs for a given Thread.
 
         Params:
         :last_access_time: timezone aware datetime object
+        :error_models: misconceptions Student fall into
         """
         def get_new_resolutions(em: UnitLesson) -> 'QuerySet[UnitLesson]':
             return em.unitlesson_set.filter(
-                kind=self.RESOLVES, atime__gt=last_access_time
-            )
+                kind=self.RESOLVES, atime__gt=last_access_time)
 
-        thread_ems = self.get_errors()
-        result = [get_new_resolutions(em) for em in thread_ems]
-
-        return result
+        thread_ems = error_models or self.get_errors()
+        return [get_new_resolutions(em) for em in thread_ems]
 
     def em_resolutions_updates_count(self, last_access_time: datetime) -> int:
         """
@@ -1040,9 +1101,9 @@ class UnitLesson(models.Model):
         """
         return reduce(operator.add, [emr.count() for emr in self.em_resolutions_updates(last_access_time)], 0)
 
-    def updates(self, chat):
+    def updates_count(self, chat) -> int:
         """
-        Currently presents Question FAQ updates.
+        Currently Thread updates count.
         """
         context = c_chat_context().find_one({"chat_id": chat.id})
         last_access_time = context.get('activity', {}).get(f"{self.id}") if context else None

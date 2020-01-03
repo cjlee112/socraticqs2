@@ -59,6 +59,7 @@ CUI.SidebarBreakpointPresenter.prototype.getInfo = function() {
     threadId: this._model.threadId,
     html: this._model.html,
     isDone: this._model.isDone,
+    updatesCount: this._model.updatesCount
   };
 };
 

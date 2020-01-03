@@ -194,6 +194,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
     def perform_update(self, serializer):
         chat_id = self.request.data.get('chat_id')
         message = self.get_object()
+        node = message.chat.state.fsmNode
         chat = Chat.objects.get(id=chat_id, user=self.request.user)
         activity = chat.state and chat.state.activity
 
@@ -202,6 +203,11 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
 
         # Check if message is not in current chat
         if not message.chat or message.chat != chat:
+            return
+
+        # Do procced the user response in the FSMNode
+        if hasattr(node._plugin, 'handler'):
+            node._plugin.handler(message, chat, self.request, self.next_handler)
             return
 
         if is_chat_add_faq(message) and is_in_node('GET_NEW_FAQ'):
@@ -625,6 +631,10 @@ class UpdatesView(ValidateMixin, APIView):
         self.check_object_permissions(self.request, chat)
 
         unitlesson = get_object_or_404(UnitLesson, pk=pk)
+
+        if chat.state:
+            chat.state.set_data_attr('saved_next_point', chat.next_point.id)
+            chat.state.save_json_data()
 
         divider = ChatDivider(
             text=unitlesson.lesson.title, unitlesson=unitlesson

@@ -122,7 +122,12 @@ Courselets
                     <!--TODO: remove comments after success runing code-->
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/"
-                         class="chat-start-session" data-chat-id="{{ chat_sess.id }}">
+                         class="chat-start-session"
+                         data-chat-id="{{ chat_sess.id }}"
+                         {% if most_recent_complete_session and most_recent_complete_session.id == chat_sess.id %}
+                          data-complete="yes"
+                         {% endif %}
+                      >
                         <h3>
                           {% if chat_sess.last_modify_timestamp%}
                           {{ chat_sess.last_modify_timestamp|date:"F j, Y P" }}

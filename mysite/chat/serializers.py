@@ -309,8 +309,8 @@ class LessonSerializer(serializers.ModelSerializer):
 
     def get_updatesCount(self, obj):
         is_done = obj.is_done if hasattr(obj, 'is_done') else self.get_isDone(obj)
-        return obj.updates(self.context.get('chat')) if is_done and self.context.get('chat') else 0
-    
+        return obj.updates_count(self.context.get('chat')) if is_done and self.context.get('chat') else 0
+
     def get_threadId(self, obj):
         return obj.id
 
@@ -369,7 +369,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                             lessons.append(lesson)
                     except:
                         pass
-            
+
             self.lessons_dict = LessonSerializer(many=True, context={'chat': obj}).to_representation(lessons)
         return self.lessons_dict
 

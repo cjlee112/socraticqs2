@@ -247,3 +247,73 @@ def load_from_json(file_dir):
 @pytest.fixture(params=load_from_json('api/v0/bp_calculation_data.json'), ids=lambda param: str(param.get("data")))
 def input_data(request):
     return request.param
+
+
+@pytest.fixture(scope='function')
+def updates():
+    """
+    Baseline for Thread updates.
+    """
+    UPDATES_DATA = {
+        'em_resolutions': [
+            {
+                "em_id": 1,
+                "em_title": "EM title 1",
+                "em_text": "EM text 1",
+                "resolutions": [
+                    {'id': 1, 'title': 'Resolution 1', "text": "Resolution text 1"},
+                    {'id': 2, 'title': 'Resolution 2', "text": "Resolution text 2"},
+                ]
+            },
+            {
+                "em_id": 2,
+                "em_title": "EM title 2",
+                "em_text": "EM text 2",
+                "resolutions": [
+                    {'id': 3, 'title': 'Resolution 3', "text": "Resolution text 3"},
+                    {'id': 4, 'title': 'Resolution 4', "text": "Resolution text 4"},
+                ]
+            },
+        ],
+        'faq_answers': [
+            {
+                "faq_id": 1,
+                "faq_title": "FAQ title 1",
+                "faq_text": "FAQ text 1",
+                "answers": [
+                    {"id": 1, "title": "Title 1", "text": "Answer text 1"},
+                    {"id": 2, "title": "Title 2", "text": "Answer text 2"},
+                ]
+            },
+            {
+                "faq_id": 2,
+                "faq_title": "FAQ title 2",
+                "faq_text": "FAQ text 2",
+                "answers": [
+                    {"id": 3, "title": "Title 3", "text": "Answer text 3"},
+                    {"id": 4, "title": "Title 4", "text": "Answer text 4"},
+                ]
+            }
+        ],
+        'new_ems': [
+            {
+                "em_id": 1,
+                "em_title": "EM title 1",
+            },
+            {
+                "em_id": 2,
+                "em_title": "EM title 2",
+            }
+        ],
+        'new_faqs': [
+            {
+                "faq_id": 1,
+                "faq_title": "FAQ title 1",
+            },
+            {
+                "faq_id": 2,
+                "faq_title": "FAQ title 2",
+            }
+        ]
+    }
+    return UPDATES_DATA

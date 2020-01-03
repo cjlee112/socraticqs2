@@ -1,6 +1,48 @@
 /**
  * @file Handles page preloading and binds event listeners for starting the chat.
  */
+var CUI = CUI || {};
+
+CUI.chat = CUI.chat || {};
+
+/**
+ *
+ */
+CUI.chat.open = function($startChatSesssionElement, showUpdates){
+  var data = $startChatSesssionElement.data() || {};
+  if(data.chatId != undefined) {
+    CUI.config.chatID = data.chatId;
+    if(data.chatId == 0) {
+      // NOT async call to create new chat session
+      $.ajax({
+        url: CUI.config.initNewChatUrl,
+        async: false,
+        dataType: 'json',
+        success: function(result) {
+          CUI.config.chatID = Number(result.id);
+          CUI.config.is_test = result.is_test;
+          CUI.config.is_preview = result.is_preview;
+        }
+      })
+    }
+  }
+
+  // Hide start buttons
+  $('.chat__start, .chat__history').hide();
+
+  // Get the chat id from the link
+  var chatID = data.chatId || CUI.config.chatID;
+
+  // Create the chat
+  var chat = new CUI.ChatPresenter(
+    chatID,
+    CUI.config.historyUrl,
+    CUI.config.progressUrl,
+    CUI.config.resourcesUrl,
+    CUI.config.updatesUrl,
+    showUpdates
+  );
+};
 
 // Bind event listeners when the DOM has loaded
 $(function(){
@@ -13,38 +55,14 @@ $(function(){
   CUI.animation.pagePreloaderTimeline.staggerTo($preloaderDots, 0.6, {y: -10, yoyo: true, repeat: -1, repeatDelay: 0.3, ease: Back.easeInOut,  force3D: true, clearProps: 'transform'}, 0.1);
 
   // Create and initialize the chat when the start button is clicked
-  $('.chat-start-session').on('click', function(e){
+  $('.chat-start-session').on('click', function(e) {
     e.preventDefault();
 
-    var data = $(this).data();
-    if(data.chatId != undefined) {
-      CUI.config.chatID = data.chatId;
-      if(data.chatId == 0) {
-        // NOT async call to create new chat session
-        $.ajax({
-          url: CUI.config.initNewChatUrl,
-          async: false,
-          dataType: 'json',
-          success: function(result) {
-            CUI.config.chatID = Number(result.id);
-            CUI.config.is_test = result.is_test;
-            CUI.config.is_preview = result.is_preview;
-          }
-        })
-      }
-    }
-    // Disable multiple clicks
+      // Disable multiple clicks
     if(chatHasStarted) return;
     else chatHasStarted = true;
 
-    // Hide start buttons
-    $('.chat__start, .chat__history').hide();
-
-    // Get the chat id from the link
-    var chatID = $(e.currentTarget).data('chat-id') || CUI.config.chatID;
-
-    // Create the chat
-    var chat = new CUI.ChatPresenter(chatID, CUI.config.historyUrl, CUI.config.progressUrl, CUI.config.resourcesUrl, CUI.config.updatesUrl);
+    CUI.chat.open($(e.currentTarget));
   });
 });
 
@@ -110,5 +128,15 @@ $(window).on('load', function(){
       console.log(chatSessions);
       $('.chat-start-session').click();
     }, 1000);
+  }
+
+  // Check if want to see updates
+  var urlHash = window.location.hash;
+  if (urlHash === '#updates') {
+    var $completeChatSession = $('.chat-start-session[data-complete="yes"]');
+
+    if ($completeChatSession) {
+      CUI.chat.open($completeChatSession, true);
+    }
   }
 });
