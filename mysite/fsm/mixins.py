@@ -888,6 +888,7 @@ class ChatMixin(object):
                 userMessage=False,
                 is_additional=is_additional)[0]
         if self.node_name_is_one_of('SHOW_FAQS'):
+            is_new = chat.state.get_data_attr('updates') if 'updates' in chat.state.load_json_data() else None
             message, _ = Message.objects.get_or_create(
                 contenttype='unitlesson',
                 content_id=next_lesson.id,
@@ -896,7 +897,8 @@ class ChatMixin(object):
                 kind='faqs',
                 owner=chat.user,
                 userMessage=False,
-                is_additional=is_additional)  
+                is_new=is_new,
+                is_additional=is_additional)
         if self.node_name_is_one_of('TITLE'):
             divider = ChatDivider(text=next_lesson.lesson.title,
                                   unitlesson=next_lesson)

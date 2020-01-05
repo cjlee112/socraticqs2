@@ -39,6 +39,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             'html',
             'initials',
             'threadId',
+            'is_new'
         )
 
     def get_avatar(self, obj):
@@ -379,6 +380,7 @@ class ChatProgressSerializer(serializers.ModelSerializer):
                 self.get_breakpoints(obj)
             except:
                 pass
+        # TODO investigate fsm.models.FSMState.DoesNotExist: FSMState matching query does not exist.
         if self.lessons_dict and obj.state:
             done = reduce(lambda x, y: x+y, [x['isDone'] for x in self.lessons_dict])
             progress = round(float(done)/len(self.lessons_dict), 2)

@@ -120,16 +120,35 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
             else:
                 previous_state = chat.state.fsmNode.fsm.name if chat.state else None
+                saved_actual_ul = (
+                    chat.state.get_data_attr('saved_actual_ul')
+                    if 'saved_actual_ul' in chat.state.load_json_data() else None)
+                thread = (
+                    chat.state.get_data_attr('thread')
+                    if 'thread' in chat.state.load_json_data() else None)
                 self.pop_state(chat)
                 next_point = Message.objects.filter(
                     id=chat.state.get_data_attr('saved_next_point')
                 ).first() if previous_state == 'updates' else None
+                c_chat_context().update_one(
+                    {"chat_id": chat.id},
+                    {"$set": {"actual_ul_id": saved_actual_ul, "thread_id": thread}}
+                ) if saved_actual_ul else None
 
         if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ'):
             chat_context = c_chat_context().find_one({'chat_id': chat.id})
             self.push_state(chat, request, 'faq', {
                 'unitlesson': UnitLesson.objects.filter(id=chat_context.get('actual_ul_id')).first(),
                 'chat': chat})
+            next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+        if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ_UPDATES'):
+            chat_context = c_chat_context().find_one({'chat_id': chat.id})
+            self.push_state(chat, request, 'faq', {
+                'unitlesson': chat.state.unitLesson,
+                'chat': chat,
+                'updates': True,
+                'new_faqs': (chat.state.get_data_attr('new_faqs')
+                             if 'new_faqs' in chat.state.load_json_data() else None)})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         elif helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
             unitlesson = helps.first().content

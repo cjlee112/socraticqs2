@@ -174,6 +174,7 @@ class Message(models.Model):
     kind = models.CharField(max_length=32, choices=KIND_CHOICES, null=True)
     sub_kind = models.CharField(max_length=32, choices=SUB_KIND_CHOICES, null=True)
     userMessage = models.BooleanField(default=False)
+    is_new = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['timestamp']
@@ -550,6 +551,10 @@ class Message(models.Model):
         )
 
     def get_faqs(self):
+        # FIXME UPDATE -> FAQ -> get_faqs ['updates', 'new_faqs'], this transition potentially cause bugs
+        state = self.chat.state
+        updates = state.get_data_attr('updates') if 'updates' in state.load_json_data() else None
+        new_faqs = state.get_data_attr('new_faqs') if 'new_faqs' in state.load_json_data() else None
         faqs = None
         faq_list = self.content.response_set.filter(
             ~Q(author=self.owner),
@@ -558,6 +563,10 @@ class Message(models.Model):
             is_test=False
         ).exclude(title__isnull=True).exclude(title__exact='')\
             .annotate(num_inquiry=Count('inquirycount')).order_by('-num_inquiry')
+
+        if updates and new_faqs:
+            faq_list = faq_list.filter(id__in=[faq.get('faq_id') for faq in new_faqs])
+
         if faq_list:
             checked_faqs = c_faq_data().find_one(
                 {'chat_id': self.chat.id, "ul_id": self.content_id},

@@ -13,25 +13,6 @@ from chat.models import Message, UnitError
 from ct.templatetags.ct_extras import md2html
 
 
-def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    """
-    Edge method that moves us to right state for next lesson (or END).
-    """
-    chat = fsmStack
-    thread_id = chat.state.unitLesson.id
-    # TODO uncomment after development
-    # c_chat_context().update_one(
-    #     {"chat_id": chat.id},
-    #     {"$set": {
-    #         "thread_id": thread_id,
-    #         f"activity.{thread_id}": timezone.now(),
-    #         "need_faqs": False
-    #     }},
-    #     upsert=True
-    # )
-    return edge.toNode
-
-
 class START(object):
     """
     Initialize data for viewing a courselet.
@@ -43,7 +24,20 @@ class START(object):
         dict(name='next', toNode='UPDATES', title='Present common update message'),
     )
 
+    # TODO add unittests
+    def update_activity(self, chat_id: int, thread_id: int) -> None:
+        c_chat_context().update_one(
+            {"chat_id": chat_id},
+            {"$set": {
+                "thread_id": thread_id,
+                f"activity.{thread_id}": timezone.now(),
+                "need_faqs": False
+            }},
+            upsert=True
+        )
+
     def collect_updates(self, node, fsmStack, request, **kwargs):
+        # TODO add unittests
         chat = kwargs.get('chat')
         unit_lesson = kwargs.get('unitlesson')
         response = chat.message_set.filter(
@@ -76,7 +70,10 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
+        chat = kwargs.get('chat')
+        unit_lesson = kwargs.get('unitlesson')
         self.collect_updates(node, fsmStack, request, **kwargs)
+        self.update_activity(chat.id, unit_lesson.id)
 
         try:  # use unitStatus if provided
             unitStatus = fsmStack.state.get_data_attr('unitStatus')
@@ -104,7 +101,6 @@ class UPDATES(object):
     """
     View a lesson updates.
     """
-    next_edge = next_lesson_after_title
     get_path = get_lesson_url
     title = 'View updates'
     edges = (
@@ -124,11 +120,15 @@ class UPDATES(object):
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         data = chat.state.load_json_data()
-        if all(('em_resolutions' in data,
+        if any(('em_resolutions' in data,
                 'faq_answers' in data,
                 'new_ems' in data if waffle.switch_is_active('new_ems') else True,
                 'new_faqs' in data if waffle.switch_is_active('new_faqs') else True)):
             text = 'There are new upates for a Thread you asked for a help.'
+            c_chat_context().update_one(
+                {"chat_id": chat.id},
+                {"$set": {"actual_ul_id": chat.state.unitLesson.id}}
+            )
         else:
             text = 'I can\'t find updates for you.'
         _data = {
@@ -156,10 +156,12 @@ class SHOW_NEW_RESOLUTIONS(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'New resolutions for your miscoceptions have been added. Hope it will help you to overcame your misunderstanding.',
+            'text': 'New resolutions for your miscoceptions have been added. \
+                     Hope it will help you to overcame your misunderstanding.',
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -197,6 +199,7 @@ class SHOW_EM(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -240,6 +243,7 @@ class SHOW_EM_RESOLUTION(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -263,6 +267,7 @@ class SHOW_NEW_ANSWERS(object):
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -304,6 +309,7 @@ class SHOW_FAQ(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -345,6 +351,7 @@ class SHOW_FAQ_ANSWER(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -364,12 +371,14 @@ class SHOW_NEW_EMS(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': ''''''
-                '''Here are the new most common blindspots people reported when comparing their answer vs. '''
-                '''the correct answer. Check the box(es) that seem relevant to your answer (if any).''',
+            'text': """
+                    Here are the new most common blindspots people reported when comparing their answer vs.
+                     the correct answer. Check the box(es) that seem relevant to your answer (if any).
+                    """,
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -395,14 +404,16 @@ class GET_NEW_EMS(object):
         unit_lesson = next_lesson
         response = chat.message_set.filter(
             lesson_to_answer_id=unit_lesson.id, kind='response', contenttype='response').first().content
+        # TODO investigate 'content_id': uniterror.id AttributeError: 'NoneType' object has no attribute 'id'
         uniterror = UnitError.objects.filter(response=response, unit=chat.enroll_code.courseUnit.unit).first()
         _data = {
             'chat': chat,
             'contenttype': 'uniterror',
-            'content_id': uniterror.id,
+            'content_id': uniterror.id if uniterror else None,
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'uniterror',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -435,21 +446,29 @@ class SHOW_NEW_FAQS(object):
     """
     title = 'View FAQs'
     edges = (
-        dict(name='next', toNode='ACT', title='Ask for acknowlegement'),
+        dict(name='next', toNode='FAQ_UPDATES', title='Ask for acknowlegement'),
     )
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'Imagine new FAQs for this thread here :)',
+            'text': 'There are new questions from Student. I hope it can help you.',
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
+            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
         message.save()
         return message
+
+
+class FAQ_UPDATES(object):
+    title = 'FAQ_UPDATES'
+    edges = (
+        dict(name='next', toNode='ACT', title='View Next Lesson'),
+    )
 
 
 class ACT(object):
@@ -624,6 +643,7 @@ def get_specs():
             SHOW_NEW_EMS,
             GET_NEW_EMS,
             SHOW_NEW_FAQS,
+            FAQ_UPDATES,
             ACT,
             GET_ACT,
             TRANSITION,

@@ -27,6 +27,8 @@ class START(object):
 
         unit_lesson, chat = kwargs.get('unitlesson'), kwargs.get('chat')
         fsmStack.state.unitLesson = unit_lesson
+        fsmStack.state.set_data_attr('updates', kwargs.get('updates', False))
+        fsmStack.state.set_data_attr('new_faqs', kwargs.get('new_faqs', False)) if kwargs.get('new_faqs') else None
 
         faqs_for_ul = unit_lesson.response_set.filter(
             ~Q(author=request.user),

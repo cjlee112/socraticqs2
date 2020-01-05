@@ -82,6 +82,13 @@ CUI.ChatMessageModel = function(data){
   this.initials = data.initials;
 
   /**
+   * Indicates whether msg is new.
+   * @type {string}
+   * @public
+   */
+  this.is_new = data.is_new;
+
+  /**
    * An optional array of overflow options.
    * @type {Array}
    * @public

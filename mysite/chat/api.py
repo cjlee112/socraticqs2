@@ -19,7 +19,7 @@ from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPre
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
 from core.common import onboarding
-from core.common.mongo import c_faq_data
+from core.common.mongo import c_faq_data, c_chat_context
 from core.common.utils import get_onboarding_setting, update_onboarding_step
 from lti.utils import key_secret_generator
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
@@ -639,7 +639,11 @@ class UpdatesView(ValidateMixin, APIView):
         unitlesson = get_object_or_404(UnitLesson, pk=pk)
 
         if chat.state:
+            saved_actual_ul = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+            thread = c_chat_context().find_one({"chat_id": chat.id}).get('thread_id')
             chat.state.set_data_attr('saved_next_point', chat.next_point.id)
+            chat.state.set_data_attr('saved_actual_ul', saved_actual_ul)
+            chat.state.set_data_attr('thread', thread)
             chat.state.save_json_data()
 
         divider = ChatDivider(

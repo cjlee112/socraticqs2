@@ -109,12 +109,14 @@ this["CUI"]["views"]["chatMessage"] = Handlebars.template({"1":function(containe
     + alias5(((helper = (helper = helpers.name || (depth0 != null ? depth0.name : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"name","hash":{},"data":data,"loc":{"start":{"line":9,"column":40},"end":{"line":9,"column":48}}}) : helper)))
     + "\" class=\"chat-avatar\">\n      ";
 },"13":function(container,depth0,helpers,partials,data) {
+    return "is-new";
+},"15":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=container.propertyIsEnumerable;
 
   return "          <div class=\"chat-actions\">\n            <div class=\"chat-actions-toggle\"><span></span><span></span><span></span></div>\n\n            <ul>\n"
-    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? depth0.overflow : depth0),{"name":"each","hash":{},"fn":container.program(14, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":23,"column":14},"end":{"line":25,"column":23}}})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? depth0.overflow : depth0),{"name":"each","hash":{},"fn":container.program(16, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":23,"column":14},"end":{"line":25,"column":23}}})) != null ? stack1 : "")
     + "            </ul>\n          </div>\n";
-},"14":function(container,depth0,helpers,partials,data) {
+},"16":function(container,depth0,helpers,partials,data) {
     var helper, alias1=container.propertyIsEnumerable, alias2=depth0 != null ? depth0 : (container.nullContext || {}), alias3=container.hooks.helperMissing, alias4="function", alias5=container.escapeExpression;
 
   return "              <li data-action=\""
@@ -133,10 +135,12 @@ this["CUI"]["views"]["chatMessage"] = Handlebars.template({"1":function(containe
     + alias5(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"id","hash":{},"data":data,"loc":{"start":{"line":1,"column":135},"end":{"line":1,"column":141}}}) : helper)))
     + "\">\n  <div class=\"chat-container\">\n    <div class=\"inner\">\n"
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.avatar : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data,"loc":{"start":{"line":4,"column":6},"end":{"line":10,"column":13}}})) != null ? stack1 : "")
-    + "      <div class=\"chat-bubble\">\n        "
+    + "      <div class=\"chat-bubble "
+    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.is_new : depth0),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":11,"column":30},"end":{"line":11,"column":57}}})) != null ? stack1 : "")
+    + "\">\n        "
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"html","hash":{},"data":data,"loc":{"start":{"line":12,"column":8},"end":{"line":12,"column":18}}}) : helper))) != null ? stack1 : "")
     + "\n\n        <span class=\"chat-new-msg\">\n            new\n        </span>\n\n"
-    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.overflow : depth0),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":18,"column":8},"end":{"line":28,"column":15}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.overflow : depth0),{"name":"if","hash":{},"fn":container.program(15, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":18,"column":8},"end":{"line":28,"column":15}}})) != null ? stack1 : "")
     + "      </div>\n    </div>\n  </div>\n</div>\n";
 },"useData":true});
 this["CUI"]["views"]["chatToNextBreakpointButton"] = Handlebars.template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
