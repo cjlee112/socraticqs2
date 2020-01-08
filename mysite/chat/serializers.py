@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
-from ct.models import UnitLesson
+from ct.models import UnitLesson, NEED_HELP_STATUS
 from accounts.models import Instructor
 from .models import Message, Chat, ChatDivider
 from .services import ProgressHandler
@@ -309,8 +309,26 @@ class LessonSerializer(serializers.ModelSerializer):
             return False
 
     def get_updatesCount(self, obj):
+        chat = self.context.get('chat')
+        if not chat:
+            return 0
+
+        # TODO investigate response_msg w/o content
+        response_msg = chat.message_set.filter(
+            lesson_to_answer_id=obj.id,
+            kind='response',
+            contenttype='response',
+            content_id__isnull=False).first()
+
+        if not response_msg:
+            return 0
+
+        response = response_msg.content
         is_done = obj.is_done if hasattr(obj, 'is_done') else self.get_isDone(obj)
-        return obj.updates_count(self.context.get('chat')) if is_done and self.context.get('chat') else 0
+        is_orct = obj.lesson.kind == obj.lesson.ORCT_QUESTION
+        is_need_help = response.status == NEED_HELP_STATUS
+
+        return (obj.updates_count(chat) if is_orct and is_done and is_need_help else 0)
 
     def get_threadId(self, obj):
         return obj.id

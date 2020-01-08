@@ -41,26 +41,34 @@ class START(object):
         chat = kwargs.get('chat')
         unit_lesson = kwargs.get('unitlesson')
         response = chat.message_set.filter(
-            lesson_to_answer_id=unit_lesson.id, kind='response', contenttype='response').first().content
+            lesson_to_answer_id=unit_lesson.id,
+            kind='response',
+            contenttype='response',
+            content_id__isnull=False).first().content
         affected_ems = [i.errorModel for i in response.studenterror_set.all()]
 
         context = c_chat_context().find_one({"chat_id": chat.id})
         last_access_time = context.get('activity', {}).get(f"{unit_lesson.id}") if context else None
         tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
 
+        # Collect EMs resolutions. Don't filter by user
         em_resolutions = unit_lesson.em_resolutions(tz_aware_datetime, affected_ems)
         fsmStack.state.set_data_attr('em_resolutions', em_resolutions) if em_resolutions else None
 
-        interested_faqs = unit_lesson.response_set.filter(
+        thread_answer = unit_lesson.get_answers().first()
+        interested_faqs = thread_answer.response_set.filter(
             Q(
                 kind=Response.STUDENT_QUESTION, inquirycount__addedBy=request.user
             ) | Q(author=request.user, kind=Response.STUDENT_QUESTION))
+        # Collect FAQ answers. Do filter by user as well as by applied previously FAQs
         faq_answers = unit_lesson.faq_answers(tz_aware_datetime, request.user, interested_faqs)
         fsmStack.state.set_data_attr('faq_answers', faq_answers) if faq_answers else None
 
+        # Collect new EMs. Don't filter by user
         new_ems = unit_lesson.new_ems(tz_aware_datetime)
         fsmStack.state.set_data_attr('new_ems', new_ems) if new_ems else None
 
+        # Collect ne FAQs. Do filter by user
         new_faqs = unit_lesson.new_faqs(tz_aware_datetime, request.user)
         fsmStack.state.set_data_attr('new_faqs', new_faqs) if new_faqs else None
 

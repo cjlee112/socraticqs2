@@ -966,10 +966,21 @@ class UnitLessonTest(TestCase):
         answer = UnitLesson.create_from_lesson(
             unit=self.unit, lesson=self.lesson, parent=unit_lesson, kind=UnitLesson.ANSWERS
         )
+        faq = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.STUDENT_QUESTION,
+            text='question text',
+            confidence=Response.GUESS,
+            author=self.another_user
+        )
+        faq.save()
         response = Response(
             lesson=self.lesson,
             unitLesson=answer,
             course=self.course,
+            parent=faq,
             kind=Response.COMMENT,
             text='test text',
             confidence=Response.GUESS,
@@ -979,10 +990,22 @@ class UnitLessonTest(TestCase):
         result2 = unit_lesson.answer_faq_comment_updates(self.last_access_time, self.user).count()
         self.assertIsInstance(result2, int)
         self.assertEqual(result2, 0)
+
+        faq2 = Response(
+            lesson=self.lesson,
+            unitLesson=answer,
+            course=self.course,
+            kind=Response.STUDENT_QUESTION,
+            text='question text',
+            confidence=Response.GUESS,
+            author=self.user
+        )
+        faq2.save()
         another_student_response = Response(
             lesson=self.lesson,
             unitLesson=answer,
             course=self.course,
+            parent=faq2,
             kind=Response.COMMENT,
             text='test text',
             confidence=Response.GUESS,
@@ -1065,7 +1088,7 @@ class UnitLessonTest(TestCase):
         chat = Mock()
         result = unit_lesson.updates_count(chat)
         self.assertIsInstance(result, int)
-        self.assertEqual(result, 6)
+        self.assertEqual(result, 4)
 
 
 class UnitTest(TestCase):

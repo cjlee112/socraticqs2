@@ -1001,10 +1001,19 @@ class UnitLesson(models.Model):
         """
         answer = self.get_answers().first()
 
+        if not answer:
+            return Response.objects.none()
+
+        tracked_faqs = answer.response_set.filter(
+            Q(
+                kind=Response.STUDENT_QUESTION, inquirycount__addedBy=user
+            ) | Q(author=user, kind=Response.STUDENT_QUESTION))
+
         return Response.objects.filter(
             kind=Response.COMMENT,
             atime__gt=last_access_time,
-            unitLesson__id=answer.id).exclude(author=user) if answer else Response.objects.none()
+            parent__in=tracked_faqs,
+            unitLesson__id=answer.id).exclude(author=user)
 
     def em_updates(self, last_access_time: datetime) -> 'QuerySet[UnitLesson]':
         """
@@ -1105,7 +1114,7 @@ class UnitLesson(models.Model):
                 'faq_id': faq.id,
                 'faq_title': faq.title,
                 'faq_text': faq.text
-            } for faq in self.question_faq_updates(last_access_time, user)
+            } for faq in self.answer_faq_updates(last_access_time, user)
         ]
 
     def em_resolutions_updates(
@@ -1141,11 +1150,9 @@ class UnitLesson(models.Model):
         user = chat.user
 
         return reduce(operator.add, [
-            self.question_faq_updates(tz_aware_datetime, user).count(),
             self.answer_faq_updates(tz_aware_datetime, user).count(),
             self.em_resolutions_updates_count(tz_aware_datetime),
             self.em_updates(tz_aware_datetime).count(),
-            self.question_faq_comment_updates(tz_aware_datetime, user).count(),
             self.answer_faq_comment_updates(tz_aware_datetime, user).count(),
         ], 0) if tz_aware_datetime else 0
 

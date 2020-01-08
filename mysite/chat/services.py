@@ -117,23 +117,31 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 edge = chat.state.fsmNode.outgoing.get(name='next')
                 chat.state.fsmNode = edge.transition(chat, request)
                 chat.state.save()
-                next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
-            else:
-                previous_state = chat.state.fsmNode.fsm.name if chat.state else None
                 saved_actual_ul = (
                     chat.state.get_data_attr('saved_actual_ul')
                     if 'saved_actual_ul' in chat.state.load_json_data() else None)
+                c_chat_context().update_one(
+                    {"chat_id": chat.id},
+                    {"$set": {"actual_ul_id": saved_actual_ul}}
+                ) if saved_actual_ul else None
+                next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+            else:
+                previous_state = chat.state.fsmNode.fsm.name if chat.state else None
                 thread = (
                     chat.state.get_data_attr('thread')
                     if 'thread' in chat.state.load_json_data() else None)
                 self.pop_state(chat)
-                next_point = Message.objects.filter(
-                    id=chat.state.get_data_attr('saved_next_point')
-                ).first() if previous_state == 'updates' else None
-                c_chat_context().update_one(
-                    {"chat_id": chat.id},
-                    {"$set": {"actual_ul_id": saved_actual_ul, "thread_id": thread}}
-                ) if saved_actual_ul else None
+                if chat.state:
+                    saved_actual_ul = (
+                        chat.state.get_data_attr('saved_actual_ul')
+                        if 'saved_actual_ul' in chat.state.load_json_data() else None)
+                    next_point = Message.objects.filter(
+                        id=chat.state.get_data_attr('saved_next_point')
+                    ).first() if previous_state == 'updates' else None
+                    c_chat_context().update_one(
+                        {"chat_id": chat.id},
+                        {"$set": {"actual_ul_id": saved_actual_ul, "thread_id": thread}}
+                    ) if saved_actual_ul else None
 
         if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ'):
             chat_context = c_chat_context().find_one({'chat_id': chat.id})
@@ -142,13 +150,19 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 'chat': chat})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         if chat.state and chat.state.fsmNode.node_name_is_one_of('FAQ_UPDATES'):
-            chat_context = c_chat_context().find_one({'chat_id': chat.id})
+            saved_actual_ul = c_chat_context().find_one({"chat_id": chat.id}).get('actual_ul_id')
+            chat.state.set_data_attr('saved_actual_ul', saved_actual_ul)
+            chat.state.save_json_data()
+            thread_answer = chat.state.unitLesson.get_answers().first()
             self.push_state(chat, request, 'faq', {
-                'unitlesson': chat.state.unitLesson,
+                'unitlesson': thread_answer,
                 'chat': chat,
                 'updates': True,
                 'new_faqs': (chat.state.get_data_attr('new_faqs')
                              if 'new_faqs' in chat.state.load_json_data() else None)})
+            c_chat_context().update_one(
+                {"chat_id": chat.id},
+                {"$set": {"actual_ul_id": thread_answer.id}})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         elif helps and not chat.state.fsmNode.fsm.fsm_name_is_one_of('help'):
             unitlesson = helps.first().content
