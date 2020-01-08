@@ -649,7 +649,9 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
       var threadsCompletedCount = 0;
 
       // Add new breakpoints
+      var compoundUpdatesCounter = 0;
       $.each(data.breakpoints, $.proxy(function(i, b){
+        compoundUpdatesCounter += b.updatesCount;
         // Create breakpoint from template
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
 
@@ -672,6 +674,13 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         }
 
       }
+    }
+    if ( compoundUpdatesCounter > 0 ) {
+      $('.chat-counter').html(compoundUpdatesCounter);
+      $('.chat-counter').show();
+    }
+    else if ( compoundUpdatesCounter == 0 ) {
+      $('.chat-counter').hide();
     }
   }else{
     throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');

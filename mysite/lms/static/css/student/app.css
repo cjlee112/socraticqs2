@@ -1045,7 +1045,8 @@ p + p {
     font-size: 12px;
     font-weight: 600;
     text-align: center;
-    pointer-events: none; }
+    pointer-events: none;
+    display: none; }
   .chat-input-bar .sidebar-toggle.active .chat-counter {
     display: none;
     visibility: hidden; }
