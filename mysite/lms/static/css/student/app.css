@@ -1216,6 +1216,28 @@ p + p {
       background: url(../../img/student/chat-sidebar-breakpoint-locked.png) no-repeat 10px 4px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-locked.svg), none;
       position: relative; }
+      .chat-sidebar .chat-sidebar-breakpoints li.is-active,
+      .chat-sidebar .chat-sidebar-resources li.is-active {
+        padding: 6px 0 6px 44px;
+        border: 1px solid white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+        border-radius: 4px; }
+        .chat-sidebar .chat-sidebar-breakpoints li.is-active:before,
+        .chat-sidebar .chat-sidebar-resources li.is-active:before {
+          content: '';
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          left: 0;
+          top: 0;
+          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.08); }
+        .chat-sidebar .chat-sidebar-breakpoints li.is-active.done, .chat-sidebar .chat-sidebar-breakpoints li.is-active.unlocked,
+        .chat-sidebar .chat-sidebar-resources li.is-active.done,
+        .chat-sidebar .chat-sidebar-resources li.is-active.unlocked {
+          background-position-y: 12px !important; }
     .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
     .chat-sidebar .chat-sidebar-resources li.unlocked,
     .chat-sidebar .chat-sidebar-resources li.done {
@@ -1233,7 +1255,7 @@ p + p {
     .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done,
     .chat-sidebar .chat-sidebar-resources li.done,
     .chat-sidebar .chat-sidebar-resources li.unlocked.done {
-      background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 5px;
+      background: url(../../img/student/chat-sidebar-breakpoint-done.png) no-repeat 8px 8px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-done.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints .breakpoints-unreads,
     .chat-sidebar .chat-sidebar-resources .breakpoints-unreads {
