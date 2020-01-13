@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from core.common import onboarding
-from core.common.mongo import c_faq_data
+from core.common.mongo import c_chat_context, c_faq_data
 from core.common.utils import update_onboarding_step
 from .utils import enroll_generator
 from ct.models import (
@@ -175,6 +175,7 @@ class Message(models.Model):
     sub_kind = models.CharField(max_length=32, choices=SUB_KIND_CHOICES, null=True)
     userMessage = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
+    thread_id = models.IntegerField(null=True)
 
     class Meta:
         ordering = ['timestamp']
@@ -587,6 +588,12 @@ class Message(models.Model):
             faqs or '<li><h3>There are no faqs to display.</h3></li>'
         )
 
+    def save(self, *args, **kwargs):
+        context = c_chat_context().find_one({"chat_id": self.chat_id}) or dict()
+        if not self.pk:
+            self.thread_id = context.get('thread_id')
+        super().save(*args, **kwargs)
+
 
 class EnrollUnitCode(models.Model):
     """
@@ -677,4 +684,4 @@ class UnitError(models.Model):
 
 class ChatDivider(models.Model):
     text = models.CharField(max_length=200)
-    unitlesson = models.ForeignKey(UnitLesson, null=True, on_delete=models.CASCADE) 
+    unitlesson = models.ForeignKey(UnitLesson, null=True, on_delete=models.CASCADE)

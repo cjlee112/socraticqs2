@@ -26,7 +26,7 @@ class InternalMessageSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='get_name', read_only=True)
     avatar = serializers.SerializerMethodField()
     initials = serializers.SerializerMethodField()
-    threadId = serializers.SerializerMethodField()
+    threadId = serializers.IntegerField(source='thread_id', read_only=True)
 
     class Meta:
         model = Message
@@ -56,9 +56,6 @@ class InternalMessageSerializer(serializers.ModelSerializer):
             else:
                 return  # Myabe need to add here something like "PR" (professor)?
         return 'me'
-
-    def get_threadId(self, obj):
-        return obj.content.unitlesson_id if isinstance(obj.content, ChatDivider) else None
 
 
 class InputSerializer(serializers.Serializer):
@@ -543,7 +540,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
                 return True
         else:
             return False
-    
+
     def get_threadId(self, obj):
         """
         Get id of current thread.
