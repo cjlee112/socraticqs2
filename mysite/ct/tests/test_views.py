@@ -1,5 +1,5 @@
 import pytest
-from mock import Mock
+from unittest.mock import Mock
 
 from ct.views import check_instructor_auth, concept_tabs
 
@@ -32,8 +32,8 @@ def test_check_instructor_auth(role, check, rf):
         (None, ('Home,Study:', 'Lessons', 'Concepts', 'Errors', 'FAQ', 'Edit'))
     )
 )
-def test_concept_tabs_teacher_tabs(order, tabs, mock):
-    make_tabs = mock.patch('ct.views.make_tabs')
+def test_concept_tabs_teacher_tabs(order, tabs, mocker):
+    make_tabs = mocker.patch('ct.views.make_tabs')
     unitLesson = Mock()
     unitLesson.order = order
     current = 'FAQ'

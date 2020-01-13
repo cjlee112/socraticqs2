@@ -7,7 +7,7 @@ import time
 
 from django.test import TestCase
 from django.contrib.auth.models import User
-from mock import patch
+from unittest.mock import patch
 from ct.models import *
 from ct import views, ct_util
 from ct.fsm_plugin import live, livestudent, add_lesson

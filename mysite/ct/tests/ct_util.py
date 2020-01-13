@@ -4,7 +4,7 @@ Unit tests for ct/ct_util.py.
 from django.test import TestCase
 
 from ddt import ddt, data, unpack
-from mock import Mock
+from unittest.mock import Mock
 
 from ct.ct_util import get_path_kwargs, reverse_path_args, get_middle_indexes
 

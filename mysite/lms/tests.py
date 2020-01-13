@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.urls import reverse
 from django.test import TestCase
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 
 from chat.models import Chat, EnrollUnitCode
 from ct.models import Course, Unit, CourseUnit, Role, Concept, Lesson, UnitLesson

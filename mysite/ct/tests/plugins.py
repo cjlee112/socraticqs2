@@ -1,5 +1,5 @@
 from django.test import TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from ct.sourcedb_plugin.wikipedia_plugin import LessonDoc
 import wikipedia

@@ -127,11 +127,11 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
             else:
                 previous_state = chat.state.fsmNode.fsm.name if chat.state else None
-                thread = (
-                    chat.state.get_data_attr('thread')
-                    if 'thread' in chat.state.load_json_data() else None)
                 self.pop_state(chat)
                 if chat.state:
+                    thread = (
+                        chat.state.get_data_attr('thread')
+                        if 'thread' in chat.state.load_json_data() else None)
                     saved_actual_ul = (
                         chat.state.get_data_attr('saved_actual_ul')
                         if 'saved_actual_ul' in chat.state.load_json_data() else None)

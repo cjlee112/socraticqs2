@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db.models.query import QuerySet
 from django.db import IntegrityError
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from ddt import data, unpack, ddt
 
 from ct.models import *

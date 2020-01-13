@@ -1,8 +1,8 @@
 import datetime
-import mock
+from unittest import mock
 import unittest
 from django.utils import timezone
-from mock import Mock, call, PropertyMock
+from unittest.mock import Mock, PropertyMock
 from django.test import TestCase
 from django.contrib.sessions.models import Session
 

@@ -9,7 +9,7 @@ from django.test.utils import override_settings
 from django.contrib.auth.models import User
 from django.template import Context, Template
 
-from mock import patch
+from unittest.mock import patch
 from ddt import ddt, data, unpack
 
 from ct.models import UnitLesson, Course, Unit, Concept, Lesson, ConceptLink, Response

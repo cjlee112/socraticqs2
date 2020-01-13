@@ -1,5 +1,5 @@
-import mock
-from unittest import skip
+
+from unittest import skip, mock
 
 from ddt import ddt, data, unpack
 from django.contrib.auth.models import User

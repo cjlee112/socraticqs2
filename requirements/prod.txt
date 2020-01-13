@@ -1,7 +1,7 @@
 -r base.txt
 
 gunicorn==20.0.4
-psycopg2-binary==2.8.4
+psycopg2-binary==2.7.7
 django-storages==1.8
 boto3==1.10.35
 boto==2.49.0

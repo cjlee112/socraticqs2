@@ -1,4 +1,4 @@
-import mock
+import mock  # FIXME move to unittest.mock
 from ddt import ddt, unpack, data
 from django.urls import reverse
 from django.test import TestCase
@@ -282,6 +282,7 @@ class PasswordResetTest(TestCase):
             self.assertTemplateUsed(response, 'accounts/password_reset_done.html')
             self.assertRedirects(response, reverse('accounts:password_reset_done'))
             self.assertEqual(response.context['anonym_user_email'], user.email)
+            # FIXME examine upgrade to unittest.mock issue
             mock_send_message.assert_called_once()
 
     def test_password_reset_invalid_email(self):

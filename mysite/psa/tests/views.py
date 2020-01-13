@@ -1,4 +1,4 @@
-import mock
+from unittest import mock
 import unittest
 from uuid import uuid4
 from django.urls import reverse

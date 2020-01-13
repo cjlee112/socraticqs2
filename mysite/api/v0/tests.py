@@ -1,6 +1,5 @@
 import json
-import mock
-import pytest
+from unittest import mock
 
 from django.urls import reverse
 

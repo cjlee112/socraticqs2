@@ -7,7 +7,7 @@ from ddt import ddt, data, unpack
 from django.core.paginator import Page
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 
 from ct.views import *
 from fsm.fsm_base import FSMStack

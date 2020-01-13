@@ -28,8 +28,8 @@ services:
   local_mongo:
     container_name: local_cr_mongo
     image: mongo:latest
-    expose:
-      - "27017"
+    ports:
+      - "27017:27017"
     volumes:
       - local_cr_mongo:/data/db
  

@@ -6,8 +6,8 @@ from lti.utils import key_secret_generator, create_courselets_user, hash_lti_use
 
 
 @pytest.mark.unittest
-def test_key_secret_generator(mock):
-    settings_mock = mock.patch('lti.utils.settings')
+def test_key_secret_generator(mocker):
+    settings_mock = mocker.patch('lti.utils.settings')
     settings_mock.SECRET_KEY = 'testSecret_/Key%'
 
     value1 = key_secret_generator()

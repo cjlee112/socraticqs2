@@ -1,7 +1,7 @@
 """
 Test core utility functions.
 """
-import mock
+import mock  # FIXME move to unittest.mock
 from unittest import skip
 from ddt import ddt, data, unpack
 from django.conf import settings
@@ -229,6 +229,7 @@ class UtilityTest(TestCase):
             user=student,
         )
         self.assertEqual(get_redirect_url(student), reverse('ctms:my_courses'))
+        # FIXME examine upgrade to unittest.mock issue
         waffle_mock.assert_called()
         percentage_mock.assert_called()
 

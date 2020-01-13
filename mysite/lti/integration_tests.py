@@ -4,7 +4,7 @@ import json
 import oauth2
 from datetime import date, timedelta
 
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 from ddt import ddt, data, unpack
 from django.utils import timezone
 from django.test import TestCase, Client

@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.http.response import HttpResponseNotFound
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 import injections
 
 from ct.models import Course, Unit, Lesson, UnitLesson, CourseUnit, Role, Concept
