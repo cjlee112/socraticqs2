@@ -10,6 +10,7 @@ services:
       - ${APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
       - ${APP_PWD}/logs:/home/courselets/app/logs
       - ${APP_PWD}/static:/home/courselets/app/mysite/static
+      - ${APP_PWD}/certs/rds-ca-2015-root.pem:/home/courselets/app/certs/rds-ca-2015-root.pem
     ports:
       - "9000:9000"
     restart: on-failure
@@ -51,6 +52,7 @@ services:
     volumes:
       - ${APP_PWD}/logs:/home/courselets/app/logs
       - ${APP_PWD}/settings/local.py:/home/courselets/app/mysite/mysite/settings/local.py
+      - ${APP_PWD}/certs/rds-ca-2015-root.pem:/home/courselets/app/certs/rds-ca-2015-root.pem
     links:
       - rabbit
       - redis
