@@ -3,7 +3,7 @@ services:
   app:
     container_name: cr_app
     env_file: ./envs/prod.env
-    image: ${DOCKER_REGISTRY}/courselets
+    image: ${DOCKER_REGISTRY}/courselets:${IMAGE_TAG}
     command: ["prod"]
     volumes:
       # APP_PWD=/courselets/app
@@ -21,6 +21,7 @@ services:
       - celery
     environment:
       - DOCKER_REGISTRY
+      - IMAGE_TAG
 
   postgres:
     container_name: cr_postgres
@@ -46,7 +47,7 @@ services:
 
   celery:
     container_name: cr_celery
-    image: ${DOCKER_REGISTRY}/courselets
+    image: ${DOCKER_REGISTRY}/courselets:${IMAGE_TAG}
     command: celery worker --config ../.conf/celery/celeryconfig.py -A mysite --loglevel=INFO -B
     env_file: ./envs/prod.env
     volumes:
@@ -59,6 +60,7 @@ services:
     restart: on-failure
     environment:
       - DOCKER_REGISTRY
+      - IMAGE_TAG
       - CELERY_BROKER_URL=amqp://guest@rabbit
 
   rabbit:

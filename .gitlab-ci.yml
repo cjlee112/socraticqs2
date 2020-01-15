@@ -21,6 +21,7 @@ Build static:
     - development
     - master
     - merge_requests
+    - tags
   script:
     - docker build
       --build-arg node_env=production
@@ -35,6 +36,7 @@ Build base:
     - development
     - master
     - merge_requests
+    - tags
   script:
     - docker build
       -t $REGISTRY:base-$CI_COMMIT_SHORT_SHA
@@ -47,6 +49,7 @@ Build Prod:
   only:
     - master
     - merge_requests
+    - tags
   script:
     - docker build
       --force-rm
@@ -64,6 +67,7 @@ Build Test:
     - development
     - master
     - merge_requests
+    - tags
   script:
     - docker build
       -t $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA
@@ -95,6 +99,7 @@ JavaScript tests:
     - development
     - master
     - merge_requests
+    - tags
   script:
     - docker build -f Docker/Dockerfile-test.node -t node-test:$CI_COMMIT_SHORT_SHA .
     - docker run node-test:$CI_COMMIT_SHORT_SHA
@@ -109,6 +114,7 @@ Python tests:
     - development
     - master
     - merge_requests
+    - tags
   script:
     - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:latest
     - docker run
@@ -129,6 +135,7 @@ Check code quality:
     - development
     - master
     - merge_requests
+    - tags
   script:
     # .git volume requires for diff-quality. And it does not work :-\
     - docker run
@@ -171,12 +178,23 @@ Tag latest courselets image:
   after_script:
     - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
 
-Tag (cache) latest static image:
+Create a tag:
   stage: tag
   tags:
     - dind
   only:
+    - tags
+  script:
+    - docker tag $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA $REGISTRY/courselets:$CI_COMMIT_TAG
+    - docker push $REGISTRY/courselets:$CI_COMMIT_TAG
+  after_script:
+    - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
+
+Tag (cache) latest static image:
+  stage: tag
+  only:
     - master
+    - tags
   script:
     - docker tag $REGISTRY:static-$CI_COMMIT_SHORT_SHA $REGISTRY/static
   after_script:
@@ -224,12 +242,13 @@ Deploy Stage:
   when: manual
   allow_failure: false
   only:
-    - master
+    - tags
   variables:
     DOCKER_REGISTRY: $REGISTRY
+    IMAGE_TAG: $CI_COMMIT_TAG
   script:
     - touch $APP_PWD/settings/local.py
-    - docker pull ${DOCKER_REGISTRY}/courselets
+    - docker pull ${DOCKER_REGISTRY}/courselets:${IMAGE_TAG}
     - docker-compose -f prod.yml up -d app
     - docker-compose -f prod.yml run --rm app migrate
     - docker-compose -f prod.yml run --rm app fsm-deploy
@@ -245,9 +264,11 @@ Cleanup:
     - development
     - master
     - merge_requests
+    - tags
   when: always
   script:
     - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
     - docker rmi -f $REGISTRY:base-$CI_COMMIT_SHORT_SHA || true
     - docker rmi -f $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA || true
     - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
+    - docker rmi -f $REGISTRY/courselets:CI_COMMIT_TAG || true
