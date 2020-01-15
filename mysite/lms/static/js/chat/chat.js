@@ -42,6 +42,13 @@ CUI.chat.open = function($startChatSesssionElement, showUpdates){
     CUI.config.updatesUrl,
     showUpdates
   );
+
+  if (CUI.config.debug) {
+    CUI.debug = {
+      chat: chat,
+    };
+  }
+
 };
 
 // Bind event listeners when the DOM has loaded

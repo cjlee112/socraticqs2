@@ -23,6 +23,12 @@ CUI.text.errorNoFullscreenSupport = "Your browser does not support fullscreen mo
  */
  CUI.config = CUI.config || {};
 
+/**
+ * General debug namespace for the app.
+ * @namespace
+ */
+ CUI.debug = CUI.debug || {};
+
  /* jshint ignore:start */
  /**
   * The chat's unique ID.
@@ -65,6 +71,13 @@ CUI.text.errorNoFullscreenSupport = "Your browser does not support fullscreen mo
   * @public
   */
  CUI.config.defaultTeacherAvatar;
+
+ /**
+  * A debug flag.
+  * @type {boolean}
+  * @public
+  */
+ CUI.config.debug = false;
 
  /**
   * A namespace for globally available GSAP tweens and timelines.

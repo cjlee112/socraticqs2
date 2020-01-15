@@ -1011,6 +1011,23 @@ p + p {
   width: 100%;
   z-index: 1000;
   display: none; }
+  .chat-input-bar > .thread-nav-bar {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    min-height: 30px;
+    padding-left: 168px;
+    padding-right: 80px;
+    margin-left: auto;
+    color: #806420;
+    background-color: #FDF3D1;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: #EBE1C2; }
+    .chat-input-bar > .thread-nav-bar > .thread-toggler-btn {
+      margin-left: auto;
+      cursor: pointer;
+      font-weight: 500; }
   .chat-input-bar > .inner {
     position: relative;
     padding: 0 40px;

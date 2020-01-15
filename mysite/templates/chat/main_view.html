@@ -218,6 +218,10 @@ Courselets
 
   <!-- Chat input bar -->
   <section class="chat-input-bar">
+    <div class="thread-nav-bar">
+      <span>You're working on updates in a previous thread.</span>
+      <div class="thread-toggler-btn">↑ Scroll to Current Question</div>
+    </div>
     <div class="inner">
       <div class="sidebar-toggle">
         <span></span>
@@ -328,6 +332,7 @@ Courselets
   <script src="{% static "js/chat/models/cui.sidebar-resource-model.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-back-to-breakpoint-button-presenter.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-to-next-breakpoint-button-presenter.js" %}"></script>
+  <script src="{% static "js/chat/presenters/chat-input-container/cui.thread-nav-bar-presenter.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-input-container-presenter.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-message-presenter.js" %}"></script>
   <script src="{% static "js/chat/presenters/cui.chat-media-presenter.js" %}"></script>

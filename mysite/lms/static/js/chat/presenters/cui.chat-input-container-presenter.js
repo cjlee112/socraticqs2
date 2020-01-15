@@ -16,7 +16,11 @@ CUI.ChatInputContinerPresenter = function(selectors){
   selectors = selectors || {};
 
   if (!selectors.rootSelector) {
-    selectors.rootSelector = '.chat-input-bar .inner';
+    selectors.rootSelector = '.chat-input-bar';
+  }
+
+  if (!selectors.innerSelector) {
+    selectors.innerSelector = '.inner';
   }
 
   if (!selectors.chatControlsContainerSelector) {
@@ -28,14 +32,28 @@ CUI.ChatInputContinerPresenter = function(selectors){
    * @type {jQuery}
    * @public
    */
-
   this.$el = $(selectors.rootSelector);
+
   /**
-   * A jQuery object containing the DOM element of the root chat container.
+   * A jQuery object containing the DOM element of the inner container.
    * @type {jQuery}
    * @public
    */
-  this.$chatControlsContainer = this.$el.find(selectors.chatControlsContainerSelector);
+  this.$inner = this.$el.find(selectors.innerSelector);
+
+  /**
+   * A CUI.ThreadNavBar object.
+   * @type {A CUI.ThreadNavBar}
+   * @public
+   */
+  this.threadNavBar = new CUI.ThreadNavBar();
+
+  /**
+   * A jQuery object containing the DOM element of the chat controls container.
+   * @type {jQuery}
+   * @public
+   */
+  this.$chatControlsContainer = this.$inner.find(selectors.chatControlsContainerSelector);
 
   /**
    * An array of jQuery objects of all chat input elements except for next thread button.
@@ -135,7 +153,7 @@ CUI.ChatInputContinerPresenter.prototype.placeNextThreadButton = function(info, 
 
   this._hideMainControls();
 
-  this.$el.prepend(this.toNextBreakpointButton.$el);
+  this.$inner.prepend(this.toNextBreakpointButton.$el);
   this._showAnimationFor([this.toNextBreakpointButton.$el]);
 };
 
@@ -150,4 +168,20 @@ CUI.ChatInputContinerPresenter.prototype.removeNextThreadButton = function() {
     this.toNextBreakpointButton.destroy();
     this.toNextBreakpointButton = null;
   }
+};
+
+/**
+ * Set show all threads callback (proxy).
+ * @public
+ */
+CUI.ChatInputContinerPresenter.prototype.setShowAllThreadsCallback = function(callback) {
+  this.threadNavBar.setShowAllThreadsCallback(callback);
+};
+
+/**
+ * Set show specific thread callback (proxy).
+ * @public
+ */
+CUI.ChatInputContinerPresenter.prototype.setShowThreadCallback = function(callback) {
+  this.threadNavBar.setShowThreadCallback(callback);
 };

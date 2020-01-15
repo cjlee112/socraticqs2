@@ -167,6 +167,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._showUpdates = showUpdates;
 
   /**
+   * Current window/chat scrollTop position
+   * @type {Number}
+   * @protected
+   */
+  this._currentChatBottomMessageScrollTop = 0;
+
+  /**
    * A jQuery reference to the sidebar element.
    * @type {jQuery}
    * @protected
@@ -665,14 +672,9 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         // Add breakpoint in sidebar
         this._$sidebarBreakpointsContainer.append(breakpoint.$el);
       }, this));
+
       if (!data.is_live && threadsCompletedCount == this._sidebarBreakpoints.length){
         this._$sidebarToggle.trigger('resources');
-        var lastBreakpointIndex = threadsCompletedCount - 1;
-        var lastBreakpointInfo = this._sidebarBreakpoints[lastBreakpointIndex].getInfo();
-        if (lastBreakpointInfo.threadId = this._currentThreadId) {
-          this._updateToNextBreakpointButton(this._getNextThreadInfo(lastBreakpointInfo.threadId));
-        }
-
       }
     }
     if ( compoundUpdatesCounter > 0 ) {
@@ -941,7 +943,6 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
 CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
   var currentScrollTop = $(window).scrollTop();
   var newMessages = [];
-  var threadChanged = false;
 
   // Add new messages
   if(data.addMessages instanceof Array && data.addMessages.length > 0){
@@ -952,11 +953,7 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
       if (m.type === 'breakpoint') {
         model = new CUI.ChatBreakpointModel(m);
         this._currentThreadId = model.threadId;
-
-        threadChanged = true;
       } else {
-        m.threadId = this._currentThreadId;
-
         if (m.type === 'message') {
           model = new CUI.ChatMessageModel(m);
         } else if (m.type === 'media') {
@@ -965,7 +962,10 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
       }
 
       // Add message to chat
-      newMessages.push(this._addMessage(model));
+      var $newMessage = this._addMessage(model);
+      if ($newMessage) {
+        newMessages.push($newMessage);
+      }
     }, this));
   }else{
     throw new Error("CUI.ChatPresenter._parseMessages(): No data.addMessages.");
@@ -1004,12 +1004,10 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, scrollTo){
     MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   }});
 
-  // Show messages for selected thread or Scroll to first new message
-  if (threadChanged) {
-    this._showThreadMessages(this._currentThreadId);
-  } else {
-    if(scrollTo) this._scrollToMessage(data.addMessages[0].id);
-  }
+  // Scroll to first new message
+  var messageIdToScrollTo = newMessages[0].data('message-id');
+
+  if(scrollTo) this._scrollToMessage(messageIdToScrollTo, true);
 };
 
 /**
@@ -1030,11 +1028,34 @@ CUI.ChatPresenter.prototype._addMessage = function(model){
 
   // Save a reference to the message
   this._messages[model.id] = message;
+  var $messageElement = message.$el;
 
   // Add message to chat
-  this._$messagesContainer.append(message.$el);
+  var messageThreadId = message._model.threadId;
 
-  return message.$el;
+  // If it's a breakpoint
+  if (message instanceof CUI.ChatBreakpointPresenter) {
+    var $threadBreakpoint = this._$messagesContainer.find('.chat-breakpoint[data-thread-id="' + messageThreadId + '"]');
+
+    // And it's a new one, then add it
+    if ($threadBreakpoint.length === 0) {
+      this._$messagesContainer.append($messageElement);
+    } else {
+      $messageElement = null;
+    }
+  } else {
+    var threadMessages = this._$messagesContainer.find('[data-thread-id="' + messageThreadId + '"]');
+
+    //If it's not the first message of a thread, then add it after the last one
+    if (threadMessages.length > 0) {
+      var $lastThreadMessage = threadMessages[threadMessages.length - 1];
+      $messageElement.insertAfter($lastThreadMessage);
+    } else {
+      this._$messagesContainer.append($messageElement);
+    }
+  }
+
+  return $messageElement;
 };
 
 /**
@@ -1205,28 +1226,11 @@ CUI.ChatPresenter.prototype._showNotification = function(text){
 };
 
 /**
- * Scrolls to a message in the chat.
- * @protected
- * @param {number} id   - The ID of the message to scroll to.
- */
-CUI.ChatPresenter.prototype._scrollToMessage = function(id){
-  var $message;
-  var top;
-
-  // Check that message exists
-  if(this._messages[id]){
-    $message = this._messages[id].$el;
-    top = $message.offset().top - 14;
-    TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
-  }
-};
-
-/**
  * Get a list of all chat message elements.
  * @protected
  */
 CUI.ChatPresenter.prototype._getAllMessageElements = function(){
-  return $('.chat-message,.chat-breakpoint');
+  return this._$messagesContainer.find('.chat-message,.chat-breakpoint');
 };
 
 /**
@@ -1237,24 +1241,6 @@ CUI.ChatPresenter.prototype._getAllMessageElements = function(){
 CUI.ChatPresenter.prototype._showThreadMessages = function(threadId){
   var $messageElementToScrollTo = null;
   threadId = parseInt(threadId);
-
-  // Optimize to get (previous, current, next) info in one run (loop)
-  var previousThreadInfo = this._getPreviousThreadInfo(threadId);
-  this._updateBackToBreakpointButton(previousThreadInfo);
-
-  var currentThreadInfo = this._getThreadInfo(threadId);
-
-  var nextThreadInfo = this._getNextThreadInfo(threadId);
-
-  var isThreadDone = currentThreadInfo.isDone;
-  var isResource = currentThreadInfo.type === CUI.ChatBackToBreakpointButtonModel.ItemType.resource;
-
-  // if (isThreadDone || isResource) {
-  //   this._updateToNextBreakpointButton(nextThreadInfo);
-  // } else {
-  this._updateToNextBreakpointButton();
-  // }
-
 
   this._getAllMessageElements().each(function(){
     var $messageElement = $(this);
@@ -1272,24 +1258,68 @@ CUI.ChatPresenter.prototype._showThreadMessages = function(threadId){
 
   var scrollToMessageId = $messageElementToScrollTo ? $messageElementToScrollTo.data('message-id') : -1;
   if (scrollToMessageId >= 0) {
-    this._scrollToMessage(scrollToMessageId);
+    this._scrollToMessage(scrollToMessageId, true);
   }
 };
 
-CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, threadId){
+CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, updateScrollPosition){
   var $message;
   var top;
 
   // Check that message exists
   if(this._messages[id]){
     $message = this._messages[id].$el;
-    this._showThreadMessages(threadId);
+    // this._showThreadMessages(threadId);
     top = $message.offset().top - 60;
-    TweenLite.to(window, this._getScrollSpeed(top), {scrollTo: top, ease: Power2.easeInOut});
+    this._tweenWindowScroll(top, updateScrollPosition ? $.proxy(this._updateChatBottomMessageScroll, this) : undefined);
   } else {
     this._getMessages(this._resourcesUrl+ul+'/');
+  }
 };
+
+/**
+ * Scrolls to a message in the chat.
+ * @protected
+ * @param {number} id   - The ID of the message to scroll to.
+ */
+CUI.ChatPresenter.prototype._scrollToMessage = function(id, updateScrollPosition){
+  var $message;
+  var top;
+
+  // Check that message exists
+  if(this._messages[id]){
+    $message = this._messages[id].$el;
+    top = $message.offset().top - 14;
+
+    this._tweenWindowScroll(top, updateScrollPosition ? $.proxy(this._updateChatBottomMessageScroll, this) : undefined);
+  }
 };
+
+/**
+ * Tween an actual window scroll to position.
+ * @private
+ */
+CUI.ChatPresenter.prototype._tweenWindowScroll = function(position, onComplete) {
+  TweenLite.killTweensOf(window);
+  TweenLite.to(
+    window,
+    this._getScrollSpeed(position),
+    {
+      scrollTo: position,
+      ease: Power2.easeInOut,
+      onComplete: onComplete
+    });
+};
+
+/**
+ * Update currrent chat bottom messages scroll position.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._updateChatBottomMessageScroll = function () {
+  this._currentChatBottomMessageScrollTop = $(window).scrollTop();
+}
+
+
 /**
  * Calculates the scroll animation time for window based on distance.
  * @protected
@@ -1489,7 +1519,7 @@ CUI.ChatPresenter.prototype._setInput = function(input){
  */
 CUI.ChatPresenter.prototype._getThreadUpdates = function($thread) {
   if ($thread.data('updates-count')) {
-    this._getMessages(this._updatesUrl+$thread.data('href')+'/');
+    this._getMessages(this._updatesUrl+$thread.data('thread-id')+'/');
   };
 };
 
@@ -1526,6 +1556,17 @@ function onChangeThreadButtonClickHandler(e){
  * @protected
  */
 CUI.ChatPresenter.prototype._addEventListeners = function(){
+
+  var $window = $(window);
+
+  $window.scroll($.proxy(function() {
+    if ($window.scrollTop() < this._currentChatBottomMessageScrollTop) {
+      this._inputContainer.threadNavBar.show();
+    } else {
+      this._inputContainer.threadNavBar.hide();
+    }
+  }, this));
+
   // Sidebar toggle
   this._$sidebarToggle.on('click', $.proxy(function(e){
     e.preventDefault();
@@ -1563,9 +1604,12 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
   this._$sidebarBreakpointsContainer.on('click', 'li', $.proxy(function(e){
     e.preventDefault();
 
+    var $sidebarBreakpoint = $(e.currentTarget);
+
     // Show only related messages and Scroll to the topmost one
-    this._showThreadMessages($(e.currentTarget).data('href'));
-    this._getThreadUpdates($(e.currentTarget));
+    // this._showThreadMessages($(e.currentTarget).data('thread-id'));
+    this._scrollToMessage($sidebarBreakpoint.data('first-message-id'));
+    this._getThreadUpdates($sidebarBreakpoint);
   }, this));
 
   // Delegated events for sidebar resources links
@@ -1573,13 +1617,12 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     e.preventDefault();
 
     // Scroll to message
-    var $currentTarget = $(e.currentTarget);
+    var $sidebarResource = $(e.currentTarget);
 
-    if ($currentTarget.hasClass('started') || $currentTarget.hasClass('unlocked')) {
+    if ($sidebarResource.hasClass('started') || $sidebarResource.hasClass('unlocked')) {
       this._scrollToResourceMessage(
-        $currentTarget.data('href'),
-        $currentTarget.data('ul'),
-        $currentTarget.data('thread-id')
+        $sidebarResource.data('first-message-id'),
+        $sidebarResource.data('ul'),
       );
     }
   }, this));
@@ -1611,4 +1654,15 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     var action = $(e.currentTarget).data('action');
     this._postAction(action);
   }, this));
+
+  // Show all threads callback
+  this._inputContainer.setShowAllThreadsCallback($.proxy(function() {
+    this._scrollToMessage(this._messages)
+  }, this));
+
+  // Show specific thread callback
+  this._inputContainer.setShowThreadCallback($.proxy(function() {
+    this._tweenWindowScroll(this._currentChatBottomMessageScrollTop);
+  }, this));
+
 };
