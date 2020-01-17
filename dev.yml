@@ -3,7 +3,7 @@ services:
   dev_app:
     container_name: dev_cr_app
     env_file: ./envs/dev.env
-    image: ${DOCKER_REGISTRY}/courselets-dev
+    image: ${DOCKER_REGISTRY}/courselets
     command: ["dev"]
     volumes:
       # DEV_APP_PWD=/courselets/dev/app
@@ -43,7 +43,7 @@ services:
       - DOCKER_REGISTRY
       - CELERY_BROKER_URL=amqp://guest@dev_rabbit
     container_name: dev_cr_celery
-    image: ${DOCKER_REGISTRY}/courselets-dev
+    image: ${DOCKER_REGISTRY}/courselets
     command: celery worker -A mysite --loglevel=INFO -B
     env_file: ./envs/dev.env
     volumes:
