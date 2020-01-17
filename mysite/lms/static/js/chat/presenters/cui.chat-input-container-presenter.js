@@ -171,17 +171,25 @@ CUI.ChatInputContinerPresenter.prototype.removeNextThreadButton = function() {
 };
 
 /**
- * Set show all threads callback (proxy).
+ * Set callback to show subsequent threads (proxy).
  * @public
  */
-CUI.ChatInputContinerPresenter.prototype.setShowAllThreadsCallback = function(callback) {
-  this.threadNavBar.setShowAllThreadsCallback(callback);
+CUI.ChatInputContinerPresenter.prototype.setShowSubsequentThreadsCallback = function(callback) {
+  this.threadNavBar.setShowSubsequentThreadsCallback(callback);
 };
 
 /**
- * Set show specific thread callback (proxy).
+ * Set callback to scroll to question and hide subsequent threads (proxy).
  * @public
  */
-CUI.ChatInputContinerPresenter.prototype.setShowThreadCallback = function(callback) {
-  this.threadNavBar.setShowThreadCallback(callback);
+CUI.ChatInputContinerPresenter.prototype.setScrollToQuestionWithUpdatesCallback = function(callback) {
+  this.threadNavBar.setScrollToQuestionWithUpdatesCallback(callback);
+};
+
+/**
+ * Set callback to scroll to current question (proxy).
+ * @public
+ */
+CUI.ChatInputContinerPresenter.prototype.setScrollToQuestionCallback = function(callback) {
+  this.threadNavBar.setScrollToQuestionCallback(callback);
 };

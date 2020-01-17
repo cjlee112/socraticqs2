@@ -29,6 +29,12 @@ CUI.text.errorNoFullscreenSupport = "Your browser does not support fullscreen mo
  */
  CUI.debug = CUI.debug || {};
 
+ /**
+  * General utils namespace for the app.
+  * @namespace
+  */
+CUI.utils = CUI.utils || {};
+
  /* jshint ignore:start */
  /**
   * The chat's unique ID.
@@ -77,7 +83,7 @@ CUI.text.errorNoFullscreenSupport = "Your browser does not support fullscreen mo
   * @type {boolean}
   * @public
   */
- CUI.config.debug = false;
+ CUI.config.debug = true;
 
  /**
   * A namespace for globally available GSAP tweens and timelines.
