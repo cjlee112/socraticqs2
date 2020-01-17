@@ -14,6 +14,7 @@ stages:
   - cleanup
 
 Build static:
+  interruptible: true
   stage: pre-build
   tags:
     - dind
@@ -29,6 +30,7 @@ Build static:
       -f Docker/Dockerfile.static .
 
 Build base:
+  interruptible: true
   stage: pre-build
   tags:
     - dind
@@ -43,6 +45,7 @@ Build base:
       -f Docker/Dockerfile .
 
 Build Prod:
+  interruptible: true
   stage: build
   tags:
     - dind
@@ -60,6 +63,7 @@ Build Prod:
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 Build Test:
+  interruptible: true
   stage: build
   tags:
     - dind
@@ -77,6 +81,7 @@ Build Test:
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 Build Dev:
+  interruptible: true
   stage: build
   tags:
     - dind
@@ -92,6 +97,7 @@ Build Dev:
       --build-arg STATIC_TAG=static-$CI_COMMIT_SHORT_SHA .
 
 JavaScript tests:
+  interruptible: true
   stage: test
   tags:
     - dind
@@ -105,6 +111,7 @@ JavaScript tests:
     - docker run node-test:$CI_COMMIT_SHORT_SHA
 
 Python tests:
+  interruptible: true
   variables:
     GIT_STRATEGY: none
   stage: test
@@ -128,6 +135,7 @@ Python tests:
     - docker rm -f mongo_$CI_COMMIT_SHORT_SHA || true
 
 Check code quality:
+  interruptible: true
   stage: test
   tags:
     - dind
@@ -144,6 +152,7 @@ Check code quality:
       make quality
 
 Tag latest courselets-dev image:
+  interruptible: true
   stage: tag
   tags:
     - dind
@@ -156,6 +165,7 @@ Tag latest courselets-dev image:
     - docker rmi -f $REGISTRY/courselets-dev:$CI_COMMIT_SHORT_SHA || true
 
 Tag (cache) latest static-dev image:
+  interruptible: true
   stage: tag
   tags:
     - dind
@@ -167,6 +177,7 @@ Tag (cache) latest static-dev image:
     - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
 
 Tag latest courselets image:
+  interruptible: true
   stage: tag
   tags:
     - dind
@@ -179,6 +190,7 @@ Tag latest courselets image:
     - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
 
 Create a tag:
+  interruptible: true
   stage: tag
   tags:
     - dind
@@ -191,7 +203,10 @@ Create a tag:
     - docker rmi -f $REGISTRY/courselets:$CI_COMMIT_SHORT_SHA || true
 
 Tag (cache) latest static image:
+  interruptible: true
   stage: tag
+  tags:
+    - dind
   only:
     - master
     - tags
@@ -201,6 +216,7 @@ Tag (cache) latest static image:
     - docker rmi -f $REGISTRY:static-$CI_COMMIT_SHORT_SHA || true
 
 Deploy Dev:
+  interruptible: true
   stage: deploy
   tags:
     - stage
@@ -234,6 +250,7 @@ Deploy Dev:
 ##     - docker run maxsocl/backstop:${CI_COMMIT_REF_NAME}
 
 Deploy Stage:
+  interruptible: true
   stage: deploy
   tags:
     - stage
