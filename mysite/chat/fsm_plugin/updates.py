@@ -120,9 +120,9 @@ class UPDATES(object):
             return edge.fromNode.fsm.get_node('SHOW_NEW_RESOLUTIONS')
         elif args and 'faq_answers' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_ANSWERS')
-        elif args and 'new_ems' in args[0].state.load_json_data() and waffle.switch_is_active('new_ems'):
+        elif args and 'new_ems' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_EMS')
-        elif args and 'new_faqs' in args[0].state.load_json_data() and waffle.switch_is_active('new_faqs'):
+        elif args and 'new_faqs' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 
@@ -130,8 +130,8 @@ class UPDATES(object):
         data = chat.state.load_json_data()
         if any(('em_resolutions' in data,
                 'faq_answers' in data,
-                'new_ems' in data if waffle.switch_is_active('new_ems') else True,
-                'new_faqs' in data if waffle.switch_is_active('new_faqs') else True)):
+                'new_ems' in data,
+                'new_faqs' in data)):
             text = 'There are new upates for a Thread you asked for a help.'
             c_chat_context().update_one(
                 {"chat_id": chat.id},
@@ -231,9 +231,9 @@ class SHOW_EM_RESOLUTION(object):
             return edge.fromNode.fsm.get_node('SHOW_EM')
         elif args and 'faq_answers' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_ANSWERS')
-        elif args and 'new_ems' in args[0].state.load_json_data() and waffle.switch_is_active('new_ems'):
+        elif args and 'new_ems' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_EMS')
-        elif args and 'new_faqs' in args[0].state.load_json_data() and waffle.switch_is_active('new_faqs'):
+        elif args and 'new_faqs' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 
@@ -297,9 +297,9 @@ class SHOW_FAQ(object):
             return edge.fromNode.fsm.get_node('SHOW_FAQ_ANSWER')
         elif args and args[0].state.get_data_attr('faq_answers'):
             return edge.fromNode.fsm.get_node('SHOW_FAQ')
-        elif args and 'new_ems' in args[0].state.load_json_data() and waffle.switch_is_active('new_ems'):
+        elif args and 'new_ems' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_EMS')
-        elif args and 'new_faqs' in args[0].state.load_json_data() and waffle.switch_is_active('new_faqs'):
+        elif args and 'new_faqs' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 
@@ -339,9 +339,9 @@ class SHOW_FAQ_ANSWER(object):
             return edge.fromNode.fsm.get_node('SHOW_FAQ_ANSWER')
         elif args and args[0].state.get_data_attr('faq_answers'):
             return edge.fromNode.fsm.get_node('SHOW_FAQ')
-        elif args and 'new_ems' in args[0].state.load_json_data() and waffle.switch_is_active('new_ems'):
+        elif args and 'new_ems' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_EMS')
-        elif args and 'new_faqs' in args[0].state.load_json_data() and waffle.switch_is_active('new_faqs'):
+        elif args and 'new_faqs' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 
@@ -404,7 +404,7 @@ class GET_NEW_EMS(object):
     )
 
     def next_edge(self, edge, *args, **kwargs):
-        if args and 'new_faqs' in args[0].state.load_json_data() and waffle.switch_is_active('new_faqs'):
+        if args and 'new_faqs' in args[0].state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 

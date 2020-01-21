@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from ct.models import Response as StudentResponse, Lesson, UnitLesson, DONE_STATUS, EVAL_TO_STATUS_MAP
+from ct.models import Response as StudentResponse, Lesson, UnitLesson, EVAL_TO_STATUS_MAP
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
@@ -356,6 +356,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     selected = []
                 uniterror = message.content
                 uniterror.save_response(user=self.request.user, response_list=selected)
+
+                message.text = message.get_html()
+                message.save()
                 if not message.chat.is_live:
                     get_additional_messages(uniterror.response, chat, selected)
                 chat.next_point = self.next_handler.next_point(
@@ -366,7 +369,11 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 )
                 chat.last_modify_timestamp = timezone.now()
                 chat.save()
+
+                serializer = self.get_serializer(message, data=self.request.data)
+                serializer.is_valid()
                 serializer.save(chat=chat)
+
             elif (message.kind == 'add_faq' and message.sub_kind == 'add_faq') or \
                  (message.kind == 'get_faq_answer' and message.sub_kind == 'get_faq_answer') or \
                  (message.kind == 'ask_faq_understanding'):
@@ -390,6 +397,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                             "faqs": {str(faq_id): {'status': {"done": False}} for faq_id in selected}
                         }}
                     )
+                # Save presented in message FAQs to avoid futher bugs in wrong dadta selection
+                message.text = message.get_html()
+                message.save()
+
                 chat.next_point = self.next_handler.next_point(
                     current=message.content,
                     chat=chat,
@@ -398,6 +409,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 )
                 chat.last_modify_timestamp = timezone.now()
                 chat.save()
+
+                serializer = self.get_serializer(message, data=self.request.data)
+                serializer.is_valid()
                 serializer.save(chat=chat)
             elif message.contenttype == 'NoneType' and message.kind == 'abort':
                 # user selected abort model

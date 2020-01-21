@@ -298,7 +298,7 @@ class LessonSerializer(serializers.ModelSerializer):
                 obj.is_done = is_done
                 return is_done
             if check_fsm_name('additional') or check_fsm_name('faq'):
-                return lesson_order < chat.state.parentState.unitLesson.order
+                return lesson_order < (chat.state.parentState.unitLesson.order or 1)
             else:
                 obj.is_done = True
                 return True

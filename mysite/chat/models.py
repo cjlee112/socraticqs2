@@ -220,6 +220,8 @@ class Message(models.Model):
         ) if self.chat and self.chat.next_point else None
 
     def get_errors(self):
+        if self.text:
+            return self.text
         node = self.chat.state.fsmNode if self.chat.state else None
         if node and hasattr(node._plugin, 'get_errors'):
             return node._plugin.get_errors(self)
@@ -552,6 +554,8 @@ class Message(models.Model):
         )
 
     def get_faqs(self):
+        if self.text:
+            return self.text
         # FIXME UPDATE -> FAQ -> get_faqs ['updates', 'new_faqs'], this transition potentially cause bugs
         state = self.chat.state
         updates = state.get_data_attr('updates') if state and 'updates' in state.load_json_data() else None
