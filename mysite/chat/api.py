@@ -642,7 +642,7 @@ class UpdatesView(ValidateMixin, APIView):
             return Response({'errors': str(e)})
         self.check_object_permissions(self.request, chat)
 
-        if chat.state.fsmNode.fsm.name == 'updates':
+        if chat.state and chat.state.fsmNode.fsm.name == 'updates':
             return Response({'error': 'You are in the middle of the another updates review process'})
 
         unitlesson = get_object_or_404(UnitLesson, pk=pk)
