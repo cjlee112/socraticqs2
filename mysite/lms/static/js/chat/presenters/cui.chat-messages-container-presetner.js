@@ -1,7 +1,6 @@
 /**
  * @file Defines the class CUI.ChatMessageContainerPresenter
  */
-
 CUI = CUI || {};
 
 /**
@@ -10,9 +9,9 @@ CUI = CUI || {};
  * @param {selectors} - selectors to base the container on.
  * @param {selectors.rootSelector} - a selector for the root node.
  *
- * @returns {CUI.ChatMessagesContainerPresnter}
+ * @returns {CUI.ChatMessagesContainerPresenter}
  */
-CUI.ChatMessagesContainerPresnter = function (selectors) {
+CUI.ChatMessagesContainerPresenter = function (selectors) {
     selectors = selectors || {};
 
     if (!selectors.rootSelector) {
@@ -67,7 +66,7 @@ CUI.ChatMessagesContainerPresnter = function (selectors) {
 /**
  * {CUI.ChatMessageContainerPresenter} static namespace.
  */
-CUI.ChatMessagesContainerPresnter.selectors = {
+CUI.ChatMessagesContainerPresenter.selectors = {
     /**
      *
      * @param {Object} params - an object to create selector params from.
@@ -103,7 +102,7 @@ CUI.ChatMessagesContainerPresnter.selectors = {
             params['data-thread-id'] = threadId;
         }
 
-        selector += CUI.ChatMessagesContainerPresnter.selectors.toSelectorParams(params);
+        selector += CUI.ChatMessagesContainerPresenter.selectors.toSelectorParams(params);
 
         return selector;
     },
@@ -120,7 +119,7 @@ CUI.ChatMessagesContainerPresnter.selectors = {
             params['data-thread-id'] = threadId;
         }
 
-        selector += CUI.ChatMessagesContainerPresnter.selectors.toSelectorParams(params);
+        selector += CUI.ChatMessagesContainerPresenter.selectors.toSelectorParams(params);
 
         return selector;
     }
@@ -130,7 +129,7 @@ CUI.ChatMessagesContainerPresnter.selectors = {
  * Sets _selectedValuesFromMessages value.
  * @public
  */
-CUI.ChatMessagesContainerPresnter.prototype.setSelectedValuesFromMessages = function (value) {
+CUI.ChatMessagesContainerPresenter.prototype.setSelectedValuesFromMessages = function (value) {
     this._selectedValuesFromMessages = value;
 };
 
@@ -139,8 +138,8 @@ CUI.ChatMessagesContainerPresnter.prototype.setSelectedValuesFromMessages = func
  * @public
  * @returns {Array.<jQuery>}
  */
-CUI.ChatMessagesContainerPresnter.prototype.findBreakpoints = function () {
-    return this.$root.find(CUI.ChatMessagesContainerPresnter.selectors.breakpoint());
+CUI.ChatMessagesContainerPresenter.prototype.findBreakpoints = function () {
+    return this.$root.find(CUI.ChatMessagesContainerPresenter.selectors.breakpoint());
 };
 
 /**
@@ -148,8 +147,8 @@ CUI.ChatMessagesContainerPresnter.prototype.findBreakpoints = function () {
  * @public
  * @returns {Array.<jQuery>}
  */
-CUI.ChatMessagesContainerPresnter.prototype.findMessages = function () {
-    return this.$root.find(CUi.ChatMessagesContainerPresnter.selectors.message());
+CUI.ChatMessagesContainerPresenter.prototype.findMessages = function () {
+    return this.$root.find(CUi.ChatMessagesContainerPresenter.selectors.message());
 };
 
 /**
@@ -157,14 +156,13 @@ CUI.ChatMessagesContainerPresnter.prototype.findMessages = function () {
  * @public
  * @param {ChatMessageModel,ChatMediaModel,ChatBreakpointModel} model - a model to create the a new message from.
  */
-CUI.ChatMessagesContainerPresnter.prototype.addMessage = function (model) {
+CUI.ChatMessagesContainerPresenter.prototype.addMessage = function (model) {
     var message;
 
     // A tmeporary workaround, since sometimes backend tends to send a 'null' thread id
     // after you visit a thread with updates while having an active input in your current thread
     if (!model.threadId) {
         model.threadId = this.findBreakpoints().last().data('thread-id');
-        console.log('Model has no threadId, will use instaed: ', model.threadId);
     }
 
     // Create a message presenter based on model type
@@ -175,7 +173,7 @@ CUI.ChatMessagesContainerPresnter.prototype.addMessage = function (model) {
     } else if (model instanceof CUI.ChatBreakpointModel) {
         message = new CUI.ChatBreakpointPresenter(model);
     } else {
-        throw new Error("CUI.ChatMessagesContainerPresnter.addMessage(): Invalid model.");
+        throw new Error("CUI.ChatMessagesContainerPresenter.addMessage(): Invalid model.");
     }
 
     var $messageElement = message.$el;
@@ -185,7 +183,7 @@ CUI.ChatMessagesContainerPresnter.prototype.addMessage = function (model) {
 
     // If it's a breakpoint
     if (message instanceof CUI.ChatBreakpointPresenter) {
-        var threadBreakpointSelector = CUI.ChatMessagesContainerPresnter.selectors.breakpoint(messageThreadId);
+        var threadBreakpointSelector = CUI.ChatMessagesContainerPresenter.selectors.breakpoint(messageThreadId);
         var $threadBreakpoint = this.$root.find(threadBreakpointSelector);
 
         // And it's a new one, then add it
@@ -195,7 +193,7 @@ CUI.ChatMessagesContainerPresnter.prototype.addMessage = function (model) {
             $messageElement = null;
         }
     } else {
-        var threadMessagesSelector = CUI.ChatMessagesContainerPresnter.selectors.message(null, messageThreadId);
+        var threadMessagesSelector = CUI.ChatMessagesContainerPresenter.selectors.message(null, messageThreadId);
         var threadMessages = this.$root.find(threadMessagesSelector);
 
         //If it's not the first message of a thread, then add it after the last one
@@ -225,7 +223,7 @@ CUI.ChatMessagesContainerPresnter.prototype.addMessage = function (model) {
  * @protected
  * @param {ChatMessageModel|ChatMediaModel|ChatBreakpointModel} model   - The new model for the message.
  */
-CUI.ChatMessagesContainerPresnter.prototype.updateMessage = function (model) {
+CUI.ChatMessagesContainerPresenter.prototype.updateMessage = function (model) {
     var currentMessage;
 
     // Select existing message
@@ -235,14 +233,14 @@ CUI.ChatMessagesContainerPresnter.prototype.updateMessage = function (model) {
     if (currentMessage) {
         currentMessage.update(model);
     } else {
-        throw new Error('CUI.ChatMessagesContainerPresnter.prototype.updateMessage(): Message with id "' + model.id + '" does not exist.');
+        throw new Error('CUI.ChatMessagesContainerPresenter.prototype.updateMessage(): Message with id "' + model.id + '" does not exist.');
     }
 };
 
 /**
  * Removes message. (FOR COMPATIBILITY, IS POSSIBLY ABSOLETE, REQUIRES INVESITAGTION)
  */
-CUI.ChatMessagesContainerPresnter.prototype.removeMessage = function (id) {
+CUI.ChatMessagesContainerPresenter.prototype.removeMessage = function (id) {
     var currentMessage = this.messages[id];
 
     if (currentMessage) {
@@ -260,7 +258,7 @@ CUI.ChatMessagesContainerPresnter.prototype.removeMessage = function (id) {
  * @protected
  * @returns {object}
  */
-CUI.ChatMessagesContainerPresnter.prototype.getMessageSelectedValues = function () {
+CUI.ChatMessagesContainerPresenter.prototype.getMessageSelectedValues = function () {
     var selected = {};
 
     // Loop through messages with selectables and look for selected elements
@@ -298,7 +296,7 @@ CUI.ChatMessagesContainerPresnter.prototype.getMessageSelectedValues = function 
  * @public
  * @returns {Number} id - message id.
  */
-CUI.ChatMessagesContainerPresnter.prototype.getMessage = function (id) {
+CUI.ChatMessagesContainerPresenter.prototype.getMessage = function (id) {
     return this.messages[id];
 };
 
@@ -307,9 +305,9 @@ CUI.ChatMessagesContainerPresnter.prototype.getMessage = function (id) {
  * @public
  * @returns {Array.<jQuery>}
  */
-CUI.ChatMessagesContainerPresnter.prototype.getAllMessageElements = function () {
-    var allElementsSelector = CUI.ChatMessagesContainerPresnter.selectors.message();
-    allElementsSelector += ',' + CUI.ChatMessagesContainerPresnter.selectors.breakpoint();
+CUI.ChatMessagesContainerPresenter.prototype.getAllMessageElements = function () {
+    var allElementsSelector = CUI.ChatMessagesContainerPresenter.selectors.message();
+    allElementsSelector += ',' + CUI.ChatMessagesContainerPresenter.selectors.breakpoint();
 
     return this.$root.find(allElementsSelector);
 };
@@ -320,20 +318,25 @@ CUI.ChatMessagesContainerPresnter.prototype.getAllMessageElements = function () 
  * @param {Array<Number>} threads - an array of thread ids to get messages for.
  * @returns {Array} - an array of all related messages.
  */
-CUI.ChatMessagesContainerPresnter.prototype.getThreadsRelatedMessages = function (threads) {
+CUI.ChatMessagesContainerPresenter.prototype.getThreadsRelatedMessages = function (threads) {
     var relatedMessages = new Array();
 
     threads.forEach($.proxy(function (threadId) {
-        console.log('Messages for threadId: ', threadId);
-        var threadMesssagesSelector = CUI.ChatMessagesContainerPresnter.selectors.message(null, threadId);
+        var threadMesssagesSelector = CUI.ChatMessagesContainerPresenter.selectors.message(null, threadId);
         var threadMessages = this.$root.find(threadMesssagesSelector);
 
         if (threadMessages.length) {
-            relatedMessages = relatedMessages.concat(threadMessages);
+            $.each(threadMessages, function(i, message) {
+                relatedMessages.push($(message));
+            });
         }
     }, this));
 
     return relatedMessages;
+};
+
+CUI.ChatMessagesContainerPresenter.prototype.splitChatMessages = function(threadId) {
+
 };
 
 /**
@@ -342,11 +345,11 @@ CUI.ChatMessagesContainerPresnter.prototype.getThreadsRelatedMessages = function
  * @param {Array<Number>} threads - an array of thread ids to get messages for.
  * @returns {Array} - an array of all related chat breakpoints.
  */
-CUI.ChatMessagesContainerPresnter.prototype.getThreadsRelatedChatBreakpoints = function (threads) {
+CUI.ChatMessagesContainerPresenter.prototype.getThreadsRelatedChatBreakpoints = function (threads) {
     var relatedChatBreakpoints = new Array();
 
     threads.forEach($.proxy(function (threadId) {
-        var threadBreakpointsSelector = CUI.ChatMessagesContainerPresnter.selectors.breakpoint(threadId);
+        var threadBreakpointsSelector = CUI.ChatMessagesContainerPresenter.selectors.breakpoint(threadId);
         var $threadChatBreakpoint = this.$root.find(threadBreakpointsSelector).first();
 
         if ($threadChatBreakpoint.length) {

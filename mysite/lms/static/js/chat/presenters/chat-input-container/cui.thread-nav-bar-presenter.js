@@ -117,7 +117,6 @@ CUI.ThreadNavBar.prototype._setupEventCallbacks = function() {
  * @private
  */
 CUI.ThreadNavBar.prototype._update = function() {
-    console.log('Updating state to : ', this._state);
     switch(this._state) {
         case CUI.ThreadNavBar.state.hidden:
             this.$rootElement.hide();
@@ -154,8 +153,6 @@ CUI.ThreadNavBar.prototype.setState = function(state) {
     if (this._state === state) {
         return;
     }
-
-    console.log('NAVBAR SETTINGS STATE TO: ', state);
 
     this._state = state;
     this._update()
@@ -216,8 +213,6 @@ CUI.ThreadNavBar.prototype.setShowSubsequentThreadsCallback = function(callback)
  */
 function onThreadNavBarTogglerButtonClick(event) {
     event.preventDefault();
-
-    console.log('threadNavBar State is: ', this._state);
 
     switch(this._state) {
         case CUI.ThreadNavBar.state.scrollToQuestion:

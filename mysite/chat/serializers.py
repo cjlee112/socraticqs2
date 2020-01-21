@@ -164,12 +164,14 @@ class ChatHistorySerializer(serializers.ModelSerializer):
     """
     input = serializers.SerializerMethodField()
     addMessages = serializers.SerializerMethodField()
+    extras = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
         fields = (
             'input',
             'addMessages',
+            'extras'
         )
 
     def get_input(self, obj):
@@ -225,6 +227,24 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         return InternalMessageSerializer(many=True).to_representation(
             obj.message_set.all().exclude(timestamp__isnull=True).order_by('timestamp')
         )
+
+    def get_extras(self, obj):
+        extras = {
+            'updates': {
+                'threadId': None,
+            },
+        }
+
+        # Updates
+        if obj.state:
+            fsm_name = obj.state.fsmNode.fsm.name
+
+            if fsm_name == 'updates':
+                extras.setdefault('updates', {}).update({
+                    'threadId': obj.state.unitLesson.id,
+                })
+
+        return extras
 
 
 class LessonSerializer(serializers.ModelSerializer):
