@@ -4,10 +4,9 @@ from functools import reduce
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-import waffle
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, Response, STATUS_CHOICES
+from ct.models import UnitStatus, Response, UnitLesson, STATUS_CHOICES
 from chat.models import Message, UnitError
 
 from ct.templatetags.ct_extras import md2html
@@ -529,6 +528,7 @@ class GET_ACT(object):
             'contenttype': 'response',
             'content_id': resp.id,
             'input_type': 'options',
+            # This is needed to track the last response to handle status
             'lesson_to_answer_id': chat.state.unitLesson.id,
             'chat': chat,
             'owner': chat.user,
@@ -540,7 +540,7 @@ class GET_ACT(object):
         message.save()
         return message
 
-    def get_options(self):
+    def get_options(self, *args, **kwargs):
         return [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
 
     def handler(self, message, chat, request, state_handler) -> None:
@@ -562,22 +562,102 @@ class GET_ACT(object):
 
 
 class TRANSITION(object):
-    """
-    There we want to ask a Student to submit the transition to the next Thread.
-    """
     title = 'Transition'
     edges = (
-        dict(name='next', toNode='END', title='Move to the END'),
+        dict(name='next', toNode='END', title='Get an acknowlegement'),
+    )
+
+    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        """
+        Edge method that moves us to right state for next lesson (or END).
+        """
+        fsm = edge.fromNode.fsm
+        if 'next_update' in fsmStack.state.load_json_data() and \
+            fsmStack.state.get_data_attr('next_update') and \
+                fsmStack.state.get_data_attr('next_update').get('enabled'):
+            return fsm.get_node('VIEWUPDATES')
+
+        return edge.toNode
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+        has_updates = {
+            'enabled': False,
+            'thread_id': None
+        }
+
+        for thread in threads:
+            if thread.updates_count(chat) > 0:
+                has_updates.update({'thread_id': thread.id})
+                chat.state.set_data_attr('next_update', has_updates)
+                chat.state.save_json_data()
+                break
+
+        if has_updates['thread_id']:
+            text = f"""
+                    You have completed this thread.
+                    I have posted new messages to help you in the thread "{thread.lesson.title}".
+                    Would you like to view these updates now?
+                    """
+        else:
+            text = 'Now you can move to the next lesson'
+
+        _data = {
+            'chat': chat,
+            'text': text,
+            'owner': chat.user,
+            'input_type': 'options',
+            'kind': 'button',
+            'sub_kind': 'transition',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+    def get_options(self, *args, **kwargs) -> list:
+        options = [{'value': 'next_thread', 'text': 'View next thread'}]
+        state = args[0].state
+        if state and \
+            'next_update' in state.load_json_data() and \
+                state.get_data_attr('next_update') and \
+                state.get_data_attr('next_update').get('thread_id'):
+            options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+        return options
+
+    def handler(self, message, chat, request, state_handler) -> None:
+        """
+        Handle Student transition decision.
+
+        Must be used during PUT request processing.
+        """
+        data = request.data.get('option')
+        if data == 'next_update':
+            data = chat.state.get_data_attr('next_update')
+            data.update({'enabled': True})
+            chat.state.set_data_attr('next_update', data)
+            chat.state.save_json_data()
+        chat.next_point = state_handler.next_point(
+            current=message.content,
+            chat=chat,
+            message=message,
+            request=request)
+        chat.save()
+
+
+class VIEWUPDATES(object):
+    title = 'END'
+    edges = (
+        dict(name='next', toNode='END', title='Get updates'),
     )
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'Now you can move to the next lesson',
+            'text': 'Hey hey UPD',
             'owner': chat.user,
-            'input_type': 'options',
-            'kind': 'button',
-            'sub_kind': 'transition',
+            'input_type': 'custom',
+            'kind': 'message',
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -597,7 +677,7 @@ class FAILEDTRANSITION(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'Look\'s like you revieved updates in other way.',
+            'text': 'Look\'s like you revieved updates in a different way.',
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
@@ -656,6 +736,7 @@ def get_specs():
             ACT,
             GET_ACT,
             TRANSITION,
+            VIEWUPDATES,
             FAILEDTRANSITION,
             END
         ],

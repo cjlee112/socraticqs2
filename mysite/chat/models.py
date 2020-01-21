@@ -117,7 +117,7 @@ class Chat(models.Model):
         if self.next_point.input_type == 'options':
             node = self.state.fsmNode if self.state else None
             if node and hasattr(node._plugin, 'get_options'):
-                return node._plugin.get_options()
+                return node._plugin.get_options(self)
             options = self.next_point.get_options()
         return options
 
@@ -311,7 +311,7 @@ class Message(models.Model):
     def get_options(self):
         node = self.chat.state.fsmNode if self.chat.state else None
         if node and hasattr(node._plugin, 'get_options'):
-            return node._plugin.get_options()
+            return node._plugin.get_options(self.chat)
         options = None
         next_point = self.chat.next_point
         CONTINUE_BTN = {"value": 1, "text": "Continue"}

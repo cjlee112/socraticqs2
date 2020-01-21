@@ -328,6 +328,9 @@ class LessonSerializer(serializers.ModelSerializer):
             return False
 
     def get_updatesCount(self, obj):
+        # hardcode it till the final version will be implemented
+        # TODO: remove it eventually
+        return 0
         chat = self.context.get('chat')
         if not chat:
             return 0

@@ -164,6 +164,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._inputIsEnabled = false;
 
   /**
+   * Inidicates if we should accpect updates during next messages parsing.
+   * @type {Boolean}
+   * @protected
+   */
+  this._viewUpdatesPending = false;
+
+  /**
    * An array of existing input options.
    * @type {Array.<InputOptionPresenter>}
    * @protected
@@ -399,7 +406,7 @@ CUI.ChatPresenter.prototype._getResources = function(){
  * @param {string} params.url - A url for loading a user's next set of messages and input type.
  * @param {Boolean} params.parseUpdateMessages - A flag indicating to parse update messages.
  */
-CUI.ChatPresenter.prototype._getMessages = function(params){
+CUI.ChatPresenter.prototype._requestMessages = function(params){
   params = params || {};
   // Get messages and input
   $.ajax({
@@ -416,7 +423,7 @@ CUI.ChatPresenter.prototype._getMessages = function(params){
     this._getProgress();
     // Update the current input type in the chat
     if(data.input) this._setInput(data.input);
-    else throw new Error("CUI.ChatPresenter._getMessages(): No data.input.");
+    else throw new Error("CUI.ChatPresenter._requestMessages(): No data.input.");
 
     // Update chat with new messages
     if(data.addMessages) {
@@ -429,12 +436,12 @@ CUI.ChatPresenter.prototype._getMessages = function(params){
         this._scrollToNewMessageOnParsing = true;
       }
     } else {
-      throw new Error("CUI.ChatPresenter._getMessages(): No data.addMessages.");
+      throw new Error("CUI.ChatPresenter._requestMessages(): No data.addMessages.");
     }
 
     // Hide spinner
     this._hideLoading();
-  }).fail(function(){ throw new Error("CUI.ChatPresenter._getMessages(): Failed to load messages."); });
+  }).fail(function(){ throw new Error("CUI.ChatPresenter._requestMessages(): Failed to load messages."); });
 };
 
 /**
@@ -486,7 +493,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
     // Check that nextMessagesUrl is in response
     if(response && response.nextMessagesUrl && response.input && !response.input.doWait){
         // Load next set of messages
-        this._getMessages({url: response.nextMessagesUrl});
+        this._requestMessages({url: response.nextMessagesUrl});
         // set flag to true, because we need to show messages
         this._needShowMsg = true;
     }else if(response && response.input && response.input.doWait) {
@@ -495,7 +502,7 @@ CUI.ChatPresenter.prototype._postInput = function(input){
         * this.setInput function will look into response.input.doWait parameter
         * and if doWait is true will call setTimeout function with needed parameters.
         */
-        this._getMessages({url: response.nextMessagesUrl});
+        this._requestMessages({url: response.nextMessagesUrl});
         // set to false cause we already shown messages.
         this._needShowMsg = false;
       }else{
@@ -603,7 +610,7 @@ CUI.ChatPresenter.prototype._postAction = function(actionUrl){
     // Check that nextMessagesUrl is in response
     if(response && response.nextMessagesUrl){
         // Load next set of messages
-        this._getMessages({url: response.nextMessagesUrl});
+        this._requestMessages({url: response.nextMessagesUrl});
     }else{
       throw new Error('CUI.ChatPresenter._postAction(): No response.nextMessagesUrl');
     }
@@ -735,9 +742,15 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
       var threadsCompletedCount = 0;
 
       // Add new breakpoints
+      /**
+       * TODO: remove it eventually
       var compoundUpdatesCounter = 0;
+      */
       $.each(data.breakpoints, $.proxy(function(i, b){
+        /**
+       * TODO: remove it eventually
         compoundUpdatesCounter += b.updatesCount;
+        */
         // Create breakpoint from template
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
 
@@ -756,6 +769,8 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
         this._$sidebarToggle.trigger('resources');
       }
     }
+    /**
+    * TODO: remove it eventually
     if ( compoundUpdatesCounter > 0 ) {
       $('.chat-counter').html(compoundUpdatesCounter);
       $('.chat-counter').show();
@@ -763,6 +778,7 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
     else if ( compoundUpdatesCounter == 0 ) {
       $('.chat-counter').hide();
     }
+    */
   }else{
     throw new Error('CUI.ChatPresenter._parseProgress(): No data.progress');
   }
@@ -1125,15 +1141,22 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
     MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   }});
 
+
+  console.log('[PARSE MESSAGES]: params: ', params);
+
   // Scroll to first new message, update scroll position and resume scroll detection
   if(params.scrollToFirst) {
-    var scrollParams = new Object;
+    if (this._viewUpdatesPending) {
+      this._viewUpdatesPending = false;
 
-    if (params.parseUpdateMessages) {
-      var lastMessageId = newMessages[newMessages.length - 1].data('message-id');
-      // Scroll to message & update current
+      var $lastMessage = newMessages[newMessages.length - 1];
+      var lastMessageId = $lastMessage.data('message-id');
+      this._updatesThreadId = $lastMessage.data('thread-id');
+
+      // Scroll to message & update current chat bottom position
       this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId, true);
     } else {
+      var scrollParams = new Object;
       scrollParams.id = newMessages[0].data('message-id');
       scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.top;
       scrollParams.updateScrollPosition = true;
@@ -1374,7 +1397,7 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
       updateScrollPosition: true
     });
   } else {
-        // First message of the first thread.
+    // First message of the first thread.
     var firstSubsequentThreadId = this._$splitMessages.subsequentBreakpoints[0].data('thread-id');
     var firstSubsequentMessage = this._messagesContainer.getThreadsRelatedMessages([firstSubsequentThreadId])[0][0];
 
@@ -1403,7 +1426,7 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, updateSc
     top = $message.offset().top - 60;
     this._tweenWindowScroll(top, updateScrollPosition ? $.proxy(this._updateChatBottomMessageScroll, this) : undefined);
   } else {
-    this._getMessages({url: this._resourcesUrl + ul + '/'});
+    this._requestMessages({url: this._resourcesUrl + ul + '/'});
   }
 };
 
@@ -1726,13 +1749,21 @@ CUI.ChatPresenter.prototype._setInput = function(input){
  */
 CUI.ChatPresenter.prototype._getThreadUpdates = function($thread) {
   if ($thread.data('updates-count')) {
-    this._isShowingMessagesUpToThread = true;
-    this._updatesThreadId = $thread.data('thread-id');
-    this._getMessages({
-      url: this._updatesUrl+$thread.data('thread-id')+'/',
-      parseUpdateMessages: true,
-    });
+    this._showThreadUpdates($thread.data('thread-id'));
   };
+};
+
+/**
+ * Show thread with updates.
+ * @param {Number} threadId   - thread ID.
+ */
+CUI.ChatPresenter.prototype._showThreadUpdates = function(threadId) {
+  this._isShowingMessagesUpToThread = true;
+  this._updatesThreadId = threadId;
+  this._requestMessages({
+    url: this._updatesUrl + threadId + '/',
+    parseUpdateMessages: true,
+  });
 };
 
 /**
@@ -1841,20 +1872,32 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     var optionText = $option.text();
     var optionValue = $option.data('option-value')
 
-    if (this._isInUpdateThread && optionValue === 1 && optionText === 'Move to the next Thread') {
-      //Show all messages and scroll to the last message (true);
-      this._showSubsequentThreadMessages(true);
-      // A workaround since there's a goodbye message that is
-      // sent from the previous thread when where's scrolling to the last active one.
-      this._scrollToNewMessageOnParsing = false;
-      this._isInUpdateThread = false;
-      this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
-      this._inputContainer.threadNavBar.hide();
-      this._flowPreviousThreadId = -1;
-      this._$splitMessages.relatedMessages.length = 0;
-      this._$splitMessages.subsequentMessages.length = 0;
-      this._$splitMessages.relatedBreakpoints.length = 0;
-      this._$splitMessages.subsequentBreakpoints.length = 0;
+    switch (optionValue) {
+      case "next_thread":
+        if (this._isInUpdateThread) {
+          //Show all messages and scroll to the last message (true);
+          this._showSubsequentThreadMessages(true);
+          // A workaround since there's a goodbye message that is
+          // sent from the previous thread when we're scrolling to the last active one.
+          this._scrollToNewMessageOnParsing = false;
+          this._isInUpdateThread = false;
+          this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
+          this._inputContainer.threadNavBar.hide();
+          this._flowPreviousThreadId = -1;
+          this._$splitMessages.relatedMessages.length = 0;
+          this._$splitMessages.subsequentMessages.length = 0;
+          this._$splitMessages.relatedBreakpoints.length = 0;
+          this._$splitMessages.subsequentBreakpoints.length = 0;
+        }
+        break;
+
+      case "next_update":
+        if (this._isInUpdateThread) {
+          this._showSubsequentThreadMessages();
+        }
+
+        this._viewUpdatesPending = true;
+        break;
     }
 
     // Post input to server
@@ -1870,12 +1913,15 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Show only related messages and Scroll to the topmost one
     // this._showThreadMessages($(e.currentTarget).data('thread-id'));
     if ($sidebarBreakpoint.data('updates-count') > 0) {
+      /**
+      * Comment for a white in case we need to return it back.
+      * TODO: do not forget to remove it eventually
       this._getThreadUpdates($sidebarBreakpoint);
+      */
     } else {
       //Scroll to messages, don't update scroll position and turn off scroll detection until new messages are loaded.
       this._scrollToMessage({id: $sidebarBreakpoint.data('first-message-id')});
     }
-    // this._getThreadUpdates($sidebarBreakpoint);
   }, this));
 
   // Delegated events for sidebar resources links
