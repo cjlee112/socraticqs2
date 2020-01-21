@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from ct.models import Response as StudentResponse, Lesson, UnitLesson, DONE_STATUS
+from ct.models import Response as StudentResponse, Lesson, UnitLesson, DONE_STATUS, EVAL_TO_STATUS_MAP
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
@@ -431,8 +431,9 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     resp.selfeval = opt_data
                     text = resp.get_selfeval_display()
                     # FIX if response was correct - user will not go to `else` section and response status should be set
-                    if resp.selfeval == StudentResponse.CORRECT:
-                        resp.status = DONE_STATUS
+                    if not resp.is_locked:
+                        resp.status = EVAL_TO_STATUS_MAP.get(opt_data)
+
                 message.text = text
                 resp.save()
                 chat.next_point = message
@@ -446,9 +447,14 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 resp = message.student_error
                 resp.status = selfeval
                 resp.save()
-                # pass status to main response
-                resp.response.status = selfeval
-                resp.response.save()
+
+                # CRITICAL note - do not override response status
+                # pass status to main response ONLY in case of absence the status at all
+                # is_locked status is setted in TRANSITION node in chat FSM
+                if not resp.response.is_locked:
+                    resp.response.status = selfeval
+                    resp.response.save()
+
                 chat.next_point = message
                 chat.last_modify_timestamp = timezone.now()
                 chat.save()

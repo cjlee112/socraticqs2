@@ -9,9 +9,9 @@ from django.urls import reverse
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
-from ct.models import UnitLesson, NEED_HELP_STATUS
+from ct.models import UnitLesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from accounts.models import Instructor
-from .models import Message, Chat, ChatDivider
+from .models import Message, Chat
 from .services import ProgressHandler
 
 
@@ -315,7 +315,7 @@ class LessonSerializer(serializers.ModelSerializer):
             lesson_to_answer_id=obj.id,
             kind='response',
             contenttype='response',
-            content_id__isnull=False).first()
+            content_id__isnull=False).last()
 
         if not response_msg:
             return 0
@@ -323,7 +323,7 @@ class LessonSerializer(serializers.ModelSerializer):
         response = response_msg.content
         is_done = obj.is_done if hasattr(obj, 'is_done') else self.get_isDone(obj)
         is_orct = obj.lesson.kind == obj.lesson.ORCT_QUESTION
-        is_need_help = response.status == NEED_HELP_STATUS
+        is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
 
         return (obj.updates_count(chat) if is_orct and is_done and is_need_help else 0)
 

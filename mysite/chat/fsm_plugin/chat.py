@@ -377,8 +377,21 @@ class TRANSITION(object):
         """
         fsm = edge.fromNode.fsm
         unitStatus = fsmStack.state.get_data_attr('unitStatus')
+        currentLesson = unitStatus.get_lesson()
+
+        chat = fsmStack
+        response_msg = chat.message_set.filter(
+            lesson_to_answer_id=currentLesson,
+            kind='response',
+            contenttype='response',
+            content_id__isnull=False).last()
+        if response_msg:
+            response = response_msg.content
+            response.is_locked = True
+            response.save()
+
         if useCurrent:
-            nextUL = unitStatus.get_lesson()
+            nextUL = currentLesson
             return edge.toNode
         else:
             nextUL = unitStatus.start_next_lesson()

@@ -554,8 +554,8 @@ class Message(models.Model):
     def get_faqs(self):
         # FIXME UPDATE -> FAQ -> get_faqs ['updates', 'new_faqs'], this transition potentially cause bugs
         state = self.chat.state
-        updates = state.get_data_attr('updates') if 'updates' in state.load_json_data() else None
-        new_faqs = state.get_data_attr('new_faqs') if 'new_faqs' in state.load_json_data() else None
+        updates = state.get_data_attr('updates') if state and 'updates' in state.load_json_data() else None
+        new_faqs = state.get_data_attr('new_faqs') if state and 'new_faqs' in state.load_json_data() else None
         faqs = None
         faq_list = self.content.response_set.filter(
             ~Q(author=self.owner),

@@ -1565,7 +1565,7 @@ class Response(models.Model, SubKindMixin):
     parent = models.ForeignKey('Response', null=True, blank=True, on_delete=models.CASCADE)  # reply-to
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True, on_delete=models.CASCADE)
     faq_notified = models.BooleanField(blank=True, null=True, default=False)
-
+    is_locked = models.BooleanField(default=False)
     is_trial = models.BooleanField(default=False)
 
     objects = ResponseManager()
@@ -1727,6 +1727,13 @@ class Response(models.Model, SubKindMixin):
                 if str.isdigit(i)
             ])
         return ""
+
+
+EVAL_TO_STATUS_MAP = {
+    Response.DIFFERENT: NEED_HELP_STATUS,
+    Response.CLOSE: NEED_REVIEW_STATUS,
+    Response.CORRECT: DONE_STATUS
+}
 
 
 class StudentError(models.Model):

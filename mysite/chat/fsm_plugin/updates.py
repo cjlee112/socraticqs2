@@ -529,6 +529,7 @@ class GET_ACT(object):
             'contenttype': 'response',
             'content_id': resp.id,
             'input_type': 'options',
+            'lesson_to_answer_id': chat.state.unitLesson.id,
             'chat': chat,
             'owner': chat.user,
             'kind': 'response',
