@@ -182,6 +182,8 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         if obj.state is not None:
             msg = obj.message_set.filter(timestamp__isnull=False).last()
             # only last msg will be in available as obj after exiting from the loop.
+            if msg.contenttype == 'uniterror' or msg.kind == 'abort':
+                incl_msg.append(msg.id)
             if msg.contenttype == 'unitlesson' and msg.content:
                 if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
                     sub_kind = 'choices'

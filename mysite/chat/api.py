@@ -687,5 +687,6 @@ class UpdatesView(ValidateMixin, APIView):
         chat.next_point = self.next_handler.next_point(
             current=unitlesson, chat=chat, message=m, request=request, updates=True
         )
+        chat.save()
         serializer = MessageSerializer(m)
         return Response(serializer.data)
