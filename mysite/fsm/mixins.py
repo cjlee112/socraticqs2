@@ -783,7 +783,7 @@ class ChatMixin(object):
                 filter_data.update({'timestamp__isnull': True})
                 message = Message.objects.filter(**filter_data).first()
                 if not message:
-                    message = Message.objects.create(_data)
+                    message = Message.objects.create(**_data)
             else:
                 message = Message(**_data)
                 message.save()
