@@ -46,9 +46,30 @@ CUI.ThreadNavBar = function($rootElement, selectors) {
 
     /**
      * Current state.
-     * @type {CUI.ThreadNavBar.state.{hidden|scrollToCurrentQuestion|showSubsequentThreads}}
+     * @type {CUI.ThreadNavBar.state.*}
      */
     this._state = CUI.ThreadNavBar.state.hidden;
+
+    /**
+     * Holds the previous state.
+     * @type {CUI.ThreadNavBar.state.*}
+     * @private
+     */
+    this._prevState = CUI.ThreadNavBar.state.none;
+
+    /**
+     * Current display text.
+     * @type {CUI.ThreadNavBar.strings.displayText.*}
+     * @private
+     */
+    this._displayText = '';
+
+    /**
+     * Current display arrow
+     * @type {CUI.ThreadNavBar.strings.arrow.*}
+     * @private
+     */
+    this._displayArrow = '';
 
     /**
      * Scroll to current question.
@@ -71,6 +92,7 @@ CUI.ThreadNavBar = function($rootElement, selectors) {
      */
     this._showSubsequentThreadsCallback = function () {};
 
+
     this._setupEventCallbacks();
 
     this.$rootElement.hide();
@@ -84,25 +106,114 @@ CUI.ThreadNavBar = function($rootElement, selectors) {
 CUI.ThreadNavBar.strings = CUI.ThreadNavBar.strings || {};
 
 /**
- * Toggler button text when in updates mode and showing subsequent threads.
+ * Display text strings.
  */
-CUI.ThreadNavBar.strings.scrollToCurrentQuestion = '↑ Scroll to Current Question';
-
+CUI.ThreadNavBar.strings.displayText = CUI.ThreadNavBar.strings.displayText || {};
+CUI.ThreadNavBar.strings.displayText.scrollToCurrentQuestion = 'Scroll to Current Question';
+CUI.ThreadNavBar.strings.displayText.scrollToSubsequentThreads = 'Show Subsequent Threads';
+CUI.ThreadNavBar.strings.displayText.hideSubsequentThreads = 'Hide Subsequent Threads';
 
 /**
- * Toggler button text when in a thread with updates.
+ * Arrow symbols.
  */
-CUI.ThreadNavBar.strings.scrollToSubsequentThreads = '↓ Show Subsequent Threads';
+CUI.ThreadNavBar.strings.arrow = CUI.ThreadNavBar.strings.arrow || {};
+CUI.ThreadNavBar.strings.arrow.up = '↑';
+CUI.ThreadNavBar.strings.arrow.down = '↓';
 
 /**
  * Class static states naemspace.
  */
 CUI.ThreadNavBar.state = CUI.ThreadNavBar.state || {};
+CUI.ThreadNavBar.state.none = "none";
 CUI.ThreadNavBar.state.hidden = "hidden";
 CUI.ThreadNavBar.state.scrollToQuestion = "scrollToQuestion";
 CUI.ThreadNavBar.state.scrollToQuestionWithUpdates = "scrollToQuestionWithUpdates";
+CUI.ThreadNavBar.state.hideSubsequentThreads = "hideSubsequentThreads";
 CUI.ThreadNavBar.state.showSubsequentThreads = "showSubsequentThreads";
 CUI.ThreadNavBar.state.subsequentThreadsAreShowed = "subsequentThreadsAreShowed";
+
+CUI.ThreadNavBar.stateMap = new Object();
+CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.hidden] = [
+    CUI.ThreadNavBar.state.scrollToQuestion,
+    CUI.ThreadNavBar.state.showSubsequentThreads,
+    CUI.ThreadNavBar.state.hideSubsequentThreads
+];
+CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.scrollToQuestion] = [
+    CUI.ThreadNavBar.state.hidden,
+];
+CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.scrollToQuestionWithUpdates] = [
+    CUI.ThreadNavBar.state.showSubsequentThreads,
+    CUI.ThreadNavBar.state.hideSubsequentThreads,
+    CUI.ThreadNavBar.state.hidden
+];
+CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.showSubsequentThreads] = [
+    CUI.ThreadNavBar.state.scrollToQuestionWithUpdates,
+    CUI.ThreadNavBar.state.hideSubsequentThreads,
+    CUI.ThreadNavBar.state.hidden
+];
+CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.hideSubsequentThreads] = [
+    CUI.ThreadNavBar.state.scrollToQuestionWithUpdates,
+    CUI.ThreadNavBar.state.showSubsequentThreads
+];
+
+/**
+ * Sets up arrow.
+ * @public
+ */
+CUI.ThreadNavBar.prototype.setUpArrow = function() {
+    this._setArrow(CUI.ThreadNavBar.strings.arrow.up);
+};
+
+/**
+ * Sets down arrow.
+ * @public
+ */
+CUI.ThreadNavBar.prototype.setDownArrow = function() {
+    this._setArrow(CUI.ThreadNavBar.strings.arrow.down);
+};
+
+/**
+ * Sets current arrow and redraws text.
+ * @private
+ * @param {CUI.ThreadNavBar.strings.arrow.*} arrow  - an arrow type.
+ */
+CUI.ThreadNavBar.prototype._setArrow = function(arrow) {
+    this._displayArrow = arrow;
+    this._redrawText();
+};
+
+/**
+ * Sets display text and redraws text.
+ * @private
+ * @param {CUI.ThreadNavBar.strings.displayText} displayText    - text to be displayed.
+ */
+CUI.ThreadNavBar.prototype._setDisplayText = function(displayText) {
+    this._displayText = displayText;
+    this._redrawText();
+};
+
+/**
+ * Redraws current button text.
+ * @private
+ */
+CUI.ThreadNavBar.prototype._redrawText = function() {
+    this.$threadNavBarTogglerButton.text(this._displayArrow + ' ' + this._displayText);
+};
+
+/**
+ * Hide navigation bar.
+ * @private
+ */
+CUI.ThreadNavBar.prototype._hide = function() {
+    this.$rootElement.hide();
+};
+
+/**
+ * Show navigation bar.
+ */
+CUI.ThreadNavBar.prototype._show = function() {
+    this.$rootElement.show();
+};
 
 /**
  * Setup event callbacks.
@@ -113,73 +224,111 @@ CUI.ThreadNavBar.prototype._setupEventCallbacks = function() {
 };
 
 /**
- * Behaive according to current state.
+ * Behave according to current state.
  * @private
  */
-CUI.ThreadNavBar.prototype._update = function() {
+CUI.ThreadNavBar.prototype._updateState = function() {
     switch(this._state) {
-        case CUI.ThreadNavBar.state.hidden:
-            this.$rootElement.hide();
-            break;
-
         case CUI.ThreadNavBar.state.scrollToQuestion:
-            this.$rootElement.show();
-            this.$threadNavBarTogglerButton.text(CUI.ThreadNavBar.strings.scrollToCurrentQuestion);
+        case CUI.ThreadNavBar.state.scrollToQuestionWithUpdates:
+            this._show();
+            this._setDisplayText(CUI.ThreadNavBar.strings.displayText.scrollToCurrentQuestion);
+            this.setDownArrow();
             break;
 
-        case CUI.ThreadNavBar.state.scrollToQuestionWithUpdates:
-        case CUI.ThreadNavBar.state.subsequentThreadsAreShowed:
-            this.$rootElement.show();
-            this.$threadNavBarTogglerButton.text(CUI.ThreadNavBar.strings.scrollToCurrentQuestion);
+        case CUI.ThreadNavBar.state.hideSubsequentThreads:
+            this._show();
+            this._setDisplayText(CUI.ThreadNavBar.strings.displayText.hideSubsequentThreads);
+            this.setUpArrow();
             break;
 
         case CUI.ThreadNavBar.state.showSubsequentThreads:
-            this.$rootElement.show();
-            this.$threadNavBarTogglerButton.text(CUI.ThreadNavBar.strings.scrollToSubsequentThreads);
+            this._show();
+            this._setDisplayText(CUI.ThreadNavBar.strings.displayText.scrollToSubsequentThreads);
+            this.setDownArrow();
             break;
 
+        case CUI.ThreadNavBar.state.hidden:
         default:
-            this.$rootElement.hide();
+            this._hide();
             break;
     }
 };
 
 /**
+ * Check if the new state is valid to transition to.
+ * @private
+ * @param {String} state    - new state.
+ *
+ * @returns {Boolean}
+ */
+CUI.ThreadNavBar.prototype._isValidState = function(state) {
+    var isValid = false;
+    var validTransitionStates = CUI.ThreadNavBar.stateMap[this._state];
+
+    if (validTransitionStates) {
+        isValid = validTransitionStates.includes(state);
+    }
+
+    return isValid;
+};
+
+/**
  * Set current state.
  * @public
- * @param {CUI.ThreadNavBar.state.{hidden|scrollToQuestion|showSubsequentThreads}} state
+ * @param {CUI.ThreadNavBar.state.*} state
  */
 CUI.ThreadNavBar.prototype.setState = function(state) {
     if (this._state === state) {
         return;
     }
 
-    this._state = state;
-    this._update()
+    if (this._isValidState(state)) {
+        this._prevState = this._state;
+        this._state = state;
+
+        this._updateState()
+    }
 };
 
 /**
- * Set scroll to question state (depends on the current state).
+ * Activate scroll to question state.
  * @public
  */
-CUI.ThreadNavBar.prototype.setScrollToQuestionState = function() {
-    if (this._state === CUI.ThreadNavBar.state.scrollToQuestionWithUpdates) {
-        return;
-    }
+CUI.ThreadNavBar.prototype.activateScrollToQuestion = function() {
+    switch (this._state) {
+        case CUI.ThreadNavBar.state.hidden:
+            this.setState(CUI.ThreadNavBar.state.scrollToQuestion);
+            break;
 
-    this.setState(CUI.ThreadNavBar.state.scrollToQuestion);
+        case CUI.ThreadNavBar.state.showSubsequentThreads:
+        case CUI.ThreadNavBar.state.hideSubsequentThreads:
+            this.setState(CUI.ThreadNavBar.state.scrollToQuestionWithUpdates);
+    }
 };
 
 /**
- * Set show subsequent threads state (depends on the current state).
+ * Activate thread controls.
  * @public
  */
-CUI.ThreadNavBar.prototype.setShowSubsequentThreadsState = function() {
-    if (this._state === CUI.ThreadNavBar.state.scrollToQuestionWithUpdates) {
-        return;
-    }
+CUI.ThreadNavBar.prototype.activateThreadControls = function() {
+    switch (this._state) {
+        case CUI.ThreadNavBar.state.hidden:
+            this.setState(CUI.ThreadNavBar.state.showSubsequentThreads);
+            break;
 
-    this.setState(CUI.ThreadNavBar.state.showSubsequentThreads);
+        case CUI.ThreadNavBar.state.scrollToQuestionWithUpdates:
+            this.setState(this._prevState);
+            break;
+    }
+};
+
+/**
+ * Hide navigation bar.
+ * @public
+ */
+CUI.ThreadNavBar.prototype.hide = function() {
+    this.setState(CUI.ThreadNavBar.state.hidden);
 };
 
 /**
@@ -216,19 +365,18 @@ function onThreadNavBarTogglerButtonClick(event) {
 
     switch(this._state) {
         case CUI.ThreadNavBar.state.scrollToQuestion:
+        case CUI.ThreadNavBar.state.scrollToQuestionWithUpdates:
             this._scrollToQuestionCallback();
-            // this.setState(CUI.ThreadNavBar.state.hidden);
             break;
 
-        case CUI.ThreadNavBar.state.scrollToQuestionWithUpdates:
-        case CUI.ThreadNavBar.state.subsequentThreadsAreShowed:
+        case CUI.ThreadNavBar.state.hideSubsequentThreads:
             this._scrollToQuestionWithUpdatesCallback();
             this.setState(CUI.ThreadNavBar.state.showSubsequentThreads);
             break;
 
         case CUI.ThreadNavBar.state.showSubsequentThreads:
             this._showSubsequentThreadsCallback();
-            this.setState(CUI.ThreadNavBar.state.scrollToQuestionWithUpdates);
+            this.setState(CUI.ThreadNavBar.state.hideSubsequentThreads);
             break;
 
         default:

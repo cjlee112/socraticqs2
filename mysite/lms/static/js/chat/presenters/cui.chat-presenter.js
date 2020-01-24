@@ -199,13 +199,6 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._isInUpdateThread = false;
 
   /**
-   * Indicates if we can detect the scroll position of the last loaded message.
-   * @type {boolean}
-   * @protected
-   */
-  this._canDetectScroll = true;
-
-  /**
    * Indicates if an update thread is beeing opend at the moment.
    * @type {Boolean}
    * @protected
@@ -220,11 +213,18 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._scrollToNewMessageOnParsing = true;
 
   /**
-   * Current window/chat scrollTop position
+   * Current window/chat scrollTop position. (used when in update thread)
    * @type {Number}
    * @protected
    */
   this._currentChatBottomMessageScrollTop = 0;
+
+  /**
+   * Regular window/chat scrollTop position. (used regularly)
+   * @type {Number}
+   * @protected
+   */
+  this._regularChatBottomMessageScrollTop = 0;
 
   /**
    * A jQuery reference to the sidebar element.
@@ -246,7 +246,6 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @protected
    */
   this._$sidebarResourcesContainer = $('.chat-sidebar-resources');
-
 
   /**
    * A jQuery reference to the container element for sidebar breakpoints header.
@@ -1010,7 +1009,8 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
     if (threadMessages.length > 0) {
       var lastMessageId = threadMessages[threadMessages.length - 1].data('message-id');
 
-      this._scrollToUpdatesMessage(threadId, lastMessageId);
+      // Scroll to updates messages and update curren scroll position
+      this._scrollToUpdatesMessage(threadId, lastMessageId, true);
     }
   }
 
@@ -1029,13 +1029,15 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
 /**
  *
  */
-CUI.ChatPresenter.prototype._scrollToUpdatesMessage = function(threadId, messageId) {
+CUI.ChatPresenter.prototype._scrollToUpdatesMessage = function(threadId, messageId, updateCurrentScrollPosition) {
   var scrollParams = new Object();
 
   this._updatesThreadId = threadId;
 
   scrollParams.id = messageId;
   scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.bottom;
+  // scrollParams.updateCurrentScrollPosition = true;
+  scrollParams.updateCurrentScrollPosition = updateCurrentScrollPosition;
   scrollParams.onScrollFinished = $.proxy(function() {
     // Showing update messages for the first time.
     this._showMessagesUpToThread(this._updatesThreadId, {firstTime: true});
@@ -1129,12 +1131,12 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
 
     if (params.parseUpdateMessages) {
       var lastMessageId = newMessages[newMessages.length - 1].data('message-id');
-      this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId);
+      // Scroll to message & update current
+      this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId, true);
     } else {
       scrollParams.id = newMessages[0].data('message-id');
       scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.top;
       scrollParams.updateScrollPosition = true;
-      scrollParams.resumeScrollDetection = true;
       this._scrollToMessage(scrollParams);
     }
   }
@@ -1339,6 +1341,7 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
         id: scrollToMessageId,
         messagePlacement: CUI.ChatPresenter.messagePlacement.bottom,
         updateScrollPosition: true,
+        updateCurrentScrollPosition: params.updateCurrentScrollPosition,
         onScrollFinished: hideSubsequentChatItems
       });
     }
@@ -1367,7 +1370,8 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
 
     this._scrollToMessage({
       id: scrollToMessageId,
-      messagePlacement: CUI.ChatPresenter.messagePlacement.top
+      messagePlacement: CUI.ChatPresenter.messagePlacement.top,
+      updateScrollPosition: true
     });
   } else {
         // First message of the first thread.
@@ -1380,7 +1384,6 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
       id: scrollToMessageId,
       messagePlacement: CUI.ChatPresenter.messagePlacement.bottom,
       updateScrollPosition: false,
-      resumeScrollDetection: true,
     });
   }
 
@@ -1410,12 +1413,12 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, updateSc
  * @param {Object} params - function params.
  * @param {Number} params.id   - The ID of the message to scroll to.
  * @param {Boolean} params.updateScrollPosition - indicates that the "bottom/current message" position should be updated when message is scrolled into view.
- * @param {Boolean} params.resumeScrollDetection - indicates that scroll detection should be resumed after scrolling is done.
+ * @param {Boolean} params.updateCurrentScrollPosition - indicates that current scroll position has to be updated to.
  * @param {CUI.ChatPresenter.messagePlacement.<String>} params.messagePlacement - message placement flag: "top" or "bottom" of the chat. (default: "bottom")
  * @param {function} params.onScrollFinished - a function to call when scroll has finished.
  */
 CUI.ChatPresenter.prototype._scrollToMessage = function(params){
-  // {id, updateScrollPosition, resumeScrollDetection, messagePlacement, onScrollFinished}
+  // {id, updateScrollPosition, messagePlacement, onScrollFinished}
   params = params || {};
   var message;
   var $message;
@@ -1448,35 +1451,37 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(params){
     }
 
     // scrollToPosition = messageTop - 14;
-    this._scrollToVerticalPosition(
-      scrollToPosition,
-      params.updateScrollPosition,
-      params.resumeScrollDetection,
-      params.onScrollFinished
-    );
+    this._scrollToVerticalPosition({
+      positionY: scrollToPosition,
+      updateScrollPosition: params.updateScrollPosition,
+      updateCurrentScrollPosition: params.updateCurrentScrollPosition,
+      onScrollFinished: params.onScrollFinished
+    });
   }
 };
 
 /**
  * Scroll window to a given vertical position.
  * @protected
+ * @param {Object} params                 -
  * @param {Number} positionY              - position to scroll to.
  * @param {Boolean} updateScrollPosition  - save scroll position of the window after scrolling is finished.
- * @param {Boolean} resumeScrollDetection - resume detection of window scrolling after scrolling is finished.
  * @param {funciton} onScrollFinished     - a callback function to be called after scrolling is finished.
  */
-CUI.ChatPresenter.prototype._scrollToVerticalPosition = function(positionY, updateScrollPosition, resumeScrollDetection, onScrollFinished){
-  this._tweenWindowScroll(positionY, $.proxy(function() {
-    if (updateScrollPosition) {
+CUI.ChatPresenter.prototype._scrollToVerticalPosition = function(params){
+  params = params || {};
+
+  this._tweenWindowScroll(params.positionY, $.proxy(function() {
+    if (params.updateScrollPosition) {
       this._updateChatBottomMessageScroll();
     }
 
-    if (resumeScrollDetection) {
-      this._canDetectScroll = true;
+    if (params.updateCurrentScrollPosition) {
+      this._updateCurrentBottomMessageScroll();
     }
 
-    if (onScrollFinished) {
-      onScrollFinished();
+    if (params.onScrollFinished) {
+      params.onScrollFinished();
     }
   }, this));
 };
@@ -1504,12 +1509,20 @@ CUI.ChatPresenter.prototype._tweenWindowScroll = function(position, onComplete) 
 };
 
 /**
- * Update currrent chat bottom messages scroll position.
+ * Update regular chat bottom messages scroll position.
  * @protected
  */
 CUI.ChatPresenter.prototype._updateChatBottomMessageScroll = function () {
-  this._currentChatBottomMessageScrollTop = $(window).scrollTop();
-}
+  this._regularChatBottomMessageScrollTop = $window.scrollTop();
+};
+
+/**
+ * Update currrent chat bottom messages scroll position.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._updateCurrentBottomMessageScroll = function () {
+  this._currentChatBottomMessageScrollTop = $window.scrollTop();
+};
 
 
 /**
@@ -1756,24 +1769,32 @@ function onChangeThreadButtonClickHandler(e){
  */
 CUI.ChatPresenter.prototype._addWindowScrollStoppedListener = function() {
   var $window = $(window);
-  // move to a class
+  // move to class
   var scrollThreshold = 20;
 
   $window.on('scrollStopped',$.proxy(function() {
-
-    if (!this._canDetectScroll) {
-      return;
+    var bottomScrollTop;
+    if (this._isInUpdateThread) {
+      bottomScrollTop = this._currentChatBottomMessageScrollTop;
+    } else {
+      bottomScrollTop = this._regularChatBottomMessageScrollTop;
     }
 
-    var scrolledUp = $window.scrollTop() < this._currentChatBottomMessageScrollTop - scrollThreshold;
+    var scrolledUp = $window.scrollTop() < bottomScrollTop - scrollThreshold;
+    var scrolledDown = $window.scrollTop() > bottomScrollTop + scrollThreshold;
 
     if (scrolledUp) {
-      this._inputContainer.threadNavBar.setScrollToQuestionState();
+      this._inputContainer.threadNavBar.activateScrollToQuestion();
+      this._inputContainer.threadNavBar.setDownArrow();
     } else {
       if (this._isInUpdateThread) {
-        this._inputContainer.threadNavBar.setShowSubsequentThreadsState();
+        this._inputContainer.threadNavBar.activateThreadControls();
       } else {
-        this._inputContainer.threadNavBar.setState(CUI.ThreadNavBar.state.hidden);
+        this._inputContainer.threadNavBar.hide();
+      }
+
+      if (scrolledDown) {
+        this._inputContainer.threadNavBar.setUpArrow();
       }
     }
   }, this));
@@ -1826,8 +1847,9 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
       // A workaround since there's a goodbye message that is
       // sent from the previous thread when where's scrolling to the last active one.
       this._scrollToNewMessageOnParsing = false;
-      this._inputContainer.threadNavBar.setShowSubsequentThreadsState();
       this._isInUpdateThread = false;
+      this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
+      this._inputContainer.threadNavBar.hide();
       this._flowPreviousThreadId = -1;
       this._$splitMessages.relatedMessages.length = 0;
       this._$splitMessages.subsequentMessages.length = 0;
@@ -1848,7 +1870,6 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Show only related messages and Scroll to the topmost one
     // this._showThreadMessages($(e.currentTarget).data('thread-id'));
     if ($sidebarBreakpoint.data('updates-count') > 0) {
-      this._canDetectScroll = false;
       this._getThreadUpdates($sidebarBreakpoint);
     } else {
       //Scroll to messages, don't update scroll position and turn off scroll detection until new messages are loaded.
@@ -1901,7 +1922,11 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
   }, this));
 
   this._inputContainer.setScrollToQuestionCallback($.proxy(function() {
-    this._tweenWindowScroll(this._currentChatBottomMessageScrollTop);
+    if (this._isInUpdateThread) {
+      this._tweenWindowScroll(this._currentChatBottomMessageScrollTop)
+    } else {
+      this._tweenWindowScroll(this._regularChatBottomMessageScrollTop);
+    }
   }, this));
 
   this._inputContainer.setScrollToQuestionWithUpdatesCallback($.proxy(function() {
