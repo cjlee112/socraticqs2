@@ -1032,10 +1032,8 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
 
   // Show updates if needed (usually is triggered by a url hash #updates)
   if (this._showUpdates) {
-    var firstTreadWithUpdates = this._getThreadsWithUpdates()[0];
-
-    if (firstTreadWithUpdates) {
-      this._getThreadUpdates(firstTreadWithUpdates.$el);
+    if (CUI.config.updated_thread_id !== -1) {
+      this._getThreadUpdates($("li[data-thread-id="+CUI.config.updated_thread_id+"]"));
     }
 
     this._showUpdates = false;
@@ -1748,9 +1746,8 @@ CUI.ChatPresenter.prototype._setInput = function(input){
  * @param {jQuery} $thread - a jQuery object reference to a sidebar thread breakpoint element.
  */
 CUI.ChatPresenter.prototype._getThreadUpdates = function($thread) {
-  if ($thread.data('updates-count')) {
-    this._showThreadUpdates($thread.data('thread-id'));
-  };
+  this._showThreadUpdates($thread.data('thread-id'));
+  this._showMessagesUpToThread($thread.data('thread-id'));
 };
 
 /**

@@ -127,10 +127,11 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
             elif chat.state.fsmNode.fsm.fsm_name_is_one_of('updates'):
                 self.pop_state(chat)
-                edge = chat.state.fsmNode.outgoing.get(name='next')
-                chat.state.fsmNode = edge.transition(chat, request)
-                chat.state.save()
-                next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
+                if chat.state:
+                    edge = chat.state.fsmNode.outgoing.get(name='next')
+                    chat.state.fsmNode = edge.transition(chat, request)
+                    chat.state.save()
+                    next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
             else:
                 self.pop_state(chat)
 
@@ -166,6 +167,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         elif resources:
             self.push_state(chat, request, 'resource', {'unitlesson': current})
             next_point = chat.state.fsmNode.get_message(chat, request)
+        elif updates:
+            self.push_state(chat, request, 'updates', {'unitlesson': current, 'chat': chat})
+            next_point = chat.state.fsmNode.get_message(chat, request)
         elif chat.state and chat.state.fsmNode.node_name_is_one_of('VIEWUPDATES') and 'next_update' in chat.state.load_json_data() and chat.state.get_data_attr('next_update') and chat.state.get_data_attr('next_update').get('enabled'):
             unit_lesson_id = chat.state.get_data_attr('next_update').get('thread_id')
             chat.state.set_data_attr('next_update', None)
@@ -179,14 +183,12 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
         elif chat.state:
             if not next_point:
                 if not chat.state.fsmNode.node_name_is_one_of('END'):
-                    # import ipdb; ipdb.set_trace()
                     edge = chat.state.fsmNode.outgoing.get(name='next')
                     chat.state.fsmNode = edge.transition(chat, request)
                     chat.state.save()
                 if not (
                     chat.state.fsmNode.node_name_is_one_of('FAQ') or
                     chat.state.fsmNode.node_name_is_one_of('VIEWUPDATES')):
-                    # import ipdb; ipdb.set_trace()
                     next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
                 else:
                     next_point = self.next_point(

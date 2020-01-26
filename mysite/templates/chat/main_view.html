@@ -284,6 +284,7 @@ Courselets
     CUI.config.progressUrl = '/chat/progress/';
     CUI.config.resourcesUrl = '/chat/resources/';
     CUI.config.updatesUrl = '/chat/updates/';
+    CUI.config.updated_thread_id = {% if updated_thread_id %}{{ updated_thread_id }}{% else %}-1{% endif %};
     CUI.config.defaultStudentAvatar = '{% static "img/student/avatar-student.jpg" %}';
     CUI.config.defaultTeacherAvatar = '{% static "img/student/avatar-teacher.jpg" %}';
   </script>

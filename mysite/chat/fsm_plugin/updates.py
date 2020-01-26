@@ -510,6 +510,22 @@ class GET_ACT(object):
         dict(name='next', toNode='TRANSITION', title='Move to the transition state'),
     )
 
+    def next_edge(self, edge, *args, **kwargs):
+        if not args[0].state.parentState:
+            chat = args[0]
+            threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+            has_updates = False
+
+            for thread in threads:
+                if thread.updates_count(chat) > 0:
+                    has_updates = True
+                    break
+
+            if not has_updates:
+                return edge.fromNode.fsm.get_node('END')
+
+        return edge.toNode
+
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _response_data = {
             'lesson': chat.state.unitLesson.lesson,
