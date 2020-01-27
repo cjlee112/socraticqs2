@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, UnitLesson, Lesson, STATUS_CHOICES
+from ct.models import UnitStatus, UnitLesson, Lesson
 from chat.models import Message, ChatDivider
 
 

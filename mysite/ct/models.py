@@ -1621,7 +1621,7 @@ class Response(models.Model, SubKindMixin):
 
     def notify_students(self):
         """
-        Notify Students witha new FAQ comment.
+        Notify Students with a new FAQ comment.
         """
         # Do not send notifications about test or preview FAQs
         if self.is_preview or self.is_test:
@@ -1943,6 +1943,10 @@ class Course(models.Model):
     @property
     def instructors(self):
         return self.get_users(role=Role.INSTRUCTOR)
+
+    @property
+    def students(self):
+        return self.get_users(role=Role.ENROLLED)
 
     def apply_from(self, data: dict, commit=False):
         assert isinstance(data, dict)

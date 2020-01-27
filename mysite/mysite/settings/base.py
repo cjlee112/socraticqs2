@@ -2,6 +2,8 @@
 import os
 from datetime import timedelta
 
+from celery.schedules import crontab
+
 gettext = lambda s: s
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -319,12 +321,12 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'amqp://')
 CELERY_TIMEZONE = 'UTC'
 
-# CELERYBEAT_SCHEDULE = {
-#     'check_anonymous': {
-#         'task': 'core.tasks.check_anonymous',
-#         'schedule': timedelta(days=1),
-#     }
-# }
+CELERY_BEAT_SCHEDULE = {
+    'notify_student_about_updates': {
+        'task': 'chat.tasks.notify_for_updates',
+        'schedule': crontab(minute=0, hour=17),
+    }
+}
 
 # Cache settings
 CACHES = {
@@ -333,6 +335,11 @@ CACHES = {
         'LOCATION': '127.0.0.1:11211',
     }
 }
+
+
+# Update notification
+NEW_UPDATES_THRESHOLD = int(os.environ.get('NEW_UPDATES_THRESHOLD', 5))
+UPDATES_HASH = '#updates'
 
 
 # Path to GeoIp database to convert users IP to location

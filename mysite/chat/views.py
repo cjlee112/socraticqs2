@@ -11,10 +11,9 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 
 from mysite.mixins import LoginRequiredMixin
-from ct.models import Role, UnitLesson, ConceptLink, CourseUnit
+from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
-from chat.serializers import ChatProgressSerializer
 from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
@@ -279,13 +278,26 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
         back_url_name, back_url = self.get_back_url(**locals())
-        last_history = chat_sessions.filter(state__isnull=True, progress=100).first()
+        last_history = chat_sessions.filter(state__isnull=True, progress=100).order_by('id').last()
         updated_thread_id = None
 
         if last_history:
-            threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+            threads = last_history.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
             for thread in threads:
-                if thread.updates_count(last_history) > 0:
+                # TODO: move this to a separate cashed util function
+                response_msg = last_history.message_set.filter(
+                    lesson_to_answer_id=thread.id,
+                    kind='response',
+                    contenttype='response',
+                    content_id__isnull=False).last()
+
+                if not response_msg:
+                    continue
+
+                response = response_msg.content
+                is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS) if response else None
+
+                if is_need_help and thread.updates_count(last_history) > 0:
                     updated_thread_id = thread.id
                     break
 

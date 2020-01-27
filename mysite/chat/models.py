@@ -8,10 +8,12 @@ from django.db import models
 from django.db.models import Q
 from django.db.models import Count
 from django.utils.text import Truncator
+from django.utils.functional import cached_property
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from core.common import onboarding
 from core.common.mongo import c_chat_context, c_faq_data
@@ -25,7 +27,9 @@ from ct.models import (
     NEED_REVIEW_STATUS,
     Lesson,
     STATUS_CHOICES,
-    StudentError
+    StudentError,
+    NEED_HELP_STATUS,
+    NEED_REVIEW_STATUS
 )
 from ct.templatetags.ct_extras import md2html
 
@@ -151,6 +155,44 @@ class Chat(models.Model):
     def get_formatted_time_spent(self):
         spent_time = self.get_spent_time()
         return str(spent_time).split('.', 2)[0].replace('-', '')
+
+    @cached_property
+    def has_updates(self):
+        """
+        Return True if current updates count greater then configured threshold.
+
+        Threshold settings: settings.NEW_UPDATES_THRESHOLD
+        If there are no updates or insufficient updates count - return None
+        """
+        threads = self.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+        count = 0
+        for thread in threads:
+            # TODO: move this to a separate cashed util function
+            response_msg = self.message_set.filter(
+                lesson_to_answer_id=thread.id,
+                kind='response',
+                contenttype='response',
+                content_id__isnull=False).last()
+
+            if not response_msg:
+                continue
+
+            response = response_msg.content
+            is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS) if response else None
+
+            if is_need_help:
+                count += thread.updates_count(self)
+                if count > settings.NEW_UPDATES_THRESHOLD:
+                    return True
+
+    @cached_property
+    def is_history(self):
+        """
+        Return True if chat is a history chat.
+
+        If chat has a state - it is not a history.
+        """
+        return not self.state
 
 
 class Message(models.Model):

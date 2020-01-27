@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, Response, UnitLesson, STATUS_CHOICES
+from ct.models import UnitStatus, Response, STATUS_CHOICES
 from chat.models import Message, UnitError
 
 from ct.templatetags.ct_extras import md2html

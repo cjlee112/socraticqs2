@@ -1,0 +1,4 @@
+Hi {{student_first_name}}, the courselet “{{courselet_name}}” has just been updated by your instructor {{instructor_full_name}}.
+Click on the link below to view the new content.
+
+{{link_to_courselet}}
