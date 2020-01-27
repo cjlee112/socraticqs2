@@ -165,7 +165,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             self.push_state(chat, request, 'additional', {'unitlesson': unitlesson})
             next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
         elif resources:
-            self.push_state(chat, request, 'resource', {'unitlesson': current})
+            self.push_state(chat, request, 'resource', {'unitlesson': current, 'chat': chat})
             next_point = chat.state.fsmNode.get_message(chat, request)
         elif updates:
             self.push_state(chat, request, 'updates', {'unitlesson': current, 'chat': chat})

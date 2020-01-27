@@ -156,10 +156,10 @@ class TITLE(object):
         )
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        self._update_thread_id(chat, next_lesson.id)
+
         divider = ChatDivider(text=next_lesson.lesson.title, unitlesson=next_lesson)
         divider.save()
-
-        self._update_thread_id(chat, next_lesson.id)
 
         _data = {
             'contenttype': 'chatdivider',

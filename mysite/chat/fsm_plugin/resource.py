@@ -1,5 +1,7 @@
 from ct.models import UnitStatus
 
+from core.common.mongo import c_chat_context
+
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     """
@@ -51,8 +53,21 @@ class START(object):
             unitStatus.save()
             fsmStack.state.set_data_attr('unitStatus', unitStatus)
         fsmStack.state.unitLesson = kwargs['unitlesson']
+        chat = kwargs.get('chat')
+
+        self._update_thread_id(chat, fsmStack.state.unitLesson.id);
+
         return fsmStack.state.transition(
             fsmStack, request, 'next', useCurrent=True, **kwargs
+        )
+
+    def _update_thread_id(self, chat, thread_id):
+        c_chat_context().update_one(
+            {"chat_id": chat.id},
+            {"$set": {
+                "thread_id": thread_id,
+            }},
+            upsert=True
         )
 
     next_edge = next_lesson

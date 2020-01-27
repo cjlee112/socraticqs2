@@ -594,7 +594,7 @@ class Message(models.Model):
 
     def save(self, *args, **kwargs):
         context = c_chat_context().find_one({"chat_id": self.chat_id}) or dict()
-        if not self.pk:
+        if not (self.pk or self.thread_id):
             self.thread_id = context.get('thread_id')
         super().save(*args, **kwargs)
 

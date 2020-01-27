@@ -37,7 +37,7 @@ CUI.SidebarResourceModel = function(data){
    * @public
    */
   this.threadId = data.threadId;
-  
+
   /**
    * The id of the message this breakpoint links to in the chat.
    * @type {number}
@@ -72,6 +72,13 @@ CUI.SidebarResourceModel = function(data){
    * @public
    */
   this.isDone = data.isDone;
+
+  /**
+   * If this breakpoint should be current.
+   * @type {number}
+   * @public
+   */
+  this.isCurrent = data.isCurrent;
 
   return this;
 };

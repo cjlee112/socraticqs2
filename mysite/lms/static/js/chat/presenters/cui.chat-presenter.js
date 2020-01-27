@@ -427,12 +427,11 @@ CUI.ChatPresenter.prototype._requestMessages = function(params){
 
     // Update chat with new messages
     if(data.addMessages) {
-      if (this._scrollToNewMessageOnParsing) {
-        this._parseMessages(data, {
-          scrollToFirst: true,
-          parseUpdateMessages: params.parseUpdateMessages
-        });
-      } else {
+      this._parseMessages(data, {
+        scrollToFirst: this._scrollToNewMessageOnParsing,
+        parseUpdateMessages: params.parseUpdateMessages
+      });
+      if (!this._scrollToNewMessageOnParsing) {
         this._scrollToNewMessageOnParsing = true;
       }
     } else {
@@ -675,6 +674,47 @@ CUI.ChatPresenter.prototype._updateToNextBreakpointButton = function(info) {
 };
 
 /**
+ * Set current thread Id
+ * @protected
+ * @param {Object} params           - all neccessary parameters.
+ * @param {Number} params.threadID  -
+ * @param {Boolean} params.setUpdatesThreadId
+ */
+CUI.ChatPresenter.prototype._setCurrentThreadId = function(params) {
+  params = params || {};
+
+  if (!params.threadId) throw new Error('CUI.ChatPresenter.prototype._setCurrentThreadId(): threadId parameter is missing!');
+
+  this._currentThreadId = params.threadId;
+
+};
+
+/**
+ * TODO: During resource parsing currentThreadId is treated incorrectly!
+ */
+
+/**
+ * Manualy update current sidebar breakpoint.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._updateCurrentSidebarBreakpoint = function() {
+  $('.chat-sidebar > section > ul > li').each($.proxy(function(i, breakpoint) {
+    var $breakpoint = $(breakpoint);
+    var breakpiontThreadId = $breakpoint.data('thread-id');
+
+    if ($breakpoint.hasClass('is-active')) {
+      if (breakpiontThreadId !== this._currentThreadId) {
+        $breakpoint.toggleClass('is-active');
+      }
+    } else {
+      if (breakpiontThreadId === this._currentThreadId) {
+        $breakpoint.toggleClass('is-active');
+      }
+    }
+  }, this));
+};
+
+/**
  * Gets called when the history has loaded to initialize and show the chat.
  * @protected
  */
@@ -746,12 +786,21 @@ CUI.ChatPresenter.prototype._parseProgress = function(data){
        * TODO: remove it eventually
       var compoundUpdatesCounter = 0;
       */
+
+      // Set current thread id to the first breakpoint threadId on first load
+      if (this._currentThreadId === -1) {
+        this._setCurrentThreadId({threadId: data.breakpoints[0].threadId});
+      }
+
       $.each(data.breakpoints, $.proxy(function(i, b){
         /**
        * TODO: remove it eventually
         compoundUpdatesCounter += b.updatesCount;
         */
         // Create breakpoint from template
+
+        b.isCurrent = b.threadId === this._currentThreadId;
+
         breakpoint = new CUI.SidebarBreakpointPresenter(new CUI.SidebarBreakpointModel(b));
 
         if (b.isDone) {
@@ -974,8 +1023,17 @@ CUI.ChatPresenter.prototype._parseResources = function(data){
         // Reset breakpoints Array
         this._sidebarResources = [];
 
+        // Set current thread id to the first breakpoint threadId on first load
+        // if (this._currentThreadId === -1) {
+        //   console.log('')
+        //   this._setCurrentThreadId({threadId: data.breakpoints[0].threadId});
+        // }
+
         // Add new breakpoints
         $.each(data.breakpoints, $.proxy(function(i, b){
+
+          b.isCurrent = b.threadId === this._currentThreadId;
+
           // Create breakpoint from template
           breakpoint = new CUI.SidebarResourcePresenter(new CUI.SidebarResourceModel(b));
 
@@ -1047,6 +1105,8 @@ CUI.ChatPresenter.prototype._scrollToUpdatesMessage = function(threadId, message
   var scrollParams = new Object();
 
   this._updatesThreadId = threadId;
+  this._setCurrentThreadId({threadId});
+  this._updateCurrentSidebarBreakpoint();
 
   scrollParams.id = messageId;
   scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.bottom;
@@ -1140,26 +1200,41 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
   }});
 
 
-  console.log('[PARSE MESSAGES]: params: ', params);
-
   // Scroll to first new message, update scroll position and resume scroll detection
-  if(params.scrollToFirst) {
+  if (params.scrollToFirst) {
     if (this._viewUpdatesPending) {
       this._viewUpdatesPending = false;
 
       var $lastMessage = newMessages[newMessages.length - 1];
       var lastMessageId = $lastMessage.data('message-id');
+
       this._updatesThreadId = $lastMessage.data('thread-id');
 
       // Scroll to message & update current chat bottom position
       this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId, true);
     } else {
       var scrollParams = new Object;
+
       scrollParams.id = newMessages[0].data('message-id');
       scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.top;
       scrollParams.updateScrollPosition = true;
+
       this._scrollToMessage(scrollParams);
     }
+  } else {
+      // When returning from an 'updates' thread we can revieve messages from the previous thread
+      // So we figure out the latest thread of the newMessages and scroll to the first one of them
+      var latestThreadId = newMessages[newMessages.length - 1].data('thread-id');
+      var latestThreadMessages = newMessages.filter(function($message) {
+        return $message.data('thread-id') === latestThreadId;
+      });
+
+      var scrollParams = new Object;
+      scrollParams.id = latestThreadMessages[0].data('message-id');
+      scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.top;
+      scrollParams.updateScrollPosition = true;
+
+      this._scrollToMessage(scrollParams);
   }
 };
 
@@ -1329,7 +1404,8 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
   this._isInUpdateThread = true;
   threadId = parseInt(threadId);
   this._flowPreviousThreadId = this._currentThreadId;
-  this._currentThreadId = threadId;
+  // this._currentThreadId = threadId;
+  this._setCurrentThreadId({threadId});
 
   this._$splitMessages = this._getMessagesOfBreakpointsSplitBy(threadId);
 
@@ -1411,10 +1487,13 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
 
 };
 
-CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, updateScrollPosition){
+CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, threadId, updateScrollPosition){
   var message;
   var $message;
   var top;
+
+  this._setCurrentThreadId({threadId});
+  this._updateCurrentSidebarBreakpoint();
 
   message = this._messagesContainer.getMessage(id);
   // Check that message exists
@@ -1424,7 +1503,8 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, ul, updateSc
     top = $message.offset().top - 60;
     this._tweenWindowScroll(top, updateScrollPosition ? $.proxy(this._updateChatBottomMessageScroll, this) : undefined);
   } else {
-    this._requestMessages({url: this._resourcesUrl + ul + '/'});
+    // this._getMessages({url: this._resourcesUrl + ul + '/'});
+    this._requestMessages({url: this._resourcesUrl + threadId + '/'});
   }
 };
 
@@ -1453,6 +1533,13 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(params){
   if(message){
     $message = message.$el;
     messageTop = $message.offset().top;
+
+    this._setCurrentThreadId({threadId: $message.data('thread-id')});
+
+    // Only update sidbar if we recieve lesson messages.
+    if (!this._resourcesAreUnlocked()) {
+      this._updateCurrentSidebarBreakpoint();
+    }
 
     switch(params.messagePlacement) {
       case CUI.ChatPresenter.messagePlacement.bottom:
@@ -1764,6 +1851,15 @@ CUI.ChatPresenter.prototype._showThreadUpdates = function(threadId) {
 };
 
 /**
+ * Inidicates that resources are unlocked.
+ *
+ * @returns {Boolean}
+ */
+CUI.ChatPresenter.prototype._resourcesAreUnlocked = function() {
+  return $('section > .chat-sidebar-resources > .unlocked, section > .chat-sidebar-resources > .started').length > 0;
+};
+
+/**
  * On change thread button click handler.
  * @protected
  * @params {event} e
@@ -1784,8 +1880,8 @@ function onChangeThreadButtonClickHandler(e){
 
     this._scrollToResourceMessage(
       resourceInfo.id,
-      resourceInfo.ul,
-      resourceInfo.threadId
+      resourceInfo.threadId,
+      true
     );
   }
 
@@ -1931,7 +2027,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     if ($sidebarResource.hasClass('started') || $sidebarResource.hasClass('unlocked')) {
       this._scrollToResourceMessage(
         $sidebarResource.data('first-message-id'),
-        $sidebarResource.data('ul'),
+        $sidebarResource.data('thread-id'),
       );
     }
   }, this));
@@ -1968,6 +2064,10 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     if (this._isInUpdateThread) {
       this._tweenWindowScroll(this._currentChatBottomMessageScrollTop)
     } else {
+      this._setCurrentThreadId({
+        threadId: this._messagesContainer.getAllMessageElements().last().data('thread-id')
+      });
+      this._updateCurrentSidebarBreakpoint();
       this._tweenWindowScroll(this._regularChatBottomMessageScrollTop);
     }
   }, this));

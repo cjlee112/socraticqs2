@@ -57,11 +57,19 @@ CUI.SidebarBreakpointModel = function(data){
    */
   this.isDone = data.isDone;
 
+  /**
+   * If this breakpoint should be current.
+   * @type {number}
+   * @public
+   */
+  this.isCurrent = data.isCurrent;
+
    /**
    * If this breakpoint cointains any updates - present total count.
    * @type {number}
    * @public
    */
   this.updatesCount = data.updatesCount
+
   return this;
 };
