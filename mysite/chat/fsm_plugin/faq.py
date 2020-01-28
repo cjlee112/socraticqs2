@@ -340,7 +340,8 @@ class GET_NEW_FAQ(object):
 
     def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
         fsm = edge.fromNode.fsm
-        return fsm.get_node('NEW_FAQ_TITLE') if fsmStack.next_point.text.lower() == 'yes' else edge.toNode
+        next_point = fsmStack.next_point
+        return fsm.get_node('NEW_FAQ_TITLE') if next_point.text and next_point.text.lower() == 'yes' else edge.toNode
 
     edges = (
         dict(name='next', toNode='END', title='Go to the end'),

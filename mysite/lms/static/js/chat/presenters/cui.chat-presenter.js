@@ -683,7 +683,7 @@ CUI.ChatPresenter.prototype._updateToNextBreakpointButton = function(info) {
 CUI.ChatPresenter.prototype._setCurrentThreadId = function(params) {
   params = params || {};
 
-  if (!params.threadId) throw new Error('CUI.ChatPresenter.prototype._setCurrentThreadId(): threadId parameter is missing!');
+  // if (!params.threadId) throw new Error('CUI.ChatPresenter.prototype._setCurrentThreadId(): threadId parameter is missing!');
 
   this._currentThreadId = params.threadId;
 
