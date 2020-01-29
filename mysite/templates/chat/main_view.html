@@ -277,6 +277,8 @@ Courselets
 
     {% if not fsmstate.isLiveSession %}
     CUI.config.initNewChatUrl = '{% url 'chat:init_chat_api' enroll_key=enroll_code chat_id=0 %}';
+    {% else %}
+    CUI.config.isLive = true;
     {% endif %}
 
     CUI.config.chatID = {% if chat_id %}{{ chat_id }}{% else %}0{% endif %};

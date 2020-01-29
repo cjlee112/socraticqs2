@@ -1,3 +1,7 @@
+from core.common.mongo import c_chat_context
+from chat.models import Message, ChatDivider
+
+
 def ask_edge(self, edge, fsmStack, request, **kwargs):
     """
     Try to transition to ASK, or WAIT_ASK if not ready.
@@ -169,6 +173,37 @@ class TITLE(object):
     edges = (
         dict(name='next', toNode='ASK', title='View Next Lesson'),
     )
+
+    def _update_thread_id(self, chat, thread_id):
+        c_chat_context().update_one(
+            {"chat_id": chat.id},
+            {"$set": {
+                "thread_id": thread_id,
+            }},
+            upsert=True
+        )
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs):
+        self._update_thread_id(chat, next_lesson.id)
+
+        divider = ChatDivider(text=next_lesson.lesson.title, unitlesson=next_lesson)
+        divider.save()
+
+        _data = {
+            'contenttype': 'chatdivider',
+            'chat': chat,
+            'content_id': divider.id,
+            'input_type': 'custom',
+            'type': 'breakpoint',
+            'chat': chat,
+            'owner': chat.user,
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+
+        return message
 
 
 class ASK(object):

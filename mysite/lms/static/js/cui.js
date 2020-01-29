@@ -78,6 +78,13 @@ CUI.utils = CUI.utils || {};
   */
  CUI.config.defaultTeacherAvatar;
 
+/**
+  * Inidicates if we are in live session.
+  * @type {Boolean}
+  * @public
+  */
+ CUI.config.isLive;
+
  /**
   * A debug flag.
   * @type {boolean}

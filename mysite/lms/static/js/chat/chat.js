@@ -40,7 +40,8 @@ CUI.chat.open = function($startChatSesssionElement, showUpdates){
     CUI.config.progressUrl,
     CUI.config.resourcesUrl,
     CUI.config.updatesUrl,
-    showUpdates
+    showUpdates,
+    CUI.config.isLive
   );
 
   if (CUI.config.debug) {

@@ -10,9 +10,11 @@ var CUI = CUI || {};
  * @param {number} chatID           - A unique ID for the chat.
  * @param {string} historyUrl       - A url for loading a user's history.
  * @param {string} progressUrl      - A url for loading a user's progress.
+ * @param {Boolean} showUpdates     - Show updates on load.
+ * @param {Boolean} isLive          - A live session is started.
  * @returns {CUI.ChatPresenter}
  */
-CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl, showUpdates){
+CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl, showUpdates, isLive){
   // Check arguments
   if(typeof chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
   if(!historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
@@ -197,6 +199,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @protected
    */
   this._showUpdates = showUpdates;
+
+  /**
+   * Define if we are in live chat.
+   * @type {boolean}
+   * @protected
+   */
+  this._isLive = isLive;
 
   /**
    * Indicates if we are view an update thread currently.
@@ -1115,7 +1124,9 @@ CUI.ChatPresenter.prototype._scrollToUpdatesMessage = function(threadId, message
   scrollParams.onScrollFinished = $.proxy(function() {
     // Showing update messages for the first time.
     this._showMessagesUpToThread(this._updatesThreadId, {firstTime: true});
-    this._inputContainer.threadNavBar.setState(CUI.ThreadNavBar.state.showSubsequentThreads);
+    if (!this._isLive) {
+      this._inputContainer.threadNavBar.setState(CUI.ThreadNavBar.state.showSubsequentThreads);
+    }
   }, this);
 
   this._scrollToMessage(scrollParams);
@@ -1930,7 +1941,10 @@ CUI.ChatPresenter.prototype._addWindowScrollStoppedListener = function() {
  */
 CUI.ChatPresenter.prototype._addEventListeners = function(){
 
-  this._addWindowScrollStoppedListener();
+  // Never detect scrolling for live chat.
+  if (!this._isLive) {
+    this._addWindowScrollStoppedListener();
+  }
 
   // Sidebar toggle
   this._$sidebarToggle.on('click', $.proxy(function(e){
