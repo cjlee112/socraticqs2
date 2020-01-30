@@ -6,8 +6,8 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, Response, STATUS_CHOICES
-from chat.models import Message, UnitError
+from ct.models import UnitStatus, Response, NEED_HELP_STATUS, DONE_STATUS
+from chat.models import Message, UnitError, YES_NO_OPTIONS
 
 from ct.templatetags.ct_extras import md2html
 
@@ -48,7 +48,9 @@ class START(object):
 
         context = c_chat_context().find_one({"chat_id": chat.id})
         last_access_time = context.get('activity', {}).get(f"{unit_lesson.id}") if context else None
-        tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
+        tz_aware_datetime = (
+            last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else
+            chat.last_modify_timestamp.replace(tzinfo=tz.tzutc()))
 
         # Collect EMs resolutions. Don't filter by user
         em_resolutions = unit_lesson.em_resolutions(tz_aware_datetime, affected_ems)
@@ -490,7 +492,7 @@ class ACT(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'Have you changed your mind?',
+            'text': 'Have you anything else you are worried about?',
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
@@ -509,6 +511,10 @@ class GET_ACT(object):
     edges = (
         dict(name='next', toNode='TRANSITION', title='Move to the transition state'),
     )
+    EVAL_TO_STATUS_MAP = {
+        'yes': NEED_HELP_STATUS,
+        'no': DONE_STATUS
+    }
 
     def next_edge(self, edge, *args, **kwargs):
         if not args[0].state.parentState:
@@ -557,7 +563,7 @@ class GET_ACT(object):
         return message
 
     def get_options(self, *args, **kwargs):
-        return [dict(value=i[0], text=i[1]) for i in STATUS_CHOICES]
+        return [dict(value=i[0], text=i[1]) for i in YES_NO_OPTIONS]
 
     def handler(self, message, chat, request, state_handler) -> None:
         """
@@ -566,10 +572,10 @@ class GET_ACT(object):
         Must be used during PUT request processing.
         """
         response = message.content
-        response.status = request.data.get('option')
+        response.status = self.EVAL_TO_STATUS_MAP.get(request.data.get('option'), NEED_HELP_STATUS)
         response.save()
 
-        message.text = dict(STATUS_CHOICES).get(request.data.get('option'))
+        message.text = dict(YES_NO_OPTIONS).get(request.data.get('option'))
         message.save()
 
         chat.next_point = message

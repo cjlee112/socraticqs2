@@ -340,6 +340,7 @@ CACHES = {
 # Update notification
 NEW_UPDATES_THRESHOLD = int(os.environ.get('NEW_UPDATES_THRESHOLD', 5))
 UPDATES_HASH = '#updates'
+SHOW_CLOSE_BTN = True
 
 
 # Path to GeoIp database to convert users IP to location

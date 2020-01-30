@@ -1146,7 +1146,10 @@ class UnitLesson(models.Model):
         """
         context = c_chat_context().find_one({"chat_id": chat.id})
         last_access_time = context.get('activity', {}).get(f"{self.id}") if context else None
-        tz_aware_datetime = last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else None
+
+        tz_aware_datetime = (
+            last_access_time.replace(tzinfo=tz.tzutc()) if last_access_time else
+            chat.last_modify_timestamp.replace(tzinfo=tz.tzutc()))
         user = chat.user
 
         return reduce(operator.add, [

@@ -143,7 +143,7 @@ $(window).on('load', function(){
   if (urlHash === '#updates') {
     var $completeChatSession = $('.chat-start-session[data-complete="yes"]');
 
-    if ($completeChatSession) {
+    if ($completeChatSession.length !== 0) {
       CUI.chat.open($completeChatSession, true);
     }
   }

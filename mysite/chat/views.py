@@ -308,7 +308,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'chat_sessions_exists': len(chat_sessions),  # mark for frontend
                 'chat_sessions': chat_sessions,  # .exclude(id=chat.id), # TODO: UNCOMMENT this line to exclude current chat from sessions
                 'most_recent_complete_session': last_history,
-                'updated_thread_id': updated_thread_id,
+                'updated_thread_id': updated_thread_id or -1,
                 'chat': chat,
                 'chat_id': i_chat_id,
                 'course': courseUnit.course,

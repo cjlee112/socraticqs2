@@ -3,9 +3,9 @@ import injections
 from functools import reduce
 
 import waffle
-
 from rest_framework import serializers
 from django.urls import reverse
+from django.conf import settings
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
@@ -219,7 +219,18 @@ class ChatHistorySerializer(serializers.ModelSerializer):
 
             input_data['subType'] = sub_kind
 
-        if not obj.next_point or input_data['doWait']:
+        if not obj.next_point:
+            chat_id = obj.enroll_code.courseUnit.course.id
+            course_url = reverse('lms:course_view', kwargs={'course_id': chat_id})
+            html = f"""
+                <button class="btn chat-option" 
+                        data-option-value="close-courselet" 
+                        onclick="window.location.href='{course_url}'">
+                Close courselet
+                </button>
+            """ if settings.SHOW_CLOSE_BTN else '&nbsp;'
+            input_data['html'] = html
+        elif input_data['doWait']:
             input_data['html'] = '&nbsp;'
         return InputSerializer().to_representation(input_data)
 
@@ -319,7 +330,8 @@ class LessonSerializer(serializers.ModelSerializer):
                 is_done = lesson_order < chat.state.unitLesson.order
                 obj.is_done = is_done
                 return is_done
-            if check_fsm_name('additional') or check_fsm_name('faq'):
+            if (chat.state and chat.state.parentState and not chat.state.parentState.fsmNode.fsm.name == 'updates' and
+                    check_fsm_name('additional') or check_fsm_name('faq')):
                 return lesson_order < (chat.state.parentState.unitLesson.order or 1)
             else:
                 obj.is_done = True
