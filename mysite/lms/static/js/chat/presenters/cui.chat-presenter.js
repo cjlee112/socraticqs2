@@ -1393,6 +1393,10 @@ CUI.ChatPresenter.prototype._getMessagesOfBreakpointsSplitBy = function(threadId
   var subsequentThreadIds = this._sidebarBreakpoints.slice(sliceIndex).map(function(breakpoint) {
     return breakpoint.getInfo().threadId;
   })
+  var resorcesThreadIds = this._sidebarResources.slice().map(function(resource) {
+    return resource.getInfo().threadId;
+  })
+  subsequentThreadIds = subsequentThreadIds.concat(resorcesThreadIds);
 
   var relatedBreakpoints = this._messagesContainer.getThreadsRelatedChatBreakpoints(relatedThreadIds);
   var subsequentBreakpoints = this._messagesContainer.getThreadsRelatedChatBreakpoints(subsequentThreadIds);
