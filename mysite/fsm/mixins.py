@@ -177,7 +177,7 @@ class ChatMixin(object):
         next_lesson = chat.state.unitLesson
 
         if hasattr(self._plugin, 'get_message'):
-            return self._plugin.get_message(chat, next_lesson, is_additional)
+            return self._plugin.get_message(chat, next_lesson, is_additional, node=self)
 
         if self.node_name_is_one_of('LESSON'):
             input_type = 'custom'

@@ -1,8 +1,12 @@
 from django.utils import timezone
+from django.utils.safestring import mark_safe
+
 
 from core.common.mongo import c_chat_context
 from ct.models import UnitStatus, UnitLesson, Lesson
+from ct.templatetags.ct_extras import md2html
 from chat.models import Message, ChatDivider
+from chat.utils import is_last_thread, has_updates
 
 
 def next_lesson_after_errors(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -348,13 +352,26 @@ class GET_ERRORS(object):
 
 
 class IF_RESOURCES(object):
-    help = '''Congratulations! You have completed the core lessons for this
-              courselet.'''
-
+    help = 'Congratulations! You have completed the core lessons for this courselet.'
     title = 'Courselet core lessons completed'
     edges = (
         dict(name='next', toNode='END', title='View Next Lesson'),
     )
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'owner': chat.user,
+            'thread_id': chat.state.unitLesson.id,
+            'text': self.help,
+            'input_type': 'custom',
+            'kind': 'message',
+            'sub_kind': 'transition',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
 
 
 class FAQ(object):
@@ -414,16 +431,19 @@ class TRANSITION(object):
                 chat.state.save_json_data()
                 break
         if has_updates['thread_id']:
-            text = f"""
-                    You have completed this thread.
-                    I have posted new messages to help you in the thread "{thread.lesson.title}".
-                    Would you like to view these updates now?
-                    """
+            unitStatus = chat.state.get_data_attr('unitStatus')
+            next_lesson = unitStatus.get_next_lesson()
+            if not next_lesson:
+                text = f'You have completed this thread. I have posted new messages to help you in the thread "{thread.lesson.title}". Would you like to view these updates now?'
+            else:
+                text1 = f'You have completed this thread. I have posted new messages to help you in the thread "{thread.lesson.title}". Would you like to view these updates now?'
+                text2 = "*If you don't want to view them now, I'll ask you again once you have completed your next thread.*"
+                text = md2html(text1) + md2html(text2)
         else:
-            text = 'Now you can move to the next lesson'
+            text = md2html('Now you can move to the next lesson')
         _data = {
             'chat': chat,
-            'text': text,
+            'text': mark_safe(text),
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
@@ -435,13 +455,15 @@ class TRANSITION(object):
         return message
 
     def get_options(self, *args, **kwargs) -> list:
-        options = [{'value': 'next_thread', 'text': 'View next thread'}]
+        """
+        We should not reach this code on last transition node w/o updates.
+        """
         state = args[0].state
-        if state and \
-            'next_update' in state.load_json_data() and \
-                state.get_data_attr('next_update') and \
-                state.get_data_attr('next_update').get('thread_id'):
+        options = [{'value': 'next_thread', 'text': 'View next thread'}] if not is_last_thread(state) else []
+
+        if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+
         return options
 
     def handler(self, message, chat, request, state_handler) -> None:
@@ -498,21 +520,33 @@ class VIEWUPDATES(object):
 
 
 class END(object):
-    # node specification data goes here
-    def get_help(self, node, state, request):
-        'provide help messages for all views relevant to this stage.'
-        unit = state.get_data_attr('unit')
-        lessons = list(
-            unit.unitlesson_set.filter(
-                kind=UnitLesson.COMPONENT, order__isnull=True
-            )
-        )
-        if lessons:
-            return '''Please look over the available resources in the side panel.'''
-        else:
-            return '''Congratulations! You have completed the core lessons for this
-                      courselet.'''
     title = 'Courselet core lessons completed'
+
+    def get_help(self, node, state, request):
+        """
+        Provide help messages for all views relevant to this stage.
+        """
+        unit = state.get_data_attr('unit')
+        if unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True).exists():
+            return 'Please look over the available resources in the side panel.'
+        else:
+            return """Good job! You have completed everything in this courselet.
+                      You can always come back to review your history or start over to answer the questions again."""
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'owner': chat.user,
+            'thread_id': chat.state.unitLesson.id,
+            'text': self.get_help(kwargs.get('node'), chat.state, request=None),
+            'input_type': 'custom',
+            'kind': 'message',
+            'sub_kind': 'transition',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
 
 
 def get_specs():

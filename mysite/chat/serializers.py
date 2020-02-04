@@ -11,8 +11,8 @@ from lti.models import GradedLaunch
 from lti.tasks import send_outcome
 from ct.models import UnitLesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from accounts.models import Instructor
-from .models import Message, Chat
-from .services import ProgressHandler
+from . models import Message, Chat
+from . services import ProgressHandler
 
 
 log = logging.getLogger(__name__)
@@ -149,8 +149,19 @@ class MessageSerializer(serializers.ModelSerializer):
 
             input_data['subType'] = sub_kind
 
-        if not obj.chat.next_point or input_data['doWait']:
+        if input_data['doWait']:
             input_data['html'] = '&nbsp;'
+        elif not obj.chat.next_point:
+            chat_id = obj.chat.enroll_code.courseUnit.course.id
+            course_url = reverse('lms:course_view', kwargs={'course_id': chat_id})
+            html = f"""
+                <button class="btn chat-option" 
+                        data-option-value="close-courselet" 
+                        onclick="window.location.href='{course_url}'">
+                Close courselet
+                </button>
+            """ if settings.SHOW_CLOSE_BTN and obj.chat.resources_is_done() else '&nbsp;'
+            input_data['html'] = html
         return InputSerializer().to_representation(input_data)
 
     def get_addMessages(self, obj):
@@ -228,7 +239,7 @@ class ChatHistorySerializer(serializers.ModelSerializer):
                         onclick="window.location.href='{course_url}'">
                 Close courselet
                 </button>
-            """ if settings.SHOW_CLOSE_BTN else '&nbsp;'
+            """ if settings.SHOW_CLOSE_BTN and obj.resources_is_done() else '&nbsp;'
             input_data['html'] = html
         elif input_data['doWait']:
             input_data['html'] = '&nbsp;'
@@ -253,6 +264,10 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             if fsm_name == 'updates':
                 extras.setdefault('updates', {}).update({
                     'threadId': obj.state.unitLesson.id,
+                })
+            elif obj.state.parentState and obj.state.parentState.fsmNode.fsm.name == 'updates':
+                extras.setdefault('updates', {}).update({
+                    'threadId': obj.state.parentState.unitLesson.id,
                 })
 
         return extras

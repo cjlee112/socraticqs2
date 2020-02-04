@@ -2034,6 +2034,9 @@ class UnitStatus(models.Model):
         'get the current lesson'
         return self.unit.unitlesson_set.get(order=self.order)
 
+    def get_next_lesson(self):
+        return self.unit.unitlesson_set.filter(order=self.order + 1).first()
+
     def set_lesson(self, ul):
         'advance to specified lesson, but prevent skipping on first run'
         if ul.order > self.order:

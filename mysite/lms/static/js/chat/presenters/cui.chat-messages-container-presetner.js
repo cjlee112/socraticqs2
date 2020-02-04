@@ -107,6 +107,8 @@ CUI.ChatMessagesContainerPresenter.selectors = {
         return selector;
     },
 
+    lastUpdateMessage: '.last-update-message',
+
     /**
      *
      * @param {Number} threadId - thread id.
@@ -333,6 +335,17 @@ CUI.ChatMessagesContainerPresenter.prototype.getThreadsRelatedMessages = functio
     }, this));
 
     return relatedMessages;
+};
+
+/**
+ *
+ */
+CUI.ChatMessagesContainerPresenter.prototype.clearLastUpdatesMessagesPadding = function() {
+    var lastUpdatesMessagesSelector = CUI.ChatMessagesContainerPresenter.selectors.message();
+    lastUpdatesMessagesSelector += CUI.ChatMessagesContainerPresenter.selectors.lastUpdateMessage;
+
+    var lastUpdatesMessageClassName = CUI.ChatMessagesContainerPresenter.selectors.lastUpdateMessage.slice(1);
+    this.$root.find(lastUpdatesMessagesSelector).removeClass(lastUpdatesMessageClassName);
 };
 
 CUI.ChatMessagesContainerPresenter.prototype.splitChatMessages = function(threadId) {

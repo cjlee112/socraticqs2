@@ -7,6 +7,7 @@ from fsm.fsm_base import FSMStack
 from ct.models import Lesson, UnitLesson
 from core.common.mongo import c_chat_context
 from .models import Message
+from .utils import is_last_main_transition_wo_updates, is_update_transition_wo_updates_w_last_main
 
 
 class ProgressHandler(object):
@@ -169,7 +170,7 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
             next_point = chat.state.fsmNode.get_message(chat, request)
         elif updates:
             self.push_state(chat, request, 'updates', {'unitlesson': current, 'chat': chat})
-            next_point = chat.state.fsmNode.get_message(chat, request)
+            next_point = self.next_point(current=current, chat=chat, message=message, request=request)
         elif chat.state and chat.state.fsmNode.node_name_is_one_of('VIEWUPDATES') and 'next_update' in chat.state.load_json_data() and chat.state.get_data_attr('next_update') and chat.state.get_data_attr('next_update').get('enabled'):
             unit_lesson_id = chat.state.get_data_attr('next_update').get('thread_id')
             chat.state.set_data_attr('next_update', None)
@@ -179,16 +180,16 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 request,
                 'updates',
                 {'unitlesson': UnitLesson.objects.filter(id=unit_lesson_id).first(), 'chat': chat})
-            next_point = chat.state.fsmNode.get_message(chat, request)
+            next_point = self.next_point(current=current, chat=chat, message=message, request=request)
         elif chat.state:
             if not next_point:
                 if not chat.state.fsmNode.node_name_is_one_of('END'):
                     edge = chat.state.fsmNode.outgoing.get(name='next')
                     chat.state.fsmNode = edge.transition(chat, request)
                     chat.state.save()
-                if not (
-                    chat.state.fsmNode.node_name_is_one_of('FAQ') or
-                    chat.state.fsmNode.node_name_is_one_of('VIEWUPDATES')):
+                if not (chat.state.fsmNode.node_name_is_one_of('FAQ', 'VIEWUPDATES', 'UPDATES') or
+                        is_last_main_transition_wo_updates(chat.state) or 
+                        is_update_transition_wo_updates_w_last_main(chat.state, chat)):
                     next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
                 else:
                     next_point = self.next_point(

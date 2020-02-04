@@ -41,7 +41,7 @@ django-bower==5.2.0
 pygeoip==0.3.2
 
 # Sentry
-sentry-sdk==0.13.5
+sentry-sdk==0.14.1
 
 kombu==4.6.7
 

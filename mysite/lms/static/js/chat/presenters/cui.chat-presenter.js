@@ -229,6 +229,13 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._scrollToNewMessageOnParsing = true;
 
   /**
+   * Inidicates if a subsequent thread breakpoint was clicked while in updates mode.
+   * @type {Boolean}
+   * @protected
+   */
+  this._subsequentBreakpointClicked = true;
+
+  /**
    * Current window/chat scrollTop position. (used when in update thread)
    * @type {Number}
    * @protected
@@ -713,11 +720,11 @@ CUI.ChatPresenter.prototype._updateCurrentSidebarBreakpoint = function() {
 
     if ($breakpoint.hasClass('is-active')) {
       if (breakpiontThreadId !== this._currentThreadId) {
-        $breakpoint.toggleClass('is-active');
+        $breakpoint.removeClass('is-active');
       }
     } else {
       if (breakpiontThreadId === this._currentThreadId) {
-        $breakpoint.toggleClass('is-active');
+        $breakpoint.addClass('is-active');
       }
     }
   }, this));
@@ -1153,6 +1160,14 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
 
   // Add new messages
   if(data.addMessages instanceof Array && data.addMessages.length > 0){
+    // Remove extra padding for last updates message.
+    if (this._isInUpdateThread) {
+      this._messagesContainer.clearLastUpdatesMessagesPadding();
+      // var lastUpdatesThreadMessages = this._messagesContainer.getThreadsRelatedMessages([this._updatesThreadId]);
+      // var $lastUpdatesThreaMessage = $(lastUpdatesThreadMessages[lastUpdatesThreadMessages.length - 1]);
+      // $lastUpdatesThreaMessage.removeClass('last-update-message');
+    }
+
     $.each(data.addMessages, $.proxy(function(i, m){
       var model;
 
@@ -1210,9 +1225,15 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
     MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   }});
 
+  // Add extra padding for the last of the newly received updates messages
+  if (this._isInUpdateThread && newMessages.length > 0) {
+    var $lastNewMessage = newMessages[newMessages.length - 1];
+    $lastNewMessage.addClass('last-update-message');
+  }
 
   // Scroll to first new message, update scroll position and resume scroll detection
   if (params.scrollToFirst) {
+    // If the users has pressed the 'View updates' button
     if (this._viewUpdatesPending) {
       this._viewUpdatesPending = false;
 
@@ -1225,8 +1246,18 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
       this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId, true);
     } else {
       var scrollParams = new Object;
+      var firstMessage = newMessages[0];
+      var lastMessage = newMessages[newMessages.length - 1];
+      var messageId = firstMessage.data('message-id');
 
-      scrollParams.id = newMessages[0].data('message-id');
+      if (firstMessage.data('thread-id') !== lastMessage.data('thread-id')) {
+        messageId = lastMessage.data('message-id');
+
+        this._showSubsequentThreadMessages(true);
+        this._exitThreadUpdatesMode();
+      }
+
+      scrollParams.id = messageId;
       scrollParams.messagePlacement = CUI.ChatPresenter.messagePlacement.top;
       scrollParams.updateScrollPosition = true;
 
@@ -1408,6 +1439,21 @@ CUI.ChatPresenter.prototype._getMessagesOfBreakpointsSplitBy = function(threadId
 };
 
 /**
+ * Toggle workaround padding class for the last updates message.
+ * @param {Boolean} on - if the state is on or off.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._toggleLastUpdatesMessageClass = function(on) {
+  var lastRelatedMessage = this._$splitMessages.relatedMessages[this._$splitMessages.relatedMessages.length - 1];
+
+  if (on) {
+    lastRelatedMessage.addClass('last-update-message');
+  } else {
+    lastRelatedMessage.removeClass('last-update-message');
+  }
+};
+
+/**
  * Show only messages related to the specified thread ID and previous threads.
  * @protected
  * @param {number} threadId           - A thread ID.
@@ -1431,14 +1477,16 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
     $breakpoint.show();
   });
 
+  this._toggleLastUpdatesMessageClass(true);
   var hideSubsequentChatItems = $.proxy(function() {
-
     this._$splitMessages.subsequentMessages.forEach(function($message){
       $message.hide();
     });
     this._$splitMessages.subsequentBreakpoints.forEach(function($breakpoint){
       $breakpoint.hide();
     });
+
+    // this._scrollToVerticalPosition({positionY: $window.scrollTop() + 100 * window.devicePixelRatio})
   }, this);
 
   if (this._$splitMessages.relatedMessages.length > 0 || this._$splitMessages.relatedBreakpoints.length > 0) {
@@ -1468,6 +1516,8 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
  * @param {bool} scrollToLastMessage - indicate to scroll all the way down to the last message.
  */
 CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLastMessage) {
+  this._toggleLastUpdatesMessageClass(false);
+
   this._$splitMessages.subsequentMessages.forEach(function($message){
     $message.show()
   });
@@ -1534,7 +1584,6 @@ CUI.ChatPresenter.prototype._scrollToResourceMessage = function(id, threadId, up
  * @param {function} params.onScrollFinished - a function to call when scroll has finished.
  */
 CUI.ChatPresenter.prototype._scrollToMessage = function(params){
-  // {id, updateScrollPosition, messagePlacement, onScrollFinished}
   params = params || {};
   var message;
   var $message;
@@ -1551,17 +1600,19 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(params){
 
     this._setCurrentThreadId({threadId: $message.data('thread-id')});
 
-    // Only update sidbar if we recieve lesson messages.
-    if (!this._resourcesAreUnlocked()) {
-      this._updateCurrentSidebarBreakpoint();
-    }
+    // Only update sidbar if we lesson messages are received.
+    // if (!this._resourcesAreUnlocked()) {
+    //   this._updateCurrentSidebarBreakpoint();
+    // }
 
     switch(params.messagePlacement) {
       case CUI.ChatPresenter.messagePlacement.bottom:
         var height = $message.height();
 
         if (height < $window.height() + bottomMargin) {
-          scrollToPosition = messageTop - $(window).height() + $message.height() + bottomMargin;
+//           scrollToPosition = messageTop - $(window).height() + $message.height() + bottomMargin;
+          // scrollToPosition = messageTop - $(window).height() + $message.height() + parseInt($message.css('padding-bottom'));
+          scrollToPosition = messageTop + $message.height() + parseInt($message.css('padding-bottom')) + bottomMargin - $(window).height();
         } else {
           scrollToPosition = messageTop - topMargin;
         }
@@ -1875,6 +1926,21 @@ CUI.ChatPresenter.prototype._resourcesAreUnlocked = function() {
 };
 
 /**
+ *  Exit thread updates mode and perform all utility operations.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._exitThreadUpdatesMode = function() {
+  this._isInUpdateThread = false;
+  this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
+  this._inputContainer.threadNavBar.hide();
+  this._flowPreviousThreadId = -1;
+  this._$splitMessages.relatedMessages.length = 0;
+  this._$splitMessages.subsequentMessages.length = 0;
+  this._$splitMessages.relatedBreakpoints.length = 0;
+  this._$splitMessages.subsequentBreakpoints.length = 0;
+};
+
+/**
  * On change thread button click handler.
  * @protected
  * @params {event} e
@@ -1922,19 +1988,21 @@ CUI.ChatPresenter.prototype._addWindowScrollStoppedListener = function() {
     var scrolledUp = $window.scrollTop() < bottomScrollTop - scrollThreshold;
     var scrolledDown = $window.scrollTop() > bottomScrollTop + scrollThreshold;
 
-    if (scrolledUp) {
-      this._inputContainer.threadNavBar.activateScrollToQuestion();
-      this._inputContainer.threadNavBar.setDownArrow();
-    } else {
-      if (this._isInUpdateThread) {
-        this._inputContainer.threadNavBar.activateThreadControls();
-      } else {
-        this._inputContainer.threadNavBar.hide();
-      }
+    if (this._isInUpdateThread) {
+      // Disabple till the final decision
+      // if (scrolledUp) {
+      //   this._inputContainer.threadNavBar.setDownArrow();
+      // } else if (scrolledDown) {
+      //   this._inputContainer.threadNavBar.setUpArrow();
+      // }
 
-      if (scrolledDown) {
-        this._inputContainer.threadNavBar.setUpArrow();
+      if (this._subsequentBreakpointClicked) {
+        this._subsequentBreakpointClicked = false;
+      } else {
+        this._inputContainer.threadNavBar.activateThreadControls();
       }
+    } else {
+      this._inputContainer.threadNavBar.hide();
     }
   }, this));
 };
@@ -1991,14 +2059,8 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
           // A workaround since there's a goodbye message that is
           // sent from the previous thread when we're scrolling to the last active one.
           this._scrollToNewMessageOnParsing = false;
-          this._isInUpdateThread = false;
-          this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
-          this._inputContainer.threadNavBar.hide();
-          this._flowPreviousThreadId = -1;
-          this._$splitMessages.relatedMessages.length = 0;
-          this._$splitMessages.subsequentMessages.length = 0;
-          this._$splitMessages.relatedBreakpoints.length = 0;
-          this._$splitMessages.subsequentBreakpoints.length = 0;
+
+          this._exitThreadUpdatesMode();
         }
         break;
 
@@ -2030,6 +2092,20 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
       this._getThreadUpdates($sidebarBreakpoint);
       */
     } else {
+      if (this._isInUpdateThread) {
+        for (var i = 0; i < this._$splitMessages.subsequentBreakpoints.length; i++) {
+          var $subsequentBreakpoint = this._$splitMessages.subsequentBreakpoints[i];
+
+          if ($sidebarBreakpoint.data('thread-id') === $subsequentBreakpoint.data('thread-id')) {
+            this._subsequentBreakpointClicked = true;
+            break;
+          }
+        }
+
+        this._inputContainer.threadNavBar.activateHideSubsequentThreadsState();
+        this._showSubsequentThreadMessages();
+      }
+
       //Scroll to messages, don't update scroll position and turn off scroll detection until new messages are loaded.
       this._scrollToMessage({id: $sidebarBreakpoint.data('first-message-id')});
     }
