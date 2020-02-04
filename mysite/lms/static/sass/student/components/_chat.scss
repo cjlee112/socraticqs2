@@ -296,6 +296,10 @@
   // padding-top: 20px;
   padding-bottom: 120px;
 
+  &_is-active {
+    padding-bottom: 140px;
+  }
+
   .chat-previous-thread {
     width: 100%;
     height: 3em;
@@ -788,6 +792,7 @@
     align-items: center;
     align-content: center;
     min-height: 30px;
+    padding: 8px 80px 8px 168px;
     padding-left: 168px;
     padding-right: 80px;
     margin-left: auto;
@@ -796,13 +801,6 @@
     border-width: 1px 0;
     border-style: solid;
     border-color: #EBE1C2;
-
-    > .thread-toggler-btn {
-      margin-left: auto;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
   }
 
   > .inner {
@@ -835,6 +833,20 @@
   .chat-next-thread-container {
     margin: 0px 40px;
     overflow: hidden;
+  }
+
+  .thread-nav-bar__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 712px;
+    width: 100%;
+    margin: 0 auto;
+
+    > .thread-toggler-btn {
+      cursor: pointer;
+      font-weight: 500;
+    }
   }
 
   .sidebar-toggle {
