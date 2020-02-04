@@ -7,9 +7,9 @@ from django.utils.safestring import mark_safe
 
 from core.common.mongo import c_chat_context
 from ct.models import UnitStatus, Response, NEED_HELP_STATUS, DONE_STATUS
-from chat.models import Message, UnitError, YES_NO_OPTIONS
-
 from ct.templatetags.ct_extras import md2html
+from chat.models import Message, UnitError, YES_NO_OPTIONS
+from chat.utils import is_last_thread, has_updates
 
 
 class START(object):
@@ -133,7 +133,7 @@ class UPDATES(object):
                 'faq_answers' in data,
                 'new_ems' in data,
                 'new_faqs' in data)):
-            text = 'There are new upates for a Thread you asked for a help.'
+            text = 'There are new updates for a Thread you asked for a help.'
             c_chat_context().update_one(
                 {"chat_id": chat.id},
                 {"$set": {"actual_ul_id": chat.state.unitLesson.id}}
@@ -381,8 +381,8 @@ class SHOW_NEW_EMS(object):
         _data = {
             'chat': chat,
             'text': """
-                    Here are the new most common blindspots people reported when comparing their answer vs.
-                     the correct answer. Check the box(es) that seem relevant to your answer (if any).
+                     I have added new blindspots in this thread after reading your answers. Hopefully they'll help you understand these concepts better.
+                     Check the box(es) that seem relevant to your answer (if any).
                     """,
             'owner': chat.user,
             'input_type': 'custom',
@@ -621,8 +621,20 @@ class TRANSITION(object):
                     I have posted new messages to help you in the thread "{thread.lesson.title}".
                     Would you like to view these updates now?
                     """
+        elif chat.state.parentState:
+            next_lesson = None
+            parent = chat.state.parentState
+            while parent and not parent.fsmNode.fsm.fsm_name_is_one_of('chat'):
+                parent = parent.parentState
+            if parent:
+                status = parent.get_data_attr('unitStatus')
+                next_lesson = status.get_next_lesson().lesson.title if status.get_next_lesson() else None
+            text = f"""
+                    You have completed this thread.
+                    Click on Continue below to view your next thread "{next_lesson}".
+                    """ if next_lesson else 'You have completed this thread.'
         else:
-            text = 'Now you can move to the next lesson'
+            text = 'You have completed this thread.'
 
         _data = {
             'chat': chat,
@@ -638,13 +650,21 @@ class TRANSITION(object):
         return message
 
     def get_options(self, *args, **kwargs) -> list:
-        options = [{'value': 'next_thread', 'text': 'View next thread'}]
+        """
+        We should not reach this code on last transition node w/o updates.
+        """
         state = args[0].state
-        if state and \
-            'next_update' in state.load_json_data() and \
-                state.get_data_attr('next_update') and \
-                state.get_data_attr('next_update').get('thread_id'):
+        parent = state.parentState
+
+        while parent and not parent.fsmNode.fsm.fsm_name_is_one_of('chat'):
+            parent = parent.parentState
+
+        options = [{'value': 'next_thread', 'text': 'View next thread'}] \
+            if parent and not is_last_thread(parent) else []
+
+        if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+
         return options
 
     def handler(self, message, chat, request, state_handler) -> None:

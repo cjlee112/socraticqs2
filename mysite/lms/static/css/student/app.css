@@ -666,8 +666,8 @@ p + p {
   display: none;
   min-height: 100%;
   padding-bottom: 120px; }
-  .chat-messages_is-active {
-    padding-bottom: 140px; }
+  .chat-messages .last-update-message {
+    padding-bottom: 1em; }
   .chat-messages .chat-previous-thread {
     width: 100%;
     height: 3em;

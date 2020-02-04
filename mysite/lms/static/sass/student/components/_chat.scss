@@ -296,8 +296,8 @@
   // padding-top: 20px;
   padding-bottom: 120px;
 
-  &_is-active {
-    padding-bottom: 140px;
+  .last-update-message {
+    padding-bottom: 1em;
   }
 
   .chat-previous-thread {

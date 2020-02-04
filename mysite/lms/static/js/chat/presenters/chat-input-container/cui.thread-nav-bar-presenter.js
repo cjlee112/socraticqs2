@@ -324,6 +324,14 @@ CUI.ThreadNavBar.prototype.activateThreadControls = function() {
 };
 
 /**
+ * Activate hide subsequent threads state.
+ * @public
+ */
+CUI.ThreadNavBar.prototype.activateHideSubsequentThreadsState = function() {
+    this.setState(CUI.ThreadNavBar.state.hideSubsequentThreads);
+};
+
+/**
  * Hide navigation bar.
  * @public
  */

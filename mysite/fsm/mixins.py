@@ -177,7 +177,7 @@ class ChatMixin(object):
         next_lesson = chat.state.unitLesson
 
         if hasattr(self._plugin, 'get_message'):
-            return self._plugin.get_message(chat, next_lesson, is_additional)
+            return self._plugin.get_message(chat, next_lesson, is_additional, node=self)
 
         if self.node_name_is_one_of('LESSON'):
             input_type = 'custom'
@@ -889,7 +889,7 @@ class ChatMixin(object):
                 is_additional=is_additional)[0]
         if self.node_name_is_one_of('SHOW_FAQS'):
             is_new = chat.state.get_data_attr('updates') if 'updates' in chat.state.load_json_data() else None
-            message, _ = Message.objects.get_or_create(
+            message = Message.objects.create(
                 contenttype='unitlesson',
                 content_id=next_lesson.id,
                 input_type='options',

@@ -29,7 +29,6 @@ from ct.models import (
     STATUS_CHOICES,
     StudentError,
     NEED_HELP_STATUS,
-    NEED_REVIEW_STATUS
 )
 from ct.templatetags.ct_extras import md2html
 
@@ -90,8 +89,8 @@ STATUS_OPTIONS = {
 }
 
 YES_NO_OPTIONS = (
-    ('yes', 'Yes!'),
-    ('no', 'No!')
+    ('yes', 'Yes'),
+    ('no', 'No')
 )
 
 
@@ -107,7 +106,8 @@ class Chat(models.Model):
     is_test = models.BooleanField(default=False)
     enroll_code = models.ForeignKey('EnrollUnitCode', null=True, on_delete=models.CASCADE)
     state = models.OneToOneField('fsm.FSMState', null=True, on_delete=models.SET_NULL)
-    instructor = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='course_instructor')
+    instructor = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE, related_name='course_instructor')
     last_modify_timestamp = models.DateTimeField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     progress = models.IntegerField(default=0, blank=True, null=True)
@@ -193,6 +193,45 @@ class Chat(models.Model):
         If chat has a state - it is not a history.
         """
         return not self.state
+
+    def resources_is_done(self, client: UnitLesson = None) -> bool:
+        """
+        Calculates is_done status for all resources.
+
+        If the utility is called from another recourse - cliend can be
+        specified to exclude itself from calculation due to
+        a superposition effect O_o
+        Of course it is not, but nice to correlate.
+        """
+        courseUnit = self.enroll_code.courseUnit
+        unit = courseUnit.unit
+        lessons = list(
+            unit.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True)
+        )
+        lessons.sort(key=lambda x: x.lesson.title)
+        messages = self.message_set.filter(
+            contenttype='unitlesson', is_additional=True, student_error__isnull=True
+        )
+        for message in messages:
+            if message.content in lessons:
+                lessons[lessons.index(message.content)].message = message.id
+
+        for lesson in lessons:
+            lesson.chat = self
+
+        is_done = []
+        for lesson in lessons:
+            if hasattr(lesson, 'message'):
+                if client and lessons[-1] == client:
+                    is_done.append(True)
+                elif lesson.chat.state and lesson.chat.state.unitLesson.id == lesson.id:
+                    is_done.append(False)
+                else:
+                    is_done.append(True)
+            else:
+                is_done.append(False)
+
+        return all(is_done)
 
 
 class Message(models.Model):
@@ -415,9 +454,8 @@ class Message(models.Model):
         return stripped_text
 
     def get_html(self):
-        if self.kind in ('get_faq_answer',) or \
-            (self.kind == 'add_faq' and self.input_type == 'options'):
-            return self.text.capitalize() + '!' if self.text else 'No!'
+        if self.kind in ('get_faq_answer',) or (self.kind == 'add_faq' and self.input_type == 'options'):
+            return self.text.capitalize() if self.text else 'No'
         if self.kind in ('ask_faq_understanding',):
             return STATUS_OPTIONS.get(self.text, 'Still confused, need help')
         if self.kind == 'abort':

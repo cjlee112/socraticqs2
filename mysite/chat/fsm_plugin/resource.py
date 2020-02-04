@@ -1,6 +1,7 @@
 from ct.models import UnitStatus
 
 from core.common.mongo import c_chat_context
+from chat.models import Message
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -148,8 +149,35 @@ class GET_ERRORS(object):
 class END(object):
     # node specification data goes here
     title = 'Courselet resource lessons completed'
-    help = '''Congratulations!  You have completed one of the resources,
-    now you can try some more resources from the sidebar.'''
+    help = """Congratulations!  You have completed one of the resources,
+              now you can try some more resources from the sidebar."""
+    ultimate_help = """Good job! You have completed everything in this courselet.
+                       You can always come back to review your history or start over to answer the questions again."""
+
+    def get_help(self, node, state, request, *args, **kwargs):
+        """
+        Provide help messages for all views relevant to this stage.
+        """
+        chat = kwargs.get('chat')
+        if chat and chat.resources_is_done(client=chat.state.unitLesson):
+            return self.ultimate_help
+        else:
+            return self.help
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'owner': chat.user,
+            'thread_id': chat.state.unitLesson.id,
+            'text': self.get_help(kwargs.get('node'), chat.state, request=None, chat=chat),
+            'input_type': 'custom',
+            'kind': 'message',
+            'sub_kind': 'transition',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
 
 
 def get_specs():

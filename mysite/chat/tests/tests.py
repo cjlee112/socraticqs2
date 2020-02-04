@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.http.response import HttpResponseNotFound
+from django.utils.safestring import mark_safe
 from unittest.mock import patch, Mock
 import injections
 
@@ -389,14 +390,11 @@ class MessagesViewTests(CustomTestCase):
             follow=True
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)['addMessages']), 2)
+        self.assertEqual(len(json.loads(response.content)['addMessages']), 3)
 
-        next_url = json_content['input']['url']
-        next_url, json_content = self._push_continue(next_url, chat_id)
-        self.assertEqual(len(json_content['addMessages']), 2)
         # There are two messages - congrats and look ant resources
-        self.assertIn('Congratulations!', json_content['addMessages'][0]['html'])
-        self.assertIn('Please look over the available resources in the side panel.', json_content['addMessages'][1]['html'])
+        self.assertIn('Congratulations!', json_content['addMessages'][2]['html'])
+        self.assertIn('Please look over the available resources in the side panel.', json_content['addMessages'][3]['html'])
 
     def test_permission_denied(self):
         """
@@ -524,7 +522,8 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
 
         self.assertIn('html', json_content['addMessages'][0])
-        self.assertEqual(json_content['addMessages'][0]['html'], 'Now you can move to the next lesson')
+        self.assertEqual(
+            json_content['addMessages'][0]['html'], mark_safe(md2html('Now you can move to the next lesson')))
 
         next_url = json_content['input']['url']
         # Click `move to the next Thread` button
@@ -948,7 +947,7 @@ class MessagesViewTests(CustomTestCase):
         next_url = json_content['input']['url']
 
         self.assertEqual(len(json_content['addMessages']), 2)
-        self.assertEqual(json_content['addMessages'][0]['html'], 'Yes!')
+        self.assertEqual(json_content['addMessages'][0]['html'], 'Yes')
 
         # post FAQ (3)
         response = self.client.put(
@@ -1114,12 +1113,15 @@ class HistoryAPIViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         self.assertIsInstance(json_content['input'], dict)
         self.assertIsInstance(json_content['addMessages'], list)
-        self.assertEqual(len(json_content['addMessages']), 3)
+        # Last transition is omited so we have to have 4 messages
+        # Last two messages must be about core sequence completion
+        self.assertEqual(len(json_content['addMessages']), 4)
         self.assertEqual(json_content['addMessages'][0]['name'], self.unitlesson.addedBy.username)
         self.assertEqual(json_content['addMessages'][0]['html'], self.unitlesson.lesson.title)
         self.assertEqual(json_content['addMessages'][1]['type'], 'message')
         self.assertEqual(json_content['addMessages'][2]['type'], 'message')
-        self.assertEqual(json_content['addMessages'][2]['html'], 'Now you can move to the next lesson')
+        self.assertEqual(json_content['addMessages'][2]['html'], 'Congratulations! You have completed the core lessons for this courselet.')
+        self.assertEqual(json_content['addMessages'][3]['html'], 'Please look over the available resources in the side panel.')
         self.assertEqual(
             json_content['addMessages'][1]['html'],
             self.compile_html(self.unitlesson)
@@ -1521,22 +1523,6 @@ class ProgressAPIViewTests(CustomTestCase):
         response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
 
         json_content = json.loads(response.content)
-        self.assertIsInstance(json_content['progress'], float)
-        self.assertIsInstance(json_content['breakpoints'], list)
-        self.assertEqual(len(json_content['breakpoints']), 1)
-        self.assertEqual(json_content['progress'], 0.0)
-        self.assertEqual(json_content['breakpoints'][0]['html'], self.unitlesson.lesson.title)
-        self.assertEqual(json_content['breakpoints'][0]['isDone'], False)
-        self.assertEqual(json_content['breakpoints'][0]['isUnlocked'], True)
-
-        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
-        json_content = json.loads(response.content)
-        next_url = json_content['input']['url']
-        next_url, _ = self._push_continue(next_url, chat_id)
-
-        response = self.client.get(reverse('chat:progress'), {'chat_id': chat_id}, follow=True)
-
-        json_content = json.loads(response.content)
         self.assertIsInstance(json_content['progress'], int)
         self.assertIsInstance(json_content['breakpoints'], list)
         self.assertEqual(len(json_content['breakpoints']), 1)
@@ -1655,15 +1641,8 @@ class ResourcesViewTests(CustomTestCase):
         )
         self.assertEqual(json_content['breakpoints'][1]['isDone'], False)
         self.assertEqual(json_content['breakpoints'][1]['isStarted'], False)
-        # Explicit `Move to the next Thread` button is appearead
-        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], False)
+        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
 
-        # Do move to the next thread to get resourses to be unlocked
-        response = self.client.get(reverse('chat:chat_enroll', args=(enroll_code, chat_id)), follow=True)
-        response = self.client.get(reverse('chat:history'), {'chat_id': chat_id}, follow=True)
-        json_content = json.loads(response.content)
-        next_url = json_content['input']['url']
-        next_url, _ = self._push_continue(next_url, chat_id)
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
         self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
@@ -1722,7 +1701,7 @@ class ResourcesViewTests(CustomTestCase):
             self.compile_html(self.resource_unitlesson)
         )
         self.assertEqual(json_content['addMessages'][2]['type'], 'message')
-        self.assertEqual(json_content['addMessages'][2]['html'], END.help)
+        self.assertEqual(json_content['addMessages'][2]['html'], END.ultimate_help)
 
         self.assertIn('url', json_content['input'])
         self.assertIn('includeSelectedValuesFromMessages', json_content['input'])

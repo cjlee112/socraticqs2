@@ -209,6 +209,9 @@ Deploy Stage:
     - stage
     - deploy
     - ssh
+  environment:
+    name: staging
+    url: https://staging.courselets.org
   when: manual
   allow_failure: false
   only:
