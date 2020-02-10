@@ -1,10 +1,11 @@
 import pytest
 import random
+from itertools import permutations, combinations_with_replacement
 from dateutil import tz
 
 from django.utils import timezone
 
-from chat.utils import update_activity, c_chat_context
+from chat.utils import update_activity, c_chat_context, is_end_update_node
 
 
 @pytest.mark.integration
@@ -33,3 +34,20 @@ def test_update_activity(mocker):
 
     assert updated_activity_time != current_time
     assert actual_ul_id == actual_unit_lesson_id
+
+
+@pytest.mark.unittest
+@pytest.mark.parametrize(
+    'node_name_is_one_of, fsm_name_is_one_of, result',
+    [[x, y, x & y] for x, y in
+        set(list(permutations([True, False], 2)) + list(combinations_with_replacement([True, False], 2)))]
+)
+def test_is_end_update_node(mocker, node_name_is_one_of, fsm_name_is_one_of, result):
+    state = mocker.Mock()
+    node = mocker.Mock()
+    state.fsmNode = node
+
+    node.node_name_is_one_of = mocker.Mock(return_value=node_name_is_one_of)
+    node.fsm.fsm_name_is_one_of = mocker.Mock(return_value=fsm_name_is_one_of)
+
+    assert is_end_update_node(state) is result

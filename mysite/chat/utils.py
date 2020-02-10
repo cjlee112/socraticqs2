@@ -101,3 +101,12 @@ def is_last_thread(state):
         not state.get_data_attr('unitStatus').get_next_lesson()
 
     return last_thread
+
+
+def is_end_update_node(state):
+    """
+    Return True for updates.py::END node.
+    """
+    node = state.fsmNode
+
+    return node.node_name_is_one_of('END') and node.fsm.fsm_name_is_one_of('updates')

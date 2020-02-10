@@ -1250,7 +1250,7 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
       var lastMessage = newMessages[newMessages.length - 1];
       var messageId = firstMessage.data('message-id');
 
-      if (firstMessage.data('thread-id') !== lastMessage.data('thread-id')) {
+      if ( (firstMessage.data('thread-id') !== lastMessage.data('thread-id')) || data.nextMessagesUrl === null ) {
         messageId = lastMessage.data('message-id');
 
         this._showSubsequentThreadMessages(true);
@@ -1444,12 +1444,14 @@ CUI.ChatPresenter.prototype._getMessagesOfBreakpointsSplitBy = function(threadId
  * @protected
  */
 CUI.ChatPresenter.prototype._toggleLastUpdatesMessageClass = function(on) {
-  var lastRelatedMessage = this._$splitMessages.relatedMessages[this._$splitMessages.relatedMessages.length - 1];
+  if (this._$splitMessages.relatedMessages) {
+    var lastRelatedMessage = this._$splitMessages.relatedMessages[this._$splitMessages.relatedMessages.length - 1];
 
-  if (on) {
-    lastRelatedMessage.addClass('last-update-message');
-  } else {
-    lastRelatedMessage.removeClass('last-update-message');
+    if (on) {
+      lastRelatedMessage.addClass('last-update-message');
+    } else {
+      lastRelatedMessage.removeClass('last-update-message');
+    }
   }
 };
 
@@ -2098,12 +2100,11 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
 
           if ($sidebarBreakpoint.data('thread-id') === $subsequentBreakpoint.data('thread-id')) {
             this._subsequentBreakpointClicked = true;
+            this._inputContainer.threadNavBar.activateHideSubsequentThreadsState();
+            this._showSubsequentThreadMessages();
             break;
           }
         }
-
-        this._inputContainer.threadNavBar.activateHideSubsequentThreadsState();
-        this._showSubsequentThreadMessages();
       }
 
       //Scroll to messages, don't update scroll position and turn off scroll detection until new messages are loaded.

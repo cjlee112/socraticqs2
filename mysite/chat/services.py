@@ -7,7 +7,11 @@ from fsm.fsm_base import FSMStack
 from ct.models import Lesson, UnitLesson
 from core.common.mongo import c_chat_context
 from .models import Message
-from .utils import is_last_main_transition_wo_updates, is_update_transition_wo_updates_w_last_main
+from .utils import (
+    is_last_main_transition_wo_updates,
+    is_update_transition_wo_updates_w_last_main,
+    is_end_update_node,
+)
 
 
 class ProgressHandler(object):
@@ -188,8 +192,9 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                     chat.state.fsmNode = edge.transition(chat, request)
                     chat.state.save()
                 if not (chat.state.fsmNode.node_name_is_one_of('FAQ', 'VIEWUPDATES', 'UPDATES') or
-                        is_last_main_transition_wo_updates(chat.state) or 
-                        is_update_transition_wo_updates_w_last_main(chat.state, chat)):
+                        is_last_main_transition_wo_updates(chat.state) or
+                        is_update_transition_wo_updates_w_last_main(chat.state, chat) or
+                        is_end_update_node(chat.state)):
                     next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
                 else:
                     next_point = self.next_point(
