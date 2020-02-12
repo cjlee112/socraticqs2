@@ -86,7 +86,7 @@ CUI.ChatMessageModel = function(data){
    * @type {string}
    * @public
    */
-  this.is_new = data.is_new;
+  this.isNew = !data.userMessage && data.isNew;
 
   /**
    * An optional array of overflow options.

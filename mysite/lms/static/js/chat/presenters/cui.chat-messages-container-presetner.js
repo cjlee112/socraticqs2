@@ -60,6 +60,13 @@ CUI.ChatMessagesContainerPresenter = function (selectors) {
      */
     this._selectedValuesFromMessages = new Array();
 
+    /**
+     * Current updates thread new messages.
+     * @private
+     * @type {Array.<ChatMessagePresenter>}
+     */
+    this._updateThreadNewMessages = new Array();
+
     return this;
 };
 
@@ -217,6 +224,10 @@ CUI.ChatMessagesContainerPresenter.prototype.addMessage = function (model) {
         // this._messagesByThread[model.threadId][model.id] = message;
     }
 
+    if (message._model.isNew) {
+        this._updateThreadNewMessages.push(message);
+    }
+
     return $messageElement;
 };
 
@@ -240,7 +251,7 @@ CUI.ChatMessagesContainerPresenter.prototype.updateMessage = function (model) {
 };
 
 /**
- * Removes message. (FOR COMPATIBILITY, IS POSSIBLY ABSOLETE, REQUIRES INVESITAGTION)
+ * Removes message. (FOR COMPATIBILITY, IS POSSIBLY OBSOLETE, REQUIRES INVESITAGTION)
  */
 CUI.ChatMessagesContainerPresenter.prototype.removeMessage = function (id) {
     var currentMessage = this.messages[id];
@@ -253,6 +264,21 @@ CUI.ChatMessagesContainerPresenter.prototype.removeMessage = function (id) {
     }
 
     return Boolean(currentMessage)
+};
+
+/**
+ * Remove new label from udpates messages.
+ * @public
+ *
+ */
+CUI.ChatMessagesContainerPresenter.prototype.removeNewMessageLabels = function() {
+    this._updateThreadNewMessages.forEach(function (message) {
+        message._model.isNew = false;
+
+        message.update(message._model);
+    });
+
+    this._updateThreadNewMessages.length = 0;
 };
 
 /**

@@ -136,7 +136,7 @@ this["CUI"]["views"]["chatMessage"] = Handlebars.template({"1":function(containe
     + "\">\n  <div class=\"chat-container\">\n    <div class=\"inner\">\n"
     + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.avatar : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.program(5, data, 0),"data":data,"loc":{"start":{"line":4,"column":6},"end":{"line":10,"column":13}}})) != null ? stack1 : "")
     + "      <div class=\"chat-bubble "
-    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.is_new : depth0),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":11,"column":30},"end":{"line":11,"column":57}}})) != null ? stack1 : "")
+    + ((stack1 = helpers["if"].call(alias2,(depth0 != null ? depth0.isNew : depth0),{"name":"if","hash":{},"fn":container.program(13, data, 0),"inverse":container.noop,"data":data,"loc":{"start":{"line":11,"column":30},"end":{"line":11,"column":56}}})) != null ? stack1 : "")
     + "\">\n        "
     + ((stack1 = ((helper = (helper = helpers.html || (depth0 != null ? depth0.html : depth0)) != null ? helper : alias3),(typeof helper === alias4 ? helper.call(alias2,{"name":"html","hash":{},"data":data,"loc":{"start":{"line":12,"column":8},"end":{"line":12,"column":18}}}) : helper))) != null ? stack1 : "")
     + "\n\n        <span class=\"chat-new-msg\">\n            new\n        </span>\n\n"

@@ -1107,7 +1107,7 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
   // Show updates if needed (usually is triggered by a url hash #updates)
   if (this._showUpdates) {
     if (CUI.config.updated_thread_id !== -1) {
-      this._getThreadUpdates($("li[data-thread-id="+CUI.config.updated_thread_id+"]"));
+      this._getThreadUpdates(CUI.config.updated_thread_id);
     }
 
     this._showUpdates = false;
@@ -1176,6 +1176,8 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
         model = new CUI.ChatBreakpointModel(m);
       } else {
         if (m.type === 'message') {
+          m.isNew = this._viewUpdatesPending || this._isInUpdateThread;
+
           model = new CUI.ChatMessageModel(m);
         } else if (m.type === 'media') {
           model = new CUI.ChatMediaModel(m);
@@ -1910,11 +1912,12 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
 /**
  * Get updates for a specified thread.
- * @param {jQuery} $thread - a jQuery object reference to a sidebar thread breakpoint element.
+ * @param {Number} threadId - a thread ID.
  */
-CUI.ChatPresenter.prototype._getThreadUpdates = function($thread) {
-  this._showThreadUpdates($thread.data('thread-id'));
-  this._showMessagesUpToThread($thread.data('thread-id'));
+CUI.ChatPresenter.prototype._getThreadUpdates = function(threadId) {
+  this._isInUpdateThread = true;
+  this._showThreadUpdates(threadId);
+  this._showMessagesUpToThread(threadId);
 };
 
 /**
@@ -1946,8 +1949,11 @@ CUI.ChatPresenter.prototype._resourcesAreUnlocked = function() {
 CUI.ChatPresenter.prototype._exitThreadUpdatesMode = function() {
   this._isInUpdateThread = false;
   this._regularChatBottomMessageScrollTop = this._currentChatBottomMessageScrollTop;
-  this._inputContainer.threadNavBar.hide();
   this._flowPreviousThreadId = -1;
+
+  this._inputContainer.threadNavBar.hide();
+  this._messagesContainer.removeNewMessageLabels();
+
   this._$splitMessages.relatedMessages.length = 0;
   this._$splitMessages.subsequentMessages.length = 0;
   this._$splitMessages.relatedBreakpoints.length = 0;
