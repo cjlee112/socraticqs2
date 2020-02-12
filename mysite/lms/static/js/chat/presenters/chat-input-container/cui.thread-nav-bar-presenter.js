@@ -153,7 +153,8 @@ CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.showSubsequentThreads] = [
 ];
 CUI.ThreadNavBar.stateMap[CUI.ThreadNavBar.state.hideSubsequentThreads] = [
     CUI.ThreadNavBar.state.scrollToQuestionWithUpdates,
-    CUI.ThreadNavBar.state.showSubsequentThreads
+    CUI.ThreadNavBar.state.showSubsequentThreads,
+    CUI.ThreadNavBar.state.hidden
 ];
 
 /**
@@ -361,6 +362,14 @@ CUI.ThreadNavBar.prototype.setScrollToQuestionWithUpdatesCallback = function(cal
  */
 CUI.ThreadNavBar.prototype.setShowSubsequentThreadsCallback = function(callback) {
     this._showSubsequentThreadsCallback = callback;
+};
+
+/**
+ * Set callback to show subsequent threads.
+ * @public
+ */
+CUI.ThreadNavBar.prototype.setDetailNavText = function(detailNavText) {
+    this.$rootElement.find('span').text(detailNavText);
 };
 
 /**

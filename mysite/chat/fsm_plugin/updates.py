@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, Response, NEED_HELP_STATUS, DONE_STATUS
+from ct.models import UnitStatus, Response, NEED_HELP_STATUS, DONE_STATUS, NEED_REVIEW_STATUS
 from ct.templatetags.ct_extras import md2html
 from chat.models import Message, UnitError, YES_NO_OPTIONS
 from chat.utils import is_last_thread, has_updates
@@ -541,7 +541,17 @@ class GET_ACT(object):
             has_updates = False
 
             for thread in threads:
-                if thread.updates_count(chat) > 0:
+                # TODO: move to a dedicated util
+                response_msg = chat.message_set.filter(
+                    lesson_to_answer_id=thread.id,
+                    kind='response',
+                    contenttype='response',
+                    content_id__isnull=False).last()
+                if not response_msg:
+                    continue
+                response = response_msg.content
+                is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
+                if is_need_help and thread.updates_count(chat) > 0:
                     has_updates = True
                     break
 
@@ -627,7 +637,17 @@ class TRANSITION(object):
         }
 
         for thread in threads:
-            if thread.updates_count(chat) > 0:
+            # TODO: move to a dedicated util
+            response_msg = chat.message_set.filter(
+                lesson_to_answer_id=thread.id,
+                kind='response',
+                contenttype='response',
+                content_id__isnull=False).last()
+            if not response_msg:
+                continue
+            response = response_msg.content
+            is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
+            if is_need_help and thread.updates_count(chat) > 0:
                 has_updates.update({'thread_id': thread.id})
                 chat.state.set_data_attr('next_update', has_updates)
                 chat.state.save_json_data()
@@ -682,7 +702,8 @@ class TRANSITION(object):
 
         if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'View updates'})
-            options[1]['text'] = 'View next thread'
+            if len(options) == 2:
+                options[1]['text'] = 'View next thread'
 
         return options
 

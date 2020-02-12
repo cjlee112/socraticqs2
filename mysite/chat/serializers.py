@@ -376,6 +376,7 @@ class LessonSerializer(serializers.ModelSerializer):
             return 0
 
         # TODO investigate response_msg w/o content
+        # TODO: move to a dedicated util
         response_msg = chat.message_set.filter(
             lesson_to_answer_id=obj.id,
             kind='response',

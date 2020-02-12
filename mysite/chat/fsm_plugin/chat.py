@@ -425,6 +425,7 @@ class TRANSITION(object):
             'thread_id': None
         }
         for thread in threads:
+            # TODO: move to a dedicated util
             response_msg = chat.message_set.filter(
                 lesson_to_answer_id=thread.id,
                 kind='response',

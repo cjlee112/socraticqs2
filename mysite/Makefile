@@ -13,7 +13,7 @@ backup:
 	python manage.py dumpdata -e contenttypes >dumpdata/production-e.json
 
 coverage:
-	export DJANGO_SETTINGS_MODULE=mysite.settings.test && pytest
+	export DJANGO_SETTINGS_MODULE=mysite.settings.test && pytest -n 4
 	coverage xml
 # 	diff-cover coverage.xml --fail-under=60
 

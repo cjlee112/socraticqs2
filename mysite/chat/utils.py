@@ -3,7 +3,7 @@ from uuid import uuid4
 from django.utils import timezone
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitLesson
+from ct.models import NEED_HELP_STATUS, NEED_REVIEW_STATUS
 
 
 def enroll_generator():
@@ -61,20 +61,33 @@ def is_update_transition_wo_updates_w_last_main(state, chat):
 
     has_update = False
     for thread in threads:
-        if thread.updates_count(chat) > 0:
+        # TODO: move to a dedicated util
+        response_msg = chat.message_set.filter(
+            lesson_to_answer_id=thread.id,
+            kind='response',
+            contenttype='response',
+            content_id__isnull=False).last()
+        if not response_msg:
+            continue
+        response = response_msg.content
+        is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
+        if is_need_help and thread.updates_count(chat) > 0:
             has_update = True
             break
 
     parent = state.parentState
 
-    if not parent:
+    if not parent and not has_update:
         return True
 
     while parent and not parent.fsmNode.fsm.fsm_name_is_one_of('chat'):
         parent = parent.parentState
 
-    main_thread = parent.fsmNode.fsm.fsm_name_is_one_of('chat')
-    last_thread = main_thread and not parent.get_data_attr('unitStatus').get_next_lesson()
+    if parent:
+        main_thread = parent.fsmNode.fsm.fsm_name_is_one_of('chat')
+        last_thread = main_thread and not parent.get_data_attr('unitStatus').get_next_lesson()
+    else:
+        main_thread = last_thread = False
 
     return (not main_thread and not has_update) or (last_thread and not has_update)
 

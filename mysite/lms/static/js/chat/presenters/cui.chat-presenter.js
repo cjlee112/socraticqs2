@@ -1244,6 +1244,9 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
 
       this._updatesThreadId = $lastMessage.data('thread-id');
 
+      let detailNavText = "You’re working on updates in “"+$("li[data-thread-id="+this._updatesThreadId+"]").text().trim()+"”";
+      this._inputContainer.threadNavBar.setDetailNavText(detailNavText);
+
       // Scroll to message & update current chat bottom position
       this._scrollToUpdatesMessage(this._updatesThreadId, lastMessageId, true);
     } else {
@@ -1915,6 +1918,9 @@ CUI.ChatPresenter.prototype._setInput = function(input){
  * @param {Number} threadId - a thread ID.
  */
 CUI.ChatPresenter.prototype._getThreadUpdates = function(threadId) {
+  let detailNavText = "You’re working on updates in “"+$("li[data-thread-id="+threadId+"]").text().trim()+"”";
+  this._inputContainer.threadNavBar.setDetailNavText(detailNavText);
+
   this._isInUpdateThread = true;
   this._showThreadUpdates(threadId);
   this._showMessagesUpToThread(threadId);
