@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from chat.models import EnrollUnitCode
-from ct.models import CourseUnit, Lesson
+from ct.models import CourseUnit
 
 
 @pytest.mark.django_db
@@ -118,4 +118,3 @@ def test_message(message, unit_lesson, chat):
 @pytest.mark.django_db
 def test_unit_error(unit_error):
     assert len(unit_error.get_errors()) == 0
-

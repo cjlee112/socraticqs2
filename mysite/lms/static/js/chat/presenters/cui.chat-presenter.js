@@ -1253,8 +1253,10 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
       if ( (firstMessage.data('thread-id') !== lastMessage.data('thread-id')) || data.nextMessagesUrl === null ) {
         messageId = lastMessage.data('message-id');
 
-        this._showSubsequentThreadMessages(true);
-        this._exitThreadUpdatesMode();
+        if (this._isInUpdateThread) {
+          this._showSubsequentThreadMessages(true);
+          this._exitThreadUpdatesMode();
+        }
       }
 
       scrollParams.id = messageId;
@@ -1424,10 +1426,16 @@ CUI.ChatPresenter.prototype._getMessagesOfBreakpointsSplitBy = function(threadId
   var subsequentThreadIds = this._sidebarBreakpoints.slice(sliceIndex).map(function(breakpoint) {
     return breakpoint.getInfo().threadId;
   })
-  var resorcesThreadIds = this._sidebarResources.slice().map(function(resource) {
-    return resource.getInfo().threadId;
-  })
-  subsequentThreadIds = subsequentThreadIds.concat(resorcesThreadIds);
+
+  // Important to no fail here - this will cause futher issue in this._$splitMessages.subsequentBreakpoints.length
+  // for (var i = 0; i < this._$splitMessages.subsequentBreakpoints.length; i++) {
+  // Error: Uncaught TypeError: Cannot read property 'length' of undefined
+  if ( !$.isEmptyObject(this._sidebarResources) ) {
+    var resorcesThreadIds = this._sidebarResources.slice().map(function(resource) {
+      return resource.getInfo().threadId;
+    })
+    subsequentThreadIds = subsequentThreadIds.concat(resorcesThreadIds);
+  }
 
   var relatedBreakpoints = this._messagesContainer.getThreadsRelatedChatBreakpoints(relatedThreadIds);
   var subsequentBreakpoints = this._messagesContainer.getThreadsRelatedChatBreakpoints(subsequentThreadIds);
@@ -1444,7 +1452,7 @@ CUI.ChatPresenter.prototype._getMessagesOfBreakpointsSplitBy = function(threadId
  * @protected
  */
 CUI.ChatPresenter.prototype._toggleLastUpdatesMessageClass = function(on) {
-  if (this._$splitMessages.relatedMessages) {
+  if ( !$.isEmptyObject(this._$splitMessages.relatedMessages) ) {
     var lastRelatedMessage = this._$splitMessages.relatedMessages[this._$splitMessages.relatedMessages.length - 1];
 
     if (on) {
@@ -1520,12 +1528,14 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
 CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLastMessage) {
   this._toggleLastUpdatesMessageClass(false);
 
-  this._$splitMessages.subsequentMessages.forEach(function($message){
-    $message.show()
-  });
-  this._$splitMessages.subsequentBreakpoints.forEach(function($breakpoint) {
-    $breakpoint.show();
-  });
+  if ( !$.isEmptyObject(this._$splitMessages) ) {  
+    this._$splitMessages.subsequentMessages.forEach(function($message){
+      $message.show()
+    });
+    this._$splitMessages.subsequentBreakpoints.forEach(function($breakpoint) {
+      $breakpoint.show();
+    });
+  }
 
   var scrollToMessageId;
 
@@ -1538,17 +1548,19 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
       updateScrollPosition: true
     });
   } else {
-    // First message of the first thread.
-    var firstSubsequentThreadId = this._$splitMessages.subsequentBreakpoints[0].data('thread-id');
-    var firstSubsequentMessage = this._messagesContainer.getThreadsRelatedMessages([firstSubsequentThreadId])[0][0];
+    if ( !$.isEmptyObject(this._$splitMessages) ) {  
+      // First message of the first thread.
+      var firstSubsequentThreadId = this._$splitMessages.subsequentBreakpoints[0].data('thread-id');
+      var firstSubsequentMessage = this._messagesContainer.getThreadsRelatedMessages([firstSubsequentThreadId])[0][0];
 
-    scrollToMessageId = $(firstSubsequentMessage).data('message-id');
+      scrollToMessageId = $(firstSubsequentMessage).data('message-id');
 
-    this._scrollToMessage({
-      id: scrollToMessageId,
-      messagePlacement: CUI.ChatPresenter.messagePlacement.bottom,
-      updateScrollPosition: false,
-    });
+      this._scrollToMessage({
+        id: scrollToMessageId,
+        messagePlacement: CUI.ChatPresenter.messagePlacement.bottom,
+        updateScrollPosition: false,
+      });
+    }
   }
 
 
@@ -1919,12 +1931,12 @@ CUI.ChatPresenter.prototype._showThreadUpdates = function(threadId) {
 };
 
 /**
- * Inidicates that resources are unlocked.
+ * Inidicates that resources are available.
  *
  * @returns {Boolean}
  */
 CUI.ChatPresenter.prototype._resourcesAreUnlocked = function() {
-  return $('section > .chat-sidebar-resources > .unlocked, section > .chat-sidebar-resources > .started').length > 0;
+  return $('section > .chat-sidebar-resources > .available, section > .chat-sidebar-resources > .started').length > 0;
 };
 
 /**
@@ -2119,7 +2131,7 @@ CUI.ChatPresenter.prototype._addEventListeners = function(){
     // Scroll to message
     var $sidebarResource = $(e.currentTarget);
 
-    if ($sidebarResource.hasClass('started') || $sidebarResource.hasClass('unlocked')) {
+    if ($sidebarResource.hasClass('started') || $sidebarResource.hasClass('available')) {
       this._scrollToResourceMessage(
         $sidebarResource.data('first-message-id'),
         $sidebarResource.data('thread-id'),

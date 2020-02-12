@@ -529,7 +529,7 @@ class MessagesViewTests(CustomTestCase):
         # Click `move to the next Thread` button
         next_url, json_content = self._push_continue(next_url, chat_id)
 
-        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
+        self.assertEqual(json_content['addMessages'][0]['type'], 'breakpoint')
 
     def test_typical_chat_flow(self):
         """
@@ -983,7 +983,7 @@ class MessagesViewTests(CustomTestCase):
         next_url, json_content = self._push_continue(next_url, chat_id)
 
         # Get next Thread
-        self.assertEquals(json_content['addMessages'][0]['type'], 'breakpoint')
+        self.assertEqual(json_content['addMessages'][0]['type'], 'breakpoint')
 
     def test_preview_forbidden(self):
         """
@@ -1641,11 +1641,11 @@ class ResourcesViewTests(CustomTestCase):
         )
         self.assertEqual(json_content['breakpoints'][1]['isDone'], False)
         self.assertEqual(json_content['breakpoints'][1]['isStarted'], False)
-        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
+        self.assertEqual(json_content['breakpoints'][1]['isAvailable'], True)
 
         response = self.client.get(reverse('chat:resources-list'), {'chat_id': chat_id}, follow=True)
         json_content = json.loads(response.content)
-        self.assertEqual(json_content['breakpoints'][1]['isUnlocked'], True)
+        self.assertEqual(json_content['breakpoints'][1]['isAvailable'], True)
 
     def test_get_resources_message_by_id(self):
         """

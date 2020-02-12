@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django import template
 import re
 import pypandoc
-from django.contrib.staticfiles.templatetags import staticfiles
+from django.templatetags.static import static
 from django.utils import timezone
 from django.contrib.auth.models import User
 from datetime import timedelta
@@ -21,7 +21,7 @@ def md2html(txt, stripP=False):
     txt, markers = add_temporary_markers(txt, find_audio)
     txt, videoMarkers = add_temporary_markers(txt, find_video, len(markers))
     try:
-        txt = pypandoc.convert(
+        txt = pypandoc.convert_text(
             txt,
             'html',
             format='rst',
@@ -31,7 +31,7 @@ def md2html(txt, stripP=False):
         pass
     txt = replace_temporary_markers(txt, audio_html, markers)
     txt = replace_temporary_markers(txt, video_html, videoMarkers)
-    txt = StaticImagePat.sub(staticfiles.static('ct') + '/' + r'\1', txt)
+    txt = StaticImagePat.sub(static('ct') + '/' + r'\1', txt)
     if stripP and txt.startswith('<p>') and txt.endswith('</p>'):
         txt = txt[3:-4]
     return mark_safe(txt)

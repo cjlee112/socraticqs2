@@ -53,7 +53,7 @@ def store_outcome_parameters(request_params, user, lti_consumer):
             # the LTI consumer that the request comes from then we may be able
             # to figure out the result service URL. As it stands, though, this
             # is a badly-formed LTI request
-            log.warn(
+            log.warning(
                 "Outcome Service: lis_outcome_service_url parameter missing "
                 "from scored assignment; we will be unable to return a score. "
                 "Request parameters: %s",

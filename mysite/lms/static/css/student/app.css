@@ -1260,22 +1260,30 @@ p + p {
           top: 0;
           border-radius: 4px;
           background: rgba(255, 255, 255, 0.08); }
-        .chat-sidebar .chat-sidebar-breakpoints li.is-active.done, .chat-sidebar .chat-sidebar-breakpoints li.is-active.unlocked,
+        .chat-sidebar .chat-sidebar-breakpoints li.is-active.done, .chat-sidebar .chat-sidebar-breakpoints li.is-active.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.is-active.available,
         .chat-sidebar .chat-sidebar-resources li.is-active.done,
-        .chat-sidebar .chat-sidebar-resources li.is-active.unlocked {
+        .chat-sidebar .chat-sidebar-resources li.is-active.unlocked,
+        .chat-sidebar .chat-sidebar-resources li.is-active.available {
           background-position-y: 12px !important; }
-    .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done,
+    .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.available,
     .chat-sidebar .chat-sidebar-resources li.unlocked,
-    .chat-sidebar .chat-sidebar-resources li.done {
+    .chat-sidebar .chat-sidebar-resources li.done,
+    .chat-sidebar .chat-sidebar-resources li.available {
       cursor: pointer;
       opacity: 1;
       transition: opacity 0.3s; }
-      .chat-sidebar .chat-sidebar-breakpoints li.unlocked:hover, .chat-sidebar .chat-sidebar-breakpoints li.done:hover,
+      .chat-sidebar .chat-sidebar-breakpoints li.unlocked:hover, .chat-sidebar .chat-sidebar-breakpoints li.done:hover, .chat-sidebar .chat-sidebar-breakpoints li.available:hover,
       .chat-sidebar .chat-sidebar-resources li.unlocked:hover,
-      .chat-sidebar .chat-sidebar-resources li.done:hover {
+      .chat-sidebar .chat-sidebar-resources li.done:hover,
+      .chat-sidebar .chat-sidebar-resources li.available:hover {
         opacity: 0.6; }
-    .chat-sidebar .chat-sidebar-breakpoints li.unlocked,
-    .chat-sidebar .chat-sidebar-resources li.unlocked {
+    .chat-sidebar .chat-sidebar-breakpoints li.available,
+    .chat-sidebar .chat-sidebar-resources li.available {
+      background: url(../../img/student/chat-sidebar-resource-available.png) no-repeat 8px 4px;
+      background-image: url(../../img/student/chat-sidebar-resource-available.svg), none; }
+    .chat-sidebar .chat-sidebar-breakpoints li.unlocked, .chat-sidebar .chat-sidebar-breakpoints li.started,
+    .chat-sidebar .chat-sidebar-resources li.unlocked,
+    .chat-sidebar .chat-sidebar-resources li.started {
       background: url(../../img/student/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-active.svg), none; }
     .chat-sidebar .chat-sidebar-breakpoints li.done, .chat-sidebar .chat-sidebar-breakpoints li.unlocked.done,

@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, UnitLesson, Lesson
+from ct.models import UnitStatus, UnitLesson, Lesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from ct.templatetags.ct_extras import md2html
 from chat.models import Message, ChatDivider
 from chat.utils import is_last_thread, has_updates
@@ -425,7 +425,16 @@ class TRANSITION(object):
             'thread_id': None
         }
         for thread in threads:
-            if thread.updates_count(chat) > 0:
+            response_msg = chat.message_set.filter(
+                lesson_to_answer_id=thread.id,
+                kind='response',
+                contenttype='response',
+                content_id__isnull=False).last()
+            if not response_msg:
+                continue
+            response = response_msg.content
+            is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
+            if is_need_help and thread.updates_count(chat) > 0:
                 has_updates.update({'thread_id': thread.id})
                 chat.state.set_data_attr('next_update', has_updates)
                 chat.state.save_json_data()

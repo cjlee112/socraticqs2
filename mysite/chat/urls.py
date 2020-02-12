@@ -19,8 +19,8 @@ MessagesViewFSM = inj.inject(MessagesView)
 ChatInitialViewFSM = inj.inject(ChatInitialView)
 
 router = SimpleRouter()
-router.register(r'messages', MessagesViewFSM, base_name='messages')
-router.register(r'resources', ResourcesView, base_name='resources')
+router.register(r'messages', MessagesViewFSM, basename='messages')
+router.register(r'resources', ResourcesView, basename='resources')
 
 
 app_name = 'chat'

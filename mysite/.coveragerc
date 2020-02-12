@@ -1,6 +1,9 @@
 [run]
-plugins =
-    django_coverage_plugin
+branch = True
+
+parallel = true
+dynamic_context = none
+
 omit =
     ../*admin*
     ../*migrations*
@@ -27,3 +30,13 @@ omit =
     chat/urls.py
     fsm/mixins.py
     chat/fsm_plugin/live_chat.py
+    assets/
+    frontend/
+    draw_svg/
+    lms/static/
+    */bower_components/*
+    */node_modules/*
+
+[report]
+show_missing = true
+precision = 2

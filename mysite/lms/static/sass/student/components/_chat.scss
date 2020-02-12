@@ -1132,13 +1132,14 @@
         }
 
         &.done,
-        &.unlocked {
+        &.unlocked,
+        &.available {
           background-position-y: 12px !important;
         }
       }
     }
 
-    li.unlocked, li.done {
+    li.unlocked, li.done, li.available {
       cursor: pointer;
       opacity: 1;
       transition: opacity 0.3s;
@@ -1148,7 +1149,13 @@
       }
     }
 
-    li.unlocked {
+    li.available {
+      // IE8 SVG fallback https://css-tricks.com/using-svg/
+      background: url(../../img/student/chat-sidebar-resource-available.png) no-repeat 8px 4px;
+      background-image: url(../../img/student/chat-sidebar-resource-available.svg), none;
+    }
+
+    li.unlocked, li.started {
       // IE8 SVG fallback https://css-tricks.com/using-svg/
       background: url(../../img/student/chat-sidebar-breakpoint-active.png) no-repeat 8px 4px;
       background-image: url(../../img/student/chat-sidebar-breakpoint-active.svg), none;

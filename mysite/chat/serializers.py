@@ -539,7 +539,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
     Serializer for Resource Lesson.
     """
     html = serializers.CharField(source='lesson.title', read_only=True)
-    isUnlocked = serializers.SerializerMethodField()
+    isAvailable = serializers.SerializerMethodField()
     isDone = serializers.SerializerMethodField()
     isStarted = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
@@ -552,7 +552,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
             'id',
             'ul',
             'html',
-            'isUnlocked',
+            'isAvailable',
             'isStarted',
             'isDone',
             'threadId',
@@ -576,7 +576,7 @@ class ResourcesSerializer(serializers.ModelSerializer):
         else:
             return obj.id
 
-    def get_isUnlocked(self, obj):
+    def get_isAvailable(self, obj):
         """
         Return True if main sequence has ended and studen get access to resources
         """

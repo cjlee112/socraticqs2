@@ -170,7 +170,6 @@ class SHOW_NEW_RESOLUTIONS(object):
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -208,7 +207,6 @@ class SHOW_EM(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -252,7 +250,6 @@ class SHOW_EM_RESOLUTION(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -276,7 +273,6 @@ class SHOW_NEW_ANSWERS(object):
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -318,7 +314,6 @@ class SHOW_FAQ(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -360,7 +355,6 @@ class SHOW_FAQ_ANSWER(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -387,7 +381,6 @@ class SHOW_NEW_EMS(object):
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -422,7 +415,6 @@ class GET_NEW_EMS(object):
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'uniterror',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)
@@ -461,11 +453,10 @@ class SHOW_NEW_FAQS(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         _data = {
             'chat': chat,
-            'text': 'There are new questions from Student. I hope it can help you.',
+            'text': 'There are new questions from Students. I hope it can help you.',
             'owner': chat.user,
             'input_type': 'custom',
             'kind': 'message',
-            'is_new': True,
             'is_additional': is_additional
         }
         message = Message(**_data)

@@ -1,14 +1,12 @@
 import json
-import os
+from io import BytesIO
 import random
 from collections import namedtuple
-from tempfile import NamedTemporaryFile
 
 import pytest
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from chat.models import Chat, Message, UnitError, EnrollUnitCode
 from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Response
@@ -90,14 +88,11 @@ def lesson_question(user, concept):
     return instance
 
 
-@pytest.fixture(scope='function')
-def temp_image():
-    media_dir = settings.MEDIA_ROOT
-    if not os.path.exists(media_dir):
-        os.makedirs(media_dir)
-    temp = NamedTemporaryFile(suffix='.jpeg', dir=media_dir)
-    temp.write(bytes(base64_gif_image(), 'utf-8'))
-    yield File(temp)
+@pytest.fixture(scope="function")
+def image_file():
+    thumb_io = BytesIO()
+    thumb_file = InMemoryUploadedFile(thumb_io, None, 'img.png', 'image/jpeg', thumb_io.getbuffer().nbytes, None)
+    return thumb_file
 
 
 @pytest.fixture
@@ -112,11 +107,11 @@ def lesson_question_canvas(user, concept, base64_gif_image):
 
 
 @pytest.fixture(params=[Lesson.MULTIPLE_CHOICES, Lesson.NUMBERS, Lesson.EQUATION])
-def lesson_question_parametrized(request, user, concept, temp_image):
+def lesson_question_parametrized(request, user, concept, image_file):
     instance = Lesson(
         title='ugh', text='brr', addedBy=user,
         kind=Lesson.ORCT_QUESTION, sub_kind=request.param,
-        concept=concept, attachment=temp_image
+        concept=concept, attachment=image_file
     )
     instance.save_root(concept)
     return instance
