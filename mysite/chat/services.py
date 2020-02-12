@@ -1,6 +1,7 @@
 """
 Handler container module.
 """
+import waffle
 from django.utils import timezone
 
 from fsm.fsm_base import FSMStack
@@ -194,7 +195,8 @@ class FsmHandler(GroupMessageMixin, ProgressHandler):
                 if not (chat.state.fsmNode.node_name_is_one_of('FAQ', 'VIEWUPDATES', 'UPDATES') or
                         is_last_main_transition_wo_updates(chat.state) or
                         is_update_transition_wo_updates_w_last_main(chat.state, chat) or
-                        is_end_update_node(chat.state)):
+                        is_end_update_node(chat.state) or
+                        (waffle.switch_is_active('compound_faq_answer') and chat.state.fsmNode.node_name_is_one_of('SHOW_FAQ'))):
                     next_point = chat.state.fsmNode.get_message(chat, request, current=current, message=message)
                 else:
                     next_point = self.next_point(

@@ -1,6 +1,7 @@
 from dateutil import tz
 from functools import reduce
 
+import waffle
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.safestring import mark_safe
@@ -290,13 +291,27 @@ class SHOW_FAQ(object):
     )
 
     def next_edge(self, edge, *args, **kwargs):
-        if args and args[0].state.get_data_attr('answers_stack'):
+        chat = args[0]
+        if waffle.switch_is_active('compound_faq_answer'):
+            faq_answers = chat.state.get_data_attr('faq_answers')
+            if faq_answers:
+                faq = faq_answers.pop()
+                answers = faq['answers']
+
+                for answer in answers:
+                    answer['faq_title'] = (faq.get('faq_title', ''))
+
+                chat.state.set_data_attr('answers_stack', answers)
+                chat.state.set_data_attr('faq_answers', faq_answers)
+                chat.state.save_json_data()
+
+        if args and chat.state.get_data_attr('answers_stack'):
             return edge.fromNode.fsm.get_node('SHOW_FAQ_ANSWER')
-        elif args and args[0].state.get_data_attr('faq_answers'):
+        elif args and chat.state.get_data_attr('faq_answers'):
             return edge.fromNode.fsm.get_node('SHOW_FAQ')
-        elif args and 'new_ems' in args[0].state.load_json_data():
+        elif args and 'new_ems' in chat.state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_EMS')
-        elif args and 'new_faqs' in args[0].state.load_json_data():
+        elif args and 'new_faqs' in chat.state.load_json_data():
             return edge.fromNode.fsm.get_node('SHOW_NEW_FAQS')
         return edge.toNode
 
@@ -304,7 +319,12 @@ class SHOW_FAQ(object):
         faq_answers = chat.state.get_data_attr('faq_answers')
         if faq_answers:
             faq = faq_answers.pop()
-            chat.state.set_data_attr('answers_stack', faq['answers'])
+            answers = faq['answers']
+
+            for answer in answers:
+                answer['faq_title'] = (faq.get('faq_title', ''))
+
+            chat.state.set_data_attr('answers_stack', answers)
             chat.state.set_data_attr('faq_answers', faq_answers)
             chat.state.save_json_data()
 
@@ -349,9 +369,16 @@ class SHOW_FAQ_ANSWER(object):
             chat.state.set_data_attr('answers_stack', answers_stack)
             chat.state.save_json_data()
 
+        if waffle.switch_is_active('compound_faq_answer'):
+            text1 = md2html(f'Here\'s my answer to your question \"{answer.get("faq_title")}\"')
+            text2 = md2html(answer.get('text'))
+            text = text1 + text2
+        else:
+            text = answer.get('text')
+
         _data = {
             'chat': chat,
-            'text': mark_safe(md2html(answer.get('text'))),
+            'text': mark_safe(text),
             'owner': chat.user,
             'input_type': 'options',
             'kind': 'button',
@@ -650,11 +677,12 @@ class TRANSITION(object):
         while parent and not parent.fsmNode.fsm.fsm_name_is_one_of('chat'):
             parent = parent.parentState
 
-        options = [{'value': 'next_thread', 'text': 'View next thread'}] \
+        options = [{'value': 'next_thread', 'text': 'Continue'}] \
             if parent and not is_last_thread(parent) else []
 
         if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+            options[1]['text'] = 'View next thread'
 
         return options
 
