@@ -441,7 +441,14 @@ CUI.ChatPresenter.prototype._requestMessages = function(params){
     // Update progress
     this._getProgress();
     // Update the current input type in the chat
-    if(data.input) this._setInput(data.input);
+    if(data.input) {
+      this._setInput(data.input);
+
+      if (!data.input.url) {
+        // Threads are viewed!
+        this._checkForUpdates();
+      }
+    }
     else throw new Error("CUI.ChatPresenter._requestMessages(): No data.input.");
 
     // Update chat with new messages
@@ -1104,6 +1111,8 @@ CUI.ChatPresenter.prototype._parseHistory = function(data){
   // If we're in the middle of going through a thread with updates
   if (extras.updates && extras.updates.threadId) {
     var threadId = extras.updates.threadId;
+    let detailNavText = "You’re working on updates in “"+$("li[data-thread-id="+threadId+"]").text().trim()+"”";
+    this._inputContainer.threadNavBar.setDetailNavText(detailNavText);
     var threadMessages = this._messagesContainer.getThreadsRelatedMessages([threadId]);
 
     if (threadMessages.length > 0) {

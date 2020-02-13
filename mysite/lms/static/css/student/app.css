@@ -665,7 +665,7 @@ p + p {
   background: #F0F4F7;
   display: none;
   min-height: 100%;
-  padding-bottom: 120px; }
+  padding-bottom: 128px; }
   .chat-messages .last-update-message {
     padding-bottom: 1em; }
   .chat-messages .chat-previous-thread {
@@ -1018,7 +1018,7 @@ p + p {
     align-items: center;
     align-content: center;
     min-height: 30px;
-    padding: 8px 80px 8px 168px;
+    padding: 11.5px 80px 11.5px 168px;
     padding-left: 168px;
     padding-right: 80px;
     margin-left: auto;
@@ -1056,9 +1056,12 @@ p + p {
     max-width: 712px;
     width: 100%;
     margin: 0 auto; }
+    .chat-input-bar .thread-nav-bar__container span {
+      max-width: 430px; }
     .chat-input-bar .thread-nav-bar__container > .thread-toggler-btn {
       cursor: pointer;
-      font-weight: 500; }
+      font-weight: 500;
+      flex: none; }
   .chat-input-bar .sidebar-toggle .chat-counter {
     position: absolute;
     width: 20px;

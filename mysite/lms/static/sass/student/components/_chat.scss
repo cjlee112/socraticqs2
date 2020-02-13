@@ -294,7 +294,7 @@
   display: none;
   min-height: 100%;
   // padding-top: 20px;
-  padding-bottom: 120px;
+  padding-bottom: 128px;
 
   .last-update-message {
     padding-bottom: 1em;
@@ -792,7 +792,7 @@
     align-items: center;
     align-content: center;
     min-height: 30px;
-    padding: 8px 80px 8px 168px;
+    padding: 11.5px 80px 11.5px 168px;
     padding-left: 168px;
     padding-right: 80px;
     margin-left: auto;
@@ -843,9 +843,14 @@
     width: 100%;
     margin: 0 auto;
 
+    span {
+      max-width: 430px;
+    }
+
     > .thread-toggler-btn {
       cursor: pointer;
       font-weight: 500;
+      flex: none;
     }
   }
 
