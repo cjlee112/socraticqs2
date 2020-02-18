@@ -17,7 +17,7 @@ from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
 from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
-
+from .utils import get_updated_thread_id
 
 @injections.has
 class ChatInitialView(LoginRequiredMixin, View):
@@ -281,25 +281,9 @@ class ChatInitialView(LoginRequiredMixin, View):
         last_history = chat_sessions.filter(state__isnull=True, progress=100).order_by('id').last()
         updated_thread_id = None
 
+
         if last_history:
-            threads = last_history.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
-            for thread in threads:
-                # TODO: move this to a separate cashed util function
-                response_msg = last_history.message_set.filter(
-                    lesson_to_answer_id=thread.id,
-                    kind='response',
-                    contenttype='response',
-                    content_id__isnull=False).last()
-
-                if not response_msg:
-                    continue
-
-                response = response_msg.content
-                is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS) if response else None
-
-                if is_need_help and thread.updates_count(last_history) > 0:
-                    updated_thread_id = thread.id
-                    break
+            updated_thread_id = get_updated_thread_id(last_history)
 
         return render(
             request,

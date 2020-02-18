@@ -34,15 +34,16 @@ CUI.chat.open = function($startChatSesssionElement, showUpdates){
   var chatID = data.chatId || CUI.config.chatID;
 
   // Create the chat
-  var chat = new CUI.ChatPresenter(
-    chatID,
-    CUI.config.historyUrl,
-    CUI.config.progressUrl,
-    CUI.config.resourcesUrl,
-    CUI.config.updatesUrl,
-    showUpdates,
-    CUI.config.isLive
-  );
+  var chat = new CUI.ChatPresenter({
+    chatID: chatID,
+    historyUrl: CUI.config.historyUrl,
+    progressUrl: CUI.config.progressUrl,
+    resourcesUrl: CUI.config.resourcesUrl,
+    updatesUrl: CUI.config.updatesUrl,
+    updatesCheckUrl: CUI.config.updatesCheckUrl,
+    showUpdates: showUpdates,
+    isLive: CUI.config.isLive
+  });
 
   if (CUI.config.debug) {
     CUI.debug = {

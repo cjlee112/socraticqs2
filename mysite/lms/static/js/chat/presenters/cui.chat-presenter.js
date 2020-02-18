@@ -7,20 +7,23 @@ var CUI = CUI || {};
 /**
  * Represents the chat UI and binds listeners to pre-existing DOM elements.
  * @class
- * @param {number} chatID           - A unique ID for the chat.
- * @param {string} historyUrl       - A url for loading a user's history.
- * @param {string} progressUrl      - A url for loading a user's progress.
- * @param {Boolean} showUpdates     - Show updates on load.
- * @param {Boolean} isLive          - A live session is started.
+ * @param {Object} data                  - params data.
+ * @param {number} data.chatID           - A unique ID for the chat.
+ * @param {string} data.historyUrl       - A url for loading a user's history.
+ * @param {string} data.progressUrl      - A url for loading a user's progress.
+ * @param {string} data.updatesUrl       - A url to load unit updates.
+ * @param {Boolean} data.showUpdates     - Show updates on load.
+ * @param {Boolean} data.isLive          - A live session is started.
  * @returns {CUI.ChatPresenter}
  */
-CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl, showUpdates, isLive){
+// CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, updatesUrl, showUpdates, isLive){
+CUI.ChatPresenter = function(data){
   // Check arguments
-  if(typeof chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
-  if(!historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
-  if(!progressUrl) throw new Error('CUI.ChatPresenter(): No progressUrl.');
-  if(!resourcesUrl) throw new Error('CUI.ChatPresenter(): No resourcesUrl.');
-  if(!updatesUrl) throw new Error('CUI.ChatPresenter(): No updatesUrl.');
+  if(typeof data.chatID !== 'number') throw new Error('CUI.ChatPresenter(): Invalid chatID.');
+  if(!data.historyUrl) throw new Error('CUI.ChatPresenter(): No historyUrl.');
+  if(!data.progressUrl) throw new Error('CUI.ChatPresenter(): No progressUrl.');
+  if(!data.resourcesUrl) throw new Error('CUI.ChatPresenter(): No resourcesUrl.');
+  if(!data.updatesUrl) throw new Error('CUI.ChatPresenter(): No updatesUrl.');
 
   /* When chat gets doWait parameter it should show messages only first time. This flag is about it.
    * @type {bool}
@@ -33,7 +36,7 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @type {number}
    * @protected
    */
-  this._chatID = chatID;
+  this._chatID = data.chatID;
 
   /**
    * Current thread unique ID.
@@ -114,28 +117,35 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @type {string}
    * @protected
    */
-  this._historyUrl = historyUrl;
+  this._historyUrl = data.historyUrl;
 
   /**
    * The url for loading a user's chat progress.
    * @type {string}
    * @protected
    */
-  this._progressUrl = progressUrl;
+  this._progressUrl = data.progressUrl;
 
   /**
    * The url for loading a resources of the unit.
    * @type {string}
    * @protected
    */
-  this._resourcesUrl = resourcesUrl;
+  this._resourcesUrl = data.resourcesUrl;
 
   /**
    * The url for loading a updates of the unit.
    * @type {string}
    * @protected
    */
-  this._updatesUrl = updatesUrl;
+  this._updatesUrl = data.updatesUrl;
+
+  /**
+   * The url to check for updates thread id.
+   * @type {string}
+   * @protected
+   */
+  this._updatesCheckUrl = data.updatesCheckUrl;
 
   /**
    * The currently active input type in the chat. 'text', 'options', or 'custom'.
@@ -173,13 +183,6 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
   this._viewUpdatesPending = false;
 
   /**
-   * An array of existing input options.
-   * @type {Array.<InputOptionPresenter>}
-   * @protected
-   */
-  this._inputOptions = [];
-
-  /**
    * The current set of message IDs that are searched for values when submitting input.
    * @type {Array.<number>}
    * @protected
@@ -198,14 +201,14 @@ CUI.ChatPresenter = function(chatID, historyUrl, progressUrl, resourcesUrl, upda
    * @type {boolean}
    * @protected
    */
-  this._showUpdates = showUpdates;
+  this._showUpdates = data.showUpdates;
 
   /**
    * Define if we are in live chat.
    * @type {boolean}
    * @protected
    */
-  this._isLive = isLive;
+  this._isLive = data.isLive;
 
   /**
    * Indicates if we are view an update thread currently.
@@ -1078,8 +1081,15 @@ CUI.ChatPresenter.prototype._parseResources = function(data){
  */
 CUI.ChatPresenter.prototype._parseHistory = function(data){
   // Update the current input type in the chat
-  if(data.input) this._setInput(data.input);
-  else throw new Error("CUI.ChatPresenter._parseHistory(): No data.input.");
+  if(data.input) {
+    this._setInput(data.input);
+
+    if (!data.input.url) {
+      // Threads are viewed!
+      this._checkForUpdates();
+    }
+
+  } else throw new Error("CUI.ChatPresenter._parseHistory(): No data.input.");
 
   // Update chat with new messages
   if(data.addMessages) this._parseMessages(data, {scrollToFrist: false});
@@ -1285,6 +1295,36 @@ CUI.ChatPresenter.prototype._parseMessages = function(data, params){
 
       this._scrollToMessage(scrollParams);
   }
+};
+
+/**
+ * Check for updates and a view updates button to custom input container.
+ * @protected
+ */
+CUI.ChatPresenter.prototype._checkForUpdates = function() {
+  var url = this._updatesUrl;
+  $.ajax({
+    url: url,
+    method: 'GET',
+    dataType: 'json',
+    data: {chat_id: this._chatID},
+    cache: false,
+    context: this
+  }).done(function(data) {
+    if (data.threadId) {
+      var viewUpdatesOption = {value: "view_updates", text: "View updates"};
+      var $viewUpdatesOption = this._inputContainer.createInputOption(viewUpdatesOption, this._inputContainer.$custom).$el;
+
+      $viewUpdatesOption.on('click', $.proxy(function() {
+        this._getThreadUpdates(data.threadId);
+        this._inputContainer.threadNavBar.activateThreadControls();
+      }, this));
+
+      this._inputContainer.$custom.show();
+    }
+  }).fail(function() {
+    throw new Error("CUI.ChatPresenter._checkForUpdates")
+  });
 };
 
 /**
@@ -1533,7 +1573,7 @@ CUI.ChatPresenter.prototype._showMessagesUpToThread = function(threadId, params)
 CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLastMessage) {
   this._toggleLastUpdatesMessageClass(false);
 
-  if ( !$.isEmptyObject(this._$splitMessages) ) {  
+  if ( !$.isEmptyObject(this._$splitMessages) ) {
     this._$splitMessages.subsequentMessages.forEach(function($message){
       $message.show()
     });
@@ -1553,7 +1593,7 @@ CUI.ChatPresenter.prototype._showSubsequentThreadMessages = function(scrollToLas
       updateScrollPosition: true
     });
   } else {
-    if ( !$.isEmptyObject(this._$splitMessages) ) {  
+    if ( !$.isEmptyObject(this._$splitMessages) ) {
       // First message of the first thread.
       var firstSubsequentThreadId = this._$splitMessages.subsequentBreakpoints[0].data('thread-id');
       var firstSubsequentMessage = this._messagesContainer.getThreadsRelatedMessages([firstSubsequentThreadId])[0][0];
@@ -1659,7 +1699,7 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(params){
  * @param {Object} params                 -
  * @param {Number} positionY              - position to scroll to.
  * @param {Boolean} updateScrollPosition  - save scroll position of the window after scrolling is finished.
- * @param {funciton} onScrollFinished     - a callback function to be called after scrolling is finished.
+ * @param {function} onScrollFinished     - a callback function to be called after scrolling is finished.
  */
 CUI.ChatPresenter.prototype._scrollToVerticalPosition = function(params){
   params = params || {};
@@ -1774,34 +1814,22 @@ CUI.ChatPresenter.prototype._runWaitTimer = function(input) {
  * @param {object} input          - An object with settings for the input type.
  */
 CUI.ChatPresenter.prototype._setInput = function(input){
-  var $text;
-  var $options;
-  var $custom;
-  var $option;
+  var $text = this._inputContainer.$text;
+
+  var $textarea = this._inputContainer.$textarea;
+  var $numbers = this._inputContainer.$numbers
+
+  var $options = this._inputContainer.$options;
+  var $custom = this._inputContainer.$custom;
 
   //Disable input
   this._inputIsEnabled = false;
 
-  // Find containers for the various input types
-  $text = this._$inputContainer.find('.chat-input-text');
-
-  $textarea = $text.find('.input-text');
-  $numbers = $text.find('.input-number');
-
-  $options = this._$inputContainer.find('.chat-input-options');
-  $custom = this._$inputContainer.find('.chat-input-custom');
-
   // Hide all input containers
-  $text.hide();
-  $options.hide();
-  $custom.hide();
+  this._inputContainer.hideAllInuptElements();
 
   // Empty dynamic content in input containers
-  $custom.empty();
-  if(this._inputOptions.length) $.each(this._inputOptions, function(i, io){
-    io.destroy();
-  });
-  this._inputOptions = [];
+  this._inputContainer.destroyDynamicContent();
 
   this._inputSubType = input.subType;
 
@@ -1872,16 +1900,11 @@ CUI.ChatPresenter.prototype._setInput = function(input){
 
    // Create a button for each option
    $.each(input.options, $.proxy(function(i, o){
-     // Create a new input option
-     var inputOption = new CUI.InputOptionPresenter(new CUI.InputOptionModel(o));
-     this._inputOptions.push(inputOption);
+      this._inputContainer.createInputOption(o);
+    }, this));
 
-     // Append input option
-     $options.append(inputOption.$el);
-   }, this));
-
-   // Show input
-   $options.show();
+    // Show input
+    $options.show();
   } else if(input.type === 'custom'){
    // Set input type
    this._inputType = 'custom';

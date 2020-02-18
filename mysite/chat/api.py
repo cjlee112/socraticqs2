@@ -32,7 +32,10 @@ from .serializers import (
     AddUnitByChatSerializer,
     ChatSerializer,
 )
-from .utils import update_activity
+from .utils import (
+    get_updated_thread_id,
+    update_activity,
+)
 
 
 inj_alternative = injections.Container()
@@ -639,6 +642,20 @@ class ResourcesView(ValidateMixin, viewsets.ModelViewSet):
         )
         serializer = MessageSerializer(m)
         return Response(serializer.data)
+
+
+class UpdatesThreadIdView(ValidateMixin, APIView):
+    """
+    Return updates thread id for chat (if any).
+    """
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get(self, request):
+        thread_id = None
+        chat = self.validate_and_get_chat(self.request.GET.get('chat_id'))
+        thread_id = get_updated_thread_id(chat)
+
+        return Response({'threadId': thread_id})
 
 
 @injections.has

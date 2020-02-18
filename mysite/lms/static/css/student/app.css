@@ -1164,13 +1164,11 @@ p + p {
       position: absolute;
       bottom: 18px;
       right: 0; }
-  .chat-input-bar .chat-input-options {
+  .chat-input-bar .chat-input-options, .chat-input-bar .chat-input-custom {
     padding-top: 18px; }
-    .chat-input-bar .chat-input-options .btn {
+    .chat-input-bar .chat-input-options .btn, .chat-input-bar .chat-input-custom .btn {
       margin: 0 12px 18px 0;
       font-weight: normal; }
-  .chat-input-bar .chat-input-custom {
-    padding-top: 18px; }
 
 .chat-sidebar {
   position: fixed;

@@ -64,6 +64,20 @@ CUI.utils = CUI.utils || {};
   */
  CUI.config.resourcesUrl;
 
+  /**
+  * The url to load unit updates.
+  * @type {string}
+  * @public
+  */
+ CUI.config.updatesUrl;
+
+  /**
+  * The url to check for thread id with updates.
+  * @type {string}
+  * @public
+  */
+ CUI.config.updatesCheckUrl;
+
  /**
   * A path to a default avatar for the student.
   * @type {string}

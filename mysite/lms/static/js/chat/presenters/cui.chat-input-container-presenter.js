@@ -27,19 +27,67 @@ CUI.ChatInputContinerPresenter = function(selectors){
     selectors.chatControlsContainerSelector = '.chat-container'
   }
 
+  if (!selectors.chatInputContainer) {
+    selectors.chatInputContainer = '.chat-input'
+  }
+
   /**
-   * A jQuery object containing the DOM element of the root chat input bar.
+   * A jQuery object containing DOM element of the root chat input bar.
    * @type {jQuery}
    * @public
    */
   this.$el = $(selectors.rootSelector);
 
   /**
-   * A jQuery object containing the DOM element of the inner container.
+   * A jQuery object containing DOM element of the inner container.
    * @type {jQuery}
    * @public
    */
   this.$inner = this.$el.find(selectors.innerSelector);
+
+  /**
+   * A jQuery object containing DOM element of the inner container.
+   * @type {jQuery}
+   * @public
+   */
+  this.$chatInput = this.$inner.find(selectors.chatInputContainer);
+
+  /**
+   * A jQuery reference to text input field.
+   * @type {jQuery}
+   * @public
+   */
+  this.$text = this.$chatInput.find('.chat-input-text');
+
+  /**
+   * A jQuery reference to an input for text.
+   * @type {jQuery}
+   * @public
+   */
+  this.$textarea = this.$text.find('.input-text');
+
+   /**
+   * A jQuery reference to an input for nubers.
+   * @type {jQuery}
+   * @public
+   */
+  this.$numbers = this.$text.find('.input-number');
+
+   /**
+   * A jQuery reference to an options container.
+   * @type {jQuery}
+   * @public
+   */
+  this.$options = this.$chatInput.find('.chat-input-options');
+
+   /**
+   * A jQuery reference to custom input container.
+   * @type {jQuery}
+   * @public
+   */
+  this.$custom = this.$chatInput.find('.chat-input-custom');
+
+  this.inputOptions = new Array();
 
   /**
    * A CUI.ThreadNavBar object.
@@ -79,6 +127,56 @@ CUI.ChatInputContinerPresenter = function(selectors){
 
   return this;
 }
+
+
+/**
+ * Hide all input elements.
+ * @public
+ */
+CUI.ChatInputContinerPresenter.prototype.hideAllInuptElements = function() {
+  this.$text.hide();
+  this.$options.hide();
+  this.$custom.hide();
+};
+
+/**
+ * Destroy all custom input and input options elements.
+ * @public
+ */
+CUI.ChatInputContinerPresenter.prototype.destroyDynamicContent = function() {
+  if(this.inputOptions.length) {
+    $.each(this.inputOptions, function(i, inputOption){
+      inputOption.destroy();
+    });
+  }
+
+  this.inputOptions.length = 0;
+
+  this.$custom.empty();
+}
+
+/**
+ * Create chat input option.
+ * @protected
+ * @param {Object} data       - input option data.
+ * @param {Object} data.value - input option value.
+ * @param {Object} data.text  - input option text.
+ *
+ * @returns {CUI.InputOptionPresenter}
+ */
+CUI.ChatInputContinerPresenter.prototype.createInputOption = function(data, $container) {
+  // Create a new input option
+  var inputOption = new CUI.InputOptionPresenter(new CUI.InputOptionModel(data));
+  this.inputOptions.push(inputOption);
+
+  if (!$container) {
+    $container = this.$options;
+  }
+
+  $container.append(inputOption.$el);
+
+  return inputOption;
+};
 
 /**
  * Chain Show animation for all given elements

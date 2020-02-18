@@ -8,7 +8,14 @@ from .views import (
     ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView
 )
 from .api import (
-    MessagesView, HistoryView, ProgressView, ResourcesView, InitNewChat, UpdatesView, AddUnitByChatProgressView
+    MessagesView,
+    HistoryView,
+    ProgressView,
+    ResourcesView,
+    InitNewChat,
+    UpdatesView,
+    UpdatesThreadIdView,
+    AddUnitByChatProgressView,
 )
 from .services import FsmHandler
 
@@ -58,7 +65,8 @@ urlpatterns = [
     url(r'^history/$', HistoryView.as_view(), name='history'),
     url(r'^progress/$', ProgressView.as_view(), name='progress'),
     url(r'^progress/add_unit/$', AddUnitByChatProgressView.as_view(), name='add_unit_progress'),
-    path('updates/<int:pk>/', UpdatesView.as_view(), name='updates'),
+    path('updates/', UpdatesThreadIdView.as_view(), name='updates'),
+    path('updates/<int:pk>/', UpdatesView.as_view(), name='thread_updates'),
 
     url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),

@@ -103,6 +103,37 @@ def has_updates(state):
     return has_update
 
 
+def get_updated_thread_id(history):
+    """
+    Get updated_thread_id (if any) from the provided chat history.
+
+    :history:: chat.models.Chat instance.
+    """
+    # TODO: Cover with tests?
+    updated_thread_id = None
+
+    threads = history.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+
+    for thread in threads:
+        response_msg = history.message_set.filter(
+            lesson_to_answer_id=thread.id,
+            kind='response',
+            contenttype='response',
+            content_id__isnull=False).last()
+
+        if not response_msg:
+            continue
+
+        response = response_msg.content
+        is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS) if response else None
+
+        if is_need_help and thread.updates_count(history) > 0:
+            updated_thread_id = thread.id
+            break
+
+    return updated_thread_id
+
+
 def is_last_thread(state):
     """
     Return True if current thread is last.

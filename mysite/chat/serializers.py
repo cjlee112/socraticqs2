@@ -155,8 +155,8 @@ class MessageSerializer(serializers.ModelSerializer):
             chat_id = obj.chat.enroll_code.courseUnit.course.id
             course_url = reverse('lms:course_view', kwargs={'course_id': chat_id})
             html = f"""
-                <button class="btn chat-option" 
-                        data-option-value="close-courselet" 
+                <button class="btn chat-option"
+                        data-option-value="close-courselet"
                         onclick="window.location.href='{course_url}'">
                 Close courselet
                 </button>
@@ -234,8 +234,8 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             chat_id = obj.enroll_code.courseUnit.course.id
             course_url = reverse('lms:course_view', kwargs={'course_id': chat_id})
             html = f"""
-                <button class="btn chat-option" 
-                        data-option-value="close-courselet" 
+                <button class="btn chat-option"
+                        data-option-value="close-courselet"
                         onclick="window.location.href='{course_url}'">
                 Close courselet
                 </button>
