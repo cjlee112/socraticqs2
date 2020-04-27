@@ -21,7 +21,7 @@ services:
 
   dev_postgres:
     container_name: dev_cr_postgres
-    image: postgres:9.6
+    image: postgres:11.5
     env_file: ./envs/dev.env
     volumes:
       - dev_cr_db:/var/lib/postgresql/data/

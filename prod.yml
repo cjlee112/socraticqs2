@@ -25,7 +25,7 @@ services:
 
   postgres:
     container_name: cr_postgres
-    image: postgres:9.6
+    image: postgres:11.5
     env_file: ./envs/prod.env
     restart: on-failure
     volumes:
