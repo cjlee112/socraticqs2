@@ -12,6 +12,10 @@ DOCKER_REGISTRY = registry-gitlab.raccoongang.com/cmltawt0/socraticqs2
 GIT_TAG := $(shell git describe --abbrev=0)
 VERSION :=
 
+CURRENT_DIR = $(shell pwd)
+CTMS_APP_PATH = "${CURRENT_DIR}/mysite/ctms/frontend"
+DRAW_SVG_APP_PATH = "${CURRENT_DIR}/mysite/draw_svg"
+
 DEFAULT_APP_PWD = mysite/mysite
 # server APP_PWD for prod: /courselets/app
 # server DEV_APP_PWD for dev: /courselets/dev/app
@@ -114,6 +118,23 @@ test:
 			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \
 			make coverage \
 			"
+
+local_node: .local__draw_svg .local__bower .local_ctms
+
+.local__draw_svg:
+	npm install --prefix ${DRAW_SVG_APP_PATH} && \
+	npm run build --prefix ${DRAW_SVG_APP_PATH} && \
+	cp mysite/draw_svg/dist/drawing.bundle.js mysite/lms/static/js/drawing.bundle.js
+
+.local__bower:
+	cd mysite/frontend && \
+	yarn && \
+	cp -r bower_components/ ../chat/static/bower_components/
+
+.local_ctms:
+	npm install --prefix ${CTMS_APP_PATH} && \
+	npm run build --prefix ${CTMS_APP_PATH} && \
+	cp mysite/ctms/frontend/dist/add_threads.bundle.js mysite/lms/static/js/add_threads.bundle.js
 
 version:
 	echo "Tagged release $(VERSION)\n" > Changelog-$(VERSION).txt

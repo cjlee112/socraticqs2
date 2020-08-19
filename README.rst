@@ -57,6 +57,11 @@ To build production/staging environment locally:
 
     make build env=stage
 
+Build node packages locally:
+::
+
+    make local_node
+
 
 CI/CD
 -----
