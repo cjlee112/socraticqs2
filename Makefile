@@ -129,7 +129,7 @@ local_node: .local__draw_svg .local__bower .local_ctms
 .local__bower:
 	cd mysite/frontend && \
 	yarn && \
-	cp -r bower_components/ ../chat/static/bower_components/
+	cp -r bower_components/ ../lms/static/bower_components/
 
 .local_ctms:
 	npm install --prefix ${CTMS_APP_PATH} && \
