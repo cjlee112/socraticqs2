@@ -84,8 +84,7 @@ endif
 .init-data:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py flush
-
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run -rm $(APP) \
+	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			python manage.py loaddata dumpdata/debug-wo-fsm.json
 
 .static:
