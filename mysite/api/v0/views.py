@@ -1,7 +1,7 @@
 import time
 import logging
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -9,18 +9,25 @@ from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+from django.db.models import Q
 
 from analytics.models import CourseReport
 from analytics.tasks import report
-from ct.models import Response, StudentError, Course, Role, Unit
-from ctms.forms import BestPractice1Form, BestPractice2Form
+from ct.models import Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
 from ctms.models import BestPractice, BestPracticeTemplate
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
 from ..permissions import IsInstructor
-from ..serializers import ResponseSerializer, ErrorSerializer, CourseReportSerializer, UnitSerializer
+from ..serializers import (
+    ResponseSerializer,
+    ErrorSerializer,
+    CourseReportSerializer,
+    UnitSerializer,
+    ThreadSerializer,
+)
 from .utils import get_result_course_calculation, get_result_courselet_calculation
+from .creators import ThreadBuilder
 
 
 logger = logging.getLogger(__name__)
@@ -274,8 +281,49 @@ class BestPracticeUpload(APIView):
                 return RestResponse({'status': 'Failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UnitViewSet(viewsets.ModelViewSet):
+class CourseletViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsInstructor,)
     queryset = Unit.objects.all()
     serializer_class = UnitSerializer
+
+
+class CourseletThreadsViewSet(generics.ListCreateAPIView):
+    """
+    Returns a list of all Courselet's threads.
+    """
+    authentication_classes = (SessionAuthentication,)
+    queryset = UnitLesson.objects.all()
+    serializer_class = ThreadSerializer
+
+    def get_queryset(self):
+        """
+        Specifying UniLessons aka Threads for the Courselet aka Unit.
+        """
+        queryset = super().get_queryset()
+
+        return queryset.filter(
+            Q(lesson__kind=Lesson.ORCT_QUESTION) | Q(lesson__kind=Lesson.BASE_EXPLANATION),
+            unit=self.kwargs.get("pk"),
+            order__isnull=False)
+
+    def create(self, request, pk, *args, **kwargs):
+        """
+        Creates list of Threads for the given Courselet.
+        """
+        unit = get_object_or_404(Unit, id=self.kwargs.get("pk"))
+
+        threads = []
+
+        for thread_data in request.data:
+            builder = ThreadBuilder(unit)
+            threads.append(builder.build(thread_data))
+
+        serializer = self.serializer_class(threads, many=True)
+
+        return RestResponse(
+            {
+                "status": "created",
+                "result": serializer.data
+            },
+            status=status.HTTP_201_CREATED)

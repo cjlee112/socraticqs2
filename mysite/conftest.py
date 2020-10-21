@@ -314,3 +314,30 @@ def updates():
         ]
     }
     return UPDATES_DATA
+
+
+@pytest.fixture(scope="function")
+def intro_data():
+    """
+    Fixture for the Threads API.
+    """
+    return {
+        "title": "Ukraine population.",
+        "message": "Ukraine has a population of about 42 million.",
+        "kind": "intro",
+        "author": "Ilona"
+    }
+
+
+@pytest.fixture(scope="function")
+def orct_data():
+    """
+    Fixture for the Threads API.
+    """
+    return {
+        "title": "ORCT Ukraine population.",
+        "question": "What population of Ukraine?",
+        "answer": "Ukraine has a population of about 42 million.",
+        "kind": "question",
+        "author": "Ilona"
+    }

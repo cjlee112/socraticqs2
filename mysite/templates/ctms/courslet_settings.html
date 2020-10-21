@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <form class="form_general form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
+      <form class="form_general form-wrapper" action="{% url 'api:v0:courselet-api' pk=courslet.unit.id%}">
         {% csrf_token %}
         <div class="form-group form-group--not-first">
           <h1>General Settings</h1>
@@ -118,7 +118,7 @@
         <input type="submit" value="Update General Settings">
       </form>
 
-      <form class="form_schedul form-wrapper" action="{% url 'api:v0:unit_update' pk=courslet.unit.id%}">
+      <form class="form_schedul form-wrapper" action="{% url 'api:v0:courselet-api' pk=courslet.unit.id%}">
         {% csrf_token %}
         <div class="form-group form-group--not-first" id="schedule-section">
           <h1>Scheduling Settings</h1>

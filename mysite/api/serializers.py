@@ -136,3 +136,16 @@ class UnitSerializer(serializers.ModelSerializer):
             'late_completion_penalty',
             'is_show_will_learn',
         )
+
+
+class ThreadSerializer(serializers.ModelSerializer):
+    """
+    Serialize Thread aka UnitLesson object.
+    """
+    kind = serializers.ReadOnlyField(source="lesson.kind")
+    title = serializers.ReadOnlyField(source="lesson.title")
+    author = serializers.ReadOnlyField(source="lesson.addedBy.username")
+
+    class Meta:
+        model = UnitLesson
+        fields = ("id", "kind", "title", "author")

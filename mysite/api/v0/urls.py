@@ -13,7 +13,8 @@ from .views import (
     OnboardingBpAnalysis,
     BestPracticeCreate,
     BestPracticeUpload,
-    UnitViewSet,
+    CourseletViewSet,
+    CourseletThreadsViewSet,
 )
 
 app_name = 'v0'
@@ -52,6 +53,7 @@ urlpatterns = [
     path('bp/create/', BestPracticeCreate.as_view(), name='bp-creation'),
     path('bp/upload/', BestPracticeUpload.as_view(), name='bp-upload'),
 
-    path('unit/update/<int:pk>/', UnitViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='unit_update')
+    path('courselets/<int:pk>/', CourseletViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='courselet-api'),
+    path('courselets/<int:pk>/threads/', CourseletThreadsViewSet.as_view(), name='courselet-threads-api')
 
 ]

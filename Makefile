@@ -1,4 +1,5 @@
 env :=
+path :=
 
 LOCAL_ENV := local
 DEV_ENV := dev
@@ -36,7 +37,7 @@ else
 	APP = local_app
 endif
 
-sh:
+shell:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) bash
 
 dev.up:
@@ -116,7 +117,7 @@ test:
 			bash -c \
 			" \
 			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \
-			make coverage \
+			pytest -W ignore -s -vv --pdb $(path) \
 			"
 
 local_node: .local__draw_svg .local__bower .local_ctms
