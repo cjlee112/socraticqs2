@@ -6,6 +6,18 @@ from django.contrib.auth.models import User
 
 from ct.models import UnitLesson, Lesson
 
+from .service import factory
+from .lesson_providers.cfg import Provider
+
+
+# TODO: get rid of this
+mapping = {
+    "question": Provider.QUESTION,
+    "multichoice": Provider.MULTICHOICE,
+    "intro": Provider.INTRO,
+    "canvas": Provider.CANVAS
+}
+
 
 class Creator:
     """
@@ -17,6 +29,8 @@ class Creator:
     def __init__(self, data, unit):
         self._data = data
         self._unit = unit
+        _provider_id = mapping.get(data["kind"])
+        self._lesson_provider = factory.get(_provider_id, data=data, unit=unit)
 
     def create(self):
         """
@@ -48,25 +62,11 @@ class IntroCreator(Creator):
         """
         Create base Lesson
         """
-        author = User.objects.filter(username=self._data.get("author")).first()
-
-        _converted = {
-            "title": self._data.get("title", ""),
-            "text": self._data.get("message", ""),
-            "kind": Lesson.BASE_EXPLANATION,
-            "addedBy": author or self._unit.addedBy,
-        }
-        intro = Lesson(
-            title=_converted['title'],
-            text=_converted['text'],
-            kind=_converted['kind'],
-            addedBy=_converted['addedBy'],
-            treeID=1)
-        intro.save()
+        intro = self._lesson_provider.get_intro()
 
         order = self._unit.next_order()
         unit_lesson = UnitLesson(
-            unit=self._unit, lesson=intro, addedBy=_converted['addedBy'],
+            unit=self._unit, lesson=intro, addedBy=intro.addedBy,
             treeID=intro.treeID, order=order, kind=UnitLesson.COMPONENT)
         unit_lesson.save()
 
@@ -85,25 +85,11 @@ class QuestionCreator(Creator):
         """
         Create base Lesson.
         """
-        author = User.objects.filter(username=self._data.get("author")).first()
-
-        _converted = {
-            "title": self._data.get("title", ""),
-            "text": self._data.get("question", ""),
-            "kind": Lesson.ORCT_QUESTION,
-            "addedBy": author or self._unit.addedBy,
-        }
-        question = Lesson(
-            title=_converted['title'],
-            text=_converted['text'],
-            kind=_converted['kind'],
-            addedBy=_converted['addedBy'],
-            treeID=1)
-        question.save()
+        question = self._lesson_provider.get_question()
 
         order = self._unit.next_order()
         unit_lesson = UnitLesson(
-            unit=self._unit, lesson=question, addedBy=_converted['addedBy'],
+            unit=self._unit, lesson=question, addedBy=question.addedBy,
             treeID=question.treeID, order=order, kind=UnitLesson.COMPONENT)
         unit_lesson.save()
 
@@ -113,29 +99,20 @@ class QuestionCreator(Creator):
         """
         Create answer Lesson.
         """
-        author = User.objects.filter(username=self._data.get("author")).first()
-
-        _converted = {
-            "title": "Answer",
-            "text": self._data.get("answer", ""),
-            "kind": Lesson.ANSWER,
-            "addedBy": author or self._unit.addedBy,
-        }
-        answer = Lesson(
-            title=_converted['title'],
-            text=_converted['text'],
-            kind=_converted['kind'],
-            addedBy=_converted['addedBy'])
-        answer.save()
+        answer = self._lesson_provider.get_answer()
 
         self._thread._answer = UnitLesson(
             lesson=answer,
             unit=self._unit,
             kind=UnitLesson.ANSWERS,
-            addedBy=_converted['addedBy'],
+            addedBy=answer.addedBy,
             treeID=1,
             parent=self._thread)
         self._thread._answer.save()
+
+
+class MultichoiceCreator(QuestionCreator):
+    pass
 
 
 class ThreadBuilder:
@@ -146,6 +123,7 @@ class ThreadBuilder:
         switch = {
             "intro": IntroCreator,
             "question": QuestionCreator,
+            "multichoice": MultichoiceCreator,
         }
 
         creator = switch.get(data.get("kind", "intro"))(data, self._unit)

@@ -13,6 +13,11 @@ from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Res
 from fsm.fsm_base import FSMStack
 from fsm.models import FSM
 from mysite.helpers import base64_to_file
+from api.v0.service import LessonProvider
+from api.v0.lesson_providers.multichoice import MultiChoiceProviderBuilder
+from api.v0.lesson_providers.intro import IntroProviderBuilder
+from api.v0.lesson_providers.question import QuestionProviderBuilder
+from api.v0.lesson_providers.cfg import Provider
 
 
 def pytest_addoption(parser):
@@ -341,3 +346,51 @@ def orct_data():
         "kind": "question",
         "author": "Ilona"
     }
+
+
+@pytest.fixture(scope="function")
+def multichoice_data():
+    """
+    Fixture for the Threads API to gen multichoice post data.
+    """
+    return {
+        "title": "Brick weight.",
+        "question": "Which set of bricks is less heavier?",
+        "choices": [
+            {
+                "text": "Blue",
+                "correct": False
+            },
+            {
+                "text": "Red",
+                "correct": False
+            },
+            {
+                "text": "Green",
+                "correct": True
+            },
+            {
+                "text": "Yellow",
+                "correct": False
+            }
+        ],
+        "answer": "Green\n. The green set of bricks is the least heavy because it contains the least number of circles.",
+        "kind": "multichoice"
+    }
+
+
+@pytest.fixture(scope='function')
+def lesson_factory():
+    """
+    Unregister providers for test purposes.
+    """
+    factory = LessonProvider()
+    factory.register_builder(Provider.MULTICHOICE, MultiChoiceProviderBuilder())
+    factory.register_builder(Provider.INTRO, IntroProviderBuilder())
+    factory.register_builder(Provider.QUESTION, QuestionProviderBuilder())
+
+    yield factory
+
+    factory.unregister_builder(Provider.MULTICHOICE)
+    factory.unregister_builder(Provider.INTRO)
+    factory.unregister_builder(Provider.QUESTION)
