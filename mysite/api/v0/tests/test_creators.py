@@ -134,3 +134,26 @@ def test_question_multichoice(unit, multichoice_data):
     assert _answer.text == multichoice_data["answer"]
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_comparisons(unit, comparisons_data):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(comparisons_data)
+
+    correct_text = f"{comparisons_data['question']}\r\n\r\n"
+
+    for choice in comparisons_data["comparisons"]:
+        correct_text += f"- {choice['text']}\r\n"
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.title == comparisons_data["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == comparisons_data["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy

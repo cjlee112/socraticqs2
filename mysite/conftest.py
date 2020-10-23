@@ -343,8 +343,8 @@ def orct_data():
         "title": "ORCT Ukraine population.",
         "question": "What population of Ukraine?",
         "answer": "Ukraine has a population of about 42 million.",
+        "author": "Ilona",
         "kind": "question",
-        "author": "Ilona"
     }
 
 
@@ -376,6 +376,27 @@ def multichoice_data():
         ],
         "answer": "Green\n. The green set of bricks is the least heavy because it contains the least number of circles.",
         "kind": "multichoice"
+    }
+
+
+@pytest.fixture(scope="function")
+def comparisons_data():
+    """
+    Fixture for the Threads API to gen comparisons post data.
+    """
+    return {
+        "title": "Largest number.",
+        "question": "What would result in the largest number? Briefly explain your reasoning.",
+        "comparisons": [
+            {
+                "text": "905 divided by 5"
+            },
+            {
+                "text": "905 divided by 905"
+            }
+        ],
+        "answer": "REWRITE: Dividing something by the smallest number will always give the biggest answer.",
+        "kind": "question"
     }
 
 

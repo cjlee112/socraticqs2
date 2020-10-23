@@ -8,12 +8,25 @@ class QuestionProvider:
         self._data = data
         self._unit = unit
 
+    def _convert_data(self):
+        if "comparisons" not in self._data:
+            return self._data.get("question", "")
+
+        correct_text = f"{self._data['question']}\r\n\r\n"
+
+        for choice in self._data["comparisons"]:
+            correct_text += f"- {choice['text']}\r\n"
+
+        return correct_text
+
     def get_question(self):
         author = User.objects.filter(username=self._data.get("author")).first()
 
+        correct_text = self._convert_data()
+
         _converted = {
             "title": self._data.get("title", ""),
-            "text": self._data.get("question", ""),
+            "text": correct_text,
             "kind": Lesson.ORCT_QUESTION,
             "addedBy": author or self._unit.addedBy,
         }
