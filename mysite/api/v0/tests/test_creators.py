@@ -1,3 +1,5 @@
+import base64
+
 import pytest
 from django.contrib.auth.models import User
 
@@ -155,5 +157,25 @@ def test_question_comparisons(unit, comparisons_data):
     _answer = thread.get_answers().first().lesson
     assert _answer.title == "Answer"
     assert _answer.text == comparisons_data["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_canvas(unit, canvas_data):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(canvas_data)
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.sub_kind == Lesson.CANVAS
+    assert base64.b64encode(thread.lesson.attachment.read()) == canvas_data["canvas"].encode()
+    assert thread.lesson.title == canvas_data["title"]
+    assert thread.lesson.text == canvas_data['question']
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == canvas_data["answer"]
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy

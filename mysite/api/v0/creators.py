@@ -1,10 +1,7 @@
 """
 Module implements conversion functions for the Lesson object.
 """
-
-from django.contrib.auth.models import User
-
-from ct.models import UnitLesson, Lesson
+from ct.models import UnitLesson
 
 from .service import factory
 from .lesson_providers.cfg import Provider
@@ -115,6 +112,10 @@ class MultichoiceCreator(QuestionCreator):
     pass
 
 
+class CanvasCreator(QuestionCreator):
+    pass
+
+
 class ThreadBuilder:
     def __init__(self, unit):
         self._unit = unit
@@ -124,6 +125,7 @@ class ThreadBuilder:
             "intro": IntroCreator,
             "question": QuestionCreator,
             "multichoice": MultichoiceCreator,
+            "canvas": CanvasCreator,
         }
 
         creator = switch.get(data.get("kind", "intro"))(data, self._unit)
