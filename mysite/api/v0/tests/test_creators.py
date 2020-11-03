@@ -24,6 +24,41 @@ def test_intro(unit, intro_data):
 
 
 @pytest.mark.django_db
+def test_intro_w_image(unit, intro_data_w_image):
+    author = User.objects.create(username="Ilona")
+
+    builder = ThreadBuilder(unit)
+    thread = builder.build(intro_data_w_image)
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.addedBy == author == thread.lesson.addedBy
+    assert thread.lesson.kind == Lesson.BASE_EXPLANATION
+    assert base64.b64encode(thread.lesson.attachment.read()) == intro_data_w_image["image"].encode()
+    assert thread.lesson.title == intro_data_w_image["title"]
+    assert thread.lesson.text == intro_data_w_image["message"]
+
+
+@pytest.mark.django_db
+def test_intro_w_image_wo_message(unit, intro_data_w_image):
+    del intro_data_w_image["message"]
+    author = User.objects.create(username="Ilona")
+
+    builder = ThreadBuilder(unit)
+    thread = builder.build(intro_data_w_image)
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.addedBy == author == thread.lesson.addedBy
+    assert thread.lesson.kind == Lesson.BASE_EXPLANATION
+    assert base64.b64encode(thread.lesson.attachment.read()) == intro_data_w_image["image"].encode()
+    assert thread.lesson.title == intro_data_w_image["title"]
+    assert thread.lesson.text == ""
+
+
+@pytest.mark.django_db
 def test_intro_no_existing_user(unit, intro_data):
     builder = ThreadBuilder(unit)
     thread = builder.build(intro_data)
@@ -71,6 +106,25 @@ def test_question(unit, orct_data):
     assert _answer.text == orct_data["answer"]
 
     assert thread.addedBy == author == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_w_images(unit, orct_data_w_image):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(orct_data_w_image)
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert base64.b64encode(thread.lesson.attachment.read()) == orct_data_w_image["image"].encode()
+    assert thread.lesson.title == orct_data_w_image["title"]
+    assert thread.lesson.text == orct_data_w_image['question']
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == orct_data_w_image["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
 
 
 @pytest.mark.django_db
@@ -157,6 +211,30 @@ def test_question_comparisons(unit, comparisons_data):
     _answer = thread.get_answers().first().lesson
     assert _answer.title == "Answer"
     assert _answer.text == comparisons_data["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_comparisons_w_image(unit, comparisons_data_w_image):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(comparisons_data_w_image)
+
+    correct_text = f"{comparisons_data_w_image['question']}\r\n\r\n"
+
+    for choice in comparisons_data_w_image["comparisons"]:
+        correct_text += f"- {choice['text']}\r\n"
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert base64.b64encode(thread.lesson.attachment.read()) == comparisons_data_w_image["image"].encode()
+    assert thread.lesson.title == comparisons_data_w_image["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == comparisons_data_w_image["answer"]
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
 

@@ -1,3 +1,7 @@
+import base64
+import secrets
+
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 
 from ct.models import Lesson
@@ -19,23 +23,38 @@ class QuestionProvider:
 
         return correct_text
 
+    def extra(self):
+        """
+        Generate an Image attachment based on base64 data.
+
+        API request data must contain `canvas` field with
+        base64 encoded image.
+        """
+        if not self._data.get("image"):
+            return {}
+
+        _ext = "jpg"
+        _attachment = ContentFile(
+            base64.b64decode(self._data["image"]),
+            name=f"orct_image_{secrets.token_hex(15)}." + _ext)
+
+        return {
+            "attachment": _attachment
+        }
+
     def get_question(self):
         author = User.objects.filter(username=self._data.get("author")).first()
 
-        correct_text = self._convert_data()
-
         _converted = {
             "title": self._data.get("title", ""),
-            "text": correct_text,
+            "text": self._convert_data(),
             "kind": Lesson.ORCT_QUESTION,
+            "treeID": 1,
             "addedBy": author or self._unit.addedBy,
         }
-        question = Lesson(
-            title=_converted['title'],
-            text=_converted['text'],
-            kind=_converted['kind'],
-            addedBy=_converted['addedBy'],
-            treeID=1)
+        _converted.update(self.extra())
+
+        question = Lesson(**_converted)
         question.save()
 
         return question
