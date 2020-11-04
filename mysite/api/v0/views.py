@@ -288,7 +288,7 @@ class CourseletViewSet(viewsets.ModelViewSet):
     serializer_class = UnitSerializer
 
 
-class CourseletThreadsViewSet(generics.ListCreateAPIView):
+class CourseletThreadsViewSet(viewsets.ModelViewSet):
     """
     Returns a list of all Courselet's threads.
     """
@@ -304,14 +304,14 @@ class CourseletThreadsViewSet(generics.ListCreateAPIView):
 
         return queryset.filter(
             Q(lesson__kind=Lesson.ORCT_QUESTION) | Q(lesson__kind=Lesson.BASE_EXPLANATION),
-            unit=self.kwargs.get("pk"),
+            unit=self.kwargs.get("courselet_pk"),
             order__isnull=False)
 
-    def create(self, request, pk, *args, **kwargs):
+    def create(self, request, courselet_pk, *args, **kwargs):
         """
         Creates list of Threads for the given Courselet.
         """
-        unit = get_object_or_404(Unit, id=self.kwargs.get("pk"))
+        unit = get_object_or_404(Unit, id=courselet_pk)
 
         threads = []
 
@@ -327,3 +327,17 @@ class CourseletThreadsViewSet(generics.ListCreateAPIView):
                 "result": serializer.data
             },
             status=status.HTTP_201_CREATED)
+
+    def perform_destroy(self, instance):
+        """
+        We need to ensure Lesson instance is deleted.
+
+        Also we have to recalculate an order for a Unit.
+        """
+        # save Unit to perform reordering
+        _unit = instance.unit
+
+        instance.lesson.delete()
+        super().perform_destroy(instance)
+
+        _unit.reorder_exercise()

@@ -1,6 +1,7 @@
 """ API v0 URLs. """
 from django.conf.urls import url
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 
 from .views import (
     EchoDataView,
@@ -18,6 +19,9 @@ from .views import (
 )
 
 app_name = 'v0'
+
+router = routers.DefaultRouter()
+router.register(r"threads", CourseletThreadsViewSet, basename="courselet-threads")
 
 urlpatterns = [
     url(
@@ -54,6 +58,6 @@ urlpatterns = [
     path('bp/upload/', BestPracticeUpload.as_view(), name='bp-upload'),
 
     path('courselets/<int:pk>/', CourseletViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='courselet-api'),
-    path('courselets/<int:pk>/threads/', CourseletThreadsViewSet.as_view(), name='courselet-threads-api')
+    path('courselets/<int:courselet_pk>/', include(router.urls)),
 
 ]
