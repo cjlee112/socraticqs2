@@ -35,13 +35,31 @@ class Creator:
         """
         pass
 
+    def update(self, thread):
+        """
+        Create.
+        """
+        pass
+
     def get_base(self):
         """
         Base method for base Lesson creation.
         """
         pass
 
+    def update_base(self, thread):
+        """
+        Base method for base Lesson creation.
+        """
+        pass
+
     def get_answer(self):
+        """
+        Base method for answers Lesson creation.
+        """
+        pass
+
+    def update_answer(self, thread):
         """
         Base method for answers Lesson creation.
         """
@@ -55,9 +73,12 @@ class IntroCreator(Creator):
     def create(self):
         self.get_base()
 
+    def update(self, thread):
+        self.update_base(thread)
+
     def get_base(self):
         """
-        Create base Lesson
+        Create base Lesson.
         """
         intro = self._lesson_provider.get_intro()
 
@@ -69,6 +90,17 @@ class IntroCreator(Creator):
 
         self._thread = unit_lesson
 
+    def update_base(self, thread):
+        """
+        Update base Lesson.
+
+        TODO: discuss branching strategy for the update operation.
+        """
+        thread.lesson = self._lesson_provider.get_intro()
+        thread.save()
+
+        self._thread = thread
+
 
 class QuestionCreator(Creator):
     """
@@ -77,6 +109,10 @@ class QuestionCreator(Creator):
     def create(self):
         self.get_base()
         self.set_answer()
+
+    def update(self, thread):
+        self.update_base(thread)
+        self.update_answer(thread)
 
     def get_base(self):
         """
@@ -91,6 +127,15 @@ class QuestionCreator(Creator):
         unit_lesson.save()
 
         self._thread = unit_lesson
+
+    def update_base(self, thread):
+        """
+        Update base Lesson.
+        """
+        thread.lesson = self._lesson_provider.get_question()
+        thread.save()
+
+        self._thread = thread
 
     def set_answer(self):
         """
@@ -107,6 +152,16 @@ class QuestionCreator(Creator):
             parent=self._thread)
         self._thread._answer.save()
 
+    def update_answer(self, thread):
+        """
+        Update answer Lesson.
+        """
+        _answer = thread.get_answers().first().lesson
+        _answer.lesson = self._lesson_provider.get_answer()
+        _answer.save()
+
+        self._thread._answer = _answer
+
 
 class MultichoiceCreator(QuestionCreator):
     pass
@@ -117,18 +172,24 @@ class CanvasCreator(QuestionCreator):
 
 
 class ThreadBuilder:
+    switch = {
+        "intro": IntroCreator,
+        "question": QuestionCreator,
+        "multichoice": MultichoiceCreator,
+        "canvas": CanvasCreator,
+    }
+
     def __init__(self, unit):
         self._unit = unit
 
     def build(self, data):
-        switch = {
-            "intro": IntroCreator,
-            "question": QuestionCreator,
-            "multichoice": MultichoiceCreator,
-            "canvas": CanvasCreator,
-        }
-
-        creator = switch.get(data.get("kind", "intro"))(data, self._unit)
+        creator = self.switch.get(data.get("kind", "intro"))(data, self._unit)
         creator.create()
+
+        return creator._thread
+
+    def update(self, thread, data):
+        creator = self.switch.get(data.get("kind", "intro"))(data, self._unit)
+        creator.update(thread)
 
         return creator._thread

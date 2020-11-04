@@ -144,3 +144,48 @@ def test_courselet_threads_delete(unit, client):
 
     saved_orct_unit_lesson = UnitLesson.objects.get(id=orct_id)
     assert saved_orct_unit_lesson.order == 0
+
+
+@pytest.mark.django_db
+def test_courselet_threads_update(unit, client):
+    """
+    Test DELETE action for the REST API.
+    """
+    _data = [
+        {
+            "title": "Ukraine population.",
+            "message": "Ukraine has a population of about 42 million.",
+            "kind": "intro"
+        }
+    ]
+
+    _new_data = {
+        "title": "Ukraine population NEW calculation.",
+        "message": "Ukraine has a population of about 45 million.",
+        "kind": "intro"
+    }
+
+    response = client.post(
+        reverse("api:v0:courselet-threads-list", kwargs={
+            'courselet_pk': unit.id}),
+        data=_data,
+        content_type='application/json',
+        HTTP_ACCEPT='application/json'
+    )
+    result = response.data["result"]
+    _id = result[0]["id"]
+
+    response = client.put(
+        reverse("api:v0:courselet-threads-detail", kwargs={
+            'courselet_pk': unit.id, "pk": _id}),
+        data=_new_data,
+        content_type='application/json',
+        HTTP_ACCEPT='application/json'
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["result"]["id"] == _id
+
+    updated_thread = UnitLesson.objects.get(id=_id)
+    assert updated_thread.lesson.title == _new_data["title"]
+    assert updated_thread.lesson.text == _new_data["message"]

@@ -328,6 +328,25 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED)
 
+    def update(self, request, courselet_pk, *args, **kwargs):
+        """
+        Completelly update the Thread with a new data.
+        """
+        unit = get_object_or_404(Unit, id=courselet_pk)
+        thread = self.get_object()
+
+        builder = ThreadBuilder(unit)
+        undated_thread = builder.update(thread, request.data)
+
+        serializer = self.serializer_class(undated_thread)
+
+        return RestResponse(
+            {
+                "status": "updated",
+                "result": serializer.data
+            },
+            status=status.HTTP_200_OK)
+
     def perform_destroy(self, instance):
         """
         We need to ensure Lesson instance is deleted.
