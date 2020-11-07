@@ -27,7 +27,7 @@ class QuestionProvider:
         """
         Generate an Image attachment based on base64 data.
 
-        API request data must contain `canvas` field with
+        API request data must contain `image` field with
         base64 encoded image.
         """
         if not self._data.get("image"):
@@ -37,6 +37,25 @@ class QuestionProvider:
         _attachment = ContentFile(
             base64.b64decode(self._data["image"]),
             name=f"orct_image_{secrets.token_hex(15)}." + _ext)
+
+        return {
+            "attachment": _attachment
+        }
+
+    def extra_answer(self):
+        """
+        Generate an Image attachment based on base64 data.
+
+        API request data must contain `answerImg` field with
+        base64 encoded image.
+        """
+        if not self._data.get("answerImg"):
+            return {}
+
+        _ext = "jpg"
+        _attachment = ContentFile(
+            base64.b64decode(self._data["answerImg"]),
+            name=f"orct_answer_image_{secrets.token_hex(15)}." + _ext)
 
         return {
             "attachment": _attachment
@@ -68,11 +87,9 @@ class QuestionProvider:
             "kind": Lesson.ANSWER,
             "addedBy": author or self._unit.addedBy,
         }
-        answer = Lesson(
-            title=_converted['title'],
-            text=_converted['text'],
-            kind=_converted['kind'],
-            addedBy=_converted['addedBy'])
+        _converted.update(self.extra_answer())
+
+        answer = Lesson(**_converted)
         answer.save()
 
         return answer

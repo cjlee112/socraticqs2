@@ -109,20 +109,21 @@ def test_question(unit, orct_data):
 
 
 @pytest.mark.django_db
-def test_question_w_images(unit, orct_data_w_image):
+def test_question_w_images(unit, orct_data_w_images):
     builder = ThreadBuilder(unit)
-    thread = builder.build(orct_data_w_image)
+    thread = builder.build(orct_data_w_images)
 
     assert thread.id
     assert thread.order == 0
     assert thread.kind == UnitLesson.COMPONENT
     assert thread.lesson.kind == Lesson.ORCT_QUESTION
-    assert base64.b64encode(thread.lesson.attachment.read()) == orct_data_w_image["image"].encode()
-    assert thread.lesson.title == orct_data_w_image["title"]
-    assert thread.lesson.text == orct_data_w_image['question']
+    assert base64.b64encode(thread.lesson.attachment.read()) == orct_data_w_images["image"].encode()
+    assert thread.lesson.title == orct_data_w_images["title"]
+    assert thread.lesson.text == orct_data_w_images['question']
     _answer = thread.get_answers().first().lesson
     assert _answer.title == "Answer"
-    assert _answer.text == orct_data_w_image["answer"]
+    assert _answer.text == orct_data_w_images["answer"]
+    assert base64.b64encode(_answer.attachment.read()) == orct_data_w_images["answerImg"].encode()
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
 
@@ -182,12 +183,14 @@ def test_question_multichoice(unit, multichoice_data):
     assert thread.order == 0
     assert thread.kind == UnitLesson.COMPONENT
     assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert base64.b64encode(thread.lesson.attachment.read()) == multichoice_data["image"].encode()
     assert thread.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
     assert thread.lesson.title == multichoice_data["title"]
     assert thread.lesson.text == correct_text
     _answer = thread.get_answers().first().lesson
     assert _answer.title == "Answer"
     assert _answer.text == multichoice_data["answer"]
+    assert base64.b64encode(_answer.attachment.read()) == multichoice_data["answerImg"].encode()
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
 
@@ -216,25 +219,26 @@ def test_question_comparisons(unit, comparisons_data):
 
 
 @pytest.mark.django_db
-def test_question_comparisons_w_image(unit, comparisons_data_w_image):
+def test_question_comparisons_w_image(unit, comparisons_data_w_images):
     builder = ThreadBuilder(unit)
-    thread = builder.build(comparisons_data_w_image)
+    thread = builder.build(comparisons_data_w_images)
 
-    correct_text = f"{comparisons_data_w_image['question']}\r\n\r\n"
+    correct_text = f"{comparisons_data_w_images['question']}\r\n\r\n"
 
-    for choice in comparisons_data_w_image["comparisons"]:
+    for choice in comparisons_data_w_images["comparisons"]:
         correct_text += f"- {choice['text']}\r\n"
 
     assert thread.id
     assert thread.order == 0
     assert thread.kind == UnitLesson.COMPONENT
     assert thread.lesson.kind == Lesson.ORCT_QUESTION
-    assert base64.b64encode(thread.lesson.attachment.read()) == comparisons_data_w_image["image"].encode()
-    assert thread.lesson.title == comparisons_data_w_image["title"]
+    assert base64.b64encode(thread.lesson.attachment.read()) == comparisons_data_w_images["image"].encode()
+    assert thread.lesson.title == comparisons_data_w_images["title"]
     assert thread.lesson.text == correct_text
     _answer = thread.get_answers().first().lesson
     assert _answer.title == "Answer"
-    assert _answer.text == comparisons_data_w_image["answer"]
+    assert _answer.text == comparisons_data_w_images["answer"]
+    assert base64.b64encode(_answer.attachment.read()) == comparisons_data_w_images["answerImg"].encode()
 
     assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
 
