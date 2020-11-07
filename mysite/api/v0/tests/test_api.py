@@ -10,17 +10,17 @@ from ct.models import UnitLesson, Lesson
 
 
 @pytest.mark.django_db
-def test_courselet_threads_get(unit, client):
+def test_courselet_threads_get(course_unit, client):
     """
     Test positive case for the threads API.
     """
-    response = client.get(reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': unit.id}))
+    response = client.get(reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': course_unit.id}))
 
     assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
-def test_courselet_threads_post(unit, client):
+def test_courselet_threads_post(course_unit, client):
     """
     Test positive case for the threads API.
     """
@@ -42,7 +42,7 @@ def test_courselet_threads_post(unit, client):
     author = User.objects.create(username="Ilona")
 
     response = client.post(
-        reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': unit.id}),
+        reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': course_unit.id}),
         data=_data,
         content_type='application/json',
         HTTP_ACCEPT='application/json'
@@ -90,7 +90,7 @@ def test_courselet_get(unit, client):
 
 
 @pytest.mark.django_db
-def test_courselet_threads_delete(unit, client):
+def test_courselet_threads_delete(course_unit, client):
     """
     Test DELETE action for the REST API.
     """
@@ -109,7 +109,7 @@ def test_courselet_threads_delete(unit, client):
     ]
 
     response = client.post(
-        reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': unit.id}),
+        reverse("api:v0:courselet-threads-list", kwargs={'courselet_pk': course_unit.id}),
         data=_data,
         content_type='application/json',
         HTTP_ACCEPT='application/json'
@@ -126,7 +126,7 @@ def test_courselet_threads_delete(unit, client):
 
     response = client.delete(
         reverse("api:v0:courselet-threads-detail", kwargs={
-            'courselet_pk': unit.id, "pk": _id}),
+            'courselet_pk': course_unit.id, "pk": _id}),
         content_type='application/json',
         HTTP_ACCEPT='application/json'
     )
@@ -147,7 +147,7 @@ def test_courselet_threads_delete(unit, client):
 
 
 @pytest.mark.django_db
-def test_courselet_threads_update(unit, client):
+def test_courselet_threads_update(course_unit, client):
     """
     Test DELETE action for the REST API.
     """
@@ -167,7 +167,7 @@ def test_courselet_threads_update(unit, client):
 
     response = client.post(
         reverse("api:v0:courselet-threads-list", kwargs={
-            'courselet_pk': unit.id}),
+            'courselet_pk': course_unit.id}),
         data=_data,
         content_type='application/json',
         HTTP_ACCEPT='application/json'
@@ -177,7 +177,7 @@ def test_courselet_threads_update(unit, client):
 
     response = client.put(
         reverse("api:v0:courselet-threads-detail", kwargs={
-            'courselet_pk': unit.id, "pk": _id}),
+            'courselet_pk': course_unit.id, "pk": _id}),
         data=_new_data,
         content_type='application/json',
         HTTP_ACCEPT='application/json'

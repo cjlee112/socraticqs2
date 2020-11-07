@@ -13,7 +13,7 @@ from django.db.models import Q
 
 from analytics.models import CourseReport
 from analytics.tasks import report
-from ct.models import Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
+from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
 from ctms.models import BestPractice, BestPracticeTemplate
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
@@ -296,23 +296,31 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
     queryset = UnitLesson.objects.all()
     serializer_class = ThreadSerializer
 
+    def get_unit(self, course_unit_pk):
+        """
+        Get Unit instanfe from a CoureUnit/Courselet object.
+        """
+        course_unit = get_object_or_404(CourseUnit, id=course_unit_pk)
+
+        return course_unit.unit
+
     def get_queryset(self):
         """
         Specifying UniLessons aka Threads for the Courselet aka Unit.
         """
         queryset = super().get_queryset()
+        unit = self.get_unit(self.kwargs.get("courselet_pk"))
 
         return queryset.filter(
             Q(lesson__kind=Lesson.ORCT_QUESTION) | Q(lesson__kind=Lesson.BASE_EXPLANATION),
-            unit=self.kwargs.get("courselet_pk"),
+            unit=unit,
             order__isnull=False)
 
     def create(self, request, courselet_pk, *args, **kwargs):
         """
         Creates list of Threads for the given Courselet.
         """
-        unit = get_object_or_404(Unit, id=courselet_pk)
-
+        unit = self.get_unit(courselet_pk)
         threads = []
 
         for thread_data in request.data:
@@ -332,7 +340,7 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
         """
         Completelly update the Thread with a new data.
         """
-        unit = get_object_or_404(Unit, id=courselet_pk)
+        unit = self.get_unit(courselet_pk)
         thread = self.get_object()
 
         builder = ThreadBuilder(unit)
