@@ -116,10 +116,15 @@ class MultiChoiceProvider(SubKindBaseProvider):
         correct_text = f"{self._data['question']}\r\n\r\n[choices]\r\n"
 
         for choice in self._data["choices"]:
+            img_tag = ""
+            if choice.get("img"):
+                img_tag = f' <img src="{choice.get("img")}">'
+
             if choice['correct']:
-                correct_text += "(*) " + choice['text'] + f"\r\n{self._data['answer']}\r\n"
+                correct_text += "(*) " + choice.get('text', '') + img_tag + \
+                    f"\r\n{self._data['answer']}\r\n"
             else:
-                correct_text += "() " + choice['text'] + "\r\n"
+                correct_text += "() " + choice.get('text', '') + img_tag + "\r\n"
 
         return correct_text
 

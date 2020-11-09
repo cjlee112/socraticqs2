@@ -196,6 +196,34 @@ def test_question_multichoice(unit, multichoice_data):
 
 
 @pytest.mark.django_db
+def test_question_multichoice_img(unit, multichoice_img_data):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(multichoice_img_data)
+
+    correct_text = f"{multichoice_img_data['question']}\r\n\r\n[choices]\r\n"
+
+    for choice in multichoice_img_data["choices"]:
+        if choice['correct']:
+            correct_text += "(*) " + f' <img src="{choice.get("img")}">' + \
+                f"\r\n{multichoice_img_data['answer']}\r\n"
+        else:
+            correct_text += "() " + f' <img src="{choice.get("img")}">' + "\r\n"
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
+    assert thread.lesson.title == multichoice_img_data["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == multichoice_img_data["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
 def test_question_comparisons(unit, comparisons_data):
     builder = ThreadBuilder(unit)
     thread = builder.build(comparisons_data)

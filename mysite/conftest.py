@@ -415,8 +415,39 @@ def multichoice_data(base64_encoded_image, base64_encoded_answer_image):
                 "correct": False
             }
         ],
-        "answer": "Green\n. The green set of bricks is the least heavy because it contains the least number of circles.",
+        "answer": "The green set of bricks is the least heavy because it contains the least number of circles.",
         "answerImg": base64_encoded_answer_image,
+        "kind": "multichoice"
+    }
+
+
+@pytest.fixture(scope="function")
+def multichoice_img_data():
+    """
+    Fixture for the Threads API to gen multichoice post data with img.
+    """
+    return {
+        "title": "Brick weight.",
+        "question": "Which set of bricks is less heavier?",
+        "choices": [
+            {
+                "img": "https://aplusclick.org/image/jpg/568_4.jpg",
+                "correct": False
+            },
+            {
+                "img": "https://aplusclick.org/image/jpg/568_2.jpg",
+                "correct": False
+            },
+            {
+                "img": "https://aplusclick.org/image/jpg/568_1.jpg",
+                "correct": True
+            },
+            {
+                "img": "https://aplusclick.org/image/jpg/568_3.jpg",
+                "correct": False
+            }
+        ],
+        "answer": "The green set of bricks is the least heavy because it contains the least number of circles.",
         "kind": "multichoice"
     }
 
