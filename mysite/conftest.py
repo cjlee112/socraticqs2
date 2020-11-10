@@ -497,6 +497,64 @@ def comparisons_data_w_images(base64_encoded_image, base64_encoded_answer_image)
 
 
 @pytest.fixture(scope="function")
+def comparisons_data_w_img():
+    """
+    Fixture for the Threads API to gen comparisons post data with img.
+    """
+    return {
+        "title": "Shape's angles",
+        "question": "How many angles does this shape have?",
+        "comparisons": [
+            {
+                "img": "https://aplusclick.org/image/jpg/1166_1.jpg"
+            }
+        ],
+        "answer": "REWRITE: has 5 internal right angles and one external right angle.",
+        "kind": "question"
+    }
+
+
+@pytest.fixture(scope="function")
+def comparisons_data_w_2_img():
+    """
+    Fixture for the Threads API to gen comparisons post data with img.
+    """
+    return {
+        "title": "Shape's angles",
+        "question": "How many angles does this shape have?",
+        "comparisons": [
+            {
+                "img": "https://aplusclick.org/image/jpg/1166_1.jpg"
+            },
+            {
+                "img": "https://aplusclick.org/image/jpg/1166_1.jpg"
+            }
+        ],
+        "answer": "REWRITE: has 5 internal right angles and one external right angle.",
+        "kind": "question"
+    }
+
+
+@pytest.fixture(scope="function")
+def comparisons_data_w_img_and_text():
+    """
+    Fixture for the Threads API to gen comparisons post data with img.
+    """
+    return {
+        "title": "Shape's angles",
+        "question": "How many angles does this shape have?",
+        "comparisons": [
+            {
+                "img": "https://aplusclick.org/image/jpg/1166_1.jpg",
+                "text": "6 angles"
+            }
+        ],
+        "answer": "REWRITE: has 5 internal right angles and one external right angle.",
+        "kind": "question"
+    }
+
+
+@pytest.fixture(scope="function")
 def canvas_data(base64_encoded_image):
     """
     Fixture for the Threads API to gen canvas post data.

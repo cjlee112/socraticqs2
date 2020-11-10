@@ -231,7 +231,7 @@ def test_question_comparisons(unit, comparisons_data):
     correct_text = f"{comparisons_data['question']}\r\n\r\n"
 
     for choice in comparisons_data["comparisons"]:
-        correct_text += f"- {choice['text']}\r\n"
+        correct_text += f"- {choice['text']}\r\n\r\n"
 
     assert thread.id
     assert thread.order == 0
@@ -247,6 +247,75 @@ def test_question_comparisons(unit, comparisons_data):
 
 
 @pytest.mark.django_db
+def test_question_comparisons_img(unit, comparisons_data_w_img):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(comparisons_data_w_img)
+
+    correct_text = f"{comparisons_data_w_img['question']}\r\n\r\n"
+
+    for choice in comparisons_data_w_img["comparisons"]:
+        correct_text += f'.. image:: {choice.get("img")}\r\n'
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.title == comparisons_data_w_img["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == comparisons_data_w_img["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_comparisons_2_img(unit, comparisons_data_w_2_img):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(comparisons_data_w_2_img)
+
+    correct_text = f"{comparisons_data_w_2_img['question']}\r\n\r\n"
+
+    for choice in comparisons_data_w_2_img["comparisons"]:
+        correct_text += f'.. image:: {choice.get("img")}\r\n'
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.title == comparisons_data_w_2_img["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == comparisons_data_w_2_img["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
+def test_question_comparisons_img_and_text(unit, comparisons_data_w_img_and_text):
+    builder = ThreadBuilder(unit)
+    thread = builder.build(comparisons_data_w_img_and_text)
+
+    correct_text = f"{comparisons_data_w_img_and_text['question']}\r\n\r\n"
+
+    for choice in comparisons_data_w_img_and_text["comparisons"]:
+        correct_text += f'- {choice.get("text", "")}\r\n\r\n.. image:: {choice.get("img")}\r\n'
+
+    assert thread.id
+    assert thread.order == 0
+    assert thread.kind == UnitLesson.COMPONENT
+    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.title == comparisons_data_w_img_and_text["title"]
+    assert thread.lesson.text == correct_text
+    _answer = thread.get_answers().first().lesson
+    assert _answer.title == "Answer"
+    assert _answer.text == comparisons_data_w_img_and_text["answer"]
+
+    assert thread.addedBy == unit.addedBy == thread.lesson.addedBy == _answer.addedBy
+
+
+@pytest.mark.django_db
 def test_question_comparisons_w_image(unit, comparisons_data_w_images):
     builder = ThreadBuilder(unit)
     thread = builder.build(comparisons_data_w_images)
@@ -254,7 +323,7 @@ def test_question_comparisons_w_image(unit, comparisons_data_w_images):
     correct_text = f"{comparisons_data_w_images['question']}\r\n\r\n"
 
     for choice in comparisons_data_w_images["comparisons"]:
-        correct_text += f"- {choice['text']}\r\n"
+        correct_text += f"- {choice['text']}\r\n\r\n"
 
     assert thread.id
     assert thread.order == 0

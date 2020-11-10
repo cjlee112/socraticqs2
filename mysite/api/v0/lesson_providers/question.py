@@ -19,7 +19,15 @@ class QuestionProvider:
         correct_text = f"{self._data['question']}\r\n\r\n"
 
         for choice in self._data["comparisons"]:
-            correct_text += f"- {choice['text']}\r\n"
+            text = ""
+            if choice.get("text"):
+                text = f'- {choice.get("text", "")}\r\n\r\n'
+
+            img_tag = ""
+            if choice.get("img"):
+                img_tag = f'.. image:: {choice.get("img")}\r\n'
+
+            correct_text += f"{text}{img_tag}"
 
         return correct_text
 
