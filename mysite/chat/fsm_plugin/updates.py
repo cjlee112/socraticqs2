@@ -432,9 +432,11 @@ class GET_NEW_EMS(object):
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
         unit_lesson = next_lesson
         response = chat.message_set.filter(
-            lesson_to_answer_id=unit_lesson.id, kind='response', contenttype='response').first().content
+            lesson_to_answer_id=unit_lesson.id,
+            kind='response', contenttype='response').first().content
         # TODO investigate 'content_id': uniterror.id AttributeError: 'NoneType' object has no attribute 'id'
-        uniterror = UnitError.objects.filter(response=response, unit=chat.enroll_code.courseUnit.unit).first()
+        uniterror, _ = UnitError.objects.get_or_create(
+            response=response, unit=chat.enroll_code.courseUnit.unit)
         _data = {
             'chat': chat,
             'contenttype': 'uniterror',
@@ -449,9 +451,14 @@ class GET_NEW_EMS(object):
         return message
 
     def get_errors(self, message) -> Message:
-        checked_errors = UnitError.objects.get(
-            id=message.content_id
-        ).response.studenterror_set.all().values_list('errorModel', flat=True)
+        """
+        Get all error with selected ones.
+        """
+        checked_errors = ()
+        checked_qs = UnitError.objects.filter(id=message.content_id).first()
+        if checked_qs:
+            checked_errors = checked_qs.response.studenterror_set.all().values_list('errorModel', flat=True)
+
         error_str = (
             '<li><div class="chat-check chat-selectable {}" data-selectable-attribute="errorModel" '
             'data-selectable-value="{:d}"></div><h3>{}</h3></li>'
