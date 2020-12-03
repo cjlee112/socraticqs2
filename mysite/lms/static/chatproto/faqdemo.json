@@ -1,0 +1,54 @@
+{ "main": [
+  {
+    "kind": "intro",
+    "title": "Really Important Explanation",
+    "message": "Here I am explaining an incredibly important and interesting idea."
+  },
+  {
+    "kind": "orct",
+    "title": "Efficiency Concerns: When to Include an ORCT?",
+    "question": "What is the airspeed of a fully laden swallow?",
+    "answer": "What, do you mean an African or European swallow?"
+  },
+  {
+    "kind": "errormodel",
+    "title": "I didn't include the likelihoods of the observed rolls e.g. p(X=6|F) = 1/6.",
+    "message": "Gadzooks, promise me you won't ever make that mistake again!"
+  },
+  {
+    "kind": "errormodel",
+    "title": "I thought p(6|F)=0.5.",
+    "message": "Please don't be mean to the number 6."
+  },
+  {
+    "kind": "errormodel",
+    "title": "I thought the set of paths would be all possible dice rolls 111, 112, 113, ... 666.",
+    "message": "Go back and read the book from page 1 to the end."
+  },
+  {
+    "kind": "faq",
+    "title": "Where did the 6,2, and 10 come from in the beginning of each probability?",
+    "question": "I understand the fractions and where those probabilities came from but where did the 6s, 2s, and 10s come from?",
+    "answer": "1/6 is the likelihood of any roll outcome under the F state. 1/2 is the likelihood of rolling a six under the L state.  1/10 is the likelihood of any other outcome (i.e. anything but a six) under the L state.  Note that the question explicitly asked you to calculate the joint probability of both the observed rolls and the hidden states (not JUST the hidden states)."
+  },
+  {
+    "kind": "faq",
+    "title": "Why did I think 266 was two hundred and sixty six?",
+    "question": "I have a really important question and was wondering will you answer it?",
+    "answer": "Sure thing, buddy."
+  }
+],
+"updates": [
+  {
+    "kind": "errormodel",
+    "title": "I didn't realize that the answer to this question would change my life.",
+    "message": "Here is the amazing true story that will change your life forever!"
+  },
+  {
+    "kind": "faq",
+    "title": "Please, Professor, can you explain exactly what I am confused about?",
+    "question": "I am a student who is very confused, and am hoping that you can make everything clear to me.",
+    "answer": "I, the instructor, am now answering your question in great detail: yada yada yada."
+  }
+]
+}
