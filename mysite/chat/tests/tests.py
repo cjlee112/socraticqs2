@@ -137,6 +137,9 @@ class MainChatViewTests(CustomTestCase):
         self.assertTrue(
             Role.objects.filter(role=Role.ENROLLED, user=self.user, course=course_unit.course).exists()
         )
+        for chat_session in response.context["chat_sessions"]:
+            assert hasattr(chat_session, "lessons_done")
+            assert hasattr(chat_session, "total_lessons")
 
     def test_not_enroll_second_time(self):
         """

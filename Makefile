@@ -117,6 +117,8 @@ test:
 			bash -c \
 			" \
 			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \
+			DJANGO_SETTINGS_MODULE=mysite.settings.test \
+			PYTHONBREAKPOINT=ipdb.set_trace \
 			pytest -W ignore -s -vv --pdb $(path) \
 			"
 

@@ -14,6 +14,7 @@ from mysite.mixins import LoginRequiredMixin
 from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
+from chat.serializers import ChatProgressSerializer
 from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
@@ -277,6 +278,14 @@ class ChatInitialView(LoginRequiredMixin, View):
             instructor_icon = ''
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
+
+        for chat_ss in chat_sessions:
+            chat_prog_ser = ChatProgressSerializer()
+            lessons = chat_prog_ser.get_breakpoints(chat_ss)
+            chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
+            chat_ss.total_lessons = len(lessons)
+
+
         back_url_name, back_url = self.get_back_url(**locals())
         last_history = chat_sessions.filter(state__isnull=True, progress=100).order_by('id').last()
         updated_thread_id = None
