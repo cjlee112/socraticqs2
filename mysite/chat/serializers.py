@@ -51,15 +51,23 @@ class InternalMessageSerializer(serializers.ModelSerializer):
 
     def get_initials(self, obj):
         if not obj.userMessage:
-            if obj.kind == 'response' and obj.content and obj.content.kind == Response.STUDENT_QUESTION:
-                author = obj.content.author
-                return f"{author.first_name[0]}{author.last_name[0]}".upper()
-            elif obj.chat.instructor.first_name and obj.chat.instructor.last_name:
+
+            if obj.chat.instructor.first_name and obj.chat.instructor.last_name:
                 author = obj.chat.instructor
                 return f"{author.first_name[0]}{author.last_name[0]}".upper()
             else:
                 return  # Maybe need to add here something like "PR" (professor)?
-        return 'me'
+
+        return (
+            "?"
+
+            if obj.kind == 'response' and
+               obj.content and
+               obj.content.kind == Response.STUDENT_QUESTION and
+               obj.content.author != obj.chat.user
+
+            else "me"
+        )
 
 
 class InputSerializer(serializers.Serializer):

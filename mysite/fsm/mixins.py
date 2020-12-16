@@ -1205,7 +1205,7 @@ class ChatMixin(object):
                 sub_kind='faq',
                 chat=chat,
                 owner=chat.user,
-                userMessage=False,
+                userMessage=True,
                 is_additional=is_additional,
             )
             message = Message.objects.create(**_data)
