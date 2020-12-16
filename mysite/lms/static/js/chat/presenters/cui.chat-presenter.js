@@ -1658,7 +1658,7 @@ CUI.ChatPresenter.prototype._scrollToMessage = function(params){
   var scrollToPosition;
   var messageTop;
   var topMargin = 14;
-  var bottomMargin = 58 * window.devicePixelRatio;
+  var bottomMargin = 67 * window.devicePixelRatio;
 
   message = this._messagesContainer.getMessage(params.id);
   // Check that message exists
