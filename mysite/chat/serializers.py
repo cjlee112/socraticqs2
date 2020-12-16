@@ -9,7 +9,7 @@ from django.conf import settings
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
-from ct.models import UnitLesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
+from ct.models import Response, UnitLesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from accounts.models import Instructor
 from . models import Message, Chat
 from . services import ProgressHandler
@@ -51,10 +51,14 @@ class InternalMessageSerializer(serializers.ModelSerializer):
 
     def get_initials(self, obj):
         if not obj.userMessage:
-            if obj.chat.instructor.first_name and obj.chat.instructor.last_name:
-                return '{}{}'.format(obj.chat.instructor.first_name[0], obj.chat.instructor.last_name[0]).upper()
+            if obj.kind == 'response' and obj.content and obj.content.kind == Response.STUDENT_QUESTION:
+                author = obj.content.author
+                return f"{author.first_name[0]}{author.last_name[0]}".upper()
+            elif obj.chat.instructor.first_name and obj.chat.instructor.last_name:
+                author = obj.chat.instructor
+                return f"{author.first_name[0]}{author.last_name[0]}".upper()
             else:
-                return  # Myabe need to add here something like "PR" (professor)?
+                return  # Maybe need to add here something like "PR" (professor)?
         return 'me'
 
 
