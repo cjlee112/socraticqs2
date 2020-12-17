@@ -370,7 +370,7 @@ class SHOW_FAQ_ANSWER(object):
             chat.state.save_json_data()
 
         if waffle.switch_is_active('compound_faq_answer'):
-            text1 = md2html(f'Here\'s my answer to your question \"{answer.get("faq_title")}\"')
+            text1 = md2html(f'Below is my answer to the question you raised RE: \"{answer.get("faq_title")}\"')
             text2 = md2html(answer.get('text'))
             text = text1 + text2
         else:

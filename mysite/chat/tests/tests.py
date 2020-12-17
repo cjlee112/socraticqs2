@@ -512,7 +512,8 @@ class MessagesViewTests(CustomTestCase):
 
         next_url = json_content['input']['url']
 
-        next_url, _ = self._push_continue(next_url, chat_id)
+        # Disable CONTINUE button
+        # next_url, _ = self._push_continue(next_url, chat_id)
 
         answer = 'My Answer'
         response = self.client.put(
@@ -585,7 +586,8 @@ class MessagesViewTests(CustomTestCase):
         next_url, _ = self._push_continue(next_url, chat_id)
 
         # Click `move to the next Thread` button
-        next_url, json_content = self._push_continue(next_url, chat_id)
+        # Disable CONTINUE button
+        # next_url, json_content = self._push_continue(next_url, chat_id)
 
         # post answer
         answer = 'My Answer'
@@ -802,7 +804,8 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        next_url, json_content = self._push_continue(next_url, chat_id)
+        # Disable CONTINUE button
+        # next_url, json_content = self._push_continue(next_url, chat_id)
 
         # Move to the next Thread
         next_url, json_content = self._push_continue(next_url, chat_id)
