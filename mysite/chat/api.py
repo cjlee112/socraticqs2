@@ -35,6 +35,7 @@ from .serializers import (
 from .utils import (
     get_updated_thread_id,
     update_activity,
+    status_min
 )
 
 
@@ -400,7 +401,7 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                             "faqs": {str(faq_id): {'status': {"done": False}} for faq_id in selected}
                         }}
                     )
-                # Save presented in message FAQs to avoid futher bugs in wrong dadta selection
+                # Save presented in message FAQs to avoid futher bugs in wrong data selection
                 message.text = message.get_html()
                 message.save()
 
@@ -449,7 +450,10 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                     text = resp.get_selfeval_display()
                     # FIX if response was correct - user will not go to `else` section and response status should be set
                     if not resp.is_locked:
-                        resp.status = EVAL_TO_STATUS_MAP.get(opt_data)
+                        need_faqs = True if opt_data in (StudentResponse.CLOSE, StudentResponse.DIFFERENT) else False
+                        c_chat_context().update_one(
+                            {"chat_id": chat.id},
+                            {"$set": {"need_faqs": need_faqs}})
 
                 message.text = text
                 resp.save()
@@ -469,7 +473,8 @@ class MessagesView(ValidateMixin, generics.RetrieveUpdateAPIView, viewsets.Gener
                 # pass status to main response ONLY in case of absence the status at all
                 # is_locked status is setted in TRANSITION node in chat FSM
                 if not resp.response.is_locked:
-                    resp.response.status = selfeval
+                    resp.response.status = selfeval if not resp.response.status \
+                        else status_min(selfeval, resp.response.status).name
                     resp.response.save()
 
                 chat.next_point = message

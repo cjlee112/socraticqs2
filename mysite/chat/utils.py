@@ -1,4 +1,5 @@
 from uuid import uuid4
+from dataclasses import dataclass
 
 from django.utils import timezone
 
@@ -154,3 +155,27 @@ def is_end_update_node(state):
     node = state.fsmNode
 
     return node.node_name_is_one_of('END') and node.fsm.fsm_name_is_one_of('updates')
+
+
+@dataclass
+class Status:
+    name:                str
+
+    # TODO: revrive this using NEED_HELP_STATUS naming
+    help:                int = 0
+    review:              int = 1
+    done:                int = 2
+
+    def __lt__(self, ob) -> bool:
+        return self.weight < ob.weight
+
+    @property
+    def weight(self) -> int:
+        return getattr(self, self.name)
+
+
+def status_min(status1: str, status2: str) -> Status:
+    """
+    Apply the minimun rule for two statuses.
+    """
+    return min(Status(name=status1), Status(name=status2))

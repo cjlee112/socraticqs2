@@ -5,7 +5,7 @@ from dateutil import tz
 
 from django.utils import timezone
 
-from chat.utils import update_activity, c_chat_context, is_end_update_node
+from chat.utils import update_activity, c_chat_context, is_end_update_node, status_min, Status
 
 
 @pytest.mark.integration
@@ -51,3 +51,22 @@ def test_is_end_update_node(mocker, node_name_is_one_of, fsm_name_is_one_of, res
     node.fsm.fsm_name_is_one_of = mocker.Mock(return_value=fsm_name_is_one_of)
 
     assert is_end_update_node(state) is result
+
+
+@pytest.mark.unittest
+@pytest.mark.parametrize(
+    "status1, status2, result",
+    [
+        ["help",   "review", Status(name="help")],
+        ["help",   "done",   Status(name="help")],
+        ["review", "done",   Status(name="review")],
+        ["done",   "review", Status(name="review")],
+        ["done",   "help",   Status(name="help")],
+        ["review", "help",   Status(name="help")],
+        ["help",   "help",   Status(name="help")],
+        ["review", "review", Status(name="review")],
+        ["done",   "done",   Status(name="done")],
+    ]
+)
+def test_status_min(status1, status2, result):
+    assert status_min(status1, status2) == result

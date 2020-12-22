@@ -20,16 +20,13 @@ def next_additional_lesson(self, edge, fsmStack, request, useCurrent=False, **kw
     """
     fsm = edge.fromNode.fsm
     _status = fsmStack.next_point.student_error.status
+    additionals = None
+
     if _status == NEED_HELP_STATUS:
         additionals = Message.objects.filter(is_additional=True,
                                              chat=fsmStack,
                                              timestamp__isnull=True)
     elif _status in [NEED_REVIEW_STATUS, DONE_STATUS]:
-        if _status == DONE_STATUS:
-            c_chat_context().update_one(
-                {"chat_id": fsmStack.id},
-                {"$set": {"need_faqs": False}}
-            )
         Message.objects.filter(student_error=fsmStack.next_point.student_error,
                                is_additional=True,
                                chat=fsmStack,
@@ -264,6 +261,10 @@ class START(object):
         """
         unit = fsmStack.state.get_data_attr('unit')
         fsmStack.state.title = 'Study: %s' % unit.title
+
+        c_chat_context().update_one(
+            {"chat_id": kwargs.get('chat').id},
+            {"$set": {"need_faqs": True, "need_status": False}})
 
         try:  # use unitStatus if provided
             unitStatus = fsmStack.state.get_data_attr('unitStatus')

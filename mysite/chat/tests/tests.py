@@ -777,6 +777,24 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
+        # post status
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"value": 'help', "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # get next status message
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
         # Roll FAQs
         response = self.client.put(
             next_url,
@@ -821,6 +839,8 @@ class MessagesViewTests(CustomTestCase):
             content_type='application/json',
             follow=True
         )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
 
         # get next message - confidence (3)
         response = self.client.get(
@@ -1397,6 +1417,22 @@ class NumbersTest(CustomTestCase):
             follow=True
         )
 
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        response = self.client.get(
+            next_url, {'chat_id': chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        # Set Status of overall Lesson understanding
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": 'help', "chat_id": chat_id}),
+            content_type='application/json',
+            follow=True
+        )
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
@@ -2102,6 +2138,32 @@ class MultipleChoiceTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
         return json_content, next_url
+    
+    def set_status(self, json_content, next_url, status_id):
+        status = json_content['input']['options'][status_id]['value']
+        status_text = json_content['input']['options'][status_id]['text']
+
+        response = self.client.put(
+            next_url,
+            data=json.dumps({"option": status, "chat_id": self.chat_id}),
+            content_type='application/json',
+            follow=True
+        )
+
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEqual(json_content['addMessages'][0]['html'], "changeme")  # Hack
+
+        response = self.client.get(
+            next_url, {'chat_id': self.chat_id}, follow=True
+        )
+        json_content = json.loads(response.content)
+        next_url = json_content['input']['url']
+
+        self.assertEqual(json_content['addMessages'][0]['html'], status_text)
+
+        return json_content, next_url
 
     def get_and_check_next_question(self, json_content, next_url):
         response = self.client.get(
@@ -2195,12 +2257,15 @@ class MultipleChoiceTests(CustomTestCase):
         explanation_msg = "потому что потому"
         self.assertIn(answer_msg, json_content['addMessages'][1]['html'])
         self.assertIn(explanation_msg, json_content['addMessages'][1]['html'])
-        self.assertIn('Is there anything else you\'re wondering about, where you\'d like clarification or something you\'re unsure about this point?', json_content['addMessages'][3]['html'])
+        self.assertIn('How well do you feel you understand the solution now?', json_content['addMessages'][3]['html'])
         self.assertIn('message', json_content['addMessages'][3]['type'])
 
         answer_msg = "You selected: Nothing"
         self.assertIn(answer_msg, json_content['addMessages'][2]['html'])
 
+        json_content, next_url = self.set_status(json_content, next_url, 0)  # Set the help status
+
+        self.assertIn('Is there anything else you\'re wondering about, where you\'d like clarification or something you\'re unsure about this point?', json_content['addMessages'][1]['html'])
         # Roll FAQs
         next_url, json_content = self._push_continue(next_url, self.chat_id)
 

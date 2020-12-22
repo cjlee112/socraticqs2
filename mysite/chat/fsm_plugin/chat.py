@@ -3,21 +3,11 @@ from django.utils.safestring import mark_safe
 
 
 from core.common.mongo import c_chat_context
-from ct.models import UnitStatus, UnitLesson, Lesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
+from ct.models import UnitStatus, UnitLesson, Lesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS, EVAL_TO_STATUS_MAP
 from ct.templatetags.ct_extras import md2html
-from chat.models import Message, ChatDivider
+from chat.models import Message, ChatDivider, STATUS_CHOICES
 from chat.utils import is_last_thread, has_updates
 
-
-def next_lesson_after_errors(self, edge, fsmStack, request, useCurrent=False, **kwargs):
-    """
-    Edge method that moves us to right state for next lesson (or END).
-    """
-    fsm = edge.fromNode.fsm
-    if c_chat_context().find_one({"chat_id": fsmStack.id}).get('need_faqs'):
-        return fsm.get_node('FAQ')
-
-    return edge.toNode
 
 
 def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
@@ -27,7 +17,7 @@ def next_lesson(self, edge, fsmStack, request, useCurrent=False, **kwargs):
     fsm = edge.fromNode.fsm
     unitStatus = fsmStack.state.get_data_attr('unitStatus')
     if useCurrent:
-        nextUL = unitStatus.get_lesson()
+        _ = unitStatus.get_lesson()
         return edge.toNode
     else:
         nextUL = unitStatus.start_next_lesson()
@@ -62,7 +52,8 @@ def next_lesson_after_title(self, edge, fsmStack, request, useCurrent=False, **k
             "actual_ul_id": answer.id if answer else nextUL.id,
             "thread_id": nextUL.id,
             f"activity.{nextUL.id}": timezone.now(),
-            "need_faqs": False
+            "need_faqs": False,
+            "need_status": True,  # set True to get status by default
         }},
         upsert=True
     )
@@ -84,7 +75,7 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
                 fsmStack.next_point.content.unitLesson.unit.get_aborts()):
             c_chat_context().update_one(
                 {"chat_id": fsmStack.id},
-                {"$set": {"need_faqs": True}},
+                {"$set": {"need_faqs": False}},
                 upsert=True
             )
             return fsm.get_node('ERRORS')
@@ -92,7 +83,7 @@ def check_selfassess_and_next_lesson(self, edge, fsmStack, request, useCurrent=F
             resp = fsmStack.next_point.content
             resp.status = 'help'
             resp.save()
-            return fsm.get_node('FAQ')
+            return fsm.get_node('STATUS')
 
     return edge.toNode
 
@@ -167,7 +158,6 @@ class TITLE(object):
 
         _data = {
             'contenttype': 'chatdivider',
-            'chat': chat,
             'content_id': divider.id,
             'input_type': 'custom',
             'type': 'breakpoint',
@@ -250,8 +240,6 @@ class GET_CONFIDENCE(object):
         else:
             return edge.toNode
 
-        return edge.toNode
-
     title = 'Choose confidence'
     edges = (
         dict(name='next', toNode='ASSESS', title='Go to self-assessment'),
@@ -280,12 +268,12 @@ class INCORRECT_CHOICE(object):
                 fsmStack.next_point.content.unitLesson.unit.get_aborts()):
             c_chat_context().update_one(
                 {"chat_id": fsmStack.id},
-                {"$set": {"need_faqs": True}},
+                {"$set": {"need_faqs": False}},
                 upsert=True
             )
             return fsm.get_node('ERRORS')
         else:
-            return fsm.get_node('FAQ')
+            return fsm.get_node('STATUS')
 
     title = 'Show incorrect choice for Multiple Choices'
     edges = (
@@ -343,13 +331,125 @@ class ERRORS(object):
 
 class GET_ERRORS(object):
     get_path = get_lesson_url
-    next_edge = next_lesson_after_errors
+
+    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        """
+        Move FSM to the FAQ, GET_RESOLVE or to the TRANSITION node.
+        """
+        fsm = edge.fromNode.fsm
+
+        if c_chat_context().find_one({"chat_id": fsmStack.id}).get('need_status'):
+            return fsm.get_node('STATUS')
+
+        elif c_chat_context().find_one({"chat_id": fsmStack.id}).get('need_faqs'):
+            return fsm.get_node('FAQ')
+
+        return edge.toNode
+
     # node specification data goes here
     title = 'Classify your error(s)'
     edges = (
         dict(name='next', toNode='TRANSITION', title='View Next Lesson'),
     )
 
+
+class STATUS(object):
+    """
+    Ask Student to get status of the current ORCT.
+    """
+    title = 'Check status'
+    edges = (
+        dict(name='next', toNode='GET_STATUS', title='Get a Status'),
+    )
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'text': 'How well do you feel you understand the solution now?',
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+
+class GET_STATUS(object):
+    """
+    Get Student Status for the current ORCT.
+    """
+    title = 'Get status'
+    edges = (
+        dict(name='next', toNode='TRANSITION', title='Get a Status'),
+    )
+
+    def next_edge(self, edge, fsmStack, request, useCurrent=False, **kwargs):
+        if c_chat_context().find_one({"chat_id": fsmStack.id}).get('need_faqs'):
+            return edge.fromNode.fsm.get_node('FAQ')
+
+        return edge.toNode
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        response = chat.message_set.filter(
+            lesson_to_answer_id=next_lesson.id,
+            kind='response', contenttype='response').first().content
+
+        _data = {
+            'contenttype': 'response',
+            'content_id': response.id,
+            'input_type': 'options',
+            'chat': chat,
+            "text": "changeme",  # temp hack for render_my_choices function
+            'owner': chat.user,
+            'kind': 'response',
+            'userMessage': True,
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
+    def get_options(self, *args, **kwargs):
+        return (dict(value=i[0], text=i[1]) for i in STATUS_CHOICES)
+
+    def handler(self, message, chat, request, state_handler) -> None:
+        """
+        Handle Student status.
+
+        Must be used during PUT request processing.
+        """
+        status = request.data.get('option')
+        response = message.content
+        response.status = status
+        response.save()
+
+        is_need_status = False if status == "done" else True
+        c_chat_context().update_one(
+            {"chat_id": chat.id},
+            {"$set": {"need_faqs": is_need_status}},
+            upsert=True
+        )
+
+        _timestamp = timezone.now()
+
+        updated_status = list(map(
+            lambda x: x[1],
+            filter(
+                lambda x: x[0] == status, STATUS_CHOICES)))
+
+        if updated_status:
+            status_text = updated_status[0]
+        else:
+            status_text = request.data.get('option')
+
+        message.text = status_text
+        message.save()
+
+        chat.next_point = message
+        chat.last_modify_timestamp = _timestamp
+        chat.save()
 
 class IF_RESOURCES(object):
     help = 'Congratulations! You have completed the core lessons for this courselet.'
@@ -398,10 +498,9 @@ class TRANSITION(object):
             return fsm.get_node('VIEWUPDATES')
 
         unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        currentLesson = unitStatus.get_lesson()
+        _ = unitStatus.get_lesson()
 
         if useCurrent:
-            nextUL = currentLesson
             return edge.toNode
         else:
             nextUL = unitStatus.start_next_lesson()
@@ -469,7 +568,13 @@ class TRANSITION(object):
         We should not reach this code on last transition node w/o updates.
         """
         state = args[0].state
-        options = [{'value': 'next_thread', 'text': 'View next thread'}] if not is_last_thread(state) else []
+        lesson_kind = args[0].state.unitLesson.lesson.kind
+
+        option_text = (
+            "View next thread" if lesson_kind in (Lesson.EXPLANATION, Lesson.BASE_EXPLANATION) else
+            "View next thread"
+        )
+        options = [{'value': 'next_thread', 'text': option_text}] if not is_last_thread(state) else []
 
         if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'View updates'})
@@ -508,10 +613,9 @@ class VIEWUPDATES(object):
         """
         fsm = edge.fromNode.fsm
         unitStatus = fsmStack.state.get_data_attr('unitStatus')
-        currentLesson = unitStatus.get_lesson()
+        _ = unitStatus.get_lesson()
 
         if useCurrent:
-            nextUL = currentLesson
             return edge.toNode
         else:
             nextUL = unitStatus.start_next_lesson()
@@ -586,6 +690,8 @@ def get_specs():
             ERRORS,
             GET_ERRORS,
             IF_RESOURCES,
+            STATUS,
+            GET_STATUS,
             FAQ,
             TRANSITION,
             VIEWUPDATES,
