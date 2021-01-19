@@ -128,7 +128,7 @@ class GREAT_MESSAGE(object):
 
 class HOPENESS_MESSAGE(object):
     title = 'We all hope you are ok))'
-    help = 'Hope you\'ve overcame this misconception'
+    help = 'I hope this helped you'
     edges = (
         dict(name='next', toNode='MESSAGE_NODE', title='does not metter'),
     )
@@ -321,7 +321,7 @@ class RESOLVE(object):
 class MESSAGE_NODE(object):
     get_path = get_lesson_url
     # node specification data goes here
-    title = 'How well do you feel you understand this blindspot now? If you need more clarifications, tell us.'
+    title = 'We hope this explanation helped you. How well do you feel you understand this blindspot now? If you need more clarifications, tell us.'
     edges = (
         dict(name='next', toNode='GET_RESOLVE', title='Go to self-assessment'),
     )

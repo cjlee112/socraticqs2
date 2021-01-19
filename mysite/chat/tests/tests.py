@@ -527,7 +527,7 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertIn('html', json_content['addMessages'][0])
         self.assertEqual(
-            json_content['addMessages'][0]['html'], mark_safe(md2html('Now you can move to the next lesson')))
+            json_content['addMessages'][0]['html'], mark_safe(md2html('You\'ve completed this explanation! Let\'s continue to the next lesson.')))
 
         next_url = json_content['input']['url']
         # Click `move to the next Thread` button

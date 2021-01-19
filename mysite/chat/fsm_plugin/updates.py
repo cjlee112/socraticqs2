@@ -402,8 +402,8 @@ class SHOW_NEW_EMS(object):
         _data = {
             'chat': chat,
             'text': """
-                     I have added new blindspots in this thread after reading your answers. Hopefully they'll help you understand these concepts better.
-                     Check the box(es) that seem relevant to your answer (if any).
+                     I've added explanations for some new blindspot(s) that caused people trouble on this question.
+                     Check any box(es) that seem relevant to what you were thinking. 
                     """,
             'owner': chat.user,
             'input_type': 'custom',
@@ -662,7 +662,7 @@ class TRANSITION(object):
 
         if has_updates['thread_id']:
             text = f"""
-                    You have completed this thread.
+                    You have completed all updates for this thread.
                     I have posted new messages to help you in the thread "{thread.lesson.title}".
                     Would you like to view these updates now?
                     """
@@ -675,11 +675,11 @@ class TRANSITION(object):
                 status = parent.get_data_attr('unitStatus')
                 next_lesson = status.get_next_lesson().lesson.title if status.get_next_lesson() else None
             text = f"""
-                    You have completed this thread.
+                    You have completed all updates for this thread.
                     Click on Continue below to view your next thread "{next_lesson}".
                     """ if next_lesson else 'You have completed this thread.'
         else:
-            text = 'You have completed this thread.'
+            text = 'You have completed all updates for this thread.'
 
         _data = {
             'chat': chat,
@@ -708,9 +708,9 @@ class TRANSITION(object):
             if parent and not is_last_thread(parent) else []
 
         if has_updates(state):
-            options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+            options.insert(0, {'value': 'next_update', 'text': 'Yes'})
             if len(options) == 2:
-                options[1]['text'] = 'View next thread'
+                options[1]['text'] = 'No'
 
         return options
 

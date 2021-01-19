@@ -549,7 +549,11 @@ class TRANSITION(object):
                 text2 = "*If you don't want to view them now, I'll ask you again once you have completed your next thread.*"
                 text = md2html(text1) + md2html(text2)
         else:
-            text = md2html('Now you can move to the next lesson')
+            unitStatus = chat.state.get_data_attr('unitStatus')
+            lesson = unitStatus.get_lesson().lesson
+            lesson_type = "question" if lesson.kind == "orct" else "explanation"
+
+            text = md2html(f"You've completed this { lesson_type }! Let's continue to the next lesson.")
         _data = {
             'chat': chat,
             'text': mark_safe(text),
@@ -571,13 +575,14 @@ class TRANSITION(object):
         lesson_kind = args[0].state.unitLesson.lesson.kind
 
         option_text = (
-            "View next thread" if lesson_kind in (Lesson.EXPLANATION, Lesson.BASE_EXPLANATION) else
-            "View next thread"
+            "Continue" if lesson_kind in (Lesson.EXPLANATION, Lesson.BASE_EXPLANATION) else
+            "Continue"
         )
         options = [{'value': 'next_thread', 'text': option_text}] if not is_last_thread(state) else []
 
         if has_updates(state):
-            options.insert(0, {'value': 'next_update', 'text': 'View updates'})
+            options.insert(0, {'value': 'next_update', 'text': 'Yes'})
+            options[1]["text"] = "No"
 
         return options
 
