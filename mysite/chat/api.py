@@ -49,7 +49,7 @@ def get_additional_messages(response, chat, selected: list) -> None:
     Emit resolutions based on user selection.
     """
     student_errors = response.studenterror_set.filter(errorModel__id__in=selected)
-    dummy_ul = UnitLesson.objects.filter(lesson__title='I hope this helped you').first()
+    dummy_ul = UnitLesson.objects.filter(lesson__title='We hope this explanation helped you.').first()
     for each in student_errors:
         if not each.errorModel.get_em_resolutions()[1]:
             Message.objects.get_or_create(contenttype='unitlesson', content_id=dummy_ul.id, chat=chat,
@@ -57,7 +57,7 @@ def get_additional_messages(response, chat, selected: list) -> None:
                                           input_type='custom',
                                           student_error=each,
                                           kind='message',
-                                          text='I hope this helped you',
+                                          text='We hope this explanation helped you.',
                                           is_additional=True)
         [Message.objects.get_or_create(contenttype='unitlesson',
                                        content_id=ul.id,

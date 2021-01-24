@@ -914,26 +914,27 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         next_url = json_content['input']['url']
 
-        response = self.client.put(
-            next_url,
-            data=json.dumps({"option": 1, "chat_id": chat_id}),
-            content_type='application/json',
-            follow=True
-        )
+        # For removed Continue button for EMs
+        # response = self.client.put(
+        #     next_url,
+        #     data=json.dumps({"option": 1, "chat_id": chat_id}),
+        #     content_type='application/json',
+        #     follow=True
+        # )
 
-        json_content = json.loads(response.content)
-        next_url = json_content['input']['url']
+        # json_content = json.loads(response.content)
+        # next_url = json_content['input']['url']
         self.assertEqual(
             json_content['addMessages'][0]['html'],
             '<dl>\n<dt><strong>Re: Em1</strong></dt>\n<dd><p>Em1 description</p>\n</dd>\n</dl>\n'
         )
+        # For removed Continue button for EMs
+        # response = self.client.get(
+        #     next_url, {'chat_id': chat_id}, follow=True
+        # )
 
-        response = self.client.get(
-            next_url, {'chat_id': chat_id}, follow=True
-        )
-
-        json_content = json.loads(response.content)
-        next_url = json_content['input']['url']
+        # json_content = json.loads(response.content)
+        # next_url = json_content['input']['url']
 
         status_value = json_content['input']['options'][0]['value']
 
