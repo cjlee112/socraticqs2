@@ -8,26 +8,27 @@ async def main(threadURL='faqdemo.json', insertBeforeID=None):
     req = await aio.get(threadURL)
     threadData = json.loads(req.data)
     await offer_updates(update_test, threadData['updates'], 'TestAfterPoint')
-    mainThread = threadData['main']
+    threads = threadData['main']
     if scenario.scenarios['NoEMscenaro']:
-        errmods = []
-    else:
-        errmods = chat.filter_by_kind(mainThread, 'errormodel')
+        threads[1]['errormodels'] = []
     if scenario.scenarios['NoFAQscenaro']:
-        faqs = []
-    else:
-        faqs = chat.filter_by_kind(mainThread, 'faq')
-    await do_orct_cycle(mainThread, errmods, faqs, insertBeforeID)
+        threads[1]['answer']['faqs'] = []
+    await do_courselet(threads, insertBeforeID)
 
 
-async def do_orct_cycle(mainThread, errmods=None, faqs=None, insertBeforeID=None):
+async def do_courselet(threads, insertBeforeID=None):
+    for t in threads:
+        if t['kind'] == 'intro':
+            await show_explanation(t, insertBeforeID)
+        elif t['kind'] == 'orct':
+            await do_orct_cycle(t, insertBeforeID)
+
+async def do_orct_cycle(mainThread, insertBeforeID=None):
     'perform basic ORCT chat cycle on one thread'
-    if errmods is None:
-        errmods = chat.filter_by_kind(mainThread, 'errormodel')
-    if faqs is None:
-        faqs = chat.filter_by_kind(mainThread, 'faq')
-    await show_explanations(chat.filter_by_kind(mainThread, 'intro'), insertBeforeID)
-    s = await pose_orct(chat.filter_by_kind(mainThread, 'orct')[0], insertBeforeID)
+    errmods = mainThread.get('errormodels', ())
+    faqs = mainThread['answer'].get('faqs', ())
+    s = await pose_orct(mainThread, insertBeforeID)
+    s = await get_response(mainThread['answer'], insertBeforeID)
     stati = ()
     if s != 'same':
         if errmods:
@@ -42,12 +43,11 @@ async def do_orct_cycle(mainThread, errmods=None, faqs=None, insertBeforeID=None
     await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
                        insertBeforeID=insertBeforeID)
 
-async def show_explanations(explanations, insertBeforeID=None):
+async def show_explanation(e, insertBeforeID=None):
     'display explanation message(s) one at a time with Continue button'
-    for e in explanations:
-        chat.post_messages((("ChatBreakpointTemplate", e['title']),),
+    chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
-        await chat.continue_button((("ChatMessageTemplate", e['message']),),
+    await chat.continue_button((("ChatMessageTemplate", e['message']),),
                                    insertBeforeID=insertBeforeID)
 
 
@@ -55,9 +55,11 @@ async def pose_orct(orct, insertBeforeID=None):
     'ask question, student responds, self-evaluates answer'
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
-    await chat.ChatInput((("ChatMessageTemplate", orct['question']),), insertBeforeID=insertBeforeID).get()
+    await chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), insertBeforeID=insertBeforeID).get()
     await chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', insertBeforeID=insertBeforeID).get()
-    return await chat.ChatQuery((("ChatMessageTemplate", orct['answer']), ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
+
+async def get_response(answer, insertBeforeID=None):
+    return await chat.ChatQuery((("ChatMessageTemplate", answer['message']), ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
                              'selfeval-options-template', insertBeforeID=insertBeforeID).get()
 
 
