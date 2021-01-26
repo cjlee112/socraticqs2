@@ -3,7 +3,7 @@ import chat
 import json
 
 async def main(threadURL='faqdemo.json', insertBeforeID=None):
-    'basic ORCT chat cycle, starting with a simple updates test'
+    'basic ORCT chat test, starting with a simple updates test'
     scenario = chat.DemoScenario() # activate demo Start button
     req = await aio.get(threadURL)
     threadData = json.loads(req.data)
@@ -16,6 +16,15 @@ async def main(threadURL='faqdemo.json', insertBeforeID=None):
     if scenario.scenarios['NoFAQscenaro']:
         faqs = []
     else:
+        faqs = chat.filter_by_kind(mainThread, 'faq')
+    await do_orct_cycle(mainThread, errmods, faqs, insertBeforeID)
+
+
+async def do_orct_cycle(mainThread, errmods=None, faqs=None, insertBeforeID=None):
+    'perform basic ORCT chat cycle on one thread'
+    if errmods is None:
+        errmods = chat.filter_by_kind(mainThread, 'errormodel')
+    if faqs is None:
         faqs = chat.filter_by_kind(mainThread, 'faq')
     await show_explanations(chat.filter_by_kind(mainThread, 'intro'), insertBeforeID)
     s = await pose_orct(chat.filter_by_kind(mainThread, 'orct')[0], insertBeforeID)
