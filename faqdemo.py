@@ -101,13 +101,14 @@ async def show_faq(faq, insertBeforeID=None):
     helpful = await chat.ChatQuery((("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["question"]}'),
                      ("ChatMessageTemplate", "Would the answer to this student question help you?")), 'yesno-template', insertBeforeID=insertBeforeID).get()
     if helpful == 'yes' and 'answer' in faq:
-        return (await show_faq_answer(faq['answer'], insertBeforeID),)
+        return (await show_faq_answer(faq, insertBeforeID),)
     return () # empty tuple means no status info
 
 
-async def show_faq_answer(answer, insertBeforeID=None):
+async def show_faq_answer(faq, insertBeforeID=None):
     'show answer and ask status'
-    return await get_status((('faq-a1', answer), ("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us.")),
+    s = f'<b>{faq["answerTitle"]}</b><br>{faq["answer"]}'
+    return await get_status((('faq-a1', s), ("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us.")),
                             insertBeforeID)
 
 
@@ -141,7 +142,7 @@ async def update_test(updates, insertBeforeID, messageStamp='<span class="chat-n
     for faq in chat.filter_by_kind(updates, 'faq'):
         stati += (await get_status((("ChatMessageTemplate", f"Below is my answer to the question you raised RE: the following issue {messageStamp}"),    
                         ("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["question"]}'),
-                        ("ChatMessageTemplate", f'{faq["answer"]} {messageStamp}'),
+                        ("ChatMessageTemplate", f'<b>{faq["answerTitle"]}</b><br>{faq["answer"]} {messageStamp}'),
                         ("ChatMessageTemplate", f'How well do you feel you understand now? If you need more clarification, tell us. {messageStamp}')),
                         insertBeforeID, messageStamp),)
     if len(stati) == 0:
