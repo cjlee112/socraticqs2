@@ -17,20 +17,22 @@ async def main(threadURL='faqdemo.json', insertBeforeID=None):
 
 
 async def do_courselet(threads, insertBeforeID=None):
+    'complete a multi-thread courselet'
     for t in threads:
         if t['kind'] == 'intro':
             await show_explanation(t, insertBeforeID)
         elif t['kind'] == 'orct':
             await do_orct_cycle(t, insertBeforeID)
 
+
 async def do_orct_cycle(mainThread, insertBeforeID=None):
     'perform basic ORCT chat cycle on one thread'
     errmods = mainThread.get('errormodels', ())
     faqs = mainThread['answer'].get('faqs', ())
     s = await pose_orct(mainThread, insertBeforeID)
-    s = await get_response(mainThread['answer'], insertBeforeID)
-    stati = ()
+    s = await get_selfeval(mainThread['answer'], insertBeforeID)
     if s != 'same':
+        stati = ()
         if errmods:
             stati += await offer_errmods(errmods, insertBeforeID)
         if faqs:
@@ -43,8 +45,9 @@ async def do_orct_cycle(mainThread, insertBeforeID=None):
     await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
                        insertBeforeID=insertBeforeID)
 
+
 async def show_explanation(e, insertBeforeID=None):
-    'display explanation message(s) one at a time with Continue button'
+    'display explanation message with Continue button'
     chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
     await chat.continue_button((("ChatMessageTemplate", e['message']),),
@@ -52,16 +55,18 @@ async def show_explanation(e, insertBeforeID=None):
 
 
 async def pose_orct(orct, insertBeforeID=None):
-    'ask question, student responds, self-evaluates answer'
+    'ask question, student responds, gives confidence level'
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
     await chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), insertBeforeID=insertBeforeID).get()
-    await chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', insertBeforeID=insertBeforeID).get()
+    return await chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', insertBeforeID=insertBeforeID).get()
 
-async def get_response(answer, insertBeforeID=None):
+
+
+async def get_selfeval(answer, insertBeforeID=None):
+    'get student self-evaluation of whether their answer was right'
     return await chat.ChatQuery((("ChatMessageTemplate", answer['message']), ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
                              'selfeval-options-template', insertBeforeID=insertBeforeID).get()
-
 
 
 
@@ -82,6 +87,7 @@ async def show_em(em, insertBeforeID=None, messageStamp=''):
                          ("ChatMessageTemplate", f"We hope this explanation helped you.  How well do you feel you understand this blindspot now? If you need more clarifications, tell us. {messageStamp}")),
                             insertBeforeID, messageStamp)
 
+
 async def get_status(chats, insertBeforeID=None, messageStamp=''):
     status = await chat.ChatQuery(chats, 'status-options-template', insertBeforeID=insertBeforeID).get()
     if status == 'help':
@@ -99,6 +105,7 @@ async def offer_faqs(faqlist, insertBeforeID=None):
     for i in faqs:
         stati += await show_faq(faqlist[i], insertBeforeID)
     return stati
+
 
 async def solicit_faq(insertBeforeID=None):
     hasQuestion = await chat.ChatQuery((("ChatMessageTemplate", "Is there anything else you're wondering about, where you'd like clarification or something you're unsure about this point?"),),
