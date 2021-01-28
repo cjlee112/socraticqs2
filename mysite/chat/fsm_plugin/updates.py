@@ -1,5 +1,6 @@
 from dateutil import tz
 from functools import reduce
+from distutils.util import strtobool
 
 import waffle
 from django.db.models import Q
@@ -542,8 +543,12 @@ class GET_ACT(object):
     }
 
     def next_edge(self, edge, *args, **kwargs):
-        if not args[0].state.parentState:
-            chat = args[0]
+        chat = args[0]
+
+        if chat.state.get_data_attr("next_msg_needed"):
+            return edge.fromNode.fsm.get_node('WILL_TRY_MSG')
+
+        elif not chat.state.parentState:
             threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
             has_updates = False
 
@@ -606,16 +611,68 @@ class GET_ACT(object):
 
         Must be used during PUT request processing.
         """
+        chosen_option = request.data.get('option')
         response = message.content
-        response.status = self.EVAL_TO_STATUS_MAP.get(request.data.get('option'), NEED_HELP_STATUS)
+        response.status = self.EVAL_TO_STATUS_MAP.get(chosen_option, NEED_HELP_STATUS)
         response.save()
 
-        message.text = dict(YES_NO_OPTIONS).get(request.data.get('option'))
+        message.text = dict(YES_NO_OPTIONS).get(chosen_option)
         message.save()
+
+        chat.state.set_data_attr("next_msg_needed", strtobool(chosen_option))
+        chat.state.save_json_data()
 
         chat.next_point = message
         chat.last_modify_timestamp = timezone.now()
         chat.save()
+
+class WILL_TRY_MSG(object):
+    """
+    New message node for a conditional message.
+    """
+    title = 'We will try to provide more explanation for this.'
+    edges = (
+        dict(name='next', toNode='TRANSITION', title='Transition'),
+    )
+
+    def next_edge(self, edge, *args, **kwargs):
+        if not args[0].state.parentState:
+            chat = args[0]
+            threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
+            has_updates = False
+
+            for thread in threads:
+                # TODO: move to a dedicated util
+                response_msg = chat.message_set.filter(
+                    lesson_to_answer_id=thread.id,
+                    kind='response',
+                    contenttype='response',
+                    content_id__isnull=False).last()
+                if not response_msg:
+                    continue
+                response = response_msg.content
+                is_need_help = response.status in (None, NEED_HELP_STATUS, NEED_REVIEW_STATUS)
+                if is_need_help and thread.updates_count(chat) > 0:
+                    has_updates = True
+                    break
+
+            if not has_updates:
+                return edge.fromNode.fsm.get_node('END')
+
+        return edge.toNode
+
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'text': self.title,
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
 
 
 class TRANSITION(object):
@@ -824,6 +881,7 @@ def get_specs():
             FAQ_UPDATES,
             ACT,
             GET_ACT,
+            WILL_TRY_MSG,
             TRANSITION,
             VIEWUPDATES,
             FAILEDTRANSITION,
