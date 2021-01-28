@@ -7,6 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 from django.db.models import Q
@@ -25,6 +26,7 @@ from ..serializers import (
     CourseReportSerializer,
     UnitSerializer,
     ThreadSerializer,
+    UnitSerializer2,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -368,3 +370,12 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
         super().perform_destroy(instance)
 
         _unit.reorder_exercise()
+
+
+@api_view(['GET'])
+def get_courselet_threads(request, pk):
+    'test creating a simple GET endpoint'
+    course_unit = get_object_or_404(CourseUnit, id=pk)
+    serializer = UnitSerializer2(course_unit.unit)
+    return RestResponse(serializer.data)
+

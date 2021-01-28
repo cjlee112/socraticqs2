@@ -16,6 +16,7 @@ from .views import (
     BestPracticeUpload,
     CourseletViewSet,
     CourseletThreadsViewSet,
+    get_courselet_threads,
 )
 
 app_name = 'v0'
@@ -59,5 +60,6 @@ urlpatterns = [
 
     path('courselets/<int:pk>/', CourseletViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='courselet-api'),
     path('courselets/<int:courselet_pk>/', include(router.urls)),
+    path('brella/<int:pk>/', get_courselet_threads),
 
 ]

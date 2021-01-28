@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
-from ct.models import Response, StudentError, UnitLesson, Unit
+from ct.models import Response, StudentError, UnitLesson, Unit, Lesson
 from ctms.models import BestPractice1, BestPractice2
 from analytics.models import CourseReport
+from ct.templatetags.ct_extras import md2html
 
 
 class ResponseSerializer(serializers.ModelSerializer):
@@ -149,3 +150,31 @@ class ThreadSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitLesson
         fields = ("id", "kind", "title", "author")
+
+
+
+class UnitSerializer2(serializers.BaseSerializer):
+    def to_representation(self, unit):
+        data = []
+        for ul in unit.unitlesson_set.filter(order__isnull=False):
+            if ul.lesson.kind == Lesson.ORCT_QUESTION:
+                d = dict(kind='orct', title=ul.lesson.title)
+                d['question'] = dict(ulID=ul.id, message=md2html(ul.lesson.text))
+                for a in ul.get_answers():
+                    d['answer'] = dict(ulID=a.id, message=md2html(a.lesson.text))
+                    faqs = []
+                    for f in a.response_set.filter(kind=Response.STUDENT_QUESTION):
+                        faqs.append(dict(title=f.title, question=f.text, answerTitle='Instructor Answer', answer='You bet.'))
+                    d['answer']['faqs'] = faqs
+                    break
+                errors = []
+                for em in ul.get_errors():
+                    errors.append(dict(ulID=em.id, title=em.lesson.title, message=md2html(em.lesson.text)))
+                d['errormodels'] = errors
+                data.append(d)
+            elif ul.lesson.kind == Lesson.BASE_EXPLANATION:
+                data.append(dict(kind='intro', ulID=ul.id, title=ul.lesson.title, message=md2html(ul.lesson.text)))
+        return data
+
+
+
