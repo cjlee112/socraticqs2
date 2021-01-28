@@ -328,6 +328,22 @@ class ERRORS(object):
         dict(name='next', toNode='GET_ERRORS', title='Choose errors'),
     )
 
+    def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        _data = {
+            'chat': chat,
+            'text': """
+                    Here are the most common blindspots people reported when comparing their answer vs.
+                    the correct answer. Check the box(es) that seem relevant to your answer (if any).
+                    """,
+            'owner': chat.user,
+            'input_type': 'custom',
+            'kind': 'message',
+            'is_additional': is_additional
+        }
+        message = Message(**_data)
+        message.save()
+        return message
+
 
 class GET_ERRORS(object):
     get_path = get_lesson_url
