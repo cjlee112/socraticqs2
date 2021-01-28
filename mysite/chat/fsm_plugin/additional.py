@@ -128,7 +128,7 @@ class GREAT_MESSAGE(object):
 
 class HOPENESS_MESSAGE(object):
     title = 'We all hope you are ok))'
-    help = 'Hope you\'ve overcame this misconception'
+    help = 'We hope this explanation helped you.'
     edges = (
         dict(name='next', toNode='MESSAGE_NODE', title='does not metter'),
     )

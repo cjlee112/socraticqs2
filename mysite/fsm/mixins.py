@@ -752,8 +752,8 @@ class ChatMixin(object):
                 chat=chat,
                 owner=chat.user,
                 student_error=resolve_message.student_error,
-                input_type='options',
-                kind='button',
+                input_type='custom',
+                kind='message',
                 is_additional=True)[0]
             c_chat_stack().update_one(
                 {"stack_id": stack_pattern},
@@ -816,10 +816,14 @@ class ChatMixin(object):
             additional_info = c_chat_stack().find_one(
                 {"stack_id": stack_pattern}, {"additional_stack": 1, "_id": 0}).get("additional_stack")
             student_error_id, _ = additional_info.get('student_error_id'), additional_info.get('em_id')  # FIXME
+
+            title = chat.state.fsmNode.title
+            if not message.text:
+                title = " ".join(("We hope this explanation helped you.", title))
             message = Message.objects.get_or_create(
                 chat=chat,
                 owner=chat.user,
-                text=chat.state.fsmNode.title,
+                text=title,
                 student_error=StudentError.objects.filter(id=student_error_id).first(),
                 input_type='custom',
                 kind='message',

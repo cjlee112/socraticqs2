@@ -61,7 +61,7 @@ class START(object):
 
 class INTRO_MSG(object):
     path = 'fsm:fsm_node'
-    title = 'Would any of the following questions help you? Select the one(s) you with to view.'
+    title = 'Would any of the following questions help you? Select the one(s) you wish to view.'
 
     edges = (
         dict(name='next', toNode='SHOW_FAQS', title='Go to the end'),
@@ -102,7 +102,7 @@ class SHOW_FAQ_BY_ONE(object):
 
 class ASK_FOR_FAQ_ANSWER(object):
     path = 'fsm:fsm_node'
-    title = 'Would the answer to this question help you?'
+    title = 'Would the answer to this student question help you?'
 
     edges = (
         dict(name='next', toNode='GET_FOR_FAQ_ANSWER', title='Go to the end'),
@@ -363,10 +363,10 @@ class ADDING_FAQ(object):
 
     def get_help(self, node, state, request):
         return """
-            First, write a 'headline version' of you question
-            as a single sentence, as clearly and simply
-            as you can. (You'll have a chance to explain your
-            question fully in the next step)
+            First, write your question as a single sentence, 
+            as clearly and simply as you can. 
+            (You'll have a chance to explain your question 
+            fully in the next step).
         """
 
     edges = (
@@ -376,7 +376,7 @@ class ADDING_FAQ(object):
 
 class NEW_FAQ_TITLE(object):
     path = 'fsm:fsm_node'
-    title = 'First, write a \'headline version\' of your question as a single sentence, as cleary and simply as you can. (You\'ll have a chance to explain your question fully in the next step)'
+    title = 'First, write your question as a single sentence, as clearly and simply as you can. (You\'ll have a chance to explain your question fully in the next step).'
 
     edges = (
         dict(name='next', toNode='GET_NEW_FAQ_TITLE', title='Go to the end'),
@@ -394,7 +394,7 @@ class GET_NEW_FAQ_TITLE(object):
 
 class NEW_FAQ_DESCRIPTION(object):
     path = 'fsm:fsm_node'
-    title = 'Next, let\'s nail down exactly what you\'re unsure about, by applying your question to a real-world situation, to indentify what specific outcome you\'re unsure about (e.g. is A going to happen, or B?\')'
+    title = 'Next, try saying a bit more about exactly what you\'re unsure of, such as a simple example where you can think of two possible answers but you\'re not sure which one is actually right.'
 
     edges = (
         dict(name='next', toNode='GET_NEW_FAQ_DESCRIPTION', title='Go to the end'),

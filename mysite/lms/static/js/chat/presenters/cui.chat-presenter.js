@@ -1159,7 +1159,7 @@ CUI.ChatPresenter.prototype._scrollToUpdatesMessage = function(threadId, message
 };
 
 CUI.ChatPresenter.prototype._isLastUpdatedThreadMesaage = function(messageModel) {
-  return messageModel.html === 'Now you can move to the next lesson';
+  return messageModel.html === 'You\'ve completed this question! Let\'s continue to the next lesson.';
 };
 
 /**
