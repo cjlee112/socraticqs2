@@ -2,18 +2,12 @@ from browser import aio
 import chat
 from javascript import JSON
 
-
-async def main(threadURL='faqdemo.json', insertBeforeID=None):
+async def main(threadURL='/api/v0/brella/1/',
+               insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
-    scenario = chat.DemoScenario() # activate demo Start button
-    req = await aio.get(threadURL)
-    threadData = JSON.parse(req.data)
-    await offer_updates(update_test, threadData['updates'], 'TestAfterPoint')
-    threads = threadData['main']
-    if scenario.scenarios['NoEMscenaro']:
-        threads[1]['errormodels'] = []
-    if scenario.scenarios['NoFAQscenaro']:
-        threads[1]['answer']['faqs'] = []
+    headers = {'Content-Type': 'application/json'}
+    req = await aio.get(threadURL, headers=headers)
+    threads = JSON.parse(req.data)
     await do_courselet(threads, insertBeforeID)
 
 
