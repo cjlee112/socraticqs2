@@ -1,12 +1,13 @@
 from browser import aio
 import chat
-import json
+from javascript import JSON
+
 
 async def main(threadURL='faqdemo.json', insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
     scenario = chat.DemoScenario() # activate demo Start button
     req = await aio.get(threadURL)
-    threadData = json.loads(req.data)
+    threadData = JSON.parse(req.data)
     await offer_updates(update_test, threadData['updates'], 'TestAfterPoint')
     threads = threadData['main']
     if scenario.scenarios['NoEMscenaro']:
