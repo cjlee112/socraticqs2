@@ -184,16 +184,18 @@ class ORCTSerializer2(serializers.BaseSerializer):
         data['errormodels'] = errors
         return data
 
+def get_ul_serializer(ul):
+    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+        return ORCTSerializer2(ul)
+    elif ul.lesson.kind == Lesson.BASE_EXPLANATION:
+        return ULSerializer2(ul)
 
 class UnitSerializer2(serializers.BaseSerializer):
     'serializer for an entire courselet'
     def to_representation(self, unit):
         data = []
         for ul in unit.unitlesson_set.filter(order__isnull=False):
-            if ul.lesson.kind == Lesson.ORCT_QUESTION:
-                data.append(ORCTSerializer2(ul).data)
-            elif ul.lesson.kind == Lesson.BASE_EXPLANATION:
-                data.append(ULSerializer2(ul).data)
+            data.append(get_ul_serializer(ul).data)
         return data
 
 
