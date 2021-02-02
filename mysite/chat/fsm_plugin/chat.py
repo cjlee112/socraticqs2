@@ -534,6 +534,7 @@ class TRANSITION(object):
             return edge.toNode
 
     def get_message(self, chat, next_lesson, is_additional, *args, **kwargs) -> Message:
+        state = chat.state
         threads = chat.enroll_code.courseUnit.unit.unitlesson_set.filter(order__isnull=False).order_by('order')
         has_updates = {
             'enabled': False,
@@ -569,7 +570,13 @@ class TRANSITION(object):
             lesson = unitStatus.get_lesson().lesson
             lesson_type = "question" if lesson.kind == "orct" else "explanation"
 
-            text = md2html(f"You've completed this { lesson_type }! Let's continue to the next lesson.")
+            text = f"You've completed this { lesson_type }!"
+
+            if not is_last_thread(state):
+                text = " ".join((text, "Let's continue to the next lesson."))
+
+            text = md2html(text)
+
         _data = {
             'chat': chat,
             'text': mark_safe(text),
@@ -594,7 +601,7 @@ class TRANSITION(object):
             "Continue" if lesson_kind in (Lesson.EXPLANATION, Lesson.BASE_EXPLANATION) else
             "Continue"
         )
-        options = [{'value': 'next_thread', 'text': option_text}] if not is_last_thread(state) else []
+        options = [{'value': 'next_thread', 'text': option_text}]
 
         if has_updates(state):
             options.insert(0, {'value': 'next_update', 'text': 'Yes'})
