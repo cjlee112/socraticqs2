@@ -57,35 +57,48 @@ class ChatQuery(object):
     'prompt user with chat messages, then await get() to receive button click'
     def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
             dataAttr='data-option-value', selector='button[data-option-value]',
-            insertBeforeID=None):
+            insertBeforeID=None, postData={}):
         self.insertBeforeID = insertBeforeID
         post_messages(chats, insertBeforeID=insertBeforeID)
         self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
                                             handler=self.handler)[0]
         self.outcome = self.message = None
         self.dataAttr = dataAttr
+        self.postData = postData.copy()
     def handler(self, ev):
         if self.dataAttr:
             self.outcome = ev.target.attrs[self.dataAttr]
         else:
             self.outcome = 'continue'
-        self.message = ev.target.html
-    async def get(self):
+        self.postData['outcome'] = self.outcome
+        self.message = self.postData['message'] = ev.target.html
+    async def get(self, path, history={}):
+        try:
+            already = history[path]
+            self.close(already.get('message', ''))
+            return already.get('outcome', None)
+        except KeyError:
+            pass
         while True:
             await aio.sleep(1)
             if self.outcome is not None:
-                self.close()
+                self.send_post(path)
+                self.close(self.message)
                 return self.outcome
-    def close(self):
-        if self.message:
-            post_messages((("StudentMessageTemplate", self.message),),
+    def close(self, message=''):
+        if message:
+            post_messages((("StudentMessageTemplate", message),),
                           insertBeforeID=self.insertBeforeID)
         if self.temporary:
             self.temporary.remove() # delete this element from the DOM
+    def send_post(self, path):
+        self.postData['path'] = path
+        # POST(self.postData)
 
 
-async def continue_button(chats, **kwargs):
-    return await ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", **kwargs).get()
+async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
+    query = ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", postData=postData, **kwargs)
+    return await query.get(path, history)
 
 class ChatInput(ChatQuery):
     'prompt user with chat messages, then await get() to receive textarea'

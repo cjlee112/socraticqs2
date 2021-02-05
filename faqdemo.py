@@ -2,89 +2,97 @@ from browser import aio
 import chat
 from javascript import JSON
 
-async def main(threadURL='/api/v0/brella/1/',
+async def main(threadURL='/chat/brella/10/',
                insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
     headers = {'Content-Type': 'application/json'}
     req = await aio.get(threadURL, headers=headers)
-    threads = JSON.parse(req.data)
-    await do_courselet(threads, insertBeforeID)
+    data = JSON.parse(req.data)
+    threads = data['threads']
+    postData = dict(chat_id=data['chat_id'])
+    history = data['history']
+    await do_courselet(threads, postData, history, insertBeforeID)
 
 
-async def do_courselet(threads, insertBeforeID=None):
+async def do_courselet(threads, postData, history, insertBeforeID=None):
     'complete a multi-thread courselet'
     for t in threads:
-        if t['kind'] == 'intro':
-            await show_explanation(t, insertBeforeID)
+        if t['kind'] == 'base':
+            await show_explanation(t, postData, history, insertBeforeID)
         elif t['kind'] == 'orct':
-            await do_orct_cycle(t, insertBeforeID)
+            await do_orct_cycle(t, postData, history, insertBeforeID)
 
 
-async def do_orct_cycle(mainThread, insertBeforeID=None):
+async def do_orct_cycle(mainThread, postData, history, insertBeforeID=None):
     'perform basic ORCT chat cycle on one thread'
     errmods = mainThread.get('errormodels', ())
     faqs = mainThread['answer'].get('faqs', ())
-    s = await pose_orct(mainThread, insertBeforeID)
-    s = await get_selfeval(mainThread['answer'], insertBeforeID)
+    s = await pose_orct(mainThread, postData, history, insertBeforeID)
+    s = await get_selfeval(mainThread['answer'], postData, history, insertBeforeID)
     if s != 'same':
         stati = ()
         if errmods:
-            stati += await offer_errmods(errmods, insertBeforeID)
+            stati += await offer_errmods(errmods, postData, history, insertBeforeID)
         if faqs:
-            stati += await offer_faqs(faqs, insertBeforeID)
+            stati += await offer_faqs(faqs, postData, history, insertBeforeID)
         if len(stati) == 0:
             stati += (await get_status((("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us."),),
-                                       insertBeforeID),)
+                                       'status', postData, history, insertBeforeID),)
         if 'help' in stati:
-            await solicit_faq(insertBeforeID)
+            await solicit_faq(postData, history, insertBeforeID=insertBeforeID)
     await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
-                       insertBeforeID=insertBeforeID)
+                       path='done', postData=postData, history=history, insertBeforeID=insertBeforeID)
 
 
-async def show_explanation(e, insertBeforeID=None):
+async def show_explanation(e, postData, history, insertBeforeID=None):
     'display explanation message with Continue button'
     chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
     await chat.continue_button((("ChatMessageTemplate", e['message']),),
-                                   insertBeforeID=insertBeforeID)
+                               path='done', insertBeforeID=insertBeforeID)
 
 
-async def pose_orct(orct, insertBeforeID=None):
+async def pose_orct(orct, postData, history, insertBeforeID=None):
     'ask question, student responds, gives confidence level'
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
-    await chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), insertBeforeID=insertBeforeID).get()
-    return await chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', insertBeforeID=insertBeforeID).get()
+    query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
+    await query.get('response', history)
+    query = chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', postData=postData, insertBeforeID=insertBeforeID)
+    return await query.get('confidence', history)
 
 
 
-async def get_selfeval(answer, insertBeforeID=None):
+async def get_selfeval(answer, postData, history, insertBeforeID=None):
     'get student self-evaluation of whether their answer was right'
-    return await chat.ChatQuery((("ChatMessageTemplate", answer['message']), ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
-                             'selfeval-options-template', insertBeforeID=insertBeforeID).get()
+    query = chat.ChatQuery((("ChatMessageTemplate", answer['message']),
+                            ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
+                           'selfeval-options-template', postData=postData, insertBeforeID=insertBeforeID)
+    return await query.get('selfeval', history)
 
 
 
-async def offer_errmods(errmods, insertBeforeID=None,
+async def offer_errmods(errmods, postData, history, insertBeforeID=None,
                         chats=(("ChatMessageTemplate", "Here are the most common blindspots people reported when comparing their answer vs. the correct answer. Check the box(es) that seem relevant to your answer (if any)."),),
                         messageStamp=''):
     'let student select Error Models to view'
-    ems = await chat.MultiSelection(chats, errmods, "em-list-template", "em-choice-template", insertBeforeID=insertBeforeID).get()
+    query = chat.MultiSelection(chats, errmods, "em-list-template", "em-choice-template", postData=postData, insertBeforeID=insertBeforeID)
+    ems = await query.get('errormodels', history)
     stati = ()
     for i in ems:
-        stati += (await show_em(errmods[i], insertBeforeID, messageStamp),)
+        stati += (await show_em(errmods[i], postData, history, insertBeforeID, messageStamp),)
     return stati
 
 
-async def show_em(em, insertBeforeID=None, messageStamp=''):
+async def show_em(em, postData, history, insertBeforeID=None, messageStamp=''):
     'show error model and get student status'
     return await get_status((('faq-a1', f'<b>RE: {em["title"]}</b><br>{em["message"]} {messageStamp}'),
                          ("ChatMessageTemplate", f"We hope this explanation helped you.  How well do you feel you understand this blindspot now? If you need more clarifications, tell us. {messageStamp}")),
-                            insertBeforeID, messageStamp)
+                            f'errormodels.status.{em["ul_id"]}', postData, history, insertBeforeID, messageStamp)
 
 
-async def get_status(chats, insertBeforeID=None, messageStamp=''):
-    status = await chat.ChatQuery(chats, 'status-options-template', insertBeforeID=insertBeforeID).get()
+async def get_status(chats, path, postData, history, insertBeforeID=None, messageStamp=''):
+    status = await chat.ChatQuery(chats, 'status-options-template', postData=postData, insertBeforeID=insertBeforeID).get(path, history)
     if status == 'help':
         chat.post_messages((("ChatMessageTemplate", f"We will try to provide more explanation for this. {messageStamp}"),),
                            insertBeforeID=insertBeforeID)
@@ -92,43 +100,51 @@ async def get_status(chats, insertBeforeID=None, messageStamp=''):
 
 
 
-async def offer_faqs(faqlist, insertBeforeID=None):
+async def offer_faqs(faqlist, postData, history, insertBeforeID=None):
     'let student select FAQs to view or create a new FAQ'
     chats = (("ChatMessageTemplate", "Would any of the following questions help you? Select the one(s) you wish to view."),)
-    faqs = await chat.MultiSelection(chats, faqlist, "faq-list-template", "faq-choice-template", insertBeforeID=insertBeforeID).get()
+    query = chat.MultiSelection(chats, faqlist, "faq-list-template", "faq-choice-template", postData=postData, insertBeforeID=insertBeforeID)
+    faqs = await query.get('answer.faqs', history)
     stati = ()
     for i in faqs:
-        stati += await show_faq(faqlist[i], insertBeforeID)
+        stati += await show_faq(faqlist[i], postData, history, insertBeforeID)
     return stati
 
 
-async def solicit_faq(insertBeforeID=None):
-    hasQuestion = await chat.ChatQuery((("ChatMessageTemplate", "Is there anything else you're wondering about, where you'd like clarification or something you're unsure about this point?"),),
-                        'yesno-template', insertBeforeID=insertBeforeID).get()
+async def solicit_faq(postData, history, prefix='answer', insertBeforeID=None):
+    query = chat.ChatQuery((("ChatMessageTemplate", "Is there anything else you're wondering about, where you'd like clarification or something you're unsure about this point?"),),
+                           'yesno-template', postData=postData, insertBeforeID=insertBeforeID)
+    hasQuestion = await query.get(f'{prefix}.solicit_faq', history)
     if hasQuestion == 'yes':
-        await create_new_faq(insertBeforeID)
+        await create_new_faq(postData, history, insertBeforeID)
 
 
-async def show_faq(faq, insertBeforeID=None):
+async def show_faq(faq, postData, history, insertBeforeID=None):
     'show full question and option to view answer'
-    helpful = await chat.ChatQuery((("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["question"]}'),
-                     ("ChatMessageTemplate", "Would the answer to this student question help you?")), 'yesno-template', insertBeforeID=insertBeforeID).get()
+    query = chat.ChatQuery((("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["question"]}'),
+                            ("ChatMessageTemplate", "Would the answer to this student question help you?")),
+                           'yesno-template', postData=postData, insertBeforeID=insertBeforeID)
+    helpful = await query.get(f'faqs.helpful.{faq["faq_id"]}', history)
     if helpful == 'yes' and 'answer' in faq:
-        return (await show_faq_answer(faq, insertBeforeID),)
+        return (await show_faq_answer(faq, postData, history, insertBeforeID),)
     return () # empty tuple means no status info
 
 
-async def show_faq_answer(faq, insertBeforeID=None):
+async def show_faq_answer(faq, postData, history, insertBeforeID=None):
     'show answer and ask status'
-    s = f'<b>{faq["answerTitle"]}</b><br>{faq["answer"]}'
-    return await get_status((('faq-a1', s), ("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us.")),
-                            insertBeforeID)
+    return await get_status((('faq-a1', f'<b>{faq["answerTitle"]}</b><br>{faq["answer"]}'), 
+                             ("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us.")),
+                            f'faqs.status.{faq["faq_id"]}', postData, history, insertBeforeID)
 
 
-async def create_new_faq(insertBeforeID=None, messageStamp=''):
+async def create_new_faq(postData, history, insertBeforeID=None, messageStamp=''):
     'student writes a new FAQ question'
-    title = await chat.ChatInput((("ChatMessageTemplate", f"First, write your question as a single sentence, as clearly and simply as you can. (You'll have a chance to explain your question fully in the next step). {messageStamp}"),), insertBeforeID=insertBeforeID).get()
-    text = await chat.ChatInput((("ChatMessageTemplate", f"Next, try saying a bit more about exactly what you're unsure of, such as a simple example where you can think of two possible answers but you're not sure which one is actually right. {messageStamp}"),), insertBeforeID=insertBeforeID).get()
+    query = chat.ChatInput((("ChatMessageTemplate", f"First, write your question as a single sentence, as clearly and simply as you can. (You'll have a chance to explain your question fully in the next step). {messageStamp}"),),
+                           postData=postData, insertBeforeID=insertBeforeID)
+    title = await query.get('answer.add_faq', history)
+    query = chat.ChatInput((("ChatMessageTemplate", f"Next, try saying a bit more about exactly what you're unsure of, such as a simple example where you can think of two possible answers but you're not sure which one is actually right. {messageStamp}"),), 
+                           postData=postData, insertBeforeID=insertBeforeID)
+    text = await query.get('answer.add_faq_text', history)
     chat.post_messages((("ChatMessageTemplate", f"We'll try to get you an answer to this. {messageStamp}"),),
                        insertBeforeID=insertBeforeID)
 
@@ -145,29 +161,26 @@ async def offer_updates(updateFunc, updates, insertBeforeID, **kwargs):
     toggler.close()
 
 
-async def update_test(updates, insertBeforeID, messageStamp='<span class="chat-new-msg">new</span>'):
+async def update_test(updates, postData, history, insertBeforeID, messageStamp='<span class="chat-new-msg">new</span>'):
     'a trivial test of display a simple'
     stati = ()
     errmods = chat.filter_by_kind(updates, 'errormodel')
     if errmods:
         chats = (("ChatMessageTemplate", f"I've added explanations for some new blindspot(s) that caused people trouble on this question. Check any box(es) that seem relevant to what you were thinking. {messageStamp}"),)
-        stati += await offer_errmods(errmods, chats=chats, insertBeforeID=insertBeforeID, messageStamp=messageStamp)
+        stati += await offer_errmods(errmods, postData, history, chats=chats, insertBeforeID=insertBeforeID, messageStamp=messageStamp)
     for faq in chat.filter_by_kind(updates, 'faq'):
         stati += (await get_status((("ChatMessageTemplate", f"Below is my answer to the question you raised RE: the following issue {messageStamp}"),    
                         ("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["question"]}'),
                         ("ChatMessageTemplate", f'<b>{faq["answerTitle"]}</b><br>{faq["answer"]} {messageStamp}'),
                         ("ChatMessageTemplate", f'How well do you feel you understand now? If you need more clarification, tell us. {messageStamp}')),
-                        insertBeforeID, messageStamp),)
+                        f'faqs.status.{faq["faq_id"]}', postData, history, insertBeforeID, messageStamp),)
     if len(stati) == 0:
         stati += (await get_status((("ChatMessageTemplate", f"How well do you feel you understand now? If you need more clarification, tell us. {messageStamp}"),),
-                                   insertBeforeID, messageStamp),)
+                                   'update.status', postData, history, insertBeforeID, messageStamp),)
     if 'help' in stati:
-        hasQuestion = await chat.ChatQuery((("ChatMessageTemplate", f"Is there anything else you're wondering about, where you'd like clarification or something you're unsure about this point? {messageStamp}"),),
-                        'yesno-template', insertBeforeID=insertBeforeID).get()
-        if hasQuestion == 'yes':
-            await create_new_faq(insertBeforeID, messageStamp=messageStamp)
+        await solicit_faq(postData, history, prefix='update', insertBeforeID=insertBeforeID)
     await chat.continue_button((("ChatMessageTemplate", f'You have completed all updates for this thread. Click on Continue below to view your next thread "Efficiency Concerns: When to Include an ORCT?". {messageStamp}'),),
-                       insertBeforeID=insertBeforeID)
+                       path='update.done', postData=postData, history=history, insertBeforeID=insertBeforeID)
 
 
 aio.run(main())
