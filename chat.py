@@ -82,19 +82,22 @@ class ChatQuery(object):
             return already.get('outcome', None)
         except KeyError:
             pass
-        while True:
+        await self.sleep_until_data()
+        self.send_post(path)
+        self.close(self.message)
+        return self.outcome
+    async def sleep_until_data(self, attr='outcome'):
+        while getattr(self, attr, None) is None:
             await aio.sleep(1)
-            if self.outcome is not None:
-                await self.send_post(path)
-                self.close(self.message)
-                return self.outcome
+        return getattr(self, attr)
     def close(self, message=''):
         if message:
             post_messages((("StudentMessageTemplate", message),),
                           insertBeforeID=self.insertBeforeID)
         if self.temporary:
             self.temporary.remove() # delete this element from the DOM
-    async def send_post(self, path):
+    def send_post(self, path):
+        'initiate AJAX POST to server'
         self.postData['path'] = path
         self.response = None
         headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
@@ -104,10 +107,8 @@ class ChatQuery(object):
         for h, v in headers.items():
             req.set_header(h, v)
         req.send(JSON.stringify(self.postData))
-        while True:
-            await aio.sleep(1)
-            if self.response is not None:
-                return self.response
+    async def get_server_response(self, attr):
+        return (await self.sleep_until_data('response'))[attr]
     def on_complete(self, req):
         self.response = JSON.parse(req.text)
 

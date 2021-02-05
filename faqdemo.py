@@ -66,7 +66,7 @@ async def pose_orct(orct, postData, history, insertBeforeID=None):
                        chatSelector='span', insertBeforeID=insertBeforeID)
     query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
-    postData['response_id'] = query.response['response_id']
+    postData['response_id'] = await query.get_server_response('response_id')
     query = chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', postData=postData, insertBeforeID=insertBeforeID)
     return await query.get('confidence', history)
 
