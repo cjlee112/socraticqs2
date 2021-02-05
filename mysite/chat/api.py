@@ -8,11 +8,12 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 
 from ct.models import Response as StudentResponse, Lesson, UnitLesson, EVAL_TO_STATUS_MAP
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
@@ -31,6 +32,9 @@ from .serializers import (
     ChatResourcesSerializer,
     AddUnitByChatSerializer,
     ChatSerializer,
+    MessageSerializer2,
+    ChatThreadSerializer2,
+    ChatSerializer2,
 )
 from .utils import (
     get_updated_thread_id,
@@ -714,3 +718,47 @@ class UpdatesView(ValidateMixin, APIView):
         chat.save()
         serializer = MessageSerializer(m)
         return Response(serializer.data)
+
+
+#############################################################################
+# brella backend code
+
+
+@api_view(['GET'])
+def chat_api2(request, pk):
+    'test creating a simple GET endpoint'
+    chat = get_object_or_404(Chat, id=pk)
+    serializer = ChatSerializer2(chat)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def message_api2(request):
+    if request.method == 'GET':
+        chat_id = request.query_params.get('chat_id', '')
+        if chat_id.isdigit():
+            chat = get_object_or_404(Chat, id=int(chat_id))
+            try:
+                ulID = int(request.query_params.get('completedThread', ''))
+                lastUL = get_object_or_404(UnitLesson, id=ulID)
+                nextUL = lastUL.get_next_lesson()
+            except (ValueError, UnitLesson.DoesNotExist):
+                nextUL = UnitLesson.objects.get(unit=chat.enroll_code.courseUnit.unit,
+                                                order=0, kind=UnitLesson.COMPONENT)
+            chatThread = ChatThread(chat, nextUL)
+            serializer = ChatThreadSerializer2(chatThread)
+            return Response(serializer.data)
+             
+    elif request.method == 'POST':
+        serializer = MessageSerializer2(data=request.data)
+        if serializer.is_valid():
+            m = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ChatThread(object):
+    def __init__(self, chat, unitLesson):
+        self.chat = char
+        self.unitLesson = unitLesson
+

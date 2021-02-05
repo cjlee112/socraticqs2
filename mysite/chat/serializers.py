@@ -1,6 +1,8 @@
 import logging
 import injections
 from functools import reduce
+import json
+from django.utils import timezone
 
 import waffle
 from rest_framework import serializers
@@ -9,10 +11,11 @@ from django.conf import settings
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
-from ct.models import Response, UnitLesson, NEED_HELP_STATUS, NEED_REVIEW_STATUS
+from ct.models import Response, UnitLesson, StudentError, InquiryCount, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from accounts.models import Instructor
 from . models import Message, Chat
 from . services import ProgressHandler
+from api.serializers import get_ul_serializer, UnitSerializer2
 
 
 log = logging.getLogger(__name__)
@@ -671,3 +674,120 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chat
         fields = ('id', 'session', 'is_test', 'is_preview')
+
+
+
+#######################################################################
+# brella backend code
+
+
+class MessageSerializer2(serializers.BaseSerializer):
+    def to_representation(self, m):
+        'output dict for serialization'
+        data = json.loads(m.text)
+        data['message_id'] = m.id
+        data['chat_id'] = m.chat.id
+        data['thread_id'] = m.thread_id
+        if 'remap' in data:
+            for attr,k in data['remap']:
+                data[k] = getattr(m, attr).id
+            del data['remap']
+        return data
+    def to_internal_value(self, data):
+        'deserialize input data dict into validated attr dict'
+        valid = {'userMessage': True, 'timestamp': timezone.now()}
+        extra = {}
+        #################################### required values
+        extra['path'] = data.get('path', '')
+        if not extra['path']:
+            raise serializers.ValidationError(dict(path='Missing path value'))
+        try:
+            valid['chat'] = Chat.objects.get(id=data['chat_id'])
+            valid['owner'] = valid['chat'].user
+        except (KeyError, Chat.DoesNotExist):
+            raise serializers.ValidationError(dict(chat_id='Missing or invalid chat_id'))
+        try:
+            thread = UnitLesson.objects.get(id=data['thread_id'], order__isnull=False)
+            valid['thread_id'] = thread.id
+        except (KeyError, UnitLesson.DoesNotExist):
+            raise serializers.ValidationError(dict(thread_id='Missing or invalid thread_id'))
+        ##################################### optional values
+        for k in ('outcome', 'message'):
+            if k in data:
+                extra[k] = data[k]
+        options = dict(ul_id=('lesson_to_answer', UnitLesson), # store optional object links
+                       response_id=('response_to_check', Response), 
+                       faq_id=('response_to_check', Response),
+                       student_error_id=('student_error', StudentError))
+        remap = []
+        for k,t in options.items():
+            if k in data:
+                attr, klass = t
+                try:
+                    valid[attr] = klass.objects.get(id=data[k])
+                    remap.append((attr, k))
+                except klass.DoesNotExist:
+                    raise serializers.ValidationError({k: 'invalid object ID'})
+        self.create_affiliates(extra['path'], valid, extra, remap)
+        if remap:
+            extra['remap'] = remap
+        valid['text'] = json.dumps(extra)
+        return valid # validated data dict
+    def create(self, validated_data):
+        return Message.objects.create(**validated_data)
+    def create_affiliates(self, path, valid, extra, remap):
+        'create affiliated objects required for new message specified by data dicts'
+        p = path.split('.')
+        chat = valid['chat']
+        if (path == 'response' or p[-1] == 'add_faq') and 'response_to_check' not in valid:
+            ul = valid['lesson_to_answer']
+            r = Response.objects.create(unitLesson=ul, lesson=ul.lesson, author=valid['owner'],
+                    course=chat.enroll_code.courseUnit.course,
+                    is_preview=chat.is_preview, is_test=chat.is_test)
+            if p[-1] == 'add_faq': # mark as FAQ
+                r.kind = Response.STUDENT_QUESTION
+                r.title = extra['message']
+                remap.append(('response_to_check', 'faq_id'))
+            else: # mark as ORCT response
+                r.text = extra['message']
+                remap.append(('response_to_check', 'response_id'))
+            r.save()
+            valid['response_to_check'] = r
+        elif len(p) == 2 and p[0] == 'errormodels' and p[1].isdigit() and extra['outcome'] == 'yes' and 'student_error' not in valid:
+            ul = valid['lesson_to_answer']
+            r = valid['response_to_check']
+            se = StudentError.objects.create(errorModel=ul, response=r, author=valid['owner'])
+            se.save()
+            valid['student_error'] = se
+            remap.append(('student_error', 'student_error_id'))
+        elif len(p) == 3 and p[0:2] == ['faqs', 'helpful'] and p[-1].isdigit() and extra['outcome'] == 'yes' and 'inquiry_id' not in extra:
+            r = valid['response_to_check']
+            inquiry = InquiryCount.objects.create(response=r, addedBy=valid['owner'])
+            inquiry.save()
+            extra['inquiry_id'] = inquiry.id
+
+
+
+
+
+class ChatThreadSerializer2(serializers.BaseSerializer):
+    'read-only serializer for combining UnitLesson content and saved messages from student'
+    def to_representation(self, chatThread):
+        data = get_ul_serializer(chatThread.unitLesson).data
+        for m in chatThread.chat.message_set.filter(thread_id=chatThread.unitLesson.id).order_by('timestamp'):
+            msgData = MessageSerializer2(m).data
+            # now we have to store this in data[] in whatever way is easiest for frontend
+
+
+
+class ChatSerializer2(serializers.BaseSerializer):
+    def to_representation(self, chat):
+        data = UnitSerializer2(chat.enroll_code.courseUnit.unit).data
+        history = {}
+        for m in chat.message_set.filter(userMessage=True):
+            msgData = MessageSerializer2(m).data
+            history[msgData['path']] = msgData
+        return dict(chat_id=chat.id, threads=data, history=history)
+
+
+

@@ -16,6 +16,8 @@ from .api import (
     UpdatesView,
     UpdatesThreadIdView,
     AddUnitByChatProgressView,
+    chat_api2,
+    message_api2,
 )
 from .services import FsmHandler
 
@@ -71,4 +73,6 @@ urlpatterns = [
     url(r'^initLiveSession/(?P<state_id>\d+)/$',
         InitializeLiveSession.as_view(), name="init_live_chat"),
     url(r'^', include(router.urls)),
+    url(r'^brella/messages$', message_api2),
+    path('brella/<int:pk>/', chat_api2),
 ]
