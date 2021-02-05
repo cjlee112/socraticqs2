@@ -737,6 +737,19 @@ def message_api2(request):
         serializer = MessageSerializer2(data=request.data)
         if serializer.is_valid():
             m = serializer.save()
+            path = request.data['path']
+            if path in ('confidence', 'selfeval', 'status'):
+                setattr(m.response_to_check, path, request.data['outcome'])
+                m.response_to_check.save()
+            elif path.startswith('errormodels.status.'):
+                m.student_error.status = request.data['outcome']
+                m.student_error.save()
+            elif path.startswith('faqs.status.'):
+                m.response_to_check.status = request.data['outcome']
+                m.response_to_check.save()
+            elif path.endswith('.add_faq_text'):
+                m.response_to_check.text = request.data['message']
+                m.response_to_check.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
