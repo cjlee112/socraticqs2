@@ -157,12 +157,12 @@ class ThreadSerializer(serializers.ModelSerializer):
 class FAQSerializer2(serializers.BaseSerializer):
     'serializer for FAQ student question'
     def to_representation(self, f):
-        return dict(title=f.title, question=f.text, answerTitle='Instructor Answer', answer='You bet.')
+        return dict(faq_id=f.id, title=f.title, question=f.text, answerTitle='Instructor Answer', answer='You bet.')
 
 class ULSerializer2(serializers.BaseSerializer):
     'base UnitLesson serializer for brella API'
     def to_representation(self, ul):
-        data = dict(kind=ul.lesson.kind, ulID=ul.id, title=ul.lesson.title, message=md2html(ul.lesson.text))
+        data = dict(kind=ul.lesson.kind, ul_id=ul.id, title=ul.lesson.title, message=md2html(ul.lesson.text))
         faqs = []
         for f in ul.response_set.filter(kind=Response.STUDENT_QUESTION):
             faqs.append(FAQSerializer2(f).data)
