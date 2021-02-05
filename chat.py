@@ -68,22 +68,28 @@ class ChatQuery(object):
         self.postData = postData.copy()
         self.postURL =  postURL
     def handler(self, ev):
+        'called when user clicks Submit'
         if self.dataAttr:
             self.outcome = ev.target.attrs[self.dataAttr]
         else:
             self.outcome = 'continue'
         self.postData['outcome'] = self.outcome
         self.message = self.postData['message'] = ev.target.html
-    async def get(self, path, history={}):
+        self.send_post(self.postData)
+    def check_history(self, path, history):
+        self.postData['path'] = path
         try:
             already = history[path]
             self.response = already
+            return already
+        except KeyError:
+            return None
+    async def get(self, path, history={}):
+        already = self.check_history(path, history)
+        if already:
             self.close(already.get('message', ''))
             return already.get('outcome', None)
-        except KeyError:
-            pass
         await self.sleep_until_data()
-        self.send_post(path)
         self.close(self.message)
         return self.outcome
     async def sleep_until_data(self, attr='outcome'):
@@ -91,14 +97,14 @@ class ChatQuery(object):
             await aio.sleep(1)
         return getattr(self, attr)
     def close(self, message=''):
+        'display output message and clean up chat input area'
         if message:
             post_messages((("StudentMessageTemplate", message),),
                           insertBeforeID=self.insertBeforeID)
         if self.temporary:
             self.temporary.remove() # delete this element from the DOM
-    def send_post(self, path):
+    def send_post(self, postData):
         'initiate AJAX POST to server'
-        self.postData['path'] = path
         self.response = None
         headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
         req = ajax.Ajax()
@@ -106,7 +112,7 @@ class ChatQuery(object):
         req.open('POST', self.postURL, True)
         for h, v in headers.items():
             req.set_header(h, v)
-        req.send(JSON.stringify(self.postData))
+        req.send(JSON.stringify(postData))
     async def get_server_response(self, attr):
         return (await self.sleep_until_data('response'))[attr]
     def on_complete(self, req):
@@ -124,6 +130,7 @@ class ChatInput(ChatQuery):
     def handler(self, ev):
         self.outcome = self.message = self.temporary.select("textarea")[0].value
         self.postData['message'] = self.message
+        self.send_post(self.postData)
 
 class MultiSelection(ChatQuery):
     'prompt user with chat messages, then await get() to receive multiple-selection'
