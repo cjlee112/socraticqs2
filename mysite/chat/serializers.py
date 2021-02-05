@@ -774,9 +774,13 @@ class ChatThreadSerializer2(serializers.BaseSerializer):
     'read-only serializer for combining UnitLesson content and saved messages from student'
     def to_representation(self, chatThread):
         data = get_ul_serializer(chatThread.unitLesson).data
-        for m in chatThread.chat.message_set.filter(thread_id=chatThread.unitLesson.id).order_by('timestamp'):
+        data['chat_id'] = chatThread.chat.id
+        data['thread_id'] = chatThread.unitLesson.id
+        data['history'] = history = {}
+        for m in chatThread.chat.message_set.filter(thread_id=chatThread.unitLesson.id):
             msgData = MessageSerializer2(m).data
-            # now we have to store this in data[] in whatever way is easiest for frontend
+            history[msgData['path']] = msgData
+        return data
 
 
 

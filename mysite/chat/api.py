@@ -733,22 +733,7 @@ def chat_api2(request, pk):
 
 @api_view(['POST'])
 def message_api2(request):
-    if request.method == 'GET':
-        chat_id = request.query_params.get('chat_id', '')
-        if chat_id.isdigit():
-            chat = get_object_or_404(Chat, id=int(chat_id))
-            try:
-                ulID = int(request.query_params.get('completedThread', ''))
-                lastUL = get_object_or_404(UnitLesson, id=ulID)
-                nextUL = lastUL.get_next_lesson()
-            except (ValueError, UnitLesson.DoesNotExist):
-                nextUL = UnitLesson.objects.get(unit=chat.enroll_code.courseUnit.unit,
-                                                order=0, kind=UnitLesson.COMPONENT)
-            chatThread = ChatThread(chat, nextUL)
-            serializer = ChatThreadSerializer2(chatThread)
-            return Response(serializer.data)
-             
-    elif request.method == 'POST':
+    if request.method == 'POST':
         serializer = MessageSerializer2(data=request.data)
         if serializer.is_valid():
             m = serializer.save()
@@ -757,8 +742,26 @@ def message_api2(request):
 
 
 
+@api_view(['GET'])
+def thread_api2(request):
+    'test creating a simple GET endpoint'
+    if request.method == 'GET':
+        chat_id = request.query_params.get('chat_id', '')
+        if chat_id.isdigit():
+            chat = get_object_or_404(Chat, id=int(chat_id))
+            try:
+                ulID = int(request.query_params.get('completedThread', ''))
+                nextUL = UnitLesson.objects.get(id=ulID).get_next_lesson()
+            except (ValueError, UnitLesson.DoesNotExist):
+                nextUL = UnitLesson.objects.get(unit=chat.enroll_code.courseUnit.unit,
+                                                order=0, kind=UnitLesson.COMPONENT)
+            chatThread = ChatThread(chat, nextUL)
+            serializer = ChatThreadSerializer2(chatThread)
+            return Response(serializer.data)
+
+
 class ChatThread(object):
     def __init__(self, chat, unitLesson):
-        self.chat = char
+        self.chat = chat
         self.unitLesson = unitLesson
 
