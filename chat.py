@@ -1,4 +1,5 @@
-from browser import document, aio
+from browser import document, aio, ajax, window
+from javascript import JSON
 
 def copy_to_container(templateID, containerID, msgText=None, selector=None, handler=None, 
                       container=None, insertBeforeID=None, **kwargs):
@@ -57,7 +58,7 @@ class ChatQuery(object):
     'prompt user with chat messages, then await get() to receive button click'
     def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
             dataAttr='data-option-value', selector='button[data-option-value]',
-            insertBeforeID=None, postData={}):
+            insertBeforeID=None, postData={}, postURL='/chat/brella/messages'):
         self.insertBeforeID = insertBeforeID
         post_messages(chats, insertBeforeID=insertBeforeID)
         self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
@@ -65,6 +66,7 @@ class ChatQuery(object):
         self.outcome = self.message = None
         self.dataAttr = dataAttr
         self.postData = postData.copy()
+        self.postURL =  postURL
     def handler(self, ev):
         if self.dataAttr:
             self.outcome = ev.target.attrs[self.dataAttr]
@@ -75,6 +77,7 @@ class ChatQuery(object):
     async def get(self, path, history={}):
         try:
             already = history[path]
+            self.response = already
             self.close(already.get('message', ''))
             return already.get('outcome', None)
         except KeyError:
@@ -82,7 +85,7 @@ class ChatQuery(object):
         while True:
             await aio.sleep(1)
             if self.outcome is not None:
-                self.send_post(path)
+                await self.send_post(path)
                 self.close(self.message)
                 return self.outcome
     def close(self, message=''):
@@ -91,9 +94,22 @@ class ChatQuery(object):
                           insertBeforeID=self.insertBeforeID)
         if self.temporary:
             self.temporary.remove() # delete this element from the DOM
-    def send_post(self, path):
+    async def send_post(self, path):
         self.postData['path'] = path
-        # POST(self.postData)
+        self.response = None
+        headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
+        req = ajax.Ajax()
+        req.bind('complete', self.on_complete)
+        req.open('POST', self.postURL, True)
+        for h, v in headers.items():
+            req.set_header(h, v)
+        req.send(JSON.stringify(self.postData))
+        while True:
+            await aio.sleep(1)
+            if self.response is not None:
+                return self.response
+    def on_complete(self, req):
+        self.response = JSON.parse(req.text)
 
 
 async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
@@ -106,6 +122,7 @@ class ChatInput(ChatQuery):
         ChatQuery.__init__(self, chats, "chat-text-template", selector="button", **kwargs)
     def handler(self, ev):
         self.outcome = self.message = self.temporary.select("textarea")[0].value
+        self.postData['message'] = self.message
 
 class MultiSelection(ChatQuery):
     'prompt user with chat messages, then await get() to receive multiple-selection'
@@ -182,6 +199,13 @@ class DemoScenario(object):
         for targetID in self.showIDs:
             set_visibility(targetID, not visible)
 
+
+def get_cookie(attr):
+    'extract specified cookie value from javascript'
+    for s in window.document.cookie.split(';'):
+        k, v = s.strip().split('=')
+        if k == attr:
+            return v
         
 
 

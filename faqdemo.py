@@ -55,15 +55,18 @@ async def show_explanation(e, postData, history, insertBeforeID=None):
     chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
     await chat.continue_button((("ChatMessageTemplate", e['message']),),
-                               path='done', insertBeforeID=insertBeforeID)
+                               path='done', postData=postData, history=history,
+                               insertBeforeID=insertBeforeID)
 
 
 async def pose_orct(orct, postData, history, insertBeforeID=None):
     'ask question, student responds, gives confidence level'
+    postData['ul_id'] = orct['question']['ul_id']
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
     query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
+    postData['response_id'] = query.response['response_id']
     query = chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', postData=postData, insertBeforeID=insertBeforeID)
     return await query.get('confidence', history)
 
