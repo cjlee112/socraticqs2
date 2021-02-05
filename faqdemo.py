@@ -2,25 +2,31 @@ from browser import aio
 import chat
 from javascript import JSON
 
-async def main(threadURL='/chat/brella/10/',
-               insertBeforeID=None):
+async def main(chat_id=10, insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
+    await do_courselet(chat_id, insertBeforeID)
+
+async def get_thread(chat_id, completedThread=None, threadURL='/chat/brella/threads'):
+    params = dict(chat_id=chat_id)
+    if completedThread is not None:
+        params['completedThread'] = completedThread
     headers = {'Content-Type': 'application/json'}
-    req = await aio.get(threadURL, headers=headers)
+    req = await aio.get(threadURL, headers=headers, data=params)
     data = JSON.parse(req.data)
-    threads = data['threads']
-    postData = dict(chat_id=data['chat_id'])
-    history = data['history']
-    await do_courselet(threads, postData, history, insertBeforeID)
+    postData = dict(chat_id=data['chat_id'], thread_id=data['thread_id'])
+    return data, postData
 
 
-async def do_courselet(threads, postData, history, insertBeforeID=None):
+
+async def do_courselet(chat_id, insertBeforeID=None):
     'complete a multi-thread courselet'
-    for t in threads:
+    t, postData = await get_thread(chat_id)
+    while t:
         if t['kind'] == 'base':
-            await show_explanation(t, postData, history, insertBeforeID)
+            await show_explanation(t, postData, t['history'], insertBeforeID)
         elif t['kind'] == 'orct':
-            await do_orct_cycle(t, postData, history, insertBeforeID)
+            await do_orct_cycle(t, postData, t['history'], insertBeforeID)
+        t, postData = await get_thread(chat_id, t['thread_id'])
 
 
 async def do_orct_cycle(mainThread, postData, history, insertBeforeID=None):
