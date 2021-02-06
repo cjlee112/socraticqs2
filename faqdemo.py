@@ -89,7 +89,9 @@ async def offer_errmods(errmods, postData, history, insertBeforeID=None,
     ems = await query.get('errormodels', history)
     stati = ()
     for i in ems:
-        stati += (await show_em(errmods[i], postData, history, insertBeforeID, messageStamp),)
+        postData2 = postData.copy()
+        postData2['student_error_id'] = await query.get_server_response(i, 'student_error_id')
+        stati += (await show_em(errmods[i], postData2, history, insertBeforeID, messageStamp),)
     return stati
 
 
@@ -112,7 +114,8 @@ async def get_status(chats, path, postData, history, insertBeforeID=None, messag
 async def offer_faqs(faqlist, postData, history, insertBeforeID=None):
     'let student select FAQs to view or create a new FAQ'
     chats = (("ChatMessageTemplate", "Would any of the following questions help you? Select the one(s) you wish to view."),)
-    query = chat.MultiSelection(chats, faqlist, "faq-list-template", "faq-choice-template", postData=postData, insertBeforeID=insertBeforeID)
+    query = chat.MultiSelection(chats, faqlist, "faq-list-template", "faq-choice-template",
+                                postData=postData, idAttr='faq_id', insertBeforeID=insertBeforeID)
     faqs = await query.get('answer.faqs', history)
     stati = ()
     for i in faqs:

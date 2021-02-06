@@ -135,20 +135,30 @@ class ChatInput(ChatQuery):
 class MultiSelection(ChatQuery):
     'prompt user with chat messages, then await get() to receive multiple-selection'
     def __init__(self, chats, choices, listTemplate, choiceTemplate, listSelector=".chat-select-list", choiceSelector='h3',
-                 choiceAttr='title', chatContainer="chatSection", insertBeforeID=None, **kwargs):
+                 choiceAttr='title', idAttr='ul_id', chatContainer="chatSection", insertBeforeID=None, **kwargs):
         post_messages(chats, insertBeforeID=insertBeforeID)
         msg = copy_to_container(listTemplate, chatContainer, insertBeforeID=insertBeforeID)[0]
-        container = msg.select(listSelector)[0]
-        for c in choices:
-            e = copy_to_container(choiceTemplate, None, c[choiceAttr], choiceSelector, container=container)[0]
-            bind_event(self.toggle_choice, e, 'div')
         ChatQuery.__init__(self, (), "continue-template", selector="button", insertBeforeID=insertBeforeID, **kwargs)
         self.listID = msg.id
+        self.container = msg.select(listSelector)[0]
+        self.choices = choices
+        self.idAttr = idAttr
+        self.choiceTemplate = choiceTemplate
+        self.choiceAttr = choiceAttr
+        self.choiceSelector = choiceSelector
     def handler(self, ev):
         l = []
         for i, div in enumerate(document[self.listID].select('div.chat-check')):
+            postData = self.postData.copy()
             if div.attrs['class'].find('chat-selectable-selected') >= 0:
                 l.append(i)
+                postData['outcome'] = 'yes'
+            else:
+                postData['outcome'] = 'no'
+            if i in self.newChoices:
+                postData[self.idAttr] = self.choices[i][self.idAttr]
+                postData['path'] = self.paths[i]
+                self.send_post(postData)
         self.outcome = l
     def toggle_choice(self, ev):
         div = ev.target
@@ -156,6 +166,38 @@ class MultiSelection(ChatQuery):
             div.attrs['class'] = "chat-check chat-selectable"
         else:
             div.attrs['class'] = "chat-check chat-selectable  chat-selectable-selected"
+    def check_history(self, path, history):
+        newChoices = []
+        l = []
+        fullpaths = []
+        for i,c in enumerate(self.choices):
+            e = copy_to_container(self.choiceTemplate, None, c[self.choiceAttr], self.choiceSelector, container=self.container)[0]
+            fullpath = f'{path}.{c[self.idAttr]}'
+            fullpaths.append(fullpath)
+            try:
+                response = history[fullpath]
+                setattr(self, f'response{i}', response)
+                if response.get('outcome', '') == 'yes':
+                    div = e.select('div.chat-check')[0]
+                    div.attrs['class'] = "chat-check chat-selectable  chat-selectable-selected" # turn on check mark on this div
+                    l.append(i)
+            except KeyError:
+                bind_event(self.toggle_choice, e, 'div')
+                newChoices.append(i)
+        self.paths = fullpaths
+        if newChoices:
+            self.newChoices = newChoices
+            return None
+        else:
+            return dict(outcome=l)
+    async def get_server_response(self, i, attr):
+        return (await self.sleep_until_data(f'response{i}'))[attr]
+    def on_complete(self, req):
+        response = JSON.parse(req.text)
+        for i, c in enumerate(self.choices):
+            if c[self.idAttr] == response[self.idAttr]:
+                setattr(self, f'response{i}', response)
+                return
 
 
 class HistoryToggle(object):
