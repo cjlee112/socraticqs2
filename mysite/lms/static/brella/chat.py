@@ -1,0 +1,267 @@
+from browser import document, aio, ajax, window
+from javascript import JSON
+
+def copy_to_container(templateID, containerID, msgText=None, selector=None, handler=None, 
+                      container=None, insertBeforeID=None, **kwargs):
+    'clone a template, inject content, and append to container'
+    template = document[templateID]
+    message = template.cloneNode(True) # clone its full subtree including all descendants
+    message.id = webfsm_id.__next__()
+    if msgText:
+        contentElement = message.select(selector)[0]
+        contentElement.html = msgText
+    if handler:
+        bind_event(handler, message, selector, **kwargs)
+    if not container:
+        container = document[containerID]
+    if insertBeforeID: # insert at this specific location
+        container.insertBefore(message, document[insertBeforeID])
+    else:
+        container <= message # append to container's children
+    document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight # scroll to bottom
+    return message, container
+
+def post_messages(chats, chatContainer="chatSection", chatSelector='.chat-bubble',
+                    insertBeforeID=None):
+    'post one or more messages to the chat'
+    for t, m in chats: # inject chat messages
+        copy_to_container(t, chatContainer, m, chatSelector, insertBeforeID=insertBeforeID)
+
+
+def set_visibility(targetID, visible=True, displayStyle='block'):
+    'show or hide a specific DOM container'
+    target = document[targetID]
+    if visible:
+        target.style.display = displayStyle
+    else:
+        target.style.display = 'none'
+
+def bind_event(func, d=document, selector='button[data-option-value]', event='click'):
+    for button in d.select(selector):
+        button.bind(event, func)
+
+def generate_id(stemFormat='webfsm%d'):
+    'generate unique IDs for webfsm DOM elements'
+    i = 1
+    while True:
+        yield stemFormat % (i,)
+        i += 1
+
+webfsm_id = generate_id() # get iterator
+
+def filter_by_kind(messages, kind):
+    return [d for d in messages if d['kind'] == kind]
+
+############################################################
+
+class ChatQuery(object):
+    'prompt user with chat messages, then await get() to receive button click'
+    def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
+            dataAttr='data-option-value', selector='button[data-option-value]',
+            insertBeforeID=None, postData={}, postURL='/chat/brella/messages'):
+        self.insertBeforeID = insertBeforeID
+        post_messages(chats, insertBeforeID=insertBeforeID)
+        self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
+                                            handler=self.handler)[0]
+        self.outcome = self.message = None
+        self.dataAttr = dataAttr
+        self.postData = postData.copy()
+        self.postURL =  postURL
+    def handler(self, ev):
+        'called when user clicks Submit'
+        if self.dataAttr:
+            self.outcome = ev.target.attrs[self.dataAttr]
+        else:
+            self.outcome = 'continue'
+        self.postData['outcome'] = self.outcome
+        self.message = self.postData['message'] = ev.target.html
+        self.send_post(self.postData)
+    def check_history(self, path, history):
+        self.postData['path'] = path
+        try:
+            already = history[path]
+            self.response = already
+            return already
+        except KeyError:
+            return None
+    async def get(self, path, history={}):
+        already = self.check_history(path, history)
+        if already:
+            self.close(already.get('message', ''))
+            return already.get('outcome', None)
+        await self.sleep_until_data()
+        self.close(self.message)
+        return self.outcome
+    async def sleep_until_data(self, attr='outcome'):
+        while getattr(self, attr, None) is None:
+            await aio.sleep(1)
+        return getattr(self, attr)
+    def close(self, message=''):
+        'display output message and clean up chat input area'
+        if message:
+            post_messages((("StudentMessageTemplate", message),),
+                          insertBeforeID=self.insertBeforeID)
+        if self.temporary:
+            self.temporary.remove() # delete this element from the DOM
+    def send_post(self, postData):
+        'initiate AJAX POST to server'
+        self.response = None
+        headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
+        req = ajax.Ajax()
+        req.bind('complete', self.on_complete)
+        req.open('POST', self.postURL, True)
+        for h, v in headers.items():
+            req.set_header(h, v)
+        req.send(JSON.stringify(postData))
+    async def get_server_response(self, attr):
+        return (await self.sleep_until_data('response'))[attr]
+    def on_complete(self, req):
+        self.response = JSON.parse(req.text)
+
+
+async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
+    query = ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", postData=postData, **kwargs)
+    return await query.get(path, history)
+
+class ChatInput(ChatQuery):
+    'prompt user with chat messages, then await get() to receive textarea'
+    def __init__(self, chats, **kwargs):
+        ChatQuery.__init__(self, chats, "chat-text-template", selector="button", **kwargs)
+    def handler(self, ev):
+        self.outcome = self.message = self.temporary.select("textarea")[0].value
+        self.postData['message'] = self.message
+        self.send_post(self.postData)
+
+class MultiSelection(ChatQuery):
+    'prompt user with chat messages, then await get() to receive multiple-selection'
+    def __init__(self, chats, choices, listTemplate, choiceTemplate, listSelector=".chat-select-list", choiceSelector='h3',
+                 choiceAttr='title', idAttr='ul_id', chatContainer="chatSection", insertBeforeID=None, **kwargs):
+        post_messages(chats, insertBeforeID=insertBeforeID)
+        msg = copy_to_container(listTemplate, chatContainer, insertBeforeID=insertBeforeID)[0]
+        ChatQuery.__init__(self, (), "continue-template", selector="button", insertBeforeID=insertBeforeID, **kwargs)
+        self.listID = msg.id
+        self.container = msg.select(listSelector)[0]
+        self.choices = choices
+        self.idAttr = idAttr
+        self.choiceTemplate = choiceTemplate
+        self.choiceAttr = choiceAttr
+        self.choiceSelector = choiceSelector
+    def handler(self, ev):
+        l = []
+        for i, div in enumerate(document[self.listID].select('div.chat-check')):
+            postData = self.postData.copy()
+            if div.attrs['class'].find('chat-selectable-selected') >= 0:
+                l.append(i)
+                postData['outcome'] = 'yes'
+            else:
+                postData['outcome'] = 'no'
+            if i in self.newChoices:
+                postData[self.idAttr] = self.choices[i][self.idAttr]
+                postData['path'] = self.paths[i]
+                self.send_post(postData)
+        self.outcome = l
+    def toggle_choice(self, ev):
+        div = ev.target
+        if div.attrs['class'].find('chat-selectable-selected') >= 0:
+            div.attrs['class'] = "chat-check chat-selectable"
+        else:
+            div.attrs['class'] = "chat-check chat-selectable  chat-selectable-selected"
+    def check_history(self, path, history):
+        newChoices = []
+        l = []
+        fullpaths = []
+        for i,c in enumerate(self.choices):
+            e = copy_to_container(self.choiceTemplate, None, c[self.choiceAttr], self.choiceSelector, container=self.container)[0]
+            fullpath = f'{path}.{c[self.idAttr]}'
+            fullpaths.append(fullpath)
+            try:
+                response = history[fullpath]
+                setattr(self, f'response{i}', response)
+                if response.get('outcome', '') == 'yes':
+                    div = e.select('div.chat-check')[0]
+                    div.attrs['class'] = "chat-check chat-selectable  chat-selectable-selected" # turn on check mark on this div
+                    l.append(i)
+            except KeyError:
+                bind_event(self.toggle_choice, e, 'div')
+                newChoices.append(i)
+        self.paths = fullpaths
+        if newChoices:
+            self.newChoices = newChoices
+            return None
+        else:
+            return dict(outcome=l)
+    async def get_server_response(self, i, attr):
+        return (await self.sleep_until_data(f'response{i}'))[attr]
+    def on_complete(self, req):
+        response = JSON.parse(req.text)
+        for i, c in enumerate(self.choices):
+            if c[self.idAttr] == response[self.idAttr]:
+                setattr(self, f'response{i}', response)
+                return
+
+
+class HistoryToggle(object):
+    def __init__(self, insertBeforeID, updateFlagger='UpdateFlagger', updateToggler='UpdateToggler'):
+        self.target = document[insertBeforeID]
+        self.controller = document[updateFlagger]
+        self.msgToggler = document[updateToggler]
+        set_visibility(updateFlagger)
+        self.set_toggle()
+        bind_event(self.handler, selector='#' + updateToggler)
+    def handler(self, ev):
+        self.set_toggle(not self.visible)
+    def set_toggle(self, visible=False):
+        if visible:
+            self.msgToggler.text = '↑ Hide Subsequent Threads'
+            self.target.scrollIntoView({'block': "center"})
+            #document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight # scroll to bottom
+        else:
+            self.msgToggler.text = '↓ Show Subsequent Threads'
+        self.visible = visible
+        container = self.target.parent
+        toggle = False
+        for c in container.children:
+            if c.id == self.target.id:
+                toggle = True
+            if toggle:
+                set_visibility(c.id, visible)
+    def close(self):
+        set_visibility(self.controller.id, False)
+        self.set_toggle(True)
+
+
+class DemoScenario(object):
+    def __init__(self, formID='DemoScenarios', showIDs=('chatSection', 'ChatInputSection'),
+                 buttonSelector='button', checkboxSelector='input'):
+        self.formID = formID
+        self.showIDs = showIDs
+        self.checkboxSelector = checkboxSelector
+        self.scenarios = {}
+        self.show(True)
+        bind_event(self.start, document[formID], buttonSelector)
+    def start(self, ev):
+        for e in document[self.formID].select(self.checkboxSelector):
+            self.scenarios[e.id] = e.checked
+        self.show(False)
+        ev.target.unbind('click')
+    def show(self, visible=True):
+        set_visibility(self.formID, visible)
+        for targetID in self.showIDs:
+            set_visibility(targetID, not visible)
+
+
+def get_cookie(attr):
+    'extract specified cookie value from javascript'
+    for s in window.document.cookie.split(';'):
+        k, v = s.strip().split('=')
+        if k == attr:
+            return v
+        
+
+
+################################################################
+# distinct states:
+# * pose a question, get response from chat-input-text
+# * show text message, wait to Continue
+# * request a choice via multiple-choice buttons
+# * request a selection via multiple-selection list
