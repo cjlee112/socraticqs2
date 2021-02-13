@@ -8,9 +8,11 @@ import waffle
 from rest_framework import serializers
 from django.urls import reverse
 from django.conf import settings
+from django.core.files.base import ContentFile
 
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
+from lti.utils import key_secret_generator
 from ct.models import Response, UnitLesson, StudentError, InquiryCount, NEED_HELP_STATUS, NEED_REVIEW_STATUS
 from accounts.models import Instructor
 from . models import Message, Chat
@@ -712,7 +714,7 @@ class MessageSerializer2(serializers.BaseSerializer):
         except (KeyError, UnitLesson.DoesNotExist):
             raise serializers.ValidationError(dict(thread_id='Missing or invalid thread_id'))
         ##################################### optional values
-        for k in ('outcome', 'message'):
+        for k in ('outcome', 'message', 'canvasSVG'):
             if k in data:
                 extra[k] = data[k]
         options = dict(ul_id=('lesson_to_answer', UnitLesson), # store optional object links
@@ -751,6 +753,9 @@ class MessageSerializer2(serializers.BaseSerializer):
             else: # mark as ORCT response
                 r.text = extra['message']
                 remap.append(('response_to_check', 'response_id'))
+            if 'canvasSVG' in extra:
+                name = '{}-{}.{}'.format('canvas', key_secret_generator(), 'svg')
+                r.attachment = ContentFile(extra['canvasSVG'], name=name)
             r.save()
             valid['response_to_check'] = r
         elif len(p) == 2 and p[0] == 'errormodels' and p[1].isdigit() and extra['outcome'] == 'yes' and 'student_error' not in valid:

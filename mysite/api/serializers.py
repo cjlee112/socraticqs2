@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ct.models import Response, StudentError, UnitLesson, Unit, Lesson
+from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindMixin
 from ctms.models import BestPractice1, BestPractice2
 from analytics.models import CourseReport
 from ct.templatetags.ct_extras import md2html
@@ -163,6 +163,8 @@ class ULSerializer2(serializers.BaseSerializer):
     'base UnitLesson serializer for brella API'
     def to_representation(self, ul):
         data = dict(kind=ul.lesson.kind, ul_id=ul.id, title=ul.lesson.title, message=md2html(ul.lesson.text))
+        if ul.lesson.attachment:
+            data['image'] = ul.lesson.attachment.url
         faqs = []
         for f in ul.response_set.filter(kind=Response.STUDENT_QUESTION):
             faqs.append(FAQSerializer2(f).data)
@@ -178,6 +180,9 @@ class ORCTSerializer2(serializers.BaseSerializer):
         for a in ul.get_answers():
             data['answer'] = ULSerializer2(a).data
             break
+        if ul.lesson.sub_kind == SubKindMixin.CANVAS:
+            data['question']['canvas'] = dict(image=ul.lesson.attachment.url)
+            data['answer']['canvas'] = dict(image=ul.lesson.attachment.url, canvasURL=a.lesson.attachment.url)
         errors = []
         for em in ul.get_errors():
             errors.append(ULSerializer2(em).data)
