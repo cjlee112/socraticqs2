@@ -85,11 +85,14 @@ class ChatQuery(object):
     def check_history(self, path, history):
         self.postData['path'] = path
         try:
-            already = history[path]
+            already = self.load_history(history[path])
             self.response = already
             return already
         except KeyError:
             return None
+    def load_history(self, already):
+        'stub for any processing needed of history dict'
+        return already
     async def get(self, path, history={}):
         already = self.check_history(path, history)
         if already:
@@ -150,6 +153,9 @@ class ChatCanvas(ChatInput):
         self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble, attrs=attrs)[0]
         window.start_drawsvg(self.canvas.id)
         self.svgID = svgID
+    def load_history(self, already):
+        already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{already["canvasSVG"]}</div>'
+        return already
     def handler(self, ev):
         outcome = self.temporary.select("textarea")[0].value
         svgData = document[self.svgID].value
