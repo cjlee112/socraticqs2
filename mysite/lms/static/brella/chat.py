@@ -75,12 +75,13 @@ class ChatQuery(object):
     def handler(self, ev):
         'called when user clicks Submit'
         if self.dataAttr:
-            self.outcome = ev.target.attrs[self.dataAttr]
+            outcome = ev.target.attrs[self.dataAttr]
         else:
-            self.outcome = 'continue'
-        self.postData['outcome'] = self.outcome
+            outcome = 'continue'
+        self.postData['outcome'] = outcome
         self.message = self.postData['message'] = ev.target.html
         self.send_post(self.postData)
+        self.outcome = outcome # don't release lock until done
     def check_history(self, path, history):
         self.postData['path'] = path
         try:
@@ -133,9 +134,10 @@ class ChatInput(ChatQuery):
     def __init__(self, chats, **kwargs):
         ChatQuery.__init__(self, chats, "chat-text-template", selector="button", **kwargs)
     def handler(self, ev):
-        self.outcome = self.message = self.temporary.select("textarea")[0].value
+        outcome = self.message = self.temporary.select("textarea")[0].value
         self.postData['message'] = self.message
         self.send_post(self.postData)
+        self.outcome = outcome # don't release lock until done
 
 class ChatCanvas(ChatInput):
     'prompt user with chat canvas to draw on, then await get() to receive textarea'
@@ -149,13 +151,14 @@ class ChatCanvas(ChatInput):
         window.start_drawsvg(self.canvas.id)
         self.svgID = svgID
     def handler(self, ev):
-        self.outcome = self.temporary.select("textarea")[0].value
+        outcome = self.temporary.select("textarea")[0].value
         svgData = document[self.svgID].value
-        self.message = f'<p>{self.outcome}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{svgData}</div>'
-        self.postData['message'] = self.outcome
+        self.message = f'<p>{outcome}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{svgData}</div>'
+        self.postData['message'] = outcome
         self.postData['canvasSVG'] = svgData
         self.send_post(self.postData)
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
+        self.outcome = outcome # don't release lock until done
 
 
 
@@ -187,7 +190,7 @@ class MultiSelection(ChatQuery):
                 postData[self.idAttr] = self.choices[i][self.idAttr]
                 postData['path'] = self.paths[i]
                 self.send_post(postData)
-        self.outcome = l
+        self.outcome = l # don't release lock until done
     def toggle_choice(self, ev):
         div = ev.target
         if div.attrs['class'].find('chat-selectable-selected') >= 0:
