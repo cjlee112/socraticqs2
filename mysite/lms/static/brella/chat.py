@@ -247,7 +247,12 @@ def get_orct_query_ui(question, **kwargs):
 
 def get_orct_instructor_chats(data, msgTemplate="ChatMessageTemplate"):
     'handle minor formatting issues like image embedding'
-    if 'image' in data:
+    if 'canvas' in data:
+        if 'canvasURL' in data['canvas']:
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas"><img src="{data["canvas"]["canvasURL"]}"></div></div></div>'),)
+        else:
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas">{data["canvas"]["canvasSVG"]}</div></div></div>'),)
+    elif 'image' in data:
         return ((msgTemplate, f'<p>{data["message"]}</p>\n<img src="{data["image"]}">'),)
     else:
         return ((msgTemplate, data['message']),)
