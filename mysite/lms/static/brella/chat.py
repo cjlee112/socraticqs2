@@ -237,6 +237,16 @@ class MultiSelection(ChatQuery):
                 return
 
 
+def get_orct_query_ui(question, **kwargs):
+    'return the proper query UI object for this subkind of ORCT'
+    if 'canvas' in question:
+        return ChatCanvas(question, **kwargs)
+    else:
+        return ChatInput((("ChatMessageTemplate", question['message']),), **kwargs)
+
+
+
+
 class HistoryToggle(object):
     def __init__(self, insertBeforeID, updateFlagger='UpdateFlagger', updateToggler='UpdateToggler'):
         self.target = document[insertBeforeID]
