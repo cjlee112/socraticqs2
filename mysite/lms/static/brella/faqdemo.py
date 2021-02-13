@@ -64,7 +64,10 @@ async def pose_orct(orct, postData, history, insertBeforeID=None):
     postData['ul_id'] = orct['question']['ul_id']
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
-    query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
+    if 'canvas' in orct['question']:
+        query = chat.ChatCanvas(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
+    else:
+        query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
     postData['response_id'] = await query.get_server_response('response_id')
     query = chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', postData=postData, insertBeforeID=insertBeforeID)
