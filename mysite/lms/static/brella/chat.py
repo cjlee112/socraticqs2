@@ -145,7 +145,7 @@ class ChatInput(ChatQuery):
 class ChatCanvas(ChatInput):
     'prompt user with chat canvas to draw on, then await get() to receive textarea'
     def __init__(self, question, svgID='drawsvgOutput', **kwargs):
-        chats = (("ChatMessageTemplate", question['message']),)
+        chats = (("ChatMessageTemplate", '<p>' + question['message'] + '</p>'),)
         ChatInput.__init__(self, chats, **kwargs)
         chatBubble = self.msgElements[0].select('.chat-bubble')[0]
         self.imageURL = question['canvas']['image']
@@ -242,9 +242,15 @@ def get_orct_query_ui(question, **kwargs):
     if 'canvas' in question:
         return ChatCanvas(question, **kwargs)
     else:
-        return ChatInput((("ChatMessageTemplate", question['message']),), **kwargs)
+        return ChatInput(get_orct_instructor_chats(question), **kwargs)
 
 
+def get_orct_instructor_chats(data, msgTemplate="ChatMessageTemplate"):
+    'handle minor formatting issues like image embedding'
+    if 'image' in data:
+        return ((msgTemplate, f'<p>{data["message"]}</p>\n<img src="{data["image"]}">'),)
+    else:
+        return ((msgTemplate, data['message']),)
 
 
 class HistoryToggle(object):

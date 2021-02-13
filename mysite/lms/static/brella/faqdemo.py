@@ -74,8 +74,8 @@ async def pose_orct(orct, postData, history, insertBeforeID=None):
 
 async def get_selfeval(answer, postData, history, insertBeforeID=None):
     'get student self-evaluation of whether their answer was right'
-    query = chat.ChatQuery((("ChatMessageTemplate", answer['message']),
-                            ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
+    query = chat.ChatQuery(chat.get_orct_instructor_chats(answer) +
+                           (("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
                            'selfeval-options-template', postData=postData, insertBeforeID=insertBeforeID)
     return await query.get('selfeval', history)
 
