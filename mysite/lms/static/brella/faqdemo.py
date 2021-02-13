@@ -54,7 +54,7 @@ async def show_explanation(e, postData, history, insertBeforeID=None):
     'display explanation message with Continue button'
     chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
-    await chat.continue_button((("ChatMessageTemplate", e['message']),),
+    await chat.continue_button(chat.get_orct_instructor_chats(e),
                                path='done', postData=postData, history=history,
                                insertBeforeID=insertBeforeID)
 
