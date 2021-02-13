@@ -155,6 +155,7 @@ class ChatCanvas(ChatInput):
         self.svgID = svgID
     def load_history(self, already):
         already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{already["canvasSVG"]}</div>'
+        self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         return already
     def handler(self, ev):
         outcome = self.temporary.select("textarea")[0].value
