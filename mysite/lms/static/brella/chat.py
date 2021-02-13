@@ -2,7 +2,7 @@ from browser import document, aio, ajax, window
 from javascript import JSON
 
 def copy_to_container(templateID, containerID, msgText=None, selector=None, handler=None, 
-                      container=None, insertBeforeID=None, **kwargs):
+                      container=None, insertBeforeID=None, attrs=None, **kwargs):
     'clone a template, inject content, and append to container'
     template = document[templateID]
     message = template.cloneNode(True) # clone its full subtree including all descendants
@@ -12,6 +12,9 @@ def copy_to_container(templateID, containerID, msgText=None, selector=None, hand
         contentElement.html = msgText
     if handler:
         bind_event(handler, message, selector, **kwargs)
+    if attrs:
+        for k, v in attrs.items():
+            message.attrs[k] = v
     if not container:
         container = document[containerID]
     if insertBeforeID: # insert at this specific location
@@ -24,8 +27,10 @@ def copy_to_container(templateID, containerID, msgText=None, selector=None, hand
 def post_messages(chats, chatContainer="chatSection", chatSelector='.chat-bubble',
                     insertBeforeID=None):
     'post one or more messages to the chat'
+    l = []
     for t, m in chats: # inject chat messages
-        copy_to_container(t, chatContainer, m, chatSelector, insertBeforeID=insertBeforeID)
+        l.append(copy_to_container(t, chatContainer, m, chatSelector, insertBeforeID=insertBeforeID)[0])
+    return l
 
 
 def set_visibility(targetID, visible=True, displayStyle='block'):
@@ -60,7 +65,7 @@ class ChatQuery(object):
             dataAttr='data-option-value', selector='button[data-option-value]',
             insertBeforeID=None, postData={}, postURL='/chat/brella/messages'):
         self.insertBeforeID = insertBeforeID
-        post_messages(chats, insertBeforeID=insertBeforeID)
+        self.msgElements = post_messages(chats, insertBeforeID=insertBeforeID)
         self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
                                             handler=self.handler)[0]
         self.outcome = self.message = None
@@ -131,6 +136,29 @@ class ChatInput(ChatQuery):
         self.outcome = self.message = self.temporary.select("textarea")[0].value
         self.postData['message'] = self.message
         self.send_post(self.postData)
+
+class ChatCanvas(ChatInput):
+    'prompt user with chat canvas to draw on, then await get() to receive textarea'
+    def __init__(self, question, svgID='drawsvgOutput', **kwargs):
+        chats = (("ChatMessageTemplate", question['message']),)
+        ChatInput.__init__(self, chats, **kwargs)
+        chatBubble = self.msgElements[0].select('.chat-bubble')[0]
+        self.imageURL = question['canvas']['image']
+        attrs = {'style': f"background-image: url({self.imageURL})"}
+        self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble, attrs=attrs)[0]
+        window.start_drawsvg(self.canvas.id)
+        self.svgID = svgID
+    def handler(self, ev):
+        self.outcome = self.temporary.select("textarea")[0].value
+        svgData = document[self.svgID].value
+        self.message = f'<p>{self.outcome}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{svgData}</div>'
+        self.postData['message'] = self.outcome
+        self.postData['canvasSVG'] = svgData
+        self.send_post(self.postData)
+        self.canvas.attrs['disabled'] = '1' # no more drawing allowed
+
+
+
 
 class MultiSelection(ChatQuery):
     'prompt user with chat messages, then await get() to receive multiple-selection'

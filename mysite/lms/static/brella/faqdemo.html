@@ -336,6 +336,7 @@ Courselets
         <div class="chat-avatar chat-avatar--student-initials">me</div>
 
         <div class="chat-input" id="chat-input-container" style="opacity: 1; display: block;">
+          <div class="chat-input-custom"><input id="drawsvgOutput" type="hidden"></div>
         </div>
 
         <div class="chat-loading" style="opacity: 0; display: none;"><span style="transform: translate3d(0px, 0.264404px, 0px);"></span><span style="transform: translate3d(0px, 0.465535px, 0px);"></span><span style="transform: translate3d(0px, 0px, 0px);"></span></div>
@@ -434,6 +435,13 @@ Courselets
   <script src="/static/js/helpers.js"></script>
   <script src="/static/js/drawing.bundle.js"></script>
 
+  <script type="text/javascript">
+    function start_drawsvg(canvasid) {
+      document.drawToElement([document.getElementById(canvasid)], function (data) {
+          $('#drawsvgOutput').val(data);
+      });
+    }
+  </script>
   
 
 <!-- Templates -->
@@ -546,6 +554,13 @@ Courselets
          <div class="chat-input-options" style="display: block;" id="yesno-template"><button class="btn chat-option" data-option-value="no">No</button><button class="btn chat-option" data-option-value="yes">Yes</button></div>
 
          <div class="chat-input-options" style="display: block;" id="continue-template"><button class="btn chat-option">Continue</button></div>
+
+    <div id="ChatCanvasTemplate" class="draw-svg-container" disabled="0">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.9 595.3"
+             xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" width="500"
+             height="500">
+        </svg>
+    </div>
 
   </div>
 

@@ -1,0 +1,51 @@
+{
+    "kind": "orct",
+    "chat_id": 10,
+    "thread_id": 2,
+    "history": {
+      "nothing": "not a match"
+    },
+    "title": "Efficiency Concerns: When to Include an ORCT?",
+    "question": {
+      "ul_id": 2,
+      "message": "<p>Does the flag of France have any lines of symmetry? If so, draw all of its line(s) of symmetry below (you can click and drag on the flag image to draw on it).</p>\n",
+      "canvas": {
+        "image": "https://socraticqs2.s3.amazonaws.com/media/questions/354_3.jpg"
+      }
+    },
+    "answer": {
+      "ul_id": 3,
+      "message": "What, do you mean an African or European swallow?",
+      "faqs": [
+        {
+          "title": "Where did the 6,2, and 10 come from in the beginning of each probability?",
+          "question": "I understand the fractions and where those probabilities came from but where did the 6s, 2s, and 10s come from?",
+          "answerTitle": "Another Great Insight from your Instructor",
+          "answer": "1/6 is the likelihood of any roll outcome under the F state. 1/2 is the likelihood of rolling a six under the L state.  1/10 is the likelihood of any other outcome (i.e. anything but a six) under the L state.  Note that the question explicitly asked you to calculate the joint probability of both the observed rolls and the hidden states (not JUST the hidden states)."
+        },
+        {
+          "title": "Why did I think 266 was two hundred and sixty six?",
+          "question": "I have a really important question and was wondering will you answer it?",
+          "answerTitle": "Help Is On The Way!",
+          "answer": "Sure thing, buddy."
+        }
+      ]
+    },
+    "errormodels": [
+      {
+        "ul_id": 4,
+        "title": "I didn't include the likelihoods of the observed rolls e.g. p(X=6|F) = 1/6.",
+        "message": "Gadzooks, promise me you won't ever make that mistake again!"
+      },
+      {
+        "ul_id": 5,
+        "title": "I thought p(6|F)=0.5.",
+        "message": "Please don't be mean to the number 6."
+      },
+      {
+        "ul_id": 6,
+        "title": "I thought the set of paths would be all possible dice rolls 111, 112, 113, ... 666.",
+        "message": "Go back and read the book from page 1 to the end."
+      }
+    ]
+  }
