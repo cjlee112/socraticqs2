@@ -1419,6 +1419,13 @@ class Unit(models.Model):
             self.courselet_deadline = self.graded_assessment_datetime - timedelta(self.error_resolution_days)
         super().save(*args, **kwargs)
 
+    ############################################ new brella code
+    def get_recent_ems(self, last_access_time):
+        'get error models in this unit created after specified time'
+        return self.unitlesson_set.filter(
+            kind=UnitLesson.MISUNDERSTANDS, atime__gt=last_access_time
+        )
+
 
 ############################################################
 # student response and error data
@@ -1983,6 +1990,16 @@ class CourseUnit(models.Model):
             kind=Response.ORCT_RESPONSE,
             course=self.course,
         )
+
+    def get_recent_faqs(self, last_access_time):
+        'get new FAQ questions or comments posted after specified time'
+        return Response.objects.filter(
+            Q(unitLesson__unit=self.unit,
+              course=self.course,
+              atime__gt=last_access_time) &
+            (Q(kind=Response.STUDENT_QUESTION) | Q(kind=Response.COMMENT))
+        ).distinct()
+
 
 
 class Role(models.Model):

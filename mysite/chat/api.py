@@ -36,6 +36,7 @@ from .serializers import (
     ChatThreadSerializer2,
     ChatSerializer2,
 )
+from api.serializers import ULSerializer2, FAQSerializer2
 from .utils import (
     get_updated_thread_id,
     update_activity,
@@ -757,7 +758,7 @@ def message_api2(request):
 
 @api_view(['GET'])
 def thread_api2(request):
-    'test creating a simple GET endpoint'
+    'get all content of the next thread, previous history, and pending updates'
     if request.method == 'GET':
         chat_id = request.query_params.get('chat_id', '')
         if chat_id.isdigit():
@@ -769,8 +770,29 @@ def thread_api2(request):
                 nextUL = UnitLesson.objects.get(unit=chat.enroll_code.courseUnit.unit,
                                                 order=0, kind=UnitLesson.COMPONENT)
             chatThread = ChatThread(chat, nextUL)
-            serializer = ChatThreadSerializer2(chatThread)
-            return Response(serializer.data)
+            data = ChatThreadSerializer2(chatThread).data
+            emUpdates, faqUpdates = chat.get_recent_updates()
+            data['updates'] = build_update_dict(emUpdates, faqUpdates, chat.user)
+            chat.last_modify_timestamp = timezone.now()
+            chat.save()
+            return Response(data)
+
+
+def build_update_dict(emUpdates, faqUpdates, user):
+    'return dict of updates indexed by chat history path'
+    d = {}
+    for em in emUpdates:
+        path = f'errormodels.{em.id}'
+        d[path] = d2 = ULSerializer2(em).data
+        d2['thread_id'] = em.parent.id
+    for f in faqUpdates:
+        if f.author != user: # exclude user's own posts
+            path = f'faqs.{f.id}'
+            d[path] = d2 = FAQSerializer2(f).data
+            d2['thread_id'] = f.unitLesson.id
+            if f.kind == f.COMMENT:
+                d2['parent_id'] = f.parent.id
+    return d
 
 
 class ChatThread(object):
