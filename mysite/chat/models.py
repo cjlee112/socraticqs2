@@ -233,6 +233,17 @@ class Chat(models.Model):
 
         return all(is_done)
 
+    # new brella code ############################################
+    def get_recent_updates(self):
+        'get error model and FAQ updates since last_modify_timestamp'
+        if self.last_modify_timestamp:
+            last_access_time = self.last_modify_timestamp
+        else:
+            last_access_time = self.timestamp
+        emUpdates = self.enroll_code.courseUnit.unit.get_recent_ems(last_access_time)
+        faqUpdates = self.enroll_code.courseUnit.get_recent_faqs(last_access_time)
+        return emUpdates, faqUpdates
+
 
 class Message(models.Model):
     """
