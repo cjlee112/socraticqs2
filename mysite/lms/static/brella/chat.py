@@ -145,7 +145,7 @@ class ChatInput(ChatQuery):
 class ChatCanvas(ChatInput):
     'prompt user with chat canvas to draw on, then await get() to receive textarea'
     def __init__(self, question, svgID='drawsvgOutput', **kwargs):
-        chats = (("ChatMessageTemplate", question['message']),)
+        chats = (("ChatMessageTemplate", '<p>' + question['message'] + '</p>'),)
         ChatInput.__init__(self, chats, **kwargs)
         chatBubble = self.msgElements[0].select('.chat-bubble')[0]
         self.imageURL = question['canvas']['image']
@@ -155,6 +155,7 @@ class ChatCanvas(ChatInput):
         self.svgID = svgID
     def load_history(self, already):
         already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{already["canvasSVG"]}</div>'
+        self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         return already
     def handler(self, ev):
         outcome = self.temporary.select("textarea")[0].value
@@ -235,6 +236,27 @@ class MultiSelection(ChatQuery):
             if c[self.idAttr] == response[self.idAttr]:
                 setattr(self, f'response{i}', response)
                 return
+
+
+def get_orct_query_ui(question, **kwargs):
+    'return the proper query UI object for this subkind of ORCT'
+    if 'canvas' in question:
+        return ChatCanvas(question, **kwargs)
+    else:
+        return ChatInput(get_orct_instructor_chats(question), **kwargs)
+
+
+def get_orct_instructor_chats(data, msgTemplate="ChatMessageTemplate"):
+    'handle minor formatting issues like image embedding'
+    if 'canvas' in data:
+        if 'canvasURL' in data['canvas']:
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas"><img src="{data["canvas"]["canvasURL"]}"></div></div></div>'),)
+        else:
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas">{data["canvas"]["canvasSVG"]}</div></div></div>'),)
+    elif 'image' in data:
+        return ((msgTemplate, f'<p>{data["message"]}</p>\n<img src="{data["image"]}">'),)
+    else:
+        return ((msgTemplate, data['message']),)
 
 
 class HistoryToggle(object):

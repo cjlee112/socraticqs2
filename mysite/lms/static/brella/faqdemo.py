@@ -54,7 +54,7 @@ async def show_explanation(e, postData, history, insertBeforeID=None):
     'display explanation message with Continue button'
     chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                            chatSelector='span', insertBeforeID=insertBeforeID)
-    await chat.continue_button((("ChatMessageTemplate", e['message']),),
+    await chat.continue_button(chat.get_orct_instructor_chats(e),
                                path='done', postData=postData, history=history,
                                insertBeforeID=insertBeforeID)
 
@@ -64,10 +64,7 @@ async def pose_orct(orct, postData, history, insertBeforeID=None):
     postData['ul_id'] = orct['question']['ul_id']
     chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                        chatSelector='span', insertBeforeID=insertBeforeID)
-    if 'canvas' in orct['question']:
-        query = chat.ChatCanvas(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
-    else:
-        query = chat.ChatInput((("ChatMessageTemplate", orct['question']['message']),), postData=postData, insertBeforeID=insertBeforeID)
+    query = chat.get_orct_query_ui(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
     postData['response_id'] = await query.get_server_response('response_id')
     query = chat.ChatQuery((("ChatMessageTemplate", None),), 'chat-options-template', postData=postData, insertBeforeID=insertBeforeID)
@@ -77,8 +74,8 @@ async def pose_orct(orct, postData, history, insertBeforeID=None):
 
 async def get_selfeval(answer, postData, history, insertBeforeID=None):
     'get student self-evaluation of whether their answer was right'
-    query = chat.ChatQuery((("ChatMessageTemplate", answer['message']),
-                            ("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
+    query = chat.ChatQuery(chat.get_orct_instructor_chats(answer) +
+                           (("ChatMessageTemplate", 'How close was your answer to the one shown here? '),),
                            'selfeval-options-template', postData=postData, insertBeforeID=insertBeforeID)
     return await query.get('selfeval', history)
 
