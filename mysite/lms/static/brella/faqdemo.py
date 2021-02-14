@@ -97,7 +97,11 @@ async def offer_errmods(errmods, postData, history, insertBeforeID=None,
 
 async def show_em(em, postData, history, insertBeforeID=None, messageStamp=''):
     'show error model and get student status'
-    return await get_status((('faq-a1', f'<b>RE: {em["title"]}</b><br>{em["message"]} {messageStamp}'),
+    if 'image' in em:
+        s = f'<b>RE: {em["title"]}</b><br>{em["message"]}<br><img src="{em["image"]}"> {messageStamp}'
+    else:
+        s = f'<b>RE: {em["title"]}</b><br>{em["message"]} {messageStamp}'
+    return await get_status((('faq-a1', s),
                          ("ChatMessageTemplate", f"We hope this explanation helped you.  How well do you feel you understand this blindspot now? If you need more clarifications, tell us. {messageStamp}")),
                             f'errormodels.status.{em["ul_id"]}', postData, history, insertBeforeID, messageStamp)
 
