@@ -23,16 +23,26 @@
       },
       "faqs": [
         {
+          "faq_id": 2,
           "title": "Where did the 6,2, and 10 come from in the beginning of each probability?",
-          "question": "I understand the fractions and where those probabilities came from but where did the 6s, 2s, and 10s come from?",
-          "answerTitle": "Another Great Insight from your Instructor",
-          "answer": "1/6 is the likelihood of any roll outcome under the F state. 1/2 is the likelihood of rolling a six under the L state.  1/10 is the likelihood of any other outcome (i.e. anything but a six) under the L state.  Note that the question explicitly asked you to calculate the joint probability of both the observed rolls and the hidden states (not JUST the hidden states)."
+          "message": "I understand the fractions and where those probabilities came from but where did the 6s, 2s, and 10s come from?"
         },
         {
+          "faq_id": 3,
           "title": "Why did I think 266 was two hundred and sixty six?",
-          "question": "I have a really important question and was wondering will you answer it?",
-          "answerTitle": "Help Is On The Way!",
-          "answer": "Sure thing, buddy."
+          "message": "I have a really important question and was wondering will you answer it?"
+        }
+      ],
+      "faq_answers": [
+        {
+          "parent_id": 2,
+          "title": "Another Great Insight from your Instructor",
+          "message": "1/6 is the likelihood of any roll outcome under the F state. 1/2 is the likelihood of rolling a six under the L state.  1/10 is the likelihood of any other outcome (i.e. anything but a six) under the L state.  Note that the question explicitly asked you to calculate the joint probability of both the observed rolls and the hidden states (not JUST the hidden states)."
+        },
+        {
+          "parent_id": 3,
+          "title": "Help Is On The Way!",
+          "message": "Sure thing, buddy."
         }
       ]
     },
