@@ -714,7 +714,7 @@ class MessageSerializer2(serializers.BaseSerializer):
         except (KeyError, UnitLesson.DoesNotExist):
             raise serializers.ValidationError(dict(thread_id='Missing or invalid thread_id'))
         ##################################### optional values
-        for k in ('outcome', 'message', 'canvasSVG'):
+        for k in ('outcome', 'message', 'canvasSVG', 'inquiry_id'):
             if k in data:
                 extra[k] = data[k]
         options = dict(ul_id=('lesson_to_answer', UnitLesson), # store optional object links
@@ -740,9 +740,9 @@ class MessageSerializer2(serializers.BaseSerializer):
     def create_affiliates(self, path, valid, extra, remap):
         'create affiliated objects required for new message specified by data dicts'
         p = path.split('.')
-        chat = valid['chat']
+        chat = valid['chat'] # only CREATE is handled here!!  For UPDATE handling, see chat.api.message_api2
         if (path == 'response' or p[-1] == 'add_faq') and 'response_to_check' not in valid:
-            ul = valid['lesson_to_answer']
+            ul = valid['lesson_to_answer'] # create a new Response record
             r = Response.objects.create(unitLesson=ul, lesson=ul.lesson, author=valid['owner'],
                     course=chat.enroll_code.courseUnit.course,
                     is_preview=chat.is_preview, is_test=chat.is_test)
@@ -760,19 +760,16 @@ class MessageSerializer2(serializers.BaseSerializer):
             valid['response_to_check'] = r
         elif len(p) == 2 and p[0] == 'errormodels' and p[1].isdigit() and extra['outcome'] == 'yes' and 'student_error' not in valid:
             ul = valid['lesson_to_answer']
-            r = valid['response_to_check']
+            r = valid['response_to_check'] # create new StudentError record
             se = StudentError.objects.create(errorModel=ul, response=r, author=valid['owner'])
             se.save()
             valid['student_error'] = se
             remap.append(('student_error', 'student_error_id'))
         elif len(p) == 3 and p[0:2] == ['faqs', 'helpful'] and p[-1].isdigit() and extra['outcome'] == 'yes' and 'inquiry_id' not in extra:
-            r = valid['response_to_check']
+            r = valid['response_to_check'] # create new InquiryCount record
             inquiry = InquiryCount.objects.create(response=r, addedBy=valid['owner'])
             inquiry.save()
             extra['inquiry_id'] = inquiry.id
-
-
-
 
 
 class ChatThreadSerializer2(serializers.BaseSerializer):

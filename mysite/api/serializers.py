@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Q
 
 from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindMixin
 from ctms.models import BestPractice1, BestPractice2
@@ -157,7 +158,14 @@ class ThreadSerializer(serializers.ModelSerializer):
 class FAQSerializer2(serializers.BaseSerializer):
     'serializer for FAQ student question'
     def to_representation(self, f):
-        return dict(faq_id=f.id, title=f.title, question=f.text, answerTitle='Instructor Answer', answer='You bet.')
+        data = dict(faq_id=f.id, title=f.title, message=f.text, ul_id=f.unitLesson.id)
+        if f.kind == f.COMMENT:
+            data['parent_id'] = f.parent.id
+        if f.unitLesson.parent: # sublesson
+            data['thread_id'] = f.unitLesson.parent.id
+        else: # top-level lesson
+            data['thread_id'] = f.unitLesson.id
+        return data
 
 class ULSerializer2(serializers.BaseSerializer):
     'base UnitLesson serializer for brella API'
@@ -166,9 +174,14 @@ class ULSerializer2(serializers.BaseSerializer):
         if ul.lesson.attachment:
             data['image'] = ul.lesson.attachment.url
         faqs = []
-        for f in ul.response_set.filter(kind=Response.STUDENT_QUESTION):
-            faqs.append(FAQSerializer2(f).data)
+        faq_answers = []
+        for f in ul.response_set.filter(Q(kind=Response.STUDENT_QUESTION) | Q(kind=Response.COMMENT)):
+            if f.kind == f.STUDENT_QUESTION:
+                faqs.append(FAQSerializer2(f).data)
+            else:
+                faq_answers.append(FAQSerializer2(f).data)
         data['faqs'] = faqs
+        data['faq_answers'] = faq_answers
         return data
 
 
