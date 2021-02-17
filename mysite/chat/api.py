@@ -739,22 +739,25 @@ def message_api2(request):
         if serializer.is_valid():
             m = serializer.save()
             path = request.data['path'] # handle UPDATE here b/c requires checking authorization
-            if path in ('confidence', 'selfeval', 'status') and m.response_to_check.author == request.user:
+            if path in ('confidence', 'selfeval', 'status') and m.response_to_check and m.response_to_check.author == request.user:
                 setattr(m.response_to_check, path, request.data['outcome'])
                 m.response_to_check.save()
-            elif path.startswith('errormodels.status.') and m.student_error.author == request.user:
+            elif path.startswith('update.status') and m.response_to_check and m.response_to_check.author == request.user:
+                m.response_to_check.status = request.data['outcome']
+                m.response_to_check.save()
+            elif path.startswith('errormodels.status.') and m.student_error and m.student_error.author == request.user:
                 m.student_error.status = request.data['outcome']
                 m.student_error.save()
             elif path.startswith('faqs.status.'):
-                if m.response_to_check.author == request.user:
-                    m.response_to_check.status = request.data['outcome']
-                    m.response_to_check.save()
-                elif 'inquiry_id' in request.data:
+                if 'inquiry_id' in request.data:
                     inquiry = get_object_or_404(InquiryCount, id=request.data['inquiry_id'])
                     if inquiry.addedBy == request.user: # save Inquiry status
                         inquiry.status = request.data['outcome']
                         inquiry.save()
-            elif path.endswith('.add_faq_text') and m.response_to_check.author == request.user:
+                elif m.response_to_check and m.response_to_check.author == request.user:
+                    m.response_to_check.status = request.data['outcome']
+                    m.response_to_check.save()
+            elif path.endswith('.add_faq_text') and m.response_to_check and m.response_to_check.author == request.user:
                 m.response_to_check.text = request.data['message']
                 m.response_to_check.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -793,7 +796,10 @@ def build_update_dict(emUpdates, faqUpdates, user):
         d2['thread_id'] = em.parent.id
     for f in faqUpdates:
         if f.author != user: # exclude user's own posts
-            path = f'faqs.{f.id}'
+            if f.kind == f.COMMENT:
+                path = f'faqs.helpful.{f.parent.id}'
+            else:
+                path = f'faqs.{f.id}'
             d[path] = FAQSerializer2(f).data
     return d
 
