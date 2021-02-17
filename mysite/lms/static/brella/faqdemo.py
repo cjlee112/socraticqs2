@@ -24,7 +24,7 @@ async def main(chat_id=10, insertBeforeID=None):
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
 
-async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='threadtest.json'):
+async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
     params = dict(chat_id=chat_id)
     if completedThread is not None:
         params['completedThread'] = completedThread
