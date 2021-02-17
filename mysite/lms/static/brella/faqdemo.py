@@ -281,14 +281,13 @@ async def show_updates(updates, history, chat_id, thread_id, insertBeforeID, mes
         chats = (("ChatMessageTemplate", f"I've added explanations for some new blindspot(s) that caused people trouble on this question. Check any box(es) that seem relevant to what you were thinking. {messageStamp}"),)
         stati += await offer_errmods(errmods, postDataQ, history, chats=chats, insertBeforeID=insertBeforeID, messageStamp=messageStamp)
     faq_answers = [updates[path] for path in updates if path.startswith('faqs.helpful.')]
-    postDataA = postData.copy()
-    postDataA['ul_id'] = UnitLessons[thread_id]['answer_id'] # needed for creating new FAQ
     for answer in faq_answers:
         faq = FAQs[answer['parent_id']]
+        postDataA = postData.copy()
         try:
             postDataA['inquiry_id'] = history[f'faqs.status.{faq["faq_id"]}']["inquiry_id"] # needed for saving new status
         except KeyError: # unusual case: if FAQ authored by this student, no need for inquiry_id
-            pass
+            postDataA['faq_id'] = faq['faq_id'] # needed for saving new status
         stati += (await get_status((("ChatMessageTemplate", f"Below is my answer to the question you raised RE: the following issue {messageStamp}"),    
                         ("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["message"]}'),
                         ("ChatMessageTemplate", f'<b>{answer["title"]}</b><br>{answer["message"]} {messageStamp}'),
@@ -298,6 +297,8 @@ async def show_updates(updates, history, chat_id, thread_id, insertBeforeID, mes
         stati += (await get_status((("ChatMessageTemplate", f"How well do you feel you understand now? If you need more clarification, tell us. {messageStamp}"),),
                                    'update.status', postDataQ, history, insertBeforeID, messageStamp),)
     if 'help' in stati:
+        postDataA = postData.copy()
+        postDataA['ul_id'] = UnitLessons[thread_id]['answer_id'] # needed for creating new FAQ
         await solicit_faq(postDataA, history, 'update', insertBeforeID, messageStamp, ignoreHistory=True)
     await chat.continue_button((("ChatMessageTemplate", f'You have completed all updates for this thread. {messageStamp}'),),
                                path=None, postData=postData, history=history, insertBeforeID=insertBeforeID)
