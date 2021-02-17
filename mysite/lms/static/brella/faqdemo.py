@@ -18,11 +18,20 @@ def index_faqs(l):
         FAQs[d['faq_id']] = d
 
 
-async def main(chat_id=10, insertBeforeID=None):
+async def main(insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
+    chatInfo = await get_chat_info()
+    chat_id = chatInfo['chat_id']
     finalUpdates, oldThreads = await do_courselet(chat_id, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
+
+
+async def get_chat_info(apiURL='/chat/brella/chat'):
+    headers = {'Content-Type': 'application/json'}
+    req = await aio.get(apiURL, headers=headers)
+    return JSON.parse(req.data)
+
 
 async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
     params = dict(chat_id=chat_id)
