@@ -72,6 +72,7 @@ class ChatQuery(object):
         self.dataAttr = dataAttr
         self.postData = postData.copy()
         self.postURL =  postURL
+        self.posted = {}
     def handler(self, ev):
         'called when user clicks Submit'
         if self.dataAttr:
@@ -80,7 +81,8 @@ class ChatQuery(object):
             outcome = 'continue'
         self.postData['outcome'] = outcome
         self.message = self.postData['message'] = ev.target.html
-        self.send_post(self.postData)
+        if 'path' in self.postData: # no path means DO NOT POST
+            self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
     def check_history(self, path, history):
         self.postData['path'] = path
@@ -93,13 +95,17 @@ class ChatQuery(object):
     def load_history(self, already):
         'stub for any processing needed of history dict'
         return already
-    async def get(self, path, history={}):
-        already = self.check_history(path, history)
-        if already:
-            self.close(already.get('message', ''))
-            return already.get('outcome', None)
+    async def get(self, path, history=None, ignoreHistory=False):
+        if history is None:
+            history = {}
+        if path: # no path means exclude from history mechanism
+            already = self.check_history(path, history)
+            if already and not ignoreHistory:
+                self.close(already.get('message', ''))
+                return already.get('outcome', None)
         await self.sleep_until_data()
         self.close(self.message)
+        history.update(self.posted) # hand our POSTed messages back to history
         return self.outcome
     async def sleep_until_data(self, attr='outcome'):
         while getattr(self, attr, None) is None:
@@ -114,6 +120,7 @@ class ChatQuery(object):
             self.temporary.remove() # delete this element from the DOM
     def send_post(self, postData):
         'initiate AJAX POST to server'
+        self.posted[postData['path']] = postData.copy()
         self.response = None
         headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
         req = ajax.Ajax()
@@ -130,7 +137,8 @@ class ChatQuery(object):
 
 async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
     query = ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", postData=postData, **kwargs)
-    return await query.get(path, history)
+    await query.get(path, history)
+    return query.msgElements # list of DOM elements output as chats
 
 class ChatInput(ChatQuery):
     'prompt user with chat messages, then await get() to receive textarea'
