@@ -76,5 +76,5 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^brella/messages$', message_api2),
     url(r'^brella/threads$', thread_api2),
-    path('brella/<int:pk>/', chat_api2),
+    url(r'^brella/chat$', chat_api2),
 ]
