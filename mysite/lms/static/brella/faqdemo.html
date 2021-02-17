@@ -91,26 +91,24 @@ Courselets
   <!-- Chat -->
   <main style="display: block; opacity: 1;">
     <!-- Header -->
-    <header class="course-header" style="background-image:url(&#39;https://www.courselets.org/static/img/student/hero.jpg&#39;);">
+    <header class="course-header">
       <div class="overlay"></div>
 
       <div class="container">
         <div class="logo" style=""></div>
 
-        <h1 style="">An Introduction to Courselets</h1>
+        <h1 id="CourseTitle" style=""></h1>
 
-        <p style="">
-          by The Teacher
-        </p>
+        <p id="InstructorCredits" style=""></p>
       </div>
     </header>
 
     <!-- Introduction -->
     <section class="chat-introduction">
       <div class="chat-introduction-title" style="">
-        <a href="http://localhost:8080/lms/courses/1/">Course</a>
+        <a id="CourseURL" href="/ct/">Course</a>
         
-        <h2>What is a Concept Inventory?</h2>
+        <h2 id="CourseletTitle"></h2>
         
       </div>
 
@@ -128,7 +126,7 @@ Courselets
                   <h3>You will learn about</h3>
                     <ul>
                       
-                      <li>No prerequisities</li>
+                      <li id="CourseletDescription">No prerequisites</li>
                       
                     </ul>
                 </div>
@@ -137,7 +135,7 @@ Courselets
                   <h3>You need to know about</h3>
                     <ul>
                       
-                      <li>No prerequisities</li>
+                      <li id="CourseletPrereqs">No prerequisites</li>
                       
                     </ul>
                 </div>
@@ -209,43 +207,7 @@ Courselets
 
     <!-- Chat messages container -->
     <section class="chat-messages" id="chatSection" style="display: block; opacity: 1;">
-
-<div class="chat-breakpoint" style="opacity: 1;">
-  <span>Active Learning Approaches for Conceptual Understanding?</span>
-</div>
-
-<div class="chat-message chat-message-text " id="TestInsertionPoint" style="opacity: 1;">
-  <div class="chat-container">
-    <div class="inner">
-      <div class="chat-avatar  chat-avatar--instructor-initials ">TT</div>
-      <div class="chat-bubble">
-        This is the end of a previous thread for which there will be updates...
-
-        <span class="chat-new-msg">
-            new
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="chat-message chat-message-text " id="TestAfterPoint" style="opacity: 1;">
-  <div class="chat-container">
-    <div class="inner">
-      <div class="chat-avatar  chat-avatar--instructor-initials ">TT</div>
-      <div class="chat-bubble">
-        This is the end of another thread.
-
-        <span class="chat-new-msg">
-            new
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
-
-</section>
+    </section>
   </main>
 
   <!-- Chat sidebar -->

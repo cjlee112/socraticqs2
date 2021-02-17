@@ -1,4 +1,4 @@
-from browser import aio
+from browser import document, aio
 import chat
 from javascript import JSON
 
@@ -21,6 +21,7 @@ def index_faqs(l):
 async def main(insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
     chatInfo = await get_chat_info()
+    show_courselet_info(chatInfo)
     chat_id = chatInfo['chat_id']
     finalUpdates, oldThreads = await do_courselet(chat_id, insertBeforeID)
     if finalUpdates:
@@ -31,6 +32,24 @@ async def get_chat_info(apiURL='/chat/brella/chat'):
     headers = {'Content-Type': 'application/json'}
     req = await aio.get(apiURL, headers=headers)
     return JSON.parse(req.data)
+
+
+def show_courselet_info(info, defaultImage='https://www.courselets.org/static/img/student/hero.jpg'):
+    image = info['courselet'].get('image', None)
+    if not image:
+        image = defaultImage
+    header = document.select('.course-header')[0]
+    header.attrs['style'] = f"background-image: url({image})"
+    document['CourseTitle'].html = info['course']['title']
+    document['CourseURL'].attrs['href'] = f"/lms/courses/{info['course']['course_id']}/"
+    document['InstructorCredits'].html = ', '.join([d['name'] for d in info['course']['instructors']])
+    document['CourseletTitle'].html = info['courselet']['title']
+    description = info['courselet'].get('description', None)
+    if description:
+        document['CourseletDescription'].html = description
+    prereqs = info['courselet'].get('prereqs', None)
+    if prereqs:
+        document['CourseletPrereqs'].html = prereqs
 
 
 async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
