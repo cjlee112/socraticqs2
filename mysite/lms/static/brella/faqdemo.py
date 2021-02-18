@@ -1,4 +1,4 @@
-from browser import aio
+from browser import document, aio
 import chat
 from javascript import JSON
 
@@ -18,11 +18,39 @@ def index_faqs(l):
         FAQs[d['faq_id']] = d
 
 
-async def main(chat_id=10, insertBeforeID=None):
+async def main(insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
+    chatInfo = await get_chat_info()
+    show_courselet_info(chatInfo)
+    chat_id = chatInfo['chat_id']
     finalUpdates, oldThreads = await do_courselet(chat_id, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
+
+
+async def get_chat_info(apiURL='/chat/brella/chat'):
+    headers = {'Content-Type': 'application/json'}
+    req = await aio.get(apiURL, headers=headers)
+    return JSON.parse(req.data)
+
+
+def show_courselet_info(info, defaultImage='https://www.courselets.org/static/img/student/hero.jpg'):
+    image = info['courselet'].get('image', None)
+    if not image:
+        image = defaultImage
+    header = document.select('.course-header')[0]
+    header.attrs['style'] = f"background-image: url({image})"
+    document['CourseTitle'].html = info['course']['title']
+    document['CourseURL'].attrs['href'] = f"/lms/courses/{info['course']['course_id']}/"
+    document['InstructorCredits'].html = ', '.join([d['name'] for d in info['course']['instructors']])
+    document['CourseletTitle'].html = info['courselet']['title']
+    description = info['courselet'].get('description', None)
+    if description:
+        document['CourseletDescription'].html = description
+    prereqs = info['courselet'].get('prereqs', None)
+    if prereqs:
+        document['CourseletPrereqs'].html = prereqs
+
 
 async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
     params = dict(chat_id=chat_id)
@@ -281,14 +309,13 @@ async def show_updates(updates, history, chat_id, thread_id, insertBeforeID, mes
         chats = (("ChatMessageTemplate", f"I've added explanations for some new blindspot(s) that caused people trouble on this question. Check any box(es) that seem relevant to what you were thinking. {messageStamp}"),)
         stati += await offer_errmods(errmods, postDataQ, history, chats=chats, insertBeforeID=insertBeforeID, messageStamp=messageStamp)
     faq_answers = [updates[path] for path in updates if path.startswith('faqs.helpful.')]
-    postDataA = postData.copy()
-    postDataA['ul_id'] = UnitLessons[thread_id]['answer_id'] # needed for creating new FAQ
     for answer in faq_answers:
         faq = FAQs[answer['parent_id']]
+        postDataA = postData.copy()
         try:
             postDataA['inquiry_id'] = history[f'faqs.status.{faq["faq_id"]}']["inquiry_id"] # needed for saving new status
         except KeyError: # unusual case: if FAQ authored by this student, no need for inquiry_id
-            pass
+            postDataA['faq_id'] = faq['faq_id'] # needed for saving new status
         stati += (await get_status((("ChatMessageTemplate", f"Below is my answer to the question you raised RE: the following issue {messageStamp}"),    
                         ("FaqMessageTemplate", f'<b>{faq["title"]}</b><br>{faq["message"]}'),
                         ("ChatMessageTemplate", f'<b>{answer["title"]}</b><br>{answer["message"]} {messageStamp}'),
@@ -298,6 +325,8 @@ async def show_updates(updates, history, chat_id, thread_id, insertBeforeID, mes
         stati += (await get_status((("ChatMessageTemplate", f"How well do you feel you understand now? If you need more clarification, tell us. {messageStamp}"),),
                                    'update.status', postDataQ, history, insertBeforeID, messageStamp),)
     if 'help' in stati:
+        postDataA = postData.copy()
+        postDataA['ul_id'] = UnitLessons[thread_id]['answer_id'] # needed for creating new FAQ
         await solicit_faq(postDataA, history, 'update', insertBeforeID, messageStamp, ignoreHistory=True)
     await chat.continue_button((("ChatMessageTemplate", f'You have completed all updates for this thread. {messageStamp}'),),
                                path=None, postData=postData, history=history, insertBeforeID=insertBeforeID)

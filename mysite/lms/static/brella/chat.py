@@ -63,11 +63,11 @@ class ChatQuery(object):
     'prompt user with chat messages, then await get() to receive button click'
     def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
             dataAttr='data-option-value', selector='button[data-option-value]',
-            insertBeforeID=None, postData={}, postURL='/chat/brella/messages'):
+            insertBeforeID=None, postData={}, postURL='/chat/brella/messages', **kwargs):
         self.insertBeforeID = insertBeforeID
         self.msgElements = post_messages(chats, insertBeforeID=insertBeforeID)
         self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
-                                            handler=self.handler)[0]
+                                            handler=self.handler, **kwargs)[0]
         self.outcome = self.message = None
         self.dataAttr = dataAttr
         self.postData = postData.copy()
@@ -143,8 +143,9 @@ async def continue_button(chats, path='continue', postData={}, history={}, **kwa
 class ChatInput(ChatQuery):
     'prompt user with chat messages, then await get() to receive textarea'
     def __init__(self, chats, **kwargs):
-        ChatQuery.__init__(self, chats, "chat-text-template", selector="button", **kwargs)
+        ChatQuery.__init__(self, chats, "chat-text-template", selector="form", event='submit', **kwargs)
     def handler(self, ev):
+        ev.preventDefault() # block default form GET action
         outcome = self.message = self.temporary.select("textarea")[0].value
         self.postData['message'] = self.message
         self.send_post(self.postData)
