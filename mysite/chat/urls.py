@@ -39,6 +39,11 @@ app_name = 'chat'
 urlpatterns = [
     url(r'^ui/$', TemplateView.as_view(template_name="cui/index.html")),
     url(
+        r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>[a-z]+)/$',
+        ChatInitialView.as_view(),
+        name='chat_brella'
+    ),
+    url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>0)/?$',
         InitNewChat.as_view(),
         name='init_chat_api'

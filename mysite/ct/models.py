@@ -1425,6 +1425,10 @@ class Unit(models.Model):
         return self.unitlesson_set.filter(
             kind=UnitLesson.MISUNDERSTANDS, atime__gt=last_access_time
         )
+    def use_brella_frontend(self):
+        'this is just a temporary stub for activating brella frontend on a courselet'
+        return self.description and self.description.find('newChatMode=brella') >= 0
+
 
 
 ############################################################

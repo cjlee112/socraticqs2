@@ -129,8 +129,13 @@ class ChatInitialView(LoginRequiredMixin, View):
             chat = self.get_chat(self.request, enroll_code, user=self.request.user, id=i_chat_id)
         elif i_chat_id is None:  # chat_id not passed - restore last session
             chat = self.get_chat(self.request, enroll_code, user=self.request.user)
+            if chat and chat.is_open: # do not restore brella session without asking!
+                chat = None
         elif i_chat_id == 0 and enroll_code:  # create new session
             chat = self.create_new_chat(self.request, enroll_code, courseUnit)
+
+        if chat and chat.is_open: ################################## brella front-end, not legacy!
+            return chat, i_chat_id  # no need to initialize FSM, not used by brella!!
 
         if chat and not chat.state:
             chat.next_point = None
@@ -162,7 +167,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             user=request.user.id, course=courseUnit.course, role=Role.ENROLLED
         )
 
-    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+    def create_new_chat(self, request, enroll_code, courseUnit, useBrella=False, **kwargs):
         # TODO user_trial_mode = self.define_user_trial_mode(request, courseUnit)
         defaults = dict(
             user=request.user,
@@ -172,6 +177,8 @@ class ChatInitialView(LoginRequiredMixin, View):
             is_trial=False
         )
         defaults.update(kwargs)
+        if useBrella or courseUnit.unit.use_brella_frontend():
+            defaults['is_open'] = True # this chat session will use brella frontend
         chat = Chat(**defaults)
         chat.save()
         return chat
@@ -260,10 +267,16 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        # new chat will be created only if chat_id is 0
-        chat, i_chat_id = self.get_or_init_chat(enroll_code, chat_id)
+        chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
-        if chat.is_open: ################################## redirect to brella chat
+        if chat_id == 'brella' or (courseUnit.unit.use_brella_frontend() and not chat_sessions):
+            chat = self.create_new_chat(request, enroll_code, courseUnit, useBrella=True)
+            i_chat_id = chat.id
+        else:
+            # new chat will be created only if chat_id is 0
+            chat, i_chat_id = self.get_or_init_chat(enroll_code, chat_id)
+
+        if chat and chat.is_open: ################################## redirect to brella chat
             request.session['chat_id'] = chat.id
             return HttpResponseRedirect(brellaChatURL)
 
@@ -284,8 +297,6 @@ class ChatInitialView(LoginRequiredMixin, View):
             instructor_icon = courseUnit.course.addedBy.instructor.icon_url
         except AttributeError:
             instructor_icon = ''
-
-        chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
         for chat_ss in chat_sessions:
             chat_prog_ser = ChatProgressSerializer()
@@ -326,7 +337,8 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'enroll_code': enroll_key,
                 # 'next_point': next_point,
                 'back_url': back_url,
-                'back_url_name': back_url_name
+                'back_url_name': back_url_name,
+                'use_brella_frontend': courseUnit.unit.use_brella_frontend()
             }
         )
 
@@ -409,14 +421,15 @@ class CourseletPreviewView(ChatInitialView):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
-    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+    def create_new_chat(self, request, enroll_code, courseUnit, useBrella=False, **kwargs):
         return super(CourseletPreviewView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
-            is_preview=True
+            is_preview=True,
+            useBrella=useBrella
         )
 
     @staticmethod
@@ -440,6 +453,12 @@ class CourseletPreviewView(ChatInitialView):
         return ChatInitialView.get_chat(request, enroll_code, is_preview=True)
 
     def get(self, request, enroll_key):
+        enroll_code = self.get_enroll_code_object(enroll_key)
+        if enroll_code.courseUnit.unit.use_brella_frontend(): ############### redirect to brella chat
+            chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
+            request.session['chat_id'] = chat.id
+            return HttpResponseRedirect(brellaChatURL)
+
         request.user.fsmstate_set.filter(chat__is_preview=True).delete()
         request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
         return super(CourseletPreviewView, self).get(request, enroll_key)
