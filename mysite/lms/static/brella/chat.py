@@ -121,6 +121,8 @@ class ChatQuery(object):
     def send_post(self, postData):
         'initiate AJAX POST to server'
         self.posted[postData['path']] = postData.copy()
+        if postData.get('is_preview', False): # just instructor preview, so no Message sent!
+            return
         self.response = None
         headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
         req = ajax.Ajax()
@@ -130,6 +132,8 @@ class ChatQuery(object):
             req.set_header(h, v)
         req.send(JSON.stringify(postData))
     async def get_server_response(self, attr):
+        if self.postData.get('is_preview', False): # just instructor preview, so return fake ID
+            return webfsm_id.__next__()
         return (await self.sleep_until_data('response'))[attr]
     def on_complete(self, req):
         self.response = JSON.parse(req.text)
@@ -238,6 +242,8 @@ class MultiSelection(ChatQuery):
         else:
             return dict(outcome=l)
     async def get_server_response(self, i, attr):
+        if self.postData.get('is_preview', False): # just instructor preview, so return fake ID
+            return webfsm_id.__next__()
         return (await self.sleep_until_data(f'response{i}'))[attr]
     def on_complete(self, req):
         response = JSON.parse(req.text)
