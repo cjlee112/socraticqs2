@@ -787,13 +787,19 @@ class ChatThreadSerializer2(serializers.BaseSerializer):
 
 
 class ChatSerializer2(serializers.BaseSerializer):
+    'read-only serializer providing basic info about a chat session'
     def to_representation(self, chat):
-        data = UnitSerializer2(chat.enroll_code.courseUnit.unit).data
-        history = {}
-        for m in chat.message_set.filter(userMessage=True):
-            msgData = MessageSerializer2(m).data
-            history[msgData['path']] = msgData
-        return dict(chat_id=chat.id, threads=data, history=history)
+        data = dict(chat_id=chat.id, )
+        courseUnit = chat.enroll_code.courseUnit
+        data['course'] = dict(title=courseUnit.course.title, description=courseUnit.course.description,
+                              course_id=courseUnit.course.id)
+        data['courselet'] = dict(title=courseUnit.unit.title, description=courseUnit.unit.description,
+                                 image=courseUnit.unit.img_url)
+        instructors = []
+        for u in courseUnit.course.instructors:
+            instructors.append(dict(name=f'{u.first_name} {u.last_name}'))
+        data['course']['instructors'] = instructors
+        return data
 
 
 

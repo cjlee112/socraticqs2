@@ -9,6 +9,7 @@ from django.views.generic import View
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
 
 from mysite.mixins import LoginRequiredMixin
 from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS
@@ -19,6 +20,8 @@ from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from .utils import get_updated_thread_id
+
+brellaChatURL = '/static/brella/faqdemo.html' # stub for launching chat session via brella frontend
 
 @injections.has
 class ChatInitialView(LoginRequiredMixin, View):
@@ -259,6 +262,11 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         # new chat will be created only if chat_id is 0
         chat, i_chat_id = self.get_or_init_chat(enroll_code, chat_id)
+
+        if chat.is_open: ################################## redirect to brella chat
+            request.session['chat_id'] = chat.id
+            return HttpResponseRedirect(brellaChatURL)
+
         lessons = unit.get_exercises()
 
         if chat and chat.is_live:

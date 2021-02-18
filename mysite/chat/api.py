@@ -726,11 +726,13 @@ class UpdatesView(ValidateMixin, APIView):
 
 
 @api_view(['GET'])
-def chat_api2(request, pk):
+def chat_api2(request):
     'test creating a simple GET endpoint'
-    chat = get_object_or_404(Chat, id=pk)
-    serializer = ChatSerializer2(chat)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        chat_id = request.query_params.get('chat_id', request.session.get('chat_id', None))
+        chat = get_object_or_404(Chat, id=chat_id)
+        serializer = ChatSerializer2(chat)
+        return Response(serializer.data)
 
 @api_view(['POST'])
 def message_api2(request):
