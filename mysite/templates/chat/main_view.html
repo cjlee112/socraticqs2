@@ -122,7 +122,7 @@ Courselets
                     <!--TODO: remove comments after success runing code-->
                     <li>
                       <a href="{{ domain }}/chat/enrollcode/{{ chat_sess.enroll_code.enrollCode }}/{{ chat_sess.id }}/"
-                         class="chat-start-session"
+                         {% if not chat_sess.is_open %}class="chat-start-session"{% endif %}
                          data-chat-id="{{ chat_sess.id }}"
                          {% if most_recent_complete_session and most_recent_complete_session.id == chat_sess.id %}
                           data-complete="yes"
@@ -148,8 +148,8 @@ Courselets
 
                     <li>
                       <!-- Not necessary show this button where there are no chat sessions -->
-                      <a class="chat-start-session unit-links__new"
-                        href="{{ domain }}/chat/enrollcode/{{ chat.enroll_code.enrollCode }}/0/"
+                      <a {% if not use_brella_frontend %}class="chat-start-session unit-links__new"{% endif %}
+                        href="{{ domain }}/chat/enrollcode/{{ enroll_code }}/brella/"
                         data-chat-id="0"
                         {% if not chat_sessions %}style="display:none;"{% endif %}>
                         <h3>New Chat Session</h3>
