@@ -23,7 +23,7 @@ async def main(insertBeforeID=None):
     chatInfo = await get_chat_info()
     show_courselet_info(chatInfo)
     chat_id = chatInfo['chat_id']
-    finalUpdates, oldThreads = await do_courselet(chat_id, insertBeforeID)
+    finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
 
@@ -110,12 +110,14 @@ def index_updates(updates, oldThreads):
             
 
 
-async def do_courselet(chat_id, insertBeforeID=None):
+async def do_courselet(chat_id, is_preview=False, insertBeforeID=None):
     'complete a multi-thread courselet'
     oldThreads = {}
     finalUpdates = {}
     t, postData, updateThreads = await get_thread(chat_id)
     while t:
+        if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
+            postData['is_preview'] = is_preview
         if t['kind'] == 'base':
             await show_explanation(t, postData, t['history'], insertBeforeID)
         elif t['kind'] == 'orct':
@@ -124,7 +126,7 @@ async def do_courselet(chat_id, insertBeforeID=None):
                 t['history']['insertBeforeID'] = msgs[0].id
                 oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
-        if updateThreads:
+        if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
             for thread_id, updates in showLater.items(): # save for display at end of courselet
                 finalUpdates.setdefault(thread_id, {}).update(updates)
