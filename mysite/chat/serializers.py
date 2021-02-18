@@ -791,7 +791,8 @@ class ChatSerializer2(serializers.BaseSerializer):
     def to_representation(self, chat):
         data = dict(chat_id=chat.id, )
         courseUnit = chat.enroll_code.courseUnit
-        data['course'] = dict(title=courseUnit.course.title, description=courseUnit.course.description)
+        data['course'] = dict(title=courseUnit.course.title, description=courseUnit.course.description,
+                              course_id=courseUnit.course.id)
         data['courselet'] = dict(title=courseUnit.unit.title, description=courseUnit.unit.description,
                                  image=courseUnit.unit.img_url)
         instructors = []
