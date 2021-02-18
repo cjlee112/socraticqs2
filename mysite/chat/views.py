@@ -421,14 +421,15 @@ class CourseletPreviewView(ChatInitialView):
         """
         return get_object_or_404(EnrollUnitCode, enrollCode=enroll_key, isPreview=True)
 
-    def create_new_chat(self, request, enroll_code, courseUnit, **kwargs):
+    def create_new_chat(self, request, enroll_code, courseUnit, useBrella=False, **kwargs):
         return super(CourseletPreviewView, self).create_new_chat(
             request=request,
             courseUnit=courseUnit,
             user=request.user,
             enroll_code=enroll_code,
             instructor=courseUnit.course.addedBy,
-            is_preview=True
+            is_preview=True,
+            useBrella=useBrella
         )
 
     @staticmethod
@@ -452,6 +453,12 @@ class CourseletPreviewView(ChatInitialView):
         return ChatInitialView.get_chat(request, enroll_code, is_preview=True)
 
     def get(self, request, enroll_key):
+        enroll_code = self.get_enroll_code_object(enroll_key)
+        if enroll_code.courseUnit.unit.use_brella_frontend(): ############### redirect to brella chat
+            chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
+            request.session['chat_id'] = chat.id
+            return HttpResponseRedirect(brellaChatURL)
+
         request.user.fsmstate_set.filter(chat__is_preview=True).delete()
         request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
         return super(CourseletPreviewView, self).get(request, enroll_key)

@@ -789,7 +789,7 @@ class ChatThreadSerializer2(serializers.BaseSerializer):
 class ChatSerializer2(serializers.BaseSerializer):
     'read-only serializer providing basic info about a chat session'
     def to_representation(self, chat):
-        data = dict(chat_id=chat.id, )
+        data = dict(chat_id=chat.id, is_preview=chat.is_preview)
         courseUnit = chat.enroll_code.courseUnit
         data['course'] = dict(title=courseUnit.course.title, description=courseUnit.course.description,
                               course_id=courseUnit.course.id)
