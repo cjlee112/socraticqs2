@@ -798,6 +798,14 @@ class ChatSerializer2(serializers.BaseSerializer):
         instructors = []
         for u in courseUnit.course.instructors:
             instructors.append(dict(name=f'{u.first_name} {u.last_name}'))
+        threads = []
+        for ul in courseUnit.unit.get_exercises(): # core lesson threads in order
+            threads.append(dict(title=ul.lesson.title, thread_id=ul.id))
+        data['threads'] = threads
+        resources = []
+        for ul in courseUnit.unit.get_resources(): # resource lessons in alphabetical order
+            resources.append(dict(title=ul.lesson.title, thread_id=ul.id))
+        data['resources'] = resources
         data['course']['instructors'] = instructors
         return data
 
