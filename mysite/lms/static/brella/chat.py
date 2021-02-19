@@ -8,8 +8,11 @@ def copy_to_container(templateID, containerID, msgText=None, selector=None, hand
     message = template.cloneNode(True) # clone its full subtree including all descendants
     message.id = webfsm_id.__next__()
     if msgText:
-        contentElement = message.select(selector)[0]
-        contentElement.html = msgText
+        if selector:
+            contentElement = message.select(selector)[0]
+            contentElement.html = msgText
+        else:
+            message.html = msgText
     if handler:
         bind_event(handler, message, selector, **kwargs)
     if attrs:
@@ -331,6 +334,63 @@ def get_cookie(attr):
         if k == attr:
             return v
         
+
+
+########### sidebar data
+# sidebar thread class options
+# "   unlocked   done  "
+# "   unlocked    is-active "
+# "    "
+
+class SidebarThread(object):
+    def __init__(self, title, thread_id, templateID='SidebarThreadTemplate', containerID='SidebarThreads'):
+        self.thread_id = thread_id
+        self.li = copy_to_container(templateID, containerID, title)[0]
+        self.li.bind('click', self.handler)
+        self.chatMsgID = None
+    def set_status(self, status, chatMsgID=None):
+        self.li.attrs['class'] = f"   unlocked   {status}  "
+        if chatMsgID:
+            self.chatMsgID = chatMsgID
+    def set_count(self, count):
+        self.li.attrs['data-updates-count'] = f"{count}"
+    def handler(self, ev):
+        'scroll this thread into view'
+        if self.chatMsgID:
+            e = document[self.chatMsgID]
+            e.scrollIntoView({'block': "center"})
+
+
+def set_on_sidebar(sidebar, thread_id, msgID=None, status='is-active'):
+    if sidebar and thread_id in sidebar:
+        sidebar[thread_id].set_status(status, msgID)
+
+
+class SidebarToggler(object):
+    def __init__(self, sidebarID='SidebarSection', togglerID='SidebarToggler', mainChatID='MainChatSection', inputbarID='ChatInputSection'):
+        self.sidebarID = sidebarID
+        self.togglerID = togglerID
+        self.mainChatID = mainChatID
+        self.inputbarID = inputbarID
+        self.visible = False
+        document[togglerID].bind('click', self.toggle)
+    def toggle(self, ev):
+        sidebar = document[self.sidebarID]
+        toggler = document[self.togglerID]
+        mainChat = document[self.mainChatID]
+        inputbar = document[self.inputbarID]
+        if self.visible:
+            self.visible = False
+            mainChat.attrs['style'] = "display: block; opacity: 1; padding-left: 0px;"
+            sidebar.style.left = '-320px'
+            toggler.attrs['class'] = 'sidebar-toggle'
+            inputbar.attrs['style'] = "display: block; bottom: 0px; padding-left: 0px;"
+        else:
+            self.visible = True
+            mainChat.attrs['style'] = "display: block; opacity: 1; padding-left: 320px;"
+            sidebar.style.left = '0px'
+            toggler.attrs['class'] = 'sidebar-toggle active'
+            inputbar.attrs['style'] = "display: block; bottom: 0px; padding-left: 320px;"
 
 
 ################################################################

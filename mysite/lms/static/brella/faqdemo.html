@@ -89,7 +89,7 @@ Courselets
   <div id="page-preloader" style="display: none; opacity: 0;"><span style="transform: translate3d(0px, -9.56531px, 0px);"></span><span style="transform: translate3d(0px, -10.9699px, 0px);"></span><span style="transform: translate3d(0px, -10.105px, 0px);"></span></div>
 
   <!-- Chat -->
-  <main style="display: block; opacity: 1;">
+  <main id="MainChatSection" style="display: block; opacity: 1;">
     <!-- Header -->
     <header class="course-header">
       <div class="overlay"></div>
@@ -97,7 +97,7 @@ Courselets
       <div class="container">
         <div class="logo" style=""></div>
 
-        <h1 id="CourseTitle" style=""></h1>
+        <h1 id="CourseletTitle" style=""></h1>
 
         <p id="InstructorCredits" style=""></p>
       </div>
@@ -108,7 +108,7 @@ Courselets
       <div class="chat-introduction-title" style="">
         <a id="CourseURL" href="/ct/">Course</a>
         
-        <h2 id="CourseletTitle"></h2>
+        <h2 id="CourseTitle"></h2>
         
       </div>
 
@@ -190,38 +190,23 @@ Courselets
     </section>
 
 
-<div id="DemoScenarios" style="display: none;">
-  This is a demonstration of the Courselets Chat Rapid Prototype.  Please choose from the following demo options, then click START to begin the demonstration.
-  <br>
-  <div>
-    <input type="checkbox" id="NoEMscenaro" name="demoscenarios" value="NoEMscenario">
-    <label for="noEMscenario">Scenario: thread has no Error Models to display.</label>
-  </div>
-  <div>
-    <input type="checkbox" id="NoFAQscenaro" name="demoscenarios" value="NoFAQscenario">
-    <label for="noFAQscenario">Scenario: thread has no FAQs to display.</label>
-  </div>
-  <button id='StartDemoButton'>Start Demo</button>
-</div>
-
-
     <!-- Chat messages container -->
     <section class="chat-messages" id="chatSection" style="display: block; opacity: 1;">
     </section>
   </main>
 
   <!-- Chat sidebar -->
-  <aside class="chat-sidebar" style="display: block;">
+  <aside id="SidebarSection" class="chat-sidebar" style="display: block;">
     <header>
-      <a href="http://localhost:8080/lms/courses/1">
+      <a id="SidebarCourseURL" href="http://localhost:8080/lms/courses/1">
         <div class="inner clearfix">
           
-          <div class="cover" style="background-image:url(&#39;https://www.courselets.org/static/img/student/hero.jpg&#39;);"></div>
+          <div id="SidebarCover" class="cover"></div>
           
 
           <div class="description">
-            <h3 class="courselet">What is a Concept Inventory?</h3>
-            <div class="course">An Introduction to Courselets</div>
+            <h3 id="SBCourseletTitle" class="courselet"></h3>
+            <div id="SBCourseTitle" class="course"></div>
           </div>
         </div>
       </a>
@@ -236,43 +221,12 @@ Courselets
 
     <section>
       <h4>Threads</h4>
-      <ul class="chat-sidebar-breakpoints"><li class="   unlocked   done  " data-thread-id="2" data-first-message-id="1" data-updates-count="0">
-  A Brief Definition of Conceptual Understanding
-</li><li class="   unlocked   done  " data-thread-id="4" data-first-message-id="4" data-updates-count="0">
-  Basic Misconception Rates?
-</li><li class="   unlocked   done  " data-thread-id="85" data-first-message-id="20" data-updates-count="0">
-  Fundamental cause and remedy?
-</li><li class="   unlocked   done  " data-thread-id="3" data-first-message-id="29" data-updates-count="0">
-  Different Strategies for Problem Solving
-</li><li class="   unlocked    is-active " data-thread-id="13" data-first-message-id="32" data-updates-count="0">
-  How to Measure Conceptual Understanding?
-</li><li class="   unlocked   done  " data-thread-id="12" data-first-message-id="51" data-updates-count="0">
-  Conceptual Thinking as a Student Strategy?
-</li><li class="    " data-thread-id="88" data-first-message-id="88" data-updates-count="0">
-  How to Specify a Course's Conceptual Learning Goals?
-</li><li class="    " data-thread-id="90" data-first-message-id="90" data-updates-count="0">
-  Concept inventory conclusions
-</li></ul>
+      <ul id="SidebarThreads" class="chat-sidebar-breakpoints"></ul>
     </section>
 
     <section>
       <h4 class="chat-sidebar-resources-header">Resources</h4>
-      <ul class="chat-sidebar-resources"><li class="
-           
-           
-           " data-first-message-id="" data-thread-id="50" data-ul="50">
-  Concept inventory
-</li><li class="
-           
-           
-           " data-first-message-id="" data-thread-id="51" data-ul="51">
-  Scientific misconceptions
-</li><li class="
-           
-           
-           " data-first-message-id="" data-thread-id="46" data-ul="46">
-  The Conceptual Understanding Iceberg
-</li></ul>
+      <ul id="SidebarResources" class="chat-sidebar-resources"></ul>
     </section>
   </aside>
 
@@ -285,7 +239,7 @@ Courselets
       </div>
     </div>
     <div class="inner">
-      <div class="sidebar-toggle">
+      <div id="SidebarToggler" class="sidebar-toggle">
         <span></span>
         <div class="chat-counter">0</div>
       </div>
@@ -523,6 +477,13 @@ Courselets
              height="500">
         </svg>
     </div>
+
+    <li id="SidebarThreadTemplate" class="    " data-thread-id="88" data-first-message-id="88" data-updates-count="0"></li>
+
+    <li id="SidebarResTemplate" class="
+           
+           
+           " data-first-message-id="" data-thread-id="51" data-ul="51"></li>
 
   </div>
 

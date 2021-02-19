@@ -21,9 +21,10 @@ def index_faqs(l):
 async def main(insertBeforeID=None):
     'basic ORCT chat test, starting with a simple updates test'
     chatInfo = await get_chat_info()
-    show_courselet_info(chatInfo)
+    sidebar = show_courselet_info(chatInfo)
+    toggler = chat.SidebarToggler()
     chat_id = chatInfo['chat_id']
-    finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], insertBeforeID)
+    finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
 
@@ -39,18 +40,24 @@ def show_courselet_info(info, defaultImage='https://www.courselets.org/static/im
     if not image:
         image = defaultImage
     header = document.select('.course-header')[0]
-    header.attrs['style'] = f"background-image: url({image})"
-    document['CourseTitle'].html = info['course']['title']
-    document['CourseURL'].attrs['href'] = f"/lms/courses/{info['course']['course_id']}/"
+    header.attrs['style'] = document['SidebarCover'].attrs['style'] = f"background-image: url({image})"
+    document['CourseTitle'].html = document['SBCourseTitle'].html = info['course']['title']
+    document['CourseURL'].attrs['href'] = document['SidebarCourseURL'].attrs['href'] = f"/lms/courses/{info['course']['course_id']}/"
     document['InstructorCredits'].html = ', '.join([d['name'] for d in info['course']['instructors']])
-    document['CourseletTitle'].html = info['courselet']['title']
+    document['CourseletTitle'].html = document['SBCourseletTitle'].html = info['courselet']['title']
     description = info['courselet'].get('description', None)
     if description:
         document['CourseletDescription'].html = description
     prereqs = info['courselet'].get('prereqs', None)
     if prereqs:
         document['CourseletPrereqs'].html = prereqs
-
+    sidebar = {}
+    for t in info.get('threads', ()):
+        sidebar[t['thread_id']] = chat.SidebarThread(t['title'], t['thread_id'])
+    for t in info.get('resources', ()):
+        sidebar[t['thread_id']] = chat.SidebarThread(t['title'], t['thread_id'], 'SidebarResTemplate',
+                                                     'SidebarResources')
+    return sidebar
 
 async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
     params = dict(chat_id=chat_id)
@@ -110,7 +117,7 @@ def index_updates(updates, oldThreads):
             
 
 
-async def do_courselet(chat_id, is_preview=False, insertBeforeID=None):
+async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=None):
     'complete a multi-thread courselet'
     oldThreads = {}
     finalUpdates = {}
@@ -119,12 +126,13 @@ async def do_courselet(chat_id, is_preview=False, insertBeforeID=None):
         if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
             postData['is_preview'] = is_preview
         if t['kind'] == 'base':
-            await show_explanation(t, postData, t['history'], insertBeforeID)
+            await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
         elif t['kind'] == 'orct':
-            wantsHelp, msgs = await do_orct_cycle(t, postData, t['history'], insertBeforeID)
+            wantsHelp, msgs = await do_orct_cycle(t, postData, t['history'], sidebar, insertBeforeID)
             if wantsHelp:
                 t['history']['insertBeforeID'] = msgs[0].id
                 oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
+        chat.set_on_sidebar(sidebar, t['thread_id'], status='done')
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
@@ -133,11 +141,11 @@ async def do_courselet(chat_id, is_preview=False, insertBeforeID=None):
     return finalUpdates, oldThreads
 
 
-async def do_orct_cycle(mainThread, postData, history, insertBeforeID=None):
+async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=None):
     'perform basic ORCT chat cycle on one thread'
     postDataQ = postData.copy()
     postDataQ['ul_id'] = mainThread['question']['ul_id'] # POST messages will be about this question
-    await pose_orct(mainThread, postDataQ, history, insertBeforeID)
+    await pose_orct(mainThread, postDataQ, history, sidebar, insertBeforeID)
     s = await get_selfeval(mainThread['answer'], postDataQ, history, insertBeforeID)
     stati = ()
     if s != 'same':
@@ -159,20 +167,22 @@ async def do_orct_cycle(mainThread, postData, history, insertBeforeID=None):
     return ('help' in stati), msgs
 
 
-async def show_explanation(e, postData, history, insertBeforeID=None):
+async def show_explanation(e, postData, history, sidebar, insertBeforeID=None):
     'display explanation message with Continue button'
     postData['ul_id'] = e['ul_id']
-    chat.post_messages((("ChatBreakpointTemplate", e['title']),),
-                           chatSelector='span', insertBeforeID=insertBeforeID)
+    msgs = chat.post_messages((("ChatBreakpointTemplate", e['title']),),
+                              chatSelector='span', insertBeforeID=insertBeforeID)
+    chat.set_on_sidebar(sidebar, e['thread_id'], msgs[0].id)
     await chat.continue_button(chat.get_orct_instructor_chats(e),
                                path='done', postData=postData, history=history,
                                insertBeforeID=insertBeforeID)
 
 
-async def pose_orct(orct, postData, history, insertBeforeID=None):
+async def pose_orct(orct, postData, history, sidebar, insertBeforeID=None):
     'ask question, student responds, gives confidence level'
-    chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
-                       chatSelector='span', insertBeforeID=insertBeforeID)
+    msgs = chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
+                              chatSelector='span', insertBeforeID=insertBeforeID)
+    chat.set_on_sidebar(sidebar, orct['thread_id'], msgs[0].id)
     query = chat.get_orct_query_ui(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
     postData['response_id'] = await query.get_server_response('response_id')
