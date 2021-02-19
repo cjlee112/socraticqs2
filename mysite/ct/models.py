@@ -1308,6 +1308,12 @@ class Unit(models.Model):
         _filter = _filter or {}
         return list(self.unitlesson_set.filter(order__isnull=False, **_filter)
                     .order_by('order'))
+    def get_resources(self, _filter=None):
+        'alphabetical list of resources for this courselet'
+        _filter = _filter or {}
+        lessonTable = list(self.unitlesson_set.filter(kind=UnitLesson.COMPONENT, order__isnull=True))
+        lessonTable.sort(key=lambda x: x.lesson.title)
+        return lessonTable
 
     reorder_exercise = reorder_exercise
 
