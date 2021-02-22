@@ -174,6 +174,7 @@ class ChatCanvas(ChatInput):
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         return already
     def handler(self, ev):
+        ev.preventDefault() # block default form GET action
         outcome = self.temporary.select("textarea")[0].value
         svgData = document[self.svgID].value
         self.message = f'<p>{outcome}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{svgData}</div>'
