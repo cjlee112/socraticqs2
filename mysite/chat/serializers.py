@@ -755,7 +755,7 @@ class MessageSerializer2(serializers.BaseSerializer):
                 remap.append(('response_to_check', 'response_id'))
             if 'canvasSVG' in extra:
                 name = '{}-{}.{}'.format('canvas', key_secret_generator(), 'svg')
-                r.attachment = ContentFile(extra['canvasSVG'], name=name)
+                r.attachment = ContentFile(extra['canvasSVG'].encode(), name=name)
             r.save()
             valid['response_to_check'] = r
         elif len(p) == 2 and p[0] == 'errormodels' and p[1].isdigit() and extra['outcome'] == 'yes' and 'student_error' not in valid:
