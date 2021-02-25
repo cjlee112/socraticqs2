@@ -1,0 +1,15 @@
+{
+  "chat_id":10,
+  "is_preview":true,
+  "course":{"title":"An Introduction to Courselets","description":"my first attempt to explain what it's all about","course_id":1,"instructors":[{"name":"The Teacher"}]},
+  "courselet":{"title":"What is a Concept Inventory?","description":"newChatMode=brella","image":""},
+  "threads":[
+    {"title":"Efficiency Concerns: When to Include an ORCT?","thread_id":2},
+    {"title":"Largest number.","thread_id":154},
+    {"title":"end of tranche 1","thread_id":143},
+    {"title":"Brick weight.","thread_id":150},
+    {"title":"Canvas ORCT.","thread_id":113},
+    {"title":"Brick weight 222.","thread_id":107}
+  ],
+  "resources":[{"title":"Concept inventory","thread_id":50},{"title":"Scientific misconceptions","thread_id":51},{"title":"The Conceptual Understanding Iceberg","thread_id":46}]
+}
