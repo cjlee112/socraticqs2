@@ -5,7 +5,8 @@ from django.views.generic import TemplateView
 from rest_framework.routers import SimpleRouter
 
 from .views import (
-    ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView
+    ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView,
+    brella_demo_view,
 )
 from .api import (
     MessagesView,
@@ -82,4 +83,8 @@ urlpatterns = [
     url(r'^brella/messages$', message_api2),
     url(r'^brella/threads$', thread_api2),
     url(r'^brella/chat$', chat_api2),
+    url(
+        r'^brella/demo/(?P<enroll_key>[a-zA-Z0-9]+)/$',
+        brella_demo_view,
+    ),
 ]

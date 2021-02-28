@@ -620,3 +620,15 @@ class CheckChatInitialView(ChatInitialView):
             role__role=Role.INSTRUCTOR,
             role__course=courseUnit.course
         ).exists()
+
+
+
+def brella_demo_view(request, enroll_key):
+    'provide login-less chat demo if allowed for this enroll_key'
+    chat = Chat.objects.filter(is_open=True, is_trial=True, is_preview=True, enroll_code__enrollCode=enroll_key).first()
+    if chat:
+        request.session['chat_id'] = chat.id
+        return HttpResponseRedirect(brellaChatURL)
+    else:
+        return Response('No such demo available', status=400)
+
