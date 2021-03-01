@@ -731,8 +731,9 @@ def chat_api2(request):
     if request.method == 'GET':
         chat_id = request.query_params.get('chat_id', request.session.get('chat_id', None))
         chat = get_object_or_404(Chat, id=chat_id)
-        serializer = ChatSerializer2(chat)
-        return Response(serializer.data)
+        if chat.user == request.user or (chat.is_open and chat.is_preview and chat.is_trial):
+            serializer = ChatSerializer2(chat)
+            return Response(serializer.data)
 
 @api_view(['POST'])
 def message_api2(request):
@@ -774,6 +775,8 @@ def thread_api2(request):
         chat_id = request.query_params.get('chat_id', '')
         if chat_id.isdigit():
             chat = get_object_or_404(Chat, id=int(chat_id))
+            if chat.user != request.user and not (chat.is_open and chat.is_preview and chat.is_trial):
+                return Response('action is not allowed', status=403)
             try:
                 ulID = int(request.query_params.get('completedThread', ''))
                 nextUL = UnitLesson.objects.get(id=ulID).get_next_lesson()
