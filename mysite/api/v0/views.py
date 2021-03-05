@@ -27,6 +27,9 @@ from ..serializers import (
     UnitSerializer,
     ThreadSerializer,
     UnitSerializer2,
+    ORCTSerializer3,
+    ULSerializer3,
+    get_ul_serializer,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -378,4 +381,14 @@ def get_courselet_threads(request, pk):
     course_unit = get_object_or_404(CourseUnit, id=pk)
     serializer = UnitSerializer2(course_unit.unit)
     return RestResponse(serializer.data)
+
+
+@api_view(['GET'])
+def get_thread_timecourse(request, pk):
+    'return interventions timecourse data for specified thread'
+    ul = get_object_or_404(UnitLesson, id=pk)
+    serializer = get_ul_serializer(ul, ORCTSerializer3, ULSerializer3)
+    data = serializer.data
+    data['timenow'] = time.gmtime() # include current timestamp for timediff calculations
+    return RestResponse(data)
 
