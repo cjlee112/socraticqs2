@@ -169,7 +169,7 @@ class FAQSerializer2(serializers.BaseSerializer):
     'serializer for FAQ student question'
     def to_representation(self, f):
         data = dict(faq_id=f.id, title=f.title, message=f.text, ul_id=f.unitLesson.id,
-                    atime=f.atime.timetuple())
+                    atime=f.atime.timetuple(), user_id=f.author.id)
         if f.kind == f.COMMENT:
             data['parent_id'] = f.parent.id
         if f.unitLesson.parent: # sublesson
@@ -220,7 +220,7 @@ class EMSerializer3(ULSerializer3):
         data['studenterrors'] = students = []
         for se in ul.studenterror_set.all():
             students.append(dict(student_error_id=se.id, status=se.status, atime=se.atime.timetuple(),
-                                 response_id=se.response.id))
+                                 response_id=se.response.id, user_id=se.author.id))
         return data
 
 
@@ -244,9 +244,15 @@ class ORCTSerializer2(serializers.BaseSerializer):
         return data
 
 class ORCTSerializer3(ORCTSerializer2):
-    'include StudentErrors and InquiryCounts in output'
+    'include Responses, StudentErrors and InquiryCounts in output'
     _ulSerializer = ULSerializer3
     _emSerializer = EMSerializer3
+    def to_representation(self, ul):
+        data = ORCTSerializer2.to_representation(self, ul)
+        data['responses'] = responses = []
+        for r in ul.response_set.filter(kind=Response.ORCT_RESPONSE):
+            responses.append(ResponseSerializer2(r).data)
+        return data
 
 
 
