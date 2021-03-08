@@ -211,6 +211,7 @@ class MultiSelection(ChatQuery):
             else:
                 postData['outcome'] = 'no'
             if i in self.newChoices:
+                div.unbind('click') # deactivate toggle response
                 postData[self.idAttr] = self.choices[i][self.idAttr]
                 postData['path'] = self.paths[i]
                 self.send_post(postData)
