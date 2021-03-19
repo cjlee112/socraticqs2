@@ -30,7 +30,7 @@ wikipedia==1.4.0
 
 python-memcached==1.59
 injections==0.2.2
-djangorestframework==3.10.2
+djangorestframework==3.11.2
 django-waffle==0.15.0
 django_intercom
 
