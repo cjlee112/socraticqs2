@@ -734,6 +734,7 @@ def chat_api2(request):
         if chat.user == request.user or (chat.is_open and chat.is_preview and chat.is_trial):
             serializer = ChatSerializer2(chat)
             return Response(serializer.data)
+        return Response('action is not allowed', status=403)
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication])
