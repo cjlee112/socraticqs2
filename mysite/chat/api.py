@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from ct.models import Response as StudentResponse, Lesson, UnitLesson, EVAL_TO_STATUS_MAP, InquiryCount
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
@@ -736,10 +736,14 @@ def chat_api2(request):
             return Response(serializer.data)
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def message_api2(request):
     if request.method == 'POST':
         serializer = MessageSerializer2(data=request.data)
         if serializer.is_valid():
+            if serializer.validated_data['chat'].user != request.user:
+                return Response('action is not allowed', status=403)
             m = serializer.save()
             path = request.data['path'] # handle UPDATE here b/c requires checking authorization
             if path in ('confidence', 'selfeval', 'status') and m.response_to_check and m.response_to_check.author == request.user:
