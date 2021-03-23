@@ -794,7 +794,7 @@ def thread_api2(request):
             chat.last_modify_timestamp = timezone.now()
             chat.save()
             return Response(data)
-
+        return Response('missing or invalid chat_id', status=status.HTTP_400_BAD_REQUEST)
 
 def build_update_dict(emUpdates, faqUpdates, user):
     'return dict of updates indexed by chat history path'
