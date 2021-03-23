@@ -7,7 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 from django.db.models import Q
@@ -27,6 +27,9 @@ from ..serializers import (
     UnitSerializer,
     ThreadSerializer,
     UnitSerializer2,
+    ORCTSerializer3,
+    ULSerializer3,
+    get_ul_serializer,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -373,9 +376,29 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def get_courselet_threads(request, pk):
     'test creating a simple GET endpoint'
     course_unit = get_object_or_404(CourseUnit, id=pk)
-    serializer = UnitSerializer2(course_unit.unit)
-    return RestResponse(serializer.data)
+    if Role.INSTRUCTOR in course_unit.course.get_user_role(request.user, justOne=False, raiseError=False):
+        serializer = UnitSerializer2(course_unit.unit)
+        return RestResponse(serializer.data)
+    else:
+        return RestResponse('action is not allowed', status=403)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_thread_timecourse(request, pk):
+    'return interventions timecourse data for specified thread'
+    ul = get_object_or_404(UnitLesson, id=pk)
+    if Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=request.user,
+                             courseunit__unit__unitlesson=ul).exists():
+        serializer = get_ul_serializer(ul, ORCTSerializer3, ULSerializer3)
+        data = serializer.data
+        data['timenow'] = time.gmtime() # include current timestamp for timediff calculations
+        return RestResponse(data)
+    else:
+        return RestResponse('action is not allowed', status=403)
 

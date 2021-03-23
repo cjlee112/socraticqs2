@@ -741,16 +741,24 @@ class MessageSerializer2(serializers.BaseSerializer):
         'create affiliated objects required for new message specified by data dicts'
         p = path.split('.')
         chat = valid['chat'] # only CREATE is handled here!!  For UPDATE handling, see chat.api.message_api2
-        if (path == 'response' or p[-1] == 'add_faq') and 'response_to_check' not in valid:
+        if ((path == 'response' or p[-1] == 'add_faq') and 
+                'response_to_check' not in valid) or path.startswith('faqs.add_answer.'):
             ul = valid['lesson_to_answer'] # create a new Response record
             r = Response.objects.create(unitLesson=ul, lesson=ul.lesson, author=valid['owner'],
                     course=chat.enroll_code.courseUnit.course,
                     is_preview=chat.is_preview, is_test=chat.is_test)
-            if p[-1] == 'add_faq': # mark as FAQ
+            if path.startswith('faqs.add_answer.'): # instructor answering a FAQ
+                r.kind = Response.COMMENT
+                r.title = extra['outcome']
+                r.text = extra['message']
+                r.parent = valid['response_to_check'] # the original FAQ being answered
+                r.course = r.parent.course # inherit from original FAQ
+                remap.append(('response_to_check', 'faq_id'))
+            elif p[-1] == 'add_faq': # mark as FAQ asked by student
                 r.kind = Response.STUDENT_QUESTION
                 r.title = extra['message']
                 remap.append(('response_to_check', 'faq_id'))
-            else: # mark as ORCT response
+            else: # mark as ORCT response from student
                 r.text = extra['message']
                 remap.append(('response_to_check', 'response_id'))
             if 'canvasSVG' in extra:
