@@ -125,13 +125,13 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
     while t:
         if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
             postData['is_preview'] = is_preview
-        if t['kind'] == 'base':
-            await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
-        elif t['kind'] == 'orct':
+        if t['kind'] == 'orct':
             wantsHelp, msgs = await do_orct_cycle(t, postData, t['history'], sidebar, insertBeforeID)
             if wantsHelp:
                 t['history']['insertBeforeID'] = msgs[0].id
                 oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
+        else:
+            await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
         chat.set_on_sidebar(sidebar, t['thread_id'], status='done')
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
