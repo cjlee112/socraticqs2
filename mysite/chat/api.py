@@ -743,7 +743,8 @@ def message_api2(request):
     if request.method == 'POST':
         serializer = MessageSerializer2(data=request.data)
         if serializer.is_valid():
-            if serializer.validated_data['chat'].user != request.user:
+            chat = serializer.validated_data['chat']
+            if chat.user != request.user or not chat.is_open: # only allowed for brella-mode chat
                 return Response('action is not allowed', status=403)
             m = serializer.save()
             path = request.data['path'] # handle UPDATE here b/c requires checking authorization
