@@ -259,7 +259,7 @@ class ORCTSerializer3(ORCTSerializer2):
 def get_ul_serializer(ul, _orctSerializer=ORCTSerializer2, _ulSerializer=ULSerializer2):
     if ul.lesson.kind == Lesson.ORCT_QUESTION:
         return _orctSerializer(ul)
-    elif ul.lesson.kind == Lesson.BASE_EXPLANATION:
+    else: # treat as a simple explanation
         return _ulSerializer(ul)
 
 class UnitSerializer2(serializers.BaseSerializer):
