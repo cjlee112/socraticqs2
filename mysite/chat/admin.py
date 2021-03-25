@@ -40,6 +40,7 @@ class ChatAdmin(admin.ModelAdmin):
         get_property_if_exist('next_point', 'contenttype'),
         get_property_if_exist('next_point', 'content_id'),
     )
+    raw_id_fields = ('next_point', 'user', 'instructor', 'state', 'enroll_code')
 
 
 def chat_id(obj):
