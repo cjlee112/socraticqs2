@@ -65,6 +65,8 @@ async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='
         params['completedThread'] = completedThread
     headers = {'Content-Type': 'application/json'}
     req = await aio.get(threadURL, headers=headers, data=params)
+    if req.status == 204:
+        return None, None, None
     data = JSON.parse(req.data)
     if 'answer' in data:
         data['question']['answer_id'] = data['answer']['ul_id']
