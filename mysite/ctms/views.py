@@ -542,7 +542,12 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
         courslet = self.get_courslet()
         is_trial = self.request.GET.get('is_trial') in ['true', 'True', '1']
         responses = self.object.response_set.filter(is_trial=is_trial).order_by('-atime')
-
+        try:
+            answer = self.object.get_answers()[0]
+            faqs = answer.response_set.filter(kind=Response.STUDENT_QUESTION)
+        except IndexError:
+            answer = faqs = ()
+        errors = self.object.get_errors()
         page = self.request.GET.get('page', 1)
         paginator = Paginator(responses, 50)  # Show 50 contacts per page
         current_page = paginator.page(page)
@@ -558,6 +563,9 @@ class UnitView(NewLoginRequiredMixin, CourseCoursletUnitMixin, DetailView):
             'courslet': courslet,
             'responses': responses,
             'unit': self.get_object(),
+            'answer': answer,
+            'errors': errors,
+            'faqs': faqs,
             'is_trial': is_trial
         })
         kwargs.update(self.kwargs)

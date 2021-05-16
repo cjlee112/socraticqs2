@@ -1,6 +1,19 @@
 {% extends 'ctms_base.html' %}
 {% load static ct_extras %}
 
+{% block head %}
+{{ block.super }}
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function() {
+  brython({debug: 1, indexedDB: false});
+});
+</script>
+<script  type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+<script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
+{% endblock %}
+
 
 {% block title %}
   Answers: {{ unit.lesson.title }}
@@ -29,117 +42,118 @@
     </ul>
   </nav>
 
-  <div class="card__notice">
-    You can find additional features in <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.unit.id %}">the old Instructor UI</a>.
-  </div>
+  
 
   <main class="card__content">
     <ul class="nav nav-tabs custom-nav-tabs">
       {# <li class="{% if not is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courselet_pk=courslet.pk pk=unit.pk %}">Common</a></li> #}
       {# <li class="{% if is_trial %}active{% endif %}"><a href="{% url 'ctms:unit_view' course_pk=course.pk courselet_pk=courslet.pk pk=unit.pk %}?is_trial=true">Trial</a></li> #}
     </ul>
-    {% if responses %}
+
+
+ <div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <div class="panel-title">
+        <a data-toggle="collapse" href="#collapseList">Click here to view question details, answer, student blindspots, and student questions</a>
+      </div>
+    </div>
+    <div id="collapseList" class="panel-collapse collapse">
+      <ul class="list-group">
+        <li class="list-group-item">
+          <input type="checkbox" value="" data-toggle="collapse" data-target="#collapseQ"/> <b>Show original question</b>:
+          <div id="collapseQ" class="panel-collapse collapse">{{ unit.lesson.text |md2html }}</div>
+        </li>
+        {% if answer %}
+        <li class="list-group-item">
+          <input type="checkbox" value="" data-toggle="collapse" data-target="#collapseA"/> <b>Show correct answer</b>:
+          <div id="collapseA" class="panel-collapse collapse">{{ answer.lesson.text |md2html }}</div>
+        </li>
+        {% endif %}
+        {% for em in errors %}
+        <li class="list-group-item">
+          <input type="checkbox" value="" data-toggle="collapse" data-target="#collapseEM{{ em.id }}"/>
+          <b>Blindspot: {{ em.lesson.title }}</b> ({{ em.atime | display_datetime }})
+          <div id="collapseEM{{ em.id }}" class="panel-collapse collapse">{{ em.lesson.text |md2html }}</div>
+        </li>
+        {% endfor %}
+        {% for faq in faqs %}
+        <li class="list-group-item">
+          <input type="checkbox" value="" data-toggle="collapse" data-target="#collapseFAQ{{ faq.id }}"/>
+          <b>Student question: {{ faq.title }}</b> (from {{ faq.faq_affected_studets}} student(s); {{ faq.atime | display_datetime }})
+          <div id="collapseFAQ{{ faq.id }}" class="panel-collapse collapse">{{ faq.text |md2html }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <div class="card__notice">
+        You can find additional features in <a href="{% url 'ct:unit_answers' course_id=course.id unit_id=courslet.unit.id %}">the old Instructor UI</a>.
+      </div>
+    </div>
+  </div>
+</div> 
+
+    <b>Show:</b> <select id="NamedViewMenu" name="NamedViewMenu"></select><br>
     <table>
       <thead>
         <tr>
+          <th>Student</th>
           <th>Answer</th>
-          <th>img</th>
           <th>Status</th>
-          <th>Role</th>
-          <th></th>
         </tr>
       </thead>
 
-      <tbody>
-        {% for answer in current_page %}
-        <tr>
-          <td>
-            <div class="user-info">
-              <img src="{% if answer.author.instructor.icon_url %}{{ answer.author.instructor.icon_url }}{% else %}{% static "img/student/avatar-student.jpg" %}{% endif %}" alt="{{ answer.author|display_full_username }}" class="avatar">
-              <h3>{{ answer.author|display_full_username }}</h3>
-              <p>{{ answer.atime|date }}</p>
-            </div>
-
-            <div class="table-answer">
-              {{ answer.text|truncatechars:150 }}
-            </div>
-          </td>
-          <td>
-          {% if answer.lesson.sub_kind == 'canvas' or answer.parent.sub_kind == 'canvas' %}
-            {% if answer.lesson.attachment %}
-              <div class="draw-svg-container" disabled="disabled" width="100" height="100"
-                style="background-image: url({{ answer.lesson.attachment.url }})">
-                <img src="{{ answer.attachment.url }}" width="100" height="100">
-              </div>
-            {% endif %}
-          {% endif %}
-          </td>
-
-          <td>
-            {% if answer.status != None %}
-            {{ answer.get_status_display }}
-            {% endif %}
-
-          </td>
-          <td>
-            {{ answer.is_test|yesno:"tester,student" }}
-          </td>
-
-          <td>
-            <a href="{% url 'ctms:response_view' course_pk=course_pk courselet_pk=courselet_pk unit_pk=pk pk=answer.id %}">View &rarr;</a>
-          </td>
-        </tr>
-        {% endfor %}
+      <tbody id="StudentResponses">
       </tbody>
+      <tfoot>
+        <tr id="ViewMoreTrigger" style="display: none;"><td>Click here to view more student responses...</td></tr>
+        <tr id="LoadInProgress" style="display: none;"><td>Loading more student responses...</td></tr>
+      </tfoot>
     </table>
 
 
-    {% if current_page.has_other_pages %}
-    <center>
-      <ul class="pagination">
-        {% if current_page.has_previous %}
-        <li class="page-item">
-          <span><a class="page-link" href="?page={{ current_page.previous_page_number }}">Previous</a></span>
-        </li>
-        {%else%}
-        <li class="page-item disabled">
-          <span><a class="page-link">Previous</a></span>
-        </li>
-        {% endif %}
 
-        {% for i, j in pages %}
-
-          {% if current_page.number == j %}
-          <li class="page-item active">
-            <span class="page-link">
-              {{ i }}
-              <span class="sr-only">(current)</span>
-            </span>
-          </li>
-          {% else %}
-          <li class="page-item disable">
-            <li class="page-item"><a class="page-link" href="?page={{ j }}">{{ i }}</a></li>
-          </li>
-          {%endif%}
-
-        {%endfor%}
-
-        {% if current_page.has_next %}
-        <li class="page-item">
-          <span><a class="page-link" href="?page={{ current_page.next_page_number }}">Next</a></span>
-        </li>
-        {%else%}
-        <li class="page-item disabled"> 
-          <span><a class="page-link">Next</a></span>
-        </li>
-        {% endif %} 
-      </ul>
-    </center>
-    {% endif %}
-
-    {% else %}
-    <p>No answers yet.</p>
-    {% endif %}
   </main>
 </div>
+
+<!-- Templates -->
+<div id="HiddenTemplates" style="display: none;">
+  <table><tbody>
+        <tr id="ResponseRowTemplate"></tr>
+  </tbody></table>
+</div>
+
+<script type="text/python">
+import sys
+sys.path.append('/static/brella')
+import chat
+
+def format_response_row(r):
+    fmt = f'''<td>
+            <div class="user-info">
+              <img src="/static/img/student/avatar-student.jpg" alt="Joe Student" class="avatar">
+              <h3>{r["student_firstname"]} {r["student_lastname"]}</h3>
+              <p>Today at 2 PM</p>
+            </div>
+
+          </td>
+
+          <td>
+            <div class="table-answer">{r["text"]}</div>
+          </td>
+
+          <td>{r["status"]}</td>
+'''
+    return fmt
+
+
+namedViews = dict(StillConfused=dict(title='students who need more help', 
+                                     params=dict(thread_id={{ unit.id }}),
+                                     formatter=format_response_row),
+                  Latest=dict(title='most recent first', 
+                                     params=dict(thread_id={{ unit.id }}),
+                                     formatter=format_response_row))
+viewTable = chat.NamedViewTableUI('/api/v0/threadResponses/', namedViews, 'StillConfused')
+</script>
+
 {% endblock %}
