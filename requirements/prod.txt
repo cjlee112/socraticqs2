@@ -3,6 +3,6 @@
 gunicorn==20.0.4
 psycopg2-binary==2.7.7
 django-storages==1.8
-boto3==1.10.35
+boto3==1.17.43
 boto==2.49.0
-django-ses==0.8.13
+django-ses==2.0.0
