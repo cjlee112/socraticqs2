@@ -165,6 +165,13 @@ class ResponseSerializer2(serializers.BaseSerializer):
         return data
 
 
+class StudentErrorSerializer(serializers.BaseSerializer):
+    'serializer for student error'
+    def to_representation(self, se):
+        return dict(student_error_id=se.id, status=se.status, atime=se.atime.timetuple(),
+                    response_id=se.__dict__['response_id'], user_id=se.__dict__['author_id'])
+
+
 class FAQSerializer2(serializers.BaseSerializer):
     'serializer for FAQ student question'
     def to_representation(self, f):
@@ -270,5 +277,10 @@ class UnitSerializer2(serializers.BaseSerializer):
             data.append(get_ul_serializer(ul).data)
         return data
 
+
+class TrivialSerializer(serializers.BaseSerializer):
+    'serializer that just echoes input dict'
+    def to_representation(self, d):
+        return d
 
 

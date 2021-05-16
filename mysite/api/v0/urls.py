@@ -18,6 +18,8 @@ from .views import (
     CourseletThreadsViewSet,
     get_courselet_threads,
     get_thread_timecourse,
+    ThreadResponsesView,
+    ThreadErrorsView,
 )
 
 app_name = 'v0'
@@ -63,5 +65,7 @@ urlpatterns = [
     path('courselets/<int:courselet_pk>/', include(router.urls)),
     path('brella/<int:pk>/', get_courselet_threads),
     path('threads/<int:pk>/', get_thread_timecourse),
+    path('threadResponses/', ThreadResponsesView.as_view()),
+    path('threadErrors/', ThreadErrorsView.as_view()),
 
 ]

@@ -1,7 +1,7 @@
 import time
 import logging
 
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status, generics, exceptions, pagination
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from django.db.models import Q
+from django.db.models import Q, F
+from django.db.models.functions import Length
 
 from analytics.models import CourseReport
 from analytics.tasks import report
@@ -30,6 +31,9 @@ from ..serializers import (
     ORCTSerializer3,
     ULSerializer3,
     get_ul_serializer,
+    ResponseSerializer2,
+    StudentErrorSerializer,
+    TrivialSerializer,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -392,13 +396,73 @@ def get_courselet_threads(request, pk):
 @permission_classes([IsAuthenticated])
 def get_thread_timecourse(request, pk):
     'return interventions timecourse data for specified thread'
-    ul = get_object_or_404(UnitLesson, id=pk)
+    ul = check_ul_instructor(request, pk)
+    serializer = get_ul_serializer(ul, ORCTSerializer3, ULSerializer3)
+    data = serializer.data
+    data['timenow'] = time.gmtime() # include current timestamp for timediff calculations
+    return RestResponse(data)
+
+
+def check_ul_instructor(request, ulID=None):
+    'return UnitLesson iff request.user is course instructor'
+    if ulID is None:
+        ulID = request.query_params['thread_id']
+    ul = get_object_or_404(UnitLesson, id=ulID)
     if Course.objects.filter(role__role=Role.INSTRUCTOR, role__user=request.user,
                              courseunit__unit__unitlesson=ul).exists():
-        serializer = get_ul_serializer(ul, ORCTSerializer3, ULSerializer3)
-        data = serializer.data
-        data['timenow'] = time.gmtime() # include current timestamp for timediff calculations
-        return RestResponse(data)
+        return ul
     else:
-        return RestResponse('action is not allowed', status=403)
+        raise exceptions.PermissionDenied('you are not the instructor')
+
+
+class NamedViewBase(generics.ListAPIView):
+    'base class for creating API endpoint that serves multiple named-views'
+    serializer_class = TrivialSerializer
+    pagination_class = pagination.LimitOffsetPagination
+    def get_queryset(self):
+        'apply namedView consisting of filter, order_by, values'
+        namedView = self.request.query_params.get('namedView', self._defaultView)
+        try:
+            nv = self._namedViews[namedView]
+        except KeyError:
+            raise exceptions.NotFound(f'invalid named view {namedView}')
+        if 'filter' in nv:
+            queryset = nv['filter'](self)
+        else: # use the default filter source
+            queryset = self._default_filter()
+        if 'order_by' in nv:
+            queryset = nv['order_by'](self, queryset)
+        return nv['values'](self, queryset)
+
+
+def response_values_default(self, queryset):
+    return queryset.values('id', 'text', 'status', error_id=F('studenterror__errorModel_id'),
+                           error_status=F('studenterror__status'), student_firstname=F('author__first_name'),
+                           student_lastname=F('author__last_name'))
+
+class ThreadResponsesView(NamedViewBase):
+    _namedViews = {
+        'StillConfused': {
+            'filter': lambda self:self._default_filter().filter(status='help'),
+            'order_by': lambda self, queryset: queryset.order_by(Length('text').desc()),
+            'values': response_values_default 
+        },
+        'Latest': {
+            'filter': lambda self:self._default_filter(),
+            'order_by': lambda self, queryset: queryset.order_by('-atime'),
+            'values': response_values_default
+        }
+    }
+    _defaultView = 'StillConfused'
+    def _default_filter(self):
+        ul = check_ul_instructor(self.request)
+        return Response.objects.filter(unitLesson_id=ul.id)
+
+
+
+class ThreadErrorsView(generics.ListAPIView):
+    serializer_class = StudentErrorSerializer
+    def get_queryset(self):
+        ul = check_ul_instructor(self.request)
+        return StudentError.objects.filter(response__unitLesson=ul)
 
