@@ -521,3 +521,9 @@ COURSELETS_EMAIL = 'info@courselets.org'
 INTERCOM_APPID = ''
 INTERCOM_SECURE_KEY = ''
 INTERCOM_ACCESS_TOKEN = ''
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 100
+}
+
