@@ -401,3 +401,89 @@ class SidebarToggler(object):
 # * show text message, wait to Continue
 # * request a choice via multiple-choice buttons
 # * request a selection via multiple-selection list
+
+
+#####################################################################
+# Named View UI for displaying tables
+
+class NamedViewTableUI(object):
+    def __init__(self, apiURL, namedViews, initialView=None, containerID="StudentResponses",
+                 templateID="ResponseRowTemplate", menuID='NamedViewMenu',
+                 viewMoreID='ViewMoreTrigger', loadingID='LoadInProgress'):
+        self.apiURL = apiURL
+        self.namedViews = namedViews
+        self.containerID = containerID
+        self.templateID = templateID
+        self.menuID = menuID
+        self.viewMoreID = viewMoreID
+        self.loadingID = loadingID
+        set_visibility(viewMoreID, False)
+        document[viewMoreID].bind('click', self.get_more)
+        s = ''
+        for k,v in namedViews.items():
+            if k == initialView:
+                s += f'<option value="{k}" selected>{v["title"]}</option>\n'
+            else:
+                s += f'<option value="{k}">{v["title"]}</option>\n'
+        menu = document[menuID]
+        menu.html = s
+        menu.bind('change', self.begin_view)
+        if initialView:
+            self.begin_view(None, initialView)
+    def begin_view(self, ev, viewName=None):
+        if not viewName:
+            viewName = document[self.menuID].value
+        self.viewName = viewName
+        v = self.namedViews[viewName]
+        document[self.containerID].clear()
+        self.get_data(self.apiURL, v['params'])
+    def get_data(self, apiURL=None, params=None, headers={'Content-Type': 'application/json'}):
+        set_visibility(self.loadingID)
+        set_visibility(self.viewMoreID, False)
+        req = ajax.Ajax()
+        req.bind('complete', self.on_complete)
+        if apiURL:
+            params = params.copy()
+            params['namedView'] = self.viewName
+            url = apiURL + '?' + '&'.join([f'{t[0]}={t[1]}' for t in params.items()])
+        else:
+            url = self.nextURL
+        req.open('GET', url, True)
+        for h, v in headers.items():
+            req.set_header(h, v)
+        req.send()
+    def on_complete(self, req):
+        tranche = JSON.parse(req.text)
+        self.nextURL = tranche.get('next', None)
+        fmt = self.namedViews[self.viewName]['formatter']
+        for row in tranche['results']:
+            copy_to_container(self.templateID, self.containerID, fmt(row), None)
+        set_visibility(self.loadingID, False)
+        if self.nextURL:
+            set_visibility(self.viewMoreID)
+    def get_more(self, ev):
+        'user clicked View More, so get next page of results'
+        if self.nextURL:
+            self.get_data()
+    def toggle_item(self, ev):
+        pass
+
+
+#####################################################################
+# paginated GET support
+
+async def get_all_pages(url, params):
+    headers = {'Content-Type': 'application/json'}
+    req = await aio.get(url, headers=headers, data=params)
+    results = []
+    while req:
+        tranche = JSON.parse(req.data)
+        results += tranche['results']
+        nextURL = tranche.get('next', None)
+        if nextURL:
+            req = await aio.get(nextURL, headers=headers)
+        else:
+            req = None
+    return results
+
+
