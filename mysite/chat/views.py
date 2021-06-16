@@ -454,14 +454,14 @@ class CourseletPreviewView(ChatInitialView):
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
-        if enroll_code.courseUnit.unit.use_brella_frontend(): ############### redirect to brella chat
-            chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
-            request.session['chat_id'] = chat.id
-            return HttpResponseRedirect(brellaChatURL)
+        ############### redirect to brella chat
+        chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
+        request.session['chat_id'] = chat.id
+        return HttpResponseRedirect(brellaChatURL)
 
-        request.user.fsmstate_set.filter(chat__is_preview=True).delete()
-        request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
-        return super(CourseletPreviewView, self).get(request, enroll_key)
+        #request.user.fsmstate_set.filter(chat__is_preview=True).delete()
+        #request.user.chat_set.filter(is_preview=True).update(enroll_code=None)
+        #return super(CourseletPreviewView, self).get(request, enroll_key)
 
 
 class InitializeLiveSession(ChatInitialView):
