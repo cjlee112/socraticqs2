@@ -338,7 +338,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 # 'next_point': next_point,
                 'back_url': back_url,
                 'back_url_name': back_url_name,
-                'use_brella_frontend': courseUnit.unit.use_brella_frontend()
+                'use_brella_frontend': random.random() < 0.5  # courseUnit.unit.use_brella_frontend()
             }
         )
 
