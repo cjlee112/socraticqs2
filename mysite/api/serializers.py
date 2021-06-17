@@ -5,6 +5,7 @@ from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindM
 from ctms.models import BestPractice1, BestPractice2
 from analytics.models import CourseReport
 from ct.templatetags.ct_extras import md2html
+import datetime
 
 
 class ResponseSerializer(serializers.ModelSerializer):
@@ -281,6 +282,11 @@ class UnitSerializer2(serializers.BaseSerializer):
 class TrivialSerializer(serializers.BaseSerializer):
     'serializer that just echoes input dict'
     def to_representation(self, d):
+        for k,v in list(d.items()):
+            if isinstance(v, datetime.timedelta):
+                d[k] = v.total_seconds()
+            elif isinstance(v, datetime.datetime):
+                d[k] = v.timestamp()
         return d
 
 

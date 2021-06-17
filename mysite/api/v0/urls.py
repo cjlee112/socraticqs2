@@ -20,6 +20,7 @@ from .views import (
     get_thread_timecourse,
     ThreadResponsesView,
     ThreadErrorsView,
+    ChatStatsView,
 )
 
 app_name = 'v0'
@@ -67,5 +68,5 @@ urlpatterns = [
     path('threads/<int:pk>/', get_thread_timecourse),
     path('threadResponses/', ThreadResponsesView.as_view()),
     path('threadErrors/', ThreadErrorsView.as_view()),
-
+    path('chatStats/', ChatStatsView.as_view()),
 ]

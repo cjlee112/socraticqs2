@@ -1,5 +1,6 @@
 import time
 import logging
+from datetime import datetime, timezone
 
 from rest_framework import viewsets, status, generics, exceptions, pagination
 from rest_framework.authentication import SessionAuthentication
@@ -10,12 +11,13 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from django.db.models import Q, F
+from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
 
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
+from chat.models import Chat
 from ctms.models import BestPractice, BestPracticeTemplate
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
@@ -458,6 +460,35 @@ class ThreadResponsesView(NamedViewBase):
         ul = check_ul_instructor(self.request)
         return Response.objects.filter(unitLesson_id=ul.id)
 
+
+def filter_chats_since(chatStatsView):
+    'get Message and Response counts for Chat sessions since startTime'
+    if not chatStatsView.request.user or not chatStatsView.request.user.is_superuser:
+        raise exceptions.PermissionDenied('you do not have admin rights')
+    startTime = chatStatsView.request.query_params.get('startTime', '0')
+    startTime = datetime.fromtimestamp(float(startTime), timezone.utc)
+    return Chat.objects.filter(
+              timestamp__gte=startTime,
+              is_preview=False
+            ).annotate(
+              maxtime=Max('message__timestamp')
+            ).annotate(
+              nresp=Count('message__response_to_check', distinct=True),
+              nmsg=Count('message', distinct=True),
+              duration=F('maxtime') - F('timestamp')
+            )
+
+def chats_since_values(self, queryset):
+    return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open')
+
+class ChatStatsView(NamedViewBase):
+    _namedViews = {
+        'UsageSince': {
+            'filter': filter_chats_since,
+            'values': chats_since_values
+        }
+    }
+    _defaultView = 'UsageSince'
 
 
 class ThreadErrorsView(generics.ListAPIView):
