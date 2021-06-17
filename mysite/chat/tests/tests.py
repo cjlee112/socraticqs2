@@ -1030,7 +1030,7 @@ class MessagesViewTests(CustomTestCase):
             reverse('chat:preview_courselet',
                     kwargs={'enroll_key': enroll.enrollCode}),
         )
-        assert b'This Courselet is not published yet or you have no permisions to open it.' in response.content
+        self.assertEqual(response.status_code, 403)
 
 
 class HistoryAPIViewTests(CustomTestCase):

@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
 
 from mysite.mixins import LoginRequiredMixin
 from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS
@@ -454,6 +455,8 @@ class CourseletPreviewView(ChatInitialView):
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
+        if self.check_course_not_published_and_user_is_not_instructor(request, enroll_code.courseUnit):
+            raise PermissionDenied('This Courselet is not published yet or you have no permisions to open it.')
         ############### redirect to brella chat
         chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
         request.session['chat_id'] = chat.id
