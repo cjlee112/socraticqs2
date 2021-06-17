@@ -369,14 +369,20 @@ def set_on_sidebar(sidebar, thread_id, msgID=None, status='is-active'):
 
 
 class SidebarToggler(object):
-    def __init__(self, sidebarID='SidebarSection', togglerID='SidebarToggler', mainChatID='MainChatSection', inputbarID='ChatInputSection'):
+    def __init__(self, sidebarID='SidebarSection', togglerID='SidebarToggler', mainChatID='MainChatSection', inputbarID='ChatInputSection', resourcesID='SidebarResources'):
         self.sidebarID = sidebarID
         self.togglerID = togglerID
         self.mainChatID = mainChatID
         self.inputbarID = inputbarID
+        self.resourcesID = resourcesID
         self.visible = False
         document[togglerID].bind('click', self.toggle)
-    def toggle(self, ev):
+    def has_resources(self):
+        try:
+            return len(document[self.resourcesID].children) > 0
+        except KeyError:
+            return False
+    def toggle(self, ev=None):
         sidebar = document[self.sidebarID]
         toggler = document[self.togglerID]
         mainChat = document[self.mainChatID]

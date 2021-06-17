@@ -18,7 +18,7 @@ def index_faqs(l):
         FAQs[d['faq_id']] = d
 
 
-async def main(insertBeforeID=None):
+async def main(insertBeforeID=None, endmsg=''):
     'basic ORCT chat test, starting with a simple updates test'
     chatInfo = await get_chat_info()
     sidebar = show_courselet_info(chatInfo)
@@ -27,6 +27,12 @@ async def main(insertBeforeID=None):
     finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
+    if toggler.has_resources():
+        endmsg = '  Please look over the follow-up resources in the side panel.'
+    chat.post_messages((("ChatMessageTemplate", f'Good job! You have completed everything in this courselet.{endmsg}  You can always come back to review your history or start over to answer the questions again.  You can click the course link at top-left to return to the course overview.'),),
+                       insertBeforeID=insertBeforeID)
+    if not toggler.visible: # always show sidebar after courselet completed
+        toggler.toggle()
 
 
 async def get_chat_info(apiURL='/chat/brella/chat'):
