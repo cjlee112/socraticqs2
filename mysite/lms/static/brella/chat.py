@@ -342,6 +342,7 @@ def get_cookie(attr):
 # sidebar thread class options
 # "   unlocked   done  "
 # "   unlocked    is-active "
+# "   unlocked   available  "
 # "    "
 
 class SidebarThread(object):
@@ -353,7 +354,9 @@ class SidebarThread(object):
         self.chatMsgID = None
         self.isResource = isResource
         self.sidebar = sidebar
+        self.status = None
     def set_status(self, status, chatMsgID=None):
+        self.status = status
         self.li.attrs['class'] = f"   unlocked   {status}  "
         if chatMsgID:
             self.chatMsgID = chatMsgID
@@ -391,15 +394,20 @@ class SidebarToggler(object):
         self.resourceNext = thread_id
         if self.resourceDefer:
             alert('This lesson will be shown after you complete the current lesson.')
-    def enable_resources(self):
-        present = False
+    def enable_all(self, makeVisible=False):
+        for st in self.threads.values():
+            if not st.status: # still locked, so unlock
+                st.set_status('available')
+        if makeVisible and not self.visible: # show sidebar so resources are visible to click
+            self.toggle()
+    def has_resources(self):
         for st in self.threads.values():
             if st.isResource:
-                st.set_status('available')
-                present = True
-        if not self.visible: # show sidebar so resources are visible to click
-            self.toggle()
-        return present
+                return True
+    def is_unfinished(self):
+        for st in self.threads.values():
+            if not st.chatMsgID:
+                return True
     def toggle(self, ev=None):
         sidebar = document[self.sidebarID]
         toggler = document[self.togglerID]
