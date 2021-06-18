@@ -345,11 +345,13 @@ def get_cookie(attr):
 # "    "
 
 class SidebarThread(object):
-    def __init__(self, title, thread_id, templateID='SidebarThreadTemplate', containerID='SidebarThreads'):
+    def __init__(self, title, thread_id, templateID='SidebarThreadTemplate', containerID='SidebarThreads',
+                 isResource=False):
         self.thread_id = thread_id
         self.li = copy_to_container(templateID, containerID, title)[0]
         self.li.bind('click', self.handler)
         self.chatMsgID = None
+        self.isResource = isResource
     def set_status(self, status, chatMsgID=None):
         self.li.attrs['class'] = f"   unlocked   {status}  "
         if chatMsgID:
@@ -363,9 +365,6 @@ class SidebarThread(object):
             e.scrollIntoView({'block': "center"})
 
 
-def set_on_sidebar(sidebar, thread_id, msgID=None, status='is-active'):
-    if sidebar and thread_id in sidebar:
-        sidebar[thread_id].set_status(status, msgID)
 
 
 class SidebarToggler(object):
@@ -376,7 +375,13 @@ class SidebarToggler(object):
         self.inputbarID = inputbarID
         self.resourcesID = resourcesID
         self.visible = False
+        self.threads = {}
         document[togglerID].bind('click', self.toggle)
+    def add_thread(self, title, thread_id, *args, **kwargs):
+        self.threads[thread_id] = SidebarThread(title, thread_id, *args, **kwargs)
+    def set_on_sidebar(self, thread_id, msgID=None, status='is-active'):
+        if thread_id in self.threads:
+            self.threads[thread_id].set_status(status, msgID)
     def has_resources(self):
         try:
             return len(document[self.resourcesID].children) > 0

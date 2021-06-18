@@ -22,17 +22,19 @@ async def main(insertBeforeID=None, endmsg=''):
     'basic ORCT chat test, starting with a simple updates test'
     chatInfo = await get_chat_info()
     sidebar = show_courselet_info(chatInfo)
-    toggler = chat.SidebarToggler()
     chat_id = chatInfo['chat_id']
     finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
-    if toggler.has_resources():
+    if sidebar.has_resources():
         endmsg = '  Please look over the follow-up resources in the side panel.'
+        for st in sidebar.threads.values():
+            if st.isResource:
+                st.set_status('available')
     chat.post_messages((("ChatMessageTemplate", f'Good job! You have completed everything in this courselet.{endmsg}  You can always come back to review your history or start over to answer the questions again.  You can click the course link at top-left to return to the course overview.'),),
                        insertBeforeID=insertBeforeID)
-    if not toggler.visible: # always show sidebar after courselet completed
-        toggler.toggle()
+    if not sidebar.visible: # always show sidebar after courselet completed
+        sidebar.toggle()
 
 
 async def get_chat_info(apiURL='/chat/brella/chat'):
@@ -57,12 +59,11 @@ def show_courselet_info(info, defaultImage='https://www.courselets.org/static/im
     prereqs = info['courselet'].get('prereqs', None)
     if prereqs:
         document['CourseletPrereqs'].html = prereqs
-    sidebar = {}
+    sidebar = chat.SidebarToggler()
     for t in info.get('threads', ()):
-        sidebar[t['thread_id']] = chat.SidebarThread(t['title'], t['thread_id'])
+        sidebar.add_thread(t['title'], t['thread_id'])
     for t in info.get('resources', ()):
-        sidebar[t['thread_id']] = chat.SidebarThread(t['title'], t['thread_id'], 'SidebarResTemplate',
-                                                     'SidebarResources')
+        sidebar.add_thread(t['title'], t['thread_id'], 'SidebarResTemplate', 'SidebarResources', isResource=True)
     return sidebar
 
 async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
@@ -140,7 +141,7 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
                 oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
         else:
             await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
-        chat.set_on_sidebar(sidebar, t['thread_id'], status='done')
+        sidebar.set_on_sidebar(t['thread_id'], status='done')
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
@@ -180,7 +181,7 @@ async def show_explanation(e, postData, history, sidebar, insertBeforeID=None):
     postData['ul_id'] = e['ul_id']
     msgs = chat.post_messages((("ChatBreakpointTemplate", e['title']),),
                               chatSelector='span', insertBeforeID=insertBeforeID)
-    chat.set_on_sidebar(sidebar, e['thread_id'], msgs[0].id)
+    sidebar.set_on_sidebar(e['thread_id'], msgs[0].id)
     await chat.continue_button(chat.get_orct_instructor_chats(e),
                                path='done', postData=postData, history=history,
                                insertBeforeID=insertBeforeID)
@@ -190,7 +191,7 @@ async def pose_orct(orct, postData, history, sidebar, insertBeforeID=None):
     'ask question, student responds, gives confidence level'
     msgs = chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
                               chatSelector='span', insertBeforeID=insertBeforeID)
-    chat.set_on_sidebar(sidebar, orct['thread_id'], msgs[0].id)
+    sidebar.set_on_sidebar(orct['thread_id'], msgs[0].id)
     query = chat.get_orct_query_ui(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
     postData['response_id'] = await query.get_server_response('response_id')
