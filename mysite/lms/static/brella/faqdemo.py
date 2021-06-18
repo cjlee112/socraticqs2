@@ -26,15 +26,24 @@ async def main(insertBeforeID=None, endmsg=''):
     finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
-    if sidebar.has_resources():
+    hasResources = sidebar.enable_resources()
+    if hasResources:
         endmsg = '  Please look over the follow-up resources in the side panel.'
-        for st in sidebar.threads.values():
-            if st.isResource:
-                st.set_status('available')
     chat.post_messages((("ChatMessageTemplate", f'Good job! You have completed everything in this courselet.{endmsg}  You can always come back to review your history or start over to answer the questions again.  You can click the course link at top-left to return to the course overview.'),),
                        insertBeforeID=insertBeforeID)
-    if not sidebar.visible: # always show sidebar after courselet completed
-        sidebar.toggle()
+    if hasResources:
+        await show_resources(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
+
+
+async def show_resources(chat_id, is_preview, sidebar, insertBeforeID=None):
+    'allow the student to view additional resources after finishing the courselet'
+    while True:
+        thread_id = await sidebar.resource_clicked()
+        t, postData, updateThreads = await get_thread(chat_id, thread_id=thread_id)
+        await do_thread(t, postData, {}, is_preview, sidebar, insertBeforeID)
+        if not sidebar.resourceNext:
+            chat.post_messages((("ChatMessageTemplate", f'You completed this resource.  You can view other lessons by clicking in the sidebar at left, or click the course link at top-left to return to the course overview.'),),
+                       insertBeforeID=insertBeforeID)
 
 
 async def get_chat_info(apiURL='/chat/brella/chat'):
@@ -66,10 +75,13 @@ def show_courselet_info(info, defaultImage='https://www.courselets.org/static/im
         sidebar.add_thread(t['title'], t['thread_id'], 'SidebarResTemplate', 'SidebarResources', isResource=True)
     return sidebar
 
-async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads'):
+async def get_thread(chat_id, completedThread=None, oldThreads=None, threadURL='/chat/brella/threads',
+                     thread_id=None):
     params = dict(chat_id=chat_id)
     if completedThread is not None:
         params['completedThread'] = completedThread
+    elif thread_id is not None:
+        params['thread_id'] = thread_id
     headers = {'Content-Type': 'application/json'}
     req = await aio.get(threadURL, headers=headers, data=params)
     if req.status == 204:
@@ -132,22 +144,26 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
     finalUpdates = {}
     t, postData, updateThreads = await get_thread(chat_id)
     while t:
-        if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
-            postData['is_preview'] = is_preview
-        if t['kind'] == 'orct':
-            wantsHelp, msgs = await do_orct_cycle(t, postData, t['history'], sidebar, insertBeforeID)
-            if wantsHelp:
-                t['history']['insertBeforeID'] = msgs[0].id
-                oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
-        else:
-            await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
-        sidebar.set_on_sidebar(t['thread_id'], status='done')
+        await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID)
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
             for thread_id, updates in showLater.items(): # save for display at end of courselet
                 finalUpdates.setdefault(thread_id, {}).update(updates)
     return finalUpdates, oldThreads
+
+
+async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, insertBeforeID=None):
+    if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
+        postData['is_preview'] = is_preview
+    if t['kind'] == 'orct':
+        wantsHelp, msgs = await do_orct_cycle(t, postData, t['history'], sidebar, insertBeforeID)
+        if wantsHelp:
+            t['history']['insertBeforeID'] = msgs[0].id
+            oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
+    else:
+        await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
+    sidebar.set_on_sidebar(t['thread_id'], status='done')
 
 
 async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=None):

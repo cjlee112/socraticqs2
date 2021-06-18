@@ -1,4 +1,4 @@
-from browser import document, aio, ajax, window
+from browser import document, aio, ajax, window, alert
 from javascript import JSON
 
 def copy_to_container(templateID, containerID, msgText=None, selector=None, handler=None, 
@@ -345,13 +345,14 @@ def get_cookie(attr):
 # "    "
 
 class SidebarThread(object):
-    def __init__(self, title, thread_id, templateID='SidebarThreadTemplate', containerID='SidebarThreads',
+    def __init__(self, sidebar, title, thread_id, templateID='SidebarThreadTemplate', containerID='SidebarThreads',
                  isResource=False):
         self.thread_id = thread_id
         self.li = copy_to_container(templateID, containerID, title)[0]
         self.li.bind('click', self.handler)
         self.chatMsgID = None
         self.isResource = isResource
+        self.sidebar = sidebar
     def set_status(self, status, chatMsgID=None):
         self.li.attrs['class'] = f"   unlocked   {status}  "
         if chatMsgID:
@@ -363,6 +364,8 @@ class SidebarThread(object):
         if self.chatMsgID:
             e = document[self.chatMsgID]
             e.scrollIntoView({'block': "center"})
+        else:
+            self.sidebar.set_next_resource(self.thread_id)
 
 
 
@@ -376,17 +379,27 @@ class SidebarToggler(object):
         self.resourcesID = resourcesID
         self.visible = False
         self.threads = {}
+        self.resourceNext = None
+        self.resourceDefer = True
         document[togglerID].bind('click', self.toggle)
     def add_thread(self, title, thread_id, *args, **kwargs):
-        self.threads[thread_id] = SidebarThread(title, thread_id, *args, **kwargs)
+        self.threads[thread_id] = SidebarThread(self, title, thread_id, *args, **kwargs)
     def set_on_sidebar(self, thread_id, msgID=None, status='is-active'):
         if thread_id in self.threads:
             self.threads[thread_id].set_status(status, msgID)
-    def has_resources(self):
-        try:
-            return len(document[self.resourcesID].children) > 0
-        except KeyError:
-            return False
+    def set_next_resource(self, thread_id):
+        self.resourceNext = thread_id
+        if self.resourceDefer:
+            alert('This lesson will be shown after you complete the current lesson.')
+    def enable_resources(self):
+        present = False
+        for st in self.threads.values():
+            if st.isResource:
+                st.set_status('available')
+                present = True
+        if not self.visible: # show sidebar so resources are visible to click
+            self.toggle()
+        return present
     def toggle(self, ev=None):
         sidebar = document[self.sidebarID]
         toggler = document[self.togglerID]
@@ -404,6 +417,14 @@ class SidebarToggler(object):
             sidebar.style.left = '0px'
             toggler.attrs['class'] = 'sidebar-toggle active'
             inputbar.attrs['style'] = "display: block; bottom: 0px; padding-left: 320px;"
+    async def resource_clicked(self):
+        self.resourceDefer = False
+        while not self.resourceNext:
+            await aio.sleep(1)
+        thread_id = self.resourceNext
+        self.resourceNext = None
+        self.resourceDefer = True
+        return thread_id
 
 
 ################################################################
