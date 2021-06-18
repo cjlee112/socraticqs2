@@ -784,13 +784,17 @@ def thread_api2(request):
             if chat.user != request.user and not (chat.is_open and chat.is_preview and chat.is_trial):
                 return Response('action is not allowed', status=403)
             try:
-                try:
-                    ulID = int(request.query_params.get('completedThread', ''))
-                    nextUL = UnitLesson.objects.get(id=ulID).get_next_lesson()
-                except ValueError:
+                if 'completedThread' in request.query_params: # get next lesson
+                    ulID = int(request.query_params['completedThread'])
+                    nextUL = UnitLesson.objects.get(id=ulID,
+                                 unit=chat.enroll_code.courseUnit.unit).get_next_lesson()
+                elif 'thread_id' in request.query_params: # get specified lesson
+                    ulID = int(request.query_params['thread_id'])
+                    nextUL = UnitLesson.objects.get(id=ulID, unit=chat.enroll_code.courseUnit.unit)
+                else: # get first lesson
                     nextUL = UnitLesson.objects.get(unit=chat.enroll_code.courseUnit.unit,
                                                     order=0, kind=UnitLesson.COMPONENT)
-            except UnitLesson.DoesNotExist:
+            except (ValueError, UnitLesson.DoesNotExist):
                 return Response(status=204) # NO CONTENT status indicates there is no next UnitLesson
             chatThread = ChatThread(chat, nextUL)
             data = ChatThreadSerializer2(chatThread).data
