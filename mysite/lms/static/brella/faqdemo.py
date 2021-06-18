@@ -23,15 +23,20 @@ async def main(insertBeforeID=None, endmsg=''):
     chatInfo = await get_chat_info()
     sidebar = show_courselet_info(chatInfo)
     chat_id = chatInfo['chat_id']
+    if chatInfo['is_preview']:
+        sidebar.enable_all()
+        chat.post_messages((("ChatMessageTemplate", 'In this Preview mode you can go directly to any lesson by clicking its title in the sidebar. (Click the menu button at bottom-left to open the sidebar).'),),
+                           insertBeforeID=insertBeforeID)
     finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
         await offer_updates(finalUpdates, oldThreads, chat_id, insertBeforeID)
-    hasResources = sidebar.enable_resources()
-    if hasResources:
-        endmsg = '  Please look over the follow-up resources in the side panel.'
-    chat.post_messages((("ChatMessageTemplate", f'Good job! You have completed everything in this courselet.{endmsg}  You can always come back to review your history or start over to answer the questions again.  You can click the course link at top-left to return to the course overview.'),),
-                       insertBeforeID=insertBeforeID)
-    if hasResources:
+    sidebar.enable_all(makeVisible=True)
+    if finalUpdates is not None: # actually reached the end of the courselet
+        if sidebar.has_resources():
+            endmsg = '  Please look over the follow-up resources in the side panel.'
+        chat.post_messages((("ChatMessageTemplate", f'Good job! You have completed everything in this courselet.{endmsg}  You can always come back to review your history or start over to answer the questions again.  You can click the course link at top-left to return to the course overview.'),),
+                           insertBeforeID=insertBeforeID)
+    if sidebar.is_unfinished():
         await show_resources(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
 
 
@@ -145,6 +150,8 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
     t, postData, updateThreads = await get_thread(chat_id)
     while t:
         await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID)
+        if is_preview and sidebar.resourceNext: # instructor clicked in sidebar, so exit lesson sequence
+            return None, None # no updates in preview mode anyway!
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
