@@ -40,6 +40,6 @@ def send_validation(strategy, backend, code, *args, **kwargs):
         rendered_subj,
         rendered_text,
         settings.EMAIL_FROM,
-        [code.email],
+        ['info@courselets.org'], # send to our own account so we can screen out spam
         fail_silently=False
     )
