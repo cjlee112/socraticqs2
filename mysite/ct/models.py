@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.sites.models import Site
+from django.contrib.postgres.fields import JSONField
 
 from core.tasks import faq_notify_instructors, faq_notify_students
 from core.common import onboarding
@@ -319,7 +320,7 @@ class Lesson(models.Model, SubKindMixin):
     text = models.TextField(null=True, blank=True)
     attachment = models.FileField(null=True, blank=True, upload_to='questions')
 
-    data = models.TextField(null=True, blank=True)  # JSON DATA
+    data = JSONField(null=True, blank=True)  # JSON DATA
     url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
