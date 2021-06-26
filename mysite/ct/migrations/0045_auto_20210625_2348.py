@@ -4,6 +4,15 @@ import django.contrib.postgres.fields.jsonb
 from django.db import migrations
 
 
+def ensure_data_is_null(apps, schema_editor):
+    # We can't import the Lesson model directly as it may be a newer
+    # version than this migration expects. We use the historical version.
+    Lesson = apps.get_model('ct', 'Lesson')
+    Lesson.objects.filter(data__isnull=False).update(data=None) # non-null values may fail to parse as JSON!
+
+def do_nothing(apps, schema_editor): # for reverse migration, leave data as-is
+    pass
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -11,6 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(ensure_data_is_null, do_nothing),
         migrations.AlterField(
             model_name='lesson',
             name='data',
