@@ -244,7 +244,11 @@ class ORCTSerializer2(serializers.BaseSerializer):
             break
         if ul.lesson.sub_kind == SubKindMixin.CANVAS:
             data['question']['canvas'] = dict(image=ul.lesson.attachment.url)
-            data['answer']['canvas'] = dict(image=ul.lesson.attachment.url, canvasURL=a.lesson.attachment.url)
+            if a.lesson.attachment:
+                answerURL = a.lesson.attachment.url
+            else:
+                answerURL = None
+            data['answer']['canvas'] = dict(image=ul.lesson.attachment.url, canvasURL=answerURL)
         errors = []
         for em in ul.get_errors():
             errors.append(self._emSerializer(em).data)
