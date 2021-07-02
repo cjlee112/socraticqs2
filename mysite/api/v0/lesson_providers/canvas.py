@@ -32,6 +32,15 @@ class CanvasProvider(SubKindBaseProvider):
         return {
             "attachment": _attachment
         }
+    def extra_answer(self):
+        _ext = "jpg"
+        _attachment = ContentFile(
+            base64.b64decode(self._data["answerImg"]),
+            name=f"canvas_question_{secrets.token_hex(15)}." + _ext)
+
+        return {
+            "attachment": _attachment
+        }
 
 
 class CanvasProviderBuilder:
