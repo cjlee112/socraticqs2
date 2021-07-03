@@ -165,9 +165,10 @@ class ChatCanvas(ChatInput):
         ChatInput.__init__(self, chats, **kwargs)
         chatBubble = self.msgElements[0].select('.chat-bubble')[0]
         self.imageURL = question['canvas']['image']
-        attrs = {'style': f"background-image: url({self.imageURL})"}
-        self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble, attrs=attrs)[0]
+        self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble)[0]
         window.start_drawsvg(self.canvas.id)
+        e = self.canvas.select('.canvas')[0]
+        e.attrs['style'] = f"position: relative;top: 30px;background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;"
         self.svgID = svgID
     def load_history(self, already):
         already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{already["canvasSVG"]}</div>'
