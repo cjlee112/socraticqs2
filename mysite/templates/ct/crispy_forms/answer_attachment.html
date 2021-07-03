@@ -5,8 +5,7 @@
     <label for="id_attachment">Answer attachment</label>
     {% if unitLesson.parent.lesson.attachment %}
         <div class="draw-svg-preview form-group">
-            <div id="draw-svg" class="draw-svg-container"
-                 style="background-image: url({{ unitLesson.parent.lesson.attachment.url }})">
+            <div id="draw-svg" class="draw-svg-container">
                 {% with attachment=unitLesson.lesson.attachment %}
                 {% if attachment and attachment|is_svg %}
                     {{ attachment.file.read|decode|safe }}
@@ -24,6 +23,7 @@
                     document.drawToElement([document.getElementById('draw-svg')], function (data) {
                         $('#id_attachment').val('data:image/svg+xml;base64,' + btoa(data));
                     });
+                    $('.canvas').css({"position": "relative", "top": "30px", "background-image": "url({{ unitLesson.parent.lesson.attachment.url }})", "background-size": "contain", "background-repeat": "no-repeat"});
                 }
             </script>
         </div>
