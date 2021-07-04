@@ -171,14 +171,16 @@ class ChatCanvas(ChatInput):
         e.attrs['style'] = f"position: relative;top: 30px;background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;"
         self.svgID = svgID
     def load_history(self, already):
-        already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{already["canvasSVG"]}</div>'
+        drawSVGdiv = get_disabled_draw_svg_div(self.imageURL)
+        already['message'] = f'<p>{already["message"]}</p>\n{drawSVGdiv}{already["canvasSVG"]}</div>'
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         return already
     def handler(self, ev):
         ev.preventDefault() # block default form GET action
         outcome = self.temporary.select("textarea")[0].value
         svgData = document[self.svgID].value
-        self.message = f'<p>{outcome}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL})">{svgData}</div>'
+        drawSVGdiv = get_disabled_draw_svg_div(self.imageURL)
+        self.message = f'<p>{outcome}</p>\n{drawSVGdiv}{svgData}</div>'
         self.postData['message'] = outcome
         self.postData['canvasSVG'] = svgData
         self.send_post(self.postData)
@@ -266,14 +268,18 @@ def get_orct_query_ui(question, **kwargs):
     else:
         return ChatInput(get_orct_instructor_chats(question), **kwargs)
 
+def get_disabled_draw_svg_div(imageURL):
+    return f'<div class="draw-svg-container" disabled="1" style="background-image: url({imageURL});background-size: contain;background-repeat: no-repeat;background-position: top;">'
+
 
 def get_orct_instructor_chats(data, msgTemplate="ChatMessageTemplate"):
     'handle minor formatting issues like image embedding'
     if 'canvas' in data:
+        drawSVGdiv = get_disabled_draw_svg_div(data["canvas"]["image"])
         if 'canvasURL' in data['canvas']:
-            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas"><img src="{data["canvas"]["canvasURL"]}"></div></div></div>'),)
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n{drawSVGdiv}<div class="canvas-wrapper"><div class="canvas"><img src="{data["canvas"]["canvasURL"]}"></div></div></div>'),)
         else:
-            return ((msgTemplate, f'<p>{data["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({data["canvas"]["image"]})"><div class="canvas-wrapper"><div class="canvas">{data["canvas"]["canvasSVG"]}</div></div></div>'),)
+            return ((msgTemplate, f'<p>{data["message"]}</p>\n{drawSVGdiv}<div class="canvas-wrapper"><div class="canvas">{data["canvas"]["canvasSVG"]}</div></div></div>'),)
     elif 'image' in data:
         return ((msgTemplate, f'<p>{data["message"]}</p>\n<img src="{data["image"]}">'),)
     else:
