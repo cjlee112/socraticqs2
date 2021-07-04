@@ -49,6 +49,7 @@ ul.messages > li {
     display: inline-block;
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: top;
 }
 
 .draw-svg-container > img {

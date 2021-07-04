@@ -19,7 +19,7 @@
 
     {% if lesson.unitlesson_set.first.parent.sub_kind == 'canvas' and lesson.kind == 'answer' and lesson.attachment %}
       <p><b>Attachment</b></p>
-      <div class="draw-svg-container" style="background-image: url({{ lesson.unitlesson_set.first.parent.lesson.attachment.url }})" disabled="1">
+      <div class="draw-svg-container" style="background-image: url({{ lesson.unitlesson_set.first.parent.lesson.attachment.url }});background-size: contain;background-repeat: no-repeat;background-position: top;" disabled="1">
           <img id="image-{{ id }}" src="{% media_prefix value %}">
       </div>
     {% else %}

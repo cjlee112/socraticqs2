@@ -1,5 +1,5 @@
 <div id="draw-svg--{{ lesson.id }}" class="draw-svg-container" disabled="{{ disabled|yesno:'1,0' }}"
-     style="background-image: url({{ background_image.url }})">
+     style="background-image: url({{ background_image.url }});background-size: contain;background-repeat: no-repeat;background-position: top;">
     {% if svg_image %}
         <img src="{{ svg_image.url }}">
     {% else %}
