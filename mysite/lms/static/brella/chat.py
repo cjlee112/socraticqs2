@@ -171,7 +171,8 @@ class ChatCanvas(ChatInput):
         e.attrs['style'] = f"position: relative;top: 30px;background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;"
         self.svgID = svgID
     def load_history(self, already):
-        already['message'] = f'<p>{already["message"]}</p>\n<div class="draw-svg-container" disabled="1" style="background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;background-position: top;">{already["canvasSVG"]}</div>'
+        drawSVGdiv = get_disabled_draw_svg_div(self.imageURL)
+        already['message'] = f'<p>{already["message"]}</p>\n{drawSVGdiv}{already["canvasSVG"]}</div>'
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         return already
     def handler(self, ev):
