@@ -44,7 +44,7 @@
         {% if object.lesson.sub_kind == 'canvas' or object.parent.sub_kind == 'canvas' %}
           {% if object.lesson.attachment %}
             <div class="draw-svg-container" disabled="disabled"
-              style="background-image: url({{ object.lesson.attachment.url }});background-size: contain;background-repeat: no-repeat;background-position: top;">
+              style="background-image: url({{ object.lesson.attachment.url }});background-size: contain;background-repeat: no-repeat;background-position: top left;">
               <img src="{{ object.attachment.url }}">
             </div>
           {% endif %}
