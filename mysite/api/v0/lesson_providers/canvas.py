@@ -1,5 +1,6 @@
 import base64
 import secrets
+import hashlib
 
 from django.core.files.base import ContentFile
 
@@ -24,7 +25,7 @@ class CanvasProvider(SubKindBaseProvider):
         API request data must contain `canvas` field with
         base64 encoded image.
         """
-        _ext = "jpg"
+        _ext = self.get_image_format('canvas')
         _attachment = ContentFile(
             base64.b64decode(self._data["canvas"]),
             name=f"canvas_question_{secrets.token_hex(15)}." + _ext)
@@ -33,17 +34,23 @@ class CanvasProvider(SubKindBaseProvider):
             "attachment": _attachment
         }
     def extra_answer(self):
-        _ext = "jpg"
         if 'answerImg' in self._data:
-            _attachment = ContentFile(
-                base64.b64decode(self._data["answerImg"]),
-                name=f"canvas_question_{secrets.token_hex(15)}." + _ext)
-
+            _ext = self.get_image_format('answerImg')
+            imageData = base64.b64decode(self._data["answerImg"])
+            name = f"canvas_answer_{secrets.token_hex(15)}.{_ext}"
+            _attachment = ContentFile(imageData, name=name)
+            self._response['answerImg'] = dict(sha256=hashlib.sha256(imageData).hexdigest(),
+                                               fmt=self._data.get('answerImgfmt', None), name=name)
             return {
                 "attachment": _attachment
             }
         else:
             return {}
+    def get_image_format(self, kwarg):
+        try:
+            return self._data[kwarg + 'fmt']
+        except KeyError:
+            return 'jpg'
 
 
 class CanvasProviderBuilder:

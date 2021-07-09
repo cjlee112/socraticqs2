@@ -185,11 +185,14 @@ class ThreadBuilder:
     def build(self, data):
         creator = self.switch.get(data.get("kind", "intro"))(data, self._unit)
         creator.create()
-
+        self.creator = creator
         return creator._thread
 
     def update(self, thread, data):
         creator = self.switch.get(data.get("kind", "intro"))(data, self._unit)
         creator.update(thread)
-
+        self.creator = creator
         return creator._thread
+    def get_response_data(self):
+        return getattr(self.creator._lesson_provider, '_response', {})
+

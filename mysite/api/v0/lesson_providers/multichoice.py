@@ -11,6 +11,7 @@ class SubKindBaseProvider:
     def __init__(self, data, unit):
         self._data = data
         self._unit = unit
+        self._response = {}
 
     def _convert_data(self):
         """

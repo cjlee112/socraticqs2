@@ -332,18 +332,19 @@ class CourseletThreadsViewSet(viewsets.ModelViewSet):
         Creates list of Threads for the given Courselet.
         """
         unit = self.get_unit(courselet_pk)
-        threads = []
+        results = []
 
         for thread_data in request.data:
             builder = ThreadBuilder(unit)
-            threads.append(builder.build(thread_data))
-
-        serializer = self.serializer_class(threads, many=True)
+            ul = builder.build(thread_data)
+            result = self.serializer_class(ul).data
+            result.update(builder.get_response_data())
+            results.append(result)
 
         return RestResponse(
             {
                 "status": "created",
-                "result": serializer.data
+                "result": results
             },
             status=status.HTTP_201_CREATED)
 
