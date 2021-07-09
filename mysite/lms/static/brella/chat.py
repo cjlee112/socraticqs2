@@ -168,7 +168,7 @@ class ChatCanvas(ChatInput):
         self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble)[0]
         window.start_drawsvg(self.canvas.id)
         e = self.canvas.select('.canvas')[0]
-        e.attrs['style'] = f"position: relative;top: 30px;background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;"
+        e.attrs['style'] = f"position: relative;top: 40px;background-image: url({self.imageURL});background-size: contain;background-repeat: no-repeat;background-position: top left;"
         self.svgID = svgID
     def load_history(self, already):
         drawSVGdiv = get_disabled_draw_svg_div(self.imageURL)
@@ -269,7 +269,7 @@ def get_orct_query_ui(question, **kwargs):
         return ChatInput(get_orct_instructor_chats(question), **kwargs)
 
 def get_disabled_draw_svg_div(imageURL):
-    return f'<div class="draw-svg-container" disabled="1" style="background-image: url({imageURL});background-size: contain;background-repeat: no-repeat;background-position: top;">'
+    return f'<div class="draw-svg-container" disabled="1" style="background-image: url({imageURL});background-size: contain;background-repeat: no-repeat;background-position: top left;">'
 
 
 def get_orct_instructor_chats(data, msgTemplate="ChatMessageTemplate"):
