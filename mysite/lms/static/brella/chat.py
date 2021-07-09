@@ -69,6 +69,8 @@ class ChatQuery(object):
             insertBeforeID=None, postData={}, postURL='/chat/brella/messages', **kwargs):
         self.insertBeforeID = insertBeforeID
         self.msgElements = post_messages(chats, insertBeforeID=insertBeforeID)
+        if self.msgElements:
+            self.scrollToElement = self.msgElements[-1] # ensure last chat message is visible
         self.temporary = copy_to_container(responseTemplate, responseContainer, selector=selector,
                                             handler=self.handler, **kwargs)[0]
         self.outcome = self.message = None
@@ -113,6 +115,9 @@ class ChatQuery(object):
     async def sleep_until_data(self, attr='outcome'):
         while getattr(self, attr, None) is None:
             await aio.sleep(1)
+            if getattr(self, 'scrollToElement', False): # make sure message actually visible!
+                self.scrollToElement.scrollIntoView()
+                self.scrollToElement = False
         return getattr(self, attr)
     def close(self, message=''):
         'display output message and clean up chat input area'
