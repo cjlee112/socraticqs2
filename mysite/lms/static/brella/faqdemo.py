@@ -25,7 +25,7 @@ async def main(insertBeforeID=None, endmsg=''):
     chat_id = chatInfo['chat_id']
     if chatInfo['is_preview']:
         sidebar.enable_all()
-        chat.post_messages((("ChatMessageTemplate", 'In this Preview mode you can go directly to any lesson by clicking its title in the sidebar. (Click the menu button at bottom-left to open the sidebar).'),),
+        chat.post_messages((("ChatMessageTemplate", 'In this Preview mode you can go to any lesson by clicking its title in the sidebar. (Click the menu button at bottom-left to open the sidebar).'),),
                            insertBeforeID=insertBeforeID)
     finalUpdates, oldThreads = await do_courselet(chat_id, chatInfo['is_preview'], sidebar, insertBeforeID)
     if finalUpdates:
