@@ -3,6 +3,7 @@ Various utilities.
 """
 import time
 import functools
+import random
 
 import logging
 
@@ -265,3 +266,9 @@ def get_redirect_url(user):
                     kwargs={'course_id': role.course.id}
                 )
     return redirect_url
+
+
+def make_random_password(length=10, 
+                         chars='QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890'):
+    return ''.join([random.choice(chars) for i in range(length)])
+

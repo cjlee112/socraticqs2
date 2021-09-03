@@ -3,9 +3,9 @@ import os
 import time
 from uuid import uuid4
 
-from django.db import models
-from django.db.utils import IntegrityError
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
+from django.contrib.auth import logout, login
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.mail import send_mail
@@ -23,14 +23,22 @@ from ct.models import Course
 
 
 STATUS_CHOICES = (
-    ('pendind', 'pending'),
+    ('pending', 'pending'),
     ('joined', 'joined'),
 )
 
 TYPE_CHOICES = (
     ('student', 'student'),
-    ('tester', 'tester')
+    ('tester', 'tester'),
+    ('professor', 'professor'),
+    ('blindspotter', 'blindspotter'),
+    ('teacher', 'teacher'),
+    ('parent', 'parent'),
+    ('blank', 'blank')
 )
+
+class InviteReplayError(ValueError):
+    pass
 
 
 def clean_email_name(email):
@@ -64,6 +72,7 @@ class Invite(models.Model):
     type = models.CharField('invite type', max_length=50, choices=TYPE_CHOICES, default='tester')
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     enroll_unit_code = models.ForeignKey(EnrollUnitCode, null=True, on_delete=models.CASCADE)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     added = models.DateTimeField('added datetime', auto_now_add=True)
 
@@ -74,7 +83,8 @@ class Invite(models.Model):
         return User.objects.filter(email=email).first()
 
     @classmethod
-    def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code):
+    def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code,
+                   data=None):
         user = Invite.search_user_by_email(email)
         code = Invite(
             instructor=instructor,
@@ -84,7 +94,8 @@ class Invite(models.Model):
             status='pending',
             type=invite_type,
             course=course,
-            enroll_unit_code=enroll_unit_code
+            enroll_unit_code=enroll_unit_code,
+            data=data
         )
         if commit:
             code.save()
@@ -97,48 +108,96 @@ class Invite(models.Model):
         unique_together = ('instructor', 'email', 'type', 'course', 'enroll_unit_code')
 
     def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        user = Invite.search_user_by_email(self.email)
-        self.user = user
+             update_fields=None, user=None):
+        if not user and not self.user:
+            user = Invite.search_user_by_email(self.email)
+        if user and user != self.user:
+            self.user = user
         return super(Invite, self).save(force_insert, force_update, using, update_fields)
 
-    def send_mail(self, request, view):
-        try:
-            # TODO: use `send_email` utility function here (see `core`)
-            context = {
-                'invite': self,
-                'current_site': Site.objects.get_current(request)
-            }
-            subj_template = loader.get_template('ctms/email/invite_subject.txt')
-            rendered_subj = subj_template.render(context)
+    def save_status(self, status, user=None):
+        self.status = status
+        self.save(user=user)
 
-            text_template = loader.get_template('ctms/email/invite_text.txt')
-            rendered_text = text_template.render(context)
-            send_mail(
-                rendered_subj,
-                rendered_text,
-                settings.EMAIL_FROM,
-                [self.email],
-                fail_silently=False
-            )
-            create_intercom_event(
+    def render_template(self, request, messageType, part='text', **kwargs):
+        context = {
+            'invite': self,
+            'current_site': Site.objects.get_current(request)
+        }
+        context.update(kwargs)
+        text_template = loader.get_template(f'ctms/email/invite/{messageType}_{part}.txt')
+        return text_template.render(context)
+
+    def send_mail(self, request, messageType=None, **kwargs):
+        'send the specified invite email message type'
+        if not messageType:
+            messageType = self.type
+        rendered_subj = self.render_template(request, messageType, 'subject', **kwargs).strip()
+        rendered_text = self.render_template(request, messageType, 'text', **kwargs)
+        send_mail(rendered_subj, rendered_text, settings.EMAIL_FROM, [self.email], fail_silently=False)
+        create_intercom_event(
                 event_name='invitation-sent',
                 created_at=int(time.mktime(time.localtime())),
                 email=self.instructor.user.email,
                 metadata={'tester': self.email}
-            )
-            return {
+        )
+        return {
                 'success': True,
                 'message': 'Invitation successfully sent.',
                 'invite': {
                     'status': self.status,
                 }
-            }
-        except IntegrityError:
-            return {
-                'success': False,
-                'message': 'You already have sent invite to user with {} email'.format(request.POST['email'])
-            }
+        }
+
+    def get_existing_user(self):
+        'look for user with same email address'
+        if self.user:
+            return self.user
+        else:
+            return Invite.search_user_by_email(self.email)
+
+    def create_unique_user(self, password, first_name, last_name, is_active=False,
+                           minlength=4, maxtry=1000):
+        'find a unique username and create new django User'
+        username = self.get_invited_user_username()
+        if len(username) < minlength:
+            username = first_name + '_' + last_name
+        userbase = username
+        i = 0
+        while i < maxtry: # no infinite loops, please
+            try:
+                user = User.objects.create_user(username, self.email, password)
+                user.first_name = first_name
+                user.last_name = last_name
+                user.is_active = is_active
+                user.save()
+                self.save(user=user)
+                return user
+            except IntegrityError: # extend name to be unique
+                i += 1
+                username = userbase + str(i) # just append a number
+        raise ValueError(f'Exceeded Invite.create_unique_user() maxtry: {userbase}, {i}')
+
+    def finish_acceptance(self):
+        'finalize Invite, User, Role records as needed for user to start the invited work'
+        self.user.is_active = True
+        self.user.save()
+        self.save_status('joined')
+        # TODO: do we need to create Role for enrolling in course?
+
+    def login_accepted_invite(self, request):
+        'login accepted invite (based on Invite code, not password)'
+        if self.status != 'pending':
+            raise InviteReplayError('This invitation has already been used.  Please use the usual login page.')
+        if self.user == request.user: # already logged in, so just update Invite record
+            self.finish_acceptance()
+            return
+        elif request.user.is_authenticated: # session logged into another account??
+            # TODO: we should handle this by offering to merge the two accounts 
+            logout(request) # logout existing session prior to logging in invited user
+        self.user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, self.user)
+        self.finish_acceptance()
 
     def get_absolute_url(self):
         return reverse('ctms:tester_join_course', kwargs={'code': self.code})

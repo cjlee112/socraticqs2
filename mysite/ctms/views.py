@@ -44,7 +44,7 @@ from ctms.forms import (
 )
 from ct.models import Course, CourseUnit, Unit, UnitLesson, Lesson, Response, Role, Concept
 from ctms.forms import CourseForm, CreateCourseletForm, EditUnitForm, InviteForm, EditCourseletForm, UploadFileBPForm
-from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate
+from ctms.models import Invite, BestPractice1, BestPractice2, BestPractice, BestPracticeTemplate, InviteReplayError
 from mysite.mixins import NewLoginRequiredMixin
 from psa.forms import SignUpForm, EmailLoginForm
 from .utils import Memoize
@@ -1158,7 +1158,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         #     )
         #     return self.form_invalid(form)
         response = super(InvitesListView, self).form_valid(form)
-        self.object.send_mail(self.request, self)
+        self.object.send_mail(self.request)
         messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
         return response
 
@@ -1169,7 +1169,18 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         return response
 
 
+def accept_invite(request, code):
+    'onboard the user and redirect to target page'
+    invite = get_object_or_404(Invite, code=code)
+    try:
+        invite.login_accepted_invite(request)
+    except InviteReplayError:
+        pass # redirect will demand password if page requires login
+    return HttpResponseRedirect(invite.data['page'])
+
+
 class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
+    'specifically for tester to accept invite to test a courselet'
     NEED_INSTRUCTOR = False
 
     def get(self, *args, **kwargs):
@@ -1236,7 +1247,7 @@ class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
         invite = get_object_or_404(Invite, code=code)
         if invite.course.addedBy != self.request.user and not Role(course=invite.course, role=Role.INSTRUCTOR).exists():
             raise Http404()
-        response = invite.send_mail(self.request, self)
+        response = invite.send_mail(self.request)
         messages.add_message(self.request, messages.SUCCESS,
                              "We just resent invitation to {}".format(invite.email))
         return json_response(response)

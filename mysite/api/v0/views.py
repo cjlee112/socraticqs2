@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from rest_framework import viewsets, status, generics, exceptions, pagination
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response as RestResponse
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -14,14 +14,15 @@ from django.utils.safestring import mark_safe
 from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
 
+from accounts.models import Instructor
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
-from chat.models import Chat
-from ctms.models import BestPractice, BestPracticeTemplate
+from chat.models import Chat, EnrollUnitCode
+from ctms.models import BestPractice, BestPracticeTemplate, Invite
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
-from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event
+from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event, make_random_password
 from ..permissions import IsInstructor
 from ..serializers import (
     ResponseSerializer,
@@ -497,4 +498,37 @@ class ThreadErrorsView(generics.ListAPIView):
     def get_queryset(self):
         ul = check_ul_instructor(self.request)
         return StudentError.objects.filter(response__unitLesson=ul)
+
+
+class InviteView(APIView):
+    'API to invite a teacher, student etc. to onboard'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        'needs email address, first_name, last_name, invite_type, enrollCode or course_id'
+        page = request.data.get('page', '/')
+        data = dict(page=page)
+        enrollCode = request.data.get('enrollCode', None)
+        if enrollCode:
+            enrollUnitCode = EnrollUnitCode.objects.get(enrollCode=enrollCode)
+            course = enrollUnitCode.courseUnit.course
+        else:
+            course = Course.objects.get(id=request.data.get('course_id'))
+            enrollUnitCode = None
+        try:
+            instructor = Instructor.objects.get(user=request.user)
+        except Instructor.DoesNotExist:
+            return RestResponse('only Instructors can send invitations!', status=403)
+        invite = Invite.create_new(True, course, instructor, request.data.get('email'),
+                                   request.data.get('invite_type'), enrollUnitCode, data=data)
+        if not invite.user: # need to create inactive account
+            password = make_random_password()
+            invite.create_unique_user(password, request.data['first_name'],
+                                      request.data['last_name'])
+        else:
+            password = None
+        invite.send_mail(request, password=password)
+        return RestResponse(dict(invite_id=invite.id))
+
 

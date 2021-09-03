@@ -166,6 +166,11 @@ def enroll_unit_code(course_unit, user):
 
 
 @pytest.fixture
+def teacher_invite_dict(enroll_unit_code):
+    return dict(enrollCode=enroll_unit_code.enrollCode, email='jojo@example.com', invite_type='teacher')
+
+
+@pytest.fixture
 def chat(enroll_unit_code, user):
     return Chat.objects.create(
         enroll_code=enroll_unit_code,

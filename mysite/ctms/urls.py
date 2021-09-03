@@ -8,7 +8,8 @@ from ctms.views import (
     CoursletDeleteView, DeleteUnitView, CreateEditUnitView, RedirectToCourseletPreviewView, RedirectToAddUnitsView,
     InvitesListView, JoinCourseView, ResendInviteView, DeleteInviteView, EmailSentView,
     ReorderUnits, Onboarding, OnboardingBP1, OnboardingBP2, BestPracticesCourseView, BestPracticesCourseletView,
-    BestPracticeCalculation, BestPracticeActivation, BestPracticePreCalculation)
+    BestPracticeCalculation, BestPracticeActivation, BestPracticePreCalculation,
+    accept_invite)
 
 app_name = 'ctms'
 
@@ -108,6 +109,7 @@ urlpatterns = [
 
     # url(r'^course/(?P<pk>\d+)/invite/?$', InvitesListView.as_view(), name='course_invite'),
     url(r'^invites/(?P<code>\w+)/join/$', JoinCourseView.as_view(), name='tester_join_course'),
+    url(r'^invites/(?P<code>\w+)/accept/$', accept_invite, name='accept_invite'),
     url(r'^invites/(?P<code>\w+)/resend/$', ResendInviteView.as_view(), name='resend_invite'),
     url(r'^invites/(?P<code>\w+)/delete/$', DeleteInviteView.as_view(), name='delete_invite'),
 

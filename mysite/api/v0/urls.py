@@ -21,6 +21,7 @@ from .views import (
     ThreadResponsesView,
     ThreadErrorsView,
     ChatStatsView,
+    InviteView,
 )
 
 app_name = 'v0'
@@ -59,6 +60,7 @@ urlpatterns = [
     url(r'^onboarding-status/$', OnboardingStatus.as_view(), name='onboarding-status'),
 
     url(r'^bp-analysis/$', OnboardingBpAnalysis.as_view(), name='onboarding_bp2-analysis'),
+    url(r'^invite/$', InviteView.as_view(), name='invite'),
     path('bp/create/', BestPracticeCreate.as_view(), name='bp-creation'),
     path('bp/upload/', BestPracticeUpload.as_view(), name='bp-upload'),
 

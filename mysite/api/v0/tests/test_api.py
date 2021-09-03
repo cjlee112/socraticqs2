@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 
 from ct.models import UnitLesson, Lesson
+from accounts.models import Instructor
 
 
 @pytest.mark.django_db
@@ -189,3 +190,21 @@ def test_courselet_threads_update(course_unit, client):
     updated_thread = UnitLesson.objects.get(id=_id)
     assert updated_thread.lesson.title == _new_data["title"]
     assert updated_thread.lesson.text == _new_data["message"]
+
+
+@pytest.mark.django_db
+def test_nonadmin_invite(teacher_invite_dict, client):
+    'invite API by non-admin user should be forbidden'
+    response = client.post(reverse("api:v0:invite"), data=teacher_invite_dict,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_invite_not_instructor(teacher_invite_dict, client, user):
+    'invite API by non-instructor user should be forbidden'
+    client.force_login(user)
+    response = client.post(reverse("api:v0:invite"), data=teacher_invite_dict,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
