@@ -102,7 +102,7 @@ Python tests:
     - merge_requests
     - tags
   script:
-    - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:latest
+    - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:4.0
     - docker run
       --volume ${PWD}/logs:/home/courselets/app/logs
       --volume ${PWD}/.git:/home/courselets/app/.git

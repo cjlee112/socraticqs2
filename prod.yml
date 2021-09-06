@@ -33,7 +33,7 @@ services:
 
   mongo:
     container_name: cr_mongo
-    image: mongo:latest
+    image: mongo:4.0
     expose:
       - "27017"
     volumes:
