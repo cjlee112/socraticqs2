@@ -513,7 +513,7 @@ class SharedCoursesListViewTests(MyTestCase):
             reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course3.code}),
             response.context['shared_courses'][self.course2.title]['link']
         )
-    @skip
+
     def test_join_course(self):
         url = reverse('ctms:tester_join_course', kwargs={'code': self.tester_shared_course.code})
         response = self.client.get(url)
