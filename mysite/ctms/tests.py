@@ -540,6 +540,7 @@ class SharedCoursesListViewTests(MyTestCase):
 
         # if no such user
         invite.email = 'asdasd@aac.cc'
+        invite.user = None
         invite.save()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

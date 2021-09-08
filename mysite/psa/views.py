@@ -121,7 +121,7 @@ def custom_complete(request, backend, u_hash, u_hash_sess, *args, **kwargs):
         # if invited tester join course - create user immediately without confirmation email.
         data = request.POST.dict().copy()
         user = request.backend.strategy.create_user(**data)
-        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        user.backend = 'django.contrib.auth.backends.ModelBackend' # FIXME: pointless -- authenticate() will override this!!!
         user = authenticate(username=user.username, password=data.get('password'))
         login(request, user)
         request.session['u_hash'] = u_hash

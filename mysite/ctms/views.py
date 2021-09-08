@@ -1194,6 +1194,8 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                     messages.add_message(self.request, messages.SUCCESS,
                                          "You just joined course as tester")
                     invite.status = 'joined'
+                    if not invite.user:
+                        invite.user = self.request.user
                     invite.save()
                     if invite.enroll_unit_code:
                         return redirect(reverse('chat:tester_chat_enroll',
@@ -1219,7 +1221,6 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
             kwargs = dict(available_backends=load_backends(settings.AUTHENTICATION_BACKENDS))
             kwargs['u_hash'] = u_hash
             kwargs['next'] = self.request.path
-            invite = get_object_or_404(Invite, code=self.kwargs['code'])
             init_data = {'next': kwargs['next'], 'email': invite.email, 'u_hash': kwargs['u_hash']}
             if invite.user:
                 # user already registered

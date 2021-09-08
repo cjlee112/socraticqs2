@@ -107,18 +107,6 @@ class Invite(models.Model):
     class Meta:
         unique_together = ('instructor', 'email', 'type', 'course', 'enroll_unit_code')
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None, user=None):
-        if not user and not self.user:
-            user = Invite.search_user_by_email(self.email)
-        if user and user != self.user:
-            self.user = user
-        return super(Invite, self).save(force_insert, force_update, using, update_fields)
-
-    def save_status(self, status, user=None):
-        self.status = status
-        self.save(user=user)
-
     def render_template(self, request, messageType, part='text', **kwargs):
         context = {
             'invite': self,
@@ -171,7 +159,8 @@ class Invite(models.Model):
                 user.last_name = last_name
                 user.is_active = is_active
                 user.save()
-                self.save(user=user)
+                self.user = user
+                self.save()
                 return user
             except IntegrityError: # extend name to be unique
                 i += 1
@@ -182,7 +171,8 @@ class Invite(models.Model):
         'finalize Invite, User, Role records as needed for user to start the invited work'
         self.user.is_active = True
         self.user.save()
-        self.save_status('joined')
+        self.status = 'joined'
+        self.save()
         # TODO: do we need to create Role for enrolling in course?
 
     def login_accepted_invite(self, request):

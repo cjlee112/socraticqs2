@@ -527,7 +527,7 @@ class InviteView(APIView):
             invite.create_unique_user(password, request.data['first_name'],
                                       request.data['last_name'])
         else:
-            password = None
+            password = None # since user already has account, no need to email their password
         invite.send_mail(request, password=password)
         return RestResponse(dict(invite_id=invite.id))
 
