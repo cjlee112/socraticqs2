@@ -27,7 +27,7 @@ services:
 
   local_mongo:
     container_name: local_cr_mongo
-    image: mongo:latest
+    image: mongo:4.0
     ports:
       - "27017:27017"
     volumes:

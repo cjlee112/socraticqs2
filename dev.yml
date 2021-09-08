@@ -28,7 +28,7 @@ services:
 
   dev_mongo:
     container_name: dev_cr_mongo
-    image: mongo:latest
+    image: mongo:4.0
     expose:
       - "27017"
     volumes:
