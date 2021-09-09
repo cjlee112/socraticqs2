@@ -44,9 +44,12 @@ def set_visibility(targetID, visible=True, displayStyle='block'):
     else:
         target.style.display = 'none'
 
-def bind_event(func, d=document, selector='button[data-option-value]', event='click'):
+def bind_event(func, d=document, selector='button[data-option-value]', event='click', data=None):
     for button in d.select(selector):
         button.bind(event, func)
+        if data:
+            for k, v in data.items():
+                button.attrs[k] = v
 
 def generate_id(stemFormat='webfsm%d'):
     'generate unique IDs for webfsm DOM elements'
@@ -190,6 +193,43 @@ class ChatCanvas(ChatInput):
         self.postData['canvasSVG'] = svgData
         self.send_post(self.postData)
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
+        self.outcome = outcome # don't release lock until done
+
+
+
+
+class MultipleChoice(ChatQuery):
+    'prompt user with chat messages, then await get() to receive chosen value'
+    def __init__(self, chats, choices, listTemplate, choiceTemplate, listSelector=".chat-select-list", choiceSelector='h3',
+                 choiceAttr='title', chatContainer="chatSection", insertBeforeID=None, **kwargs):
+        post_messages(chats, insertBeforeID=insertBeforeID)
+        msg = copy_to_container(listTemplate, chatContainer, insertBeforeID=insertBeforeID)[0]
+        ChatQuery.__init__(self, (), "continue-template", selector="button", insertBeforeID=insertBeforeID, **kwargs)
+        self.listID = msg.id
+        self.container = msg.select(listSelector)[0]
+        self.chosen = None
+        self.choiceSelector = choiceSelector
+        for i,c in enumerate(choices):
+            e = copy_to_container(choiceTemplate, None, c[choiceAttr], choiceSelector, container=self.container)[0]
+            bind_event(self.set_choice, e, 'div', data = {'data-selectable-value': str(i)})
+    def set_choice(self, ev):
+        'user clicked one of the choices'
+        div = ev.target
+        if self.chosen != div: # user made a new, different choice
+            div.attrs['class'] = "chat-check chat-selectable  chat-selectable-selected"
+            if self.chosen: # un-check the previous choice
+                self.chosen.attrs['class'] = "chat-check chat-selectable"
+            self.chosen = div
+    def handler(self, ev):
+        'send chosen index value as outcome'
+        if not self.chosen: # user hasn't made a choice
+            return
+        outcome = int(self.chosen.attrs['data-selectable-value'])
+        self.postData['outcome'] = outcome
+        e = self.chosen.parent.select(self.choiceSelector)[0]
+        self.message = self.postData['message'] = e.html
+        if 'path' in self.postData: # no path means DO NOT POST
+            self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
 
 
