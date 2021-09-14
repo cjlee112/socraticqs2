@@ -1,0 +1,11 @@
+{% load cms_tags %}
+
+{% if not instance.hidden %}
+      <!-- Three columns of text below the carousel -->
+      <div class="row">
+        {% for plugin in instance.child_plugin_instances %}
+          {% render_plugin plugin %}
+        {% endfor %}
+      </div><!-- /.row -->
+{% endif %}
+

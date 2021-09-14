@@ -1,0 +1,16 @@
+{% load thumbnail %}
+
+{% if not instance.hidden %}
+      <hr class="featurette-divider">
+
+      <div class="row featurette" id="{{ instance.fragment_id }}">
+        <div class="col-md-7">
+          <h2 class="featurette-heading">{{ instance.title }}</h2>
+          <p class="lead">{{ instance.description|safe }}</p>
+        </div>
+        <div class="col-md-5">
+          <img class="featurette-image img-responsive center-block" src="{% thumbnail instance.image 500x500 crop %}" alt="{{ instance.image.name }}">
+        </div>
+      </div>
+{% endif %}
+

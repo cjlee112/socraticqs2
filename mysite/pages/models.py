@@ -35,6 +35,58 @@ class AbstractPlugin(CMSPlugin):
         abstract = True
 
 
+class CarouselModel(AbstractPlugin):
+    'rotating banner container for top of landing page'
+    title = models.CharField(max_length=200, null=True, blank=True)
+    def get_child_indices(self):
+        'return list [0, 1, 2, ...] of child plugins'
+        l = []
+        for i, ci in enumerate(self.child_plugin_instances):
+            ci.is_first_item = (i == 0)
+            l.append(i)
+        return l
+
+
+
+class CarouselItemModel(AbstractPlugin):
+    'one item to show in carousel'
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField(blank=True)
+    image = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
+    button_text = models.CharField(max_length=70, blank=True)
+    button_url = models.CharField(max_length=200, blank=True)
+
+
+class Big3Model(AbstractPlugin):
+    'key points for overview at-a-glance on landing page'
+    title = models.CharField(max_length=200, null=True, blank=True)
+
+
+class Big3ItemModel(AbstractPlugin):
+    'one key point for landing page at-a-glance overview'
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField(blank=True)
+    image = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
+    button_text = models.CharField(max_length=70, blank=True)
+    button_url = models.CharField(max_length=200, blank=True)
+
+class FeaturetteBoardModel(AbstractPlugin):
+    'container for our call-to-action featurettes'
+    title = models.CharField(max_length=200, null=True, blank=True)
+
+
+class FeaturetteItemModel(AbstractPlugin):
+    'one marketing message with a call-to-action'
+    title = models.CharField(max_length=200, blank=True)
+    description = fields.HTMLField(blank=True)
+    image = FilerImageField(null=True, blank=True, on_delete=models.CASCADE)
+    video_url = models.URLField(null=True, blank=True)
+    button_text = models.CharField(null=True, max_length=70, blank=True)
+    button_url = models.CharField(max_length=200, blank=True)
+    fragment_id = models.CharField(max_length=70, blank=True)
+
+
+
 class LandingPlugin(AbstractPlugin):
     """
     Plugin provide widget main page

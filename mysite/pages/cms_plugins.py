@@ -5,7 +5,14 @@ from cms.plugin_pool import plugin_pool
 
 from pages.forms import BecomeInstructorForm
 from pages.models import (
-    LandingPlugin,
+    CarouselModel,
+    CarouselItemModel,
+    Big3Model,
+    Big3ItemModel,
+    FeaturetteBoardModel,
+    FeaturetteItemModel,
+
+    LandingPlugin, ################## legacy plugins
     BannerPlugin,
     ActiveLearningRatesPlugin,
     ListPlugin,
@@ -36,6 +43,51 @@ from pages.models import (
     BecomeInstructorPlugin as BecomeInstructorPluginModel,
 )
 
+class CarouselPlugin(CMSPluginBase):
+    model = CarouselModel
+    render_template = 'pages/carousel_plugin.html'
+    allow_children = True
+    child_classes = ['CarouselItemPlugin']
+
+
+class CarouselItemPlugin(CMSPluginBase):
+    model = CarouselItemModel
+    render_template = 'pages/carousel_item_plugin.html'
+    require_parent = True
+    parent_classes = ['CarouselPlugin']
+
+
+class Big3Plugin(CMSPluginBase):
+    model = Big3Model
+    render_template = 'pages/big3_plugin.html'
+    allow_children = True
+    child_classes = ['Big3ItemPlugin']
+
+
+class Big3ItemPlugin(CMSPluginBase):
+    model = Big3ItemModel
+    render_template = 'pages/big3_item_plugin.html'
+    require_parent = True
+    parent_classes = ['Big3Plugin']
+
+
+class FeaturetteBoardPlugin(CMSPluginBase):
+    model = FeaturetteBoardModel
+    render_template = 'pages/featurette_board_plugin.html'
+    allow_children = True
+    child_classes = ['FeaturetteItemPlugin']
+
+
+class FeaturetteItemPlugin(CMSPluginBase):
+    model = FeaturetteItemModel
+    render_template = 'pages/featurette_item_plugin.html'
+    require_parent = True
+    parent_classes = ['FeaturetteBoardPlugin']
+
+
+
+####################################################################
+# legacy plugins
 
 class LandingPagePlugin(CMSPluginBase):
     model = LandingPlugin
@@ -306,6 +358,15 @@ class Hero2Plugin(CMSPluginBase):
     allow_children = True
 
 
+plugin_pool.register_plugin(CarouselPlugin)
+plugin_pool.register_plugin(CarouselItemPlugin)
+plugin_pool.register_plugin(Big3Plugin)
+plugin_pool.register_plugin(Big3ItemPlugin)
+plugin_pool.register_plugin(FeaturetteBoardPlugin)
+plugin_pool.register_plugin(FeaturetteItemPlugin)
+
+
+####################################### legacy
 plugin_pool.register_plugin(BecomeInstructorPlugin)
 plugin_pool.register_plugin(BannerPagePlugin)
 plugin_pool.register_plugin(LandingPagePlugin)
