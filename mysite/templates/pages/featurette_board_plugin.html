@@ -1,6 +1,6 @@
 {% load cms_tags %}
 
-{% if not instance.hidden %}
+{% if not instance.hidden and instance.list_child_indices %}
         {% for plugin in instance.child_plugin_instances %}
           {% render_plugin plugin %}
         {% endfor %}

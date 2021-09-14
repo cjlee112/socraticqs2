@@ -4,11 +4,11 @@
       <hr class="featurette-divider">
 
       <div class="row featurette" id="{{ instance.fragment_id }}">
-        <div class="col-md-7">
+        <div class="col-md-7 {% if instance.is_odd_index %} col-md-push-5 {% endif %}">
           <h2 class="featurette-heading">{{ instance.title }}</h2>
           <p class="lead">{{ instance.description|safe }}</p>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-5 {% if instance.is_odd_index %} col-md-pull-7 {% endif %}">
           <img class="featurette-image img-responsive center-block" src="{% thumbnail instance.image 500x500 crop %}" alt="{{ instance.image.name }}">
         </div>
       </div>

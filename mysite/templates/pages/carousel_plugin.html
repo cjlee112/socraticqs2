@@ -4,7 +4,7 @@
     <div id="myCarousel" class="carousel slide" data-ride="carousel">
       <!-- Indicators -->
       <ol class="carousel-indicators">
-        {% for ichild in instance.get_child_indices %}
+        {% for ichild in instance.list_child_indices %}
           <li data-target="#myCarousel" data-slide-to="{{ ichild }}" {% if ichild == 0 %}class="active"{% endif %}></li>
         {% endfor %}
       </ol>

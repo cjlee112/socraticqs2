@@ -35,17 +35,19 @@ class AbstractPlugin(CMSPlugin):
         abstract = True
 
 
+def list_child_indices(self):
+    'index child instances and return list [0, 1, 2, ...]'
+    l = []
+    for ichild, child in enumerate(self.child_plugin_instances):
+        child.ichild = ichild
+        l.append(ichild)
+    return l
+
+
 class CarouselModel(AbstractPlugin):
     'rotating banner container for top of landing page'
     title = models.CharField(max_length=200, null=True, blank=True)
-    def get_child_indices(self):
-        'return list [0, 1, 2, ...] of child plugins'
-        l = []
-        for i, ci in enumerate(self.child_plugin_instances):
-            ci.is_first_item = (i == 0)
-            l.append(i)
-        return l
-
+    list_child_indices = list_child_indices
 
 
 class CarouselItemModel(AbstractPlugin):
@@ -73,6 +75,7 @@ class Big3ItemModel(AbstractPlugin):
 class FeaturetteBoardModel(AbstractPlugin):
     'container for our call-to-action featurettes'
     title = models.CharField(max_length=200, null=True, blank=True)
+    list_child_indices = list_child_indices
 
 
 class FeaturetteItemModel(AbstractPlugin):
@@ -84,6 +87,8 @@ class FeaturetteItemModel(AbstractPlugin):
     button_text = models.CharField(null=True, max_length=70, blank=True)
     button_url = models.CharField(max_length=200, blank=True)
     fragment_id = models.CharField(max_length=70, blank=True)
+    def is_odd_index(self):
+        return self.ichild % 2
 
 
 
