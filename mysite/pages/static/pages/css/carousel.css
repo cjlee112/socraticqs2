@@ -74,6 +74,7 @@ body {
 .marketing .col-lg-4 p {
   margin-right: 10px;
   margin-left: 10px;
+  font-size: 18px;
 }
 
 
@@ -89,6 +90,10 @@ body {
   font-weight: 300;
   line-height: 1;
   letter-spacing: -1px;
+}
+
+.featurette .col-md-7 p {
+  font-size: 18px;
 }
 
 
@@ -110,10 +115,15 @@ body {
     border-radius: 4px; /* The navbar becomes detached from the top, so we round the corners */
   }
 
+  .carousel-caption h1 {
+    color: #c0ffc0;
+  }
+
   /* Bump up size of carousel content */
   .carousel-caption p {
     margin-bottom: 20px;
-    font-size: 21px;
+    font-size: 28px;
+    color: #c0ffc0;
     line-height: 1.4;
   }
 
@@ -124,6 +134,6 @@ body {
 
 @media (min-width: 992px) {
   .featurette-heading {
-    margin-top: 120px;
+    margin-top: 60px;
   }
 }

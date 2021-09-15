@@ -5,14 +5,19 @@
 
       <div class="row featurette" id="{{ instance.fragment_id }}">
         <div class="col-md-7 {% if instance.is_odd_index %} col-md-push-5 {% endif %}">
-          <h2 class="featurette-heading">{{ instance.title }}</h2>
-          <p class="lead">{{ instance.description|safe }}</p>
+          <h2 class="featurette-heading">{{ instance.title|safe }}</h2>
+          {{ instance.description|safe }}
+          {% if instance.button_text %}
+            <p><a class="btn btn-default" href="{{ instance.button_url }}" role="button">{{ instance.button_text }}</a></p>
+          {% endif %}
         </div>
         <div class="col-md-5 {% if instance.is_odd_index %} col-md-pull-7 {% endif %}">
           {% if instance.video_url %}
             <iframe src="{{ instance.video_url }}" width="500" height="375" frameborder="0" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>
           {% else %}
+            <a href="{{ instance.button_url }}">
             <img class="featurette-image img-responsive center-block" src="{% thumbnail instance.image 500x500 crop %}" alt="{{ instance.image.name }}">
+            </a>
           {% endif %}
         </div>
       </div>

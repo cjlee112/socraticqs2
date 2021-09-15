@@ -3,7 +3,7 @@
           <img class="third-slide" src="{{ instance.image.url }}" alt="{{ instance.image.name }}">
           <div class="container">
             <div class="carousel-caption">
-              <h1>{{ instance.title }}</h1>
+              <h1>{{ instance.title|safe }}</h1>
               <p>{{ instance.description|safe }}</p>
               <p><a class="btn btn-lg btn-primary" href="{{ instance.button_url }}" role="button">{{ instance.button_text }}</a></p>
             </div>

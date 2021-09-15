@@ -3,7 +3,7 @@
 {% if not instance.hidden %}
         <div class="col-lg-4">
           <img class="img-circle" src="{% thumbnail instance.image 140x140 crop %}" alt="{{ instance.image.name }}" width="140" height="140">
-          <h2>{{ instance.title }}</h2>
+          <h2>{{ instance.title|safe }}</h2>
           <p>{{ instance.description|safe }}</p>
           <p><a class="btn btn-default" href="{{ instance.button_url }}" role="button">{{ instance.button_text }}</a></p>
         </div><!-- /.col-lg-4 -->
