@@ -2,5 +2,8 @@ This is an internal notification of the following onboarding event:
 
 Event name: {{ event_name }}
 User: {{ email }}
-Metadata: {{ metadata }}
+Metadata:
+{% for mkey, mvalue in metadata.items %}
+    {{ mkey }} : {{ mvalue }}
+{% endfor %}
 
