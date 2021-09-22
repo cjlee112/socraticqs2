@@ -1,10 +1,10 @@
 
 
-{% load static intercom %}
+{% load static %}
 {% load cms_tags sekizai_tags %}
 {% load static %}
 {% load static %}
-{% load intercom account_utils %}
+{% load account_utils %}
 <!DOCTYPE html>
 <html lang="en" style="height: 100%;">
     <head>
@@ -56,7 +56,6 @@
     
     {% cms_toolbar %}
     {% block base_content %}{% endblock %}
-    {% if '/teach/' in request.path %}{% intercom_tag %}{% endif %}
 
 
     <!-- Added from the ctms_base-->
@@ -384,6 +383,5 @@
 
     </script>
     {% endif %}
-    {% intercom_tag %}
     </body>
 </html>
