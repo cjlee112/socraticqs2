@@ -35,7 +35,7 @@ def create_onboarding_event(event_name, created_at, email, metadata):
         logger.info(f'Event: {event_name}: created at: {created_at}: email: {email}: metadata: {metadata}')
         return
     context = dict(event_name=event_name, created_at=created_at, email=email, metadata=metadata)
-    send_email(context, 'info@courselets.org', 'info@courselets.org', 'ctms/email/ievent_subject.txt',
+    send_email(context, 'info@courselets.org', ['info@courselets.org'], 'ctms/email/ievent_subject.txt',
                'ctms/email/ievent_text.txt')
     #intercom_event.apply_async(args=(event_name, created_at, email, metadata))
 
