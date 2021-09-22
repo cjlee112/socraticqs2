@@ -52,7 +52,7 @@ def send_email(context_data, from_email, to_email, template_subject, template_te
         template_text (str):  path to a body template, e.g. 'ctms/email/text.txt'
     """
     subj_template = loader.get_template(template_subject)
-    rendered_subj = subj_template.render(context_data)
+    rendered_subj = subj_template.render(context_data).strip()
 
     text_template = loader.get_template(template_text)
     rendered_text = text_template.render(context_data)
