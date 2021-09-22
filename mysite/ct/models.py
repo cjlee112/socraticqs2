@@ -25,7 +25,7 @@ from django.contrib.postgres.fields import JSONField
 from core.tasks import faq_notify_instructors, faq_notify_students
 from core.common import onboarding
 from core.common.mongo import c_chat_context
-from core.common.utils import update_onboarding_step, create_intercom_event
+from core.common.utils import update_onboarding_step, create_onboarding_event
 from ct.templatetags.ct_extras import md2html
 
 
@@ -2111,7 +2111,7 @@ def onboarding_lesson_created(sender, instance, created, **kwargs):
         update_onboarding_step(onboarding.STEP_5, instance.addedBy.id)
     if created and instance.kind == Lesson.ORCT_QUESTION:
         orct_count = Lesson.objects.filter(addedBy=instance.addedBy, kind=Lesson.ORCT_QUESTION).count()
-        create_intercom_event(
+        create_onboarding_event(
             event_name='orct-created',
             created_at=int(time.mktime(time.localtime())),
             email=instance.addedBy.email,

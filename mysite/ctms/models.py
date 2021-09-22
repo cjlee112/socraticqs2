@@ -18,7 +18,7 @@ from django.contrib.postgres.fields import JSONField
 
 from accounts.models import Instructor
 from chat.models import EnrollUnitCode
-from core.common.utils import create_intercom_event
+from core.common.utils import create_onboarding_event
 from ct.models import Course
 
 
@@ -123,11 +123,11 @@ class Invite(models.Model):
         rendered_subj = self.render_template(request, messageType, 'subject', **kwargs).strip()
         rendered_text = self.render_template(request, messageType, 'text', **kwargs)
         send_mail(rendered_subj, rendered_text, settings.EMAIL_FROM, [self.email], fail_silently=False)
-        create_intercom_event(
+        create_onboarding_event(
                 event_name='invitation-sent',
                 created_at=int(time.mktime(time.localtime())),
                 email=self.instructor.user.email,
-                metadata={'tester': self.email}
+                metadata={'invitee': self.email}
         )
         return {
                 'success': True,

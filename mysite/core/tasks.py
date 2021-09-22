@@ -1,6 +1,6 @@
 import logging
 
-from intercom.client import Client
+#from intercom.client import Client
 from django.conf import settings
 from django.template import loader
 
@@ -9,19 +9,19 @@ from mysite import celery_app
 
 
 log = logging.getLogger(__name__)
-intercom = Client(personal_access_token=settings.INTERCOM_ACCESS_TOKEN)
+#intercom = Client(personal_access_token=settings.INTERCOM_ACCESS_TOKEN)
 LOGGER = logging.getLogger('celery_warn')
 
 
-@celery_app.task
-def intercom_event(event_name, created_at, email, metadata) -> None:
-    intercom.events.create(
-        event_name=event_name,
-        created_at=created_at,
-        email=email,
-        metadata=metadata
-    )
-    log.info("{}:{}:{}:{}".format(event_name, created_at, email, metadata))
+#celery_app.task
+#def intercom_event(event_name, created_at, email, metadata) -> None:
+#    intercom.events.create(
+#        event_name=event_name,
+#        created_at=created_at,
+#        email=email,
+#        metadata=metadata
+#    )
+#    log.info("{}:{}:{}:{}".format(event_name, created_at, email, metadata))
 
 
 @celery_app.task

@@ -1,0 +1,6 @@
+This is an internal notification of the following onboarding event:
+
+Event name: {{ event_name }}
+User: {{ email }}
+Metadata: {{ metadata }}
+

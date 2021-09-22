@@ -22,7 +22,7 @@ from chat.models import Chat, EnrollUnitCode
 from ctms.models import BestPractice, BestPracticeTemplate, Invite
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
-from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_intercom_event, make_random_password
+from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_onboarding_event, make_random_password
 from ..permissions import IsInstructor
 from ..serializers import (
     ResponseSerializer,
@@ -172,7 +172,7 @@ class OnboardingStatus(APIView):
             passed_steps = c_onboarding_status().find_one({onboarding.USER_ID: user_id}, projection) or {}
             for step in to_update:
                 if to_update[step] and not passed_steps.get(step):
-                    create_intercom_event(
+                    create_onboarding_event(
                         event_name='step-completed',
                         created_at=int(time.mktime(time.localtime())),
                         email=request.user.email,
@@ -257,7 +257,7 @@ class BestPracticeUpload(APIView):
             best_practice = BestPractice.objects.filter(id=int(request.POST.get('best_practice_id'))).first()
             best_practice.upload_file = request.data.get('upload_file')
             best_practice.save()
-            create_intercom_event(
+            create_onboarding_event(
                 event_name='exam-upload',
                 created_at=int(time.mktime(time.localtime())),
                 email=request.user.email,
@@ -276,7 +276,7 @@ class BestPracticeUpload(APIView):
                     upload_file=request.data.get('upload_file'),
                     active=True
                 )
-                create_intercom_event(
+                create_onboarding_event(
                     event_name='exam-upload',
                     created_at=int(time.mktime(time.localtime())),
                     email=request.user.email,

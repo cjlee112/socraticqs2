@@ -17,13 +17,13 @@ from django.template import loader
 
 from core.common.mongo import c_onboarding_status, c_onboarding_settings
 from core.common import onboarding
-from core.tasks import intercom_event
+#from core.tasks import intercom_event
 
 
 logger = logging.getLogger(__name__)
 
 
-def create_intercom_event(event_name, created_at, email, metadata):
+def create_onboarding_event(event_name, created_at, email, metadata):
     """
     params:
       event_name: string
@@ -34,7 +34,10 @@ def create_intercom_event(event_name, created_at, email, metadata):
     if getattr(settings, 'IN_TESTING', None):
         logger.info(f'Event: {event_name}: created at: {created_at}: email: {email}: metadata: {metadata}')
         return
-    intercom_event.apply_async(args=(event_name, created_at, email, metadata))
+    context = dict(event_name=event_name, created_at=created_at, email=email, metadata=metadata)
+    send_email(context, 'info@courselets.org', 'info@courselets.org', 'ctms/email/ievent_subject.txt',
+               'ctms/email/ievent_text.txt')
+    #intercom_event.apply_async(args=(event_name, created_at, email, metadata))
 
 
 def send_email(context_data, from_email, to_email, template_subject, template_text):
@@ -123,7 +126,7 @@ def update_onboarding_step(step, user_id):
         }}, upsert=True)
         user = User.objects.filter(id=user_id).first()
         if user:
-            create_intercom_event(
+            create_onboarding_event(
                 event_name='step-completed',
                 created_at=int(time.mktime(time.localtime())),
                 email=user.email,

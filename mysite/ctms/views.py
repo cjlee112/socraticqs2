@@ -28,7 +28,7 @@ from accounts.models import Instructor
 
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, \
-    get_onboarding_setting, get_onboarding_status_with_settings, create_intercom_event
+    get_onboarding_setting, get_onboarding_status_with_settings, create_onboarding_event
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -735,7 +735,7 @@ class CoursletSettingsView(NewLoginRequiredMixin, CourseCoursletUnitMixin, Updat
         if task:
             cu = self.get_courslet()
             if task == 'release':
-                create_intercom_event(
+                create_onboarding_event(
                     event_name='courselet-published',
                     created_at=int(time.mktime(time.localtime())),
                     email=cu.addedBy.email,
