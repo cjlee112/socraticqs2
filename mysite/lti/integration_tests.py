@@ -62,7 +62,7 @@ class LTITestCase(TestCase):
             'oauth_signature': mocked_decoded_signature
         }
 
-        self.unit = Unit(title='Test title', addedBy=self.user)
+        self.unit = Unit(title='Test title', description='newChatMode=legacy', addedBy=self.user)
         self.unit.save()
         self.course = Course(title='Test title',
                              description='test description',

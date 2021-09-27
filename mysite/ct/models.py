@@ -1435,6 +1435,9 @@ class Unit(models.Model):
     def use_brella_frontend(self):
         'this is just a temporary stub for activating brella frontend on a courselet'
         return self.description and self.description.find('newChatMode=brella') >= 0
+    def use_legacy_frontend(self):
+        'this is just a temporary stub for activating brella frontend on a courselet'
+        return self.description and self.description.find('newChatMode=legacy') >= 0
 
 
 

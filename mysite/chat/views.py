@@ -345,6 +345,8 @@ class ChatInitialView(LoginRequiredMixin, View):
 
     def choose_brella_vs_legacy(self, courseUnit):
         'return True to launch brella (or False to launch legacy chat)'
+        if courseUnit.unit.use_legacy_frontend():
+            return False
         return courseUnit.unit.use_brella_frontend() or (random.random() < 0.5)
 
 
