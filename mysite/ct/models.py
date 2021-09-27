@@ -1976,6 +1976,13 @@ class Course(models.Model):
         self.save() if commit else None
         return self
 
+    def add_role(self, user, **kwargs):
+        'add the specified user to this course as a new Role object'
+        data = kwargs.copy()
+        data['course'] =  self
+        data['user'] = user
+        return Role.objects.create(**data)
+
     def __str__(self):
         return self.title
 

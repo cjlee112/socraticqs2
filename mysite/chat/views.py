@@ -6,14 +6,14 @@ from django.db.models.expressions import When, Case
 from django.db.models.fields import IntegerField
 from django.db.models import Q
 from django.views.generic import View
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 
 from mysite.mixins import LoginRequiredMixin
-from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS
+from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS, PUBLIC_ACCESS
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
 from chat.serializers import ChatProgressSerializer
@@ -631,11 +631,19 @@ class CheckChatInitialView(ChatInitialView):
 
 
 def brella_demo_view(request, enroll_key):
-    'provide login-less chat demo if allowed for this enroll_key'
+    'provide logged-in brella OR login-less chat if allowed for this enroll_key'
+    if request.user.is_authenticated: # logged-in user
+        enrollCode = EnrollUnitCode.objects.filter(enrollCode=enroll_key, isPreview=False).first()
+        if enrollCode and enrollCode.courseUnit.is_published(): # check possible enrollment
+            role = Role.objects.filter(course=enrollCode.courseUnit.course, user=request.user).first()
+            if not role and enrollCode.courseUnit.course.access == PUBLIC_ACCESS: # auto-enroll
+                role = enrollCode.courseUnit.course.add_role(request.user)
+            if role: # user is enrolled, so just open regular chat session
+                return redirect(reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_key}))
     chat = Chat.objects.filter(is_open=True, is_trial=True, is_preview=True, enroll_code__enrollCode=enroll_key).first()
     if chat:
         request.session['chat_id'] = chat.id
         return HttpResponseRedirect(brellaChatURL)
     else:
-        return Response('No such demo available', status=400)
+        return HttpResponse('No such demo available', status=400)
 
