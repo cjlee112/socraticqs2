@@ -270,7 +270,7 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
 
-        if chat_id == 'brella' or (courseUnit.unit.use_brella_frontend() and not chat_sessions):
+        if chat_id == 'brella' or (self.choose_brella_vs_legacy(courseUnit) and not chat_sessions):
             chat = self.create_new_chat(request, enroll_code, courseUnit, useBrella=True)
             i_chat_id = chat.id
         else:
@@ -339,9 +339,13 @@ class ChatInitialView(LoginRequiredMixin, View):
                 # 'next_point': next_point,
                 'back_url': back_url,
                 'back_url_name': back_url_name,
-                'use_brella_frontend': random.random() < 0.5  # courseUnit.unit.use_brella_frontend()
+                'use_brella_frontend': self.choose_brella_vs_legacy(courseUnit)
             }
         )
+
+    def choose_brella_vs_legacy(self, courseUnit):
+        'return True to launch brella (or False to launch legacy chat)'
+        return random.random() < 0.5  # courseUnit.unit.use_brella_frontend()
 
 
 class ChatNoJSInit(object):
