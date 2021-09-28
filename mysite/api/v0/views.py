@@ -530,7 +530,9 @@ class InviteView(APIView):
                                       request.data['last_name'])
         else:
             password = None # since user already has account, no need to email their password
-        invite.send_mail(request, password=password)
+        invite.send_mail(request, password=password, messageText=request.data.get('messageText', None),
+                         senderName=request.data.get('senderName', None),
+                         subjectText=request.data.get('subjectText', None))
         return RestResponse(dict(invite_id=invite.id))
 
 

@@ -122,7 +122,11 @@ class Invite(models.Model):
             messageType = self.type
         rendered_subj = self.render_template(request, messageType, 'subject', **kwargs).strip()
         rendered_text = self.render_template(request, messageType, 'text', **kwargs)
-        send_mail(rendered_subj, rendered_text, settings.EMAIL_FROM, [self.email], fail_silently=False)
+        if 'senderName' in kwargs:
+            email_from = f'{kwargs["senderName"]} <{settings.EMAIL_FROM}>' # RFC822 format
+        else:
+            email_from = settings.EMAIL_FROM
+        send_mail(rendered_subj, rendered_text, email_from, [self.email], fail_silently=False)
         create_onboarding_event(
                 event_name='invitation-sent',
                 created_at=int(time.mktime(time.localtime())),
