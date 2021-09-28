@@ -472,6 +472,8 @@ def filter_chats_since(chatStatsView):
     return Chat.objects.filter(
               timestamp__gte=startTime,
               is_preview=False
+            ).exclude(
+              enroll_code__courseUnit__unit__description__contains='newChatMode='
             ).annotate(
               maxtime=Max('message__timestamp')
             ).annotate(
