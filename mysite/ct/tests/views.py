@@ -1021,7 +1021,6 @@ class EditLessonTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'ct/edit_lesson.html')
-        self.assertFalse(len(self.unit_lesson.lesson.conceptlink_set.all()))
 
     def test_edit_lesson_delete(self):
         response = self.client.post(
