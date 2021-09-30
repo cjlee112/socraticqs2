@@ -1994,7 +1994,7 @@ class TestChatGetBackUrls(CustomTestCase):
             'ctms:courslet_view',
             kwargs={
                 'course_pk': self.course.id,
-                'pk': self.unit.pk
+                'pk': self.courseunit.pk
             })
         ),
         (CheckChatInitialView, "Return",
