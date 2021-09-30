@@ -88,14 +88,14 @@ class TagsTest(TestCase):
                 '/ct/courses/1/units/1/lessons/1/', baseToken='non_existent_token'
             )
 
-    def test_get_object_url_exception(self):
+    def test_get_object_url_of_unit(self):
         self.context['ul'] = self.unit  # Unit object does not have get_url method
         rendered = self.render_template(
             '{% load ct_extras %}'
             '{{ actionTarget | get_object_url:ul }}',
             context=self.context
         )
-        self.assertEqual(rendered, '/ct/courses/1/units/1/unit/1/teach/')
+        self.assertEqual(rendered, f'/ct/courses/1/units/1/unit/{self.unit.id}/teach/')
 
     @patch('ct.templatetags.ct_extras.timezone')
     def test_display_datetime(self, timezone_patched):
