@@ -56,11 +56,11 @@ class TagsTest(TestCase):
 
     @unpack
     @data(
-        ('{{ test_text | md2html }}', '<p>This is a test text</p>\n'),
-        ('{{ actionTarget | get_object_url:ul }}', '/ct/courses/1/units/1/lessons/1/'),
-        ('{{ actionTarget | get_home_url:ul }}', '/ct/courses/1/units/1/lessons/1/'),
-        ('{{ actionTarget | get_thread_url:r }}', '/ct/courses/1/units/1/lessons/1/faq/1/'),
-        ('{{ actionTarget | get_tasks_url:ul }}', '/ct/courses/1/units/1/lessons/1/tasks/'),
+        ('{{ test_text | md2html }}', '<p>{test_text}</p>\n'),
+        ('{{ actionTarget | get_object_url:ul }}', '/ct/courses/1/units/1/lessons/{ul.id}/'),
+        ('{{ actionTarget | get_home_url:ul }}', '/ct/courses/1/units/1/lessons/{ul.id}/'),
+        ('{{ actionTarget | get_thread_url:r }}', '/ct/courses/1/units/1/lessons/{ul.id}/faq/{r.id}/'),
+        ('{{ actionTarget | get_tasks_url:ul }}', '/ct/courses/1/units/1/lessons/{ul.id}/tasks/'),
         ('{{ actionTarget | get_dummy_navbar }}', '<li><a href="/ct/courses/1/">Course</a></li>'),
     )
     def test_all_filters(self, template_variable, expected_result):
@@ -68,7 +68,8 @@ class TagsTest(TestCase):
             '{% load ct_extras %}' + template_variable,
             context=self.context
         )
-        self.assertEqual(rendered, expected_result)
+        expected_string = expected_result.format(**self.context)
+        self.assertEqual(rendered, expected_string)
 
     @patch('ct.templatetags.ct_extras.pypandoc')
     def test_md2html_pandoc_exception(self, pypandoc):
