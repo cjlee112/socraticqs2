@@ -306,7 +306,7 @@ class MiscTests(TestCase):
         role_stud.save()
 
         response = self.client.get(
-            reverse("ct:ul_teach", kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': lesson.pk})
+            reverse("ct:ul_teach", kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': unit_lesson.pk})
         )
         f = find_table(response.content)
         self.assertFalse(f)
@@ -337,7 +337,7 @@ class MiscTests(TestCase):
 
         response = self.client.get(
             reverse("ct:ul_teach",
-                    kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': lesson.pk}))
+                    kwargs={'course_id': course.pk, 'unit_id': unit.pk, 'ul_id': unit_lesson.pk}))
         f = find_table(response.content)
         self.assertTrue(f)
         grouped = f.groupdict()
