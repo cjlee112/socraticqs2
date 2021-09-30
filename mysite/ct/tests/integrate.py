@@ -531,8 +531,8 @@ class WikiDisambiguationErrorTests(TestCase):
         self.user = User.objects.create_user(username='jacob', email='jacob@_',
                                              password='top_secret')
         self.client.login(username='jacob', password='top_secret')
-        self.ul = Unit(title='test', addedBy=self.user)
-        self.ul.save()
+        self.unit = Unit(title='test', addedBy=self.user)
+        self.unit.save()
 
     @patch('ct.sourcedb_plugin.wikipedia_plugin.wikipedia.page')
     def test_exception_hande(self, mocked):
@@ -547,8 +547,8 @@ class WikiDisambiguationErrorTests(TestCase):
     @patch('ct.sourcedb_plugin.wikipedia_plugin.wikipedia.page')
     def test_exception_hande_in_view(self, mocked):
         mocked.side_effect = wikipedia.exceptions.DisambiguationError('Exception title', ['1', '2', '3'])
-        url = '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % (self.ul.id, '1', '1')
-        opt = [(x, '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % (self.ul.id, '1', x))
+        url = '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % ('1', self.unit.id, '1')
+        opt = [(x, '/ct/teach/courses/%s/units/%s/concepts/wikipedia/%s/' % ('1', self.unit.id, x))
                for x in ['1', '2', '3']]
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
