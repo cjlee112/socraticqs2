@@ -1967,7 +1967,8 @@ class LessonSerializerTests(CustomTestCase):
         for attr in attrs:
             self.assertIn(attr, result)
 
-        self.assertEqual(result['id'], msg_id)
+        self.assertEqual(msg.contenttype, 'unitlesson')
+        self.assertEqual(result['id'], msg.content_id)
         self.assertEqual(result['html'], msg.content.lesson.title)
 
 
