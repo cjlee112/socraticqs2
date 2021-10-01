@@ -883,7 +883,7 @@ class EditUnitViewTests(MyTestCase):
             kwargs={
                 'course_pk': self.get_test_course().id,
                 'courselet_pk': self.get_test_courseunit().id,
-                'pk': lesson_id,
+                'pk': self.unitlesson.id,
             }
         )
         data = {
