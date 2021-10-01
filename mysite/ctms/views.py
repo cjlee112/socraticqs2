@@ -28,7 +28,7 @@ from accounts.models import Instructor
 
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, \
-    get_onboarding_setting, get_onboarding_status_with_settings, create_onboarding_event
+    get_onboarding_courselet_ids, get_onboarding_status_with_settings, create_onboarding_event
 
 from chat.models import EnrollUnitCode
 from ct.forms import LessonRoleForm
@@ -1338,8 +1338,7 @@ class Onboarding(NewLoginRequiredMixin, TemplateView):
         ).last()
         users_thread = Lesson.objects.filter(addedBy=self.request.user, kind=Lesson.ANSWER).last()
 
-        introduction_course_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID)
-        introduction_courselet_id = get_onboarding_setting(onboarding.INTRODUCTION_COURSELET_ID)
+        introduction_course_id, introduction_courselet_id = get_onboarding_courselet_ids()
 
         course = Course.objects.filter(id=introduction_course_id).first()
         enroll_unit_code = EnrollUnitCode.objects.filter(

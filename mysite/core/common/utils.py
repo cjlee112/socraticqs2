@@ -153,26 +153,11 @@ ONBOARDING_SETTINGS_DEFAULT = {
 }
 
 
-# TODO: write unit tests
-def get_onboarding_setting(setting_name):
-    """
-    Return settings for the certain `settings_name`
-    If it does not exist take default settings and save it to the MongoDB
-    Argument:
-        setting_name (str): name of setting e.g. `create_course`
-    Return:
-        dict object with the data. See ONBOARDING_STEPS_DEFAULT_TEMPLATE
-    """
-    try:
-        ONBOARDING_SETTINGS_DEFAULT[setting_name]
-    except KeyError:
-        return
+def get_onboarding_courselet_ids():
+    return (ONBOARDING_SETTINGS_DEFAULT[onboarding.INTRODUCTION_COURSE_ID],
+            ONBOARDING_SETTINGS_DEFAULT[onboarding.INTRODUCTION_COURSELET_ID])
 
-    onboarding_setting = c_onboarding_settings(use_secondary=True).find_one({'name': setting_name})
-    if not onboarding_setting:
-        c_onboarding_settings().insert({'name': setting_name, 'data': ONBOARDING_SETTINGS_DEFAULT[setting_name]})
-        return ONBOARDING_SETTINGS_DEFAULT[setting_name]
-    return onboarding_setting['data']
+
 
 
 # TODO: refactor this, settings for each step no need longer

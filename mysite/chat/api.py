@@ -21,7 +21,7 @@ from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
 from core.common import onboarding
 from core.common.mongo import c_faq_data, c_chat_context
-from core.common.utils import get_onboarding_setting, update_onboarding_step
+from core.common.utils import get_onboarding_courselet_ids, update_onboarding_step
 from lti.utils import key_secret_generator
 from .models import Message, Chat, ChatDivider, EnrollUnitCode
 from .views import ChatInitialView
@@ -577,8 +577,7 @@ class ProgressView(ValidateMixin, generics.RetrieveAPIView):
         course_id = serializer.instance.get_course_unit().course.id
         courselet_id = serializer.instance.get_course_unit().id
         # onboarding checking
-        if course_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSE_ID) and \
-            courselet_id == get_onboarding_setting(onboarding.INTRODUCTION_COURSELET_ID) and \
+        if (course_id, courselet_id) == get_onboarding_courselet_ids() and \
                 serializer_data.get('progress', 0) * 100 >= 70:
             update_onboarding_step(onboarding.STEP_2, self.request.user.id)
         return Response(serializer_data)
