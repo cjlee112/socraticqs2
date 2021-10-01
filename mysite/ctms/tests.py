@@ -104,6 +104,7 @@ class MyTestCase(TestCase):
         copied_data = {}
         if getattr(self, 'default_data', False):
             copied_data.update(self.default_data)
+        if data:
             copied_data.update(data)
         response = client_method(self.url, copied_data, follow=True)
         return response
