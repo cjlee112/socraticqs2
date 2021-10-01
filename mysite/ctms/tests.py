@@ -4,7 +4,7 @@ from unittest import skip, mock
 from ddt import ddt, data, unpack
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.utils import timezone
 from django.db import models
@@ -15,6 +15,7 @@ from ct.models import (
     Unit, Course, CourseUnit, Lesson, UnitLesson, Response, NEED_HELP_STATUS, SubKindMixin, Role)
 from ctms.forms import EditUnitForm
 from ctms.models import Invite
+from ctms.views import CoursletDeleteView
 from psa.forms import EmailLoginForm, SignUpForm
 
 @override_settings(SUSPEND_SIGNALS=True)
@@ -1174,6 +1175,14 @@ class CoursletDeleteViewTests(MyTestCase):
             'pk': self.get_test_courslet().id
         }
         self.url = reverse('ctms:courslet_delete', kwargs=self.kwargs)
+
+    def test_as_view(self):
+        v = CoursletDeleteView.as_view()
+        factory = RequestFactory()
+        request = factory.get(self.url)
+        request.user = self.user
+        response = v(request, **self.kwargs) # make sure view doesn't crash
+        self.assertEqual(response.status_code, 200)
 
     def test_get_page(self):
         # should return delete confirmation page
