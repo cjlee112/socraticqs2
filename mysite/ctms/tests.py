@@ -376,7 +376,7 @@ class MyCoursesTests(MyTestCase):
         courses_cnt = Course.objects.filter(addedBy=self.user).count()
         course_ids = [
             i['id'] for i in
-            Course.obget_courslet_view_logged_out_user_testjects.filter(addedBy=self.user).values('id')
+            Course.objects.filter(addedBy=self.user).values('id')
         ]
         data = {
             'name': ''
