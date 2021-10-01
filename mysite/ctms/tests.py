@@ -144,8 +144,6 @@ class MyTestCase(TestCase):
             responses_count=models.Count('response')
         )[0]
 
-    get_test_courslet = get_test_unitlesson
-
     get_test_response = lambda self: self.get_test_responses()[0]
 
     def get_test_courseunit(self):
@@ -1172,7 +1170,7 @@ class CoursletDeleteViewTests(MyTestCase):
         super(CoursletDeleteViewTests, self).setUp()
         self.kwargs = {
             'course_pk': self.get_test_course().id,
-            'pk': self.get_test_courslet().id
+            'pk': self.get_test_courseunit().id
         }
         self.url = reverse('ctms:courslet_delete', kwargs=self.kwargs)
 
@@ -1213,7 +1211,7 @@ class DeleteUnitViewTests(MyTestCase):
         self.kwargs = {
             'course_pk': self.get_test_course().id,
             'courselet_pk': self.get_test_courseunit().id,
-            'pk': self.get_test_courslet().id
+            'pk': self.get_test_unitlesson().id
         }
         self.url = reverse('ctms:unit_delete', kwargs=self.kwargs)
 
