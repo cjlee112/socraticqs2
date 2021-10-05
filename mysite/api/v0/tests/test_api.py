@@ -208,3 +208,14 @@ def test_invite_not_instructor(teacher_invite_dict, client, user):
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
+@pytest.mark.django_db
+def test_invite_success(teacher_invite_dict, client, user):
+    'invite API by instructor user should succeed'
+    client.force_login(user)
+    Instructor.objects.create(user=user, institution='institute', what_do_you_teach='something')
+    data = teacher_invite_dict.copy()
+    data['first_name'] = 'Boris'
+    data['last_name'] = 'Karloff'
+    response = client.post(reverse("api:v0:invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_200_OK
