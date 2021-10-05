@@ -113,7 +113,7 @@ rm:
 	docker-compose -f $(DOCKERCOMPOSE_PATH) rm
 
 test:
-	docker-compose -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
+	docker-compose  --env-file ./envs/test.env -f $(DOCKERCOMPOSE_PATH) run --rm $(APP) \
 			bash -c \
 			" \
 			find . | grep -E \"(__pycache__|\.pyc|\.pyo$\)\" | xargs rm -rf && \

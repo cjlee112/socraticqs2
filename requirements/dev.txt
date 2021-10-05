@@ -1,12 +1,12 @@
 # Packages required for local development
 -r test.txt
 
-ipython==5.5.0
-ipdb<=0.11
+ipython
+ipdb
 
 pep8
 pylint-django
-django-debug-toolbar==1.8
+django-debug-toolbar
 flake8
 ptvsd
-mypy==0.761
+mypy
