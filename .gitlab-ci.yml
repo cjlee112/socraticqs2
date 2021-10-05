@@ -103,15 +103,18 @@ Python tests:
     - tags
   script:
     - docker run -d --name mongo_$CI_COMMIT_SHORT_SHA mongo:4.0
+    - docker run -d --name postgres_$CI_COMMIT_SHORT_SHA postgres:11.5
     - docker run
       --volume ${PWD}/logs:/home/courselets/app/logs
       --volume ${PWD}/.git:/home/courselets/app/.git
       --rm
       --link mongo_$CI_COMMIT_SHORT_SHA:mongo
+      --link postgres_$CI_COMMIT_SHORT_SHA:postgres
       $REGISTRY/courselets-test:$CI_COMMIT_SHORT_SHA
       make coverage
   after_script:
     - docker rm -f mongo_$CI_COMMIT_SHORT_SHA || true
+    - docker rm -f postgres_$CI_COMMIT_SHORT_SHA || true
 
 Check code quality:
   interruptible: true

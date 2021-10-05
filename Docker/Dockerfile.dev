@@ -13,7 +13,6 @@ RUN apt-get -y update && \
 	libxml2-dev \
 	libxslt1-dev \
 	make \
-	phantomjs \
 	python3-dev \
 	wget \
 	zlib1g-dev \

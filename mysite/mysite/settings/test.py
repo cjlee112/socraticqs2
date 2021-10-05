@@ -3,7 +3,17 @@
 from .base import *
 
 
-DATABASES['default']['NAME'] = 'test.db'
+# Test DB settings for docker postgres container
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'test_courselets'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('PGPASSWORD', 'postgres'),
+        'HOST': os.environ.get('DB_SERVICE', 'postgres'),
+        'PORT': os.environ.get('DB_PORT', '5432')
+    }
+}
 
 SECRET_KEY = 'KEY'
 
