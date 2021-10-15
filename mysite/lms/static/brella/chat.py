@@ -100,7 +100,7 @@ class ChatQuery(object):
     def load_history(self, already):
         'stub for any processing needed of history dict'
         return already
-    async def get(self, path, history=None, ignoreHistory=False):
+    async def get(self, path, history=None, ignoreHistory=False, showInChat=True):
         if history is None:
             history = {}
         if path: # no path means exclude from history mechanism
@@ -109,7 +109,10 @@ class ChatQuery(object):
                 self.close(already.get('message', ''))
                 return already.get('outcome', None)
         await self.sleep_until_data()
-        self.close(self.message)
+        if showInChat:
+            self.close(self.message) # display as chat message
+        else:
+            self.close()
         history.update(self.posted) # hand our POSTed messages back to history
         return self.outcome
     async def sleep_until_data(self, attr='outcome'):
@@ -149,7 +152,7 @@ class ChatQuery(object):
 
 async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
     query = ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", postData=postData, **kwargs)
-    await query.get(path, history)
+    await query.get(path, history, showInChat=False)
     return query.msgElements # list of DOM elements output as chats
 
 class ChatInput(ChatQuery):
