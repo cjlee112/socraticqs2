@@ -193,6 +193,7 @@ class ChatCanvas(ChatInput):
         self.postData['canvasSVG'] = svgData
         self.send_post(self.postData)
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
+        self.canvas.style.display = 'none' # will be shown instead in message bubble
         self.outcome = outcome # don't release lock until done
 
 
