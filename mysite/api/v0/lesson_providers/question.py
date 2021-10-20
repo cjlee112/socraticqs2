@@ -76,13 +76,12 @@ class QuestionProvider:
             "title": self._data.get("title", ""),
             "text": self._convert_data(),
             "kind": Lesson.ORCT_QUESTION,
-            "treeID": 1,
             "addedBy": author or self._unit.addedBy,
         }
         _converted.update(self.extra())
 
         question = Lesson(**_converted)
-        question.save()
+        question.save_root()
 
         return question
 
@@ -98,7 +97,7 @@ class QuestionProvider:
         _converted.update(self.extra_answer())
 
         answer = Lesson(**_converted)
-        answer.save()
+        answer.save_root()
 
         return answer
 

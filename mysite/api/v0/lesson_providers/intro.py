@@ -45,13 +45,12 @@ class IntroProvider:
             "title": self._data.get("title", ""),
             "text": self._convert_data(),
             "kind": Lesson.BASE_EXPLANATION,
-            "treeID": 1,
             "addedBy": author or self._unit.addedBy,
         }
         _converted.update(self.extra())
 
         intro = Lesson(**_converted)
-        intro.save()
+        intro.save_root()
 
         return intro
 

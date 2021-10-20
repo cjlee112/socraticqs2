@@ -45,13 +45,12 @@ class SubKindBaseProvider:
             "text": self._convert_data(),
             "kind": Lesson.ORCT_QUESTION,
             "sub_kind": self.SUB_KIND,
-            "treeID": 1,
             "addedBy": author or self._unit.addedBy,
         }
         _converted.update(self.extra())
 
         question = Lesson(**_converted)
-        question.save()
+        question.save_root()
 
         return question
 
@@ -67,7 +66,7 @@ class SubKindBaseProvider:
         _converted.update(self.extra_answer())
 
         answer = Lesson(**_converted)
-        answer.save()
+        answer.save_root()
 
         return answer
 
