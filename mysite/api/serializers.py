@@ -267,9 +267,21 @@ class ORCTSerializer3(ORCTSerializer2):
         return data
 
 
+class MultipleChoiceSerializer(serializers.BaseSerializer):
+    'question serializer for brella API'
+    _ulSerializer = ULSerializer2
+    _emSerializer = ULSerializer2
+    def to_representation(self, ul):
+        data = dict(kind='assess-only', sub_kind=ul.lesson.sub_kind, title=ul.lesson.title)
+        data['question'] = self._ulSerializer(ul).data
+        data['question']['choices'] = ul.lesson.data['choices']
+        return data
+
 
 def get_ul_serializer(ul, _orctSerializer=ORCTSerializer2, _ulSerializer=ULSerializer2):
-    if ul.lesson.kind == Lesson.ORCT_QUESTION:
+    if ul.lesson.sub_kind == SubKindMixin.MULTIPLE_CHOICES:
+        return MultipleChoiceSerializer(ul)
+    elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return _orctSerializer(ul)
     else: # treat as a simple explanation
         return _ulSerializer(ul)
