@@ -168,6 +168,8 @@ async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, ins
         if wantsHelp:
             t['history']['insertBeforeID'] = msgs[0].id
             oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
+    elif t['kind'] == 'assess-only':
+        await do_assessment(t, postData, t['history'], sidebar, insertBeforeID)
     else:
         await show_explanation(t, postData, t['history'], sidebar, insertBeforeID)
     sidebar.set_on_sidebar(t['thread_id'], status='done')
@@ -197,6 +199,22 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
     msgs = await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
                                       path='done', postData=postData, history=history, insertBeforeID=insertBeforeID)
     return ('help' in stati), msgs
+
+
+async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=None):
+    'run a multiple-choice question'
+    postDataQ = postData.copy()
+    postDataQ['ul_id'] = mainThread['question']['ul_id'] # POST messages will be about this question
+    msgs = chat.post_messages((("ChatBreakpointTemplate", mainThread['title']),),
+                              chatSelector='span', insertBeforeID=insertBeforeID)
+    sidebar.set_on_sidebar(mainThread['thread_id'], msgs[0].id)
+    chats=(("ChatMessageTemplate", mainThread['question']['message']),)
+    query = chat.MultipleChoice(chats, mainThread['question']['choices'], "em-list-template",
+                                "em-choice-template", postData=postDataQ, insertBeforeID=insertBeforeID)
+    ichoice = await query.get('response', history)
+
+
+
 
 
 async def show_explanation(e, postData, history, sidebar, insertBeforeID=None):
