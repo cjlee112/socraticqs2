@@ -208,11 +208,31 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
     msgs = chat.post_messages((("ChatBreakpointTemplate", mainThread['title']),),
                               chatSelector='span', insertBeforeID=insertBeforeID)
     sidebar.set_on_sidebar(mainThread['thread_id'], msgs[0].id)
-    chats=(("ChatMessageTemplate", mainThread['question']['message']),)
-    query = chat.MultipleChoice(chats, mainThread['question']['choices'], "em-list-template",
+    chats = (("ChatMessageTemplate", mainThread['question']['message']),)
+    choices = mainThread['question']['choices']
+    query = chat.MultipleChoice(chats, choices, "em-list-template",
                                 "em-choice-template", postData=postDataQ, insertBeforeID=insertBeforeID)
     ichoice = await query.get('response', history)
-
+    postDataQ['response_id'] = await query.get_server_response('response_id')
+    chosen = choices[ichoice]
+    if chosen['correct']:
+        message = 'Correct.'
+        if 'clue' in chosen:
+            message = message + '  ' + chosen['clue']
+        chats = (("ChatMessageTemplate", message),)
+        await chat.continue_button(chats, path='done', postData=postDataQ, history=history,
+                               insertBeforeID=insertBeforeID)
+    else:
+        message = "No, that's not quite right."
+        if 'clue' in chosen:
+            message = message + '  ' + chosen['clue']
+        for c in choices:
+            if c['correct']:
+                message = message + f'  The correct answer is: {c["title"]}.'
+                break
+        chats = (("ChatMessageTemplate", message),)
+        await chat.continue_button(chats, path='done', postData=postDataQ, history=history,
+                               insertBeforeID=insertBeforeID)
 
 
 
