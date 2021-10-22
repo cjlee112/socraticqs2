@@ -177,8 +177,8 @@ async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, ins
 
 async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=None):
     'perform basic ORCT chat cycle on one thread'
-    postDataQ = postData.copy()
-    postDataQ['ul_id'] = mainThread['question']['ul_id'] # POST messages will be about this question
+    postDataQ = sidebar.advance_chat_thread(mainThread, postData, mainThread['question']['ul_id'],
+                                            insertBeforeID)
     await pose_orct(mainThread, postDataQ, history, sidebar, insertBeforeID)
     s = await get_selfeval(mainThread['answer'], postDataQ, history, insertBeforeID)
     stati = ()
@@ -203,11 +203,8 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
 
 async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=None):
     'run a multiple-choice question'
-    postDataQ = postData.copy()
-    postDataQ['ul_id'] = mainThread['question']['ul_id'] # POST messages will be about this question
-    msgs = chat.post_messages((("ChatBreakpointTemplate", mainThread['title']),),
-                              chatSelector='span', insertBeforeID=insertBeforeID)
-    sidebar.set_on_sidebar(mainThread['thread_id'], msgs[0].id)
+    postDataQ = sidebar.advance_chat_thread(mainThread, postData, mainThread['question']['ul_id'],
+                                            insertBeforeID)
     chats = (("ChatMessageTemplate", mainThread['question']['message']),)
     choices = mainThread['question']['choices']
     query = chat.MultipleChoice(chats, choices, "em-list-template",
@@ -239,10 +236,7 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
 
 async def show_explanation(e, postData, history, sidebar, insertBeforeID=None):
     'display explanation message with Continue button'
-    postData['ul_id'] = e['ul_id']
-    msgs = chat.post_messages((("ChatBreakpointTemplate", e['title']),),
-                              chatSelector='span', insertBeforeID=insertBeforeID)
-    sidebar.set_on_sidebar(e['thread_id'], msgs[0].id)
+    postData = sidebar.advance_chat_thread(e, postData, insertBeforeID=insertBeforeID)
     await chat.continue_button(chat.get_orct_instructor_chats(e),
                                path='done', postData=postData, history=history,
                                insertBeforeID=insertBeforeID)
@@ -250,9 +244,6 @@ async def show_explanation(e, postData, history, sidebar, insertBeforeID=None):
 
 async def pose_orct(orct, postData, history, sidebar, insertBeforeID=None):
     'ask question, student responds, gives confidence level'
-    msgs = chat.post_messages((("ChatBreakpointTemplate", orct['title']),),
-                              chatSelector='span', insertBeforeID=insertBeforeID)
-    sidebar.set_on_sidebar(orct['thread_id'], msgs[0].id)
     query = chat.get_orct_query_ui(orct['question'], postData=postData, insertBeforeID=insertBeforeID)
     await query.get('response', history)
     postData['response_id'] = await query.get_server_response('response_id')

@@ -446,6 +446,16 @@ class SidebarToggler(object):
     def set_on_sidebar(self, thread_id, msgID=None, status='is-active'):
         if thread_id in self.threads:
             self.threads[thread_id].set_status(status, msgID)
+    def advance_chat_thread(self, chatThread, postData, ul_id=None, insertBeforeID=None):
+        'show in sidebar and chat that we are starting a new thread'
+        msgs = post_messages((("ChatBreakpointTemplate", chatThread['title']),),
+                             chatSelector='span', insertBeforeID=insertBeforeID)
+        self.set_on_sidebar(chatThread['thread_id'], msgs[0].id)
+        postData = postData.copy() # leave postData from caller unchanged, to avoid side effects
+        if ul_id is None:
+            ul_id = chatThread['ul_id']
+        postData['ul_id'] = ul_id
+        return postData
     def set_next_resource(self, thread_id):
         self.resourceNext = thread_id
         if self.resourceDefer:
