@@ -20,7 +20,7 @@ def notify_for_updates(**kwargs):
         for courselet in course.get_course_units():
             for student in course.students:
                 last_chat = student.chat_set.filter(enroll_code__courseUnit=courselet).order_by('id').last()
-                if last_chat.is_history and last_chat.has_updates:
+                if last_chat and last_chat.is_history and last_chat.has_updates:
                     url = reverse(
                         'chat:chat_enroll',
                         kwargs={'enroll_key': last_chat.enroll_code.enrollCode}
