@@ -24,6 +24,7 @@ def copy_to_container(templateID, containerID, msgText=None, selector=None, hand
         container.insertBefore(message, document[insertBeforeID])
     else:
         container <= message # append to container's children
+    window.mathjax_on_element(message.id)
     document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight # scroll to bottom
     return message, container
 
