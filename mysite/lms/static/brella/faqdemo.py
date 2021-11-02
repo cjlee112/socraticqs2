@@ -205,8 +205,9 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
     'run a multiple-choice question'
     postDataQ = sidebar.advance_chat_thread(mainThread, postData, mainThread['question']['ul_id'],
                                             insertBeforeID)
-    chats = (("ChatMessageTemplate", mainThread['question']['message']),)
-    choices = mainThread['question']['choices']
+    htmldata = mainThread['question']['md2html']
+    chats = (("ChatMessageTemplate", htmldata['text']),)
+    choices = htmldata['choices']
     query = chat.MultipleChoice(chats, choices, "em-list-template",
                                 "em-choice-template", postData=postDataQ, insertBeforeID=insertBeforeID)
     ichoice = await query.get('response', history)
@@ -215,20 +216,27 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
     if chosen['correct']:
         message = 'Correct.'
         if 'clue' in chosen:
-            message = message + '  ' + chosen['clue']
+            message = message + '  ' + chosen['clue']['text']
         chats = (("ChatMessageTemplate", message),)
         await chat.continue_button(chats, path='done', postData=postDataQ, history=history,
                                insertBeforeID=insertBeforeID)
     else:
         message = "No, that's not quite right."
         if 'clue' in chosen:
-            message = message + '  ' + chosen['clue']
+            message = message + '  ' + chosen['clue']['text']
         for c in choices:
             if c['correct']:
-                message = message + f'  The correct answer is: {c["title"]}.'
+                message = message + f'  The correct answer is: {c["text"]}.'
                 break
         chats = (("ChatMessageTemplate", message),)
-        await chat.continue_button(chats, path='done', postData=postDataQ, history=history,
+        await chat.continue_button(chats, path='saw-answer', postData=postDataQ, history=history,
+                               insertBeforeID=insertBeforeID)
+        status = await get_status((("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us."),),
+                                       'status', postDataQ, history, insertBeforeID)
+        if status == 'help':
+            for i, hint in enumerate(htmldata.get('hints', ())):
+                chats = (("ChatMessageTemplate", hint['text']),)
+                await chat.continue_button(chats, path=f'hint{i}', postData=postDataQ, history=history,
                                insertBeforeID=insertBeforeID)
 
 
