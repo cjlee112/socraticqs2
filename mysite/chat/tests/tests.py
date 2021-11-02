@@ -43,7 +43,7 @@ class CustomTestCase(TestCase):
         get_specs_resource()[0].save_graph(self.user.username)
         get_specs_faq()[0].save_graph(self.user.username)
 
-        self.unit = Unit(title='Test title', addedBy=self.user)
+        self.unit = Unit(title='Test title', description='newChatMode=legacy', addedBy=self.user)
         self.unit.save()
         self.course = Course(title='Test title',
                              description='test description',
@@ -74,7 +74,7 @@ class CustomTestCase(TestCase):
         )
         self.resource_unitlesson.save()
         # TODO remove this later
-        self.unit_dummy = Unit(title='Test title', addedBy=self.user)
+        self.unit_dummy = Unit(title='Test title', description='newChatMode=legacy', addedBy=self.user)
         self.unit_dummy.save()
         lesson_dummy = Lesson(title='Hope you\'ve overcame the misconception',
                               text='Hope you\'ve overcame the misconception',
