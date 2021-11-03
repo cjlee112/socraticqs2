@@ -25,7 +25,7 @@ def report(course_id, user_id):
     last_resps = []
 
     q = Response.objects.filter(
-        Q(kind='orct') | Q(sub_kind='choices'), unitLesson__order__isnull=False, course__id=course_id
+        Q(kind=Response.ORCT_RESPONSE) | Q(sub_kind=Response.MULTIPLE_CHOICES), unitLesson__order__isnull=False, course__id=course_id
     )
 
     for obj in q:
@@ -47,7 +47,7 @@ def report(course_id, user_id):
             lti_identity = lti_user.user_id
         else:
             lti_identity = None
-        if obj.sub_kind == 'choices':
+        if obj.sub_kind == Response.MULTIPLE_CHOICES:
             text = obj.show_my_choices()
         else:
             text = obj.text
