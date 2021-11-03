@@ -8,6 +8,7 @@ from ct.models import Lesson
 
 
 class SubKindBaseProvider:
+    KIND = Lesson.ORCT_QUESTION
     def __init__(self, data, unit):
         self._data = data
         self._unit = unit
@@ -26,7 +27,16 @@ class SubKindBaseProvider:
         This can be used to override any fields indended to be
         added to a Lesson instance.
         """
-        return {}
+        out = {}
+        if 'data' in self._data:   # let caller save JSON directly into Lesson.data
+            out['data'] = self._data['data']
+        if 'text2html' in self._data:   # let caller save JSON directly into Lesson.text2html
+            out['text2html'] = self._data['text2html']
+        if 'image' in self._data:  # Generate an Image attachment based on base64 data.
+            out['attachment'] = ContentFile(base64.b64decode(self._data["image"]),
+                                            name=f"multichoice_image_{secrets.token_hex(15)}.jpg")
+        return out
+
 
     def extra_answer(self):
         """
@@ -35,7 +45,11 @@ class SubKindBaseProvider:
         This can be used to override any fields indended to be
         added to a answer Lesson instance.
         """
-        return {}
+        out = {}
+        if 'answerImg' in self._data:  # Generate an Image attachment based on base64 data.
+            out['attachment'] = ContentFile(base64.b64decode(self._data["answerImg"]),
+                                            name=f"multichoice_answer_image_{secrets.token_hex(15)}.jpg")
+        return out
 
     def get_question(self):
         author = User.objects.filter(username=self._data.get("author")).first()
@@ -43,7 +57,7 @@ class SubKindBaseProvider:
         _converted = {
             "title": self._data.get("title", ""),
             "text": self._convert_data(),
-            "kind": Lesson.ORCT_QUESTION,
+            "kind": self.KIND,
             "sub_kind": self.SUB_KIND,
             "addedBy": author or self._unit.addedBy,
         }
@@ -72,46 +86,8 @@ class SubKindBaseProvider:
 
 
 class MultiChoiceProvider(SubKindBaseProvider):
+    KIND = Lesson.ASSESSMENT
     SUB_KIND = Lesson.MULTIPLE_CHOICES
-
-    def extra(self):
-        """
-        Generate an Image attachment based on base64 data.
-
-        API request data must contain `image` field with
-        base64 encoded image.
-        """
-        if not self._data.get("image"):
-            return {}
-
-        _ext = "jpg"
-        _attachment = ContentFile(
-            base64.b64decode(self._data["image"]),
-            name=f"multichoice_image_{secrets.token_hex(15)}." + _ext)
-
-        return {
-            "attachment": _attachment
-        }
-
-    def extra_answer(self):
-        """
-        Generate an Image attachment based on base64 data.
-
-        API request data must contain `answerImg` field with
-        base64 encoded image.
-        """
-        if not self._data.get("answerImg"):
-            return {}
-
-        _ext = "jpg"
-        _attachment = ContentFile(
-            base64.b64decode(self._data["answerImg"]),
-            name=f"multichoice_answer_image_{secrets.token_hex(15)}." + _ext)
-
-        return {
-            "attachment": _attachment
-        }
-
     def _convert_data(self):
         correct_text = f"{self._data['question']}\r\n\r\n[choices]\r\n"
 

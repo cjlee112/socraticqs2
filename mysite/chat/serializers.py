@@ -13,7 +13,7 @@ from django.core.files.base import ContentFile
 from lti.models import GradedLaunch
 from lti.tasks import send_outcome
 from lti.utils import key_secret_generator
-from ct.models import Response, UnitLesson, StudentError, InquiryCount, NEED_HELP_STATUS, NEED_REVIEW_STATUS
+from ct.models import Response, UnitLesson, StudentError, InquiryCount, NEED_HELP_STATUS, NEED_REVIEW_STATUS, SubKindMixin
 from accounts.models import Instructor
 from . models import Message, Chat
 from . services import ProgressHandler
@@ -135,15 +135,10 @@ class MessageSerializer(serializers.ModelSerializer):
             if i.contenttype == 'uniterror' or i.kind == 'abort':
                 incl_msg.append(i.id)
             if i.contenttype == 'unitlesson' and i.content:
-                if i.content.lesson.sub_kind == 'choices':
-                    sub_kind = 'choices'
+                if i.content.lesson.sub_kind:
+                    sub_kind = i.content.lesson.sub_kind
+                if i.content.lesson.sub_kind == SubKindMixin.MULTIPLE_CHOICES:
                     incl_msg.append(i.id)
-                if i.content.sub_kind == 'numbers':
-                    sub_kind = 'numbers'
-                if i.content.lesson.sub_kind == 'equation':
-                    sub_kind = 'equation'
-                elif i.content.lesson.sub_kind == 'canvas':
-                    sub_kind = 'canvas'
             # Add UnitLesson id for JS to check during selection validation
             if i.contenttype == 'unitlesson' and i.kind == 'faqs':
                 incl_msg.append(i.id)
@@ -156,12 +151,12 @@ class MessageSerializer(serializers.ModelSerializer):
             'includeSelectedValuesFromMessages': incl_msg,
         }
         if i.contenttype == 'unitlesson':
-            if sub_kind == 'numbers':
+            if sub_kind == SubKindMixin.NUMBERS:
                 input_data['html'] = '<input type="number" name="{}" value="{}">'.format(
                     "text",
                     0,
                 )
-            elif sub_kind == 'canvas':
+            elif sub_kind == SubKindMixin.CANVAS:
                 input_data['html'] = '<input type="hidden" />'
 
             input_data['subType'] = sub_kind
@@ -215,15 +210,10 @@ class ChatHistorySerializer(serializers.ModelSerializer):
             if msg.contenttype == 'uniterror' or msg.kind == 'abort':
                 incl_msg.append(msg.id)
             if msg.contenttype == 'unitlesson' and msg.content:
-                if msg and msg.contenttype == 'unitlesson' and msg.content and msg.content.lesson.sub_kind == 'choices':
-                    sub_kind = 'choices'
+                if msg.content.lesson.sub_kind:
+                    sub_kind = msg.content.lesson.sub_kind
+                if msg.content.lesson.sub_kind == SubKindMixin.MULTIPLE_CHOICES:
                     incl_msg.append(msg.id)
-                if msg.content.lesson.sub_kind == 'numbers':
-                    sub_kind = 'numbers'
-                elif msg.content.lesson.sub_kind == 'equation':
-                    sub_kind = 'equation'
-                elif msg.content.lesson.sub_kind == 'canvas':
-                    sub_kind = 'canvas'
             # Add UnitLesson id for JS to check during selection validation
             if msg.contenttype == 'unitlesson' and msg.kind == 'faqs':
                 incl_msg.append(msg.id)
@@ -238,11 +228,11 @@ class ChatHistorySerializer(serializers.ModelSerializer):
         }
 
         if msg and msg.contenttype == 'unitlesson':
-            if sub_kind == 'numbers':
+            if sub_kind == SubKindMixin.NUMBERS:
                 input_data['html'] = '<input name="{}" type="number" value="{}">'.format(
                     "text", 0,
                 )
-            elif sub_kind == 'canvas':
+            elif sub_kind == SubKindMixin.CANVAS:
                 input_data['html'] = '<input type="hidden" />'
 
             input_data['subType'] = sub_kind
@@ -745,7 +735,7 @@ class MessageSerializer2(serializers.BaseSerializer):
                 'response_to_check' not in valid) or path.startswith('faqs.add_answer.'):
             ul = valid['lesson_to_answer'] # create a new Response record
             r = Response.objects.create(unitLesson=ul, lesson=ul.lesson, author=valid['owner'],
-                    course=chat.enroll_code.courseUnit.course,
+                    course=chat.enroll_code.courseUnit.course, sub_kind=ul.lesson.sub_kind,
                     is_preview=chat.is_preview, is_test=chat.is_test)
             if path.startswith('faqs.add_answer.'): # instructor answering a FAQ
                 r.kind = Response.COMMENT
@@ -760,6 +750,8 @@ class MessageSerializer2(serializers.BaseSerializer):
                 remap.append(('response_to_check', 'faq_id'))
             else: # mark as ORCT response from student
                 r.text = extra['message']
+                if r.sub_kind == SubKindMixin.MULTIPLE_CHOICES:
+                    r.data = dict(ichoice=extra['outcome'])
                 remap.append(('response_to_check', 'response_id'))
             if 'canvasSVG' in extra:
                 name = '{}-{}.{}'.format('canvas', key_secret_generator(), 'svg')

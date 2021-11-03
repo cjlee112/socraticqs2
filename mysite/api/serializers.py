@@ -205,6 +205,8 @@ class ULSerializer2(serializers.BaseSerializer):
                     atime=ul.atime.timetuple())
         if ul.lesson.attachment:
             data['image'] = ul.lesson.attachment.url
+        if ul.lesson.text2html: # include pre-formatted HTML if provided
+            data['text2html'] = ul.lesson.text2html
         faqs = []
         faq_answers = []
         for f in ul.response_set.filter(Q(kind=Response.STUDENT_QUESTION) | Q(kind=Response.COMMENT)):
@@ -267,20 +269,19 @@ class ORCTSerializer3(ORCTSerializer2):
         return data
 
 
-class MultipleChoiceSerializer(serializers.BaseSerializer):
+class AssessmentSerializer(serializers.BaseSerializer):
     'question serializer for brella API'
     _ulSerializer = ULSerializer2
     _emSerializer = ULSerializer2
     def to_representation(self, ul):
-        data = dict(kind='assess-only', sub_kind=ul.lesson.sub_kind, title=ul.lesson.title)
+        data = dict(kind=ul.lesson.kind, sub_kind=ul.lesson.sub_kind, title=ul.lesson.title)
         data['question'] = self._ulSerializer(ul).data
-        data['question']['choices'] = ul.lesson.data['choices']
         return data
 
 
 def get_ul_serializer(ul, _orctSerializer=ORCTSerializer2, _ulSerializer=ULSerializer2):
-    if ul.lesson.sub_kind == SubKindMixin.MULTIPLE_CHOICES:
-        return MultipleChoiceSerializer(ul)
+    if ul.lesson.kind == Lesson.ASSESSMENT:
+        return AssessmentSerializer(ul)
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return _orctSerializer(ul)
     else: # treat as a simple explanation

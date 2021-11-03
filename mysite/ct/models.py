@@ -63,6 +63,13 @@ class SubKindMixin(object):
     EQUATION = 'equation'
     CANVAS = 'canvas'
 
+    SUB_KIND_CHOICES = (
+        (MULTIPLE_CHOICES, 'Multiple Choices Question'),
+        (NUMBERS, 'Numbers'),
+        (EQUATION, 'Equation'),
+        (CANVAS, 'Canvas'),
+    )
+
     def is_canvas(self):
         try:
             unit_lesson = self.unitlesson_set.first()
@@ -262,6 +269,7 @@ class Lesson(models.Model, SubKindMixin):
     EXERCISE = 'exercise'
     PROJECT = 'project'
     PRACTICE_EXAM = 'practice'
+    ASSESSMENT = 'assess-only'
 
     ANSWER = 'answer'
     ERROR_MODEL = 'errmod'
@@ -291,6 +299,7 @@ class Lesson(models.Model, SubKindMixin):
         (EXERCISE, EXERCISE),
         (PROJECT, PROJECT),
         (PRACTICE_EXAM, 'practice exam question'),
+        (ASSESSMENT, 'for assessment purposes only'),
         (ANSWER, ANSWER),
         (ERROR_MODEL, 'error model'),
         (DATA, DATA),
@@ -298,12 +307,6 @@ class Lesson(models.Model, SubKindMixin):
         (ENCYCLOPEDIA, 'Encyclopedia'),
         (FAQ_QUESTION, 'frequently asked question'),
         (FORUM, FORUM),
-    )
-    SUB_KIND_CHOICES = (
-        (SubKindMixin.MULTIPLE_CHOICES, 'Multiple Choices Question'),
-        (SubKindMixin.NUMBERS, 'Numbers'),
-        (SubKindMixin.EQUATION, 'Equation'),
-        (SubKindMixin.CANVAS, 'Canvas'),
     )
     MEDIA_CHOICES = (
         (READING, READING),
@@ -321,10 +324,11 @@ class Lesson(models.Model, SubKindMixin):
     attachment = models.FileField(null=True, blank=True, upload_to='questions')
 
     data = JSONField(null=True, blank=True)  # JSON DATA
+    text2html = JSONField(null=True, blank=True)  # caches latest pre-formatted HTML data
     url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
-    sub_kind = models.CharField(max_length=50, choices=SUB_KIND_CHOICES, blank=True, null=True)
+    sub_kind = models.CharField(max_length=50, choices=SubKindMixin.SUB_KIND_CHOICES, blank=True, null=True)
     # lessons with sub kind numbers
     number_value = models.FloatField(default=0)
     number_max_value = models.FloatField(default=0)
@@ -1537,13 +1541,6 @@ class Response(models.Model, SubKindMixin):
         (COMMENT, 'Reply comment'),
     )
 
-    # new interactions
-    SUB_KIND_CHOICES = (
-        (SubKindMixin.MULTIPLE_CHOICES, 'Multiple Choices response'),
-        (SubKindMixin.NUMBERS, 'Numbers response'),
-        (SubKindMixin.EQUATION, 'Equation response'),
-        (SubKindMixin.CANVAS, 'Canvas response'),
-    )
     CORRECT = 'correct'
     CLOSE = 'close'
     DIFFERENT = 'different'
@@ -1572,9 +1569,11 @@ class Response(models.Model, SubKindMixin):
     is_test = models.BooleanField(default=False)
     is_preview = models.BooleanField(default=False)
 
-    sub_kind = models.CharField(max_length=10, choices=SUB_KIND_CHOICES, blank=True, null=True)
+    sub_kind = models.CharField(max_length=10, choices=SubKindMixin.SUB_KIND_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
+    text2html = JSONField(null=True, blank=True)  # caches latest pre-formatted HTML data
+    data = JSONField(null=True, blank=True)  # general purpose JSON data storage
     attachment = models.FileField(null=True, blank=True, upload_to='answers')
 
     confidence = models.CharField(max_length=10, choices=CONF_CHOICES,
@@ -1738,7 +1737,7 @@ class Response(models.Model, SubKindMixin):
                 return self.CLASSIFY_STEP, 'classify your error(s)'
 
     def show_my_choices(self):
-        if self.sub_kind != 'choices':
+        if self.sub_kind != self.MULTIPLE_CHOICES:
             raise ValueError('Response.sub_kind should be choices to call this function')
 
         available_choices = dict(self.lesson.get_choices())
