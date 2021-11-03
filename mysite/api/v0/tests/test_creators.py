@@ -182,7 +182,7 @@ def test_question_multichoice(unit, multichoice_data):
     assert thread.id
     assert thread.order == 0
     assert thread.kind == UnitLesson.COMPONENT
-    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.kind == Lesson.ASSESSMENT
     assert base64.b64encode(thread.lesson.attachment.read()) == multichoice_data["image"].encode()
     assert thread.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
     assert thread.lesson.title == multichoice_data["title"]
@@ -212,7 +212,7 @@ def test_question_multichoice_img(unit, multichoice_img_data):
     assert thread.id
     assert thread.order == 0
     assert thread.kind == UnitLesson.COMPONENT
-    assert thread.lesson.kind == Lesson.ORCT_QUESTION
+    assert thread.lesson.kind == Lesson.ASSESSMENT
     assert thread.lesson.sub_kind == Lesson.MULTIPLE_CHOICES
     assert thread.lesson.title == multichoice_img_data["title"]
     assert thread.lesson.text == correct_text
