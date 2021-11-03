@@ -205,7 +205,7 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
     'run a multiple-choice question'
     postDataQ = sidebar.advance_chat_thread(mainThread, postData, mainThread['question']['ul_id'],
                                             insertBeforeID)
-    htmldata = mainThread['question']['md2html']
+    htmldata = mainThread['question']['text2html']
     chats = (("ChatMessageTemplate", htmldata['text']),)
     choices = htmldata['choices']
     query = chat.MultipleChoice(chats, choices, "em-list-template",
