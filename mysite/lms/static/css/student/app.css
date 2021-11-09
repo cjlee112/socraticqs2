@@ -831,7 +831,8 @@ p + p {
       border-top: 1px solid #EBEEF0; }
       .chat-message .chat-bubble .chat-select-list > li {
         position: relative;
-        padding: 40px 80px 40px 124px;
+        padding: 20px 80px 20px 124px;
+        min-height: 84px;
         margin: 0;
         border-bottom: 1px solid #EBEEF0; }
         .chat-message .chat-bubble .chat-select-list > li:last-child {
@@ -839,7 +840,7 @@ p + p {
       .chat-message .chat-bubble .chat-select-list .chat-check {
         display: block;
         position: absolute;
-        top: 40px;
+        top: 20px;
         left: 40px;
         width: 44px;
         height: 44px;
@@ -853,6 +854,14 @@ p + p {
         .chat-message .chat-bubble .chat-select-list .chat-check.chat-selectable-selected {
           background: url(../../img/student/chat-select-list-active.png) no-repeat top left;
           background-image: url(../../img/student/chat-select-list-active.svg), none; }
+      .chat-message .chat-bubble .chat-image-choice {
+        height: 80px;
+        background-image: url(../../img/student/chat-select-list-active.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: top left; }
+      .chat-message .chat-bubble .chat-text-choice {
+        display: inline; }
       .chat-message .chat-bubble .chat-select-list h3 {
         font-size: 15px;
         line-height: 22px;
@@ -862,6 +871,11 @@ p + p {
         padding: 0; }
       .chat-message .chat-bubble .chat-select-list p {
         margin: 0; }
+      .chat-message .chat-bubble .chat-mc-img {
+        display: inline;
+        float: left;
+        margin-right: 20px;
+        height: 80px; }
       .chat-message .chat-bubble .chat-select-list .description {
         color: #666; }
     .chat-message .chat-bubble .MathJax_Display {
