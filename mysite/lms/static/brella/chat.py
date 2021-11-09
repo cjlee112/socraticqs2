@@ -116,13 +116,10 @@ class ChatQuery(object):
         if path: # no path means exclude from history mechanism
             already = self.check_history(path, history)
             if already and not ignoreHistory:
-                self.close(already.get('message', ''))
+                self.close(already.get('message', ''), showInChat)
                 return already.get('outcome', None)
         await self.sleep_until_data()
-        if showInChat:
-            self.close(self.message) # display as chat message
-        else:
-            self.close()
+        self.close(self.message, showInChat) # display as chat message
         history.update(self.posted) # hand our POSTed messages back to history
         return self.outcome
     async def sleep_until_data(self, attr='outcome'):
@@ -132,9 +129,9 @@ class ChatQuery(object):
                 self.scrollToElement.scrollIntoView()
                 self.scrollToElement = False
         return getattr(self, attr)
-    def close(self, message=''):
+    def close(self, message='', showInChat=True):
         'display output message and clean up chat input area'
-        if message:
+        if showInChat and message:
             post_messages((("StudentMessageTemplate", message),),
                           insertBeforeID=self.insertBeforeID)
         if self.temporary:
