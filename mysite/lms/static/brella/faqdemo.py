@@ -208,8 +208,7 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
     htmldata = mainThread['question']['text2html']
     chats = (("ChatMessageTemplate", htmldata['text']),)
     choices = htmldata['choices']
-    query = chat.MultipleChoice(chats, choices, "em-list-template",
-                                "em-choice-template", postData=postDataQ, insertBeforeID=insertBeforeID)
+    query = chat.MultipleChoice(chats, choices, postData=postDataQ, insertBeforeID=insertBeforeID)
     ichoice = await query.get('response', history)
     postDataQ['response_id'] = await query.get_server_response('response_id')
     chosen = choices[ichoice]
@@ -226,7 +225,7 @@ async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=N
             message = message + '  ' + chosen['clue']['text']
         for c in choices:
             if c['correct']:
-                message = message + f'  The correct answer is: {c["text"]}.'
+                message = message + f'  The correct answer is:<br>{query.format_choice(c)}'
                 break
         chats = (("ChatMessageTemplate", message),)
         await chat.continue_button(chats, path='saw-answer', postData=postDataQ, history=history,

@@ -2,7 +2,7 @@ from browser import document, aio, ajax, window, alert
 from javascript import JSON
 
 def copy_to_container(templateID, containerID, msgText=None, selector=None, handler=None, 
-                      container=None, insertBeforeID=None, attrs=None, **kwargs):
+                      container=None, insertBeforeID=None, attrs=None, attrSelector=None, **kwargs):
     'clone a template, inject content, and append to container'
     template = document[templateID]
     message = template.cloneNode(True) # clone its full subtree including all descendants
@@ -16,8 +16,12 @@ def copy_to_container(templateID, containerID, msgText=None, selector=None, hand
     if handler:
         bind_event(handler, message, selector, **kwargs)
     if attrs:
+        if attrSelector:
+            contentElement = message.select(attrSelector)[0]
+        else:
+            contentElement = message
         for k, v in attrs.items():
-            message.attrs[k] = v
+            contentElement.attrs[k] = v
     if not container:
         container = document[containerID]
     if insertBeforeID: # insert at this specific location
@@ -208,7 +212,8 @@ class ChatCanvas(ChatInput):
 
 class MultipleChoice(ChatQuery):
     'prompt user with chat messages, then await get() to receive chosen value'
-    def __init__(self, chats, choices, listTemplate, choiceTemplate, listSelector=".chat-select-list", choiceSelector='h3',
+    def __init__(self, chats, choices, listTemplate="em-list-template", choiceTemplate='multiple-choice-template',
+                 listSelector=".chat-select-list", choiceSelector='.multiple-choice-item',
                  choiceAttr='text', chatContainer="chatSection", insertBeforeID=None, **kwargs):
         post_messages(chats, insertBeforeID=insertBeforeID)
         msg = copy_to_container(listTemplate, chatContainer, insertBeforeID=insertBeforeID)[0]
@@ -220,9 +225,18 @@ class MultipleChoice(ChatQuery):
         self.choices = choices
         self.choiceAttr = choiceAttr
         for i,c in enumerate(choices):
-            e = copy_to_container(choiceTemplate, None, c[choiceAttr], choiceSelector, container=self.container)[0]
+            itemHtml = self.format_choice(c)
+            e = copy_to_container(choiceTemplate, None, itemHtml, choiceSelector, container=self.container)[0]
             e.bind('click', self.set_choice)
             e.attrs['data-selectable-value'] = str(i)
+    def format_choice(self, c, textAttr='text', imageAttr='image'):
+        if imageAttr in c:
+            if textAttr in c:
+                return f'<img class="chat-mc-img" src="{c[imageAttr]}">{c[textAttr]}'
+            else:
+                return f'<div class="chat-image-choice" style="background-image: url({c[imageAttr]});"></div>'
+        else:
+            return f'<h3>{c[textAttr]}</h3>'
     def set_choice(self, ev):
         'user clicked one of the choices'
         div = ev.currentTarget
@@ -238,7 +252,7 @@ class MultipleChoice(ChatQuery):
             return
         outcome = int(self.chosen.attrs['data-selectable-value'])
         self.postData['outcome'] = outcome
-        self.message = self.postData['message'] = self.choices[outcome][self.choiceAttr]
+        self.message = self.postData['message'] = self.format_choice(self.choices[outcome])
         if 'path' in self.postData: # no path means DO NOT POST
             self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
