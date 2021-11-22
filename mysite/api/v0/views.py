@@ -533,6 +533,6 @@ class InviteView(APIView):
         invite.send_mail(request, password=password, messageText=request.data.get('messageText', None),
                          senderName=request.data.get('senderName', None),
                          subjectText=request.data.get('subjectText', None))
-        return RestResponse(dict(invite_id=invite.id))
+        return RestResponse(dict(invite_id=invite.id), status=status.HTTP_201_CREATED)
 
 
