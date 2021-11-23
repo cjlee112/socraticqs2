@@ -9,6 +9,10 @@ from rest_framework import status
 from ct.models import UnitLesson, Lesson
 from accounts.models import Instructor
 
+import base64
+import hashlib
+
+
 
 @pytest.mark.django_db
 def test_courselet_threads_get(course_unit, client):
@@ -219,4 +223,43 @@ def test_invite_success(teacher_invite_dict, client, user):
     response = client.post(reverse("api:v0:invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_ech_not_admin(client, user):
+    'ECH API by non-admin user should be forbidden'
+    client.force_login(user)
+    response = client.get(reverse("api:v0:external-content-hash") + '?hashID=bogus&hashID=invalid', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+@pytest.mark.django_db
+def test_ech_get(client, user):
+    'ECH API by admin user should be allowed'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    response = client.get(reverse("api:v0:external-content-hash") + '?hashID=bogus&hashID=invalid', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_200_OK
+    assert set(response.data['missing']) == set(['bogus', 'invalid']) and response.data['found'] == []
+
+
+
+@pytest.mark.django_db
+def test_ech_post(ech_example1, client, user):
+    'ECH API POST by admin user should be allowed'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    print(f"hashID: {ech_example1['hashID']}")
+    response = client.post(reverse("api:v0:external-content-hash"), data=ech_example1,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data['result']['hashID'] == ech_example1['hashID']
+    print(f"clientURL: {response.data['result']['clientURL']}")
+    assert response.data['result']['clientURL'].endswith(ech_example1['hashID'] + ech_example1['extension'])
+    response = client.get(reverse("api:v0:external-content-hash"), data=dict(hashID=ech_example1['hashID']),
+                          HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['missing'] == [] and response.data['found'][0]['hashID'] == ech_example1['hashID']
+
 

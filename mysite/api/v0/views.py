@@ -17,7 +17,7 @@ from django.db.models.functions import Length
 from accounts.models import Instructor
 from analytics.models import CourseReport
 from analytics.tasks import report
-from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson
+from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson, ExternalContentHash
 from chat.models import Chat, EnrollUnitCode
 from ctms.models import BestPractice, BestPracticeTemplate, Invite
 from core.common.mongo import do_health, c_onboarding_status
@@ -37,6 +37,7 @@ from ..serializers import (
     ResponseSerializer2,
     StudentErrorSerializer,
     TrivialSerializer,
+    ECHSerializer
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -535,4 +536,28 @@ class InviteView(APIView):
                          subjectText=request.data.get('subjectText', None))
         return RestResponse(dict(invite_id=invite.id), status=status.HTTP_201_CREATED)
 
+
+
+class ExternalContentHashView(APIView):
+    'API to upload a read-only content file such as an image'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request, *args, **kwargs):
+        'returns found=list of JSON for hashIDs found; missing=list of hashIDs not found in database'
+        hashIDs = request.query_params.getlist('hashID')
+        missing = set(hashIDs)
+        found = []
+        for ech in ExternalContentHash.objects.filter(hashID__in=hashIDs):
+            found.append(ECHSerializer(ech).data)
+            missing.remove(ech.hashID)
+        return RestResponse(dict(found=found, missing=list(missing)), status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        data['addedBy'] = request.user
+        serializer = ECHSerializer(data=data)
+        if serializer.is_valid():
+            ech = serializer.save()
+        return RestResponse(dict(result=serializer.data), status=status.HTTP_201_CREATED)
 

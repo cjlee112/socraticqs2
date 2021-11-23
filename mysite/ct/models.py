@@ -325,6 +325,7 @@ class Lesson(models.Model, SubKindMixin):
 
     data = JSONField(null=True, blank=True)  # JSON DATA
     text2html = JSONField(null=True, blank=True)  # caches latest pre-formatted HTML data
+    echfiles = models.ManyToManyField('ExternalContentHash')
     url = models.CharField(max_length=256, null=True, blank=True)
     kind = models.CharField(max_length=50, choices=KIND_CHOICES,
                             default=BASE_EXPLANATION)
@@ -1573,6 +1574,7 @@ class Response(models.Model, SubKindMixin):
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
     text2html = JSONField(null=True, blank=True)  # caches latest pre-formatted HTML data
+    echfiles = models.ManyToManyField('ExternalContentHash')
     data = JSONField(null=True, blank=True)  # general purpose JSON data storage
     attachment = models.FileField(null=True, blank=True, upload_to='answers')
 
@@ -2126,3 +2128,36 @@ def onboarding_lesson_created(sender, instance, created, **kwargs):
             email=instance.addedBy.email,
             metadata={'ORCT written': orct_count}
         )
+
+
+
+class ExternalContentHash(models.Model):
+    'generic storage for external content files as read-only hash ID'
+    MIMETYPES = ('application/javascript', 'application/json', 'application/manifest+json', 'application/msword', 
+        'application/octet-stream', 'application/oda', 'application/pdf', 'application/pkcs7-mime', 
+        'application/postscript', 'application/vnd.apple.mpegurl', 'application/vnd.ms-excel', 
+        'application/vnd.ms-powerpoint', 'application/wasm', 'application/x-bcpio', 'application/x-cpio', 
+        'application/x-csh', 'application/x-dvi', 'application/x-gtar', 'application/x-hdf', 'application/x-latex', 
+        'application/x-mif', 'application/x-netcdf', 'application/x-pkcs12', 'application/x-pn-realaudio', 
+        'application/x-python-code', 'application/x-sh', 'application/x-shar', 'application/x-shockwave-flash', 
+        'application/x-sv4cpio', 'application/x-sv4crc', 'application/x-tar', 'application/x-tcl', 'application/x-tex', 
+        'application/x-texinfo', 'application/x-troff', 'application/x-troff-man', 'application/x-troff-me', 
+        'application/x-troff-ms', 'application/x-ustar', 'application/x-wais-source', 'application/xml', 'application/zip', 
+        'audio/basic', 'audio/mpeg', 'audio/x-aiff', 'audio/x-pn-realaudio', 'audio/x-wav', 'image/gif', 'image/ief', 
+        'image/jpeg', 'image/png', 'image/svg+xml', 'image/tiff', 'image/vnd.microsoft.icon', 'image/x-cmu-raster', 
+        'image/x-ms-bmp', 'image/x-portable-anymap', 'image/x-portable-bitmap', 'image/x-portable-graymap', 
+        'image/x-portable-pixmap', 'image/x-rgb', 'image/x-xbitmap', 'image/x-xpixmap', 'image/x-xwindowdump', 
+        'message/rfc822', 'text/css', 'text/csv', 'text/html', 'text/plain', 'text/richtext', 'text/tab-separated-values', 
+        'text/x-python', 'text/x-setext', 'text/x-sgml', 'text/x-vcard', 'text/xml', 'video/mp4', 'video/mpeg', 
+        'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/x-sgi-movie'
+    )
+    MIME_CHOICES = tuple([(s,s) for s in MIMETYPES])
+    JPEG_MIME = 'image/jpeg'
+
+    hashID = models.CharField(max_length=200, primary_key=True)
+    attachment = models.FileField(null=True, blank=True, upload_to='questions')
+    mimeType = models.CharField(max_length=50, choices=MIME_CHOICES, default=JPEG_MIME)
+    data = JSONField(null=True, blank=True)  # JSON DATA
+    atime = models.DateTimeField('time submitted', default=timezone.now)
+    addedBy = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+

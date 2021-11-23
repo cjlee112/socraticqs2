@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from django.db.models import Q
+from django.core.files.base import ContentFile
 
-from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindMixin
+from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindMixin, ExternalContentHash
 from ctms.models import BestPractice1, BestPractice2
 from analytics.models import CourseReport
 from ct.templatetags.ct_extras import md2html
 import datetime
+import base64
+import hashlib
 
 
 class ResponseSerializer(serializers.ModelSerializer):
@@ -306,4 +309,26 @@ class TrivialSerializer(serializers.BaseSerializer):
                 d[k] = v.timestamp()
         return d
 
+
+class ECHSerializer(serializers.BaseSerializer):
+    'serializer for ExternalContentHash'
+    def to_representation(self, ech):
+        data = dict(hashID=ech.hashID, mimeType=ech.mimeType, clientURL=ech.attachment.url, data=ech.data,
+                    atime=ech.atime.timestamp())
+        if ech.addedBy:
+            data['addedBy'] = ech.addedBy.username
+        return data
+    def to_internal_value(self, data):
+        'deserialize input data dict into validated attr dict'
+        imageData = base64.b64decode(data['base64data'])
+        hashID = hashlib.sha256(imageData).hexdigest()
+        if hashID != data['hashID']:
+            raise serializers.ValidationError(f'hashID {data["hashID"]} does not match base64data {hashID}')
+        valid = dict(attachment=ContentFile(imageData, name=f'{hashID}{data["extension"]}'))
+        for k in ('hashID', 'mimeType', 'data', 'addedBy'):
+            valid[k] = data[k]
+        valid['data']['extension'] = data['extension']
+        return valid # validated data dict
+    def create(self, validated_data):
+        return ExternalContentHash.objects.create(**validated_data)
 
