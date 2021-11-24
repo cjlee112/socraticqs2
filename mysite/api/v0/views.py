@@ -1,6 +1,6 @@
 import time
 import logging
-from datetime import datetime, timezone
+import datetime
 
 from rest_framework import viewsets, status, generics, exceptions, pagination
 from rest_framework.authentication import SessionAuthentication
@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
 
@@ -443,7 +444,7 @@ class NamedViewBase(generics.ListAPIView):
 def response_values_default(self, queryset):
     return queryset.values('id', 'text', 'status', error_id=F('studenterror__errorModel_id'),
                            error_status=F('studenterror__status'), student_firstname=F('author__first_name'),
-                           student_lastname=F('author__last_name'))
+                           student_lastname=F('author__last_name'), secsPast=timezone.now() - F('atime'))
 
 class ThreadResponsesView(NamedViewBase):
     _namedViews = {
@@ -469,7 +470,7 @@ def filter_chats_since(chatStatsView):
     if not chatStatsView.request.user or not chatStatsView.request.user.is_superuser:
         raise exceptions.PermissionDenied('you do not have admin rights')
     startTime = chatStatsView.request.query_params.get('startTime', '0')
-    startTime = datetime.fromtimestamp(float(startTime), timezone.utc)
+    startTime = datetime.datetime.fromtimestamp(float(startTime), datetime.timezone.utc)
     return Chat.objects.filter(
               timestamp__gte=startTime,
               is_preview=False

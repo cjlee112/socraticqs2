@@ -217,7 +217,7 @@ def format_response_row(r):
             <div class="user-info">
               <img src="/static/img/student/avatar-student.jpg" alt="Joe Student" class="avatar">
               <h3>{r["student_firstname"]} {r["student_lastname"]}</h3>
-              <p>Today at 2 PM</p>
+              <p>{chat.time_since_fmt(r["secsPast"])}</p>
             </div>
 
           </td>
