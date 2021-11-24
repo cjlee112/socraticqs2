@@ -3,10 +3,94 @@
 
 {% block head %}
 {{ block.super }}
+  <!-- Mathjax -->
+  <!-- macros for Khan Academy from https://github.com/Khan/khan-MathJax/blob/master/kathjax-config.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+    MathJax.Hub.Config({
+      config: ["MMLorHTML.js"],
+      jax: ["input/TeX","input/MathML","input/AsciiMath","output/HTML-CSS","output/NativeMML", "output/PreviewHTML"],
+      extensions: ["tex2jax.js","mml2jax.js","asciimath2jax.js","MathMenu.js","MathZoom.js", "fast-preview.js", "AssistiveMML.js", "a11y/accessibility-menu.js"],
+      TeX: {
+        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js","newcommand.js","boldsymbol.js"],
+        Macros: {
+            RR: "\\mathbb{R}",
+            blue: "\\color{#6495ED}",
+            orange: "\\color{#FFA500}",
+            pink: "\\color{#FF00AF}",
+            red: "\\color{#DF0030}",
+            green: "\\color{#28AE7B}",
+            gray: "\\color{gray}",
+            purple: "\\color{#9D38BD}",
+            blueA: "\\color{#CCFAFF}",
+            blueB: "\\color{#80F6FF}",
+            blueC: "\\color{#63D9EA}",
+            blueD: "\\color{#11ACCD}",
+            blueE: "\\color{#0C7F99}",
+            tealA: "\\color{#94FFF5}",
+            tealB: "\\color{#26EDD5}",
+            tealC: "\\color{#01D1C1}",
+            tealD: "\\color{#01A995}",
+            tealE: "\\color{#208170}",
+            greenA: "\\color{#B6FFB0}",
+            greenB: "\\color{#8AF281}",
+            greenC: "\\color{#74CF70}",
+            greenD: "\\color{#1FAB54}",
+            greenE: "\\color{#0D923F}",
+            goldA: "\\color{#FFD0A9}",
+            goldB: "\\color{#FFBB71}",
+            goldC: "\\color{#FF9C39}",
+            goldD: "\\color{#E07D10}",
+            goldE: "\\color{#A75A05}",
+            redA: "\\color{#FCA9A9}",
+            redB: "\\color{#FF8482}",
+            redC: "\\color{#F9685D}",
+            redD: "\\color{#E84D39}",
+            redE: "\\color{#BC2612}",
+            maroonA: "\\color{#FFBDE0}",
+            maroonB: "\\color{#FF92C6}",
+            maroonC: "\\color{#ED5FA6}",
+            maroonD: "\\color{#CA337C}",
+            maroonE: "\\color{#9E034E}",
+            purpleA: "\\color{#DDD7FF}",
+            purpleB: "\\color{#C6B9FC}",
+            purpleC: "\\color{#AA87FF}",
+            purpleD: "\\color{#7854AB}",
+            purpleE: "\\color{#543B78}",
+            mintA: "\\color{#F5F9E8}",
+            mintB: "\\color{#EDF2DF}",
+            mintC: "\\color{#E0E5CC}",
+            grayA: "\\color{#F6F7F7}",
+            grayB: "\\color{#F0F1F2}",
+            grayC: "\\color{#E3E5E6}",
+            grayD: "\\color{#D6D8DA}",
+            grayE: "\\color{#BABEC2}",
+            grayF: "\\color{#888D93}",
+            grayG: "\\color{#626569}",
+            grayH: "\\color{#3B3E40}",
+            grayI: "\\color{#21242C}",
+            kaBlue: "\\color{#314453}",
+            kaGreen: "\\color{#71B307}",
+            // For rational exponents, we provide \^ instead of ^ which pushes
+            // the exponent up higher so it's really clear that the fraction
+            // is an exponent.
+            "^": ["{}^{^{^{#1}}}", 1]
+        }
+      },
+      displayAlign: "center",
+      displayIndent: "0.1em",
+      showProcessingMessages: false
+    });
+  </script>
+
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function() {
   brython({debug: 1, indexedDB: false});
 });
+
+    function mathjax_on_element(eid) {
+      MathJax.Hub.Queue(["Typeset",MathJax.Hub,eid]);
+    }
+
 </script>
 <script  type="text/javascript"
     src="https://cdn.jsdelivr.net/npm/brython@3.9.4/brython.min.js"></script>
