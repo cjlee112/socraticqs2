@@ -598,6 +598,24 @@ class NamedViewTableUI(object):
     def toggle_item(self, ev):
         pass
 
+def time_since_fmt(secsPast):
+    'pretty-print timedelta seconds in the simplest time unit'
+    secsPast = float(secsPast)
+    if secsPast >= 2 * 31536000:
+        return f'{int(secsPast / 31536000)} years ago' 
+    elif secsPast >= 5270400:
+        return f'{int(secsPast / 2592000)} months ago' 
+    elif secsPast >= 1209600:
+        return f'{int(secsPast / 604800)} weeks ago'
+    elif secsPast >= 2 * 86400:
+        return f'{int(secsPast / 86400)} days ago'
+    elif secsPast >= 2 * 3600:
+        return f'{int(secsPast / 3600)} hours ago'
+    elif secsPast >= 2 * 60:
+        return f'{int(secsPast / 60)} minutes ago'
+    else:
+        return f'{int(secsPast)} seconds ago'
+
 
 #####################################################################
 # paginated GET support
