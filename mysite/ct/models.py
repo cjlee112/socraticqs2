@@ -2155,7 +2155,7 @@ class ExternalContentHash(models.Model):
     JPEG_MIME = 'image/jpeg'
 
     hashID = models.CharField(max_length=200, primary_key=True)
-    attachment = models.FileField(null=True, blank=True, upload_to='questions')
+    attachment = models.FileField(null=True, blank=True, upload_to='ECH')
     mimeType = models.CharField(max_length=50, choices=MIME_CHOICES, default=JPEG_MIME)
     data = JSONField(null=True, blank=True)  # JSON DATA
     atime = models.DateTimeField('time submitted', default=timezone.now)
