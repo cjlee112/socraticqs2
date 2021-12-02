@@ -4,6 +4,7 @@ import pytz
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 import pytz
 
@@ -21,6 +22,7 @@ class Profile(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     timezone = models.CharField(max_length=255, blank=True, null=True, choices=ALL_TIMEZONES_CHOICES)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     @staticmethod
     def get_user_ip(request):
@@ -75,6 +77,7 @@ class Instructor(models.Model):
     icon_url = models.URLField(blank=True)
     page_url = models.URLField(blank=True)
     what_do_you_teach = models.CharField(max_length=100, blank=True)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def __str__(self):
         return self.user.username if not (self.user.last_name or self.user.first_name) else self.user.get_full_name()

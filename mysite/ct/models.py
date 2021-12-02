@@ -105,6 +105,7 @@ class Concept(models.Model):
     isPuzzled = models.BooleanField(default=False)
     alwaysAsk = models.BooleanField(default=False)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def __str__(self):
         return self.title
@@ -241,6 +242,7 @@ class ConceptGraph(models.Model):
     approvedBy = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE,
                                    related_name='approvedConceptEdges')
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
 
 ########################################################
@@ -620,6 +622,7 @@ class ConceptLink(models.Model):
                                     default=DEFINES)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def copy(self, lesson):
         'copy this conceptlink to a new lesson'
@@ -663,6 +666,7 @@ class StudyList(models.Model):
     'list of materials of interest to each user'
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def __str__(self):
         return self.lesson.title
@@ -710,6 +714,7 @@ class UnitLesson(models.Model):
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     treeID = models.IntegerField()  # VCS METADATA
     branch = models.CharField(max_length=32, default='master')
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     # @classmethod
     # def create_from_concept(klass, concept, unit=None, ulArgs={}, **kwargs):
@@ -1232,6 +1237,7 @@ class Unit(models.Model):
                             default=COURSELET)
     atime = models.DateTimeField('time created', default=timezone.now)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
+    data = JSONField(null=True, blank=True)  # JSON DATA
     description = models.TextField(blank=True)
     img_url = models.URLField(blank=True)
     small_img_url = models.URLField(blank=True)
@@ -1770,6 +1776,7 @@ class StudentError(models.Model):
                               blank=False, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     activity = models.ForeignKey('fsm.ActivityLog', null=True, blank=True, on_delete=models.CASCADE)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def __str__(self):
         return 'eval by ' + self.author.username
@@ -1813,6 +1820,7 @@ class InquiryCount(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,
                               blank=False, null=True)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def __str__(self):
         return '{} {} {}'.format(self.response.title, self.addedBy, self.status)
@@ -1823,6 +1831,7 @@ class Liked(models.Model):
     unitLesson = models.ForeignKey(UnitLesson, on_delete=models.CASCADE)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     class Meta:
         verbose_name_plural = 'Likes'
@@ -1834,6 +1843,7 @@ class FAQ(models.Model):
     unitLesson = models.ForeignKey(UnitLesson, on_delete=models.CASCADE)
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
 
 #######################################
@@ -1873,6 +1883,7 @@ class Course(models.Model):
     students_number = models.PositiveIntegerField(blank=True, null=True, default=200)
     misconceptions_per_day = models.PositiveIntegerField(blank=True, null=True, default=5)
     best_practice1 = models.ForeignKey('ctms.BestPractice1', blank=True, null=True, on_delete=models.CASCADE)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def deep_clone(self, **options):
         publish = options.get('publish', False)
@@ -1999,6 +2010,7 @@ class CourseUnit(models.Model):
     addedBy = models.ForeignKey(User, on_delete=models.CASCADE)
     atime = models.DateTimeField('time submitted', default=timezone.now)
     releaseTime = models.DateTimeField('time released', null=True, blank=True)
+    data = JSONField(null=True, blank=True)  # JSON DATA
 
     def is_published(self):
         return self.releaseTime and self.releaseTime < timezone.now()
