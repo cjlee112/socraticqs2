@@ -305,6 +305,7 @@ def test_courses_goodid(client, user, course_json3):
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
     assert len(response.data['courselets']) == 2
+    assert response.data['courselets'][0]['unit_id'] == course_json3['units'][0]['unit_id']
 
 
 
