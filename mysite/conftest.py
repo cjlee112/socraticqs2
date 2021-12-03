@@ -352,6 +352,20 @@ def course_json1():
                        dict(title='The End', description='the other part', data=dict(license='CC BY-SA'))])
 
 
+@pytest.fixture
+def course_json2():
+    return dict(title='My Big Class', description='boooooring!', 
+                units=[dict(unit_id=999375),
+                       dict(title='The End', description='the other part', data=dict(license='CC BY-SA'))])
+
+
+@pytest.fixture
+def course_json3(unit):
+    return dict(title='My Big Class', description='boooooring!', 
+                units=[dict(unit_id=unit.id),
+                       dict(title='The End', description='the other part', data=dict(license='CC BY-SA'))])
+
+
 @pytest.fixture(scope="function")
 def intro_data():
     """

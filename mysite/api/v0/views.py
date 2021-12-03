@@ -575,9 +575,12 @@ class CourseContainerView(APIView):
             course.save()
             courselets = []
             for i, d in enumerate(request.data.get('units', ())):
-                unit = Unit(title=d['title'], description=d['description'], data=d.get('data', None), addedBy=request.user,
-                            img_url=d.get('img_url', ''), small_img_url=d.get('small_img_url', ''))
-                unit.save()
+                if 'unit_id' in d:
+                    unit = Unit.objects.get(id=int(d['unit_id']))
+                else:
+                    unit = Unit(title=d['title'], description=d['description'], data=d.get('data', None), addedBy=request.user,
+                                img_url=d.get('img_url', ''), small_img_url=d.get('small_img_url', ''))
+                    unit.save()
                 cu = CourseUnit(course=course, unit=unit, order=i, addedBy=request.user)
                 cu.save()
                 courselets.append(dict(courselet_id=cu.id, unit_id=unit.id))
