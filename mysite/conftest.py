@@ -345,6 +345,12 @@ def ech_example1(base64_encoded_image):
                 mimeType='image/jpeg', data=dict(text='this is an example'))
 
 
+@pytest.fixture
+def course_json1():
+    return dict(title='My Big Class', description='boooooring!', 
+                units=[dict(title='The Intro', description='the first part', data=dict(license='CC BY-NC-SA')),
+                       dict(title='The End', description='the other part', data=dict(license='CC BY-SA'))])
+
 
 @pytest.fixture(scope="function")
 def intro_data():

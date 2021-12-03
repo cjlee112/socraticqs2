@@ -250,7 +250,6 @@ def test_ech_post(ech_example1, client, user):
     client.force_login(user)
     user.is_staff = True
     user.save()
-    print(f"hashID: {ech_example1['hashID']}")
     response = client.post(reverse("api:v0:external-content-hash"), data=ech_example1,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
@@ -261,5 +260,27 @@ def test_ech_post(ech_example1, client, user):
                           HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_200_OK
     assert response.data['missing'] == [] and response.data['found'][0]['hashID'] == ech_example1['hashID']
+
+
+@pytest.mark.django_db
+def test_courses_not_admin(client, user, course_json1):
+    'course creation API by non-admin user should be forbidden'
+    client.force_login(user)
+    response = client.post(reverse("api:v0:courses"), data=course_json1,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+
+@pytest.mark.django_db
+def test_courses_post(client, user, course_json1):
+    'course creation API by admin user should succeed'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    response = client.post(reverse("api:v0:courses"), data=course_json1,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    assert len(response.data['courselets']) == 2
 
 

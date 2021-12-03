@@ -562,3 +562,26 @@ class ExternalContentHashView(APIView):
             ech = serializer.save()
         return RestResponse(dict(result=serializer.data), status=status.HTTP_201_CREATED)
 
+
+
+class CourseContainerView(APIView):
+    'API to upload metadata for creating a new Course and its courselets'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAdminUser,)
+    def post(self, request, *args, **kwargs):
+        try:
+            course = Course(title=request.data['title'], description=request.data['description'], 
+                        data=request.data.get('data', None), addedBy=request.user)
+            course.save()
+            courselets = []
+            for i, d in enumerate(request.data.get('units', ())):
+                unit = Unit(title=d['title'], description=d['description'], data=d.get('data', None), addedBy=request.user,
+                            img_url=d.get('img_url', ''), small_img_url=d.get('small_img_url', ''))
+                unit.save()
+                cu = CourseUnit(course=course, unit=unit, order=i, addedBy=request.user)
+                cu.save()
+                courselets.append(dict(courselet_id=cu.id, unit_id=unit.id))
+            return RestResponse(dict(course_id=course.id, courselets=courselets), status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return RestResponse(dict(error=str(e)), status=status.HTTP_400_BAD_REQUEST)
+

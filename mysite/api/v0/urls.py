@@ -23,6 +23,7 @@ from .views import (
     ChatStatsView,
     InviteView,
     ExternalContentHashView,
+    CourseContainerView,
 )
 
 app_name = 'v0'
@@ -73,4 +74,5 @@ urlpatterns = [
     path('threadResponses/', ThreadResponsesView.as_view()),
     path('threadErrors/', ThreadErrorsView.as_view()),
     path('chatStats/', ChatStatsView.as_view()),
+    path('courses/', CourseContainerView.as_view(), name='courses'),
 ]
