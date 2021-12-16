@@ -24,6 +24,7 @@ from .views import (
     InviteView,
     ExternalContentHashView,
     CourseContainerView,
+    Threads2HtmlView,
 )
 
 app_name = 'v0'
@@ -67,6 +68,7 @@ urlpatterns = [
     path('bp/create/', BestPracticeCreate.as_view(), name='bp-creation'),
     path('bp/upload/', BestPracticeUpload.as_view(), name='bp-upload'),
 
+    path('courselets/<int:pk>/threads2html/', Threads2HtmlView.as_view(), name='threads2html'),
     path('courselets/<int:pk>/', CourseletViewSet.as_view({'put': 'update', 'get': 'retrieve'}), name='courselet-api'),
     path('courselets/<int:courselet_pk>/', include(router.urls)),
     path('brella/<int:pk>/', get_courselet_threads),

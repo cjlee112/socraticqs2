@@ -38,7 +38,8 @@ from ..serializers import (
     ResponseSerializer2,
     StudentErrorSerializer,
     TrivialSerializer,
-    ECHSerializer
+    ECHSerializer,
+    Text2HtmlULSerializer,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -584,4 +585,26 @@ class CourseContainerView(APIView):
             return RestResponse(dict(course_id=course.id, courselets=courselets), status=status.HTTP_201_CREATED)
         except Exception as e:
             return RestResponse(dict(error=str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+
+class Threads2HtmlView(APIView):
+    'API to upload Lessons in new text2html + ExternalContentHash format'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAdminUser,)
+    def post(self, request, pk, *args, **kwargs):
+        course_unit = get_object_or_404(CourseUnit, id=pk)
+        out = []
+        for data in request.data:
+            data['unit'] = course_unit.unit
+            data['addedBy'] = request.user
+            serializer = Text2HtmlULSerializer(data=data)
+            if serializer.is_valid():
+                ul = serializer.save()
+                out.append(dict(ul_id=ul.id, success=True))
+                if getattr(ul, '_answer', False):
+                    out[-1]['answer_ul_id'] = ul._answer.id
+            else:
+                out.append(dict(ul_id=None, success=False))
+        return RestResponse(out, status=status.HTTP_201_CREATED)
+
 

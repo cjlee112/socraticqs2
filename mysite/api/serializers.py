@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.db.models import Q
 from django.core.files.base import ContentFile
+from django.utils import timezone
 
 from ct.models import Response, StudentError, UnitLesson, Unit, Lesson, SubKindMixin, ExternalContentHash
 from ctms.models import BestPractice1, BestPractice2
@@ -272,19 +273,50 @@ class ORCTSerializer3(ORCTSerializer2):
         return data
 
 
-class AssessmentSerializer(serializers.BaseSerializer):
+class Text2HtmlULSerializer(serializers.BaseSerializer):
     'question serializer for brella API'
     _ulSerializer = ULSerializer2
     _emSerializer = ULSerializer2
+    _optionalFields = ('sub_kind', 'textFormat', 'data',)
     def to_representation(self, ul):
         data = dict(kind=ul.lesson.kind, sub_kind=ul.lesson.sub_kind, title=ul.lesson.title)
         data['question'] = self._ulSerializer(ul).data
         return data
+    def to_internal_value(self, data):
+        'deserialize input data dict into validated attr dict'
+        valid = dict(title=data['title'], text=data['text'], kind=data['kind'], addedBy=data['addedBy'],
+                     unit=data['unit'], text2html=data['text2html'], commitTime=timezone.now())
+        valid.update({f:data[f] for f in self._optionalFields if f in data})
+        echIDs = data.get('echfiles', ())
+        if echIDs: # save references to ExternalContentHash
+            echfiles = []
+            for hashID in echIDs:
+                echfiles.append(ExternalContentHash.objects.get(hashID=hashID))
+            valid['echfiles'] = echfiles
+        if 'answer' in data:
+            answer = data['answer']
+            answer['commitTime'] = timezone.now()
+            if 'title' not in answer:
+                answer['title'] = data['title'] + ' Answer'
+            valid['answer'] = answer
+        return valid # validated data dict
+    def create(self, validated_data):
+        'save Lesson and UnitLesson'
+        unit = validated_data['unit']
+        del validated_data['unit']
+        answerData = validated_data.get('answer', None)
+        if answerData:
+            del validated_data['answer']
+        lesson = Lesson(**validated_data)
+        lesson.save_root()
+        ul = UnitLesson.create_from_lesson(lesson, unit, order='APPEND', addAnswer=(answerData is not None),
+                                           answerArgs=answerData)
+        return ul
 
 
 def get_ul_serializer(ul, _orctSerializer=ORCTSerializer2, _ulSerializer=ULSerializer2):
     if ul.lesson.kind == Lesson.ASSESSMENT:
-        return AssessmentSerializer(ul)
+        return Text2HtmlULSerializer(ul)
     elif ul.lesson.kind == Lesson.ORCT_QUESTION:
         return _orctSerializer(ul)
     else: # treat as a simple explanation
@@ -331,4 +363,6 @@ class ECHSerializer(serializers.BaseSerializer):
         return valid # validated data dict
     def create(self, validated_data):
         return ExternalContentHash.objects.create(**validated_data)
+
+
 

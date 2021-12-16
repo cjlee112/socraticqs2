@@ -261,6 +261,22 @@ ACCESS_CHOICES = (
 DEFAULT_FSM = 'chat'
 TRIAL_FSM = 'chat_trial'
 
+REST_FORMAT = 'rst'
+MARKDOWN_FORMAT = 'markdown'
+CSV_FORMAT = 'csv'
+LATEX_FORMAT = 'latex'
+HTML_FORMAT = 'html'
+
+FORMAT_CHOICES = (
+    (REST_FORMAT, 'ReStructured Text'),
+    (MARKDOWN_FORMAT, MARKDOWN_FORMAT),
+    (CSV_FORMAT, 'Comma Separated Values (CSV)'),
+    (LATEX_FORMAT, 'LaTeX'),
+    (HTML_FORMAT, 'HTML'),
+)
+
+
+
 
 class Lesson(models.Model, SubKindMixin):
     BASE_EXPLANATION = 'base'  # focused on one concept, as intro for ORCT
@@ -281,6 +297,10 @@ class Lesson(models.Model, SubKindMixin):
     ENCYCLOPEDIA = 'e-pedia'
     FAQ_QUESTION = 'faq'
     FORUM = 'forum'
+
+    QUESTION_KINDS = (ORCT_QUESTION, ASSESSMENT)
+
+
     # MEDIA CHOICES
     READING = 'reading'
     LECTURE = 'lecture'
@@ -323,6 +343,7 @@ class Lesson(models.Model, SubKindMixin):
     _sourceDBdict = {}
     title = models.CharField(max_length=200, validators=[not_only_spaces_validator])
     text = models.TextField(null=True, blank=True)
+    textFormat = models.CharField(max_length=50, choices=FORMAT_CHOICES, default=REST_FORMAT)
     attachment = models.FileField(null=True, blank=True, upload_to='questions')
 
     data = JSONField(null=True, blank=True)  # JSON DATA
@@ -752,8 +773,8 @@ class UnitLesson(models.Model):
         return f"UnitLesson: {self.lesson.title}"
 
     @classmethod
-    def create_from_lesson(klass, lesson, unit, order=None, kind=None,
-                           addAnswer=False, **kwargs):
+    def create_from_lesson(klass, lesson, unit, order=None, kind=None, addAnswer=False,
+                           answerArgs=dict(title='Answer', text='write an answer'), **kwargs):
         if not kind:
             kindMap = {Lesson.ANSWER: klass.ANSWERS,
                        Lesson.ERROR_MODEL: klass.MISUNDERSTANDS}
@@ -763,9 +784,8 @@ class UnitLesson(models.Model):
         ul = klass(unit=unit, lesson=lesson, addedBy=lesson.addedBy,
                    treeID=lesson.treeID, order=order, kind=kind, **kwargs)
         ul.save()
-        if addAnswer and lesson.kind == Lesson.ORCT_QUESTION:
-            answer = Lesson(title='Answer', text='write an answer',
-                            addedBy=lesson.addedBy, kind=Lesson.ANSWER)
+        if addAnswer and lesson.kind in Lesson.QUESTION_KINDS:
+            answer = Lesson(addedBy=lesson.addedBy, kind=Lesson.ANSWER, **answerArgs)
             answer.save_root()
             ul._answer = klass.create_from_lesson(answer, unit,
                                                   kind=klass.ANSWERS, parent=ul)
@@ -1579,6 +1599,7 @@ class Response(models.Model, SubKindMixin):
     sub_kind = models.CharField(max_length=10, choices=SubKindMixin.SUB_KIND_CHOICES, blank=True, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField()
+    textFormat = models.CharField(max_length=50, choices=FORMAT_CHOICES, default=REST_FORMAT)
     text2html = JSONField(null=True, blank=True)  # caches latest pre-formatted HTML data
     echfiles = models.ManyToManyField('ExternalContentHash')
     data = JSONField(null=True, blank=True)  # general purpose JSON data storage

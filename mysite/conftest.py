@@ -352,6 +352,14 @@ def course_json1():
                        dict(title='The End', description='the other part', data=dict(license='CC BY-SA'))])
 
 
+@pytest.fixture
+def threads2html_data1():
+    return [dict(title='What is the Airspeed?', text='of a fully laden swallow?', textFormat='markdown',
+                 kind='assess-only', text2html=dict(text='<P>of a fully laden swallow?</P>'),
+                 answer=dict(text='great answer!'), data=dict(license='CC BY-NC-SA'))]
+
+
+
 @pytest.fixture(scope="function")
 def intro_data():
     """
