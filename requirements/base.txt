@@ -7,7 +7,7 @@ django-filer==1.6.0
 amqp==2.5.2
 
 # Distributed Task Queue
-celery==4.3.0
+celery==5.2.2
 
 django-crispy-forms==1.7.2
 
