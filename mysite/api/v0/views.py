@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
+from django.contrib.auth.models import User
 
 from accounts.models import Instructor
 from analytics.models import CourseReport
@@ -596,7 +597,12 @@ class Threads2HtmlView(APIView):
         out = []
         for data in request.data:
             data['unit'] = course_unit.unit
-            data['addedBy'] = request.user
+            try:
+                username = data['addedBy']
+            except KeyError: # treat the uploader identity as author
+                data['addedBy'] = request.user
+            else: # use the specified author identity
+                data['addedBy'] = User.objects.get(username=username)
             serializer = Text2HtmlULSerializer(data=data)
             if serializer.is_valid():
                 ul = serializer.save()
