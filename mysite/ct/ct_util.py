@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.core.cache import cache
 from django.utils.encoding import force_bytes
 from django.utils.http import urlquote
+from django.db.models import Aggregate
 
 
 CACHE_KEY_TEMPLATE = 'views.cache.%s.%s'
@@ -125,3 +126,13 @@ def get_middle_indexes(lst):
         return [n / 2 - 1, n / 2]
     else:
         return [n // 2]
+
+
+class PercentileDisc(Aggregate):
+    'use postgresql percentile_disc(fraction) aggregation function'
+    function = 'percentile_disc'
+    template = '%(function)s(%(fraction)f) within group(order by %(expressions)s)'
+    allow_distinct = False
+    def __init__(self, expression, fraction=0.5, **extra):
+        super().__init__(expression, fraction=fraction, **extra)
+

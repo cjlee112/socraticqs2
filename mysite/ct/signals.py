@@ -6,9 +6,10 @@ import logging
 from django.db.models.signals import post_save
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import Min, Max
 
 from .models import Response, UnitLesson
-from .ct_util import get_middle_indexes
+from .ct_util import get_middle_indexes, PercentileDisc
 
 from core.common.mongo import c_milestone_orct
 from core.common.utils import send_email, suspending_receiver
@@ -41,14 +42,13 @@ def run_courselet_notif_flow(sender, instance, **kwargs):
 
         # Define if it's a milestone question (either first, middle, or last)
         milestone = None
-        questions = unit_lesson.unit.all_orct()
-        i = [_[0] for _ in questions.values_list('id')].index(unit_lesson_id)
-        if i == 0:
-            milestone = "first"
-        elif i == len(questions) - 1:
-            milestone = "last"
-        elif i in get_middle_indexes(questions):
-            milestone = "middle"  # TODO consider returning a single number
+        questions = unit_lesson.unit.all_questions()
+        agg = questions.aggregate(first=Min('order'), last=Max('order'),
+                                  middle=PercentileDisc('order', fraction=0.5))
+        for k,v in agg.items():
+            if unit_lesson.order == v:
+                milestone = k
+                break
 
         # If milestone, store the record
         if milestone:

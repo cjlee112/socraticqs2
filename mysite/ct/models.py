@@ -1297,6 +1297,13 @@ class Unit(models.Model):
         return self.unitlesson_set.filter(order__isnull=False,
                                           lesson__kind=Lesson.ORCT_QUESTION)
 
+    def all_questions(self):
+        """
+        Return all question unitlessons.
+        """
+        return self.unitlesson_set.filter(order__isnull=False,
+                                          lesson__kind__gte=Lesson.ORCT_QUESTION)
+
     def create_lesson(self, title, text, author=None, **kwargs):
         if author is None:
             author = self.addedBy
