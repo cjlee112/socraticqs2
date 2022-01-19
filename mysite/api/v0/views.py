@@ -482,12 +482,12 @@ def filter_chats_since(chatStatsView):
               maxtime=Max('message__timestamp')
             ).annotate(
               nresp=Count('message__response_to_check', distinct=True),
-              nmsg=Count('message', distinct=True),
+              nmsg=Count('message', distinct=True), courselet_id=F('enroll_code__courseUnit_id'),
               duration=F('maxtime') - F('timestamp')
             )
 
 def chats_since_values(self, queryset):
-    return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open')
+    return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open', 'courselet_id', 'timestamp')
 
 class ChatStatsView(NamedViewBase):
     _namedViews = {
