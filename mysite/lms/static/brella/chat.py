@@ -635,3 +635,8 @@ async def get_all_pages(url, params):
     return results
 
 
+def load_new_page(exitURL):
+    'force this browser window to load a whole new page'
+    window.location.assign(exitURL)
+
+

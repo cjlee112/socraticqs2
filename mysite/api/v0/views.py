@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
+from django.contrib.auth.models import User
 
 from accounts.models import Instructor
 from analytics.models import CourseReport
@@ -38,7 +39,8 @@ from ..serializers import (
     ResponseSerializer2,
     StudentErrorSerializer,
     TrivialSerializer,
-    ECHSerializer
+    ECHSerializer,
+    Text2HtmlULSerializer,
 )
 from .utils import get_result_course_calculation, get_result_courselet_calculation
 from .creators import ThreadBuilder
@@ -480,12 +482,12 @@ def filter_chats_since(chatStatsView):
               maxtime=Max('message__timestamp')
             ).annotate(
               nresp=Count('message__response_to_check', distinct=True),
-              nmsg=Count('message', distinct=True),
+              nmsg=Count('message', distinct=True), courselet_id=F('enroll_code__courseUnit_id'),
               duration=F('maxtime') - F('timestamp')
             )
 
 def chats_since_values(self, queryset):
-    return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open')
+    return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open', 'courselet_id', 'timestamp')
 
 class ChatStatsView(NamedViewBase):
     _namedViews = {
@@ -587,4 +589,31 @@ class CourseContainerView(APIView):
             return RestResponse(dict(course_id=course.id, courselets=courselets), status=status.HTTP_201_CREATED)
         except Exception as e:
             return RestResponse(dict(error=str(e)), status=status.HTTP_400_BAD_REQUEST)
+
+
+class Threads2HtmlView(APIView):
+    'API to upload Lessons in new text2html + ExternalContentHash format'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAdminUser,)
+    def post(self, request, pk, *args, **kwargs):
+        course_unit = get_object_or_404(CourseUnit, id=pk)
+        out = []
+        for data in request.data:
+            data['unit'] = course_unit.unit
+            try:
+                username = data['addedBy']
+            except KeyError: # treat the uploader identity as author
+                data['addedBy'] = request.user
+            else: # use the specified author identity
+                data['addedBy'] = User.objects.get(username=username)
+            serializer = Text2HtmlULSerializer(data=data)
+            if serializer.is_valid():
+                ul = serializer.save()
+                out.append(dict(ul_id=ul.id, success=True))
+                if getattr(ul, '_answer', False):
+                    out[-1]['answer_ul_id'] = ul._answer.id
+            else:
+                out.append(dict(ul_id=None, success=False))
+        return RestResponse(out, status=status.HTTP_201_CREATED)
+
 

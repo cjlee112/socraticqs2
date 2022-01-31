@@ -286,7 +286,7 @@ def test_courses_post(client, user, course_json1):
 
 @pytest.mark.django_db
 def test_courses_badid(client, user, course_json2):
-    'course creation API by admin user should succeed'
+    'course creation API with bad unit_id should fail'
     client.force_login(user)
     user.is_staff = True
     user.save()
@@ -297,7 +297,7 @@ def test_courses_badid(client, user, course_json2):
 
 @pytest.mark.django_db
 def test_courses_goodid(client, user, course_json3):
-    'course creation API by admin user should succeed'
+    'course creation API with good unit_id should succeed'
     client.force_login(user)
     user.is_staff = True
     user.save()
@@ -307,5 +307,19 @@ def test_courses_goodid(client, user, course_json3):
     assert len(response.data['courselets']) == 2
     assert response.data['courselets'][0]['unit_id'] == course_json3['units'][0]['unit_id']
 
+
+@pytest.mark.django_db
+def test_threads2html_post(course_unit, client, user, threads2html_data1):
+    'threads2html upload API by admin user should succeed'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    response = client.post(reverse("api:v0:threads2html", kwargs={"pk": course_unit.id}), data=threads2html_data1,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    assert len(response.data) == 1
+    result = response.data[0]
+    assert isinstance(result.get('ul_id', 'missing!'), int)
+    assert isinstance(result.get('answer_ul_id', 'missing!'), int)
 
 

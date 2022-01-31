@@ -198,7 +198,11 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
             await solicit_faq(postDataA, history, insertBeforeID=insertBeforeID)
     msgs = await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
                                       path='done', postData=postData, history=history, insertBeforeID=insertBeforeID)
-    return ('help' in stati), msgs
+    try:
+        exitURL = mainThread['question']['text2html']['exitURL']
+        chat.load_new_page(exitURL) # redirect to a completely different page if specified
+    except KeyError:
+        return ('help' in stati), msgs
 
 
 async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=None):

@@ -347,7 +347,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         'return True to launch brella (or False to launch legacy chat)'
         if courseUnit.unit.use_legacy_frontend():
             return False
-        return courseUnit.unit.use_brella_frontend() or (random.random() < 0.5)
+        return True # brella is now the default!
 
 
 class ChatNoJSInit(object):

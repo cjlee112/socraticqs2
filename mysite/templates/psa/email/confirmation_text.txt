@@ -2,7 +2,4 @@ Hi,
 Click on the link below to confirm that you own this email. You can ignore this email If you haven’t signed up for Courselets
 Confirm email {{ url }}
 
-First name: {{ user_data.first_name }}
-Last name: {{ user_data.last_name }}
-Institution: {{ user_data.institution }}
-email: {{ user_data.email }}
+
