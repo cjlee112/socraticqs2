@@ -1,5 +1,5 @@
 Hi {% if invite.user %}{% if invite.user.first_name %}{{ invite.user.first_name }}{% else %}{{ invite.user.username }}{% endif %}{% else %}{{ invite.get_invited_user_username }}{% endif %},
-{% if messageText %}{{ messageText }}{% else %}{% if invite.instructor.user.get_full_name %}{{ invite.instructor.user.get_full_name }}{% else %}{{ invite.instructor.user.username }}{% endif %} has invited you to see Courselets.org, the K-12 math exercise platform that helps students overcome their individual blindspots — whatever's blocking them from understanding how to solve problems.{% endif %}  Click the following link to learn more:
+{% if messageText %}{{ messageText }}{% else %}{% if requestor.get_full_name %}{{ requestor.get_full_name }}{% else %}{{ requestor.username }}{% endif %} has invited you to see Courselets.org, the K-12 math exercise platform that helps students overcome their individual blindspots — whatever's blocking them from understanding how to solve problems.{% endif %}  Click the following link to learn more:
 
 https://{{ current_site }}{% url 'ctms:accept_invite' code=invite.code %}
 {% if password %}

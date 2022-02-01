@@ -110,7 +110,8 @@ class Invite(models.Model):
     def render_template(self, request, messageType, part='text', **kwargs):
         context = {
             'invite': self,
-            'current_site': Site.objects.get_current(request)
+            'current_site': Site.objects.get_current(request),
+            'requestor': request.user
         }
         context.update(kwargs)
         text_template = loader.get_template(f'ctms/email/invite/{messageType}_{part}.txt')
