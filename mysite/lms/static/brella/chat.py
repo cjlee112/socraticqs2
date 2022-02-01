@@ -228,7 +228,7 @@ class MultipleChoice(ChatQuery):
         self.choices = choices
         self.choiceAttr = choiceAttr
         for i,c in enumerate(choices):
-            itemHtml = self.format_choice(c)
+            itemHtml = self.format_choice(c, choiceAttr)
             e = copy_to_container(choiceTemplate, None, itemHtml, choiceSelector, container=self.container)[0]
             e.bind('click', self.set_choice)
             e.attrs['data-selectable-value'] = str(i)
