@@ -241,6 +241,9 @@ def test_invite_teacher(teacher_invite_dict, client, user, unique_instructor, co
     data = teacher_invite_dict.copy()
     data['first_name'] = 'Boris'
     data['last_name'] = 'Karloff'
+    response = client.get(reverse("api:v0:invite"), HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['canInvite']
     response = client.post(reverse("api:v0:invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
@@ -258,6 +261,9 @@ def test_invite_teacher_fail(teacher_invite_dict, client, user, unique_instructo
     data = teacher_invite_dict.copy()
     data['first_name'] = 'Boris'
     data['last_name'] = 'Karloff'
+    response = client.get(reverse("api:v0:invite"), HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_200_OK
+    assert not response.data['canInvite']
     response = client.post(reverse("api:v0:invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_403_FORBIDDEN

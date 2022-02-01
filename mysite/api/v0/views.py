@@ -511,6 +511,12 @@ class InviteView(APIView):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def get(self, request):
+        if self.is_invited_user(request):
+            return RestResponse(dict(canInvite=True, invite_types=['teacher', 'parent']),
+                                status=status.HTTP_200_OK)
+        else:
+            return RestResponse(dict(canInvite=False), status=status.HTTP_200_OK)
     def post(self, request, *args, **kwargs):
         'needs email address, first_name, last_name, invite_type, enrollCode or course_id'
         page = request.data.get('page', '/')
@@ -530,8 +536,7 @@ class InviteView(APIView):
                 course = Course.objects.get(id=request.data.get('course_id'))
                 enrollUnitCode = None
         except Instructor.DoesNotExist: # allow invited teacher or parent to invite another
-            myInvites = Invite.objects.shared_for_me(request).filter(status='joined',
-                                                         type__in=['teacher', 'parent']).first()
+            myInvites = self.is_invited_user(request)
             if myInvites:
                 if invite_type in ['teacher', 'parent']: # only allowed to invite teacher or parent
                     enrollUnitCode = EnrollUnitCode.objects.filter(courseUnit__data__onboarding__contains=
@@ -563,7 +568,9 @@ class InviteView(APIView):
                          senderName=request.data.get('senderName', None),
                          subjectText=request.data.get('subjectText', None))
         return RestResponse(dict(invite_id=invite.id), status=status.HTTP_201_CREATED)
-
+    def is_invited_user(self, request):
+        return Invite.objects.shared_for_me(request).filter(status='joined',
+                                                         type__in=['teacher', 'parent']).first()
 
 
 class ExternalContentHashView(APIView):
