@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 
 from ct.models import UnitLesson, Lesson
+from ctms.models import Invite
 from accounts.models import Instructor
 
 import base64
@@ -223,6 +224,43 @@ def test_invite_success(teacher_invite_dict, client, user):
     response = client.post(reverse("api:v0:invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_invite_teacher(teacher_invite_dict, client, user, unique_instructor, course_unit):
+    'invite API by invited teacher should succeed'
+    client.force_login(user)
+    instructor = Instructor.objects.create(user=unique_instructor, institution='institute', what_do_you_teach='something')
+    invite = Invite.create_new(True, course_unit.course, instructor, user.email, 'teacher', None)
+    invite.status = 'joined' # user must be an invited teacher to send new teacher Invite
+    invite.save()
+    course_unit.data = dict(onboarding=dict(teacher='production')) # mark this as onboarding target
+    course_unit.save()
+    course_unit.course.addedBy = unique_instructor # onboarding course owner must be an Instructor
+    course_unit.course.save()
+    data = teacher_invite_dict.copy()
+    data['first_name'] = 'Boris'
+    data['last_name'] = 'Karloff'
+    response = client.post(reverse("api:v0:invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+@pytest.mark.django_db
+def test_invite_teacher_fail(teacher_invite_dict, client, user, unique_instructor, course_unit):
+    'invite API from uninvited user should fail'
+    client.force_login(user)
+    instructor = Instructor.objects.create(user=unique_instructor, institution='institute', what_do_you_teach='something')
+    course_unit.data = dict(onboarding=dict(teacher='production')) # mark this as onboarding target
+    course_unit.save()
+    course_unit.course.addedBy = unique_instructor # onboarding course owner must be an Instructor
+    course_unit.course.save()
+    data = teacher_invite_dict.copy()
+    data['first_name'] = 'Boris'
+    data['last_name'] = 'Karloff'
+    response = client.post(reverse("api:v0:invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.django_db

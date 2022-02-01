@@ -515,26 +515,51 @@ class InviteView(APIView):
         'needs email address, first_name, last_name, invite_type, enrollCode or course_id'
         page = request.data.get('page', '/')
         data = dict(page=page)
-        enrollCode = request.data.get('enrollCode', None)
-        if enrollCode:
-            enrollUnitCode = EnrollUnitCode.objects.get(enrollCode=enrollCode)
-            course = enrollUnitCode.courseUnit.course
-        else:
-            course = Course.objects.get(id=request.data.get('course_id'))
-            enrollUnitCode = None
+        try:
+            invite_type = request.data['invite_type']
+        except KeyError:
+            return RestResponse('Must specify invite_type', status=status.HTTP_400_BAD_REQUEST)
+        messageText = request.data.get('messageText', None)
         try:
             instructor = Instructor.objects.get(user=request.user)
-        except Instructor.DoesNotExist:
-            return RestResponse('only Instructors can send invitations!', status=403)
+            enrollCode = request.data.get('enrollCode', None)
+            if enrollCode:
+                enrollUnitCode = EnrollUnitCode.objects.get(enrollCode=enrollCode)
+                course = enrollUnitCode.courseUnit.course
+            else:
+                course = Course.objects.get(id=request.data.get('course_id'))
+                enrollUnitCode = None
+        except Instructor.DoesNotExist: # allow invited teacher or parent to invite another
+            myInvites = Invite.objects.shared_for_me(request).filter(status='joined',
+                                                         type__in=['teacher', 'parent']).first()
+            if myInvites:
+                if invite_type in ['teacher', 'parent']: # only allowed to invite teacher or parent
+                    enrollUnitCode = EnrollUnitCode.objects.filter(courseUnit__data__onboarding__contains=
+                                                                   {invite_type: 'production'}).first()
+                    if not enrollUnitCode:
+                        enrollUnitCode = EnrollUnitCode.objects.filter(courseUnit__data__has_key='onboarding').first()
+                        if not enrollUnitCode:
+                            return RestResponse('no onboarding EnrollUnitCode exists',
+                                                status=status.HTTP_403_FORBIDDEN)
+                    course = enrollUnitCode.courseUnit.course
+                    instructor = Instructor.objects.get(user_id=course.addedBy_id)
+                else:
+                    return RestResponse('invite_type must be teacher or parent',
+                                        status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return RestResponse('only Instructor, invited teacher, or parent can send invitations!',
+                                    status=status.HTTP_403_FORBIDDEN)
+        if not request.user.is_staff:
+            messageText = None # only admin can provide raw text
         invite = Invite.create_new(True, course, instructor, request.data.get('email'),
-                                   request.data.get('invite_type'), enrollUnitCode, data=data)
+                                   invite_type, enrollUnitCode, data=data)
         if not invite.user: # need to create inactive account
             password = make_random_password()
             invite.create_unique_user(password, request.data['first_name'],
                                       request.data['last_name'])
         else:
             password = None # since user already has account, no need to email their password
-        invite.send_mail(request, password=password, messageText=request.data.get('messageText', None),
+        invite.send_mail(request, password=password, messageText=messageText,
                          senderName=request.data.get('senderName', None),
                          subjectText=request.data.get('subjectText', None))
         return RestResponse(dict(invite_id=invite.id), status=status.HTTP_201_CREATED)
