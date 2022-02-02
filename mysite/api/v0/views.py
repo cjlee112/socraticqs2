@@ -527,15 +527,15 @@ class InviteView(APIView):
             return RestResponse('Must specify invite_type', status=status.HTTP_400_BAD_REQUEST)
         messageText = request.data.get('messageText', None)
         try:
-            instructor = Instructor.objects.get(user=request.user)
             enrollCode = request.data.get('enrollCode', None)
             if enrollCode:
                 enrollUnitCode = EnrollUnitCode.objects.get(enrollCode=enrollCode)
                 course = enrollUnitCode.courseUnit.course
             else:
-                course = Course.objects.get(id=request.data.get('course_id'))
+                course = Course.objects.get(id=request.data['course_id'])
                 enrollUnitCode = None
-        except Instructor.DoesNotExist: # allow invited teacher or parent to invite another
+            instructor = Instructor.objects.get(user=request.user)
+        except (Instructor.DoesNotExist, KeyError): # allow invited teacher or parent to invite another
             myInvites = self.is_invited_user(request)
             if myInvites:
                 if invite_type in ['teacher', 'parent']: # only allowed to invite teacher or parent
