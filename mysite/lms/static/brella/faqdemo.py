@@ -202,7 +202,13 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
         exitURL = mainThread['question']['text2html']['exitURL']
         chat.load_new_page(exitURL) # redirect to a completely different page if specified
     except KeyError:
-        return ('help' in stati), msgs
+        pass
+    try:
+        if mainThread['question']['text2html']['offerInvites']:
+            await offer_invites(insertBeforeID=insertBeforeID)
+    except KeyError:
+        pass
+    return ('help' in stati), msgs
 
 
 async def do_assessment(mainThread, postData, history, sidebar, insertBeforeID=None):
@@ -414,6 +420,52 @@ async def show_updates(updates, history, chat_id, thread_id, insertBeforeID, mes
         await solicit_faq(postDataA, history, 'update', insertBeforeID, messageStamp, ignoreHistory=True)
     await chat.continue_button((("ChatMessageTemplate", f'You have completed all updates for this thread. {messageStamp}'),),
                                path=None, postData=postData, history=history, insertBeforeID=insertBeforeID)
+
+
+async def offer_invite(insertBeforeID=None):
+    'ask if user wants to send an invite'
+    query = chat.ChatQuery((("ChatMessageTemplate", 'Is there anyone else who might be interested in seeing this information?'),),
+                           'yesno-template', insertBeforeID=insertBeforeID)
+    return await query.get(None) # no path means do not post message to chat API
+
+async def offer_invites(apiURL='/api/v0/invite/', insertBeforeID=None):
+    'let user invite one or more people'
+    data = await get_chat_info(apiURL)
+    if data.get('canInvite', False):
+        choices = [dict(text=c) for c in data.get('invite_types', ())]
+        proceed = 'yes'
+        while proceed == 'yes' and choices:
+            proceed = await offer_invite(insertBeforeID)
+            if proceed == 'yes':
+                query = chat.ChatInput((("ChatMessageTemplate", "Enter that person's email address:"),),
+                                       insertBeforeID=insertBeforeID)
+                email = await query.get(None) # no path means do not post message to chat API
+                email = email.strip()
+                if not email:
+                    await chat.continue_button((("ChatMessageTemplate", 'Not a valid email address.  Please try again.'),),
+                                               path=None, insertBeforeID=insertBeforeID)
+                    continue
+                query = chat.ChatInput((("ChatMessageTemplate", "Enter that person's first and last name:"),),
+                                       insertBeforeID=insertBeforeID)
+                name = await query.get(None) # no path means do not post message to chat API
+                name = name.strip()
+                first_name = last_name = None
+                if name:
+                    first_name = name.split()[0]
+                    last_name = name[len(first_name):].strip()
+                if not first_name or not last_name:
+                    await chat.continue_button((("ChatMessageTemplate", 'Missing first or last name.  Please try again.'),),
+                                               path=None, insertBeforeID=insertBeforeID)
+                    continue                    
+                query = chat.MultipleChoice((("ChatMessageTemplate", "Is this person a teacher or a parent?"),),
+                                            choices, insertBeforeID=insertBeforeID)
+                ichoice = await query.get(None)
+                invite = dict(email=email, first_name=first_name, last_name=last_name,
+                              invite_type=data['invite_types'][ichoice])
+                chat.begin_post(apiURL, invite)
+                await chat.continue_button((("ChatMessageTemplate", f'Sent invitation to {email}.'),),
+                                           path=None, insertBeforeID=insertBeforeID)
+
 
 
 aio.run(main())
