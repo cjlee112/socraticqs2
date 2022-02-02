@@ -149,13 +149,7 @@ class ChatQuery(object):
         if postData.get('is_preview', False): # just instructor preview, so no Message sent!
             return
         self.response = None
-        headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
-        req = ajax.Ajax()
-        req.bind('complete', self.on_complete)
-        req.open('POST', self.postURL, True)
-        for h, v in headers.items():
-            req.set_header(h, v)
-        req.send(JSON.stringify(postData))
+        begin_post(self.postURL, postData, self.on_complete)
     async def get_server_response(self, attr):
         if self.postData.get('is_preview', False): # just instructor preview, so return fake ID
             return webfsm_id.__next__()
@@ -163,8 +157,20 @@ class ChatQuery(object):
     def on_complete(self, req):
         self.response = JSON.parse(req.text)
 
+def begin_post(url, data, func=None, headers=None):
+    'initiate AJAX POST'
+    if not headers:
+        headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
+    req = ajax.Ajax()
+    if func:
+        req.bind('complete', func)
+    req.open('POST', url, True)
+    for h, v in headers.items():
+        req.set_header(h, v)
+    req.send(JSON.stringify(data))
+    return req
 
-async def continue_button(chats, path='continue', postData={}, history={}, **kwargs):
+async def continue_button(chats, path='continue', postData={}, history=None, **kwargs):
     query = ChatQuery(chats, 'continue-template', dataAttr=None, selector="button", postData=postData, **kwargs)
     await query.get(path, history, showInChat=False)
     return query.msgElements # list of DOM elements output as chats
@@ -177,7 +183,8 @@ class ChatInput(ChatQuery):
         ev.preventDefault() # block default form GET action
         outcome = self.message = self.temporary.select("textarea")[0].value
         self.postData['message'] = self.message
-        self.send_post(self.postData)
+        if 'path' in self.postData: # no path means DO NOT POST
+            self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
 
 class ChatCanvas(ChatInput):
@@ -205,7 +212,8 @@ class ChatCanvas(ChatInput):
         self.message = f'<p>{outcome}</p>\n{drawSVGdiv}{svgData}</div>'
         self.postData['message'] = outcome
         self.postData['canvasSVG'] = svgData
-        self.send_post(self.postData)
+        if 'path' in self.postData: # no path means DO NOT POST
+            self.send_post(self.postData)
         self.canvas.attrs['disabled'] = '1' # no more drawing allowed
         self.canvas.style.display = 'none' # will be shown instead in message bubble
         self.outcome = outcome # don't release lock until done
