@@ -16,7 +16,7 @@ from django.template import loader
 from django.utils.safestring import mark_safe
 from django.contrib.postgres.fields import JSONField
 
-from accounts.models import Instructor
+from accounts.models import Instructor, search_user_by_email
 from chat.models import EnrollUnitCode
 from core.common.utils import create_onboarding_event
 from ct.models import Course
@@ -78,14 +78,10 @@ class Invite(models.Model):
 
     objects = InviteQuerySet.as_manager()
 
-    @staticmethod
-    def search_user_by_email(email):
-        return User.objects.filter(email=email).first()
-
     @classmethod
     def create_new(cls, commit, course, instructor, email, invite_type, enroll_unit_code,
                    data=None):
-        user = Invite.search_user_by_email(email)
+        user = search_user_by_email(email)
         code = Invite(
             instructor=instructor,
             user=user,
@@ -147,7 +143,7 @@ class Invite(models.Model):
         if self.user:
             return self.user
         else:
-            return Invite.search_user_by_email(self.email)
+            return search_user_by_email(self.email)
 
     def create_unique_user(self, password, first_name, last_name, is_active=False,
                            minlength=4, maxtry=1000):

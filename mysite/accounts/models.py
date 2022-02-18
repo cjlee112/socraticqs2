@@ -93,3 +93,10 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 post_save.connect(create_user_profile, sender=User, dispatch_uid='create_user_profile')
+
+
+def search_user_by_email(email):
+    'return one User with matching email, or None if not found'
+    return User.objects.filter(email=email).first()
+
+

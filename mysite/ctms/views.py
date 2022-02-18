@@ -24,7 +24,7 @@ from django.conf import settings
 from django.core.cache import cache
 from social_core.backends.utils import load_backends
 
-from accounts.models import Instructor
+from accounts.models import Instructor, search_user_by_email
 
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, \
@@ -1231,7 +1231,7 @@ class JoinCourseView(CourseCoursletUnitMixin, View):  # NewLoginRequiredMixin
                 # user not yet registered
                 # show signup page
                 # try to find user with email
-                user = invite.search_user_by_email(invite.email)
+                user = search_user_by_email(invite.email)
                 if user:
                     invite.user = user
                     invite.save()
