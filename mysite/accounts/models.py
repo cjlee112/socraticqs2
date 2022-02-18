@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 import pygeoip
 import pytz
+import hashlib
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -107,6 +108,14 @@ def clean_email_name(email):
     email_name = email_name.replace('.', '')
     return email_name, domain
 
+def create_user_account(username, email, password, first_name, last_name, is_active=False):
+    'create new account and return user object'
+    user = User.objects.create_user(username, email, password)
+    user.first_name = first_name
+    user.last_name = last_name
+    user.is_active = is_active
+    user.save()
+    return user
 
 def create_unique_user(email, password, first_name, last_name, username='', is_active=False,
                        minlength=4, maxtry=1000):
@@ -117,16 +126,22 @@ def create_unique_user(email, password, first_name, last_name, username='', is_a
     i = 0
     while i < maxtry: # no infinite loops, please
         try:
-            user = User.objects.create_user(username, email, password)
-            user.first_name = first_name
-            user.last_name = last_name
-            user.is_active = is_active
-            user.save()
-            return user
+            return create_user_account(username, email, password, first_name, last_name, is_active)
         except IntegrityError: # extend name to be unique
             i += 1
             username = userbase + str(i) # just append a number
-    raise ValueError(f'Exceeded Invite.create_unique_user() maxtry: {userbase}, {i}')
+    raise ValueError(f'Exceeded create_unique_user() maxtry: {userbase}, {i}')
+
+
+def create_user_by_ip(ip, email, password, first_name, last_name, is_active=False):
+    'create user account specific to this IP address'
+    username = hashlib.sha256(ip).hexdigest()
+    try:
+        user = User.objects.get(username=username)
+        return None # visitor account already associated with this IP address, refuse to create another
+    except User.DoesNotExist:
+        return create_user_account(username, email, password, first_name, last_name, is_active)
+
 
 
 def login_this_session(request, user):
@@ -137,6 +152,6 @@ def login_this_session(request, user):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
 
-
+NO_EMAIL_VISITOR_DOMAIN = 'nonexistent.fun'
 
 
