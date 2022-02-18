@@ -99,4 +99,13 @@ def search_user_by_email(email):
     'return one User with matching email, or None if not found'
     return User.objects.filter(email=email).first()
 
+def clean_email_name(email):
+    'split email address into username (stripped of .) and domain'
+    email_name, domain = email.split('@', 1)
+    email_name = email_name.replace('.', '')
+    return email_name, domain
+
+
+
+
 

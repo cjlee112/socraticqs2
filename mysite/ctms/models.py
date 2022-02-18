@@ -16,7 +16,7 @@ from django.template import loader
 from django.utils.safestring import mark_safe
 from django.contrib.postgres.fields import JSONField
 
-from accounts.models import Instructor, search_user_by_email
+from accounts.models import Instructor, search_user_by_email, clean_email_name
 from chat.models import EnrollUnitCode
 from core.common.utils import create_onboarding_event
 from ct.models import Course
@@ -39,12 +39,6 @@ TYPE_CHOICES = (
 
 class InviteReplayError(ValueError):
     pass
-
-
-def clean_email_name(email):
-    email_name, domain = email.split('@', 1)
-    email_name = email_name.replace('.', '')
-    return email_name, domain
 
 
 class InviteQuerySet(models.QuerySet):
