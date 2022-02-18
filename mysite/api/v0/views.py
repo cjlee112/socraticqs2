@@ -16,7 +16,7 @@ from django.db.models import Q, F, Max, Count
 from django.db.models.functions import Length
 from django.contrib.auth.models import User
 
-from accounts.models import Instructor
+from accounts.models import Instructor, create_unique_user
 from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson, ExternalContentHash
@@ -560,8 +560,10 @@ class InviteView(APIView):
                                    invite_type, enrollUnitCode, data=data)
         if not invite.user: # need to create inactive account
             password = make_random_password()
-            invite.create_unique_user(password, request.data['first_name'],
-                                      request.data['last_name'])
+            username = invite.get_invited_user_username()
+            invite.user = create_unique_user(password, request.data['first_name'], request.data['last_name'],
+                                             username)
+            invite.save()
         else:
             password = None # since user already has account, no need to email their password
             if not invite.user.first_name or not invite.user.last_name: # invitation needs actual name!
@@ -651,5 +653,4 @@ class Threads2HtmlView(APIView):
             else:
                 out.append(dict(ul_id=None, success=False))
         return RestResponse(out, status=status.HTTP_201_CREATED)
-
 

@@ -99,11 +99,33 @@ def search_user_by_email(email):
     'return one User with matching email, or None if not found'
     return User.objects.filter(email=email).first()
 
+
 def clean_email_name(email):
     'split email address into username (stripped of .) and domain'
     email_name, domain = email.split('@', 1)
     email_name = email_name.replace('.', '')
     return email_name, domain
+
+
+def create_unique_user(email, password, first_name, last_name, username='', is_active=False,
+                       minlength=4, maxtry=1000):
+    'find a unique username and create new django User'
+    if len(username) < minlength:
+        username = first_name + '_' + last_name
+    userbase = username
+    i = 0
+    while i < maxtry: # no infinite loops, please
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.is_active = is_active
+            user.save()
+            return user
+        except IntegrityError: # extend name to be unique
+            i += 1
+            username = userbase + str(i) # just append a number
+    raise ValueError(f'Exceeded Invite.create_unique_user() maxtry: {userbase}, {i}')
 
 
 

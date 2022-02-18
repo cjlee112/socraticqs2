@@ -139,29 +139,6 @@ class Invite(models.Model):
         else:
             return search_user_by_email(self.email)
 
-    def create_unique_user(self, password, first_name, last_name, is_active=False,
-                           minlength=4, maxtry=1000):
-        'find a unique username and create new django User'
-        username = self.get_invited_user_username()
-        if len(username) < minlength:
-            username = first_name + '_' + last_name
-        userbase = username
-        i = 0
-        while i < maxtry: # no infinite loops, please
-            try:
-                user = User.objects.create_user(username, self.email, password)
-                user.first_name = first_name
-                user.last_name = last_name
-                user.is_active = is_active
-                user.save()
-                self.user = user
-                self.save()
-                return user
-            except IntegrityError: # extend name to be unique
-                i += 1
-                username = userbase + str(i) # just append a number
-        raise ValueError(f'Exceeded Invite.create_unique_user() maxtry: {userbase}, {i}')
-
     def finish_acceptance(self):
         'finalize Invite, User, Role records as needed for user to start the invited work'
         self.user.is_active = True
