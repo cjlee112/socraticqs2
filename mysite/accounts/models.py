@@ -4,6 +4,7 @@ import pytz
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth import logout, login
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 import pytz
@@ -127,6 +128,14 @@ def create_unique_user(email, password, first_name, last_name, username='', is_a
             username = userbase + str(i) # just append a number
     raise ValueError(f'Exceeded Invite.create_unique_user() maxtry: {userbase}, {i}')
 
+
+def login_this_session(request, user):
+    'login the specified user in association with the current session'
+    if request.user.is_authenticated: # session logged into another account??
+        # TODO: we should handle this by offering to merge the two accounts 
+        logout(request) # logout existing session prior to logging in specified user account
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
 
 
 

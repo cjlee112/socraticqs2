@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
-from django.contrib.auth import logout, login
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.mail import send_mail
@@ -16,7 +15,7 @@ from django.template import loader
 from django.utils.safestring import mark_safe
 from django.contrib.postgres.fields import JSONField
 
-from accounts.models import Instructor, search_user_by_email, clean_email_name
+from accounts.models import Instructor, search_user_by_email, clean_email_name, login_this_session
 from chat.models import EnrollUnitCode
 from core.common.utils import create_onboarding_event
 from ct.models import Course
@@ -151,14 +150,8 @@ class Invite(models.Model):
         'login accepted invite (based on Invite code, not password)'
         if self.status != 'pending':
             raise InviteReplayError('This invitation has already been used.  Please use the usual login page.')
-        if self.user == request.user: # already logged in, so just update Invite record
-            self.finish_acceptance()
-            return
-        elif request.user.is_authenticated: # session logged into another account??
-            # TODO: we should handle this by offering to merge the two accounts 
-            logout(request) # logout existing session prior to logging in invited user
-        self.user.backend = 'django.contrib.auth.backends.ModelBackend'
-        login(request, self.user)
+        if self.user != request.user: # not already logged in
+            login_this_session(request, self.user)
         self.finish_acceptance()
 
     def get_absolute_url(self):
