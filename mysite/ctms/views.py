@@ -1174,6 +1174,8 @@ def accept_invite(request, code):
     invite = get_object_or_404(Invite, code=code)
     try:
         invite.login_accepted_invite(request)
+        emailValidation = dict(addedBy=invite.user.username, timestamp=time.time(), inviteCode=code)
+        invite.user.profile.save_validation(('email', 'receipt'), emailValidation)
     except InviteReplayError:
         pass # redirect will demand password if page requires login
     return HttpResponseRedirect(invite.data['page'])

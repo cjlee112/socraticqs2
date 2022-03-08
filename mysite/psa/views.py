@@ -1,4 +1,5 @@
 import waffle
+import time
 from django.contrib import messages
 from django.contrib.messages.api import add_message
 from django.db.models import Q
@@ -265,7 +266,10 @@ def complete(request, *args, **kwargs):
         try:
             resp = social_complete(request, 'email', *args, **kwargs)
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated:
-                Profile.check_tz(request)
+                profile = Profile.check_tz(request)
+                emailValidation = dict(addedBy=request.user.username, timestamp=time.time(),
+                                       verification_code=request.GET['verification_code'])
+                profile.save_validation(('email', 'receipt'), emailValidation)
             return resp
         except AuthMissingParameter:
             messages.error(request, 'Email already verified.')
