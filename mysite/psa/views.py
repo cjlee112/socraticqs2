@@ -268,7 +268,7 @@ def complete(request, *args, **kwargs):
             if not ('confirm' in request.POST or login_by_email) and request.user.is_authenticated:
                 profile = Profile.check_tz(request)
                 emailValidation = dict(addedBy=request.user.username, timestamp=time.time(),
-                                       verification_code=request.GET['verification_code'])
+                                       verification_code=request.GET.get('verification_code', None))
                 profile.save_validation(('email', 'receipt'), emailValidation)
             return resp
         except AuthMissingParameter:
