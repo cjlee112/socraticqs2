@@ -144,8 +144,7 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         return chat, i_chat_id
 
-    @staticmethod
-    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
+    def is_user_allowed(self, request, courseUnit):
         """
         This method checks that course is not published and user is not instructor.
 
@@ -255,7 +254,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
-        if self.check_course_not_published_and_user_is_not_instructor(request, courseUnit):
+        if self.is_user_allowed(request, courseUnit):
             return render(
                 request,
                 'lti/error.html',
@@ -439,8 +438,7 @@ class CourseletPreviewView(ChatInitialView):
             useBrella=useBrella
         )
 
-    @staticmethod
-    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
+    def is_user_allowed(self, request, courseUnit):
         """
         Check that course is not published and user is not instructor.
 
@@ -461,7 +459,7 @@ class CourseletPreviewView(ChatInitialView):
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
-        if self.check_course_not_published_and_user_is_not_instructor(request, enroll_code.courseUnit):
+        if self.is_user_allowed(request, enroll_code.courseUnit):
             raise PermissionDenied('This Courselet is not published yet or you have no permisions to open it.')
         ############### redirect to brella chat
         chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
@@ -620,8 +618,8 @@ class CheckChatInitialView(ChatInitialView):
 
         return "Return", reverse('lms:tester_course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
-    @staticmethod
-    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
+    def is_user_allowed(self, request, courseUnit):
+        'returns True if user not invited to this course (and not its Instructor)'
         return not courseUnit.course.invite_set.filter(
             Q(user=request.user) | Q(email=request.user.email),
         ) and not User.objects.filter(
