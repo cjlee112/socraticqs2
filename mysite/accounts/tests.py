@@ -1,11 +1,12 @@
 import mock  # FIXME move to unittest.mock
+import time
 from ddt import ddt, unpack, data
 from django.urls import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
 
 from accounts.forms import CreatePasswordForm, ChangePasswordForm, SocialForm, CustomPasswordResetForm
-from accounts.models import Instructor
+from accounts.models import Instructor, Profile
 from core.common.mongo import c_onboarding_status
 from psa.custom_django_storage import CustomCode
 
@@ -182,6 +183,14 @@ class AccountSettingsTests(TestCase):
 
         self.assertTemplateUsed(response, 'accounts/settings.html')
         self.assertTrue(bool(response.context['delete_account_form'].errors))
+
+    def test_profile_validation(self):
+        user = self.get_user()
+        profile = Profile.get_for_user(user)
+        emailValidation = dict(addedBy=user.username, timestamp=time.time(),
+                               verification_code='check this')
+        profile.save_validation(('email', 'receipt'), emailValidation)
+        self.assertEqual(profile.data['validations']['email']['receipt']['verification_code'], 'check this')
 
 
 class AnonymousUserAccountSettingsTests(TestCase):

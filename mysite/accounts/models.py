@@ -26,6 +26,15 @@ class Profile(models.Model):
     timezone = models.CharField(max_length=255, blank=True, null=True, choices=ALL_TIMEZONES_CHOICES)
     data = JSONField(null=True, blank=True)  # JSON DATA
 
+    @classmethod
+    def get_for_user(cls, user):
+        'return Profile object associated with user (create if missing)'
+        try:
+            return user.profile
+        except cls.DoesNotExist:
+            return cls.objects.create(user=user)
+
+
     @staticmethod
     def get_user_ip(request):
         """
@@ -46,19 +55,31 @@ class Profile(models.Model):
         """
         Check if self.timezone is empty - get timezone from pygeoip and store it there.
         :param request: django request
-        :return: nothing
+        :return: Profile object associated with request.user
         """
-        try:
-            profile = request.user.profile
-        except cls.DoesNotExist:
-            profile = cls.objects.create(user=request.user)
-
+        profile = cls.get_for_user(request.user)
         if profile.timezone not in pytz.all_timezones:
             gi = pygeoip.GeoIP(settings.GEO_IP_DB_PATH)
             loc_data = gi.record_by_addr(cls.get_user_ip(request)) or {}
             timezone = loc_data.get('time_zone', settings.TIME_ZONE)
             profile.timezone = timezone
             profile.save()
+        return profile
+
+    def is_provisional(self):
+        'True iff this is a provisional user account'
+        return self.user.email.endswith(NO_EMAIL_VISITOR_DOMAIN) or not self.data or not 'email' in self.data.get('validations', {})
+
+    def save_validation(self, validationPath, validationData):
+        'set self.data["validations"][validationPath[0]][validationPath[1]]... = validationData'
+        data = d = self.data or {}
+        for k in ('validations',) + tuple(validationPath[:-1]): # follow path inside JSONField
+            d = d.setdefault(k, {})
+        d[validationPath[-1]] = validationData
+        self.data = data
+        self.save()
+        
+        
 
 
 class Instructor(models.Model):
