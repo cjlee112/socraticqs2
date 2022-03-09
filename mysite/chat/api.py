@@ -799,6 +799,7 @@ def thread_api2(request):
             data = ChatThreadSerializer2(chatThread).data
             emUpdates, faqUpdates = chat.get_recent_updates()
             data['updates'] = build_update_dict(emUpdates, faqUpdates, chat.user)
+            data['is_provisional_user'] = chat.user.profile.is_provisional()
             chat.last_modify_timestamp = timezone.now()
             chat.save()
             return Response(data)
