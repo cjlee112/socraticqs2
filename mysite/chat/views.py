@@ -21,6 +21,7 @@ from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from .utils import get_updated_thread_id
+from accounts.models import Profile
 
 brellaChatURL = '/static/brella/faqdemo.html' # stub for launching chat session via brella frontend
 
@@ -146,15 +147,15 @@ class ChatInitialView(LoginRequiredMixin, View):
 
     def is_user_allowed(self, request, courseUnit):
         """
-        This method checks that course is not published and user is not instructor.
+        This method checks that course is published or user is instructor.
 
         :param request: request
         :param courseUnit: course unit
         :return: True | False
         """
         return (
-            not courseUnit.is_published() and
-            not User.objects.filter(
+            courseUnit.is_published() or
+            User.objects.filter(
                 id=request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
@@ -254,7 +255,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
-        if self.is_user_allowed(request, courseUnit):
+        if not self.is_user_allowed(request, courseUnit):
             return render(
                 request,
                 'lti/error.html',
@@ -440,15 +441,15 @@ class CourseletPreviewView(ChatInitialView):
 
     def is_user_allowed(self, request, courseUnit):
         """
-        Check that course is not published and user is not instructor.
+        Check that user created courseUnit or is course instructor.
 
         :param request: request
         :param courseUnit: course unit
         :return: True | False
         """
         return (
-            not courseUnit.addedBy == request.user and
-            not User.objects.filter(
+            courseUnit.addedBy == request.user or
+            User.objects.filter(
                 id=request.user.id, role__role=Role.INSTRUCTOR, role__course=courseUnit.course
             ).exists()
         )
@@ -459,7 +460,7 @@ class CourseletPreviewView(ChatInitialView):
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
-        if self.is_user_allowed(request, enroll_code.courseUnit):
+        if not self.is_user_allowed(request, enroll_code.courseUnit):
             raise PermissionDenied('This Courselet is not published yet or you have no permisions to open it.')
         ############### redirect to brella chat
         chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
@@ -619,14 +620,37 @@ class CheckChatInitialView(ChatInitialView):
         return "Return", reverse('lms:tester_course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
     def is_user_allowed(self, request, courseUnit):
-        'returns True if user not invited to this course (and not its Instructor)'
-        return not courseUnit.course.invite_set.filter(
+        'returns True if user invited to this course or is its Instructor'
+        return courseUnit.course.invite_set.filter(
             Q(user=request.user) | Q(email=request.user.email),
-        ) and not User.objects.filter(
+        ) or User.objects.filter(
             id=request.user.id,
             role__role=Role.INSTRUCTOR,
             role__course=courseUnit.course
         ).exists()
+
+
+class FrictionlessChatInitialView(ChatInitialView):
+    def dispatch(self, *args, **kwargs):
+        'override parent class requirement that user already be logged in'
+        return View.dispatch(self, *args, **kwargs)
+
+    def is_user_allowed(self, request, courseUnit):
+        'frictionless login any provisional user'
+        if Role.objects.filter(user_id=request.user.id, role=Role.INSTRUCTOR, course=courseUnit.course).exists():
+            return True # instructor always has access
+        if not courseUnit.is_published():
+            return False # not published yet!
+        if request.user.is_authenticated and courseUnit.course.invite_set.filter(Q(user=request.user)
+                                                 | Q(email=request.user.email)).exists():
+            return True # has an invite to this course
+        if courseUnit.course.access != PUBLIC_ACCESS:
+            return False # not public
+        if not request.user.is_authenticated: # anonymous, so create provisional account
+            profile = Profile.create_provisional_login(request)
+            if not profile: # failed to create provisional login
+                return False
+        return True
 
 
 

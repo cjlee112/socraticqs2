@@ -6,7 +6,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView,
-    brella_demo_view,
+    brella_demo_view, FrictionlessChatInitialView,
 )
 from .api import (
     MessagesView,
@@ -27,7 +27,7 @@ from .services import FsmHandler
 inj = injections.Container()
 inj['next_handler'] = FsmHandler()
 MessagesViewFSM = inj.inject(MessagesView)
-ChatInitialViewFSM = inj.inject(ChatInitialView)
+ChatInitialViewFSM = inj.inject(FrictionlessChatInitialView)
 
 router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, basename='messages')
@@ -57,7 +57,7 @@ urlpatterns = [
     ),
     url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',
-        ChatInitialViewFSM.as_view(),
+        FrictionlessChatInitialView.as_view(),
         name='chat_enroll'
     ),
     url(

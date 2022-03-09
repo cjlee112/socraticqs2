@@ -10,9 +10,13 @@ from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 import pytz
 
+from core.common.utils import make_random_password
+
 ALL_TIMEZONES_CHOICES = [
     (i, i) for i in pytz.all_timezones
 ]
+
+NO_EMAIL_VISITOR_DOMAIN = 'nonexistent.fun'
 
 
 class Profile(models.Model):
@@ -34,6 +38,20 @@ class Profile(models.Model):
         except cls.DoesNotExist:
             return cls.objects.create(user=user)
 
+    @classmethod
+    def create_provisional_login(cls, request, email=f'invalid@{NO_EMAIL_VISITOR_DOMAIN}',
+                                 first_name='Visitor', last_name='Anonymous'):
+        'create provisional User account, login this session, and return Profile object'
+        password = make_random_password()
+        ip = cls.get_user_ip(request)
+        user = create_user_by_ip(ip, email, password, first_name, last_name, True)
+        if not user: # already a provisional account from this IP, refuse to create another
+            return None
+        if email == f'invalid@{NO_EMAIL_VISITOR_DOMAIN}': # use the assigned username to make fake email unique
+            user.email = f'{user.username}@{NO_EMAIL_VISITOR_DOMAIN}'
+            user.save()
+        login_this_session(request, user)
+        return cls.check_tz(request)
 
     @staticmethod
     def get_user_ip(request):
@@ -156,7 +174,7 @@ def create_unique_user(email, password, first_name, last_name, username='', is_a
 
 def create_user_by_ip(ip, email, password, first_name, last_name, is_active=False):
     'create user account specific to this IP address'
-    username = hashlib.sha256(ip).hexdigest()
+    username = hashlib.sha256(ip.encode('utf8')).hexdigest()
     try:
         user = User.objects.get(username=username)
         return None # visitor account already associated with this IP address, refuse to create another
@@ -173,6 +191,6 @@ def login_this_session(request, user):
     user.backend = 'django.contrib.auth.backends.ModelBackend'
     login(request, user)
 
-NO_EMAIL_VISITOR_DOMAIN = 'nonexistent.fun'
+
 
 
