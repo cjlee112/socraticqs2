@@ -21,7 +21,7 @@ from fsm.models import FSMState
 from .models import Chat, EnrollUnitCode
 from .services import ProgressHandler
 from .utils import get_updated_thread_id
-from accounts.models import Profile
+from accounts.models import Profile, clean_email_name
 
 brellaChatURL = '/static/brella/faqdemo.html' # stub for launching chat session via brella frontend
 
@@ -630,27 +630,26 @@ class CheckChatInitialView(ChatInitialView):
         ).exists()
 
 
-class FrictionlessChatInitialView(ChatInitialView):
-    def dispatch(self, *args, **kwargs):
-        'override parent class requirement that user already be logged in'
-        return View.dispatch(self, *args, **kwargs)
-
-    def is_user_allowed(self, request, courseUnit):
-        'frictionless login any provisional user'
-        if Role.objects.filter(user_id=request.user.id, role=Role.INSTRUCTOR, course=courseUnit.course).exists():
-            return True # instructor always has access
-        if not courseUnit.is_published():
-            return False # not published yet!
-        if request.user.is_authenticated and courseUnit.course.invite_set.filter(Q(user=request.user)
-                                                 | Q(email=request.user.email)).exists():
-            return True # has an invite to this course
-        if courseUnit.course.access != PUBLIC_ACCESS:
-            return False # not public
-        if not request.user.is_authenticated: # anonymous, so create provisional account
-            profile = Profile.create_provisional_login(request)
-            if not profile: # failed to create provisional login
-                return False
-        return True
+def enrollcode_gateway(request, enroll_key, chat_id=None):
+    'ask anonymous user to enter email (optional)'
+    nextURL = reverse('chat:chat_enroll', kwargs={'enroll_key': enroll_key})
+    if request.user.is_authenticated: # logged-in user
+        return redirect(nextURL) # go straight to courselet
+    if request.method == 'POST':
+        email = request.POST.get('email', None)
+        if email and User.objects.filter(email=email).exists():
+            return redirect(reverse('new_login') + f'?next={nextURL}') # already has an account, so login
+        else: # frictionless login: create provisional account for this visitor
+            if email:
+                first_name, domain = clean_email_name(email)
+                profile = Profile.create_provisional_login(request, email, first_name)
+            else:
+                profile = Profile.create_provisional_login(request)
+            if not profile: # account creation failed: last fallback is to run brella loginless demo
+                nextURL = reverse('chat:brella_demo', kwargs={'enroll_key': enroll_key})
+            return redirect(nextURL) # proceed with courselet
+    else:
+        return render(request, 'chat/ask_email.html', dict(title='enrollcode gateway'))
 
 
 

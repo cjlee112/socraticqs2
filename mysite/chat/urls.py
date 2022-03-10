@@ -6,7 +6,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     ChatInitialView, InitializeLiveSession, CourseletPreviewView, CheckChatInitialView,
-    brella_demo_view, FrictionlessChatInitialView,
+    brella_demo_view, enrollcode_gateway,
 )
 from .api import (
     MessagesView,
@@ -27,7 +27,7 @@ from .services import FsmHandler
 inj = injections.Container()
 inj['next_handler'] = FsmHandler()
 MessagesViewFSM = inj.inject(MessagesView)
-ChatInitialViewFSM = inj.inject(FrictionlessChatInitialView)
+ChatInitialViewFSM = inj.inject(ChatInitialView)
 
 router = SimpleRouter()
 router.register(r'messages', MessagesViewFSM, basename='messages')
@@ -56,8 +56,13 @@ urlpatterns = [
         name='courselet_history'
     ),
     url(
+        r'^enrollnow/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',
+        enrollcode_gateway,
+        name='frictionless_enroll'
+    ),
+    url(
         r'^enrollcode/(?P<enroll_key>[a-zA-Z0-9]+)/(?P<chat_id>\d+)?/?$',
-        FrictionlessChatInitialView.as_view(),
+        ChatInitialViewFSM.as_view(),
         name='chat_enroll'
     ),
     url(
@@ -85,6 +90,6 @@ urlpatterns = [
     url(r'^brella/chat$', chat_api2),
     url(
         r'^brella/demo/(?P<enroll_key>[a-zA-Z0-9]+)/$',
-        brella_demo_view,
+        brella_demo_view, name='brella_demo'
     ),
 ]

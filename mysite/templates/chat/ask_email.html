@@ -1,0 +1,24 @@
+{% extends "ctms_base.html" %}
+
+{% block title %}
+  Enter your email
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <header class="card__topbar">
+      <h1>Enter your email</h1>
+    </header>
+
+    <main class="card__content">
+      <form class="form" method="post">
+        {% csrf_token %}
+
+        <label for="email">Email</label>
+        <p>If you have used Courselets before, or want us to be able to answer your questions, please enter your email address here.  This is not required.  We will never share your information with anyone.</p>
+        <input type="text" id="email" name="email">
+        <input type="submit" value="Continue">
+      </form>
+    </main>
+  </div>
+{% endblock %}

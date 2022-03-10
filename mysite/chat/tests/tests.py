@@ -332,6 +332,35 @@ class MainChatViewTests(CustomTestCase):
         )
         start_point.assert_called_once()
 
+    def test_frictionless_get(self):
+        """
+        Should get form requesting email address.
+        """
+        enroll_key = EnrollUnitCode.get_code(self.get_course_unit())
+        response = self.client.get(reverse('chat:frictionless_enroll', kwargs=dict(enroll_key=enroll_key)))
+        self.assertTemplateUsed(response, 'chat/ask_email.html')
+
+    def test_frictionless_get2(self):
+        """
+        Should redirect to chat:chat_enroll.
+        """
+        enroll_key = EnrollUnitCode.get_code(self.get_course_unit())
+        self.client.login(username='test', password='test')
+        response = self.client.get(reverse('chat:frictionless_enroll', kwargs=dict(enroll_key=enroll_key)), follow=False)
+        self.assertRedirects(response, reverse('chat:chat_enroll', kwargs=dict(enroll_key=enroll_key)),
+                             fetch_redirect_response=False)
+
+    def test_frictionless_post(self):
+        """
+        Should redirect to new_login.
+        """
+        enroll_key = EnrollUnitCode.get_code(self.get_course_unit())
+        response = self.client.post(reverse('chat:frictionless_enroll', kwargs=dict(enroll_key=enroll_key)),
+                                    dict(email='test@test.com'))
+        nextURL = reverse('chat:chat_enroll', kwargs=dict(enroll_key=enroll_key))
+        self.assertRedirects(response, reverse('new_login') + f'?next={nextURL}',
+                             fetch_redirect_response=False)
+
 
 @override_settings(SUSPEND_SIGNALS=True)
 class MessagesViewTests(CustomTestCase):
