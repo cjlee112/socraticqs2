@@ -21,7 +21,7 @@ from analytics.models import CourseReport
 from analytics.tasks import report
 from ct.models import CourseUnit, Response, StudentError, Course, Role, Unit, UnitLesson, Lesson, ExternalContentHash
 from chat.models import Chat, EnrollUnitCode
-from ctms.models import BestPractice, BestPracticeTemplate, Invite
+from ctms.models import BestPractice, BestPracticeTemplate, Invite, InviteReplayError
 from core.common.mongo import do_health, c_onboarding_status
 from core.common import onboarding
 from core.common.utils import get_onboarding_steps, get_onboarding_status_with_settings, create_onboarding_event, make_random_password
@@ -570,7 +570,7 @@ class InviteView(APIView):
                 invite.user.first_name = request.data['first_name']
                 invite.user.last_name = request.data['last_name']
                 invite.user.save()
-        invite.send_mail(request, password=password, messageText=messageText,
+        invite.send_mail(request.user, password=password, messageText=messageText, request=request,
                          senderName=request.data.get('senderName', None),
                          subjectText=request.data.get('subjectText', None))
         return RestResponse(dict(invite_id=invite.id), status=status.HTTP_201_CREATED)
@@ -653,4 +653,6 @@ class Threads2HtmlView(APIView):
             else:
                 out.append(dict(ul_id=None, success=False))
         return RestResponse(out, status=status.HTTP_201_CREATED)
+
+
 

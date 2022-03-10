@@ -90,28 +90,41 @@ class Invite(models.Model):
             code.save()
         return code
 
+    @classmethod
+    def create_for_user(cls, user, enrollCode, invite_type='student', sendInvite=True, **kwargs):
+        'convenience method just needs user and enrollCode'
+        enrollUnitCode = EnrollUnitCode.objects.get(enrollCode=enrollCode)
+        course = enrollUnitCode.courseUnit.course
+        instructor = Instructor.objects.get(user_id=course.addedBy_id)
+        invite = cls(user=user, instructor=instructor, email=user.email, status='pending', type=invite_type,
+                     course=course, enroll_unit_code=enrollUnitCode, **kwargs)
+        invite.save()
+        if sendInvite:
+            self.send_mail(instructor.user)
+        return invite
+
     def get_invited_user_username(self):
         return self.email.split("@")[0] if self.email else ''
 
     class Meta:
         unique_together = ('instructor', 'email', 'type', 'course', 'enroll_unit_code')
 
-    def render_template(self, request, messageType, part='text', **kwargs):
+    def render_template(self, requestor, messageType, part='text', request=None, **kwargs):
         context = {
             'invite': self,
             'current_site': Site.objects.get_current(request),
-            'requestor': request.user
+            'requestor': requestor
         }
         context.update(kwargs)
         text_template = loader.get_template(f'ctms/email/invite/{messageType}_{part}.txt')
         return text_template.render(context)
 
-    def send_mail(self, request, messageType=None, **kwargs):
+    def send_mail(self, requestor, messageType=None, **kwargs):
         'send the specified invite email message type'
         if not messageType:
             messageType = self.type
-        rendered_subj = self.render_template(request, messageType, 'subject', **kwargs).strip()
-        rendered_text = self.render_template(request, messageType, 'text', **kwargs)
+        rendered_subj = self.render_template(requestor, messageType, 'subject', **kwargs).strip()
+        rendered_text = self.render_template(requestor, messageType, 'text', **kwargs)
         if 'senderName' in kwargs:
             email_from = f'{kwargs["senderName"]} <{settings.EMAIL_FROM}>' # RFC822 format
         else:
@@ -156,6 +169,20 @@ class Invite(models.Model):
 
     def get_absolute_url(self):
         return reverse('ctms:tester_join_course', kwargs={'code': self.code})
+
+    def get_mailto_url(self):
+        'return URL that sends email accepting this Invite'
+        return f'mailto:{settings.EMAIL_FROM}?subject=Invite%20{self.code}&body=all%20you%20need%20to%20do%20is%20click%20Send'
+
+    def mailto_acceptance(self, validated_email):
+        'bind the validated email address to Invite.user'
+        if self.status != 'pending':
+            raise InviteReplayError('This invitation has already been used.  Please use the usual login page.')
+        if not validated_email:
+            raise InviteReplayError('Missing email address')
+        # TODO: must first check with validated_email is associated with a different User!!
+        self.user.email = self.email = validated_email
+        self.finish_acceptance() # saves all changes
 
     # TODO: refactor it ASAP, it may result in errors in certain cases
     @staticmethod

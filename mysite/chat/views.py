@@ -14,6 +14,7 @@ from django.core.exceptions import PermissionDenied
 
 from mysite.mixins import LoginRequiredMixin
 from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS, PUBLIC_ACCESS
+from ctms.models import Invite
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
 from chat.serializers import ChatProgressSerializer
@@ -643,6 +644,9 @@ def enrollcode_gateway(request, enroll_key, chat_id=None):
             if email:
                 first_name, domain = clean_email_name(email)
                 profile = Profile.create_provisional_login(request, email, first_name)
+                if profile: # send invite to validate this email
+                    Invite.create_for_user(profile.user, enroll_key,
+                                           data=dict(page=nextURL, trigger='enrollcode_gateway'))
             else:
                 profile = Profile.create_provisional_login(request)
             if not profile: # account creation failed: last fallback is to run brella loginless demo

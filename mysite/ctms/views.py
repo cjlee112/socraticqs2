@@ -1158,7 +1158,7 @@ class InvitesListView(NewLoginRequiredMixin, CourseCoursletUnitMixin, CreateView
         #     )
         #     return self.form_invalid(form)
         response = super(InvitesListView, self).form_valid(form)
-        self.object.send_mail(self.request)
+        self.object.send_mail(self.request.user, request=self.request)
         messages.add_message(self.request, messages.SUCCESS, "Invitation successfully sent")
         return response
 
@@ -1250,7 +1250,7 @@ class ResendInviteView(NewLoginRequiredMixin, CourseCoursletUnitMixin, View):
         invite = get_object_or_404(Invite, code=code)
         if invite.course.addedBy != self.request.user and not Role(course=invite.course, role=Role.INSTRUCTOR).exists():
             raise Http404()
-        response = invite.send_mail(self.request)
+        response = invite.send_mail(self.request.user, request=self.request)
         messages.add_message(self.request, messages.SUCCESS,
                              "We just resent invitation to {}".format(invite.email))
         return json_response(response)
