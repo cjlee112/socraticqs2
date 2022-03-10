@@ -130,6 +130,9 @@ class Invite(models.Model):
         else:
             email_from = settings.EMAIL_FROM
         send_mail(rendered_subj, rendered_text, email_from, [self.email], fail_silently=False)
+        if self.user and self.user.profile: # record this event in user profile
+            self.user.profile.save_path(('invitations_sent', self.code),
+                                        dict(email=self.email, timestamp=time.time()))
         create_onboarding_event(
                 event_name='invitation-sent',
                 created_at=int(time.mktime(time.localtime())),

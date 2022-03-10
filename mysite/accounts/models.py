@@ -88,15 +88,18 @@ class Profile(models.Model):
         'True iff this is a provisional user account'
         return self.user.email.endswith(NO_EMAIL_VISITOR_DOMAIN) or not self.data or not 'email' in self.data.get('validations', {})
 
-    def save_validation(self, validationPath, validationData):
-        'set self.data["validations"][validationPath[0]][validationPath[1]]... = validationData'
+    def save_path(self, path, dataToSave):
+        'set self.data[path[0]][path[1]]... = dataToSave'
         data = d = self.data or {}
-        for k in ('validations',) + tuple(validationPath[:-1]): # follow path inside JSONField
+        for k in path[:-1]: # follow path inside JSONField
             d = d.setdefault(k, {})
-        d[validationPath[-1]] = validationData
+        d[path[-1]] = dataToSave
         self.data = data
         self.save()
         
+    def save_validation(self, validationPath, validationData):
+        'set self.data["validations"][validationPath[0]][validationPath[1]]... = validationData'
+        self.save_path(('validations',) + tuple(validationPath), validationData)
         
 
 
