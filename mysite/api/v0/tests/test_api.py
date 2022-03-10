@@ -8,7 +8,7 @@ from rest_framework import status
 
 from ct.models import UnitLesson, Lesson
 from ctms.models import Invite
-from accounts.models import Instructor
+from accounts.models import Profile, Instructor
 
 import base64
 import hashlib
@@ -366,4 +366,47 @@ def test_threads2html_post(course_unit, client, user, threads2html_data1):
     assert isinstance(result.get('ul_id', 'missing!'), int)
     assert isinstance(result.get('answer_ul_id', 'missing!'), int)
 
+
+@pytest.mark.django_db
+def test_accinv_not_admin(client, user, pending_invite, dkim_validation_dict):
+    'accept-invite API by non-admin user should be forbidden'
+    client.force_login(user)
+    data = dkim_validation_dict.copy()
+    data['code'] = pending_invite.code
+    response = client.post(reverse("api:v0:accept-invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_accinv_post(client, user, pending_invite, dkim_validation_dict):
+    'accept-invite API by admin user should succeed'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    data = dkim_validation_dict.copy()
+    data['code'] = pending_invite.code
+    assert pending_invite.user.profile.is_provisional()
+    response = client.post(reverse("api:v0:accept-invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    assert Invite.objects.filter(code=pending_invite.code, status='joined').exists()
+    assert not Profile.objects.get(user=pending_invite.user).is_provisional()
+    assert User.objects.get(id=pending_invite.user.id).email == data['email']
+    response = client.post(reverse("api:v0:accept-invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST # should block attempt to reuse invite
+
+
+@pytest.mark.django_db
+def test_accinv_badcode(client, user, pending_invite, dkim_validation_dict):
+    'accept-invite API with invalid invite code should fail'
+    client.force_login(user)
+    user.is_staff = True
+    user.save()
+    data = dkim_validation_dict.copy()
+    data['code'] = 'invalid code'
+    response = client.post(reverse("api:v0:accept-invite"), data=data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_400_BAD_REQUEST # should block bad invite
 

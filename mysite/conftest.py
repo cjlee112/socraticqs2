@@ -20,6 +20,8 @@ from api.v0.lesson_providers.multichoice import MultiChoiceProviderBuilder
 from api.v0.lesson_providers.intro import IntroProviderBuilder
 from api.v0.lesson_providers.question import QuestionProviderBuilder
 from api.v0.lesson_providers.cfg import Provider
+from accounts.models import Instructor
+from ctms.models import Invite
 
 
 def pytest_addoption(parser):
@@ -171,6 +173,16 @@ def enroll_unit_code(course_unit, user):
 def teacher_invite_dict(enroll_unit_code):
     return dict(enrollCode=enroll_unit_code.enrollCode, email='jojo@example.com', invite_type='teacher')
 
+
+@pytest.fixture
+def pending_invite(user, course_unit, unique_instructor):
+    instructor = Instructor.objects.create(user=unique_instructor, institution='institute', what_do_you_teach='something')
+    return Invite.create_new(True, course_unit.course, instructor, user.email, 'teacher', None)
+
+
+@pytest.fixture
+def dkim_validation_dict():
+    return dict(email='changed@example.com', dkimValidation=dict(dkim_valid=True, dkim_aligned=True))
 
 @pytest.fixture
 def chat(enroll_unit_code, user):

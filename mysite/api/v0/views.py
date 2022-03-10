@@ -655,4 +655,29 @@ class Threads2HtmlView(APIView):
         return RestResponse(out, status=status.HTTP_201_CREATED)
 
 
+class AcceptInviteView(APIView):
+    'API to accept an invite by providing a validation code'
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAdminUser,)
+    def post(self, request, *args, **kwargs):
+        'accept Invite by providing its secret code'
+        try:
+            code = request.data['code']
+            email = request.data['email']
+            invite = Invite.objects.get(code=code)
+        except (KeyError, Invite.DoesNotExist):
+            return RestResponse(dict(error='missing or invalid Invite code or email'),
+                                status=status.HTTP_400_BAD_REQUEST)
+        try:
+            invite.mailto_acceptance(email)
+        except InviteReplayError as e:
+            return RestResponse(dict(error=str(e)), status=status.HTTP_400_BAD_REQUEST)
+        out = dict(user_id=invite.user.id, invite_id=invite.id)
+        dkimValidation = request.data.get('dkimValidation', None)
+        if dkimValidation:
+            dkimValidation['timestamp'] = time.time()
+            dkimValidation['addedBy'] = request.user.username
+            invite.user.profile.save_validation(('email', 'DKIM'), dkimValidation)
+            out['dkimValidation'] = dkimValidation
+        return RestResponse(out, status=status.HTTP_201_CREATED)
 
