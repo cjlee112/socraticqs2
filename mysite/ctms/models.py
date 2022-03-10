@@ -97,7 +97,7 @@ class Invite(models.Model):
         course = enrollUnitCode.courseUnit.course
         instructor = Instructor.objects.get(user_id=course.addedBy_id)
         invite = cls(user=user, instructor=instructor, email=user.email, status='pending', type=invite_type,
-                     course=course, enroll_unit_code=enrollUnitCode, **kwargs)
+                     course=course, enroll_unit_code=enrollUnitCode, code=uuid4().hex, **kwargs)
         invite.save()
         if sendInvite:
             self.send_mail(instructor.user)
