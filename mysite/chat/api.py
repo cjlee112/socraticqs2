@@ -800,6 +800,8 @@ def thread_api2(request):
             emUpdates, faqUpdates = chat.get_recent_updates()
             data['updates'] = build_update_dict(emUpdates, faqUpdates, chat.user)
             data['is_provisional_user'] = chat.user.profile.is_provisional()
+            if chat.user.profile.data and chat.user.profile.data.get('invitations_sent', False):
+                data['invitations_sent'] = True
             chat.last_modify_timestamp = timezone.now()
             chat.save()
             return Response(data)
