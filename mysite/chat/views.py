@@ -146,17 +146,18 @@ class ChatInitialView(LoginRequiredMixin, View):
 
         return chat, i_chat_id
 
-    def is_user_allowed(self, request, courseUnit):
+    @staticmethod
+    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         """
-        This method checks that course is published or user is instructor.
+        This method checks that course is not published and user is not instructor.
 
         :param request: request
         :param courseUnit: course unit
         :return: True | False
         """
         return (
-            courseUnit.is_published() or
-            User.objects.filter(
+            not courseUnit.is_published() and
+            not User.objects.filter(
                 id=request.user.id,
                 role__role=Role.INSTRUCTOR,
                 role__course=courseUnit.course
@@ -256,7 +257,7 @@ class ChatInitialView(LoginRequiredMixin, View):
                 'lti/error.html',
                 {'message': 'There are no Lessons to display for that Courselet.'}
             )
-        if not self.is_user_allowed(request, courseUnit):
+        if self.check_course_not_published_and_user_is_not_instructor(request, courseUnit):
             return render(
                 request,
                 'lti/error.html',
@@ -440,17 +441,18 @@ class CourseletPreviewView(ChatInitialView):
             useBrella=useBrella
         )
 
-    def is_user_allowed(self, request, courseUnit):
+    @staticmethod
+    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
         """
-        Check that user created courseUnit or is course instructor.
+        Check that course is not published and user is not instructor.
 
         :param request: request
         :param courseUnit: course unit
         :return: True | False
         """
         return (
-            courseUnit.addedBy == request.user or
-            User.objects.filter(
+            not courseUnit.addedBy == request.user and
+            not User.objects.filter(
                 id=request.user.id, role__role=Role.INSTRUCTOR, role__course=courseUnit.course
             ).exists()
         )
@@ -461,7 +463,7 @@ class CourseletPreviewView(ChatInitialView):
 
     def get(self, request, enroll_key):
         enroll_code = self.get_enroll_code_object(enroll_key)
-        if not self.is_user_allowed(request, enroll_code.courseUnit):
+        if self.check_course_not_published_and_user_is_not_instructor(request, enroll_code.courseUnit):
             raise PermissionDenied('This Courselet is not published yet or you have no permisions to open it.')
         ############### redirect to brella chat
         chat = self.create_new_chat(request, enroll_code, enroll_code.courseUnit, useBrella=True)
@@ -620,15 +622,16 @@ class CheckChatInitialView(ChatInitialView):
 
         return "Return", reverse('lms:tester_course_view', kwargs=dict(course_id=kwargs['courseUnit'].course.id))
 
-    def is_user_allowed(self, request, courseUnit):
-        'returns True if user invited to this course or is its Instructor'
-        return courseUnit.course.invite_set.filter(
+    @staticmethod
+    def check_course_not_published_and_user_is_not_instructor(request, courseUnit):
+        return not courseUnit.course.invite_set.filter(
             Q(user=request.user) | Q(email=request.user.email),
-        ) or User.objects.filter(
+        ) and not User.objects.filter(
             id=request.user.id,
             role__role=Role.INSTRUCTOR,
             role__course=courseUnit.course
         ).exists()
+
 
 
 def enrollcode_gateway(request, enroll_key, chat_id=None):
