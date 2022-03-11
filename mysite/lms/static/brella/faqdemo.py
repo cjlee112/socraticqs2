@@ -148,8 +148,9 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
     oldThreads = {}
     finalUpdates = {}
     t, postData, updateThreads = await get_thread(chat_id)
+    state = dict(firstORCT=True)
     while t:
-        await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID)
+        await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID, state)
         if is_preview and sidebar.resourceNext: # instructor clicked in sidebar, so exit lesson sequence
             return None, None # no updates in preview mode anyway!
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
@@ -157,10 +158,11 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
             for thread_id, updates in showLater.items(): # save for display at end of courselet
                 finalUpdates.setdefault(thread_id, {}).update(updates)
+    await post_courselet_actions(t, state, insertBeforeID)
     return finalUpdates, oldThreads
 
 
-async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, insertBeforeID=None):
+async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, insertBeforeID=None, state=None):
     if is_preview: # mark postData to block all POST messages.  This is just instructor preview!!
         postData['is_preview'] = is_preview
     if t['kind'] == 'orct':
@@ -168,6 +170,8 @@ async def do_thread(t, postData, oldThreads, is_preview=False, sidebar=None, ins
         if wantsHelp:
             t['history']['insertBeforeID'] = msgs[0].id
             oldThreads[t['thread_id']] = t['history'] # student wants more help on this thread
+        if state:
+            await post_orct_actions(t, state, insertBeforeID)
     elif t['kind'] == 'assess-only':
         await do_assessment(t, postData, t['history'], sidebar, insertBeforeID)
     else:
@@ -465,6 +469,31 @@ async def offer_invites(apiURL='/api/v0/invite/', insertBeforeID=None):
                 chat.begin_post(apiURL, invite)
                 await chat.continue_button((("ChatMessageTemplate", f'Sent invitation to {email}.'),),
                                            path=None, insertBeforeID=insertBeforeID)
+
+
+#######################################
+# state-dependent actions during courselet
+
+async def post_orct_actions(orct, state, insertBeforeID):
+    if state.get('firstORCT', False):
+        state['firstORCT'] = False
+        await offer_mailto(orct, state, insertBeforeID)
+
+async def offer_mailto(orct, state, insertBeforeID):
+    mailto_url = orct.get('mailto_url', False)
+    if mailto_url:
+        msg = f'''In order for us to be able to reply to any questions you may have on this courselet, it would be helpful to be able to contact you.  To enable this, all you need to do is click the <a href="{mailto_url}">Replies OK</a> button, then click <b>Send</b> on the resulting message dialog.  This is recommended, but not required. <button onclick="window.location.href='{mailto_url}';">Replies OK</button>'''
+        await chat.continue_button((("ChatMessageTemplate", msg),), path=None, insertBeforeID=insertBeforeID)
+
+async def post_courselet_actions(t, state, insertBeforeID):
+    if t.get('invitations_sent', False):
+        msg = '''You should now have received a confirmation email from Courselets.  Please check your email for that confirmation message and click its email validation link, so that you will be able to continue to access your work, help answers and messages on Courselets.  Thanks for checking out Courselets!'''
+        await chat.continue_button((("ChatMessageTemplate", msg),), path=None, insertBeforeID=insertBeforeID)
+    else:
+        await offer_mailto(t, state, insertBeforeID)
+
+
+##########################################
 
 
 

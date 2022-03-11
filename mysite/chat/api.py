@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from ct.models import Response as StudentResponse, Lesson, UnitLesson, EVAL_TO_STATUS_MAP, InquiryCount
+from ctms.models import Invite
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from chat.services import ProgressHandler, FsmHandler
 from chat.permissions import IsOwner
