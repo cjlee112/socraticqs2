@@ -668,16 +668,13 @@ class AcceptInviteView(APIView):
         except (KeyError, Invite.DoesNotExist):
             return RestResponse(dict(error='missing or invalid Invite code or email'),
                                 status=status.HTTP_400_BAD_REQUEST)
+        out = dict(user_id=invite.user.id, invite_id=invite.id)
         try:
-            invite.mailto_acceptance(email)
+            dkimValidation = invite.mailto_acceptance(email, request.data.get('dkimValidation', None),
+                                                      request.user.username)
+            if dkimValidation:
+                out['dkimValidation'] = dkimValidation
         except InviteReplayError as e:
             return RestResponse(dict(error=str(e)), status=status.HTTP_400_BAD_REQUEST)
-        out = dict(user_id=invite.user.id, invite_id=invite.id)
-        dkimValidation = request.data.get('dkimValidation', None)
-        if dkimValidation:
-            dkimValidation['timestamp'] = time.time()
-            dkimValidation['addedBy'] = request.user.username
-            invite.user.profile.save_validation(('email', 'DKIM'), dkimValidation)
-            out['dkimValidation'] = dkimValidation
         return RestResponse(out, status=status.HTTP_201_CREATED)
 

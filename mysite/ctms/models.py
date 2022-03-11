@@ -33,7 +33,8 @@ TYPE_CHOICES = (
     ('blindspotter', 'blindspotter'),
     ('teacher', 'teacher'),
     ('parent', 'parent'),
-    ('blank', 'blank')
+    ('blank', 'blank'),
+    ('mailto', 'mailto'),
 )
 
 class InviteReplayError(ValueError):
@@ -102,6 +103,17 @@ class Invite(models.Model):
         if sendInvite:
             self.send_mail(instructor.user)
         return invite
+
+    @classmethod
+    def get_or_create_mailto(cls, user, enrollCode):
+        'get a mailto invite for this user, creating it if needed'
+        invite = cls.objects.filter(user=user, type='mailto').first()
+        if invite:
+            if invite.status == 'pending':
+                return invite
+            else:
+                return None # user already performed mailto validation, no need to do it again!
+        return cls.create_for_user(user, enrollCode, 'mailto', sendInvite=False)
 
     def get_invited_user_username(self):
         return self.email.split("@")[0] if self.email else ''
@@ -177,7 +189,7 @@ class Invite(models.Model):
         'return URL that sends email accepting this Invite'
         return f'mailto:{settings.EMAIL_FROM}?subject=Invite%20{self.code}&body=all%20you%20need%20to%20do%20is%20click%20Send'
 
-    def mailto_acceptance(self, validated_email):
+    def mailto_acceptance(self, validated_email, dkimValidation=None, addedBy=None):
         'bind the validated email address to Invite.user'
         if self.status != 'pending':
             raise InviteReplayError('This invitation has already been used.  Please use the usual login page.')
@@ -186,6 +198,13 @@ class Invite(models.Model):
         # TODO: must first check with validated_email is associated with a different User!!
         self.user.email = self.email = validated_email
         self.finish_acceptance() # saves all changes
+        if dkimValidation:
+            dkimValidation = dkimValidation.copy()
+            dkimValidation['timestamp'] = time.time()
+            dkimValidation['addedBy'] = addedBy
+            self.user.profile.save_validation(('email', 'DKIM'), dkimValidation)
+        return dkimValidation
+
 
     # TODO: refactor it ASAP, it may result in errors in certain cases
     @staticmethod
