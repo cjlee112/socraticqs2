@@ -482,7 +482,7 @@ async def post_orct_actions(orct, state, insertBeforeID):
 async def offer_mailto(orct, state, insertBeforeID):
     mailto_url = orct.get('mailto_url', False)
     if mailto_url:
-        msg = f'''In order for us to be able to reply to any questions you may have on this courselet, it would be helpful to be able to contact you.  To enable this, all you need to do is click the <a href="{mailto_url}">Replies OK</a> button, then click <b>Send</b> on the resulting message dialog.  This is recommended, but not required. <button onclick="window.location.href='{mailto_url}';">Replies OK</button>'''
+        msg = f'''In order for us to be able to reply to any questions you may have on this courselet, it would be helpful to be able to contact you.  To enable this, all you need to do is click the <a href="{mailto_url}">Replies OK</a> button, then click <b>Send</b> on the resulting message dialog (if no dialog appears, please look for it on your desktop Task Bar in case the dialog was behind the browser window).  This is recommended, but not required. <button onclick="window.location.href='{mailto_url}';">Replies OK</button>'''
         await chat.continue_button((("ChatMessageTemplate", msg),), path=None, insertBeforeID=insertBeforeID)
 
 async def post_courselet_actions(t, state, insertBeforeID):
