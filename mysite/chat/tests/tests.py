@@ -32,6 +32,8 @@ from ..fsm_plugin.additional import get_specs as get_specs_additional
 from ..fsm_plugin.resource import END, get_specs as get_specs_resource
 from ..fsm_plugin.faq import get_specs as get_specs_faq
 from ..views import ChatInitialView, CourseletPreviewView, CheckChatInitialView
+from accounts.models import Instructor, Profile
+from ctms.models import Invite
 
 
 class CustomTestCase(TestCase):
@@ -360,6 +362,23 @@ class MainChatViewTests(CustomTestCase):
         nextURL = reverse('chat:chat_enroll', kwargs=dict(enroll_key=enroll_key))
         self.assertRedirects(response, reverse('new_login') + f'?next={nextURL}',
                              fetch_redirect_response=False)
+
+
+    def test_frictionless_post2(self):
+        """
+        Should redirect to chat:chat_enroll.
+        """
+        enrollUnitCode = EnrollUnitCode.get_code(self.get_course_unit(), give_instance=True)
+        instructor = Instructor.objects.create(user=enrollUnitCode.courseUnit.course.addedBy,
+                                               institution='institute', what_do_you_teach='something')
+        response = self.client.post(reverse('chat:frictionless_enroll',
+                                            kwargs=dict(enroll_key=enrollUnitCode.enrollCode)),
+                                    dict(email='jojo@nowhere.com'))
+        nextURL = reverse('chat:chat_enroll', kwargs=dict(enroll_key=enrollUnitCode.enrollCode))
+        self.assertRedirects(response, nextURL, fetch_redirect_response=False)
+        profile = Profile.objects.get(user__email='jojo@nowhere.com')
+        invite = Invite.objects.get(email='jojo@nowhere.com')
+        self.assertTrue(profile.data['invitations_sent'][invite.code]['email'] == invite.email)
 
 
 @override_settings(SUSPEND_SIGNALS=True)
