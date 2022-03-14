@@ -21,3 +21,12 @@ def test_mailto_invite(user, enroll_unit_code, dkim_validation_dict):
     assert not profile.is_provisional()
     assert profile.user.email == 'mutated@example.com'
 
+
+
+@pytest.mark.django_db
+def test_create_for_user(user, enroll_unit_code):
+    instructor = Instructor.objects.create(user=user, institution='institute', what_do_you_teach='something')
+    invite = Invite.create_for_user(user, enroll_unit_code.enrollCode, data=dict(page='/boo'))
+    profile = Profile.objects.get(user=user)
+    assert profile.data['invitations_sent'][invite.code]['email'] == invite.email
+

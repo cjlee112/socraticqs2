@@ -101,7 +101,7 @@ class Invite(models.Model):
                      course=course, enroll_unit_code=enrollUnitCode, code=uuid4().hex, **kwargs)
         invite.save()
         if sendInvite:
-            self.send_mail(instructor.user)
+            invite.send_mail(instructor.user)
         return invite
 
     @classmethod
