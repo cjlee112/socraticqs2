@@ -153,12 +153,13 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
         await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID, state)
         if is_preview and sidebar.resourceNext: # instructor clicked in sidebar, so exit lesson sequence
             return None, None # no updates in preview mode anyway!
+        lastThread = t
         t, postData, updateThreads = await get_thread(chat_id, t['thread_id'], oldThreads)
         if updateThreads and not is_preview:
             showLater = await offer_updates(updateThreads, oldThreads, chat_id, insertBeforeID)
             for thread_id, updates in showLater.items(): # save for display at end of courselet
                 finalUpdates.setdefault(thread_id, {}).update(updates)
-    await post_courselet_actions(t, state, insertBeforeID)
+    await post_courselet_actions(lastThread, state, insertBeforeID)
     return finalUpdates, oldThreads
 
 
