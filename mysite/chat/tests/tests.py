@@ -528,6 +528,7 @@ class MessagesViewTests(CustomTestCase):
         json_content = json.loads(response.content)
         self.assertNotIn('text', json_content['addMessages'][0])
 
+    @unittest.skip("chat:messages-detail endpoint removed")
     def test_valid_message_put(self):
         """
         Test a valid case when Student puts `text` to add `Response`.
@@ -583,6 +584,7 @@ class MessagesViewTests(CustomTestCase):
 
         self.assertEqual(json_content['addMessages'][0]['type'], 'breakpoint')
 
+    @unittest.skip("chat:messages-detail endpoint removed")
     def test_typical_chat_flow(self):
         """
         Check for typical chat flow.
