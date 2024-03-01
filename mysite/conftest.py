@@ -20,7 +20,7 @@ from api.v0.lesson_providers.multichoice import MultiChoiceProviderBuilder
 from api.v0.lesson_providers.intro import IntroProviderBuilder
 from api.v0.lesson_providers.question import QuestionProviderBuilder
 from api.v0.lesson_providers.cfg import Provider
-from accounts.models import Instructor
+from accounts.models import Instructor, Profile
 from ctms.models import Invite
 
 
@@ -44,6 +44,17 @@ def base64_gif_image():
 @pytest.fixture
 def user():
     return User.objects.create_user(username='admin', password='test_admin')
+
+
+@pytest.fixture
+def user_profile(user):
+    user.email = 'me@example.com' # email required for profile validation
+    user.save()
+    p = Profile.get_for_user(user)
+    p.data = dict(validations=dict(email=user.email)) # required for p.is_provisional() to return False
+    p.save()
+    return p
+
 
 
 @pytest.fixture
@@ -156,7 +167,7 @@ def lesson_answer(unit, lesson_question):
 
 @pytest.fixture
 def lesson_answer_canvas(unit, lesson_question_canvas):
-    return UnitLesson.create_from_lesson(unit=unit, lesson=lesson_question_canvas, addAnswer=True)
+    return UnitLesson.create_from_lesson(unit=unit, lesson=lesson_question_canvas, addAnswer=True, order=0)
 
 
 @pytest.fixture
@@ -246,6 +257,34 @@ def message_parametrized(chat, user, unit_lesson_parametrized):
         lesson_to_answer=unit_lesson_parametrized,
     )
 
+
+#############################################################
+# brella-specific chat fixtures
+
+@pytest.fixture
+def chat_brella(enroll_unit_code, user):
+    return Chat.objects.create(
+        enroll_code=enroll_unit_code,
+        user=user,
+        is_open=True,
+    )
+
+
+
+@pytest.fixture
+def message_brella(chat_brella, user, unit_lesson):
+    return Message.objects.create(
+        chat=chat_brella,
+        contenttype='unitlesson',
+        content_id=unit_lesson.id,
+        owner=user,
+        type='message',
+        lesson_to_answer=unit_lesson,
+    )
+
+
+
+#############################################################
 
 @pytest.fixture(scope='function')
 def unique_instructor():
