@@ -44,3 +44,21 @@ def test_brella_threads(chat_brella, lesson_answer_canvas, user_profile, client)
     assert response.status_code == status.HTTP_200_OK
     assert response.data['thread_id'] == lesson_answer_canvas.id
 
+
+
+@pytest.mark.django_db
+def test_messages_blocked(chat_brella, lesson_answer_canvas, user_profile, client):
+    """
+    Test unauthenticated case for the brella chat API.
+    """
+    post_data = create_post_data(chat_brella.id, lesson_answer_canvas.id)
+    response = client.post('/chat/brella/messages', data=post_data,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+
+def create_post_data(chat_id, thread_id):
+    return dict(chat_id=chat_id, thread_id=thread_id)
+
