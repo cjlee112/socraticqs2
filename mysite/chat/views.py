@@ -231,10 +231,10 @@ class ChatInitialView(LoginRequiredMixin, View):
         kw.update(kwargs)
         return Chat.objects.filter(**kw).first()
 
-    def get_chat_sessions(self, request, enroll_code, courseUnit):
+    def get_chat_sessions(self, chat_user, enroll_code, courseUnit):
         return Chat.objects.filter(
             enroll_code=enroll_code,
-            user=request.user,
+            user=chat_user,
             instructor=courseUnit.course.addedBy,
             is_live=False,
             is_test=self.tester_mode,
@@ -270,7 +270,7 @@ class ChatInitialView(LoginRequiredMixin, View):
             enrolling.role = Role.ENROLLED
             enrolling.save()
 
-        chat_sessions = self.get_chat_sessions(request, enroll_code, courseUnit)
+        chat_sessions = self.get_chat_sessions(request.user, enroll_code, courseUnit)
 
         if chat_id == 'brella' or (self.choose_brella_vs_legacy(courseUnit) and not chat_sessions):
             chat = self.create_new_chat(request, enroll_code, courseUnit, useBrella=True)
@@ -301,11 +301,7 @@ class ChatInitialView(LoginRequiredMixin, View):
         except AttributeError:
             instructor_icon = ''
 
-        for chat_ss in chat_sessions:
-            chat_prog_ser = ChatProgressSerializer()
-            lessons = chat_prog_ser.get_breakpoints(chat_ss)
-            chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
-            chat_ss.total_lessons = len(lessons)
+        annotate_chat_sessions(chat_sessions)
 
 
         back_url_name, back_url = self.get_back_url(**locals())
@@ -350,6 +346,15 @@ class ChatInitialView(LoginRequiredMixin, View):
         if courseUnit.unit.use_legacy_frontend():
             return False
         return True # brella is now the default!
+
+
+def annotate_chat_sessions(chat_sessions):
+    'add lessons_done and total_lessons attrs to each chat_session'
+    for chat_ss in chat_sessions:
+        chat_prog_ser = ChatProgressSerializer()
+        lessons = chat_prog_ser.get_breakpoints(chat_ss)
+        chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
+        chat_ss.total_lessons = len(lessons)
 
 
 class ChatNoJSInit(object):
