@@ -283,6 +283,17 @@ def message_brella(chat_brella, user, unit_lesson):
     )
 
 
+@pytest.fixture
+def brella_messages_json1(chat_brella, unit_lesson):
+    return {
+    	"chat_id": chat_brella.id,
+    	"message": "boo boo",
+    	"path": "response",
+    	"thread_id": unit_lesson.id,
+    	"ul_id": unit_lesson.id
+    }
+
+
 
 #############################################################
 
