@@ -757,6 +757,9 @@ def message_api2(request):
             elif path.startswith('errormodels.status.') and m.student_error and m.student_error.author == request.user:
                 m.student_error.status = request.data['outcome']
                 m.student_error.save()
+                if m.response_to_check and m.response_to_check.author == request.user:
+                    m.response_to_check.status = request.data['outcome']
+                    m.response_to_check.save()
             elif path.startswith('faqs.status.'):
                 if 'inquiry_id' in request.data:
                     inquiry = get_object_or_404(InquiryCount, id=request.data['inquiry_id'])

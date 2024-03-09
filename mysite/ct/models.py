@@ -535,9 +535,9 @@ class Lesson(models.Model, SubKindMixin):
         questionUL."""
         self.kind = self.ERROR_MODEL
         if errorModel is None:
-            em = concept.create_error_model(title=self.title,
-                                            addedBy=self.addedBy)
-        self.concept = em
+            errorModel = concept.create_error_model(title=self.title,
+                                                    addedBy=self.addedBy)
+        self.concept = errorModel
         self.save_root()
         return UnitLesson.create_from_lesson(self, questionUL.unit,
                                              parent=questionUL)

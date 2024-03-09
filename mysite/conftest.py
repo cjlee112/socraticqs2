@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from chat.models import Chat, Message, UnitError, EnrollUnitCode
-from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Response
+from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Response, StudentError
 from fsm.fsm_base import FSMStack
 from fsm.models import FSM
 from mysite.helpers import base64_to_file
@@ -166,6 +166,12 @@ def lesson_answer(unit, lesson_question):
 
 
 @pytest.fixture
+def lesson_error_model(unit_lesson):
+    eml = Lesson(title='I thought all that glitters', text='was gold', addedBy=unit_lesson.addedBy)
+    return eml.save_as_error_model(unit_lesson.lesson.concept, unit_lesson)
+
+
+@pytest.fixture
 def lesson_answer_canvas(unit, lesson_question_canvas):
     return UnitLesson.create_from_lesson(unit=unit, lesson=lesson_question_canvas, addAnswer=True, order=0)
 
@@ -220,6 +226,11 @@ def unit_error(unit, response):
         unit=unit,
         response=response,
     )
+
+
+@pytest.fixture
+def student_error_eg1(response, lesson_error_model):
+    return StudentError.objects.create(response=response, errorModel=lesson_error_model, author=response.author)
 
 
 @pytest.fixture
@@ -302,6 +313,19 @@ def brella_messages_json2(brella_messages_json1):
     	"outcome": "guess",
     	"path": "confidence",
     })
+    return d
+
+
+@pytest.fixture
+def brella_messages_json3(brella_messages_json1, student_error_eg1):
+    d = brella_messages_json1.copy() # make a new copy; do not modify original!!
+    d.update({
+	    "message": "Still confused, need help",
+	    "outcome": "help",
+	    "path": f"errormodels.status.{student_error_eg1.errorModel.id}",
+	    "response_id": student_error_eg1.response.id,
+	    "student_error_id": student_error_eg1.id,
+	})
     return d
 
 #############################################################

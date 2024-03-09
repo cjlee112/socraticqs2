@@ -7,7 +7,7 @@ from django.shortcuts import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
 
-from ct.models import UnitLesson, Lesson
+from ct.models import UnitLesson, Lesson, Response
 from chat.models import Message
 from chat.views import ChatInitialView, annotate_chat_sessions
 
@@ -97,7 +97,14 @@ def test_chat_lessons_done(chat_brella, brella_messages_json1, brella_messages_j
     assert chat_sessions[0].lessons_done == 1
 
 
-
+@pytest.mark.django_db
+def test_em_response_status(chat_brella, brella_messages_json3, client):
+    client.force_login(chat_brella.user)
+    response = client.post('/chat/brella/messages', data=brella_messages_json3,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    r = Response.objects.get(id=brella_messages_json3['response_id'])
+    assert r.status == brella_messages_json3['outcome']
 
 
 def create_post_data(chat_id, thread_id):
