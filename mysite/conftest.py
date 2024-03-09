@@ -267,6 +267,7 @@ def chat_brella(enroll_unit_code, user):
         enroll_code=enroll_unit_code,
         user=user,
         is_open=True,
+        instructor=enroll_unit_code.courseUnit.course.addedBy
     )
 
 
@@ -293,7 +294,15 @@ def brella_messages_json1(chat_brella, unit_lesson):
     	"ul_id": unit_lesson.id
     }
 
-
+@pytest.fixture
+def brella_messages_json2(brella_messages_json1):
+    d = brella_messages_json1.copy() # make a new copy; do not modify original!!
+    d.update({
+    	"message": "Just guessing",
+    	"outcome": "guess",
+    	"path": "confidence",
+    })
+    return d
 
 #############################################################
 

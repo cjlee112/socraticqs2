@@ -13,7 +13,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
 
 from mysite.mixins import LoginRequiredMixin
-from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, NEED_HELP_STATUS, NEED_REVIEW_STATUS, PUBLIC_ACCESS
+from ct.models import Role, UnitLesson, ConceptLink, CourseUnit, Response, NEED_HELP_STATUS, NEED_REVIEW_STATUS, PUBLIC_ACCESS
 from ctms.models import Invite
 from chat.models import Message
 from chat.services import LiveChatFsmHandler, ChatPreviewFsmHandler
@@ -351,10 +351,16 @@ class ChatInitialView(LoginRequiredMixin, View):
 def annotate_chat_sessions(chat_sessions):
     'add lessons_done and total_lessons attrs to each chat_session'
     for chat_ss in chat_sessions:
-        chat_prog_ser = ChatProgressSerializer()
-        lessons = chat_prog_ser.get_breakpoints(chat_ss)
-        chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
-        chat_ss.total_lessons = len(lessons)
+        if chat_ss.is_open: # brella
+            chat_ss.lessons_done = Response.objects.filter(message__chat=chat_ss, kind=Response.ORCT_RESPONSE,
+                                                           unitLesson__order__isnull=False).distinct().count()
+            chat_ss.total_lessons = UnitLesson.objects.filter(order__isnull=False,
+                                                              unit=chat_ss.enroll_code.courseUnit.unit).count()
+        else: # legacy horror
+            chat_prog_ser = ChatProgressSerializer()
+            lessons = chat_prog_ser.get_breakpoints(chat_ss)
+            chat_ss.lessons_done = len([i for i in lessons if i['isDone']])
+            chat_ss.total_lessons = len(lessons)
 
 
 class ChatNoJSInit(object):
