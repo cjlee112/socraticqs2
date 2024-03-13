@@ -9,6 +9,7 @@ import pytest
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 
 from chat.models import Chat, Message, UnitError, EnrollUnitCode
 from ct.models import Lesson, Concept, Course, Unit, UnitLesson, CourseUnit, Response, StudentError
@@ -292,8 +293,15 @@ def message_brella(chat_brella, user, unit_lesson):
         owner=user,
         type='message',
         lesson_to_answer=unit_lesson,
+        timestamp=timezone.now(),
     )
 
+
+@pytest.fixture
+def msg_response_brella(message_brella, response):
+    message_brella.response_to_check = response
+    message_brella.save()
+    return message_brella
 
 @pytest.fixture
 def brella_messages_json1(chat_brella, unit_lesson):

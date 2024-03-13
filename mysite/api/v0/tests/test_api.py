@@ -12,6 +12,7 @@ from accounts.models import Profile, Instructor
 
 import base64
 import hashlib
+from urllib.parse import urlparse
 
 
 
@@ -409,4 +410,44 @@ def test_accinv_badcode(client, user, pending_invite, dkim_validation_dict):
     response = client.post(reverse("api:v0:accept-invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_400_BAD_REQUEST # should block bad invite
+
+
+@pytest.mark.django_db
+def test_chatstats_not_admin(client, user):
+    'chatStats API by non-admin user should be forbidden'
+    client.force_login(user)
+    response = client.get('/api/v0/chatStats/?startTime=0', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+
+
+@pytest.mark.django_db
+def test_chatstats_basic(client, user, msg_response_brella):
+    client.force_login(user)
+    user.is_superuser = True
+    user.save()
+    good = False
+    for result in iter_paginated_get(client, '/api/v0/chatStats/', data=dict(startTime=0),
+                                     HTTP_ACCEPT='application/json'):
+        if result['id'] == msg_response_brella.chat_id:
+            assert result['nresp'] == 1
+            good = True
+    if not good:
+        raise ValueError('missing chat response data')
+
+
+
+def iter_paginated_get(clientObj, path, data=None, **kwargs):
+    'iterate over all results from Django REST pagination'
+    while path:
+        response = clientObj.get(path, data, **kwargs)
+        assert response.status_code == status.HTTP_200_OK
+        dataPage = response.data
+        for r in dataPage.get('results', ()):
+            yield r
+        path = dataPage.get('next', None) # URL for next page
+        if path:
+            path = urlparse(path).path # always use relative path
+            data = None # don't resend params after first page
 
