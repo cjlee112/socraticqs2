@@ -421,6 +421,15 @@ def test_chatstats_not_admin(client, user):
 
 
 
+@pytest.mark.django_db
+def test_chatstats_nonesuch(client, user):
+    'chatStats API should reject non-existent namedView'
+    client.force_login(user)
+    response = client.get('/api/v0/chatStats/?namedView=nonesuch', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+
 
 @pytest.mark.django_db
 def test_chatstats_basic(client, user, msg_response_brella):
@@ -450,4 +459,10 @@ def iter_paginated_get(clientObj, path, data=None, **kwargs):
         if path:
             path = urlparse(path).path # always use relative path
             data = None # don't resend params after first page
+
+
+
+
+
+
 
