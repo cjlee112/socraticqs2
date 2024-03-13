@@ -491,7 +491,7 @@ async def post_courselet_actions(t, state, insertBeforeID):
         msg = '''You should now have received a confirmation email from Courselets.  Please check your email for that confirmation message and click its email validation link, so that you will be able to continue to access your work, help answers and messages on Courselets.  Thanks for checking out Courselets!'''
         await chat.continue_button((("ChatMessageTemplate", msg),), path=None, insertBeforeID=insertBeforeID)
     else:
-        await offer_mailto(t, state, insertBeforeID)
+        pass # TODO: temporarily deactivate offer_mailto: await offer_mailto(t, state, insertBeforeID)
 
 
 ##########################################
