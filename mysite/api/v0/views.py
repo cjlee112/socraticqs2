@@ -489,11 +489,40 @@ def filter_chats_since(chatStatsView):
 def chats_since_values(self, queryset):
     return queryset.values('id', 'duration', 'nmsg', 'nresp', 'is_open', 'courselet_id', 'timestamp')
 
+
+def filter_courselet_chats(chatStatsView):
+    'get Response counts for Chat sessions in specified courseUnit'
+    courseUnit_id = chatStatsView.request.query_params.get('courselet_id', None)
+    if not chatStatsView.request.user or courseUnit_id is None or not Role.objects.filter(
+            role=Role.INSTRUCTOR, course__courseunit__id=courseUnit_id, 
+            user=chatStatsView.request.user).exists():
+        raise exceptions.PermissionDenied('you do not have instructor rights')
+    return Chat.objects.filter(
+              enroll_code__courseUnit_id=courseUnit_id,
+              is_preview=False
+            ).annotate(
+              maxtime=Max('message__timestamp')
+            ).annotate(
+              nresp=Count('message__response_to_check', distinct=True),
+              email=F('user__email'), first_name=F('user__first_name'), last_name=F('user__last_name'),
+              duration=F('maxtime') - F('timestamp')
+            )
+
+
+def courselet_chats_values(self, queryset):
+    return queryset.values('id', 'duration', 'nresp', 'email', 'first_name', 'last_name', 'timestamp')
+
+
+
 class ChatStatsView(NamedViewBase):
     _namedViews = {
         'UsageSince': {
             'filter': filter_chats_since,
             'values': chats_since_values
+        },
+        'CourseletChats': {
+            'filter': filter_courselet_chats,
+            'values': courselet_chats_values
         }
     }
     _defaultView = 'UsageSince'

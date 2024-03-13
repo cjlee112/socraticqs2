@@ -6,7 +6,7 @@ from django.shortcuts import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
 
-from ct.models import UnitLesson, Lesson
+from ct.models import UnitLesson, Lesson, Role
 from ctms.models import Invite
 from accounts.models import Profile, Instructor
 
@@ -462,7 +462,32 @@ def iter_paginated_get(clientObj, path, data=None, **kwargs):
 
 
 
+@pytest.mark.django_db
+def test_chatstats2_not_instructor(client, user):
+    'chatStats CourseletChats API by non-instructor user should be forbidden'
+    client.force_login(user)
+    response = client.get('/api/v0/chatStats/?startTime=0&namedView=CourseletChats',
+                          HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
+
+
+@pytest.mark.django_db
+def test_chatstats_courselet(client, user, msg_response_brella, chatstats_courselet_json):
+    'instructor access to CourseletChats API'
+    role = Role.objects.create(role=Role.INSTRUCTOR, user=user,
+                               course=msg_response_brella.chat.enroll_code.courseUnit.course)
+    client.force_login(user)
+    good = False
+    for result in iter_paginated_get(client, '/api/v0/chatStats/',
+                                     data=chatstats_courselet_json,
+                                     HTTP_ACCEPT='application/json'):
+        if result['id'] == msg_response_brella.chat_id:
+            assert result['nresp'] == 1
+            assert result['email'] == 'me@example.com'
+            good = True
+    if not good:
+        raise AssertionError('missing chat response data')
 
 
 

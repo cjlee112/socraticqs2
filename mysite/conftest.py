@@ -303,6 +303,16 @@ def msg_response_brella(message_brella, response):
     message_brella.save()
     return message_brella
 
+
+@pytest.fixture
+def chatstats_courselet_json(msg_response_brella, user_profile):
+    return dict(
+        courselet_id=msg_response_brella.chat.enroll_code.courseUnit.id,
+        namedView='CourseletChats'
+    )
+
+
+
 @pytest.fixture
 def brella_messages_json1(chat_brella, unit_lesson):
     return {
