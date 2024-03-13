@@ -434,7 +434,7 @@ def test_chatstats_basic(client, user, msg_response_brella):
             assert result['nresp'] == 1
             good = True
     if not good:
-        raise ValueError('missing chat response data')
+        raise AssertionError('missing chat response data')
 
 
 
