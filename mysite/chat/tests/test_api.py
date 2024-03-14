@@ -3,6 +3,7 @@ Test brella APIs.
 """
 import pytest
 import unittest
+import json
 from django.shortcuts import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -105,6 +106,39 @@ def test_em_response_status(chat_brella, brella_messages_json3, client):
     assert response.status_code == status.HTTP_201_CREATED
     r = Response.objects.get(id=brella_messages_json3['response_id'])
     assert r.status == brella_messages_json3['outcome']
+
+
+@pytest.mark.django_db
+def test_messages_bad_patch(message_brella, client):
+    'forbidden to patch unless special case matched (see test_messages_patch)'
+    data = dict(message_id=message_brella.id, outcome='no')
+    client.force_login(message_brella.owner)
+    response = client.patch('/chat/brella/messages', data=data,
+                            content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    data['message_id'] =  295601
+    response = client.patch('/chat/brella/messages', data=data,
+                            content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_messages_patch(message_solicit_faq, client):
+    'patch answer.solicit_faq to outcome=no should succeed'
+    data = json.loads(message_solicit_faq.text)
+    assert data['outcome'] == 'yes'
+    data = dict(message_id=message_solicit_faq.id, outcome='no')
+    response = client.patch('/chat/brella/messages', data=data,
+                            content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    client.force_login(message_solicit_faq.owner)
+    response = client.patch('/chat/brella/messages', data=data,
+                            content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    m = Message.objects.get(id=message_solicit_faq.id)
+    data = json.loads(m.text)
+    assert data['outcome'] == 'no'
+
 
 
 def create_post_data(chat_id, thread_id):

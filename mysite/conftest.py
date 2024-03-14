@@ -298,6 +298,20 @@ def message_brella(chat_brella, user, unit_lesson):
 
 
 @pytest.fixture
+def message_solicit_faq(chat_brella, user, unit_lesson):
+    return Message.objects.create(
+        chat=chat_brella,
+        contenttype='unitlesson',
+        content_id=unit_lesson.id,
+        owner=user,
+        type='message',
+        lesson_to_answer=unit_lesson,
+        timestamp=timezone.now(),
+        text='{"path": "answer.solicit_faq", "outcome": "yes", "message": "Yes", "remap": [["lesson_to_answer", "ul_id"]]}'
+    )
+
+
+@pytest.fixture
 def msg_response_brella(message_brella, response):
     message_brella.response_to_check = response
     message_brella.save()

@@ -1,5 +1,6 @@
 import base64
 from itertools import chain
+import json
 
 import injections
 from django.core.files.base import ContentFile
@@ -736,7 +737,7 @@ def chat_api2(request):
             return Response(serializer.data)
         return Response('action is not allowed', status=403)
 
-@api_view(['POST'])
+@api_view(['POST', 'PATCH'])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def message_api2(request):
@@ -774,7 +775,21 @@ def message_api2(request):
                 m.response_to_check.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    elif request.method == 'PATCH':
+        message_id = request.data.get('message_id', None)
+        outcome = request.data.get('outcome', None)
+        if message_id:
+            m = get_object_or_404(Message, id=message_id)
+            data = m.text and json.loads(m.text) # protected against NULL m.text
+            if m.owner == request.user and data and data.get('path', '') == 'answer.solicit_faq' and outcome == 'no':
+                data['outcome'] = outcome # cancel FAQ creation step
+                data['message'] = 'No'
+                m.text = json.dumps(data)
+                m.save()
+                return Response({}, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response('action is not allowed', status=403)
+        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
