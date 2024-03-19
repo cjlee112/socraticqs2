@@ -157,14 +157,14 @@ class ChatQuery(object):
     def on_complete(self, req):
         self.response = JSON.parse(req.text)
 
-def begin_post(url, data, func=None, headers=None):
+def begin_post(url, data, func=None, headers=None, action='POST'):
     'initiate AJAX POST'
     if not headers:
         headers = {'Content-Type': 'application/json', 'X-CSRFToken': get_cookie('csrftoken')}
     req = ajax.Ajax()
     if func:
         req.bind('complete', func)
-    req.open('POST', url, True)
+    req.open(action, url, True)
     for h, v in headers.items():
         req.set_header(h, v)
     req.send(JSON.stringify(data))
