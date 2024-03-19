@@ -185,22 +185,24 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
     postDataQ = sidebar.advance_chat_thread(mainThread, postData, mainThread['question']['ul_id'],
                                             insertBeforeID)
     await pose_orct(mainThread, postDataQ, history, sidebar, insertBeforeID)
-    s = await get_selfeval(mainThread['answer'], postDataQ, history, insertBeforeID)
+    selfeval = await get_selfeval(mainThread['answer'], postDataQ, history, insertBeforeID)
     stati = ()
-    if s != 'correct':
-        errmods = mainThread.get('errormodels', ())
-        if errmods:
-            stati += await offer_errmods(errmods, postDataQ, history, insertBeforeID)
-        postDataA = postData.copy()
-        postDataA['ul_id'] = mainThread['answer']['ul_id'] # POST messages will be about this answer
-        faqs = mainThread['answer'].get('faqs', ())
-        if faqs:
-            stati += await offer_faqs(faqs, mainThread['answer'].get('faq_answers', {}), postDataA, history, insertBeforeID)
-        if len(stati) == 0:
-            stati += (await get_status((("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us."),),
-                                       'status', postDataQ, history, insertBeforeID),)
-        if 'help' in stati:
-            await solicit_faq(postDataA, history, insertBeforeID=insertBeforeID)
+    errmods = mainThread.get('errormodels', ())
+    if selfeval == 'correct':
+        stati += (await get_status((("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us."),),
+                                   'status', postDataQ, history, insertBeforeID),)
+    elif errmods:
+        stati += await offer_errmods(errmods, postDataQ, history, insertBeforeID)
+    postDataA = postData.copy()
+    postDataA['ul_id'] = mainThread['answer']['ul_id'] # POST messages will be about this answer
+    faqs = mainThread['answer'].get('faqs', ())
+    if (selfeval != 'correct' or 'help' in stati) and faqs:
+        stati += await offer_faqs(faqs, mainThread['answer'].get('faq_answers', {}), postDataA, history, insertBeforeID)
+    if len(stati) == 0:
+        stati += (await get_status((("ChatMessageTemplate", "How well do you feel you understand now? If you need more clarification, tell us."),),
+                                   'status', postDataQ, history, insertBeforeID),)
+    if 'help' in stati:
+        await solicit_faq(postDataA, history, insertBeforeID=insertBeforeID)
     msgs = await chat.continue_button((("ChatMessageTemplate", "You've completed this question!  Let's continue to the next lesson."),),
                                       path='done', postData=postData, history=history, insertBeforeID=insertBeforeID)
     try:
