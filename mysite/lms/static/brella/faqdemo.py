@@ -480,7 +480,7 @@ async def offer_invites(apiURL='/api/v0/invite/', insertBeforeID=None):
 async def post_orct_actions(orct, state, insertBeforeID):
     if state.get('firstORCT', False):
         state['firstORCT'] = False
-        await offer_mailto(orct, state, insertBeforeID)
+        return # TODO: temporarily deactivate offer_mailto: await offer_mailto(orct, state, insertBeforeID)
 
 async def offer_mailto(orct, state, insertBeforeID):
     mailto_url = orct.get('mailto_url', False)
