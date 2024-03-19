@@ -187,7 +187,7 @@ async def do_orct_cycle(mainThread, postData, history, sidebar, insertBeforeID=N
     await pose_orct(mainThread, postDataQ, history, sidebar, insertBeforeID)
     s = await get_selfeval(mainThread['answer'], postDataQ, history, insertBeforeID)
     stati = ()
-    if s != 'same':
+    if s != 'correct':
         errmods = mainThread.get('errormodels', ())
         if errmods:
             stati += await offer_errmods(errmods, postDataQ, history, insertBeforeID)
