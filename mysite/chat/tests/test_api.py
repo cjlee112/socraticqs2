@@ -109,6 +109,26 @@ def test_em_response_status(chat_brella, brella_messages_json3, client):
 
 
 @pytest.mark.django_db
+def test_response_selfeval(chat_brella, brella_messages_json4, client):
+    client.force_login(chat_brella.user)
+    response = client.post('/chat/brella/messages', data=brella_messages_json4,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    r = Response.objects.get(id=brella_messages_json4['response_id'])
+    assert r.selfeval == brella_messages_json4['outcome']
+
+
+@pytest.mark.django_db
+def test_response_status(chat_brella, brella_messages_json5, client):
+    client.force_login(chat_brella.user)
+    response = client.post('/chat/brella/messages', data=brella_messages_json5,
+                           content_type='application/json', HTTP_ACCEPT='application/json')
+    assert response.status_code == status.HTTP_201_CREATED
+    r = Response.objects.get(id=brella_messages_json5['response_id'])
+    assert r.status == brella_messages_json5['outcome']
+
+
+@pytest.mark.django_db
 def test_messages_bad_patch(message_brella, client):
     'forbidden to patch unless special case matched (see test_messages_patch)'
     data = dict(message_id=message_brella.id, outcome='no')

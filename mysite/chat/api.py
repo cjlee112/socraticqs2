@@ -16,7 +16,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from ct.models import Response as StudentResponse, Lesson, UnitLesson, EVAL_TO_STATUS_MAP, InquiryCount
+from ct.models import Response as StudentResponse, Lesson, UnitLesson, InquiryCount, NEED_HELP_STATUS, NEED_REVIEW_STATUS, DONE_STATUS
 from ctms.models import Invite
 from chat.views import CheckChatInitialView, InitializeLiveSession, CourseletPreviewView
 from chat.services import ProgressHandler, FsmHandler
@@ -749,6 +749,7 @@ def message_api2(request):
                 return Response('action is not allowed', status=403)
             m = serializer.save()
             path = request.data['path'] # handle UPDATE here b/c requires checking authorization
+            statusLevel = {NEED_HELP_STATUS: 0, NEED_REVIEW_STATUS: 1, DONE_STATUS: 2}
             if path in ('confidence', 'selfeval', 'status') and m.response_to_check and m.response_to_check.author == request.user:
                 setattr(m.response_to_check, path, request.data['outcome'])
                 m.response_to_check.save()
@@ -767,7 +768,8 @@ def message_api2(request):
                     if inquiry.addedBy == request.user: # save Inquiry status
                         inquiry.status = request.data['outcome']
                         inquiry.save()
-                elif m.response_to_check and m.response_to_check.author == request.user:
+                elif m.response_to_check and m.response_to_check.author == request.user and (not m.response_to_check.status
+                        or statusLevel.get(request.data['outcome'], 3) < statusLevel.get(m.response_to_check.status, 3)):
                     m.response_to_check.status = request.data['outcome']
                     m.response_to_check.save()
             elif path.endswith('.add_faq_text') and m.response_to_check and m.response_to_check.author == request.user:

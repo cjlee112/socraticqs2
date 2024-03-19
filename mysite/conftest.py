@@ -360,6 +360,32 @@ def brella_messages_json3(brella_messages_json1, student_error_eg1):
 	})
     return d
 
+@pytest.fixture
+def brella_messages_json4(brella_messages_json1, response):
+    d = brella_messages_json1.copy() # make a new copy; do not modify original!!
+    d.update({
+	    "message": "Essentially the same",
+	    "outcome": "correct",
+	    "path": "selfeval",
+	    "response_id": response.id,
+	})
+    return d
+
+
+
+@pytest.fixture
+def brella_messages_json5(brella_messages_json1, response):
+    d = brella_messages_json1.copy() # make a new copy; do not modify original!!
+    d.update({
+	    "message": "OK, but flag this for me to review",
+	    "outcome": "review",
+	    "path": "status",
+	    "response_id": response.id,
+	})
+    return d
+
+
+
 #############################################################
 
 @pytest.fixture(scope='function')
