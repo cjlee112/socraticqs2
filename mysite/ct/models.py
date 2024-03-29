@@ -860,7 +860,7 @@ class UnitLesson(models.Model):
     def get_em_resolutions(self):
         'get list of resolution UL for this error UL'
         em = self.lesson.concept
-        return em, list(self.unitlesson_set.filter(kind=self.RESOLVES))
+        return em, list(self.unitlesson_set.filter(kind=self.RESOLVES).order_by('order', 'atime'))
         # query = Q(kind=self.RESOLVES,
         #           lesson__conceptlink__relationship=ConceptLink.RESOLVES,
         #           lesson__conceptlink__concept=em)
