@@ -338,7 +338,8 @@ async def solicit_faq(postData, history, prefix='answer', insertBeforeID=None, m
     if hasQuestion == 'yes':
         newfaq = await create_new_faq(postData, history, prefix, insertBeforeID, messageStamp, ignoreHistory)
         if not newfaq: # cancel creation of this FAQ
-            data = dict(message_id=query.response['message_id'], outcome='no', message='No')
+            message_id = await query.get_server_response('message_id')
+            data = dict(message_id=message_id, outcome='no', message='No')
             chat.begin_post(query.postURL, data, action='PATCH')
             chat.post_messages((("ChatMessageTemplate", f"No question posted... {messageStamp}"),),
                                insertBeforeID=insertBeforeID)
@@ -369,7 +370,7 @@ async def show_faq_answer(faq_id, answer, postData, history, insertBeforeID=None
 async def create_new_faq(postData, history, prefix='answer', insertBeforeID=None, messageStamp='', ignoreHistory=False):
     'student writes a new FAQ question'
     query = chat.ChatInput((("ChatMessageTemplate", f"First, write your question as a single sentence, as clearly and simply as you can. (You'll have a chance to explain your question fully in the next step).  If you decide you don't want to ask a question now, just click Send without typing anything here. {messageStamp}"),),
-                           postData=postData, insertBeforeID=insertBeforeID)
+                           postData=postData, insertBeforeID=insertBeforeID, blankPolicy='no-post')
     title = await query.get(f'{prefix}.add_faq', history, ignoreHistory)
     if title.strip(): # non-blank title, so save
         postData['faq_id'] = await query.get_server_response('faq_id')

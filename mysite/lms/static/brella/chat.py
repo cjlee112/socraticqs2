@@ -83,7 +83,7 @@ class ChatQuery(object):
     'prompt user with chat messages, then await get() to receive button click'
     def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
             dataAttr='data-option-value', selector='button[data-option-value]',
-            insertBeforeID=None, postData={}, postURL='/chat/brella/messages', **kwargs):
+            insertBeforeID=None, postData={}, postURL='/chat/brella/messages', blankPolicy='allow', **kwargs):
         self.insertBeforeID = insertBeforeID
         self.msgElements = post_messages(chats, insertBeforeID=insertBeforeID)
         if self.msgElements:
@@ -95,6 +95,7 @@ class ChatQuery(object):
         self.postData = postData.copy()
         self.postURL =  postURL
         self.posted = {}
+        self.blankPolicy = blankPolicy
     def handler(self, ev):
         'called when user clicks Submit'
         if self.dataAttr:
@@ -181,9 +182,12 @@ class ChatInput(ChatQuery):
         ChatQuery.__init__(self, chats, "chat-text-template", selector="form", event='submit', **kwargs)
     def handler(self, ev):
         ev.preventDefault() # block default form GET action
-        outcome = self.message = self.temporary.select("textarea")[0].value
-        self.postData['message'] = self.message
-        if 'path' in self.postData: # no path means DO NOT POST
+        outcome = self.temporary.select("textarea")[0].value
+        isBlank = (outcome.strip() == '')
+        if self.blankPolicy == 'reject' and isBlank: # refuse to accept blank submission
+            return
+        self.postData['message'] = self.message = outcome
+        if 'path' in self.postData and (not isBlank or self.blankPolicy != 'no-post'): # no path means DO NOT POST
             self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
 
