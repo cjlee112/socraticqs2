@@ -590,8 +590,8 @@ class InviteView(APIView):
         if not invite.user: # need to create inactive account
             password = make_random_password()
             username = invite.get_invited_user_username()
-            invite.user = create_unique_user(password, request.data['first_name'], request.data['last_name'],
-                                             username)
+            invite.user = create_unique_user(request.data['email'], password, request.data['first_name'], 
+                                             request.data['last_name'], username)
             invite.save()
         else:
             password = None # since user already has account, no need to email their password

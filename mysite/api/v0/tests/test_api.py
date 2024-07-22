@@ -225,6 +225,9 @@ def test_invite_success(teacher_invite_dict, client, user):
     response = client.post(reverse("api:v0:invite"), data=data,
                            content_type='application/json', HTTP_ACCEPT='application/json')
     assert response.status_code == status.HTTP_201_CREATED
+    invite = Invite.objects.get(id=response.data['invite_id'])
+    assert invite.user.first_name == data['first_name']
+    assert invite.user.last_name == data['last_name']
 
 
 @pytest.mark.django_db
