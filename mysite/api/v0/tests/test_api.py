@@ -5,14 +5,17 @@ import pytest
 from django.shortcuts import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
+from django.utils import timezone
 
 from ct.models import UnitLesson, Lesson, Role
 from ctms.models import Invite
 from accounts.models import Profile, Instructor
+from chat.views import brellaChatURL
 
 import base64
 import hashlib
 from urllib.parse import urlparse
+from datetime import timedelta
 
 
 
@@ -215,8 +218,10 @@ def test_invite_not_instructor(teacher_invite_dict, client, user):
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 @pytest.mark.django_db
-def test_invite_success(teacher_invite_dict, client, user):
+def test_invite_success(teacher_invite_dict, client, user, mailoutbox, course_unit):
     'invite API by instructor user should succeed'
+    course_unit.releaseTime = timezone.now() - timedelta(hours=1) # publish courselet so student can view!
+    course_unit.save()
     client.force_login(user)
     Instructor.objects.create(user=user, institution='institute', what_do_you_teach='something')
     data = teacher_invite_dict.copy()
@@ -228,7 +233,20 @@ def test_invite_success(teacher_invite_dict, client, user):
     invite = Invite.objects.get(id=response.data['invite_id'])
     assert invite.user.first_name == data['first_name']
     assert invite.user.last_name == data['last_name']
-
+    assert len(mailoutbox) == 1
+    m = mailoutbox[0]
+    assert list(m.to) == [data['email']]
+    url = [s for s in m.body.split() if s.startswith('http')][0]
+    client.logout()
+    response = client.get(urlparse(url).path)
+    assert response.status_code == status.HTTP_302_FOUND
+    url = response['Location']
+    assert url == data['page']
+    response = client.get(url)
+    assert response.status_code == status.HTTP_302_FOUND
+    assert Role.objects.filter(role=Role.ENROLLED, user=invite.user, course=invite.course).exists()
+    url = response['Location']
+    assert url == brellaChatURL
 
 @pytest.mark.django_db
 def test_invite_teacher(teacher_invite_dict, client, user, unique_instructor, course_unit):

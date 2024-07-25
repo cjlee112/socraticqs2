@@ -188,8 +188,10 @@ def enroll_unit_code(course_unit, user):
 
 
 @pytest.fixture
-def teacher_invite_dict(enroll_unit_code):
-    return dict(enrollCode=enroll_unit_code.enrollCode, email='jojo@example.com', invite_type='teacher')
+def teacher_invite_dict(enroll_unit_code, unit_lesson):
+    'requires unit_lesson so there will be at least one thread in courselet'
+    return dict(enrollCode=enroll_unit_code.enrollCode, email='jojo@example.com', invite_type='teacher',
+                page=f'/chat/enrollcode/{enroll_unit_code.enrollCode}/')
 
 
 @pytest.fixture
