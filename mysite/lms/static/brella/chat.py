@@ -190,6 +190,12 @@ class ChatInput(ChatQuery):
         if 'path' in self.postData and (not isBlank or self.blankPolicy != 'no-post'): # no path means DO NOT POST
             self.send_post(self.postData)
         self.outcome = outcome # don't release lock until done
+    def check_history(self, path, history):
+        'workaround for ChatInput.handler() historical failure to save outcome to history'
+        already = ChatQuery.check_history(self, path, history)
+        if already and 'message' in already and 'outcome' not in already:
+            already['outcome'] = already['message']
+        return already
 
 class ChatCanvas(ChatInput):
     'prompt user with chat canvas to draw on, then await get() to receive textarea'
