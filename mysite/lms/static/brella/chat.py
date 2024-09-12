@@ -83,7 +83,7 @@ class ChatQuery(object):
     'prompt user with chat messages, then await get() to receive button click'
     def __init__(self, chats, responseTemplate="chat-options-template", responseContainer="chat-input-container",
             dataAttr='data-option-value', selector='button[data-option-value]',
-            insertBeforeID=None, postData={}, postURL='/chat/brella/messages', blankPolicy='allow', **kwargs):
+            insertBeforeID=None, postData={}, postURL='/chat/brella/messages', **kwargs):
         self.insertBeforeID = insertBeforeID
         self.msgElements = post_messages(chats, insertBeforeID=insertBeforeID)
         if self.msgElements:
@@ -95,7 +95,6 @@ class ChatQuery(object):
         self.postData = postData.copy()
         self.postURL =  postURL
         self.posted = {}
-        self.blankPolicy = blankPolicy
     def handler(self, ev):
         'called when user clicks Submit'
         if self.dataAttr:
@@ -178,8 +177,9 @@ async def continue_button(chats, path='continue', postData={}, history=None, **k
 
 class ChatInput(ChatQuery):
     'prompt user with chat messages, then await get() to receive textarea'
-    def __init__(self, chats, **kwargs):
+    def __init__(self, chats, blankPolicy='reject', **kwargs):
         ChatQuery.__init__(self, chats, "chat-text-template", selector="form", event='submit', **kwargs)
+        self.blankPolicy = blankPolicy
     def handler(self, ev):
         ev.preventDefault() # block default form GET action
         outcome = self.temporary.select("textarea")[0].value
@@ -199,9 +199,9 @@ class ChatInput(ChatQuery):
 
 class ChatCanvas(ChatInput):
     'prompt user with chat canvas to draw on, then await get() to receive textarea'
-    def __init__(self, question, svgID='drawsvgOutput', **kwargs):
+    def __init__(self, question, svgID='drawsvgOutput', blankPolicy='allow', **kwargs):
         chats = (("ChatMessageTemplate", '<p>' + question['message'] + '</p>'),)
-        ChatInput.__init__(self, chats, **kwargs)
+        ChatInput.__init__(self, chats, blankPolicy=blankPolicy, **kwargs)
         chatBubble = self.msgElements[0].select('.chat-bubble')[0]
         self.imageURL = question['canvas']['image']
         self.canvas = copy_to_container('ChatCanvasTemplate', None, container=chatBubble)[0]
