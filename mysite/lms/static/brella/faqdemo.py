@@ -379,7 +379,7 @@ async def create_new_faq(postData, history, prefix='answer', insertBeforeID=None
     query = chat.ChatInput((("ChatMessageTemplate", f"First, write your question as a single sentence, as clearly and simply as you can. (You'll have a chance to explain your question fully in the next step).  If you decide you don't want to ask a question now, just click Send without typing anything here. {messageStamp}"),),
                            postData=postData, insertBeforeID=insertBeforeID, blankPolicy='no-post')
     title = await query.get(f'{prefix}.add_faq', history, ignoreHistory)
-    if title.strip(): # non-blank title, so save
+    if title and isinstance(title, str) and title.strip(): # non-blank title, so save
         postData['faq_id'] = await query.get_server_response('faq_id')
         query = chat.ChatInput((("ChatMessageTemplate", f"Next, try saying a bit more about exactly what you're unsure of, such as a simple example where you can think of two possible answers but you're not sure which one is actually right. {messageStamp}"),), 
                                postData=postData, insertBeforeID=insertBeforeID)
