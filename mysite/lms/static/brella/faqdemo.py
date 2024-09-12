@@ -150,7 +150,14 @@ async def do_courselet(chat_id, is_preview=False, sidebar=None, insertBeforeID=N
     t, postData, updateThreads = await get_thread(chat_id)
     state = dict(firstORCT=True)
     while t:
-        await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID, state)
+        try:
+            await do_thread(t, postData, oldThreads, is_preview, sidebar, insertBeforeID, state)
+        except Exception as e: # guard against any crash in a thread, just skip to next thread
+            errmsg = str(e.__class__.__name__) + ': ' + str(e)
+            chat.post_messages((("ChatMessageTemplate",
+                                 f"Oops!  Something went wrong in this thread. Please report the following to info@courselets.org: {errmsg}  Continuing to next thread..."),),
+                               insertBeforeID=insertBeforeID)
+
         if is_preview and sidebar.resourceNext: # instructor clicked in sidebar, so exit lesson sequence
             return None, None # no updates in preview mode anyway!
         lastThread = t
